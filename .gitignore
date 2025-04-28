@@ -1,0 +1,51 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Prisma
+/apps/backend/prisma/dev.db
+/apps/backend/prisma/dev.db-journal
+/prisma/migrations/
+/prisma/populatedb.py
+
+# Next.js
+.next/
+out/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+ios/
+android/
+build/
+*.apk
+*.ipa
+
+# Turbo / Cache
+turbo/
+.cache/
+dist/
+
+# MacOS system files
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# VS Code
+.vscode/
+
+# Docker
+**/docker-compose.override.yml
+

@@ -1,0 +1,155 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  Admin
+  OperationsExecutive
+  FieldExecutive
+  Verifier
+}
+
+enum VerificationType {
+  PermanentAddress
+  CurrentAddress
+  Work
+}
+
+enum VerificationStatus {
+  Pending
+  InProgress
+  Completed
+}
+
+enum LoanStatus {
+  Unassigned
+  Assigned
+  UnderFV
+  FVCompleted
+  Approved
+  Rejected
+}
+
+enum FieldExecutiveStatus {
+  Pending
+  InProgress
+  Completed
+}
+
+model User {
+  id                Int            @id @default(autoincrement())
+  mobile           String         @unique
+  role             UserRole
+  name             String
+  email            String?        @unique
+  officeId         Int
+  office           Office         @relation(fields: [officeId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  // Relations
+  operationsExecutiveLoans Loan[]  @relation("OperationsExecutive")
+  verifiedLoans           Loan[]  @relation("LoanVerifier")
+  verificationReports     VerificationReport[] @relation("ReportVerifier")
+  uploadedDocuments       Document[] @relation("UploadedByUser")
+  verifications           Verification[] @relation("VerificationFieldExecutive")
+  sessions                Session[]
+}
+
+model Organization {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  offices     Office[]
+}
+
+model Office {
+  id                Int            @id @default(autoincrement())
+  name             String
+  location         String
+  address          String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  users            User[]
+  loans            Loan[]
+  archived         Boolean        @default(false)
+  organizationId   Int @default(1)
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+}
+
+model Verification {
+  id                Int                @id @default(autoincrement())
+  loanId            Int
+  loan              Loan               @relation(fields: [loanId], references: [id])
+  type              VerificationType
+  fieldExecutiveId  Int
+  fieldExecutive    User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
+  status            VerificationStatus
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([loanId, type])
+}
+
+model Loan {
+  id                    Int            @id @default(autoincrement())
+  applicationNumber     String         @unique
+  applicantName         String
+  applicantMobile       String
+  applicantAddress      String
+  loanType              String
+  bankName              String
+  loanAmount            Float
+  status                LoanStatus
+  officeId              Int
+  office                Office         @relation(fields: [officeId], references: [id])
+  operationsExecutiveId Int
+  operationsExecutive   User           @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
+  verifierId            Int?
+  verifier              User?          @relation("LoanVerifier", fields: [verifierId], references: [id])
+  verificationReport    VerificationReport?
+  documents             Document[]
+  verifications         Verification[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+model VerificationReport {
+  id                Int            @id @default(autoincrement())
+  loanId            Int            @unique
+  loan              Loan           @relation(fields: [loanId], references: [id])
+  verifierId        Int
+  verifier          User           @relation("ReportVerifier", fields: [verifierId], references: [id])
+  verificationDate  DateTime
+  remarks           String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Document {
+  id                Int            @id @default(autoincrement())
+  name             String
+  url              String
+  type             String         // 'ID', 'Address', 'Income', 'Other'
+  loanId           Int
+  loan             Loan           @relation(fields: [loanId], references: [id])
+  uploadedBy       Int
+  uploadedByUser   User           @relation("UploadedByUser", fields: [uploadedBy], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  otp          String?
+  otpExpires   DateTime?
+  createdAt    DateTime @default(now())
+  lastLoginAt  DateTime?
+  isActive     Boolean  @default(true)
+}
