@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 
 # Database connection parameters
 db_params = {
-    "dbname": "loan_verification",
-    "user": "devuser",
-    "password": "devpass",
+    "dbname": "kowtha",
+    "user": "localuser",
+    "password": "localuser",
     "host": "localhost",
     "port": 5432
 }

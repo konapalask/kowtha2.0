@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('org')
 export class OrgController {
-  constructor(private readonly orgService: OrgService) {}
+  constructor(private readonly orgService: OrgService) { }
 
   @Get('offices')
   async getOffices() {
@@ -15,7 +15,7 @@ export class OrgController {
   async createOffice(@Body() body: { name: string; location: string; address: string }) {
     return this.orgService.createOffice(body);
   }
-  
+
   @Put('offices/:id')
   async updateOffice(
     @Param('id') id: string,
