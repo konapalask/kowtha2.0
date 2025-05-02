@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AccountsController } from './accounts.controller';
+import { AccountsService } from './accounts.service';
 import { PrismaService } from '../../prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -14,8 +14,8 @@ import { JwtStrategy } from './jwt.strategy';
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy],
-  exports: [AuthService],
+  controllers: [AccountsController],
+  providers: [AccountsService, PrismaService, JwtStrategy],
+  exports: [AccountsService],
 })
-export class AuthModule {}
+export class AccountsModule {} 

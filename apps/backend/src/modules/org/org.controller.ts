@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { OrgService } from './org.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 
 @Controller('org')
 export class OrgController {

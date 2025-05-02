@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { VerificationType, LoanStatus } from '@prisma/client';
 @Controller('loans')
 @UseGuards(JwtAuthGuard)
