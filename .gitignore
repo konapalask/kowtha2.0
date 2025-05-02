@@ -45,7 +45,7 @@ logs
 
 # VS Code
 .vscode/
-
+.venv/
 # Docker
 **/docker-compose.override.yml
 
