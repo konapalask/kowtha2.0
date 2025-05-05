@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Prisma, LoanStatus, VerificationType } from '@prisma/client';
-import { logger } from '../common/logging';
+import { LoggingService } from '../common/logging/logging.service';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -9,19 +9,22 @@ import { logger } from '../common/logging';
 
 @Injectable()
 export class LoanService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private loggingService: LoggingService,
+  ) {}
 
   async importLoans(file: Express.Multer.File, operationsExecutiveId: number) {
     try {
       // TODO: Implement Excel file parsing and loan import
       // This is a placeholder for the actual implementation
-      await logger.info('Loans import started', { 
+      await this.loggingService.info('Loans import started', { 
         operationsExecutiveId,
         fileName: file.originalname 
       });
       return { message: 'Loans imported successfully' };
     } catch (error) {
-      await logger.error('Failed to import loans', { 
+      await this.loggingService.error('Failed to import loans', { 
         operationsExecutiveId,
         fileName: file.originalname,
         error: error.message,
@@ -40,7 +43,7 @@ export class LoanService {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
       if (!loan) {
-        await logger.warn('Verification assignment failed - Loan not found', { loanId });
+        await this.loggingService.warn('Verification assignment failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
@@ -63,7 +66,7 @@ export class LoanService {
         },
       });
 
-      await logger.info('Verification assigned successfully', {
+      await this.loggingService.info('Verification assigned successfully', {
         loanId,
         verificationType,
         fieldExecutiveId,
@@ -75,7 +78,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await logger.error('Failed to assign verification', {
+      await this.loggingService.error('Failed to assign verification', {
         loanId,
         verificationType,
         fieldExecutiveId,
@@ -104,7 +107,7 @@ export class LoanService {
       });
 
       if (!verification) {
-        await logger.warn('Verification report submission failed - Verification not found', {
+        await this.loggingService.warn('Verification report submission failed - Verification not found', {
           loanId,
           verificationType
         });
@@ -124,7 +127,7 @@ export class LoanService {
         },
       });
 
-      await logger.info('Verification report submitted successfully', {
+      await this.loggingService.info('Verification report submitted successfully', {
         loanId,
         verificationType,
         fieldExecutiveId,
@@ -136,7 +139,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await logger.error('Failed to submit verification report', {
+      await this.loggingService.error('Failed to submit verification report', {
         loanId,
         verificationType,
         fieldExecutiveId,
@@ -155,12 +158,12 @@ export class LoanService {
       });
 
       if (!loan) {
-        await logger.warn('Loan verification failed - Loan not found', { loanId });
+        await this.loggingService.warn('Loan verification failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
       if (!loan.verificationReport) {
-        await logger.warn('Loan verification failed - Verification report not found', { loanId });
+        await this.loggingService.warn('Loan verification failed - Verification report not found', { loanId });
         throw new NotFoundException('Verification report not found');
       }
 
@@ -177,7 +180,7 @@ export class LoanService {
         },
       });
 
-      await logger.info('Loan verified successfully', {
+      await this.loggingService.info('Loan verified successfully', {
         loanId,
         verifierId,
         status,
@@ -189,7 +192,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await logger.error('Failed to verify loan', {
+      await this.loggingService.error('Failed to verify loan', {
         loanId,
         verifierId,
         status,
@@ -212,14 +215,14 @@ export class LoanService {
         },
       });
 
-      await logger.debug('Retrieved loans by office', {
+      await this.loggingService.debug('Retrieved loans by office', {
         officeId,
         count: loans.length
       });
 
       return loans;
     } catch (error) {
-      await logger.error('Failed to get loans by office', {
+      await this.loggingService.error('Failed to get loans by office', {
         officeId,
         error: error.message,
         stack: error.stack
@@ -245,14 +248,14 @@ export class LoanService {
         },
       });
 
-      await logger.debug('Retrieved loans by field executive', {
+      await this.loggingService.debug('Retrieved loans by field executive', {
         fieldExecutiveId,
         count: loans.length
       });
 
       return loans;
     } catch (error) {
-      await logger.error('Failed to get loans by field executive', {
+      await this.loggingService.error('Failed to get loans by field executive', {
         fieldExecutiveId,
         error: error.message,
         stack: error.stack
@@ -272,14 +275,14 @@ export class LoanService {
         },
       });
 
-      await logger.debug('Retrieved loans by verifier', {
+      await this.loggingService.debug('Retrieved loans by verifier', {
         verifierId,
         count: loans.length
       });
 
       return loans;
     } catch (error) {
-      await logger.error('Failed to get loans by verifier', {
+      await this.loggingService.error('Failed to get loans by verifier', {
         verifierId,
         error: error.message,
         stack: error.stack

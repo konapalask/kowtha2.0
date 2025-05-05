@@ -2,13 +2,14 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
-import { logger } from '../common/logging';
+import { LoggingService } from '../common/logging/logging.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private loggingService: LoggingService,
   ) {}
 
   async generateOTP(mobile: string): Promise<{ message: string }> {
@@ -29,10 +30,10 @@ export class AccountsService {
       });
 
       // In production, send OTP via SMS service
-      await logger.info('OTP generated successfully', { mobile, userId: user.id });
+      await this.loggingService.info('OTP generated successfully', { mobile, userId: user.id });
       return { message: 'OTP sent successfully' };
     } catch (error) {
-      await logger.error('Failed to generate OTP', { 
+      await this.loggingService.error('Failed to generate OTP', { 
         mobile, 
         error: error.message,
         stack: error.stack 
@@ -45,7 +46,7 @@ export class AccountsService {
     try {
       const user = await this.prisma.user.findUnique({ where: { mobile } });
       if (!user) {
-        await logger.warn('OTP verification failed - User not found', { mobile });
+        await this.loggingService.warn('OTP verification failed - User not found', { mobile });
         throw new UnauthorizedException('User not found');
       }
 
@@ -61,7 +62,7 @@ export class AccountsService {
       });
 
       if (!session) {
-        await logger.warn('OTP verification failed - Invalid or expired OTP', { 
+        await this.loggingService.warn('OTP verification failed - Invalid or expired OTP', { 
           mobile, 
           userId: user.id 
         });
@@ -82,7 +83,7 @@ export class AccountsService {
       const payload = { sub: user.id, mobile: user.mobile, role: user.role };
       const token = this.jwtService.sign(payload);
       
-      await logger.info('OTP verified successfully', { 
+      await this.loggingService.info('OTP verified successfully', { 
         mobile, 
         userId: user.id,
         role: user.role 
@@ -93,7 +94,7 @@ export class AccountsService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      await logger.error('Failed to verify OTP', { 
+      await this.loggingService.error('Failed to verify OTP', { 
         mobile, 
         error: error.message,
         stack: error.stack 
@@ -109,17 +110,17 @@ export class AccountsService {
       });
 
       if (!user) {
-        await logger.warn('User validation failed - User not found', { userId: id });
+        await this.loggingService.warn('User validation failed - User not found', { userId: id });
         throw new UnauthorizedException('User not found');
       }
 
-      await logger.debug('User validated successfully', { userId: id });
+      await this.loggingService.debug('User validated successfully', { userId: id });
       return user;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      await logger.error('Failed to validate user', { 
+      await this.loggingService.error('Failed to validate user', { 
         userId: id, 
         error: error.message,
         stack: error.stack 

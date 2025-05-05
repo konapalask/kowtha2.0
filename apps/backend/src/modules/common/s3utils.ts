@@ -1,124 +1,62 @@
-import { S3 } from 'aws-sdk';
-import { Readable } from 'stream';
+import { Injectable } from '@nestjs/common';
+import { LoggingService } from './logging/logging.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const s3 = new S3({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+@Injectable()
+export class StorageService {
+  private readonly uploadDir: string;
 
-export interface S3Config {
-  bucket: string;
-  region?: string;
-}
-
-export class S3Service {
-  private bucket: string;
-  private region: string;
-
-  constructor(config: S3Config) {
-    this.bucket = config.bucket;
-    this.region = config.region || process.env.AWS_REGION || 'us-east-1';
-  }
-
-  async generatePresignedUrl(
-    key: string,
-    operation: 'getObject' | 'putObject',
-    expiresIn: number = 3600
-  ): Promise<string> {
-    const params = {
-      Bucket: this.bucket,
-      Key: key,
-      Expires: expiresIn,
-    };
-
-    try {
-      const url = await s3.getSignedUrlPromise(operation, params);
-      return url;
-    } catch (error) {
-      throw new Error(`Failed to generate presigned URL: ${error.message}`);
+  constructor(
+    private loggingService: LoggingService,
+    uploadDir: string = 'uploads'
+  ) {
+    this.uploadDir = path.resolve(process.cwd(), uploadDir);
+    if (!fs.existsSync(this.uploadDir)) {
+      fs.mkdirSync(this.uploadDir, { recursive: true });
     }
   }
 
-  async uploadFile(
-    key: string,
-    file: Buffer | Readable,
-    contentType?: string
-  ): Promise<string> {
-    const params: S3.PutObjectRequest = {
-      Bucket: this.bucket,
-      Key: key,
-      Body: file,
-      ...(contentType && { ContentType: contentType }),
-    };
-
+  async uploadFile(file: Express.Multer.File): Promise<string> {
     try {
-      await s3.upload(params).promise();
-      return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const filePath = path.join(this.uploadDir, fileName);
+      
+      await fs.promises.writeFile(filePath, file.buffer);
+      
+      await this.loggingService.info('File uploaded successfully', {
+        fileName,
+        size: file.size
+      });
+      
+      return fileName;
     } catch (error) {
-      throw new Error(`Failed to upload file: ${error.message}`);
+      await this.loggingService.error('Failed to upload file', {
+        originalName: file.originalname,
+        error: error.message
+      });
+      throw error;
     }
   }
 
-  async downloadFile(key: string): Promise<Buffer> {
-    const params = {
-      Bucket: this.bucket,
-      Key: key,
-    };
-
-    try {
-      const response = await s3.getObject(params).promise();
-      return response.Body as Buffer;
-    } catch (error) {
-      throw new Error(`Failed to download file: ${error.message}`);
-    }
+  async getFileUrl(fileName: string): Promise<string> {
+    return `/uploads/${fileName}`;
   }
 
-  async deleteFile(key: string): Promise<void> {
-    const params = {
-      Bucket: this.bucket,
-      Key: key,
-    };
-
+  async deleteFile(fileName: string): Promise<void> {
     try {
-      await s3.deleteObject(params).promise();
+      const filePath = path.join(this.uploadDir, fileName);
+      await fs.promises.unlink(filePath);
+      
+      await this.loggingService.info('File deleted successfully', {
+        fileName
+      });
     } catch (error) {
-      throw new Error(`Failed to delete file: ${error.message}`);
-    }
-  }
-
-  async listFiles(prefix?: string): Promise<string[]> {
-    const params: S3.ListObjectsV2Request = {
-      Bucket: this.bucket,
-      ...(prefix && { Prefix: prefix }),
-    };
-
-    try {
-      const response = await s3.listObjectsV2(params).promise();
-      return (response.Contents || []).map(item => item.Key);
-    } catch (error) {
-      throw new Error(`Failed to list files: ${error.message}`);
-    }
-  }
-
-  async copyFile(
-    sourceKey: string,
-    destinationKey: string,
-    sourceBucket?: string
-  ): Promise<void> {
-    const params: S3.CopyObjectRequest = {
-      Bucket: this.bucket,
-      CopySource: `${sourceBucket || this.bucket}/${sourceKey}`,
-      Key: destinationKey,
-    };
-
-    try {
-      await s3.copyObject(params).promise();
-    } catch (error) {
-      throw new Error(`Failed to copy file: ${error.message}`);
+      await this.loggingService.error('Failed to delete file', {
+        fileName,
+        error: error.message
+      });
+      throw error;
     }
   }
 }
-
-// Create a default S3 service instance
-export const s3Service = new S3Service({
-  bucket: process.env.S3_BUCKET || 'default-bucket',
-});
