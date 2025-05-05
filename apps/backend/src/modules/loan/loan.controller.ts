@@ -1,18 +1,10 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  UseGuards,
-  Request,
-  UseInterceptors,
-  UploadedFile,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { VerificationType, LoanStatus } from '@prisma/client';
+import { AuthenticatedRequest } from '../common/types/request.types';
+
 @Controller('loans')
 @UseGuards(JwtAuthGuard)
 export class LoanController {
@@ -22,7 +14,7 @@ export class LoanController {
   @UseInterceptors(FileInterceptor('file'))
   async importLoans(
     @UploadedFile() file: Express.Multer.File,
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
   ) {
     return this.loanService.importLoans(file, req.user.sub);
   }
@@ -39,7 +31,7 @@ export class LoanController {
    async submitVerificationReport(
      @Param('id') loanId: number,
      @Body() body: { verificationType: VerificationType; findings: string; documents: string[] },
-     @Request() req,
+     @Request() req: AuthenticatedRequest,
    ) {
      return this.loanService.submitVerificationReport(
        loanId,
@@ -54,7 +46,7 @@ export class LoanController {
   async verifyLoan(
     @Param('id') loanId: number,
     @Body() body: { status: string; comments?: string },
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
   ) {
     return this.loanService.verifyLoan(
       loanId,
@@ -70,12 +62,12 @@ export class LoanController {
   }
 
   @Get('field-executive')
-  async getLoansByFieldExecutive(@Request() req) {
+  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
     return this.loanService.getLoansByFieldExecutive(req.user.sub);
   }
 
   @Get('verifier')
-  async getLoansByVerifier(@Request() req) {
+  async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
     return this.loanService.getLoansByVerifier(req.user.sub);
   }
 } 
