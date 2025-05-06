@@ -31,6 +31,67 @@ build/
 *.apk
 *.ipa
 
+# React Native specific
+*.hprof
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+*.tsbundle
+*.jsbundle
+*.bundle
+*.ipa
+*.apk
+*.aab
+*.xcarchive
+*.dSYM.zip
+*.dSYM
+*.keystore
+!debug.keystore
+
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.xcuserstate
+ios/.xcode.env.local
+
+# Android/IntelliJ
+.idea/
+.gradle/
+local.properties
+*.iml
+.cxx/
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Ruby / CocoaPods
+/ios/Pods/
+/vendor/bundle/
+
+# Metro
+.metro-health-check*
+
+# Testing
+/coverage
+
 # Turbo / Cache
 turbo/
 .cache/
@@ -46,6 +107,7 @@ logs
 # VS Code
 .vscode/
 .venv/
+
 # Docker
 **/docker-compose.override.yml
 

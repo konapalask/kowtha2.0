@@ -1,0 +1,60 @@
+import axiosInstance from '../config/axios';
+
+export const login = async (email: string, password: string) => {
+  try {
+    const response = await axiosInstance.post('/auth/login', {
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+interface OTPResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
+export const generateOTP = async (mobileNumber: string): Promise<void> => {
+  try {
+    const response = await axiosInstance.post('/auth/otp/generate', {
+      mobile: mobileNumber,
+    });
+
+    // if (response.status !== 200) {
+    //   console.log('RESPONSE', response);
+    //   throw new Error('Failed to generate OTP');
+    // }
+  } catch (error) {
+    console.error('Error generating OTP:', error);
+    throw error;
+  }
+};
+
+export const verifyOTP = async (
+  mobileNumber: string,
+  otp: string,
+): Promise<OTPResponse> => {
+  try {
+    const response = await axiosInstance.post('/auth/otp/verify', {
+      mobile: mobileNumber,
+      otp,
+    });
+
+    // if (response.status !== 200) {
+    //   throw new Error('Failed to verify OTP');
+    // }
+
+    return {
+      access_token: response.data.token,
+      refresh_token: response.data.token,
+      // access_token: response.data.access_token,
+      // refresh_token: response.data.refresh_token,
+    };
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    throw error;
+  }
+};
