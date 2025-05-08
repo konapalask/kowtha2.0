@@ -1,10 +1,13 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { VerificationType, LoanStatus } from '@prisma/client';
 import { AuthenticatedRequest } from '../common/types/request.types';
+import { GetLoansDto } from './dto/get-loans.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('loans')
 @Controller('loans')
 @UseGuards(JwtAuthGuard)
 export class LoanController {
@@ -69,5 +72,15 @@ export class LoanController {
   @Get('verifier')
   async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
     return this.loanService.getLoansByVerifier(req.user.sub);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all loans with optional status filter' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans matching the filter criteria' 
+  })
+  async getLoans(@Query() filters: GetLoansDto) {
+    return this.loanService.getLoans(filters);
   }
 } 

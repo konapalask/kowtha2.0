@@ -290,4 +290,41 @@ export class LoanService {
       throw error;
     }
   }
+
+  async getLoans(filters?: { status?: LoanStatus }) {
+    try {
+      const where: Prisma.LoanWhereInput = {};
+      
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      const loans = await this.prisma.loan.findMany({
+        where,
+        include: {
+          operationsExecutive: true,
+          verifier: true,
+          verificationReport: true,
+          verifications: true,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      await this.loggingService.debug('Retrieved loans with filters', {
+        filters,
+        count: loans.length
+      });
+
+      return loans;
+    } catch (error) {
+      await this.loggingService.error('Failed to get loans', {
+        filters,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
 } 
