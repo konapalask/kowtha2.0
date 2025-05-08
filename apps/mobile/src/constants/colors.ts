@@ -42,6 +42,7 @@ export const colors = {
     border: '#E0E0E0',
     text: '#212121',
     placeholder: '#9E9E9E',
+    disabled: '#F5F5F5',
   },
   button: {
     primary: {
