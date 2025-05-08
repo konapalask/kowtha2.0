@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {useForm, Controller} from 'react-hook-form';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {AddressVerificationFormData} from '../../types/verification';
 import {colors} from '../../constants/colors';
+import Geolocation from '@react-native-community/geolocation';
 
 type AddressVerificationProps = {
   onSubmit: (data: AddressVerificationFormData) => void;
@@ -50,6 +51,21 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
     'Industrial Area',
     'Commercial Area',
   ];
+
+  useEffect(() => {
+    // Request location permission and get coordinates
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setValue('geoTag', `${latitude},${longitude}`);
+      },
+      error => {
+        console.error('Error getting location:', error);
+        setValue('geoTag', 'Location not available');
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  }, [setValue]);
 
   const showAddressTypeSheet = () => {
     addressTypeSheetRef.current?.show();
@@ -163,14 +179,14 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         control={control}
         name="geoTag"
         rules={{required: 'Geo tag is required'}}
-        render={({field: {onChange, value}}) => (
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Geo Tag</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Enter geo tag"
+              style={[styles.input, styles.readOnlyInput]}
               value={value}
-              onChangeText={onChange}
+              editable={false}
+              placeholder="Location coordinates will be captured automatically"
             />
             {errors.geoTag && (
               <Text style={styles.errorText}>{errors.geoTag.message}</Text>
@@ -329,6 +345,10 @@ const styles = StyleSheet.create({
   actionSheetItemText: {
     fontSize: 16,
     color: colors.text.primary,
+  },
+  readOnlyInput: {
+    backgroundColor: colors.input.disabled,
+    color: colors.text.disabled,
   },
 });
 

@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, message, Typography, Space } from 'antd';
-import { useRouter } from 'next/router';
-import { signIn, useSession } from 'next-auth/react';
-import { MobileOutlined, LockOutlined } from '@ant-design/icons';
-import api from '@/utils/axios';
+import { useState, useEffect } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  message,
+  Typography,
+  Space,
+  Image,
+} from "antd";
+import { useRouter } from "next/router";
+import { signIn, useSession } from "next-auth/react";
+import { MobileOutlined, LockOutlined } from "@ant-design/icons";
+// import Image from "next/image";
+import api from "@/utils/axios";
 
 const { Title, Text } = Typography;
 
@@ -16,27 +26,27 @@ export default function Login() {
 
   useEffect(() => {
     if (session) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [session, router]);
 
   useEffect(() => {
     if (router.query.error) {
-      message.error('Authentication failed. Please try again.');
+      message.error("Authentication failed. Please try again.");
     }
   }, [router.query.error]);
 
   const handleSendOTP = async (values: { mobile: string }) => {
     try {
       setLoading(true);
-      await api.post('/auth/otp/generate', {
-        mobile: values.mobile
+      await api.post("/auth/otp/generate", {
+        mobile: values.mobile,
       });
       setOtpSent(true);
-      message.success('OTP sent successfully');
+      message.success("OTP sent successfully");
     } catch (error) {
-      console.error('OTP send error:', error);
-      message.error('Failed to send OTP');
+      console.error("OTP send error:", error);
+      message.error("Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -46,46 +56,65 @@ export default function Login() {
     try {
       setLoading(true);
       // Real API call for login
-      const result = await api.post('/auth/otp/verify', {
+      const result = await api.post("/auth/otp/verify", {
         mobile: values.mobile,
         otp: values.otp,
-        });
+      });
       if (result?.status >= 200 && result.status < 300) {
-        router.push('/dashboard');
+        router.push("/dashboard");
       } else {
-        message.error('Failed to verify OTP');
+        message.error("Failed to verify OTP");
       }
     } catch (error) {
-      console.error('OTP verify error:', error);
-      message.error('Failed to verify OTP');
+      console.error("OTP verify error:", error);
+      message.error("Failed to verify OTP");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      minHeight: '100vh',
-      background: '#fbeaf3' // light background for contrast
-    }}>
-      <Card 
-        style={{ 
-          width: 400,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          borderRadius: '8px',
-          background: 'rgba(255, 255, 255, 0.95)'
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        background: "var(--background-secondary)",
+        padding: "16px",
+      }}
+    >
+      <Card
+        style={{
+          width: "100%",
+          maxWidth: "400px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          borderRadius: "8px",
+          background: "var(--background-primary)",
         }}
       >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ textAlign: 'center' }}>
-            <Title level={2} style={{ marginBottom: 8, color: '#85365f' }}>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ marginBottom: 16 }}>
+              <Image
+                src="/images/appLogos/KowthaDarkIcon.png"
+                alt="Kowtha Logo"
+                width={300}
+                height={150}
+                style={{ objectFit: "contain" }}
+                preview={false}
+              />
+            </div>
+            <Title
+              level={2}
+              style={{ marginBottom: 8, color: "var(--primary-800)" }}
+            >
               Loan Verification System
             </Title>
-            <Text type="secondary">
-              {otpSent ? 'Enter the OTP sent to your mobile' : 'Enter your mobile number to continue'}
+            <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
+              {otpSent
+                ? "Enter the OTP sent to your mobile"
+                : "Enter your mobile number to continue"}
             </Text>
           </div>
 
@@ -98,15 +127,23 @@ export default function Login() {
             <Form.Item
               name="mobile"
               rules={[
-                { required: true, message: 'Please enter your mobile number' },
-                { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit mobile number' }
+                { required: true, message: "Please enter your mobile number" },
+                {
+                  pattern: /^[0-9]{10}$/,
+                  message: "Please enter a valid 10-digit mobile number",
+                },
               ]}
             >
-              <Input 
-                prefix={<MobileOutlined />} 
+              <Input
+                prefix={
+                  <MobileOutlined style={{ color: "var(--primary-600)" }} />
+                }
                 placeholder="Enter mobile number"
                 disabled={otpSent}
-                style={{ borderRadius: '6px' }}
+                style={{
+                  borderRadius: "6px",
+                  height: "40px",
+                }}
               />
             </Form.Item>
 
@@ -114,33 +151,41 @@ export default function Login() {
               <Form.Item
                 name="otp"
                 rules={[
-                  { required: true, message: 'Please enter the OTP' },
-                  { pattern: /^[0-9]{6}$/, message: 'Please enter a valid 6-digit OTP' }
+                  { required: true, message: "Please enter the OTP" },
+                  {
+                    pattern: /^[0-9]{6}$/,
+                    message: "Please enter a valid 6-digit OTP",
+                  },
                 ]}
               >
-                <Input 
-                  prefix={<LockOutlined />}
+                <Input
+                  prefix={
+                    <LockOutlined style={{ color: "var(--primary-600)" }} />
+                  }
                   placeholder="Enter 6-digit OTP"
-                  style={{ borderRadius: '6px' }}
+                  style={{
+                    borderRadius: "6px",
+                    height: "40px",
+                  }}
                 />
               </Form.Item>
             )}
 
             <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                block 
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
                 loading={loading}
-                style={{ 
-                  height: '40px',
-                  borderRadius: '6px',
-                  background: '#85365f',
-                  border: 'none',
-                  color: '#fff',
+                style={{
+                  height: "40px",
+                  borderRadius: "6px",
+                  background: "var(--primary-800)",
+                  border: "none",
+                  color: "#fff",
                 }}
               >
-                {otpSent ? 'Verify OTP' : 'Send OTP'}
+                {otpSent ? "Verify OTP" : "Send OTP"}
               </Button>
             </Form.Item>
           </Form>
@@ -148,4 +193,4 @@ export default function Login() {
       </Card>
     </div>
   );
-} 
+}

@@ -1,8 +1,21 @@
-import { useState } from 'react';
-import { Table, Card, Button, Space, Modal, Form, Input, Select, Typography, message, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useSession } from 'next-auth/react';
+import { useState } from "react";
+import {
+  Table,
+  Card,
+  Button,
+  Space,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Typography,
+  message,
+  Popconfirm,
+} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useSession } from "next-auth/react";
+import { ColumnsType } from "antd/es/table";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -12,7 +25,7 @@ interface User {
   firstName: string;
   lastName: string;
   mobile: string;
-  status: 'Active' | 'Inactive';
+  status: "Active" | "Inactive";
   role: string;
   office?: string;
 }
@@ -31,50 +44,52 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([
     {
       id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      mobile: '9876543210',
-      status: 'Active',
-      role: 'FieldExecutive',
-      office: 'Head Office',
+      firstName: "John",
+      lastName: "Doe",
+      mobile: "9876543210",
+      status: "Active",
+      role: "FieldExecutive",
+      office: "Head Office",
     },
     {
       id: 2,
-      firstName: 'Jane',
-      lastName: 'Smith',
-      mobile: '9876543211',
-      status: 'Active',
-      role: 'Verifier',
-      office: 'Branch Office',
+      firstName: "Jane",
+      lastName: "Smith",
+      mobile: "9876543211",
+      status: "Active",
+      role: "Verifier",
+      office: "Branch Office",
     },
   ]);
 
   const [offices] = useState<Office[]>([
-    { id: 1, name: 'Head Office' },
-    { id: 2, name: 'Branch Office' },
+    { id: 1, name: "Head Office" },
+    { id: 2, name: "Branch Office" },
   ]);
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
       // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (editingUser) {
-        setUsers(users.map(user => 
-          user.id === editingUser.id ? { ...user, ...values } : user
-        ));
-        message.success('User updated successfully');
+        setUsers(
+          users.map((user) =>
+            user.id === editingUser.id ? { ...user, ...values } : user
+          )
+        );
+        message.success("User updated successfully");
       } else {
         setUsers([...users, { id: Date.now(), ...values }]);
-        message.success('User added successfully');
+        message.success("User added successfully");
       }
-      
+
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
     } catch (error) {
-      message.error('Failed to save user');
+      message.error("Failed to save user");
     } finally {
       setLoading(false);
     }
@@ -90,11 +105,11 @@ export default function Users() {
     try {
       setLoading(true);
       // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUsers(users.filter(user => user.id !== id));
-      message.success('User deleted successfully');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setUsers(users.filter((user) => user.id !== id));
+      message.success("User deleted successfully");
     } catch (error) {
-      message.error('Failed to delete user');
+      message.error("Failed to delete user");
     } finally {
       setLoading(false);
     }
@@ -102,62 +117,79 @@ export default function Users() {
 
   const handleDeactivateUser = () => {
     // Implement the logic to deactivate the user
-    console.log('Deactivating user');
+    console.log("Deactivating user");
+    form.setFieldsValue({ status: "Inactive" });
+    handleSubmit({
+      ...form.getFieldsValue(),
+      status: "Inactive",
+    });
   };
 
-  const columns = [
+  const columns: ColumnsType<User> = [
     {
-      title: 'First Name',
-      dataIndex: 'firstName',
-      key: 'firstName',
+      title: "First Name",
+      dataIndex: "firstName",
+      key: "firstName",
+      width: 150,
     },
     {
-      title: 'Last Name',
-      dataIndex: 'lastName',
-      key: 'lastName',
+      title: "Last Name",
+      dataIndex: "lastName",
+      key: "lastName",
+      width: 150,
     },
     {
-      title: 'Mobile',
-      dataIndex: 'mobile',
-      key: 'mobile',
+      title: "Mobile",
+      dataIndex: "mobile",
+      key: "mobile",
+      width: 150,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => <span style={{ color: status === 'Active' ? 'green' : 'red' }}>{status}</span>,
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <span style={{ color: status === "Active" ? "green" : "red" }}>
+          {status}
+        </span>
+      ),
+      width: 150,
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      width: 150,
     },
     {
-      title: 'Office',
-      dataIndex: 'office',
-      key: 'office',
+      title: "Office",
+      dataIndex: "office",
+      key: "office",
+      width: 150,
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_: any, record: User) => (
         <Space>
-          <Button 
-            type="link" 
-            icon={<EditOutlined />} 
+          <Button
+            type="link"
+            icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
             Edit
           </Button>
         </Space>
       ),
+      fixed: "right",
+      width: 100,
     },
   ];
 
   return (
     <DashboardLayout>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="flex-end" style={{ marginBottom: 16 }}>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -170,17 +202,22 @@ export default function Users() {
             Add User
           </Button>
         </div>
-        
+
         <Table
           columns={columns}
           dataSource={users}
           rowKey="id"
           loading={loading}
+          scroll={{ y: 400 }}
+          pagination={{
+            showTotal: (total) => `Total ${total} users`,
+            position: ["bottomCenter"],
+          }}
         />
       </Card>
 
       <Modal
-        title={editingUser ? 'Edit User' : 'Add User'}
+        title={editingUser ? "Edit User" : "Add User"}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
@@ -193,12 +230,12 @@ export default function Users() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          style={{ gap: 8, display: 'flex', flexDirection: 'column' }}
+          style={{ gap: 8, display: "flex", flexDirection: "column" }}
         >
           <Form.Item
             name="firstName"
             label="First Name"
-            rules={[{ required: true, message: 'Please enter first name' }]}
+            rules={[{ required: true, message: "Please enter first name" }]}
             style={{ marginBottom: 8 }}
           >
             <Input />
@@ -206,7 +243,7 @@ export default function Users() {
           <Form.Item
             name="lastName"
             label="Last Name"
-            rules={[{ required: true, message: 'Please enter last name' }]}
+            rules={[{ required: true, message: "Please enter last name" }]}
             style={{ marginBottom: 8 }}
           >
             <Input />
@@ -214,7 +251,7 @@ export default function Users() {
           <Form.Item
             name="mobile"
             label="Mobile Number"
-            rules={[{ required: true, message: 'Please enter mobile number' }]}
+            rules={[{ required: true, message: "Please enter mobile number" }]}
             style={{ marginBottom: 8 }}
           >
             <Input />
@@ -222,7 +259,7 @@ export default function Users() {
           <Form.Item
             name="role"
             label="Role"
-            rules={[{ required: true, message: 'Please select role' }]}
+            rules={[{ required: true, message: "Please select role" }]}
             style={{ marginBottom: 8 }}
           >
             <Select>
@@ -235,11 +272,11 @@ export default function Users() {
           <Form.Item
             name="office"
             label="Office"
-            rules={[{ required: true, message: 'Please select office' }]}
+            rules={[{ required: true, message: "Please select office" }]}
             style={{ marginBottom: 8 }}
           >
             <Select>
-              {offices.map(office => (
+              {offices.map((office) => (
                 <Option key={office.id} value={office.name}>
                   {office.name}
                 </Option>
@@ -248,46 +285,57 @@ export default function Users() {
           </Form.Item>
           {editingUser && (
             <Form.Item style={{ marginBottom: 8 }}>
-              <Button
-                danger
-                onClick={() => {
-                  form.setFieldsValue({ status: 'Inactive' });
-                  handleSubmit({ ...form.getFieldsValue(), status: 'Inactive' });
-                }}
-                style={{ float: 'right' }}
-              >
-                Deactivate User
-              </Button>
-            </Form.Item>
-          )}
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                {editingUser ? 'Update' : 'Add'} User
-              </Button>
-              <Button onClick={() => {
-                setIsModalVisible(false);
-                setEditingUser(null);
-                form.resetFields();
-              }}>
-                Cancel
-              </Button>
-            </Space>
-          </Form.Item>
-          {editingUser && (
-            <div style={{ marginTop: 16, textAlign: 'right' }}>
               <Popconfirm
                 title="Are you sure you want to deactivate the user?"
                 onConfirm={handleDeactivateUser}
                 okText="Yes"
                 cancelText="No"
               >
-                <a style={{ color: '#cf1322' }}>Deactivate User</a>
+                <Button danger style={{ float: "right" }}>
+                  Deactivate User
+                </Button>
+              </Popconfirm>
+            </Form.Item>
+          )}
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingUser ? "Update" : "Add"} User
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsModalVisible(false);
+                  setEditingUser(null);
+                  form.resetFields();
+                }}
+              >
+                Cancel
+              </Button>
+            </Space>
+          </Form.Item>
+          {/* {editingUser && (
+            <div style={{ marginTop: 16, textAlign: "right" }}>
+              <Popconfirm
+                title="Are you sure you want to deactivate the user?"
+                onConfirm={handleDeactivateUser}
+                okText="Yes"
+                cancelText="No"
+              >
+                <a
+                  style={{
+                    color: "#ff4d4f",
+                    border: "1px solid #ff4d4f",
+                    borderRadius: 6,
+                    padding: "4px 8px",
+                  }}
+                >
+                  Deactivate User
+                </a>
               </Popconfirm>
             </div>
-          )}
+          )} */}
         </Form>
       </Modal>
     </DashboardLayout>
   );
-} 
+}
