@@ -17,11 +17,10 @@ export class StorageService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: { originalname: string; buffer: Buffer; size: number }): Promise<string> {
     try {
       const fileName = `${Date.now()}-${file.originalname}`;
       const filePath = path.join(this.uploadDir, fileName);
-      
       await fs.promises.writeFile(filePath, file.buffer);
       
       await this.loggingService.info('File uploaded successfully', {

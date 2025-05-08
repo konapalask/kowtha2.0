@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Prisma, LoanStatus, VerificationType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
+import { CreateLoanDto } from './dto/create-loan.dto';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -13,6 +14,46 @@ export class LoanService {
     private prisma: PrismaService,
     private loggingService: LoggingService,
   ) {}
+
+  async createLoan(data: CreateLoanDto) {
+    try {
+      const loanData: Prisma.LoanCreateInput = {
+        applicationNumber: `LOAN-${Date.now()}`,
+        applicantName: data.applicantName,
+        applicantMobile: data.applicantMobile,
+        applicantAddress: data.applicantAddress,
+        loanType: data.loanType,
+        bankName: data.bankName,
+        loanAmount: data.loanAmount,
+        office: { connect: { id: data.officeId } },
+        operationsExecutive: { connect: { id: data.operationsExecutiveId } },
+        status: data.status || LoanStatus.Unassigned,
+      };
+
+      const loan = await this.prisma.loan.create({
+        data: loanData,
+        include: {
+          operationsExecutive: true,
+          office: true,
+        },
+      });
+
+      await this.loggingService.info('Loan created successfully', {
+        loanId: loan.id,
+        applicantName: loan.applicantName,
+        loanAmount: loan.loanAmount,
+      });
+
+      return loan;
+    } catch (error) {
+      await this.loggingService.error('Failed to create loan', {
+        data,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
 
   async importLoans(file: Express.Multer.File, operationsExecutiveId: number) {
     try {
