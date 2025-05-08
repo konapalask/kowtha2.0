@@ -1,8 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Table, Card, Tag, Space, Button, Modal, Form, Select, message, Typography } from 'antd';
-import { UserOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import api from '@/utils/axios';
+import { useEffect, useState } from "react";
+import {
+  Table,
+  Card,
+  Tag,
+  Space,
+  Button,
+  Modal,
+  Form,
+  Select,
+  message,
+  Typography,
+} from "antd";
+import {
+  UserOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import api from "@/utils/axios";
 
 const { Title } = Typography;
 
@@ -40,14 +55,14 @@ export default function ManageLoans() {
   const fetchLoans = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/loans', {
+      const response = await api.get("/api/loans", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       setLoans(response.data);
     } catch (error) {
-      message.error('Failed to fetch loans');
+      message.error("Failed to fetch loans");
     } finally {
       setLoading(false);
     }
@@ -55,14 +70,14 @@ export default function ManageLoans() {
 
   const fetchFieldExecutives = async () => {
     try {
-      const response = await api.get('/api/users/field-executives', {
+      const response = await api.get("/api/users/field-executives", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       setFieldExecutives(response.data);
     } catch (error) {
-      message.error('Failed to fetch field executives');
+      message.error("Failed to fetch field executives");
     }
   };
 
@@ -81,59 +96,62 @@ export default function ManageLoans() {
       const values = await form.validateFields();
       await api.post(`/api/loans/${selectedLoan?.id}/assign`, values, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      message.success('Field executive assigned successfully');
+      message.success("Field executive assigned successfully");
       setIsModalVisible(false);
       form.resetFields();
       fetchLoans();
     } catch (error) {
-      message.error('Failed to assign field executive');
+      message.error("Failed to assign field executive");
     }
   };
 
   const columns = [
     {
-      title: 'Application Number',
-      dataIndex: 'applicationNumber',
-      key: 'applicationNumber',
+      title: "Application Number",
+      dataIndex: "applicationNumber",
+      key: "applicationNumber",
     },
     {
-      title: 'Applicant Name',
-      dataIndex: 'applicantName',
-      key: 'applicantName',
+      title: "Applicant Name",
+      dataIndex: "applicantName",
+      key: "applicantName",
     },
     {
-      title: 'Loan Type',
-      dataIndex: 'loanType',
-      key: 'loanType',
+      title: "Loan Type",
+      dataIndex: "loanType",
+      key: "loanType",
     },
     {
-      title: 'Bank Name',
-      dataIndex: 'bankName',
-      key: 'bankName',
+      title: "Bank Name",
+      dataIndex: "bankName",
+      key: "bankName",
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (status: string) => {
-        let color = 'blue';
-        if (status === 'Pending') color = 'orange';
-        else if (status === 'Approved') color = 'green';
-        else if (status === 'Rejected') color = 'red';
+        let color = "blue";
+        if (status === "Pending") color = "orange";
+        else if (status === "Approved") color = "green";
+        else if (status === "Rejected") color = "red";
         return <Tag color={color}>{status}</Tag>;
       },
     },
     {
-      title: 'Field Executives',
-      dataIndex: 'fieldExecutives',
-      key: 'fieldExecutives',
-      render: (fieldExecutives: Loan['fieldExecutives']) => (
+      title: "Field Executives",
+      dataIndex: "fieldExecutives",
+      key: "fieldExecutives",
+      render: (fieldExecutives: Loan["fieldExecutives"]) => (
         <Space direction="vertical">
           {fieldExecutives.map((fe) => (
-            <Tag key={fe.id} color={fe.status === 'Completed' ? 'success' : 'processing'}>
+            <Tag
+              key={fe.id}
+              color={fe.status === "Completed" ? "success" : "processing"}
+            >
               {fe.fieldExecutive.name} ({fe.status})
             </Tag>
           ))}
@@ -141,17 +159,17 @@ export default function ManageLoans() {
       ),
     },
     {
-      title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record: Loan) => (
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: Loan) => (
         <Space>
-          {record.status === 'Pending' && (
+          {record.status === "Pending" && (
             <Button
               type="primary"
               icon={<UserOutlined />}
@@ -190,7 +208,9 @@ export default function ManageLoans() {
           <Form.Item
             name="fieldExecutiveId"
             label="Field Executive"
-            rules={[{ required: true, message: 'Please select a field executive' }]}
+            rules={[
+              { required: true, message: "Please select a field executive" },
+            ]}
           >
             <Select
               placeholder="Select field executive"
@@ -204,4 +224,4 @@ export default function ManageLoans() {
       </Modal>
     </DashboardLayout>
   );
-} 
+}
