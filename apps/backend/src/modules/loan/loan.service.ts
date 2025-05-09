@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Prisma, LoanStatus, VerificationType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
+import * as XLSX from 'xlsx';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -18,7 +19,7 @@ export class LoanService {
   async createLoan(data: CreateLoanDto) {
     try {
       const loanData: Prisma.LoanCreateInput = {
-        applicationNumber: `LOAN-${Date.now()}`,
+        applicationNumber: data.applicationNumber || `LOAN-${Date.now()}`,
         applicantName: data.applicantName,
         applicantMobile: data.applicantMobile,
         applicantAddress: data.applicantAddress,
@@ -40,6 +41,7 @@ export class LoanService {
 
       await this.loggingService.info('Loan created successfully', {
         loanId: loan.id,
+        applicationNumber: loan.applicationNumber,
         applicantName: loan.applicantName,
         loanAmount: loan.loanAmount,
       });
@@ -57,19 +59,83 @@ export class LoanService {
 
   async importLoans(file: Express.Multer.File, operationsExecutiveId: number) {
     try {
-      // TODO: Implement Excel file parsing and loan import
-      // This is a placeholder for the actual implementation
-      await this.loggingService.info('Loans import started', { 
+      if (!file) {
+        throw new BadRequestException('No file uploaded');
+      }
+
+      // Read the Excel file
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+
+      if (!data.length) {
+        throw new BadRequestException('Excel file is empty');
+      }
+
+      const results = [];
+      const errors = [];
+
+      // Process each row
+      for (const row of data) {
+        try {
+          const loanData: CreateLoanDto = {
+            applicantName: row['NAME OF THE APPLICANT'],
+            applicantMobile: row['CONTACT NUMBER'].toString(),
+            applicantAddress: row['FULL ADDRESS'],
+            applicationNumber: row['APPLICATION ID'],
+            loanType: 'Personal', // Default to Personal if not specified
+            bankName: 'Default Bank', // Default bank if not specified
+            loanAmount: 100,
+            officeId: 1,
+            operationsExecutiveId: 1,
+            status: LoanStatus.Unassigned,
+          };
+
+          // Validate required fields
+          if (!loanData.applicantName || !loanData.applicantMobile || !loanData.applicantAddress) {
+            throw new Error('Missing required fields: Applicant Name, Contact Number, or Full Address');
+          }
+
+          if (!loanData.applicationNumber) {
+            throw new Error('Missing required field: APPLICATION ID');
+          }
+
+          const loan = await this.createLoan(loanData);
+          results.push({
+            row: row['__rowNum__'] + 1,
+            loanId: loan.id,
+            status: 'success'
+          });
+        } catch (error) {
+          errors.push({
+            row: row['__rowNum__'] + 1,
+            error: error.message
+          });
+        }
+      }
+
+      await this.loggingService.info('Loans import completed', {
         operationsExecutiveId,
-        fileName: file.originalname 
+        fileName: file.originalname,
+        totalProcessed: data.length,
+        successful: results.length,
+        failed: errors.length
       });
-      return { message: 'Loans imported successfully' };
+
+      return {
+        message: 'Loans import completed',
+        totalProcessed: data.length,
+        successful: results.length,
+        failed: errors.length,
+        results,
+        errors
+      };
     } catch (error) {
-      await this.loggingService.error('Failed to import loans', { 
+      await this.loggingService.error('Failed to import loans', {
         operationsExecutiveId,
         fileName: file.originalname,
         error: error.message,
-        stack: error.stack 
+        stack: error.stack
       });
       throw error;
     }
@@ -362,6 +428,63 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to get loans', {
         filters,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async updateVerificationAssignment(
+    loanId: number,
+    verificationType?: VerificationType,
+    fieldExecutiveId?: number,
+  ) {
+    try {
+      const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
+      if (!loan) {
+        await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
+        throw new NotFoundException('Loan not found');
+      }
+
+      // If no updates provided, return current verification
+      if (!verificationType && !fieldExecutiveId) {
+        const verification = await this.prisma.verification.findFirst({
+          where: { loanId }
+        });
+        return verification;
+      }
+
+      // Update verification
+      const verification = await this.prisma.verification.update({
+        where: {
+          loanId_type: {
+            loanId,
+            type: verificationType,
+          },
+        },
+        data: {
+          ...(fieldExecutiveId && { fieldExecutiveId }),
+          status: 'Pending', // Reset status when assignment is updated
+        },
+      });
+
+      await this.loggingService.info('Verification assignment updated successfully', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        verificationId: verification.id
+      });
+
+      return verification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update verification assignment', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
         error: error.message,
         stack: error.stack
       });

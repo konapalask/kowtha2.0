@@ -9,31 +9,42 @@ export class CreateLoanDto {
 
   @ApiProperty({ description: 'Applicant mobile number' })
   @IsString()
+  @IsOptional()
   applicantMobile: string;
 
   @ApiProperty({ description: 'Applicant address' })
   @IsString()
-  applicantAddress: string;
+  @IsOptional()
+  applicantAddress?: string;
+
+  @ApiProperty({ description: 'Application number' })
+  @IsString()
+  applicationNumber?: string;
 
   @ApiProperty({ description: 'Loan type' })
   @IsString()
-  loanType: string;
+  @IsOptional()
+  loanType?: string;
 
   @ApiProperty({ description: 'Bank name' })
   @IsString()
-  bankName: string;
+  @IsOptional()
+  bankName?: string;
 
   @ApiProperty({ description: 'Loan amount' })
   @IsNumber()
-  loanAmount: number;
+  @IsOptional()
+  loanAmount?: number;
 
   @ApiProperty({ description: 'Office ID' })
   @IsNumber()
-  officeId: number;
+  @IsOptional()
+  officeId?: number;
 
   @ApiProperty({ description: 'Operations executive ID' })
   @IsNumber()
-  operationsExecutiveId: number;
+  @IsOptional()
+  operationsExecutiveId?: number;
 
   @ApiProperty({ description: 'Loan status', enum: LoanStatus, default: LoanStatus.Unassigned })
   @IsEnum(LoanStatus)

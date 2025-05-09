@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
 import { LoggingService } from '../common/logging/logging.service';
+import { UserRole } from '@prisma/client';
+import { ListUsersDto } from './dto/list-users.dto';
 
 @Injectable()
 export class AccountsService {
@@ -124,6 +126,50 @@ export class AccountsService {
         userId: id, 
         error: error.message,
         stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  async listUsers(filters?: ListUsersDto) {
+    try {
+      const where: any = {};
+      
+      if (filters?.role) {
+        where.role = filters.role;
+      }
+
+      const users = await this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          role: true,
+          office: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          createdAt: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      await this.loggingService.info('Users listed successfully', {
+        filter: filters,
+        count: users.length
+      });
+
+      return users;
+    } catch (error) {
+      await this.loggingService.error('Failed to list users', {
+        filter: filters,
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }
