@@ -18,6 +18,7 @@ import {generateOTP, verifyOTP} from '../services/auth';
 import {colors} from '../constants/colors';
 import KowthaLightIcon from '../assets/Images/KowthaLightIcon.png';
 import KowthaDarkIcon from '../assets/Images/KowthaDarkIcon.png';
+import Toast from 'react-native-toast-message';
 // import {REACT_APP_BASE_URL} from '@env';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -41,9 +42,13 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      // await generateOTP(mobileNumber);
-      setShowOtpInput(true);
+      await generateOTP(mobileNumber);
       // Alert.alert('Success', 'OTP has been sent to your mobile number');
+      Toast.show({
+        text1: 'OTP has been sent to your mobile number',
+        type: 'success',
+      });
+      setShowOtpInput(true);
     } catch (error: any) {
       // Alert.alert(
       //   'Error',
@@ -65,11 +70,11 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      // const {access_token, refresh_token} = await verifyOTP(mobileNumber, otp);
+      const {access_token, refresh_token} = await verifyOTP(mobileNumber, otp);
 
       // Store the tokens
-      // await setItem('access_token', access_token);
-      // await setItem('refresh_token', refresh_token);
+      await setItem('access_token', access_token);
+      await setItem('refresh_token', refresh_token);
 
       // Request all permissions after successful login
       await requestAllPermissions();

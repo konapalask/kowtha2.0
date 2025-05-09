@@ -1,0 +1,64 @@
+import axiosInstance from "../config/axios.config";
+
+export interface Verification {
+  id: number;
+  type: "Permanent Address" | "Current Address" | "Work";
+  assignmentMethod: "Local" | "Remote";
+  office?: string;
+  assignee: string;
+  status: "Pending" | "In Progress" | "Completed";
+}
+
+export interface Loan {
+  id: number;
+  applicationNumber: string;
+  applicantName: string;
+  applicantPhone: string;
+  applicantAddress: string;
+  loanType: string;
+  bankName: string;
+  status: string;
+  assignee: string;
+  uploadedAt: string;
+  updatedAt: string;
+  verifications: Verification[];
+}
+
+export interface GetLoansResponse {
+  data: Loan[];
+  total: number;
+}
+
+export const getLoansApi = () => {
+  return axiosInstance.get<GetLoansResponse>("/loans");
+};
+
+export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {
+  return axiosInstance.put<Loan>(`/loans/${loanId}`, payload);
+};
+
+export const assignVerificationApi = (
+  loanId: number,
+  verificationType: string,
+  payload: {
+    assignmentMethod: "Local" | "Remote";
+    office?: string;
+    assignee: string;
+  }
+) => {
+  return axiosInstance.post<Verification>(
+    `/loans/${loanId}/verifications/${verificationType}/assign`,
+    payload
+  );
+};
+
+export const importLoansApi = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return axiosInstance.post<{ message: string }>("/loans/import", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
