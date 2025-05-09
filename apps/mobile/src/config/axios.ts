@@ -5,7 +5,7 @@ import {clearAll, clearItem, getItem, setItem} from '../helpers/utility';
 console;
 const axiosConfig = {
   // baseURL: REACT_APP_BASE_URL,
-  baseURL: `http://192.168.7.55:3012`,
+  baseURL: process.env.REACT_APP_BASE_URL,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

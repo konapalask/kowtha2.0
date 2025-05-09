@@ -19,9 +19,10 @@ interface OTPResponse {
 
 export const generateOTP = async (mobileNumber: string): Promise<void> => {
   try {
-    const response = await axiosInstance.post('/auth/otp/generate', {
+    const response = await axiosInstance.post('/accounts/otp/generate', {
       mobile: mobileNumber,
     });
+    return response.data;
 
     // if (response.status !== 200) {
     //   console.log('RESPONSE', response);
@@ -38,7 +39,7 @@ export const verifyOTP = async (
   otp: string,
 ): Promise<OTPResponse> => {
   try {
-    const response = await axiosInstance.post('/auth/otp/verify', {
+    const response = await axiosInstance.post('/accounts/otp/verify', {
       mobile: mobileNumber,
       otp,
     });
