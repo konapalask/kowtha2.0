@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -31,35 +31,19 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
 import type { UploadFile } from "antd/es/upload/interface";
 import * as XLSX from "xlsx";
+import {
+  getLoansApi,
+  updateLoanApi,
+  assignVerificationApi,
+  importLoansApi,
+  type Loan,
+  type Verification,
+} from "@/services/loans.services";
 
 dayjs.extend(relativeTime);
 
 const { Title, Text } = Typography;
 const { Option } = Select;
-
-interface Verification {
-  id: number;
-  type: "Permanent Address" | "Current Address" | "Work";
-  assignmentMethod: "Local" | "Remote";
-  office?: string;
-  assignee: string;
-  status: "Pending" | "In Progress" | "Completed";
-}
-
-interface Loan {
-  id: number;
-  applicationNumber: string;
-  applicantName: string;
-  applicantPhone: string;
-  applicantAddress: string;
-  loanType: string;
-  bankName: string;
-  status: string;
-  assignee: string;
-  uploadedAt: string;
-  updatedAt: string;
-  verifications: Verification[];
-}
 
 interface FieldExecutive {
   id: number;
@@ -131,6 +115,21 @@ export default function Loans() {
     },
   ]);
 
+  useEffect(() => {
+    const fetchLoans = async () => {
+      try {
+        setLoading(true);
+        const result = await getLoansApi();
+        setLoans(result.data.data);
+      } catch (error) {
+        message.error("Failed to fetch loans");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLoans();
+  }, []);
+
   const [fieldExecutives] = useState<FieldExecutive[]>([
     { id: 1, name: "John Doe" },
     { id: 2, name: "Jane Smith" },
@@ -163,8 +162,7 @@ export default function Loans() {
   const handleImport = async (file: File) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await importLoansApi(file);
       message.success("Loans imported successfully");
       setIsImportModalVisible(false);
     } catch (error) {
@@ -185,14 +183,13 @@ export default function Loans() {
   ) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      const result = await assignVerificationApi(loanId, verificationType, values);
+      
       setLoans(
         loans.map((loan) => {
           if (loan.id === loanId) {
             const updatedVerifications = loan.verifications.map((v) =>
-              v.type === verificationType ? { ...v, ...values } : v
+              v.type === verificationType ? { ...v, ...result.data } : v
             );
             return { ...loan, verifications: updatedVerifications };
           }
@@ -208,18 +205,24 @@ export default function Loans() {
     }
   };
 
-  const handleLoanInfoSave = (values: any) => {
-    setLoading(true);
-    setTimeout(() => {
+  const handleLoanInfoSave = async (values: any) => {
+    try {
+      setLoading(true);
+      if (!selectedLoan) return;
+      
+      const result = await updateLoanApi(selectedLoan.id, values);
       setLoans(
         loans.map((loan) =>
-          loan.id === selectedLoan?.id ? { ...loan, ...values } : loan
+          loan.id === selectedLoan.id ? result.data : loan
         )
       );
       setEditLoanInfo(false);
-      setLoading(false);
       message.success("Loan information updated");
-    }, 1000);
+    } catch (error) {
+      message.error("Failed to update loan information");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns: ColumnsType<Loan> = [

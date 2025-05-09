@@ -23,6 +23,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
+import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -154,18 +155,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             fontFamily: "Noto Sans, sans-serif",
           }}
         >
-          {/* <h2
-            style={{ margin: 0, color: "var(--primary-800)", fontWeight: 700 }}
-          >
-            LVSs
-          </h2> */}
-          <Image
-            src={logo}
+         
+         {collapsed? <Image
+            src={smallLogo}
             alt="Kowtha Logo"
             width={120}
-            height={40}
+            height={60}
             style={{ objectFit: "contain" }}
-          />
+          />: <Image
+          src={logo}
+          alt="Kowtha Logo"
+          width={120}
+          height={60}
+          style={{ objectFit: "contain" }}
+        />}
         </div>
         <Menu
           mode="inline"

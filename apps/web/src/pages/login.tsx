@@ -13,7 +13,9 @@ import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { MobileOutlined, LockOutlined } from "@ant-design/icons";
 // import Image from "next/image";
-import api from "@/utils/axios";
+import { generateOtpApi, verifyOtpApi } from "@/services/auth.services";
+import { setCookie } from "@/helpers/localStorage";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 
 const { Title, Text } = Typography;
 
@@ -39,9 +41,7 @@ export default function Login() {
   const handleSendOTP = async (values: { mobile: string }) => {
     try {
       setLoading(true);
-      await api.post("/auth/otp/generate", {
-        mobile: values.mobile,
-      });
+      await generateOtpApi({ mobile: values.mobile });
       setOtpSent(true);
       message.success("OTP sent successfully");
     } catch (error) {
@@ -55,15 +55,19 @@ export default function Login() {
   const handleVerifyOTP = async (values: { mobile: string; otp: string }) => {
     try {
       setLoading(true);
-      // Real API call for login
-      const result = await api.post("/auth/otp/verify", {
+      const result = await verifyOtpApi({
         mobile: values.mobile,
         otp: values.otp,
       });
-      if (result?.status >= 200 && result.status < 300) {
+      if (result.status >= 200 && result.status < 300) {
+        console.log(result)
+        setCookie(ACCESS_TOKEN, result.data?.token, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        setCookie(REFRESH_TOKEN, "help", `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+
+        // setCookie(REFRESH_TOKEN, result.data.refreshToken);
         router.push("/dashboard");
       } else {
-        message.error("Failed to verify OTP");
+        message.error(result.data?.message || "Failed to verify OTP");
       }
     } catch (error) {
       console.error("OTP verify error:", error);
@@ -144,6 +148,8 @@ export default function Login() {
                   borderRadius: "6px",
                   height: "40px",
                 }}
+                maxLength={10}
+                // minLength={10}
               />
             </Form.Item>
 
