@@ -54,73 +54,75 @@ interface RemoteExecutives {
   [office: string]: FieldExecutive[];
 }
 
+const dummyLoans = [
+  {
+    id: 1,
+    applicationNumber: "LOAN-001",
+    applicantName: "John Doe",
+    applicantPhone: "9876543210",
+    applicantAddress: "123 Main St, Mumbai",
+    loanType: "Home Loan",
+    bankName: "HDFC Bank",
+    status: "Pending",
+    assignee: "Jane Smith",
+    uploadedAt: "2024-03-20T10:00:00Z",
+    updatedAt: "2024-03-20T10:00:00Z",
+    verifications: [
+      {
+        id: 1,
+        type: "Permanent Address",
+        assignmentMethod: "Local",
+        assignee: "John Doe",
+        status: "Pending",
+      },
+      {
+        id: 2,
+        type: "Work",
+        assignmentMethod: "Remote",
+        office: "Delhi",
+        assignee: "Jane Smith",
+        status: "Pending",
+      },
+    ],
+  },
+  {
+    id: 2,
+    applicationNumber: "LOAN-002",
+    applicantName: "Jane Smith",
+    applicantPhone: "9876543210",
+    applicantAddress: "456 Park Ave, Delhi",
+    loanType: "Business Loan",
+    bankName: "ICICI Bank",
+    status: "In Progress",
+    assignee: "John Doe",
+    uploadedAt: "2024-03-19T15:30:00Z",
+    updatedAt: "2024-03-20T09:15:00Z",
+    verifications: [
+      {
+        id: 3,
+        type: "Current Address",
+        assignmentMethod: "Local",
+        assignee: "Jane Smith",
+        status: "Pending",
+      },
+    ],
+  },
+]
+
 export default function Loans() {
   const [loading, setLoading] = useState(false);
   const [isImportModalVisible, setIsImportModalVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [form] = Form.useForm();
-  const [loans, setLoans] = useState<Loan[]>([
-    {
-      id: 1,
-      applicationNumber: "LOAN-001",
-      applicantName: "John Doe",
-      applicantPhone: "9876543210",
-      applicantAddress: "123 Main St, Mumbai",
-      loanType: "Home Loan",
-      bankName: "HDFC Bank",
-      status: "Pending",
-      assignee: "Jane Smith",
-      uploadedAt: "2024-03-20T10:00:00Z",
-      updatedAt: "2024-03-20T10:00:00Z",
-      verifications: [
-        {
-          id: 1,
-          type: "Permanent Address",
-          assignmentMethod: "Local",
-          assignee: "John Doe",
-          status: "Pending",
-        },
-        {
-          id: 2,
-          type: "Work",
-          assignmentMethod: "Remote",
-          office: "Delhi",
-          assignee: "Jane Smith",
-          status: "Pending",
-        },
-      ],
-    },
-    {
-      id: 2,
-      applicationNumber: "LOAN-002",
-      applicantName: "Jane Smith",
-      applicantPhone: "9876543210",
-      applicantAddress: "456 Park Ave, Delhi",
-      loanType: "Business Loan",
-      bankName: "ICICI Bank",
-      status: "In Progress",
-      assignee: "John Doe",
-      uploadedAt: "2024-03-19T15:30:00Z",
-      updatedAt: "2024-03-20T09:15:00Z",
-      verifications: [
-        {
-          id: 3,
-          type: "Current Address",
-          assignmentMethod: "Local",
-          assignee: "Jane Smith",
-          status: "Pending",
-        },
-      ],
-    },
-  ]);
+  const [loans, setLoans] = useState<Loan[]>([]);
 
   useEffect(() => {
     const fetchLoans = async () => {
       try {
         setLoading(true);
         const result = await getLoansApi();
-        setLoans(result.data.data);
+        setLoans(result.data.data??dummyLoans);
       } catch (error) {
         message.error("Failed to fetch loans");
       } finally {
@@ -550,7 +552,7 @@ export default function Loans() {
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   Loan Information
                 </Typography.Title>
-                {!editLoanInfo && (
+                {/* {!editLoanInfo && (
                   <Button
                     type="link"
                     onClick={() => setEditLoanInfo(true)}
@@ -558,7 +560,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                )}
+                )} */}
               </div>
               {!editLoanInfo ? (
                 <Descriptions
@@ -728,7 +730,7 @@ export default function Loans() {
                               handleVerificationAssign(
                                 selectedLoan.id,
                                 type,
-                                values
+                                {...values,sameAddress:true}
                               )
                             }
                           >
