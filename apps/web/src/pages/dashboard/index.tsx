@@ -17,6 +17,9 @@ import {
   ResponsiveContainer,
   Legend,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell
 } from "recharts";
 
 interface DashboardStats {
@@ -193,7 +196,7 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               borderColor: "#145886",
-              backgroundColor: "rgba(20, 88, 134, 0.05)",
+              // backgroundColor: "rgba(20, 88, 134, 0.05)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -243,7 +246,7 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               borderColor: "#2196F3",
-              backgroundColor: "rgba(33, 150, 243, 0.05)",
+              // backgroundColor: "rgba(33, 150, 243, 0.05)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -295,7 +298,7 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               borderColor: "#F44336",
-              backgroundColor: "rgba(244, 67, 54, 0.05)",
+              // backgroundColor: "rgba(244, 67, 54, 0.05)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -347,7 +350,7 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               borderColor: "#FFC107",
-              backgroundColor: "rgba(255, 193, 7, 0.05)",
+              // backgroundColor: "rgba(255, 193, 7, 0.05)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -408,17 +411,24 @@ export default function Dashboard() {
         <Col md={24} lg={12}>
           <Card title="Loan Applications Being Processed">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={processingStats}
-                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
-                <YAxis allowDecimals={false} />
+              <PieChart>
+                <Pie
+                  data={processingStats}
+                  dataKey="count"
+                  nameKey="status"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {processingStats.map((entry, index) => {
+                    const COLORS = ["#FFC107", "#2196F3", "#F44336"];
+                    return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                  })}
+                </Pie>
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="count" fill="#009688" />
-              </BarChart>
+              </PieChart>
             </ResponsiveContainer>
           </Card>
         </Col>

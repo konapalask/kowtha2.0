@@ -3,6 +3,7 @@ import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import {getItem} from '../helpers/utility';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -43,6 +44,7 @@ const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
   const [data, setData] = useState<VerificationItem[]>(dummyData);
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
+  console.log(getItem('access_token'));
 
   const filterOptions = ['All', 'Pending', 'In Progress', 'Completed'];
 

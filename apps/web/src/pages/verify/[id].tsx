@@ -11,6 +11,11 @@ import {
   Tooltip,
   Input,
   Card,
+  Form,
+  Select,
+  InputNumber,
+  Row,
+  Col,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -21,6 +26,7 @@ import {
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
+import React from "react";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
@@ -186,6 +192,161 @@ const dummyLoans = [
   },
 ];
 
+interface EditFormModalProps {
+  visible: boolean;
+  onCancel: () => void;
+  onSave: (values: any) => void;
+  formKey: string;
+  initialValues: any;
+}
+
+const EditFormModal: React.FC<EditFormModalProps> = ({
+  visible,
+  onCancel,
+  onSave,
+  formKey,
+  initialValues,
+}) => {
+  const [form] = Form.useForm();
+
+  // Reset form when modal opens with new values
+  React.useEffect(() => {
+    if (visible && initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [visible, initialValues, form]);
+
+  const getFormFields = () => {
+    switch (formKey) {
+      case "basicDetails":
+        return [
+          { name: "verificationType", label: "Verification Type", type: "input" },
+          { name: "verificationDate", label: "Verification Date", type: "input" },
+          { name: "verificationTime", label: "Verification Time", type: "input" },
+          { name: "verificationMode", label: "Verification Mode", type: "input" },
+          { name: "verificationStatus", label: "Verification Status", type: "input" },
+          { name: "verificationRemarks", label: "Verification Remarks", type: "textarea" },
+        ];
+      case "applicantInformation":
+        return [
+          { name: "applicantName", label: "Applicant Name", type: "input" },
+          { name: "applicantAge", label: "Applicant Age", type: "input" },
+          { name: "applicantGender", label: "Applicant Gender", type: "select", options: ["Male", "Female", "Other"] },
+          { name: "applicantMaritalStatus", label: "Marital Status", type: "select", options: ["Single", "Married", "Divorced", "Widowed"] },
+          { name: "applicantEducation", label: "Education Level", type: "input" },
+        ];
+      case "residenceDetails":
+        return [
+          { name: "residenceStatus", label: "Residence Status", type: "select", options: ["Owned", "Rented", "Leased"] },
+          { name: "rentDetails", label: "Rent Details", type: "input" },
+          { name: "residenceType", label: "Type of Residence", type: "select", options: ["House", "Apartment", "Villa"] },
+          { name: "constructionQuality", label: "Construction Quality", type: "select", options: ["Excellent", "Good", "Average", "Poor"] },
+          { name: "standardOfLiving", label: "Standard of Living", type: "select", options: ["Excellent", "Good", "Average", "Poor"] },
+          { name: "locationCategory", label: "Location Category", type: "select", options: ["Urban", "Semi-Urban", "Rural"] },
+          { name: "localityType", label: "Locality Type", type: "select", options: ["Residential", "Commercial", "Mixed"] },
+          { name: "accessibility", label: "Accessibility", type: "select", options: ["Easy", "Moderate", "Difficult"] },
+          { name: "houseArea", label: "House Area", type: "input" },
+          { name: "yearsAtCurrentAddress", label: "Years at Current Address", type: "input" },
+          { name: "nameplateVisible", label: "Nameplate Visible", type: "select", options: ["Yes", "No"] },
+        ];
+      case "familyEmploymentDetails":
+        return [
+          { name: "totalFamilyMembers", label: "Total Family Members", type: "input" },
+          { name: "earningMembers", label: "No. of Earning Members", type: "input" },
+          { name: "dependents", label: "No. of Dependents", type: "input" },
+          { name: "isSpouseWorking", label: "Is Spouse Working", type: "select", options: ["Yes", "No"] },
+          { name: "spouseEmploymentDetails", label: "Spouse's Employment Details", type: "input" },
+          { name: "assetsObserved", label: "Assets Observed", type: "input" },
+        ];
+      case "addressVerification":
+        return [
+          { name: "addressType", label: "Address Type", type: "select", options: ["Residence", "Office", "Business", "Other"] },
+          { name: "addressCategory", label: "Address Category", type: "select", options: ["Urban", "Rural", "Semi-Urban"] },
+          { name: "addressSubCategory", label: "Address Sub-Category", type: "select", options: ["Metropolitan", "City", "Town", "Village", "Industrial Area", "Commercial Area"] },
+          { name: "addressDetails", label: "Address Details", type: "textarea" },
+          { name: "geoTag", label: "Geo Tag", type: "input" },
+        ];
+      case "thirdPartyCheck":
+        return [
+          { name: "tpcName", label: "Name of TPC/Neighbor", type: "input" },
+          { name: "relationship", label: "Relationship to Applicant", type: "select", options: ["Neighbor", "Friend", "Local Shop Owner", "Other"] },
+          { name: "feedbackStatus", label: "Feedback Status", type: "select", options: ["Positive", "Negative", "Could Not Confirm"] },
+          { name: "comments", label: "Comments/Remarks", type: "textarea" },
+        ];
+      case "finalObservations":
+        return [
+          { name: "cooperativeness", label: "Cooperativeness of Applicant", type: "select", options: ["Polite", "Neutral", "Rude", "Not Met"] },
+          { name: "overallStatus", label: "Overall Status", type: "select", options: ["Positive", "Negative", "Referred", "Fraud"] },
+          { name: "remarks", label: "Remarks", type: "textarea" },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const renderFormField = (field: any) => {
+    switch (field.type) {
+      case "input":
+        return <Input />;
+      case "textarea":
+        return <Input.TextArea rows={4} />;
+      case "select":
+        return (
+          <Select>
+            {field.options.map((option: string) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        );
+      default:
+        return <Input />;
+    }
+  };
+
+  const handleSubmit = () => {
+    form.validateFields().then((values) => {
+      onSave(values);
+      form.resetFields();
+    });
+  };
+
+  return (
+    <Modal
+      title={`Edit ${formKey.replace(/([A-Z])/g, " $1").trim()}`}
+      open={visible}
+      onCancel={() => {
+        form.resetFields();
+        onCancel();
+      }}
+      onOk={handleSubmit}
+      width={1000}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={initialValues}
+        preserve={false}
+      >
+        <Row gutter={[16, 16]}>
+          {getFormFields().map((field) => (
+            <Col span={8} key={field.name}>
+              <Form.Item
+                name={field.name}
+                label={field.label}
+                rules={[{ required: true, message: `Please enter ${field.label}` }]}
+              >
+                {renderFormField(field)}
+              </Form.Item>
+            </Col>
+          ))}
+        </Row>
+      </Form>
+    </Modal>
+  );
+};
+
 export default function LoanVerifyDetails() {
   const router = useRouter();
   const { id } = router.query;
@@ -198,6 +359,8 @@ export default function LoanVerifyDetails() {
   const [pdfPreviewUrl] = useState(
     "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
   );
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [currentFormKey, setCurrentFormKey] = useState("");
 
   const defaultFormData: FormData = {
     basicDetails: {
@@ -271,8 +434,16 @@ export default function LoanVerifyDetails() {
   }
 
   const handleEdit = (formKey: string) => {
-    console.log(`Editing ${formKey}`);
-    // Here you would typically open a modal or navigate to edit the form
+    setCurrentFormKey(formKey);
+    setEditModalVisible(true);
+  };
+
+  const handleFormSave = (values: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [currentFormKey]: values,
+    }));
+    setEditModalVisible(false);
   };
 
   const handleApprove = () => {
@@ -292,28 +463,363 @@ export default function LoanVerifyDetails() {
 
   return (
     <DashboardLayout>
+      <div style={{ paddingBottom: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
+          <Title level={3} style={{ margin: 0 }}>
+            Loan Verification - {loan.applicationNumber}
+          </Title>
+        </div>
+        <div style={{ display: "flex", gap: 32 }}>
+          {/* Left column: forms and documents */}
+          <div style={{ flex: 1, minWidth: 320 }}>
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Basic Details"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("basicDetails")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Verification Type">
+                    {formData.basicDetails.verificationType}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Verification Date">
+                    {formData.basicDetails.verificationDate}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Verification Time">
+                    {formData.basicDetails.verificationTime}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Verification Mode">
+                    {formData.basicDetails.verificationMode}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Verification Status">
+                    {formData.basicDetails.verificationStatus}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Verification Remarks">
+                    {formData.basicDetails.verificationRemarks}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Applicant Information"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("applicantInformation")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Applicant Name">
+                    {formData.applicantInformation.applicantName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Applicant Age">
+                    {formData.applicantInformation.applicantAge}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Applicant Gender">
+                    {formData.applicantInformation.applicantGender}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Marital Status">
+                    {formData.applicantInformation.applicantMaritalStatus}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Education Level">
+                    {formData.applicantInformation.applicantEducation}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Address Verification"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("addressVerification")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Address Type">
+                    {formData.addressVerification.addressType}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Address Category">
+                    {formData.addressVerification.addressCategory}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Address Sub-Category">
+                    {formData.addressVerification.addressSubCategory}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Address Details">
+                    {formData.addressVerification.addressDetails}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Geo Tag">
+                    {formData.addressVerification.geoTag}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Residence Details"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("residenceDetails")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Residence Status">
+                    {formData.residenceDetails.residenceStatus}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Rent Details">
+                    {formData.residenceDetails.rentDetails}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Type of Residence">
+                    {formData.residenceDetails.residenceType}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Construction Quality">
+                    {formData.residenceDetails.constructionQuality}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Standard of Living">
+                    {formData.residenceDetails.standardOfLiving}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Location Category">
+                    {formData.residenceDetails.locationCategory}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Locality Type">
+                    {formData.residenceDetails.localityType}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Accessibility">
+                    {formData.residenceDetails.accessibility}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="House Area">
+                    {formData.residenceDetails.houseArea}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Years at Current Address">
+                    {formData.residenceDetails.yearsAtCurrentAddress}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Nameplate Visible">
+                    {formData.residenceDetails.nameplateVisible}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Family & Employment Details"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("familyEmploymentDetails")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Total Family Members">
+                    {formData.familyEmploymentDetails.totalFamilyMembers}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="No. of Earning Members">
+                    {formData.familyEmploymentDetails.earningMembers}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="No. of Dependents">
+                    {formData.familyEmploymentDetails.dependents}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Is Spouse Working">
+                    {formData.familyEmploymentDetails.isSpouseWorking}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Spouse's Employment Details">
+                    {formData.familyEmploymentDetails.spouseEmploymentDetails}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Assets Observed">
+                    {formData.familyEmploymentDetails.assetsObserved}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Third Party Check"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("thirdPartyCheck")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="TPC Name">
+                    {formData.thirdPartyCheck.tpcName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Relationship">
+                    {formData.thirdPartyCheck.relationship}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Feedback Status">
+                    {formData.thirdPartyCheck.feedbackStatus}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Comments">
+                    {formData.thirdPartyCheck.comments}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Final Observations"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("finalObservations")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Cooperativeness">
+                    {formData.finalObservations.cooperativeness}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Overall Status">
+                    {formData.finalObservations.overallStatus}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Remarks">
+                    {formData.finalObservations.remarks}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions title="Photo Capture" bordered column={1}>
+                  {formData.uploadedItems?.map((item, idx) => (
+                    <Descriptions.Item
+                      label={`${
+                        item.type.charAt(0).toUpperCase() + item.type.slice(1)
+                      } Photo ${idx + 1}`}
+                    >
+                      {item.uri}
+                    </Descriptions.Item>
+                  ))}
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions title="Documents & Photos" bordered column={1}>
+                  <Descriptions.Item label="Work Verification">
+                    <Space direction="vertical">
+                      {loan.documents
+                        .filter((d) => d.type === "Work")
+                        .map((doc, idx) => (
+                          <a
+                            key={idx}
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {doc.name}
+                          </a>
+                        ))}
+                      {loan.photos
+                        .filter((p) => p.type === "Work")
+                        .map((photo, idx) => (
+                          <img
+                            key={idx}
+                            src={photo.url}
+                            alt="Work Photo"
+                            style={{ width: 120, borderRadius: 4 }}
+                          />
+                        ))}
+                    </Space>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Address Verification">
+                    <Space direction="vertical">
+                      {loan.documents
+                        .filter((d) => d.type === "Address")
+                        .map((doc, idx) => (
+                          <a
+                            key={idx}
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {doc.name}
+                          </a>
+                        ))}
+                      {loan.photos
+                        .filter((p) => p.type === "Address")
+                        .map((photo, idx) => (
+                          <img
+                            key={idx}
+                            src={photo.url}
+                            alt="Address Photo"
+                            style={{ width: 120, borderRadius: 4 }}
+                          />
+                        ))}
+                    </Space>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+          </div>
+        </div>
+      </div>
+
       <div
         style={{
+          position: "sticky",
+          bottom: 0,
+          left: 120,
+          right: 40,
+          background: "#fff",
+          padding: "16px 24px",
+          borderTop: "1px solid #f0f0f0",
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
+          justifyContent: "flex-end",
+          gap: "16px",
+          zIndex: 1000,
+          boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
         }}
       >
-        <Title level={3} style={{ margin: 0 }}>
-          Loan Verification - {loan.applicationNumber}
-        </Title>
         <Space>
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            onClick={() => {
-              setModalAction("approve");
-              setModalVisible(true);
-            }}
-          >
-            Approve
-          </Button>
           <Button
             danger
             icon={<CloseCircleOutlined />}
@@ -324,333 +830,19 @@ export default function LoanVerifyDetails() {
           >
             Reject
           </Button>
+          <Button
+            type="primary"
+            icon={<CheckCircleOutlined />}
+            onClick={() => {
+              setModalAction("approve");
+              setModalVisible(true);
+            }}
+          >
+            Approve
+          </Button>
         </Space>
       </div>
-      <div style={{ display: "flex", gap: 32 }}>
-        {/* Left column: forms and documents */}
-        <div style={{ flex: 1, minWidth: 320 }}>
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Basic Details"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("basicDetails")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Verification Type">
-                  {formData.basicDetails.verificationType}
-                </Descriptions.Item>
-                <Descriptions.Item label="Verification Date">
-                  {formData.basicDetails.verificationDate}
-                </Descriptions.Item>
-                <Descriptions.Item label="Verification Time">
-                  {formData.basicDetails.verificationTime}
-                </Descriptions.Item>
-                <Descriptions.Item label="Verification Mode">
-                  {formData.basicDetails.verificationMode}
-                </Descriptions.Item>
-                <Descriptions.Item label="Verification Status">
-                  {formData.basicDetails.verificationStatus}
-                </Descriptions.Item>
-                <Descriptions.Item label="Verification Remarks">
-                  {formData.basicDetails.verificationRemarks}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
 
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Applicant Information"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("applicantInformation")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Applicant Name">
-                  {formData.applicantInformation.applicantName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Applicant Age">
-                  {formData.applicantInformation.applicantAge}
-                </Descriptions.Item>
-                <Descriptions.Item label="Applicant Gender">
-                  {formData.applicantInformation.applicantGender}
-                </Descriptions.Item>
-                <Descriptions.Item label="Marital Status">
-                  {formData.applicantInformation.applicantMaritalStatus}
-                </Descriptions.Item>
-                <Descriptions.Item label="Education Level">
-                  {formData.applicantInformation.applicantEducation}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Residence Details"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("residenceDetails")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Residence Status">
-                  {formData.residenceDetails.residenceStatus}
-                </Descriptions.Item>
-                <Descriptions.Item label="Rent Details">
-                  {formData.residenceDetails.rentDetails}
-                </Descriptions.Item>
-                <Descriptions.Item label="Type of Residence">
-                  {formData.residenceDetails.residenceType}
-                </Descriptions.Item>
-                <Descriptions.Item label="Construction Quality">
-                  {formData.residenceDetails.constructionQuality}
-                </Descriptions.Item>
-                <Descriptions.Item label="Standard of Living">
-                  {formData.residenceDetails.standardOfLiving}
-                </Descriptions.Item>
-                <Descriptions.Item label="Location Category">
-                  {formData.residenceDetails.locationCategory}
-                </Descriptions.Item>
-                <Descriptions.Item label="Locality Type">
-                  {formData.residenceDetails.localityType}
-                </Descriptions.Item>
-                <Descriptions.Item label="Accessibility">
-                  {formData.residenceDetails.accessibility}
-                </Descriptions.Item>
-                <Descriptions.Item label="House Area">
-                  {formData.residenceDetails.houseArea}
-                </Descriptions.Item>
-                <Descriptions.Item label="Years at Current Address">
-                  {formData.residenceDetails.yearsAtCurrentAddress}
-                </Descriptions.Item>
-                <Descriptions.Item label="Nameplate Visible">
-                  {formData.residenceDetails.nameplateVisible}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Family & Employment Details"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("familyEmploymentDetails")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Total Family Members">
-                  {formData.familyEmploymentDetails.totalFamilyMembers}
-                </Descriptions.Item>
-                <Descriptions.Item label="No. of Earning Members">
-                  {formData.familyEmploymentDetails.earningMembers}
-                </Descriptions.Item>
-                <Descriptions.Item label="No. of Dependents">
-                  {formData.familyEmploymentDetails.dependents}
-                </Descriptions.Item>
-                <Descriptions.Item label="Is Spouse Working">
-                  {formData.familyEmploymentDetails.isSpouseWorking}
-                </Descriptions.Item>
-                <Descriptions.Item label="Spouse's Employment Details">
-                  {formData.familyEmploymentDetails.spouseEmploymentDetails}
-                </Descriptions.Item>
-                <Descriptions.Item label="Assets Observed">
-                  {formData.familyEmploymentDetails.assetsObserved}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Address Verification"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("addressVerification")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Address Type">
-                  {formData.addressVerification.addressType}
-                </Descriptions.Item>
-                <Descriptions.Item label="Address Category">
-                  {formData.addressVerification.addressCategory}
-                </Descriptions.Item>
-                <Descriptions.Item label="Address Sub-Category">
-                  {formData.addressVerification.addressSubCategory}
-                </Descriptions.Item>
-                <Descriptions.Item label="Address Details">
-                  {formData.addressVerification.addressDetails}
-                </Descriptions.Item>
-                <Descriptions.Item label="Geo Tag">
-                  {formData.addressVerification.geoTag}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Third Party Check"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("thirdPartyCheck")}
-                  />
-                }
-              >
-                <Descriptions.Item label="TPC Name">
-                  {formData.thirdPartyCheck.tpcName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Relationship">
-                  {formData.thirdPartyCheck.relationship}
-                </Descriptions.Item>
-                <Descriptions.Item label="Feedback Status">
-                  {formData.thirdPartyCheck.feedbackStatus}
-                </Descriptions.Item>
-                <Descriptions.Item label="Comments">
-                  {formData.thirdPartyCheck.comments}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions
-                title="Final Observations"
-                bordered
-                column={2}
-                extra={
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit("finalObservations")}
-                  />
-                }
-              >
-                <Descriptions.Item label="Cooperativeness">
-                  {formData.finalObservations.cooperativeness}
-                </Descriptions.Item>
-                <Descriptions.Item label="Overall Status">
-                  {formData.finalObservations.overallStatus}
-                </Descriptions.Item>
-                <Descriptions.Item label="Remarks">
-                  {formData.finalObservations.remarks}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions title="Photo Capture" bordered column={1}>
-                {formData.uploadedItems?.map((item, idx) => (
-                  <Descriptions.Item
-                    label={`${
-                      item.type.charAt(0).toUpperCase() + item.type.slice(1)
-                    } Photo ${idx + 1}`}
-                  >
-                    {item.uri}
-                  </Descriptions.Item>
-                ))}
-              </Descriptions>
-            </Card>
-          </section>
-
-          <section style={{ marginBottom: 24 }}>
-            <Card>
-              <Descriptions title="Documents & Photos" bordered column={1}>
-                <Descriptions.Item label="Work Verification">
-                  <Space direction="vertical">
-                    {loan.documents
-                      .filter((d) => d.type === "Work")
-                      .map((doc, idx) => (
-                        <a
-                          key={idx}
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {doc.name}
-                        </a>
-                      ))}
-                    {loan.photos
-                      .filter((p) => p.type === "Work")
-                      .map((photo, idx) => (
-                        <img
-                          key={idx}
-                          src={photo.url}
-                          alt="Work Photo"
-                          style={{ width: 120, borderRadius: 4 }}
-                        />
-                      ))}
-                  </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="Address Verification">
-                  <Space direction="vertical">
-                    {loan.documents
-                      .filter((d) => d.type === "Address")
-                      .map((doc, idx) => (
-                        <a
-                          key={idx}
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {doc.name}
-                        </a>
-                      ))}
-                    {loan.photos
-                      .filter((p) => p.type === "Address")
-                      .map((photo, idx) => (
-                        <img
-                          key={idx}
-                          src={photo.url}
-                          alt="Address Photo"
-                          style={{ width: 120, borderRadius: 4 }}
-                        />
-                      ))}
-                  </Space>
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-        </div>
-      </div>
       <Modal
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
@@ -696,6 +888,13 @@ export default function LoanVerifyDetails() {
           <Button onClick={() => setModalVisible(false)}>Cancel</Button>
         </Space>
       </Modal>
+      <EditFormModal
+        visible={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        onSave={handleFormSave}
+        formKey={currentFormKey}
+        initialValues={formData[currentFormKey as keyof FormData]}
+      />
     </DashboardLayout>
   );
 }

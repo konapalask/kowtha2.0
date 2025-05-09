@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -31,35 +31,19 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
 import type { UploadFile } from "antd/es/upload/interface";
 import * as XLSX from "xlsx";
+import {
+  getLoansApi,
+  updateLoanApi,
+  assignVerificationApi,
+  importLoansApi,
+  type Loan,
+  type Verification,
+} from "@/services/loans.services";
 
 dayjs.extend(relativeTime);
 
 const { Title, Text } = Typography;
 const { Option } = Select;
-
-interface Verification {
-  id: number;
-  type: "Permanent Address" | "Current Address" | "Work";
-  assignmentMethod: "Local" | "Remote";
-  office?: string;
-  assignee: string;
-  status: "Pending" | "In Progress" | "Completed";
-}
-
-interface Loan {
-  id: number;
-  applicationNumber: string;
-  applicantName: string;
-  applicantPhone: string;
-  applicantAddress: string;
-  loanType: string;
-  bankName: string;
-  status: string;
-  assignee: string;
-  uploadedAt: string;
-  updatedAt: string;
-  verifications: Verification[];
-}
 
 interface FieldExecutive {
   id: number;
@@ -70,66 +54,83 @@ interface RemoteExecutives {
   [office: string]: FieldExecutive[];
 }
 
+const dummyLoans = [
+  {
+    id: 1,
+    applicationNumber: "LOAN-001",
+    applicantName: "John Doe",
+    applicantPhone: "9876543210",
+    applicantAddress: "123 Main St, Mumbai",
+    loanType: "Home Loan",
+    bankName: "HDFC Bank",
+    status: "Pending",
+    assignee: "Jane Smith",
+    uploadedAt: "2024-03-20T10:00:00Z",
+    updatedAt: "2024-03-20T10:00:00Z",
+    verifications: [
+      {
+        id: 1,
+        type: "Permanent Address",
+        assignmentMethod: "Local",
+        assignee: "John Doe",
+        status: "Pending",
+      },
+      {
+        id: 2,
+        type: "Work",
+        assignmentMethod: "Remote",
+        office: "Delhi",
+        assignee: "Jane Smith",
+        status: "Pending",
+      },
+    ],
+  },
+  {
+    id: 2,
+    applicationNumber: "LOAN-002",
+    applicantName: "Jane Smith",
+    applicantPhone: "9876543210",
+    applicantAddress: "456 Park Ave, Delhi",
+    loanType: "Business Loan",
+    bankName: "ICICI Bank",
+    status: "In Progress",
+    assignee: "John Doe",
+    uploadedAt: "2024-03-19T15:30:00Z",
+    updatedAt: "2024-03-20T09:15:00Z",
+    verifications: [
+      {
+        id: 3,
+        type: "Current Address",
+        assignmentMethod: "Local",
+        assignee: "Jane Smith",
+        status: "Pending",
+      },
+    ],
+  },
+]
+
 export default function Loans() {
   const [loading, setLoading] = useState(false);
   const [isImportModalVisible, setIsImportModalVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [form] = Form.useForm();
-  const [loans, setLoans] = useState<Loan[]>([
-    {
-      id: 1,
-      applicationNumber: "LOAN-001",
-      applicantName: "John Doe",
-      applicantPhone: "9876543210",
-      applicantAddress: "123 Main St, Mumbai",
-      loanType: "Home Loan",
-      bankName: "HDFC Bank",
-      status: "Pending",
-      assignee: "Jane Smith",
-      uploadedAt: "2024-03-20T10:00:00Z",
-      updatedAt: "2024-03-20T10:00:00Z",
-      verifications: [
-        {
-          id: 1,
-          type: "Permanent Address",
-          assignmentMethod: "Local",
-          assignee: "John Doe",
-          status: "Pending",
-        },
-        {
-          id: 2,
-          type: "Work",
-          assignmentMethod: "Remote",
-          office: "Delhi",
-          assignee: "Jane Smith",
-          status: "Pending",
-        },
-      ],
-    },
-    {
-      id: 2,
-      applicationNumber: "LOAN-002",
-      applicantName: "Jane Smith",
-      applicantPhone: "9876543210",
-      applicantAddress: "456 Park Ave, Delhi",
-      loanType: "Business Loan",
-      bankName: "ICICI Bank",
-      status: "In Progress",
-      assignee: "John Doe",
-      uploadedAt: "2024-03-19T15:30:00Z",
-      updatedAt: "2024-03-20T09:15:00Z",
-      verifications: [
-        {
-          id: 3,
-          type: "Current Address",
-          assignmentMethod: "Local",
-          assignee: "Jane Smith",
-          status: "Pending",
-        },
-      ],
-    },
-  ]);
+  const [loans, setLoans] = useState<Loan[]>([]);
+
+  useEffect(() => {
+    const fetchLoans = async () => {
+      try {
+        setLoading(true);
+        const result = await getLoansApi();
+        setLoans(result.data.data??dummyLoans);
+      } catch (error) {
+        message.error("Failed to fetch loans");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLoans();
+  }, []);
 
   const [fieldExecutives] = useState<FieldExecutive[]>([
     { id: 1, name: "John Doe" },
@@ -163,8 +164,7 @@ export default function Loans() {
   const handleImport = async (file: File) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await importLoansApi(file);
       message.success("Loans imported successfully");
       setIsImportModalVisible(false);
     } catch (error) {
@@ -185,14 +185,13 @@ export default function Loans() {
   ) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      const result = await assignVerificationApi(loanId, verificationType, values);
+      
       setLoans(
         loans.map((loan) => {
           if (loan.id === loanId) {
             const updatedVerifications = loan.verifications.map((v) =>
-              v.type === verificationType ? { ...v, ...values } : v
+              v.type === verificationType ? { ...v, ...result.data } : v
             );
             return { ...loan, verifications: updatedVerifications };
           }
@@ -208,18 +207,24 @@ export default function Loans() {
     }
   };
 
-  const handleLoanInfoSave = (values: any) => {
-    setLoading(true);
-    setTimeout(() => {
+  const handleLoanInfoSave = async (values: any) => {
+    try {
+      setLoading(true);
+      if (!selectedLoan) return;
+      
+      const result = await updateLoanApi(selectedLoan.id, values);
       setLoans(
         loans.map((loan) =>
-          loan.id === selectedLoan?.id ? { ...loan, ...values } : loan
+          loan.id === selectedLoan.id ? result.data : loan
         )
       );
       setEditLoanInfo(false);
-      setLoading(false);
       message.success("Loan information updated");
-    }, 1000);
+    } catch (error) {
+      message.error("Failed to update loan information");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns: ColumnsType<Loan> = [
@@ -547,7 +552,7 @@ export default function Loans() {
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   Loan Information
                 </Typography.Title>
-                {!editLoanInfo && (
+                {/* {!editLoanInfo && (
                   <Button
                     type="link"
                     onClick={() => setEditLoanInfo(true)}
@@ -555,7 +560,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                )}
+                )} */}
               </div>
               {!editLoanInfo ? (
                 <Descriptions
@@ -725,7 +730,7 @@ export default function Loans() {
                               handleVerificationAssign(
                                 selectedLoan.id,
                                 type,
-                                values
+                                {...values,sameAddress:true}
                               )
                             }
                           >

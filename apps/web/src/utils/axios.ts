@@ -1,9 +1,9 @@
 import axios from 'axios';
-console.log('API Base URL:', process.env.NEXT_PUBLIC_API_URL);  // Add this
+console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);  // Add this
 
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
