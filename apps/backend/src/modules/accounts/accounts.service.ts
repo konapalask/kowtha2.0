@@ -14,6 +14,22 @@ export class AccountsService {
     private loggingService: LoggingService,
   ) {}
 
+  private generateTokens(userId: number, mobile: string, role: UserRole) {
+    const payload = { sub: userId, mobile, role };
+    
+    // Generate access token (expires in 1 hour)
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h'
+    });
+
+    // Generate refresh token (expires in 7 days)
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d'
+    });
+
+    return { accessToken, refreshToken };
+  }
+
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
       const otp = '123456'; // Hardcoded OTP for now
@@ -44,7 +60,7 @@ export class AccountsService {
     }
   }
 
-  async verifyOTP(mobile: string, otp: string): Promise<{ token: string }> {
+  async verifyOTP(mobile: string, otp: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const user = await this.prisma.user.findUnique({ where: { mobile } });
       if (!user) {
@@ -82,8 +98,8 @@ export class AccountsService {
         },
       });
 
-      const payload = { sub: user.id, mobile: user.mobile, role: user.role };
-      const token = this.jwtService.sign(payload);
+      // Generate both tokens
+      const tokens = this.generateTokens(user.id, user.mobile, user.role);
       
       await this.loggingService.info('OTP verified successfully', { 
         mobile, 
@@ -91,7 +107,7 @@ export class AccountsService {
         role: user.role 
       });
       
-      return { token };
+      return tokens;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;

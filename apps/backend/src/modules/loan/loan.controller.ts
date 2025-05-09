@@ -2,7 +2,9 @@ import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
-import { VerificationType, LoanStatus } from '@prisma/client';
+import { RolesGuard } from '../accounts/guards/roles.guard';
+import { Roles } from '../accounts/decorators/roles.decorator';
+import { VerificationType, LoanStatus, UserRole } from '@prisma/client';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { CreateLoanDto } from './dto/create-loan.dto';
@@ -14,11 +16,12 @@ import * as XLSX from 'xlsx';
 
 @ApiTags('loans')
 @Controller('loans')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class LoanController {
   constructor(private loanService: LoanService) {}
 
   @Post()
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Create a new loan' })
   @ApiResponse({ 
     status: 201, 
@@ -34,6 +37,7 @@ export class LoanController {
   }
 
   @Post('import')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Import loans from Excel file' })
   @ApiConsumes('multipart/form-data')
@@ -107,6 +111,7 @@ export class LoanController {
   }
 
   @Post(':id/assign')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Assign a field executive to a loan verification' })
   @ApiResponse({ 
     status: 200, 
@@ -151,9 +156,20 @@ export class LoanController {
   }
 
   @Post(':id/verification-report')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Submit verification report' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The verification report has been successfully submitted'
+  })
   async submitVerificationReport(
     @Param('id') loanId: number,
-    @Body() body: { verificationType: VerificationType; findings: string; documents: string[] },
+    @Body() body: { 
+      verificationType: VerificationType; 
+      findings: string; 
+      documents: string[];
+      path?: string;
+    },
     @Request() req: AuthenticatedRequest,
   ) {
     const result = await this.loanService.submitVerificationReport(
@@ -162,6 +178,7 @@ export class LoanController {
       req.user.sub,
       body.findings,
       body.documents,
+      body.path,
     );
     return {
       status: 200,
@@ -171,6 +188,7 @@ export class LoanController {
   }
 
   @Post(':id/verify')
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Verify a loan by field verifier' })
   @ApiResponse({ 
     status: 200, 
@@ -195,6 +213,12 @@ export class LoanController {
   }
 
   @Get('office/:officeId')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Get loans by office' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans for the specified office'
+  })
   async getLoansByOffice(@Param('officeId') officeId: number) {
     const result = await this.loanService.getLoansByOffice(officeId);
     return {
@@ -205,6 +229,12 @@ export class LoanController {
   }
 
   @Get('field-executive')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Get loans assigned to field executive' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans assigned to the field executive'
+  })
   async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
     const result = await this.loanService.getLoansByFieldExecutive(req.user.sub);
     return {
@@ -215,6 +245,12 @@ export class LoanController {
   }
 
   @Get('verifier')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Get loans assigned to verifier' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans assigned to the verifier'
+  })
   async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
     const result = await this.loanService.getLoansByVerifier(req.user.sub);
     return {
@@ -225,6 +261,7 @@ export class LoanController {
   }
 
   @Get()
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
   @ApiResponse({ 
     status: 200, 
@@ -240,6 +277,7 @@ export class LoanController {
   }
 
   @Patch(':id/assign')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Update loan verification assignment' })
   @ApiResponse({ 
     status: 200, 
@@ -279,6 +317,110 @@ export class LoanController {
     return {
       status: 200,
       message: 'Verification assignment updated successfully',
+      data: result
+    };
+  }
+
+  @Get('field-executive/assigned')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Get all loans assigned to field executive with verification details' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans assigned to the field executive with verification details',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Assigned loans fetched successfully' },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              loanNumber: { type: 'string' },
+              applicantName: { type: 'string' },
+              amount: { type: 'number' },
+              status: { type: 'string', enum: Object.values(LoanStatus) },
+              verifications: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'number' },
+                    type: { type: 'string', enum: Object.values(VerificationType) },
+                    status: { type: 'string' },
+                    findings: { type: 'string' },
+                    documents: { type: 'array', items: { type: 'string' } },
+                    createdAt: { type: 'string', format: 'date-time' },
+                    updatedAt: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getAssignedLoansWithVerifications(@Request() req: AuthenticatedRequest) {
+    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub);
+    return {
+      status: 200,
+      message: 'Assigned loans fetched successfully',
+      data: result
+    };
+  }
+
+  @Patch(':id/verification-report')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Edit verification report' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The verification report has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification report updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            fieldExecutiveId: { type: 'number' },
+            findings: { type: 'string' },
+            documents: { type: 'array', items: { type: 'string' } },
+            path: { type: 'string', nullable: true },
+            status: { type: 'string' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async editVerificationReport(
+    @Param('id') loanId: number,
+    @Body() body: { 
+      verificationType: VerificationType; 
+      findings: string; 
+      documents: string[];
+      path?: string;
+    },
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const result = await this.loanService.editVerificationReport(
+      loanId,
+      body.verificationType,
+      req.user.sub,
+      body.findings,
+      body.documents,
+      body.path,
+    );
+    return {
+      status: 200,
+      message: 'Verification report updated successfully',
       data: result
     };
   }

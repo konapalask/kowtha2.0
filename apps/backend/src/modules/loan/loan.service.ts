@@ -4,6 +4,7 @@ import { Prisma, LoanStatus, VerificationType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
+import { Logger } from '@nestjs/common';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -14,6 +15,7 @@ export class LoanService {
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService,
+    private logger: Logger,
   ) {}
 
   async createLoan(data: CreateLoanDto) {
@@ -202,6 +204,7 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     documents: string[],
+    path?: string,
   ) {
     try {
       const verification = await this.prisma.verification.findUnique({
@@ -230,7 +233,7 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          // Optionally store findings and documents if schema supports
+          path: path || null,
         },
       });
 
@@ -238,7 +241,8 @@ export class LoanService {
         loanId,
         verificationType,
         fieldExecutiveId,
-        verificationId: verification.id
+        verificationId: verification.id,
+        hasPath: !!path
       });
 
       return updatedVerification;
@@ -489,6 +493,114 @@ export class LoanService {
         stack: error.stack
       });
       throw error;
+    }
+  }
+
+  async getAssignedLoansWithVerifications(fieldExecutiveId: number) {
+    try {
+      const loans = await this.prisma.loan.findMany({
+        where: {
+          verifications: {
+            some: {
+              fieldExecutiveId: fieldExecutiveId,
+            },
+          },
+        },
+        include: {
+          verifications: {
+            where: {
+              fieldExecutiveId: fieldExecutiveId,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return loans;
+    } catch (error) {
+      this.logger.error(`Error fetching assigned loans with verifications: ${error.message}`, error.stack);
+      throw new Error('Failed to fetch assigned loans with verifications');
+    }
+  }
+
+  async editVerificationReport(
+    loanId: number,
+    verificationType: VerificationType,
+    fieldExecutiveId: number,
+    findings: string,
+    documents: string[],
+    path?: string,
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+          fieldExecutiveId,
+        },
+      });
+
+      if (!verification) {
+        throw new Error('Verification not found or not assigned to this field executive');
+      }
+
+      // Update verification status
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          status: 'Completed',
+          path: path || null,
+          updatedAt: new Date(),
+        },
+      });
+
+      // Create or update verification report
+      const verificationReport = await this.prisma.verificationReport.upsert({
+        where: {
+          loanId,
+        },
+        update: {
+          remarks: findings,
+          updatedAt: new Date(),
+        },
+        create: {
+          loanId,
+          verifierId: fieldExecutiveId,
+          verificationDate: new Date(),
+          remarks: findings,
+        },
+      });
+
+      // Create document records
+      if (documents.length > 0) {
+        await Promise.all(
+          documents.map(url =>
+            this.prisma.document.create({
+              data: {
+                url,
+                type: 'Other',
+                loanId,
+                uploadedById: fieldExecutiveId,
+              },
+            })
+          )
+        );
+      }
+
+      return {
+        verification: updatedVerification,
+        report: verificationReport,
+      };
+    } catch (error) {
+      this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
+      throw new Error('Failed to update verification report');
     }
   }
 } 

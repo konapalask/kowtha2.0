@@ -1,9 +1,12 @@
 import { Controller, Post, Body, UseGuards, Get, Request, Query } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -19,24 +22,38 @@ export class AccountsController {
   async generateOTP(@Body() body: { mobile: string }) {
     const result = await this.accountsService.generateOTP(body.mobile);
     return {
-      status: 200,
-      message: 'OTP generated successfully',
-      data: result
+      message: 'OTP generated successfully'
     };
   }
 
   @Post('otp/verify')
-  @ApiOperation({ summary: 'Verify OTP and get JWT token' })
+  @ApiOperation({ summary: 'Verify OTP and get access and refresh tokens' })
   @ApiResponse({ 
     status: 200, 
-    description: 'OTP has been successfully verified and token generated' 
+    description: 'OTP has been successfully verified and tokens generated',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'OTP verified successfully' },
+        accessToken: { 
+          type: 'string',
+          description: 'JWT access token valid for 1 hour'
+        },
+        refreshToken: { 
+          type: 'string',
+          description: 'JWT refresh token valid for 7 days'
+        }
+      }
+    }
   })
   async verifyOTP(@Body() body: { mobile: string; otp: string }) {
     const result = await this.accountsService.verifyOTP(body.mobile, body.otp);
+    console.log(result);
+    
     return {
-      status: 200,
       message: 'OTP verified successfully',
-      data: result
+      accessToken: result?.accessToken,
+      refreshToken: result?.refreshToken
     };
   }
 
@@ -47,7 +64,8 @@ export class AccountsController {
   }
 
   @Get('users')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'List all users with optional role filter' })
   @ApiResponse({ 
     status: 200, 
@@ -55,7 +73,6 @@ export class AccountsController {
     schema: {
       type: 'object',
       properties: {
-        status: { type: 'number', example: 200 },
         message: { type: 'string', example: 'Users fetched successfully' },
         data: {
           type: 'array',
@@ -65,7 +82,7 @@ export class AccountsController {
               id: { type: 'number' },
               name: { type: 'string' },
               mobile: { type: 'string' },
-              role: { type: 'string', enum: ['ADMIN', 'OPERATIONS_EXECUTIVE', 'FIELD_EXECUTIVE', 'VERIFIER'] },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
               office: {
                 type: 'object',
                 properties: {
@@ -83,7 +100,6 @@ export class AccountsController {
   async listUsers(@Query() filters: ListUsersDto) {
     const result = await this.accountsService.listUsers(filters);
     return {
-      status: 200,
       message: 'Users fetched successfully',
       data: result
     };

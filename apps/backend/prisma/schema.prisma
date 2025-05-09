@@ -96,6 +96,7 @@ model Verification {
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
+  path             String?            // S3 path for verification documents
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
