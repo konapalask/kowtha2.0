@@ -96,6 +96,7 @@ export class LoanService {
             officeId: officeId, // Use the provided officeId
             operationsExecutiveId: operationsExecutiveId,
             status: LoanStatus.Unassigned,
+            verifierId: 9,
           };
 
           // Validate required fields
@@ -812,6 +813,68 @@ export class LoanService {
         loanId,
         verificationType,
         fieldExecutiveId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getVerificationData(loanId: number) {
+    try {
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        include: {
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
+              }
+            }
+          },
+          verificationReport: true
+        }
+      });
+
+      if (!loan) {
+        await this.loggingService.warn('Failed to get verification data - Loan not found', { loanId });
+        throw new NotFoundException('Loan not found');
+      }
+
+      // Format the verification data
+      const verificationData = loan.verifications.map(verification => ({
+        id: verification.id,
+        type: verification.type,
+        status: verification.status,
+        verificationData: verification.verificationData,
+        path: verification.path,
+        fieldExecutive: verification.fieldExecutive,
+        createdAt: verification.createdAt,
+        updatedAt: verification.updatedAt
+      }));
+
+      await this.loggingService.info('Verification data retrieved successfully', {
+        loanId,
+        verificationCount: verificationData.length
+      });
+
+      return {
+        loanId: loan.id,
+        applicationNumber: loan.applicationNumber,
+        applicantName: loan.applicantName,
+        verifications: verificationData,
+        verificationReport: loan.verificationReport
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to get verification data', {
+        loanId,
         error: error.message,
         stack: error.stack
       });

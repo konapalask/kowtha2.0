@@ -496,4 +496,66 @@ export class LoanController {
       data: result
     };
   }
+
+  @Get(':id/verification-data')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Get verification data for a loan' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns verification data for the specified loan',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification data retrieved successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            loanId: { type: 'number' },
+            applicationNumber: { type: 'string' },
+            applicantName: { type: 'string' },
+            verifications: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  type: { type: 'string', enum: Object.values(VerificationType) },
+                  status: { type: 'string', enum: Object.values(VerificationStatus) },
+                  verificationData: { type: 'object' },
+                  path: { type: 'string', nullable: true },
+                  fieldExecutive: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' },
+                      mobile: { type: 'string' }
+                    }
+                  },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            verificationReport: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                remarks: { type: 'string' },
+                verificationDate: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getVerificationData(@Param('id') loanId: string) {
+    const result = await this.loanService.getVerificationData(Number(loanId));
+    return {
+      status: 200,
+      message: 'Verification data retrieved successfully',
+      data: result
+    };
+  }
 } 

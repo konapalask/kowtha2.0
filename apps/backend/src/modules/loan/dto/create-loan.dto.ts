@@ -59,4 +59,9 @@ export class CreateLoanDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiProperty({ description: 'Verification data', required: false })
+  @IsNumber()
+  @IsOptional()
+  verifierId: any;
 } 
