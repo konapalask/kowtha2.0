@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
@@ -13,6 +13,8 @@ import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { log } from 'console';
 import * as XLSX from 'xlsx';
+import { Response } from 'express';
+import { NotFoundException } from '@nestjs/common';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -423,5 +425,32 @@ export class LoanController {
       message: 'Verification report updated successfully',
       data: result
     };
+  }
+
+  @Get(':id/pdf')
+  @ApiOperation({ summary: 'Generate PDF for loan details' })
+  @ApiResponse({ status: 200, description: 'PDF generated successfully' })
+  @ApiResponse({ status: 404, description: 'Loan not found' })
+  async generatePDF(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const pdfBuffer = await this.loanService.generateLoanPDF(Number(id));
+      
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=loan-${id}.pdf`,
+        'Content-Length': pdfBuffer.length,
+      });
+
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to generate PDF' });
+      }
+    }
   }
 } 

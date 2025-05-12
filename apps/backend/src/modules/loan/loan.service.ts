@@ -5,6 +5,9 @@ import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
 import { Logger } from '@nestjs/common';
+import * as htmlPdf from 'html-pdf-node';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -601,6 +604,136 @@ export class LoanService {
     } catch (error) {
       this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
       throw new Error('Failed to update verification report');
+    }
+  }
+
+  async generateLoanPDF(loanId: number): Promise<Buffer> {
+    try {
+      // Fetch loan details with all related data
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        include: {
+          operationsExecutive: true,
+          office: true,
+          verifications: {
+            include: {
+              fieldExecutive: true,
+            },
+          },
+          verificationReport: true,
+          documents: true,
+        },
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      // Create HTML template
+      const htmlTemplate = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .section { margin-bottom: 20px; }
+            .section-title { font-weight: bold; margin-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Loan Application Details</h1>
+            <p>Application Number: ${loan.applicationNumber}</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Applicant Information</div>
+            <table>
+              <tr><th>Name</th><td>${loan.applicantName}</td></tr>
+              <tr><th>Mobile</th><td>${loan.applicantMobile}</td></tr>
+              <tr><th>Address</th><td>${loan.applicantAddress}</td></tr>
+              <tr><th>Loan Type</th><td>${loan.loanType}</td></tr>
+              <tr><th>Bank Name</th><td>${loan.bankName}</td></tr>
+              <tr><th>Loan Amount</th><td>₹${loan.loanAmount}</td></tr>
+              <tr><th>Status</th><td>${loan.status}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Office & Executive Details</div>
+            <table>
+              <tr><th>Office</th><td>${loan.office?.name || 'N/A'}</td></tr>
+              <tr><th>Operations Executive</th><td>${loan.operationsExecutive?.name || 'N/A'}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Verification Details</div>
+            <table>
+              <tr>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Field Executive</th>
+                <th>Completed Date</th>
+              </tr>
+              ${loan.verifications.map(v => `
+                <tr>
+                  <td>${v.type}</td>
+                  <td>${v.status}</td>
+                  <td>${v.fieldExecutive?.name || 'N/A'}</td>
+                  <td>${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString() : 'N/A'}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+
+          ${loan.verificationReport ? `
+            <div class="section">
+              <div class="section-title">Verification Report</div>
+              <p>${loan.verificationReport.remarks || 'No remarks'}</p>
+              <p>Verification Date: ${new Date(loan.verificationReport.verificationDate).toLocaleDateString()}</p>
+            </div>
+          ` : ''}
+
+          ${loan.documents.length > 0 ? `
+            <div class="section">
+              <div class="section-title">Supporting Documents</div>
+              <ul>
+                ${loan.documents.map(doc => `<li>${doc.type}: ${doc.url}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </body>
+        </html>
+      `;
+
+      // Generate PDF
+      const options = {
+        format: 'A4',
+        margin: { top: 20, right: 20, bottom: 20, left: 20 },
+        printBackground: true,
+      };
+
+      const file = { content: htmlTemplate };
+      const pdfBuffer = await htmlPdf.generatePdf(file, options);
+
+      await this.loggingService.info('PDF generated successfully', {
+        loanId,
+        applicationNumber: loan.applicationNumber,
+      });
+
+      return pdfBuffer;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate PDF', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
     }
   }
 } 
