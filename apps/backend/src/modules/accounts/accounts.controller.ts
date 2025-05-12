@@ -48,7 +48,6 @@ export class AccountsController {
   })
   async verifyOTP(@Body() body: { mobile: string; otp: string }) {
     const result = await this.accountsService.verifyOTP(body.mobile, body.otp);
-    console.log(result);
     
     return {
       message: 'OTP verified successfully',

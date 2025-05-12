@@ -480,12 +480,12 @@ export class LoanController {
     }
   })
   async updateVerificationStatus(
-    @Param('id') loanId: number,
+    @Param('id') loanId: string,
     @Body() updateStatusDto: UpdateVerificationStatusDto,
     @Request() req: AuthenticatedRequest,
   ) {
     const result = await this.loanService.updateVerificationStatus(
-      loanId,
+      Number(loanId),
       updateStatusDto.type,
       req.user.sub,
       updateStatusDto.status,
