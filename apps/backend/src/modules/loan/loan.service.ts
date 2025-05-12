@@ -180,6 +180,11 @@ export class LoanService {
         },
       });
 
+      const loanStatusChange = await this.prisma.loan.update({
+        where: { id: loanId },
+        data: { status: 'Assigned' },
+      });
+
       await this.loggingService.info('Verification assigned successfully', {
         loanId,
         verificationType,
@@ -544,7 +549,7 @@ export class LoanService {
     verificationType: VerificationType,
     fieldExecutiveId: number,
     findings: string,
-    documents: string[],
+    verificationData?: any,
     path?: string,
   ) {
     try {
@@ -568,6 +573,7 @@ export class LoanService {
         data: {
           status: 'Completed',
           path: path || null,
+          verificationData: verificationData || null,
           updatedAt: new Date(),
         },
       });
@@ -588,22 +594,6 @@ export class LoanService {
           remarks: findings,
         },
       });
-
-      // Create document records
-      if (documents.length > 0) {
-        await Promise.all(
-          documents.map(url =>
-            this.prisma.document.create({
-              data: {
-                url,
-                type: 'Other',
-                loanId,
-                uploadedById: fieldExecutiveId,
-              },
-            })
-          )
-        );
-      }
 
       return {
         verification: updatedVerification,

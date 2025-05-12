@@ -394,7 +394,7 @@ export class LoanController {
             type: { type: 'string', enum: Object.values(VerificationType) },
             fieldExecutiveId: { type: 'number' },
             findings: { type: 'string' },
-            documents: { type: 'array', items: { type: 'string' } },
+            verificationData: { type: 'object' },
             path: { type: 'string', nullable: true },
             status: { type: 'string' },
             updatedAt: { type: 'string', format: 'date-time' }
@@ -404,21 +404,21 @@ export class LoanController {
     }
   })
   async editVerificationReport(
-    @Param('id') loanId: number,
+    @Param('id') loanId: string,
     @Body() body: { 
       verificationType: VerificationType; 
       findings: string; 
-      documents: string[];
+      verificationData?: any;
       path?: string;
     },
     @Request() req: AuthenticatedRequest,
   ) {
     const result = await this.loanService.editVerificationReport(
-      loanId,
+      Number(loanId),
       body.verificationType,
       req.user.sub,
       body.findings,
-      body.documents,
+      body.verificationData,
       body.path,
     );
     return {
