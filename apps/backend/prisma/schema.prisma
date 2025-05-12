@@ -20,6 +20,11 @@ enum VerificationType {
   Work
 }
 
+enum PictureSource {
+  Camera
+  Gallery
+}
+
 enum DocumentType {
   ID
   Address
@@ -97,6 +102,8 @@ model Verification {
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
   path             String?            // S3 path for verification documents
+  verificationData Json?              // JSON field to store address/work data
+  pictureSource    PictureSource?     // Source of the uploaded picture
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
@@ -109,6 +116,7 @@ model Loan {
   applicantName         String
   applicantMobile       String
   applicantAddress      String
+  isAddressSame         Boolean             @default(false)
   loanType              String
   bankName              String
   loanAmount            Float

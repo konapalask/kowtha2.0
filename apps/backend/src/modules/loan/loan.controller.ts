@@ -4,12 +4,13 @@ import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { Roles } from '../accounts/decorators/roles.decorator';
-import { VerificationType, LoanStatus, UserRole } from '@prisma/client';
+import { VerificationType, LoanStatus, UserRole, VerificationStatus } from '@prisma/client';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { log } from 'console';
 import * as XLSX from 'xlsx';
@@ -39,7 +40,7 @@ export class LoanController {
   }
 
   @Post('import')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.OperationsExecutive)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Import loans from Excel file' })
   @ApiConsumes('multipart/form-data')
@@ -104,7 +105,7 @@ export class LoanController {
       throw new BadRequestException('No file uploaded');
     }
 
-    const result = await this.loanService.importLoans(file, req.user.sub);
+    const result = await this.loanService.importLoans(file, req.user.sub, req.user.officeId);
     return {
       status: 200,
       message: 'Loans imported successfully',
@@ -449,8 +450,50 @@ export class LoanController {
       if (error instanceof NotFoundException) {
         res.status(404).json({ message: error.message });
       } else {
-        res.status(500).json({ message: 'Failed to generate PDF' });
+        res.status(500).json({ message: 'Failed to generate PDF', error: error.message });
       }
     }
+  }
+
+  @Patch(':id/verification/status')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Update verification status' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The verification status has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification status updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            fieldExecutiveId: { type: 'number' },
+            status: { type: 'string', enum: Object.values(VerificationStatus) }
+          }
+        }
+      }
+    }
+  })
+  async updateVerificationStatus(
+    @Param('id') loanId: number,
+    @Body() updateStatusDto: UpdateVerificationStatusDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const result = await this.loanService.updateVerificationStatus(
+      loanId,
+      updateStatusDto.type,
+      req.user.sub,
+      updateStatusDto.status,
+    );
+    return {
+      status: 200,
+      message: 'Verification status updated successfully',
+      data: result
+    };
   }
 } 

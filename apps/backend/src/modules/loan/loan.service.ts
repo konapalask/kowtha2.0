@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
@@ -28,6 +28,7 @@ export class LoanService {
         applicantName: data.applicantName,
         applicantMobile: data.applicantMobile,
         applicantAddress: data.applicantAddress,
+        isAddressSame: data.isAddressSame || false,
         loanType: data.loanType,
         bankName: data.bankName,
         loanAmount: data.loanAmount,
@@ -62,7 +63,7 @@ export class LoanService {
     }
   }
 
-  async importLoans(file: Express.Multer.File, operationsExecutiveId: number) {
+  async importLoans(file: Express.Multer.File, operationsExecutiveId: number, officeId: number) {
     try {
       if (!file) {
         throw new BadRequestException('No file uploaded');
@@ -87,12 +88,13 @@ export class LoanService {
             applicantName: row['NAME OF THE APPLICANT'],
             applicantMobile: row['CONTACT NUMBER'].toString(),
             applicantAddress: row['FULL ADDRESS'],
+            isAddressSame: row['IS_ADDRESS_SAME'] === 'YES' || false,
             applicationNumber: row['APPLICATION ID'],
             loanType: 'Personal', // Default to Personal if not specified
             bankName: 'Default Bank', // Default bank if not specified
             loanAmount: 100,
-            officeId: 1,
-            operationsExecutiveId: 1,
+            officeId: officeId, // Use the provided officeId
+            operationsExecutiveId: operationsExecutiveId,
             status: LoanStatus.Unassigned,
           };
 
@@ -208,6 +210,8 @@ export class LoanService {
     findings: string,
     documents: string[],
     path?: string,
+    verificationData?: any,
+    pictureSource?: 'Camera' | 'Gallery',
   ) {
     try {
       const verification = await this.prisma.verification.findUnique({
@@ -237,6 +241,8 @@ export class LoanService {
         data: {
           status: 'Completed',
           path: path || null,
+          verificationData: verificationData || null,
+          pictureSource: pictureSource || null,
         },
       });
 
@@ -245,7 +251,9 @@ export class LoanService {
         verificationType,
         fieldExecutiveId,
         verificationId: verification.id,
-        hasPath: !!path
+        hasPath: !!path,
+        hasVerificationData: !!verificationData,
+        pictureSource
       });
 
       return updatedVerification;
@@ -732,6 +740,90 @@ export class LoanService {
         loanId,
         error: error.message,
         stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async updateVerificationStatus(
+    loanId: number,
+    verificationType: VerificationType,
+    fieldExecutiveId: number,
+    status: VerificationStatus,
+  ) {
+    try {
+      // Verify that the field executive is assigned to this verification
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+          fieldExecutiveId,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Verification status update failed - Verification not found or not assigned', {
+          loanId,
+          verificationType,
+          fieldExecutiveId
+        });
+        throw new NotFoundException('Verification not found or not assigned to this field executive');
+      }
+
+      // Update verification status
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          status,
+        },
+      });
+
+      // If status is Completed, check if all verifications are complete
+      if (status === VerificationStatus.Completed) {
+        const allVerifications = await this.prisma.verification.findMany({
+          where: {
+            loanId,
+          },
+        });
+
+        const allCompleted = allVerifications.every(
+          v => v.status === VerificationStatus.Completed
+        );
+
+        // If all verifications are complete, update loan status to FVCompleted
+        if (allCompleted) {
+          await this.prisma.loan.update({
+            where: { id: loanId },
+            data: { status: LoanStatus.FVCompleted },
+          });
+
+          await this.loggingService.info('All verifications completed, loan status updated', {
+            loanId,
+            newStatus: LoanStatus.FVCompleted
+          });
+        }
+      }
+
+      await this.loggingService.info('Verification status updated successfully', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        newStatus: status
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update verification status', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }

@@ -5,5 +5,6 @@ export interface AuthenticatedRequest extends Request {
     sub: number;
     mobile: string;
     role: string;
+    officeId: number;
   };
 } 
