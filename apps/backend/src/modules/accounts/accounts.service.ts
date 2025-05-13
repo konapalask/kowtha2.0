@@ -5,6 +5,8 @@ import * as crypto from 'crypto';
 import { LoggingService } from '../common/logging/logging.service';
 import { UserRole } from '@prisma/client';
 import { ListUsersDto } from './dto/list-users.dto';
+import axios from 'axios';
+// import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AccountsService {
@@ -12,6 +14,7 @@ export class AccountsService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private loggingService: LoggingService,
+    // private configService: ConfigService,
   ) {}
 
   private generateTokens(userId: number, mobile: string, role: UserRole) {
@@ -30,13 +33,69 @@ export class AccountsService {
     return { accessToken, refreshToken };
   }
 
+  private generateRandomOTP(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  private async sendOTPViaSMS(mobile: string, otp: string): Promise<void> {
+    try {
+      const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
+      if (!fast2smsApiKey) {
+        throw new Error('FAST2SMS_API_KEY is not configured');
+      }
+      console.log("sendign message");
+      
+      const response = await axios.post(
+        'https://www.fast2sms.com/dev/bulkV2',
+        {
+          route: 'dlt',
+          sender_id: 'BYNSCL',
+          message: '166906',
+          language: 'english',
+          variables_values: `${mobile}|${otp}`,
+          flash: 0,
+          numbers: mobile,
+        },
+        {
+          headers: {
+            'authorization': fast2smsApiKey,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data.return === false) {
+        throw new Error(`SMS sending failed: ${response.data.message}`);
+      }
+      console.log(response.data);
+      
+      await this.loggingService.info('SMS sent successfully', {
+        mobile,
+        messageId: response.data.request_id,
+      });
+    } catch (error) {
+      await this.loggingService.error('Failed to send SMS', {
+        mobile,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
-      const otp = '123456'; // Hardcoded OTP for now
+      // Generate a random 6-digit OTP
+      const otp = this.generateRandomOTP();
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
       // Find or create user
       let user = await this.prisma.user.findUnique({ where: { mobile } });
-
+      if (!user) {
+        await this.loggingService.warn('OTP generation failed - User not found', { mobile });
+        throw new UnauthorizedException('User not found');
+      }
+      
       // Create a new session for this OTP
       await this.prisma.session.create({
         data: {
@@ -47,8 +106,14 @@ export class AccountsService {
         },
       });
 
-      // In production, send OTP via SMS service
-      await this.loggingService.info('OTP generated successfully', { mobile, userId: user.id });
+      // Send OTP via Fast2SMS
+      await this.sendOTPViaSMS(mobile, otp);
+
+      await this.loggingService.info('OTP generated and sent successfully', { 
+        mobile, 
+        userId: user.id 
+      });
+
       return { message: 'OTP sent successfully' };
     } catch (error) {
       await this.loggingService.error('Failed to generate OTP', { 
