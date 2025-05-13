@@ -35,13 +35,13 @@ export default function Verify() {
   // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loans, setLoans] = useState<LoanData[]>([]);
 
-  useEffect(() => {
-    getFieldExecutivesApi()?.then((res) => {
-      console.log(res)
-    })?.catch((err) => {
-      console.log(err)
-    });
-  }, []);
+  // useEffect(() => {
+  //   getFieldExecutivesApi()?.then((res) => {
+  //     console.log(res)
+  //   })?.catch((err) => {
+  //     console.log(err)
+  //   });
+  // }, []);
 
   useEffect(() => {
     getVerifierLoansApi()?.then((res: any) => {
@@ -54,7 +54,7 @@ export default function Verify() {
   const router = useRouter();
 
   const filteredLoans = loans?.filter((loan) =>
-    ["Unassigned", "FVCompleted", "Approved", "Rejected"].includes(loan?.status ?? '')
+    ["Unassigned","Assigned", "FVCompleted", "Approved", "Rejected", "Pending"].includes(loan?.status ?? '')
   ) ?? [];
 
   const columns: ColumnsType<LoanData> = [

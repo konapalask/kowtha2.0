@@ -16,7 +16,7 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 // import { useSession } from 'next-auth/react';
-import api from "@/utils/axios";
+import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
 import { getOfficesApi, getOrganizationApi, Office } from "@/services/settings.services";
 
@@ -91,7 +91,7 @@ export default function OrganizationSettings() {
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      const result = await api.put(
+      const result = await axiosInstance.put(
         `/org/organization/${organization.id}`,
         values
       );
@@ -114,7 +114,7 @@ export default function OrganizationSettings() {
 
       if (editingOffice) {
         // Update existing office
-        const result = await api.put(
+        const result = await axiosInstance.put(
           `/org/offices/${editingOffice.id}`,
           values
         );
@@ -128,7 +128,7 @@ export default function OrganizationSettings() {
         }
       } else {
         // Create new office
-        const result = await api.post("/org/offices", values);
+        const result = await axiosInstance.post("/org/offices", values);
         if (result && result.status >= 200 && result.status < 300) {
           setOffices([...offices, result.data]);
           message.success("Office added successfully");

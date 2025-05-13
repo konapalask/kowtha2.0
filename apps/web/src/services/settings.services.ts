@@ -7,13 +7,14 @@ export interface Organization {
 }
 
 export interface Office {
-   data: {
-    id: number;
-    name: string;
-    townCity: string;
-    address: string;
-    employees?: number;
-   }
+  [key: string]: any;
+  //  data: {
+  //   id: number;
+  //   name: string;
+  //   townCity: string;
+  //   address: string;
+  //   employees?: number;
+  //  }
 }
 
 export const getOrganizationApi = () => {
@@ -25,7 +26,7 @@ export const getOrganizationApi = () => {
 // };
 
 export const getOfficesApi = () => {
-  return axiosInstance.get<Office[]>(`/org/offices`);
+  return axiosInstance.get<any>(`/org/offices`);
 };
 
 

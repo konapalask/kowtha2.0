@@ -96,18 +96,18 @@ export default function Login() {
           maxWidth: "400px",
           // boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           borderRadius: "8px",
-          // borderColor:"transparent",
-          background: "var(--background-primary)",
+          borderColor:"transparent",
+          // background: "var(--background-primary)",
           // opacity: 0.2,
-          // background:"transparent"
+          background:"transparent"
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ marginBottom: 16 }}>
+          <div style={{ textAlign: "center",transform:"translateX(-10px)" }}>
+            <div style={{ marginBottom: 0 }}>
               <Image
-                // src="/images/appLogos/KowthaLightIcon.png"
-                src="/images/appLogos/KowthaDarkIcon.png"
+                src="/images/appLogos/KowthaLightIcon.png"
+                // src="/images/appLogos/KowthaDarkIcon.png"
                 alt="Kowtha Logo"
                 width={300}
                 height={150}
@@ -121,11 +121,11 @@ export default function Login() {
             >
               Loan Verification System
             </Title> */}
-            <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
+            {/* <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
               {otpSent
                 ? "Enter the OTP sent to your mobile"
                 : "Enter your mobile number to continue"}
-            </Text>
+            </Text> */}
           </div>
 
           <Form
@@ -143,10 +143,15 @@ export default function Login() {
                   message: "Please enter a valid 10-digit mobile number",
                 },
               ]}
+              style={{
+                backgroundColor: "#fff",
+                // borderRadius: "6px",
+                // height: "40px",
+              }}
             >
               <Input
                 prefix={
-                  <MobileOutlined style={{ color: "var(--primary-600)" }} />
+                  <MobileOutlined style={{ color: "var(--primary-600)", fontSize: "16px" }} />
                 }
                 placeholder="Enter mobile number"
                 disabled={otpSent}

@@ -10,17 +10,18 @@ export interface Verification {
 }
 
 export interface Loan {
-  id: number;
-  applicationNumber: string;
-  applicantName: string;
-  applicantPhone: string;
-  applicantAddress: string;
-  loanType: string;
-  bankName: string;
-  status: string;
-  assignee: string;
-  uploadedAt: string;
-  updatedAt: string;
+  [key: string]: any;
+  // id: number;
+  // applicationNumber: string;
+  // applicantName: string;
+  // applicantPhone: string;
+  // applicantAddress: string;
+  // loanType: string;
+  // bankName: string;
+  // status: string;
+  // assignee: string;
+  // uploadedAt: string;
+  // updatedAt: string;
   // verifications: Verification[];
 }
 
@@ -80,16 +81,12 @@ export const getVerifierLoansApi = () => {
   return axiosInstance.get<VerifierLoan[]>(`/loans/verifier`);
 };
 
-export const assignExecutivesApi = (loanId: number, payload: {
-  assignmentMethod: "Local" | "Remote";
-  office?: string;
-  assignee: string;
-}) => {
+export const assignExecutivesApi = (loanId: number, payload: any) => {
   return axiosInstance.post<Verification>(`/loans/${loanId}/assign`, payload);
 };
 
 export const getExecutivesApi = () => {
-  return axiosInstance.get<{ id: number; name: string }[]>(`/accounts/users?role=FieldExecutive`);
+  return axiosInstance.get<any>(`/accounts/users?role=FieldExecutive`);
 };
 
 export const getFieldExecutivesApi = () => {

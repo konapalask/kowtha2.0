@@ -9,6 +9,5 @@ export const getUserDetails = async () => {
 };
 
 export const submitVerification = async (data: any, id: string) => {
-  console.log(id);
   return axiosInstance.patch(`/loans/${id}/verification-report`, data);
 };

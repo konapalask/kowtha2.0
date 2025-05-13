@@ -266,7 +266,7 @@ const VerificationItemScreen = () => {
           findings: 'Verification Findings Text',
           verificationData: finalData,
         },
-        '8',
+        item?.id,
       );
 
       Alert.alert('Success', 'Verification submitted successfully');

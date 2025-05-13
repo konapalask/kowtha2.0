@@ -46,7 +46,7 @@ export const displayIcon = (type: ToastType): IconType => {
 interface CustomToastProps {
   type: ToastType;
   message: string;
-  autoClose?: number | boolean | string;
+  autoClose?: any;
 }
 
 const customToast = ({ type, message, autoClose }: CustomToastProps) => {

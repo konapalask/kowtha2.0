@@ -17,7 +17,7 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import api from "@/utils/axios";
+import api from "@/config/axios.config";
 
 const { Title } = Typography;
 

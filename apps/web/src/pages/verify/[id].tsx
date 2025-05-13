@@ -16,6 +16,7 @@ import {
   InputNumber,
   Row,
   Col,
+  message,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -322,7 +323,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
 export default function LoanVerifyDetails() {
   const router = useRouter();
   const { id } = router.query;
-  const loan = 4;
+  const loan: any = 4;
   const [report, setReport] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(
@@ -428,7 +429,9 @@ export default function LoanVerifyDetails() {
   useEffect(() => {
     getVerificationData(id as string).then((res) => {
       // setFormData(data);
-      console.log(res);
+      // form.setFieldsValue(res?.data?.[0]?.verificationData)
+      setFormData(res?.data?.verifications?.[0]?.verificationData?.verificationData);
+      console.log(res?.data?.verifications?.[0]?.verificationData?.verificationData);
     });
   }, [id]);
 
@@ -455,13 +458,15 @@ export default function LoanVerifyDetails() {
 
   const handleApprove = () => {
     // Collect all form data and prepare for API submission
-    const updatedData = {
-      loanId: loan.id,
-      applicationNumber: loan.applicationNumber,
+    const updatedData: any = {
+      loanId: loan?.id,
+      applicationNumber: loan?.applicationNumber,
       forms: formData,
       status: "Approved",
       timestamp: new Date().toISOString(),
     };
+    router.push(`/verify`);
+    message.success(`loan approved`);
 
     console.log("Updated data to be sent to API:", updatedData);
     // Here you would typically make an API call
@@ -501,22 +506,22 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Verification Type">
-                    {formData.basicDetails.verificationType}
+                    {formData?.basicDetails?.verificationType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Verification Date">
-                    {formData.basicDetails.verificationDate}
+                    {formData?.basicDetails?.verificationDate}
                   </Descriptions.Item>
                   <Descriptions.Item label="Verification Time">
-                    {formData.basicDetails.verificationTime}
+                    {formData?.basicDetails?.verificationTime}
                   </Descriptions.Item>
                   <Descriptions.Item label="Verification Mode">
-                    {formData.basicDetails.verificationMode}
+                    {formData?.basicDetails?.verificationMode}
                   </Descriptions.Item>
                   <Descriptions.Item label="Verification Status">
-                    {formData.basicDetails.verificationStatus}
+                    {formData?.basicDetails?.verificationStatus}
                   </Descriptions.Item>
                   <Descriptions.Item label="Verification Remarks">
-                    {formData.basicDetails.verificationRemarks}
+                    {formData?.basicDetails?.verificationRemarks}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -537,19 +542,19 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Applicant Name">
-                    {formData.applicantInformation.applicantName}
+                    {formData?.applicantInformation?.applicantName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Applicant Age">
-                    {formData.applicantInformation.applicantAge}
+                    {formData?.applicantInformation?.applicantAge}
                   </Descriptions.Item>
                   <Descriptions.Item label="Applicant Gender">
-                    {formData.applicantInformation.applicantGender}
+                    {formData?.applicantInformation?.applicantGender}
                   </Descriptions.Item>
                   <Descriptions.Item label="Marital Status">
-                    {formData.applicantInformation.applicantMaritalStatus}
+                    {formData?.applicantInformation?.applicantMaritalStatus}
                   </Descriptions.Item>
                   <Descriptions.Item label="Education Level">
-                    {formData.applicantInformation.applicantEducation}
+                    {formData?.applicantInformation?.applicantEducation}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -570,82 +575,82 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Name of the Applicant">
-                    {formData.officeVerification.applicantName}
+                    {formData?.officeVerification?.applicantName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Name of the Bank">
-                    {formData.officeVerification.bankName}
+                    {formData?.officeVerification?.bankName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Prospect Number">
-                    {formData.officeVerification.prospectNumber}
+                    {formData?.officeVerification?.prospectNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Purpose of Loan">
-                    {formData.officeVerification.purposeOfLoan}
+                    {formData?.officeVerification?.purposeOfLoan}
                   </Descriptions.Item>
                   <Descriptions.Item label="Loan Amount">
-                    {formData.officeVerification.loanAmount}
+                    {formData?.officeVerification?.loanAmount}
                   </Descriptions.Item>
                   <Descriptions.Item label="Tenure">
-                    {formData.officeVerification.tenure}
+                    {formData?.officeVerification?.tenure}
                   </Descriptions.Item>
                   <Descriptions.Item label="PAN Number">
-                    {formData.officeVerification.panNumber}
+                    {formData?.officeVerification?.panNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Aadhar Number">
-                    {formData.officeVerification.aadharNumber}
+                    {formData?.officeVerification?.aadharNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Qualification">
-                    {formData.officeVerification.qualification}
+                    {formData?.officeVerification?.qualification}
                   </Descriptions.Item>
                   <Descriptions.Item label="Current Office Name">
-                    {formData.officeVerification.currentOfficeName}
+                    {formData?.officeVerification?.currentOfficeName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Office Address">
-                    {formData.officeVerification.officeAddress}
+                    {formData?.officeVerification?.officeAddress}
                   </Descriptions.Item>
                   <Descriptions.Item label="Years in Current Job">
-                    {formData.officeVerification.yearsInCurrentJob}
+                    {formData?.officeVerification?.yearsInCurrentJob}
                   </Descriptions.Item>
                   <Descriptions.Item label="Total Work Experience">
-                    {formData.officeVerification.totalWorkExperience}
+                    {formData?.officeVerification?.totalWorkExperience}
                   </Descriptions.Item>
                   <Descriptions.Item label="Company Size">
-                    {formData.officeVerification.companySize}
+                    {formData?.officeVerification?.companySize}
                   </Descriptions.Item>
                   <Descriptions.Item label="Nature of Service/Business">
-                    {formData.officeVerification.natureOfService}
+                    {formData?.officeVerification?.natureOfService}
                   </Descriptions.Item>
                   <Descriptions.Item label="Office Locality">
-                    {formData.officeVerification.officeLocality}
+                    {formData?.officeVerification?.officeLocality}
                   </Descriptions.Item>
                   <Descriptions.Item label="ID Card Number">
-                    {formData.officeVerification.idCardNumber}
+                    {formData?.officeVerification?.idCardNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Designation">
-                    {formData.officeVerification.designation}
+                    {formData?.officeVerification?.designation}
                   </Descriptions.Item>
                   <Descriptions.Item label="Mode of Salary">
-                    {formData.officeVerification.salaryMode}
+                    {formData?.officeVerification?.salaryMode}
                   </Descriptions.Item>
                   <Descriptions.Item label="Type of Employer">
-                    {formData.officeVerification.employerType}
+                    {formData?.officeVerification?.employerType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Gross Salary per Month">
-                    {formData.officeVerification.grossSalary}
+                    {formData?.officeVerification?.grossSalary}
                   </Descriptions.Item>
                   <Descriptions.Item label="Net Salary per Month">
-                    {formData.officeVerification.netSalary}
+                    {formData?.officeVerification?.netSalary}
                   </Descriptions.Item>
                   <Descriptions.Item label="Previous Company Name">
-                    {formData.officeVerification.previousCompanyName}
+                    {formData?.officeVerification?.previousCompanyName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Work Experience">
-                    {formData.officeVerification.workExperience}
+                    {formData?.officeVerification?.workExperience}
                   </Descriptions.Item>
                   <Descriptions.Item label="Existing Loans">
-                    {formData.officeVerification.existingLoans}
+                    {formData?.officeVerification?.existingLoans}
                   </Descriptions.Item>
                   <Descriptions.Item label="References (Colleagues)">
-                    {formData.officeVerification.references}
+                    {formData?.officeVerification?.references}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -666,19 +671,19 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Address Type">
-                    {formData.addressVerification.addressType}
+                    {formData?.addressVerification?.addressType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address Category">
-                    {formData.addressVerification.addressCategory}
+                    {formData?.addressVerification?.addressCategory}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address Sub-Category">
-                    {formData.addressVerification.addressSubCategory}
+                    {formData?.addressVerification?.addressSubCategory}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address Details">
-                    {formData.addressVerification.addressDetails}
+                    {formData?.addressVerification?.addressDetails}
                   </Descriptions.Item>
                   <Descriptions.Item label="Geo Tag">
-                    {formData.addressVerification.geoTag}
+                    {formData?.addressVerification?.geoTag}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -699,37 +704,37 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Residence Status">
-                    {formData.residenceDetails.residenceStatus}
+                    {formData?.residenceDetails?.residenceStatus}
                   </Descriptions.Item>
                   <Descriptions.Item label="Rent Details">
-                    {formData.residenceDetails.rentDetails}
+                    {formData?.residenceDetails?.rentDetails}
                   </Descriptions.Item>
                   <Descriptions.Item label="Type of Residence">
-                    {formData.residenceDetails.residenceType}
+                    {formData?.residenceDetails?.residenceType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Construction Quality">
-                    {formData.residenceDetails.constructionQuality}
+                    {formData?.residenceDetails?.constructionQuality}
                   </Descriptions.Item>
                   <Descriptions.Item label="Standard of Living">
-                    {formData.residenceDetails.standardOfLiving}
+                    {formData?.residenceDetails?.standardOfLiving}
                   </Descriptions.Item>
                   <Descriptions.Item label="Location Category">
-                    {formData.residenceDetails.locationCategory}
+                    {formData?.residenceDetails?.locationCategory}
                   </Descriptions.Item>
                   <Descriptions.Item label="Locality Type">
-                    {formData.residenceDetails.localityType}
+                    {formData?.residenceDetails?.localityType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Accessibility">
-                    {formData.residenceDetails.accessibility}
+                    {formData?.residenceDetails?.accessibility}
                   </Descriptions.Item>
                   <Descriptions.Item label="House Area">
-                    {formData.residenceDetails.houseArea}
+                    {formData?.residenceDetails?.houseArea}
                   </Descriptions.Item>
                   <Descriptions.Item label="Years at Current Address">
-                    {formData.residenceDetails.yearsAtCurrentAddress}
+                    {formData?.residenceDetails?.yearsAtCurrentAddress}
                   </Descriptions.Item>
                   <Descriptions.Item label="Nameplate Visible">
-                    {formData.residenceDetails.nameplateVisible}
+                    {formData?.residenceDetails?.nameplateVisible}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -750,22 +755,22 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Total Family Members">
-                    {formData.familyEmploymentDetails.totalFamilyMembers}
+                    {formData?.familyEmploymentDetails?.totalFamilyMembers}
                   </Descriptions.Item>
                   <Descriptions.Item label="No. of Earning Members">
-                    {formData.familyEmploymentDetails.earningMembers}
+                    {formData?.familyEmploymentDetails?.earningMembers}
                   </Descriptions.Item>
                   <Descriptions.Item label="No. of Dependents">
-                    {formData.familyEmploymentDetails.dependents}
+                    {formData?.familyEmploymentDetails?.dependents}
                   </Descriptions.Item>
                   <Descriptions.Item label="Is Spouse Working">
-                    {formData.familyEmploymentDetails.isSpouseWorking}
+                    {formData?.familyEmploymentDetails?.isSpouseWorking}
                   </Descriptions.Item>
                   <Descriptions.Item label="Spouse's Employment Details">
-                    {formData.familyEmploymentDetails.spouseEmploymentDetails}
+                    {formData?.familyEmploymentDetails?.spouseEmploymentDetails}
                   </Descriptions.Item>
                   <Descriptions.Item label="Assets Observed">
-                    {formData.familyEmploymentDetails.assetsObserved}
+                    {formData?.familyEmploymentDetails?.assetsObserved}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -786,16 +791,16 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="TPC Name">
-                    {formData.thirdPartyCheck.tpcName}
+                    {formData?.thirdPartyCheck?.tpcName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Relationship">
-                    {formData.thirdPartyCheck.relationship}
+                    {formData?.thirdPartyCheck?.relationship}
                   </Descriptions.Item>
                   <Descriptions.Item label="Feedback Status">
-                    {formData.thirdPartyCheck.feedbackStatus}
+                    {formData?.thirdPartyCheck?.feedbackStatus}
                   </Descriptions.Item>
                   <Descriptions.Item label="Comments">
-                    {formData.thirdPartyCheck.comments}
+                    {formData?.thirdPartyCheck?.comments}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -816,13 +821,13 @@ export default function LoanVerifyDetails() {
                   }
                 >
                   <Descriptions.Item label="Cooperativeness">
-                    {formData.finalObservations.cooperativeness}
+                    {formData?.finalObservations?.cooperativeness}
                   </Descriptions.Item>
                   <Descriptions.Item label="Overall Status">
-                    {formData.finalObservations.overallStatus}
+                    {formData?.finalObservations?.overallStatus}
                   </Descriptions.Item>
                   <Descriptions.Item label="Remarks">
-                    {formData.finalObservations.remarks}
+                    {formData?.finalObservations?.remarks}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -831,7 +836,7 @@ export default function LoanVerifyDetails() {
             <section style={{ marginBottom: 24 }}>
               <Card>
                 <Descriptions title="Photo Capture" bordered column={1}>
-                  {formData.uploadedItems?.map((item, idx) => (
+                  {formData?.uploadedItems?.map((item, idx) => (
                     <Descriptions.Item
                       label={`${
                         item.type.charAt(0).toUpperCase() + item.type.slice(1)
@@ -850,8 +855,8 @@ export default function LoanVerifyDetails() {
                   <Descriptions.Item label="Work Verification">
                     <Space direction="vertical">
                       {loan?.documents
-                        ?.filter((d) => d.type === "Work")
-                        .map((doc, idx) => (
+                        ?.filter((d: any) => d.type === "Work")
+                        .map((doc: any, idx: any) => (
                           <a
                             key={idx}
                             href={doc.url}
@@ -862,8 +867,8 @@ export default function LoanVerifyDetails() {
                           </a>
                         ))}
                       {loan?.photos
-                        ?.filter((p) => p.type === "Work")
-                        .map((photo, idx) => (
+                        ?.filter((p: any) => p.type === "Work")
+                        .map((photo: any, idx: any) => (
                           <img
                             key={idx}
                             src={photo.url}
@@ -876,8 +881,8 @@ export default function LoanVerifyDetails() {
                   <Descriptions.Item label="Address Verification">
                     <Space direction="vertical">
                       {loan?.documents
-                        ?.filter((d) => d.type === "Address")
-                        .map((doc, idx) => (
+                        ?.filter((d: any) => d.type === "Address")
+                        .map((doc: any, idx: any) => (
                           <a
                             key={idx}
                             href={doc.url}
@@ -888,8 +893,8 @@ export default function LoanVerifyDetails() {
                           </a>
                         ))}
                       {loan?.photos
-                        ?.filter((p) => p.type === "Address")
-                        .map((photo, idx) => (
+                        ?.filter((p: any) => p.type === "Address")
+                        .map((photo: any, idx: any) => (
                           <img
                             key={idx}
                             src={photo.url}
@@ -996,7 +1001,7 @@ export default function LoanVerifyDetails() {
         onCancel={() => setEditModalVisible(false)}
         onSave={handleFormSave}
         formKey={currentFormKey}
-        initialValues={formData[currentFormKey as keyof FormData]}
+        initialValues={formData?.[currentFormKey as keyof FormData]}
       />
     </DashboardLayout>
   );

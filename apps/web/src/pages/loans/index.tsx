@@ -223,7 +223,7 @@ export default function Loans() {
       setLoans(
         loans.map((loan) => {
           if (loan.id === loanId) {
-            const updatedVerifications = loan.verifications.map((v) =>
+            const updatedVerifications = loan.verifications.map((v: any) =>
               v.type === verificationType ? { ...v, ...result.data } : v
             );
             return { ...loan, verifications: updatedVerifications };
@@ -293,7 +293,7 @@ export default function Loans() {
           key: "pavAssignee",
           render: (_, record: Loan) => {
             const pav = record.verifications.find(
-              (v) => v.type === "PermanentAddress"
+              (v: any) => v.type === "PermanentAddress"
             );
             return pav ? pav.assignee : "-";
           },
@@ -303,7 +303,7 @@ export default function Loans() {
           key: "pavStatus",
           render: (_, record: Loan) => {
             const pav = record.verifications.find(
-              (v) => v.type === "PermanentAddress"
+              (v: any) => v.type === "PermanentAddress"
             );
             return pav ? (
               <Tag color={pav.status === "Completed" ? "green" : "orange"}>
@@ -328,7 +328,7 @@ export default function Loans() {
           key: "cavAssignee",
           render: (_, record: Loan) => {
             const cav = record.verifications.find(
-              (v) => v.type === "CurrentAddress"
+              (v: any) => v.type === "CurrentAddress"
             );
             return cav ? cav.assignee : "-";
           },
@@ -338,7 +338,7 @@ export default function Loans() {
           key: "cavStatus",
           render: (_, record: Loan) => {
             const cav = record.verifications.find(
-              (v) => v.type === "CurrentAddress"
+              (v: any) => v.type === "CurrentAddress"
             );
             return cav ? (
               <Tag color={cav.status === "Completed" ? "green" : "orange"}>
@@ -360,7 +360,7 @@ export default function Loans() {
           title: "Assignee",
           key: "wvAssignee",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v) => v.type === "Work");
+            const wv = record.verifications.find((v: any) => v.type === "Work");
             return wv ? wv.assignee : "-";
           },
         },
@@ -368,7 +368,7 @@ export default function Loans() {
           title: "Status",
           key: "wvStatus",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v) => v.type === "Work");
+            const wv = record.verifications.find((v: any) => v.type === "Work");
             return wv ? (
               <Tag color={wv.status === "Completed" ? "green" : "blue"}>
                 {wv.status}
@@ -709,7 +709,7 @@ export default function Loans() {
                       { label: "Work", type: "Work", merged: false },
                     ].map(({ label, type, merged }) => {
                       const verification = selectedLoan.verifications.find(
-                        (v) =>
+                        (v: any) =>
                           merged
                             ? v.type === "PermanentAddress" ||
                               v.type === "CurrentAddress"
@@ -859,7 +859,7 @@ export default function Loans() {
                   : ["PermanentAddress", "CurrentAddress", "Work"].map(
                       (type) => {
                         const verification = selectedLoan.verifications.find(
-                          (v) => v.type === type
+                          (v: any) => v.type === type
                         );
                         return (
                           <Card
