@@ -29,8 +29,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-import type { UploadFile } from "antd/es/upload/interface";
-import * as XLSX from "xlsx";
+// import type { UploadFile } from "antd/es/upload/interface";
+// import * as XLSX from "xlsx";
 import {
   getLoansApi,
   updateLoanApi,
@@ -38,7 +38,10 @@ import {
   importLoansApi,
   type Loan,
   type Verification,
+  assignExecutivesApi,
+  getExecutivesApi,
 } from "@/services/loans.services";
+import { getOfficesApi, Office } from "@/services/settings.services";
 
 dayjs.extend(relativeTime);
 
@@ -54,60 +57,60 @@ interface RemoteExecutives {
   [office: string]: FieldExecutive[];
 }
 
-const dummyLoans = [
-  {
-    id: 1,
-    applicationNumber: "LOAN-001",
-    applicantName: "John Doe",
-    applicantPhone: "9876543210",
-    applicantAddress: "123 Main St, Mumbai",
-    loanType: "Home Loan",
-    bankName: "HDFC Bank",
-    status: "Pending",
-    assignee: "Jane Smith",
-    uploadedAt: "2024-03-20T10:00:00Z",
-    updatedAt: "2024-03-20T10:00:00Z",
-    verifications: [
-      {
-        id: 1,
-        type: "Permanent Address",
-        assignmentMethod: "Local",
-        assignee: "John Doe",
-        status: "Pending",
-      },
-      {
-        id: 2,
-        type: "Work",
-        assignmentMethod: "Remote",
-        office: "Delhi",
-        assignee: "Jane Smith",
-        status: "Pending",
-      },
-    ],
-  },
-  {
-    id: 2,
-    applicationNumber: "LOAN-002",
-    applicantName: "Jane Smith",
-    applicantPhone: "9876543210",
-    applicantAddress: "456 Park Ave, Delhi",
-    loanType: "Business Loan",
-    bankName: "ICICI Bank",
-    status: "In Progress",
-    assignee: "John Doe",
-    uploadedAt: "2024-03-19T15:30:00Z",
-    updatedAt: "2024-03-20T09:15:00Z",
-    verifications: [
-      {
-        id: 3,
-        type: "Current Address",
-        assignmentMethod: "Local",
-        assignee: "Jane Smith",
-        status: "Pending",
-      },
-    ],
-  },
-]
+// const dummyLoans = [
+//   {
+//     id: 1,
+//     applicationNumber: "LOAN-001",
+//     applicantName: "John Doe",
+//     applicantPhone: "9876543210",
+//     applicantAddress: "123 Main St, Mumbai",
+//     loanType: "Home Loan",
+//     bankName: "HDFC Bank",
+//     status: "Pending",
+//     assignee: "Jane Smith",
+//     uploadedAt: "2024-03-20T10:00:00Z",
+//     updatedAt: "2024-03-20T10:00:00Z",
+//     verifications: [
+//       {
+//         id: 1,
+//         type: "Permanent Address",
+//         assignmentMethod: "Local",
+//         assignee: "John Doe",
+//         status: "Pending",
+//       },
+//       {
+//         id: 2,
+//         type: "Work",
+//         assignmentMethod: "Remote",
+//         office: "Delhi",
+//         assignee: "Jane Smith",
+//         status: "Pending",
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     applicationNumber: "LOAN-002",
+//     applicantName: "Jane Smith",
+//     applicantPhone: "9876543210",
+//     applicantAddress: "456 Park Ave, Delhi",
+//     loanType: "Business Loan",
+//     bankName: "ICICI Bank",
+//     status: "In Progress",
+//     assignee: "John Doe",
+//     uploadedAt: "2024-03-19T15:30:00Z",
+//     updatedAt: "2024-03-20T09:15:00Z",
+//     verifications: [
+//       {
+//         id: 3,
+//         type: "Current Address",
+//         assignmentMethod: "Local",
+//         assignee: "Jane Smith",
+//         status: "Pending",
+//       },
+//     ],
+//   },
+// ]
 
 export default function Loans() {
   const [loading, setLoading] = useState(false);
@@ -116,13 +119,14 @@ export default function Loans() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [form] = Form.useForm();
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchLoans = async () => {
       try {
         setLoading(true);
         const result = await getLoansApi();
-        setLoans(result.data.data??dummyLoans);
+        setLoans(result.data.data??[]);
       } catch (error) {
         message.error("Failed to fetch loans");
       } finally {
@@ -130,33 +134,56 @@ export default function Loans() {
       }
     };
     fetchLoans();
-  }, []);
+  }, [refresh]);
 
-  const [fieldExecutives] = useState<FieldExecutive[]>([
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-  ]);
+  const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
 
   const [selectedOffice, setSelectedOffice] = useState<string>("");
-  const [offices] = useState(["Mumbai", "Delhi", "Bangalore", "Chennai"]);
-  const [remoteExecutives] = useState<RemoteExecutives>({
-    Mumbai: [
-      { id: 3, name: "Raj Kumar" },
-      { id: 4, name: "Priya Shah" },
-    ],
-    Delhi: [
-      { id: 5, name: "Amit Singh" },
-      { id: 6, name: "Neha Gupta" },
-    ],
-    Bangalore: [
-      { id: 7, name: "Karthik R" },
-      { id: 8, name: "Divya M" },
-    ],
-    Chennai: [
-      { id: 9, name: "Senthil K" },
-      { id: 10, name: "Lakshmi N" },
-    ],
-  });
+  const [offices,setOffices] = useState<Office[]>([]);
+  // const [remoteExecutives, setRemoteExecutives] = useState<RemoteExecutives>({
+  //   Mumbai: [
+  //     { id: 3, name: "Raj Kumar" },
+  //     { id: 4, name: "Priya Shah" },
+  //   ],
+  //   Delhi: [
+  //     { id: 5, name: "Amit Singh" },
+  //     { id: 6, name: "Neha Gupta" },
+  //   ],
+  //   Bangalore: [
+  //     { id: 7, name: "Karthik R" },
+  //     { id: 8, name: "Divya M" },
+  //   ],
+  //   Chennai: [
+  //     { id: 9, name: "Senthil K" },
+  //     { id: 10, name: "Lakshmi N" },
+  //   ],
+  // });
+
+  useEffect(() => {
+    getExecutivesApi().then((res) => {
+      const options = res?.data?.data?.map((item: any) => ({
+        label: item.name,
+        value: item.id,
+      }))??[];
+      setFieldExecutives(options);
+    }).catch((err) => {
+      // message.error("Failed to fetch field executives");
+      console.log(err)
+    });
+  }, []);
+
+  useEffect(() => {
+    getOfficesApi().then((res) => {
+      const options = res?.data?.map((item: any) => ({
+        label: item.name,
+        value: item.id,
+      }))??[];
+      setOffices(options);
+    }).catch((err) => {
+      // message.error("Failed to fetch offices");
+      console.log(err)
+    });
+  }, []);
 
   const [sameAddress, setSameAddress] = useState(false);
   const [editLoanInfo, setEditLoanInfo] = useState(false);
@@ -167,6 +194,7 @@ export default function Loans() {
       await importLoansApi(file);
       message.success("Loans imported successfully");
       setIsImportModalVisible(false);
+      setRefresh(!refresh);
     } catch (error) {
       message.error("Failed to import loans");
     } finally {
@@ -183,14 +211,19 @@ export default function Loans() {
       assignee: string;
     }
   ) => {
+    const finalData = {
+      // ...values,
+      verificationType,
+      fieldExecutiveId:values.assignee
+    }
     try {
       setLoading(true);
-      const result = await assignVerificationApi(loanId, verificationType, values);
+      const result = await assignExecutivesApi(loanId, finalData);
       
       setLoans(
         loans.map((loan) => {
           if (loan.id === loanId) {
-            const updatedVerifications = loan.verifications.map((v) =>
+            const updatedVerifications = loan.verifications.map((v: any) =>
               v.type === verificationType ? { ...v, ...result.data } : v
             );
             return { ...loan, verifications: updatedVerifications };
@@ -239,9 +272,9 @@ export default function Loans() {
       key: "applicantName",
     },
     {
-      title: "Phone",
-      dataIndex: "applicantPhone",
-      key: "applicantPhone",
+      title: "Mobile",
+      dataIndex: "applicantMobile",
+      key: "applicantMobile",
     },
     {
       title: "Loan Type",
@@ -260,7 +293,7 @@ export default function Loans() {
           key: "pavAssignee",
           render: (_, record: Loan) => {
             const pav = record.verifications.find(
-              (v) => v.type === "Permanent Address"
+              (v: any) => v.type === "PermanentAddress"
             );
             return pav ? pav.assignee : "-";
           },
@@ -270,7 +303,7 @@ export default function Loans() {
           key: "pavStatus",
           render: (_, record: Loan) => {
             const pav = record.verifications.find(
-              (v) => v.type === "Permanent Address"
+              (v: any) => v.type === "PermanentAddress"
             );
             return pav ? (
               <Tag color={pav.status === "Completed" ? "green" : "orange"}>
@@ -295,7 +328,7 @@ export default function Loans() {
           key: "cavAssignee",
           render: (_, record: Loan) => {
             const cav = record.verifications.find(
-              (v) => v.type === "Current Address"
+              (v: any) => v.type === "CurrentAddress"
             );
             return cav ? cav.assignee : "-";
           },
@@ -305,7 +338,7 @@ export default function Loans() {
           key: "cavStatus",
           render: (_, record: Loan) => {
             const cav = record.verifications.find(
-              (v) => v.type === "Current Address"
+              (v: any) => v.type === "CurrentAddress"
             );
             return cav ? (
               <Tag color={cav.status === "Completed" ? "green" : "orange"}>
@@ -327,7 +360,7 @@ export default function Loans() {
           title: "Assignee",
           key: "wvAssignee",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v) => v.type === "Work");
+            const wv = record.verifications.find((v: any) => v.type === "Work");
             return wv ? wv.assignee : "-";
           },
         },
@@ -335,7 +368,7 @@ export default function Loans() {
           title: "Status",
           key: "wvStatus",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v) => v.type === "Work");
+            const wv = record.verifications.find((v: any) => v.type === "Work");
             return wv ? (
               <Tag color={wv.status === "Completed" ? "green" : "blue"}>
                 {wv.status}
@@ -348,9 +381,9 @@ export default function Loans() {
       ],
     },
     {
-      title: "Uploaded At",
-      dataIndex: "uploadedAt",
-      key: "uploadedAt",
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
       render: (date: string) => dayjs(date).fromNow(),
     },
     {
@@ -426,7 +459,7 @@ export default function Loans() {
       >
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary">
-            <InfoCircleOutlined /> The CSV file should contain the following
+            <InfoCircleOutlined /> The .csv/.xls/.xlsx file should contain the following
             columns:
           </Text>
           <ul>
@@ -454,22 +487,8 @@ export default function Loans() {
               return false;
             }
             const ext = file.name.split(".").pop()?.toLowerCase();
-            if (ext === "csv") {
+            if (ext === "csv" || ext === "xls" || ext === "xlsx") {
               handleImport(file);
-            } else if (ext === "xls" || ext === "xlsx") {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                if (!e.target) {
-                  message.error("File read error");
-                  return;
-                }
-                const data = new Uint8Array(e.target.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: "array" });
-                // You can process the workbook here or pass to handleImport
-                message.success("XLS/XLSX file loaded (mock)");
-                setIsImportModalVisible(false);
-              };
-              reader.readAsArrayBuffer(file);
             } else {
               message.error("Unsupported file format");
             }
@@ -480,7 +499,7 @@ export default function Loans() {
             <UploadOutlined />
           </p>
           <p className="ant-upload-text">
-            Click or drag CSV file to this area to upload
+            Click or drag file to this area to upload
           </p>
         </Upload.Dragger>
       </Modal>
@@ -564,9 +583,10 @@ export default function Loans() {
               </div>
               {!editLoanInfo ? (
                 <Descriptions
+                  className="loan-details-descriptions"
                   bordered
                   size="small"
-                  column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
+                  column={{ xxl: 3, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
                 >
                   <Descriptions.Item label="Application Number">
                     {selectedLoan.applicationNumber}
@@ -683,16 +703,16 @@ export default function Loans() {
                   ? [
                       {
                         label: "Permanent & Current Address",
-                        type: "Permanent Address",
+                        type: "PermanentAddress",
                         merged: true,
                       },
                       { label: "Work", type: "Work", merged: false },
                     ].map(({ label, type, merged }) => {
                       const verification = selectedLoan.verifications.find(
-                        (v) =>
+                        (v: any) =>
                           merged
-                            ? v.type === "Permanent Address" ||
-                              v.type === "Current Address"
+                            ? v.type === "PermanentAddress" ||
+                              v.type === "CurrentAddress"
                             : v.type === type
                       );
                       return (
@@ -730,7 +750,7 @@ export default function Loans() {
                               handleVerificationAssign(
                                 selectedLoan.id,
                                 type,
-                                {...values,sameAddress:true}
+                                {...values,isAddressSame:true}
                               )
                             }
                           >
@@ -778,13 +798,8 @@ export default function Loans() {
                                         onChange={(value) =>
                                           setSelectedOffice(value)
                                         }
-                                      >
-                                        {offices.map((office) => (
-                                          <Option key={office} value={office}>
-                                            {office}
-                                          </Option>
-                                        ))}
-                                      </Select>
+                                        options={offices}
+                                      />
                                     </Form.Item>
                                   );
                                 }
@@ -815,25 +830,12 @@ export default function Loans() {
                                       },
                                     ]}
                                   >
-                                    <Select placeholder="Select field executive">
-                                      {assignmentMethod === "Local"
-                                        ? fieldExecutives.map((fe) => (
-                                            <Option key={fe.id} value={fe.name}>
-                                              {fe.name}
-                                            </Option>
-                                          ))
-                                        : office &&
-                                          remoteExecutives[office]?.map(
-                                            (fe: FieldExecutive) => (
-                                              <Option
-                                                key={fe.id}
-                                                value={fe.name}
-                                              >
-                                                {fe.name}
-                                              </Option>
-                                            )
-                                          )}
-                                    </Select>
+                                   <Select
+  placeholder="Select field executive"
+  style={{ width: '100%' }}
+  options={fieldExecutives}
+/>
+
                                   </Form.Item>
                                 );
                               }}
@@ -854,10 +856,10 @@ export default function Loans() {
                         </Card>
                       );
                     })
-                  : ["Permanent Address", "Current Address", "Work"].map(
+                  : ["PermanentAddress", "CurrentAddress", "Work"].map(
                       (type) => {
                         const verification = selectedLoan.verifications.find(
-                          (v) => v.type === type
+                          (v: any) => v.type === type
                         );
                         return (
                           <Card
@@ -944,13 +946,10 @@ export default function Loans() {
                                           onChange={(value) =>
                                             setSelectedOffice(value)
                                           }
-                                        >
-                                          {offices.map((office) => (
-                                            <Option key={office} value={office}>
-                                              {office}
-                                            </Option>
-                                          ))}
-                                        </Select>
+                                          options={offices}
+                                         
+                                        />
+                                        
                                       </Form.Item>
                                     );
                                   }
@@ -981,9 +980,11 @@ export default function Loans() {
                                         },
                                       ]}
                                     >
-                                      <Select placeholder="Select field executive">
-                                        {assignmentMethod === "Local"
-                                          ? fieldExecutives.map((fe) => (
+                                      <Select placeholder="Select field executive" options={fieldExecutives}>
+                                        {/* {
+                                        assignmentMethod === "Local"
+                                          ?
+                                           fieldExecutives?.map((fe) => (
                                               <Option
                                                 key={fe.id}
                                                 value={fe.name}
@@ -1001,7 +1002,7 @@ export default function Loans() {
                                                   {fe.name}
                                                 </Option>
                                               )
-                                            )}
+                                            )} */}
                                       </Select>
                                     </Form.Item>
                                   );

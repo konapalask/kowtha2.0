@@ -7,7 +7,7 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import api from "@/utils/axios";
+// import api from "@/utils/axios";
 import {
   BarChart,
   Bar,
@@ -21,6 +21,7 @@ import {
   Pie,
   Cell
 } from "recharts";
+import axiosInstance from "@/config/axios.config";
 
 interface DashboardStats {
   totalLoans: number;
@@ -84,7 +85,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get("/api/loans/stats", {
+        const response = await axiosInstance.get("/api/loans/stats", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

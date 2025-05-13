@@ -60,9 +60,8 @@ export default function Login() {
         otp: values.otp,
       });
       if (result.status >= 200 && result.status < 300) {
-        console.log(result)
-        setCookie(ACCESS_TOKEN, result.data?.token, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
-        setCookie(REFRESH_TOKEN, "help", `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
         // setCookie(REFRESH_TOKEN, result.data.refreshToken);
         router.push("/dashboard");
@@ -84,24 +83,31 @@ export default function Login() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "var(--background-secondary)",
+        // background: "var(--background-secondary)",
         padding: "16px",
+        backgroundImage: "url('/images/loginBackground.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       <Card
         style={{
           width: "100%",
           maxWidth: "400px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          // boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           borderRadius: "8px",
-          background: "var(--background-primary)",
+          borderColor:"transparent",
+          // background: "var(--background-primary)",
+          // opacity: 0.2,
+          background:"transparent"
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ marginBottom: 16 }}>
+          <div style={{ textAlign: "center",transform:"translateX(-10px)" }}>
+            <div style={{ marginBottom: 0 }}>
               <Image
-                src="/images/appLogos/KowthaDarkIcon.png"
+                src="/images/appLogos/KowthaLightIcon.png"
+                // src="/images/appLogos/KowthaDarkIcon.png"
                 alt="Kowtha Logo"
                 width={300}
                 height={150}
@@ -109,17 +115,17 @@ export default function Login() {
                 preview={false}
               />
             </div>
-            <Title
+            {/* <Title
               level={2}
               style={{ marginBottom: 8, color: "var(--primary-800)" }}
             >
               Loan Verification System
-            </Title>
-            <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
+            </Title> */}
+            {/* <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
               {otpSent
                 ? "Enter the OTP sent to your mobile"
                 : "Enter your mobile number to continue"}
-            </Text>
+            </Text> */}
           </div>
 
           <Form
@@ -137,10 +143,15 @@ export default function Login() {
                   message: "Please enter a valid 10-digit mobile number",
                 },
               ]}
+              style={{
+                backgroundColor: "#fff",
+                // borderRadius: "6px",
+                // height: "40px",
+              }}
             >
               <Input
                 prefix={
-                  <MobileOutlined style={{ color: "var(--primary-600)" }} />
+                  <MobileOutlined style={{ color: "var(--primary-600)", fontSize: "16px" }} />
                 }
                 placeholder="Enter mobile number"
                 disabled={otpSent}

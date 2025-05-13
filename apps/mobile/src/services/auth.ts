@@ -13,8 +13,8 @@ export const login = async (email: string, password: string) => {
 };
 
 interface OTPResponse {
-  access_token: string;
-  refresh_token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export const generateOTP = async (mobileNumber: string): Promise<void> => {
@@ -22,7 +22,7 @@ export const generateOTP = async (mobileNumber: string): Promise<void> => {
     const response = await axiosInstance.post('/accounts/otp/generate', {
       mobile: mobileNumber,
     });
-    return response.data;
+    return response?.data;
 
     // if (response.status !== 200) {
     //   console.log('RESPONSE', response);
@@ -47,13 +47,14 @@ export const verifyOTP = async (
     // if (response.status !== 200) {
     //   throw new Error('Failed to verify OTP');
     // }
+    return response?.data;
 
-    return {
-      access_token: response.data.token,
-      refresh_token: response.data.token,
-      // access_token: response.data.access_token,
-      // refresh_token: response.data.refresh_token,
-    };
+    // return {
+    //   access_token: response.data.token,
+    //   refresh_token: response.data.token,
+    //   // access_token: response.data.access_token,
+    //   // refresh_token: response.data.refresh_token,
+    // };
   } catch (error) {
     console.error('Error verifying OTP:', error);
     throw error;

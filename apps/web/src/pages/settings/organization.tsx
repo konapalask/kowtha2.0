@@ -16,19 +16,20 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 // import { useSession } from 'next-auth/react';
-import api from "@/utils/axios";
+import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
+import { getOfficesApi, getOrganizationApi, Office } from "@/services/settings.services";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
-interface Office {
-  id: number;
-  name: string;
-  townCity: string;
-  address: string;
-  employees?: number;
-}
+// interface Office {
+//   id: number;
+//   name: string;
+//   townCity: string;
+//   address: string;
+//   employees?: number;
+// }
 
 interface Organization {
   id: number;
@@ -53,7 +54,8 @@ export default function OrganizationSettings() {
   useEffect(() => {
     const fetchOrganization = async () => {
       try {
-        const result = await api.get("/org/organization");
+        const result = await getOrganizationApi();
+        console.log(result);
         if (result && result.status >= 200 && result.status < 300) {
           setOrganization(result.data);
           form.setFieldsValue(result.data);
@@ -72,7 +74,7 @@ export default function OrganizationSettings() {
   useEffect(() => {
     const fetchOffices = async () => {
       try {
-        const result = await api.get("/org/offices");
+        const result = await getOfficesApi();
         if (result && result.status >= 200 && result.status < 300) {
           setOffices(result.data);
         } else {
@@ -89,7 +91,7 @@ export default function OrganizationSettings() {
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      const result = await api.put(
+      const result = await axiosInstance.put(
         `/org/organization/${organization.id}`,
         values
       );
@@ -112,7 +114,7 @@ export default function OrganizationSettings() {
 
       if (editingOffice) {
         // Update existing office
-        const result = await api.put(
+        const result = await axiosInstance.put(
           `/org/offices/${editingOffice.id}`,
           values
         );
@@ -126,7 +128,7 @@ export default function OrganizationSettings() {
         }
       } else {
         // Create new office
-        const result = await api.post("/org/offices", values);
+        const result = await axiosInstance.post("/org/offices", values);
         if (result && result.status >= 200 && result.status < 300) {
           setOffices([...offices, result.data]);
           message.success("Office added successfully");

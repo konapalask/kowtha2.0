@@ -1,6 +1,6 @@
 import NextAuth, { NextAuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import api from '@/utils/axios';
+import axiosInstance from '@/config/axios.config';
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -23,7 +23,9 @@ declare module "next-auth/jwt" {
   }
 }
 
+// Ensure API URL is properly configured
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+axiosInstance.defaults.baseURL = API_URL;
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -40,19 +42,20 @@ export const authOptions: NextAuthOptions = {
           }
 
           // Real API call to backend
-          const response = await api.post('/auth/otp/verify', {
+          const response = await axiosInstance.post('/auth/otp/verify', {
             mobile: credentials.mobile,
             otp: credentials.otp,
           });
 
           // Assume backend returns { token, ...user }
-          if (response.data && response.data.token) {
+          if (response.data && response.data.access_token) {
             return {
               id: response.data.id || '1',
               name: response.data.name || credentials.mobile,
               email: response.data.email || '',
               role: response.data.role || 'User',
-              token: response.data.token,
+              token: response.data.access_token,
+              refresh_token: response.data.refresh_token,
             };
           }
 
@@ -89,6 +92,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export default NextAuth(authOptions); 

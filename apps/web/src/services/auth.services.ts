@@ -15,21 +15,22 @@ interface VerifyOtpPayload {
 }
 
 interface VerifyOtpResponse {
-  data: {
-    token: string;
-    refreshToken?: string;
-    message?: string;
-  };
-  status: number;
-  statusText: string;
-  headers: {
-    "content-length": string;
-    "content-type": string;
-  };
-  config: any;
-  request: {
-    url: string;
-  };
+  [key: string]: any;
+  // data: {
+  //   accessToken: string;
+  //   refreshToken: string;
+  //   message?: string;
+  // };
+  // status: number;
+  // statusText: string;
+  // headers: {
+  //   "content-length": string;
+  //   "content-type": string;
+  // };
+  // config: any;
+  // request: {
+  //   url: string;
+  // };
 }
 
 export const generateOtpApi = (payload: GenerateOtpPayload) => {
