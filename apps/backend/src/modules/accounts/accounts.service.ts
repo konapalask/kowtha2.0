@@ -86,7 +86,8 @@ export class AccountsService {
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
       // Generate a random 6-digit OTP
-      const otp = this.generateRandomOTP();
+      // const otp = this.generateRandomOTP();
+      const otp = "123456";
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       // Find or create user
