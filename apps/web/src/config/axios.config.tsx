@@ -41,7 +41,7 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const refreshTokenApi = "/smb/user/refresh-token";
+    const refreshTokenApi = "/account/refresh-token";
     const originalRequest = error?.config;
     // const errorCode = error?.response?.data?.code;
     const errorMessage =

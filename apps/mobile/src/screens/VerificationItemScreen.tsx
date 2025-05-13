@@ -34,6 +34,7 @@ import FinalObservations from '../components/forms/FinalObservations';
 import CollapsibleSection from '../components/CollapsibleSection';
 import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
+import {submitVerification} from '../services/field.services';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -250,12 +251,23 @@ const VerificationItemScreen = () => {
       }
 
       const finalData = {
-        ...formData,
-        uploadedItems,
+        verificationType: 'PermanentAddress',
+        findings: 'Verification Findings Text',
+        verificationData: formData,
+        // uploadedItems,
       };
 
       console.log('Submitting form data:', finalData);
       // await api.submitVerification(finalData);
+
+      await submitVerification(
+        {
+          verificationType: 'PermanentAddress',
+          findings: 'Verification Findings Text',
+          verificationData: finalData,
+        },
+        '8',
+      );
 
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();

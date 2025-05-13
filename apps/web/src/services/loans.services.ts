@@ -21,7 +21,21 @@ export interface Loan {
   assignee: string;
   uploadedAt: string;
   updatedAt: string;
-  verifications: Verification[];
+  // verifications: Verification[];
+}
+
+export interface VerifierLoan {
+  data: {
+   data:{
+    id: number;
+    applicationNumber: string;
+    applicantName: string;
+    status: string;
+    uploadedAt: string;
+    updatedAt: string;
+    documents: string[];
+   }
+  };
 }
 
 export interface GetLoansResponse {
@@ -62,3 +76,22 @@ export const importLoansApi = (file: File) => {
   });
 };
 
+export const getVerifierLoansApi = () => {
+  return axiosInstance.get<VerifierLoan[]>(`/loans/verifier`);
+};
+
+export const assignExecutivesApi = (loanId: number, payload: {
+  assignmentMethod: "Local" | "Remote";
+  office?: string;
+  assignee: string;
+}) => {
+  return axiosInstance.post<Verification>(`/loans/${loanId}/assign`, payload);
+};
+
+export const getExecutivesApi = () => {
+  return axiosInstance.get<{ id: number; name: string }[]>(`/accounts/users?role=FieldExecutive`);
+};
+
+export const getFieldExecutivesApi = () => {
+  return axiosInstance.get< any[]>(`/loans/field-executive`);
+};

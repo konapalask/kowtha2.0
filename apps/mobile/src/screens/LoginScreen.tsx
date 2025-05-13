@@ -70,11 +70,11 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const {access_token, refresh_token} = await verifyOTP(mobileNumber, otp);
-
+      const response = await verifyOTP(mobileNumber, otp);
+      // console.log('RESPONSE', response?.access_token);
       // Store the tokens
-      await setItem('access_token', access_token);
-      await setItem('refresh_token', refresh_token);
+      await setItem('accessToken', response?.accessToken);
+      await setItem('refreshToken', response?.refreshToken);
 
       // Request all permissions after successful login
       await requestAllPermissions();

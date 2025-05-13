@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Upload, Button, Table, message, Space, Typography } from 'antd';
 import { UploadOutlined, FileExcelOutlined } from '@ant-design/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import api from '@/utils/axios';
+import axiosInstance from '@/config/axios.config';
 import type { UploadFile } from 'antd/es/upload/interface';
 
 const { Title } = Typography;
@@ -33,7 +33,7 @@ export default function ImportLoans() {
 
     try {
       setLoading(true);
-      const response = await api.post('/api/loans/import', formData, {
+      const response = await axiosInstance.post('/api/loans/import', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
@@ -55,7 +55,7 @@ export default function ImportLoans() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await api.post('/api/loans/preview', formData, {
+      const response = await axiosInstance.post('/api/loans/preview', formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',

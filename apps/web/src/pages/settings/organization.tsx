@@ -18,17 +18,18 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 // import { useSession } from 'next-auth/react';
 import api from "@/utils/axios";
 import { ColumnsType } from "antd/es/table";
+import { getOfficesApi, getOrganizationApi, Office } from "@/services/settings.services";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
-interface Office {
-  id: number;
-  name: string;
-  townCity: string;
-  address: string;
-  employees?: number;
-}
+// interface Office {
+//   id: number;
+//   name: string;
+//   townCity: string;
+//   address: string;
+//   employees?: number;
+// }
 
 interface Organization {
   id: number;
@@ -53,7 +54,8 @@ export default function OrganizationSettings() {
   useEffect(() => {
     const fetchOrganization = async () => {
       try {
-        const result = await api.get("/org/organization");
+        const result = await getOrganizationApi();
+        console.log(result);
         if (result && result.status >= 200 && result.status < 300) {
           setOrganization(result.data);
           form.setFieldsValue(result.data);
@@ -72,7 +74,7 @@ export default function OrganizationSettings() {
   useEffect(() => {
     const fetchOffices = async () => {
       try {
-        const result = await api.get("/org/offices");
+        const result = await getOfficesApi();
         if (result && result.status >= 200 && result.status < 300) {
           setOffices(result.data);
         } else {

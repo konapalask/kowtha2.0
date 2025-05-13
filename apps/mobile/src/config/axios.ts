@@ -9,18 +9,19 @@ const axiosConfig = {
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
   },
 };
 
 const axiosInstance = axios.create(axiosConfig);
 
 axiosInstance.interceptors.request.use(async config => {
-  const token = await getItem('access_token');
+  const token = await getItem('accessToken');
   const Organization = await getItem('organisation_id');
   const PatientId = await getItem('patient_id');
 
   if (token) {
-    config.headers.PatientAuthorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   if (Organization) {
     config.headers.Organization = Organization;
@@ -40,7 +41,7 @@ axiosInstance.interceptors.response.use(
     const errorMessage =
       error?.response?.data?.detail?.code || error?.response?.data?.code;
     const errorStatusCode = error?.response?.status;
-    const tokenInvalid = 'token_not_valid';
+    const tokenInvalid = 'TOKEN_EXPIRED';
     const accountNotFound = 'UNAUTHORIZED_USER';
 
     if ('auth/'.includes(originalRequest.url)) {
@@ -71,15 +72,25 @@ axiosInstance.interceptors.response.use(
             refreshToken,
           )
         ) {
-          return axiosInstance
-            .post(refreshTokenApi, {refresh_token: refreshToken})
-            .then(async response => {
-              await setItem('access_token', response.data.access_token);
-              return axiosInstance(originalRequest);
-            })
-            .catch(err => {
-              console.log(err);
-            });
+          const tokenParts = JSON.parse(atob(refreshToken.split('.')[1]));
+          const now = Math.ceil(Date.now() / 1000);
+
+          if (tokenParts.exp > now) {
+            return axiosInstance
+              .post(refreshTokenApi, {refresh_token: refreshToken})
+              .then(async response => {
+                await setItem('access_token', response.data.access_token);
+                return axiosInstance(originalRequest);
+              })
+              .catch(err => {
+                console.log(err);
+                clearAll();
+                RNRestart.Restart();
+              });
+          } else {
+            clearAll();
+            RNRestart.Restart();
+          }
         } else {
           clearAll();
           RNRestart.Restart();

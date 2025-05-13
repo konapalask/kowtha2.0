@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Typography,
@@ -27,9 +27,10 @@ import {
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
 import React from "react";
+import { getVerificationData } from "@/services/verifier.services";
 
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
+// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// import "react-quill/dist/quill.snow.css";
 
 const { Title } = Typography;
 
@@ -88,6 +89,34 @@ interface FormData {
     overallStatus: string;
     remarks: string;
   };
+  officeVerification: {
+    applicantName: string;
+    bankName: string;
+    prospectNumber: string;
+    purposeOfLoan: string;
+    loanAmount: string;
+    tenure: string;
+    panNumber: string;
+    aadharNumber: string;
+    qualification: string;
+    currentOfficeName: string;
+    officeAddress: string;
+    yearsInCurrentJob: string;
+    totalWorkExperience: string;
+    companySize: string;
+    natureOfService: string;
+    officeLocality: string;
+    idCardNumber: string;
+    designation: string;
+    salaryMode: string;
+    employerType: string;
+    grossSalary: string;
+    netSalary: string;
+    previousCompanyName: string;
+    workExperience: string;
+    existingLoans: string;
+    references: string;
+  };
   section8: Record<string, any>;
   uploadedItems: Array<{
     id: string;
@@ -96,101 +125,6 @@ interface FormData {
     timestamp: string;
   }>;
 }
-
-// Dummy data for demo
-const dummyLoans = [
-  {
-    id: 1,
-    applicationNumber: "LOAN-001",
-    applicantName: "John Doe",
-    status: "FVCompleted",
-    uploadedAt: "2024-03-20T10:00:00Z",
-    updatedAt: "2024-03-20T10:00:00Z",
-    bankName: "HDFC Bank",
-    loanType: "Home Loan",
-    loanAmount: 500000,
-    contactNumber: "9876543210",
-    documents: [
-      { type: "Work", name: "work_photo1.jpg", url: "#" },
-      { type: "Address", name: "address_doc1.pdf", url: "#" },
-    ],
-    photos: [
-      {
-        type: "Work",
-        url: "https://via.placeholder.com/120?text=Work+Photo+1",
-      },
-      {
-        type: "Address",
-        url: "https://via.placeholder.com/120?text=Address+Photo+1",
-      },
-    ],
-    forms: {
-      basicDetails: {
-        verificationType: "",
-        verificationDate: "",
-        verificationTime: "",
-        verificationMode: "",
-        verificationStatus: "",
-        verificationRemarks: "",
-      },
-      applicantInformation: {
-        applicantName: "",
-        applicantAge: "",
-        applicantGender: "",
-        applicantMaritalStatus: "",
-        applicantEducation: "",
-      },
-      addressVerification: {
-        addressType: "Residence",
-        addressCategory: "Rural",
-        addressSubCategory: "Town",
-        addressDetails: "kondapur",
-        geoTag: "random geo tags",
-      },
-      residenceDetails: {
-        residenceStatus: "Owned",
-        rentDetails: "",
-        residenceType: "House",
-        constructionQuality: "Good",
-        standardOfLiving: "Good",
-        locationCategory: "Semi-Urban",
-        localityType: "Residential",
-        accessibility: "Easy",
-        houseArea: "12000",
-        yearsAtCurrentAddress: "2",
-        nameplateVisible: "Yes",
-      },
-      familyEmploymentDetails: {
-        totalFamilyMembers: "5",
-        earningMembers: "2",
-        dependents: "3",
-        isSpouseWorking: "Yes",
-        spouseEmploymentDetails: "IT",
-        assetsObserved: "Vehicle",
-      },
-      thirdPartyCheck: {
-        tpcName: "Pentayya",
-        relationship: "Neighbor",
-        feedbackStatus: "Positive",
-        comments: "Good",
-      },
-      finalObservations: {
-        cooperativeness: "Neutral",
-        overallStatus: "Positive",
-        remarks: "Good",
-      },
-      section8: {},
-      uploadedItems: [
-        {
-          id: "1746694405367",
-          uri: "file:///data/user/0/com.mobile/cache/rn_image_picker_lib_temp_664e69aa-2645-4740-a947-695c01f7d6a8.jpg",
-          type: "photo",
-          timestamp: "2025-05-08T08:53:25.367Z",
-        },
-      ],
-    },
-  },
-];
 
 interface EditFormModalProps {
   visible: boolean;
@@ -279,12 +213,46 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
           { name: "overallStatus", label: "Overall Status", type: "select", options: ["Positive", "Negative", "Referred", "Fraud"] },
           { name: "remarks", label: "Remarks", type: "textarea" },
         ];
+      case "officeVerification":
+        return [
+          { name: "applicantName", label: "Name of the Applicant", type: "input" },
+          { name: "bankName", label: "Name of the Bank", type: "input" },
+          { name: "prospectNumber", label: "Prospect Number", type: "input" },
+          { name: "purposeOfLoan", label: "Purpose of Loan", type: "input" },
+          { name: "loanAmount", label: "Loan Amount", type: "input" },
+          { name: "tenure", label: "Tenure", type: "input" },
+          { name: "panNumber", label: "PAN Number", type: "input" },
+          { name: "aadharNumber", label: "Aadhar Number", type: "input" },
+          { name: "qualification", label: "Qualification", type: "input" },
+          { name: "currentOfficeName", label: "Name of Current Working Office", type: "input" },
+          { name: "officeAddress", label: "Office Address", type: "textarea" },
+          { name: "yearsInCurrentJob", label: "Years in Current Job", type: "input" },
+          { name: "totalWorkExperience", label: "Total Work Experience", type: "input" },
+          { name: "companySize", label: "Company Size", type: "input" },
+          { name: "natureOfService", label: "Nature of Service/Business", type: "input" },
+          { name: "officeLocality", label: "Locality of Office Premises", type: "select", options: ["Residential", "Commercial", "Industry"] },
+          { name: "idCardNumber", label: "ID Card Number", type: "input" },
+          { name: "designation", label: "Designation", type: "input" },
+          { name: "salaryMode", label: "Mode of Salary", type: "select", options: ["Cash", "Online"] },
+          { name: "employerType", label: "Type of Employer", type: "select", options: ["Government", "Private"] },
+          { name: "grossSalary", label: "Gross Salary per Month", type: "input" },
+          { name: "netSalary", label: "Net Salary per Month", type: "input" },
+          { name: "previousCompanyName", label: "Previous Company Name", type: "input" },
+          { name: "workExperience", label: "Work Experience", type: "input" },
+          { name: "existingLoans", label: "Existing Loans", type: "textarea" },
+          { name: "references", label: "References (Colleagues)", type: "textarea" },
+        ];
       default:
         return [];
     }
   };
 
-  const renderFormField = (field: any) => {
+  const renderFormField = (field: {
+    type: string;
+    options?: string[];
+    name: string;
+    label: string;
+  }) => {
     switch (field.type) {
       case "input":
         return <Input />;
@@ -292,8 +260,12 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
         return <Input.TextArea rows={4} />;
       case "select":
         return (
-          <Select>
-            {field.options.map((option: string) => (
+          <Select
+            allowClear
+            placeholder={`Select ${field.label}`}
+            notFoundContent="No options available"
+          >
+            {field.options?.filter(Boolean).map((option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
@@ -350,7 +322,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
 export default function LoanVerifyDetails() {
   const router = useRouter();
   const { id } = router.query;
-  const loan = dummyLoans.find((l) => l.id === Number(id));
+  const loan = 4;
   const [report, setReport] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(
@@ -417,13 +389,48 @@ export default function LoanVerifyDetails() {
       overallStatus: "",
       remarks: "",
     },
+    officeVerification: {
+      applicantName: "",
+      bankName: "",
+      prospectNumber: "",
+      purposeOfLoan: "",
+      loanAmount: "",
+      tenure: "",
+      panNumber: "",
+      aadharNumber: "",
+      qualification: "",
+      currentOfficeName: "",
+      officeAddress: "",
+      yearsInCurrentJob: "",
+      totalWorkExperience: "",
+      companySize: "",
+      natureOfService: "",
+      officeLocality: "",
+      idCardNumber: "",
+      designation: "",
+      salaryMode: "",
+      employerType: "",
+      grossSalary: "",
+      netSalary: "",
+      previousCompanyName: "",
+      workExperience: "",
+      existingLoans: "",
+      references: "",
+    },
     section8: {},
     uploadedItems: [],
   };
 
   const [formData, setFormData] = useState<FormData>(
-    loan?.forms || defaultFormData
+   defaultFormData
   );
+
+  useEffect(() => {
+    getVerificationData(id as string).then((res) => {
+      // setFormData(data);
+      console.log(res);
+    });
+  }, [id]);
 
   if (!loan) {
     return (
@@ -543,6 +550,102 @@ export default function LoanVerifyDetails() {
                   </Descriptions.Item>
                   <Descriptions.Item label="Education Level">
                     {formData.applicantInformation.applicantEducation}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+
+            <section style={{ marginBottom: 24 }}>
+              <Card>
+                <Descriptions
+                  title="Office Verification"
+                  bordered
+                  column={2}
+                  extra={
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => handleEdit("officeVerification")}
+                    />
+                  }
+                >
+                  <Descriptions.Item label="Name of the Applicant">
+                    {formData.officeVerification.applicantName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Name of the Bank">
+                    {formData.officeVerification.bankName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Prospect Number">
+                    {formData.officeVerification.prospectNumber}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Purpose of Loan">
+                    {formData.officeVerification.purposeOfLoan}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Loan Amount">
+                    {formData.officeVerification.loanAmount}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Tenure">
+                    {formData.officeVerification.tenure}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="PAN Number">
+                    {formData.officeVerification.panNumber}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Aadhar Number">
+                    {formData.officeVerification.aadharNumber}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Qualification">
+                    {formData.officeVerification.qualification}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Current Office Name">
+                    {formData.officeVerification.currentOfficeName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Office Address">
+                    {formData.officeVerification.officeAddress}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Years in Current Job">
+                    {formData.officeVerification.yearsInCurrentJob}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Total Work Experience">
+                    {formData.officeVerification.totalWorkExperience}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Company Size">
+                    {formData.officeVerification.companySize}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Nature of Service/Business">
+                    {formData.officeVerification.natureOfService}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Office Locality">
+                    {formData.officeVerification.officeLocality}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="ID Card Number">
+                    {formData.officeVerification.idCardNumber}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Designation">
+                    {formData.officeVerification.designation}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Mode of Salary">
+                    {formData.officeVerification.salaryMode}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Type of Employer">
+                    {formData.officeVerification.employerType}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Gross Salary per Month">
+                    {formData.officeVerification.grossSalary}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Net Salary per Month">
+                    {formData.officeVerification.netSalary}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Previous Company Name">
+                    {formData.officeVerification.previousCompanyName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Work Experience">
+                    {formData.officeVerification.workExperience}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Existing Loans">
+                    {formData.officeVerification.existingLoans}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="References (Colleagues)">
+                    {formData.officeVerification.references}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -746,8 +849,8 @@ export default function LoanVerifyDetails() {
                 <Descriptions title="Documents & Photos" bordered column={1}>
                   <Descriptions.Item label="Work Verification">
                     <Space direction="vertical">
-                      {loan.documents
-                        .filter((d) => d.type === "Work")
+                      {loan?.documents
+                        ?.filter((d) => d.type === "Work")
                         .map((doc, idx) => (
                           <a
                             key={idx}
@@ -758,8 +861,8 @@ export default function LoanVerifyDetails() {
                             {doc.name}
                           </a>
                         ))}
-                      {loan.photos
-                        .filter((p) => p.type === "Work")
+                      {loan?.photos
+                        ?.filter((p) => p.type === "Work")
                         .map((photo, idx) => (
                           <img
                             key={idx}
@@ -772,8 +875,8 @@ export default function LoanVerifyDetails() {
                   </Descriptions.Item>
                   <Descriptions.Item label="Address Verification">
                     <Space direction="vertical">
-                      {loan.documents
-                        .filter((d) => d.type === "Address")
+                      {loan?.documents
+                        ?.filter((d) => d.type === "Address")
                         .map((doc, idx) => (
                           <a
                             key={idx}
@@ -784,8 +887,8 @@ export default function LoanVerifyDetails() {
                             {doc.name}
                           </a>
                         ))}
-                      {loan.photos
-                        .filter((p) => p.type === "Address")
+                      {loan?.photos
+                        ?.filter((p) => p.type === "Address")
                         .map((photo, idx) => (
                           <img
                             key={idx}

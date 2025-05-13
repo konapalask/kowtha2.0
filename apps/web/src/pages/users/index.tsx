@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Card,
@@ -16,6 +16,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useSession } from "next-auth/react";
 import { ColumnsType } from "antd/es/table";
+import { getUsersApi } from "@/services/users.services";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -41,31 +42,21 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      mobile: "9876543210",
-      status: "Active",
-      role: "FieldExecutive",
-      office: "Head Office",
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      mobile: "9876543211",
-      status: "Active",
-      role: "Verifier",
-      office: "Branch Office",
-    },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [offices] = useState<Office[]>([
     { id: 1, name: "Head Office" },
     { id: 2, name: "Branch Office" },
   ]);
+
+  useEffect(() => {
+    getUsersApi().then((res) => {
+      setUsers(res?.data?.data);
+      console.log(res?.data?.data)
+    }).catch((err) => {
+      console.log(err)
+    });
+  }, []);
 
   const handleSubmit = async (values: any) => {
     try {
@@ -127,17 +118,23 @@ export default function Users() {
 
   const columns: ColumnsType<User> = [
     {
-      title: "First Name",
-      dataIndex: "firstName",
-      key: "firstName",
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
       width: 150,
     },
-    {
-      title: "Last Name",
-      dataIndex: "lastName",
-      key: "lastName",
-      width: 150,
-    },
+    // {
+    //   title: "First Name",
+    //   dataIndex: "firstName",
+    //   key: "firstName",
+    //   width: 150,
+    // },
+    // {
+    //   title: "Last Name",
+    //   dataIndex: "lastName",
+    //   key: "lastName",
+    //   width: 150,
+    // },
     {
       title: "Mobile",
       dataIndex: "mobile",
@@ -166,6 +163,7 @@ export default function Users() {
       dataIndex: "office",
       key: "office",
       width: 150,
+      render: (office: any) => office?.name
     },
     {
       title: "Actions",

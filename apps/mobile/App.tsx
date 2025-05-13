@@ -16,13 +16,21 @@ import NetInfo from '@react-native-community/netinfo';
 import {View, Text, StyleSheet, Platform, StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import WorkVerification from './src/screens/WorkVerification';
 
 // Configure XMLHttpRequest
 
 export type RootStackParamList = {
   Login: undefined;
   VerificationList: undefined;
-  VerificationItem: {item: {name: string; age: number; sex: string}};
+  VerificationItemScreen: {
+    item: {name: string; age: number; sex: string};
+    verificationType: 'CurrentAddress' | 'PermanentAddress';
+  };
+  WorkVerification: {
+    item: {name: string; age: number; sex: string};
+    verificationType: 'Work';
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,15 +67,33 @@ const App = () => {
           <Stack.Screen
             name="VerificationList"
             component={VerificationListScreen}
-            options={{title: 'Verification List'}}
+            options={{
+              title: 'Verification List',
+              gestureEnabled: false,
+              headerBackVisible: false,
+            }}
           />
           <Stack.Screen
-            name="VerificationItem"
+            name="VerificationItemScreen"
             component={VerificationItemScreen}
             options={({route}) => ({
-              title: `${route.params.item.name}, ${
-                route.params.item.age
-              } ${route.params.item.sex.charAt(0).toUpperCase()}`,
+              title: route.params?.item
+                ? `${route.params.item.name}, ${
+                    route.params.item.age
+                  } ${route.params.item.sex.charAt(0).toUpperCase()}`
+                : 'Verification Details',
+            })}
+          />
+
+          <Stack.Screen
+            name="WorkVerification"
+            component={WorkVerification}
+            options={({route}) => ({
+              title: route.params?.item
+                ? `${route.params.item.name}, ${
+                    route.params.item.age
+                  } ${route.params.item.sex.charAt(0).toUpperCase()}`
+                : 'Work Verification',
             })}
           />
         </Stack.Navigator>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Table, Card, Button, Space, Tag, Typography } from "antd";
 import {
   CheckCircleOutlined,
@@ -9,78 +9,79 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { getFieldExecutivesApi, getVerifierLoansApi } from "@/services/loans.services";
 
 dayjs.extend(relativeTime);
 
-const { Title } = Typography;
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
+// const { Title } = Typography;
+// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// import "react-quill/dist/quill.snow.css";
 
-interface Loan {
-  id: number;
-  applicationNumber: string;
-  applicantName: string;
-  status: string;
-  uploadedAt: string;
-  updatedAt: string;
-  documents: string[];
-}
+// Define a generic type for our loan data
+type LoanData = {
+  id?: string | number;
+  applicationNumber?: string;
+  applicantName?: string;
+  status?: string;
+  uploadedAt?: string;
+  updatedAt?: string;
+  [key: string]: any; // Allow for additional properties
+};
 
 export default function Verify() {
   const [loading, setLoading] = useState(false);
-  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
-  const [loans, setLoans] = useState<Loan[]>([
-    {
-      id: 1,
-      applicationNumber: "LOAN-001",
-      applicantName: "John Doe",
-      status: "FVCompleted",
-      uploadedAt: "2024-03-20T10:00:00Z",
-      updatedAt: "2024-03-20T10:00:00Z",
-      documents: ["document1.pdf", "document2.pdf"],
-    },
-    {
-      id: 2,
-      applicationNumber: "LOAN-002",
-      applicantName: "Jane Smith",
-      status: "Approved",
-      uploadedAt: "2024-03-19T15:30:00Z",
-      updatedAt: "2024-03-20T09:15:00Z",
-      documents: ["document3.pdf", "document4.pdf"],
-    },
-  ]);
+  // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [loans, setLoans] = useState<LoanData[]>([]);
+
+  useEffect(() => {
+    getFieldExecutivesApi()?.then((res) => {
+      console.log(res)
+    })?.catch((err) => {
+      console.log(err)
+    });
+  }, []);
+
+  useEffect(() => {
+    getVerifierLoansApi()?.then((res: any) => {
+      setLoans(res?.data?.data ?? []);
+    })?.catch((err) => {
+      console.log(err)
+    });
+  }, []);
 
   const router = useRouter();
 
-  const filteredLoans = loans.filter((loan) =>
-    ["FVCompleted", "Approved", "Rejected"].includes(loan.status)
-  );
+  const filteredLoans = loans?.filter((loan) =>
+    ["Unassigned", "FVCompleted", "Approved", "Rejected"].includes(loan?.status ?? '')
+  ) ?? [];
 
-  const columns: ColumnsType<Loan> = [
+  const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",
       dataIndex: "applicationNumber",
       key: "applicationNumber",
       width: 150,
+      render: (text) => text ?? '-'
     },
     {
       title: "Applicant Name",
       dataIndex: "applicantName",
       key: "applicantName",
       width: 150,
+      render: (text) => text ?? '-'
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => {
+      render: (status?: string) => {
         let color = "blue";
         if (status === "Pending") color = "orange";
         else if (status === "Approved") color = "green";
         else if (status === "Rejected") color = "red";
-        return <Tag color={color}>{status}</Tag>;
+        return <Tag color={color}>{status ?? 'Unknown'}</Tag>;
       },
       width: 150,
     },
@@ -88,14 +89,14 @@ export default function Verify() {
       title: "Uploaded At",
       dataIndex: "uploadedAt",
       key: "uploadedAt",
-      render: (date: string) => dayjs(date).fromNow(),
+      render: (date?: string) => date ? dayjs(date).fromNow() : '-',
       width: 150,
     },
     {
       title: "Updated At",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date: string) => dayjs(date).fromNow(),
+      render: (date?: string) => date ? dayjs(date).fromNow() : '-',
       width: 150,
     },
     {
@@ -106,7 +107,7 @@ export default function Verify() {
         <Button
           type="link"
           icon={<EyeOutlined />}
-          onClick={() => router.push(`/verify/${record.id}`)}
+          onClick={() => record?.id && router?.push?.(`/verify/${record.id}`)}
         >
           View
         </Button>
@@ -122,12 +123,12 @@ export default function Verify() {
         <Table
           columns={columns}
           dataSource={filteredLoans}
-          rowKey="id"
+          rowKey={(record) => record?.id?.toString() ?? Math.random().toString()}
           loading={loading}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} items`,
+            showTotal: (total) => `Total ${total ?? 0} items`,
             position: ["bottomCenter"],
           }}
           size="small"

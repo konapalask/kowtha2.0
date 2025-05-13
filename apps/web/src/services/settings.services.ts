@@ -1,0 +1,31 @@
+import axiosInstance from "@/config/axios.config";
+
+export interface Organization {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface Office {
+   data: {
+    id: number;
+    name: string;
+    townCity: string;
+    address: string;
+    employees?: number;
+   }
+}
+
+export const getOrganizationApi = () => {
+  return axiosInstance.get<Organization>(`/org/organization`);
+};
+
+// export const updateOrganizationApi = (organization: Organization) => {
+//   return axiosInstance.put<Organization>(`/org/organization`, organization);
+// };
+
+export const getOfficesApi = () => {
+  return axiosInstance.get<Office[]>(`/org/offices`);
+};
+
+

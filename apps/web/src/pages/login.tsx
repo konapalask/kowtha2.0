@@ -60,9 +60,8 @@ export default function Login() {
         otp: values.otp,
       });
       if (result.status >= 200 && result.status < 300) {
-        console.log(result)
-        setCookie(ACCESS_TOKEN, result.data?.token, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
-        setCookie(REFRESH_TOKEN, "help", `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
         // setCookie(REFRESH_TOKEN, result.data.refreshToken);
         router.push("/dashboard");
@@ -84,23 +83,30 @@ export default function Login() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "var(--background-secondary)",
+        // background: "var(--background-secondary)",
         padding: "16px",
+        backgroundImage: "url('/images/loginBackground.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       <Card
         style={{
           width: "100%",
           maxWidth: "400px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          // boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           borderRadius: "8px",
+          // borderColor:"transparent",
           background: "var(--background-primary)",
+          // opacity: 0.2,
+          // background:"transparent"
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div style={{ textAlign: "center" }}>
             <div style={{ marginBottom: 16 }}>
               <Image
+                // src="/images/appLogos/KowthaLightIcon.png"
                 src="/images/appLogos/KowthaDarkIcon.png"
                 alt="Kowtha Logo"
                 width={300}
@@ -109,12 +115,12 @@ export default function Login() {
                 preview={false}
               />
             </div>
-            <Title
+            {/* <Title
               level={2}
               style={{ marginBottom: 8, color: "var(--primary-800)" }}
             >
               Loan Verification System
-            </Title>
+            </Title> */}
             <Text type="secondary" style={{ color: "var(--neutral-600)" }}>
               {otpSent
                 ? "Enter the OTP sent to your mobile"
