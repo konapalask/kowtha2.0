@@ -12,16 +12,16 @@ jobs:
     steps:
       - name: Pull latest code in app folder
         run: |
-          cd /home/ubuntu/kowtha
+          cd /home/ubuntu/kowtha/apps/backend/
           git pull origin development
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
-        working-directory: ./apps/backend
+        working-directory: /home/ubuntu/kowtha/apps/backend
 
       - name: Build backend
         run: npm run build
-        working-directory: ./apps/backend
+        working-directory: /home/ubuntu/kowtha/apps/backend
 
       - name: Restart PM2
         run: pm2 restart backend
