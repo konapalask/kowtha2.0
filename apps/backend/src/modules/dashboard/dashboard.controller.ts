@@ -12,42 +12,42 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
-  @Get('health-check')
-  @ApiOperation({ summary: 'Check server health status' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns server health status including database connectivity',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Health check completed successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            status: { type: 'string', enum: ['healthy', 'unhealthy'] },
-            timestamp: { type: 'string', format: 'date-time' },
-            services: {
-              type: 'object',
-              properties: {
-                database: { type: 'string', enum: ['connected', 'disconnected'] },
-                server: { type: 'string', enum: ['running'] }
-              }
-            },
-            error: { type: 'string', nullable: true }
-          }
-        }
-      }
-    }
-  })
-  async getHealthStatus() {
-    const result = await this.dashboardService.getHealthStatus();
-    return {
-      status: 200,
-      message: result.status === 'healthy' ? 'Health check completed successfully' : 'Health check failed',
-      data: result
-    };
-  }
+  // @Get('health-check')
+  // @ApiOperation({ summary: 'Check server health status' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Returns server health status including database connectivity',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       status: { type: 'number', example: 200 },
+  //       message: { type: 'string', example: 'Health check completed successfully' },
+  //       data: {
+  //         type: 'object',
+  //         properties: {
+  //           status: { type: 'string', enum: ['healthy', 'unhealthy'] },
+  //           timestamp: { type: 'string', format: 'date-time' },
+  //           services: {
+  //             type: 'object',
+  //             properties: {
+  //               database: { type: 'string', enum: ['connected', 'disconnected'] },
+  //               server: { type: 'string', enum: ['running'] }
+  //             }
+  //           },
+  //           error: { type: 'string', nullable: true }
+  //         }
+  //       }
+  //     }
+  //   }
+  // })
+  // async getHealthStatus() {
+  //   const result = await this.dashboardService.getHealthStatus();
+  //   return {
+  //     status: 200,
+  //     message: result.status === 'healthy' ? 'Health check completed successfully' : 'Health check failed',
+  //     data: result
+  //   };
+  // }
 
   @Get('metrics')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
