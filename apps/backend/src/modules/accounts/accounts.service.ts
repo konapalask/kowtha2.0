@@ -22,7 +22,7 @@ export class AccountsService {
     
     // Generate access token (expires in 1 hour)
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '1h'
+      expiresIn: '24h'
     });
 
     // Generate refresh token (expires in 7 days)
