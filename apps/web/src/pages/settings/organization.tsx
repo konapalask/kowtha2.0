@@ -248,7 +248,7 @@ export default function OrganizationSettings() {
 
         <TabPane tab="Offices" key="2">
           <Card>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 16 }} className="flex-end">
               <Button
                 type="primary"
                 icon={<PlusOutlined />}

@@ -430,8 +430,9 @@ export default function LoanVerifyDetails() {
     getVerificationData(id as string).then((res) => {
       // setFormData(data);
       // form.setFieldsValue(res?.data?.[0]?.verificationData)
-      setFormData(res?.data?.verifications?.[0]?.verificationData?.verificationData);
-      console.log(res?.data?.verifications?.[0]?.verificationData?.verificationData);
+      setFormData(res?.data?.verifications?.filter((item: any) => item.type === "PermanentAddress")?.[0]?.verificationData?.verificationData);
+      // console.log(res?.data?.verifications?.[0]?.verificationData?.verificationData);
+      console.log(res?.data?.verifications?.filter((item: any) => item.type === "PermanentAddress")?.[0]?.verificationData?.verificationData);
     });
   }, [id]);
 

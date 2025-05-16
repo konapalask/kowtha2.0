@@ -13,10 +13,18 @@ import LoginScreen from './src/screens/LoginScreen';
 import VerificationListScreen from './src/screens/VerificationListScreen';
 import VerificationItemScreen from './src/screens/VerificationItemScreen';
 import NetInfo from '@react-native-community/netinfo';
-import {View, Text, StyleSheet, Platform, StatusBar} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  StatusBar,
+  ActivityIndicator,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import WorkVerification from './src/screens/WorkVerification';
+import {getItem} from './src/helpers/utility';
 
 // Configure XMLHttpRequest
 
@@ -37,6 +45,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Subscribe to network state updates
@@ -44,11 +54,35 @@ const App = () => {
       setIsConnected(state.isConnected);
     });
 
+    // Check authentication state
+    const checkAuth = async () => {
+      try {
+        const accessToken = await getItem('accessToken');
+        const refreshToken = await getItem('refreshToken');
+        setIsAuthenticated(!!accessToken && !!refreshToken);
+      } catch (error) {
+        console.error('Error checking auth state:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
     // Cleanup subscription
     return () => {
       unsubscribe();
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#145886" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,7 +92,8 @@ const App = () => {
         </View>
       )}
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator
+          initialRouteName={isAuthenticated ? 'VerificationList' : 'Login'}>
           <Stack.Screen
             name="Login"
             component={LoginScreen}
@@ -68,7 +103,8 @@ const App = () => {
             name="VerificationList"
             component={VerificationListScreen}
             options={{
-              title: 'Verification List',
+              // title: 'Verification List',
+              headerShown: false,
               gestureEnabled: false,
               headerBackVisible: false,
             }}
@@ -78,9 +114,7 @@ const App = () => {
             component={VerificationItemScreen}
             options={({route}) => ({
               title: route.params?.item
-                ? `${route.params.item.name}, ${
-                    route.params.item.age
-                  } ${route.params.item.sex.charAt(0).toUpperCase()}`
+                ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
                 : 'Verification Details',
             })}
           />
@@ -120,6 +154,10 @@ const styles = StyleSheet.create({
   },
   offlineText: {
     color: '#fff',
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

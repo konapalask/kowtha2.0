@@ -1,6 +1,7 @@
 export type VerificationItem = {
   id: string;
   name: string;
+  applicationNumber: string;
   description: string;
 };
 
@@ -13,11 +14,14 @@ export type UploadedItem = {
 
 export type BasicDetailsFormData = {
   verificationType: string;
-  verificationDate: string;
-  verificationTime: string;
-  verificationMode: string;
-  verificationStatus: string;
-  verificationRemarks: string;
+  // verificationDate: string;
+  applicationNumber: string;
+  applicantName: string;
+  applicantMaritalStatus: string;
+  applicantMaritalStatusOther?: string;
+  educationQualification: string;
+  category: string;
+  categoryOther?: string;
 };
 
 export type ApplicantInformationFormData = {
@@ -29,10 +33,16 @@ export type ApplicantInformationFormData = {
 };
 
 export type AddressVerificationFormData = {
-  addressType: string;
+  address: string;
   addressCategory: string;
-  addressSubCategory: string;
   addressDetails: string;
+  numberOfYearsAtCurrentResidence: string;
+  previousAddress?: string;
+  previousAddressYears?: string;
+  numberOfYearsAtCurrentCity: string;
+  previousCity?: string;
+  numberOfYearsAtPreviousCity?: string;
+  reasonForChange?: string;
   geoTag: string;
 };
 
@@ -90,6 +100,5 @@ export type VerificationFormData = {
   familyEmploymentDetails: FamilyEmploymentDetailsFormData;
   thirdPartyCheck: ThirdPartyCheckFormData;
   finalObservations: FinalObservationsFormData;
-  section8: Record<string, any>;
   uploadedItems: UploadedItem[];
 };

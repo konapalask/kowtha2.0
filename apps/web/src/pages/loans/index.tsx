@@ -24,6 +24,7 @@ import {
   UploadOutlined,
   InfoCircleOutlined,
   UserOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
@@ -425,13 +426,31 @@ export default function Loans() {
   return (
     <DashboardLayout>
       <Card>
-        <div className="flex-end" style={{ marginBottom: 16 }}>
+        <div className="flex-end" style={{ marginBottom: 16, display: "flex", gap: "8px" }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            onClick={() => {
+              setSelectedLoan({} as Loan);
+              setIsDrawerVisible(true);
+            }}
+          >
+            Import Loan
+          </Button>
           <Button
             type="primary"
             icon={<UploadOutlined style={{ fontSize: 16 }} />}
             onClick={() => setIsImportModalVisible(true)}
           >
-            Import Loans
+            Bulk Import
+          </Button>
+          
+          <Button
+            type="primary"
+            icon={<UploadOutlined style={{ fontSize: 16 }} />}
+            onClick={() => setIsImportModalVisible(true)}
+          >
+           CSV/Excel Import
           </Button>
         </div>
 
@@ -507,8 +526,8 @@ export default function Loans() {
       <Drawer
         title={
           <span>
-            Loan Details - {selectedLoan?.applicationNumber}{" "}
-            {selectedLoan && (
+            Loan Details - {selectedLoan?.applicationNumber || "New Loan"}{" "}
+            {selectedLoan?.status && (
               <Tag
                 color={
                   selectedLoan.status === "Pending"
@@ -571,7 +590,7 @@ export default function Loans() {
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   Loan Information
                 </Typography.Title>
-                {/* {!editLoanInfo && (
+                {!editLoanInfo && (
                   <Button
                     type="link"
                     onClick={() => setEditLoanInfo(true)}
@@ -579,7 +598,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                )} */}
+                )}
               </div>
               {!editLoanInfo ? (
                 <Descriptions
@@ -589,35 +608,35 @@ export default function Loans() {
                   column={{ xxl: 3, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
                 >
                   <Descriptions.Item label="Application Number">
-                    {selectedLoan.applicationNumber}
+                    {selectedLoan?.applicationNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Applicant Name">
-                    {selectedLoan.applicantName}
+                    {selectedLoan?.applicantName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address">
-                    {selectedLoan.applicantAddress}
+                    {selectedLoan?.applicantAddress}
                   </Descriptions.Item>
                   <Descriptions.Item label="Loan Type">
-                    {selectedLoan.loanType}
+                    {selectedLoan?.loanType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Bank Name">
-                    {selectedLoan.bankName}
+                    {selectedLoan?.bankName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Uploaded At">
-                    {dayjs(selectedLoan.uploadedAt).format(
+                    {selectedLoan?.uploadedAt ? dayjs(selectedLoan.uploadedAt).format(
                       "YYYY-MM-DD HH:mm:ss"
-                    )}
+                    ) : "-"}
                   </Descriptions.Item>
                 </Descriptions>
               ) : (
                 <Form
                   layout="vertical"
                   initialValues={{
-                    applicationNumber: selectedLoan.applicationNumber,
-                    applicantName: selectedLoan.applicantName,
-                    applicantAddress: selectedLoan.applicantAddress,
-                    loanType: selectedLoan.loanType,
-                    bankName: selectedLoan.bankName,
+                    applicationNumber: selectedLoan?.applicationNumber,
+                    applicantName: selectedLoan?.applicantName,
+                    applicantAddress: selectedLoan?.applicantAddress,
+                    loanType: selectedLoan?.loanType,
+                    bankName: selectedLoan?.bankName,
                   }}
                   onFinish={handleLoanInfoSave}
                 >
@@ -708,7 +727,7 @@ export default function Loans() {
                       },
                       { label: "Work", type: "Work", merged: false },
                     ].map(({ label, type, merged }) => {
-                      const verification = selectedLoan.verifications.find(
+                      const verification = selectedLoan?.verifications?.find(
                         (v: any) =>
                           merged
                             ? v.type === "PermanentAddress" ||
@@ -858,7 +877,7 @@ export default function Loans() {
                     })
                   : ["PermanentAddress", "CurrentAddress", "Work"].map(
                       (type) => {
-                        const verification = selectedLoan.verifications.find(
+                        const verification = selectedLoan?.verifications?.find(
                           (v: any) => v.type === type
                         );
                         return (

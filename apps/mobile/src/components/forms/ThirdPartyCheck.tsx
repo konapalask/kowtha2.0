@@ -63,7 +63,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
       <ScrollView>
         <Controller
           control={control}
-          rules={{required: 'TPC/Neighbor name is required'}}
+          // rules={{required: 'TPC/Neighbor name is required'}}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Name of TPC/Neighbor*</Text>
@@ -83,7 +83,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
 
         <Controller
           control={control}
-          rules={{required: 'Relationship is required'}}
+          // rules={{required: 'Relationship is required'}}
           render={({field: {value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Relationship to Applicant*</Text>
@@ -106,7 +106,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
 
         <Controller
           control={control}
-          rules={{required: 'Feedback status is required'}}
+          // rules={{required: 'Feedback status is required'}}
           render={({field: {value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Feedback Status*</Text>
@@ -129,7 +129,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
 
         <Controller
           control={control}
-          rules={{required: 'Comments/Remarks is required'}}
+          // rules={{required: 'Comments/Remarks is required'}}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Comments/Remarks*</Text>
