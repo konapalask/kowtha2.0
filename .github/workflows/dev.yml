@@ -10,8 +10,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Pull latest code in app folder
+        run: |
+          cd /home/ubuntu/kowtha
+          git pull origin development
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
