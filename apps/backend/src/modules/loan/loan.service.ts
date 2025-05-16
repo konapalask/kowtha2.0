@@ -6,8 +6,11 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
 import { Logger } from '@nestjs/common';
 import * as htmlPdf from 'html-pdf-node';
+import PDFDocument = require('pdfkit');
 import * as fs from 'fs';
 import * as path from 'path';
+import { EditLoanDto } from './dto/edit-loan.dto';
+import { EditVerificationDto } from './dto/edit-verification.dto';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -608,39 +611,125 @@ export class LoanService {
 
   async generateLoanPDF(loanId: number): Promise<Buffer> {
     try {
-      // Fetch loan details with all related data
+      // Fetch only necessary loan details
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
-        include: {
-          operationsExecutive: true,
-          office: true,
+        select: {
+          applicationNumber: true,
+          applicantName: true,
+          applicantMobile: true,
+          applicantAddress: true,
+          loanType: true,
+          bankName: true,
+          loanAmount: true,
+          status: true,
+          office: { select: { name: true } },
+          operationsExecutive: { select: { name: true } },
           verifications: {
-            include: {
-              fieldExecutive: true,
-            },
+            select: {
+              type: true,
+              status: true,
+              updatedAt: true,
+              fieldExecutive: { select: { name: true } }
+            }
           },
-          verificationReport: true,
-          documents: true,
-        },
+          verificationReport: { select: { remarks: true, verificationDate: true } },
+          documents: { select: { type: true, url: true } }
+        }
       });
 
       if (!loan) {
         throw new NotFoundException('Loan not found');
       }
 
-      // Create HTML template
       const htmlTemplate = `
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="utf-8">
           <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .section { margin-bottom: 20px; }
-            .section-title { font-weight: bold; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f5f5f5; }
+            body {
+              font-family: Arial, sans-serif;
+              margin: 40px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #2c3e50;
+              padding-bottom: 20px;
+            }
+            .header h1 {
+              color: #2c3e50;
+              margin: 0;
+              font-size: 24px;
+            }
+            .header p {
+              color: #7f8c8d;
+              margin: 10px 0 0;
+            }
+            .section {
+              margin-bottom: 30px;
+              background: #fff;
+              padding: 20px;
+              border-radius: 5px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .section-title {
+              color: #2c3e50;
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 15px;
+              padding-bottom: 10px;
+              border-bottom: 1px solid #eee;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            th, td {
+              padding: 12px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+            }
+            th {
+              background-color: #f8f9fa;
+              color: #2c3e50;
+              font-weight: bold;
+            }
+            tr:nth-child(even) {
+              background-color: #f8f9fa;
+            }
+            .status {
+              display: inline-block;
+              padding: 5px 10px;
+              border-radius: 3px;
+              font-size: 12px;
+              font-weight: bold;
+            }
+            .status-pending { background-color: #ffeeba; color: #856404; }
+            .status-completed { background-color: #d4edda; color: #155724; }
+            .status-rejected { background-color: #f8d7da; color: #721c24; }
+            .document-list {
+              list-style: none;
+              padding: 0;
+            }
+            .document-list li {
+              padding: 8px 0;
+              border-bottom: 1px solid #eee;
+            }
+            .document-list li:last-child {
+              border-bottom: none;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #7f8c8d;
+              font-size: 12px;
+              border-top: 1px solid #eee;
+              padding-top: 20px;
+            }
           </style>
         </head>
         <body>
@@ -652,60 +741,103 @@ export class LoanService {
           <div class="section">
             <div class="section-title">Applicant Information</div>
             <table>
-              <tr><th>Name</th><td>${loan.applicantName}</td></tr>
-              <tr><th>Mobile</th><td>${loan.applicantMobile}</td></tr>
-              <tr><th>Address</th><td>${loan.applicantAddress}</td></tr>
-              <tr><th>Loan Type</th><td>${loan.loanType}</td></tr>
-              <tr><th>Bank Name</th><td>${loan.bankName}</td></tr>
-              <tr><th>Loan Amount</th><td>₹${loan.loanAmount}</td></tr>
-              <tr><th>Status</th><td>${loan.status}</td></tr>
+              <tr>
+                <th>Name</th>
+                <td>${loan.applicantName}</td>
+              </tr>
+              <tr>
+                <th>Mobile</th>
+                <td>${loan.applicantMobile}</td>
+              </tr>
+              <tr>
+                <th>Address</th>
+                <td>${loan.applicantAddress}</td>
+              </tr>
+              <tr>
+                <th>Loan Type</th>
+                <td>${loan.loanType}</td>
+              </tr>
+              <tr>
+                <th>Bank Name</th>
+                <td>${loan.bankName}</td>
+              </tr>
+              <tr>
+                <th>Loan Amount</th>
+                <td>₹${loan.loanAmount}</td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td><span class="status status-${loan.status.toLowerCase()}">${loan.status}</span></td>
+              </tr>
             </table>
           </div>
 
           <div class="section">
             <div class="section-title">Office & Executive Details</div>
             <table>
-              <tr><th>Office</th><td>${loan.office?.name || 'N/A'}</td></tr>
-              <tr><th>Operations Executive</th><td>${loan.operationsExecutive?.name || 'N/A'}</td></tr>
+              <tr>
+                <th>Office</th>
+                <td>${loan.office?.name || 'N/A'}</td>
+              </tr>
+              <tr>
+                <th>Operations Executive</th>
+                <td>${loan.operationsExecutive?.name || 'N/A'}</td>
+              </tr>
             </table>
           </div>
 
-          <div class="section">
-            <div class="section-title">Verification Details</div>
-            <table>
-              <tr>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Field Executive</th>
-                <th>Completed Date</th>
-              </tr>
-              ${loan.verifications.map(v => `
+          ${loan.verifications.length > 0 ? `
+            <div class="section">
+              <div class="section-title">Verification Details</div>
+              <table>
                 <tr>
-                  <td>${v.type}</td>
-                  <td>${v.status}</td>
-                  <td>${v.fieldExecutive?.name || 'N/A'}</td>
-                  <td>${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString() : 'N/A'}</td>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Field Executive</th>
+                  <th>Completed Date</th>
                 </tr>
-              `).join('')}
-            </table>
-          </div>
+                ${loan.verifications.map(v => `
+                  <tr>
+                    <td>${v.type}</td>
+                    <td><span class="status status-${v.status.toLowerCase()}">${v.status}</span></td>
+                    <td>${v.fieldExecutive?.name || 'N/A'}</td>
+                    <td>${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString() : 'N/A'}</td>
+                  </tr>
+                `).join('')}
+              </table>
+            </div>
+          ` : ''}
 
           ${loan.verificationReport ? `
             <div class="section">
               <div class="section-title">Verification Report</div>
-              <p>${loan.verificationReport.remarks || 'No remarks'}</p>
-              <p>Verification Date: ${new Date(loan.verificationReport.verificationDate).toLocaleDateString()}</p>
+              <table>
+                <tr>
+                  <th>Remarks</th>
+                  <td>${loan.verificationReport.remarks || 'No remarks'}</td>
+                </tr>
+                <tr>
+                  <th>Verification Date</th>
+                  <td>${new Date(loan.verificationReport.verificationDate).toLocaleDateString()}</td>
+                </tr>
+              </table>
             </div>
           ` : ''}
 
           ${loan.documents.length > 0 ? `
             <div class="section">
               <div class="section-title">Supporting Documents</div>
-              <ul>
-                ${loan.documents.map(doc => `<li>${doc.type}: ${doc.url}</li>`).join('')}
+              <ul class="document-list">
+                ${loan.documents.map(doc => `
+                  <li>${doc.type}: ${doc.url}</li>
+                `).join('')}
               </ul>
             </div>
           ` : ''}
+
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()}</p>
+          </div>
         </body>
         </html>
       `;
@@ -715,6 +847,7 @@ export class LoanService {
         format: 'A4',
         margin: { top: 20, right: 20, bottom: 20, left: 20 },
         printBackground: true,
+        preferCSSPageSize: true
       };
 
       const file = { content: htmlTemplate };
@@ -877,6 +1010,141 @@ export class LoanService {
         loanId,
         error: error.message,
         stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async createLoans(data: CreateLoanDto[]) {
+    try {
+      const results = {
+        successful: [],
+        failed: [],
+        totalProcessed: data.length,
+        successfulCount: 0,
+        failedCount: 0
+      };
+
+      // Process each loan creation
+      for (const loanData of data) {
+        try {
+          const loan = await this.createLoan(loanData);
+          results.successful.push({
+            loanId: loan.id,
+            applicationNumber: loan.applicationNumber,
+            status: 'success'
+          });
+          results.successfulCount++;
+        } catch (error) {
+          results.failed.push({
+            data: loanData,
+            error: error.message
+          });
+          results.failedCount++;
+        }
+      }
+
+      await this.loggingService.info('Bulk loan creation completed', {
+        totalProcessed: results.totalProcessed,
+        successful: results.successfulCount,
+        failed: results.failedCount
+      });
+
+      return results;
+    } catch (error) {
+      await this.loggingService.error('Failed to create loans in bulk', {
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async editLoan(loanId: number, editLoanDto: EditLoanDto) {
+    try {
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+      });
+
+      if (!loan) {
+        await this.loggingService.warn('Loan edit failed - Loan not found', { loanId });
+        throw new NotFoundException('Loan not found');
+      }
+
+      const updatedLoan = await this.prisma.loan.update({
+        where: { id: loanId },
+        data: {
+          ...editLoanDto,
+          updatedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info('Loan updated successfully', {
+        loanId,
+        updatedFields: Object.keys(editLoanDto),
+      });
+
+      return updatedLoan;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to edit loan', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async editVerificationData(
+    loanId: number,
+    verificationType: VerificationType,
+    editVerificationDto: EditVerificationDto,
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Verification edit failed - Verification not found', {
+          loanId,
+          verificationType,
+        });
+        throw new NotFoundException('Verification not found');
+      }
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          ...editVerificationDto,
+          updatedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info('Verification data updated successfully', {
+        loanId,
+        verificationType,
+        updatedFields: Object.keys(editVerificationDto),
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to edit verification data', {
+        loanId,
+        verificationType,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }
