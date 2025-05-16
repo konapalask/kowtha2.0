@@ -14,7 +14,7 @@ import { signIn, useSession } from "next-auth/react";
 import { MobileOutlined, LockOutlined } from "@ant-design/icons";
 // import Image from "next/image";
 import { generateOtpApi, verifyOtpApi } from "@/services/auth.services";
-import { setCookie } from "@/helpers/localStorage";
+import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 
 const { Title, Text } = Typography;
@@ -60,10 +60,13 @@ export default function Login() {
         otp: values.otp,
       });
       if (result.status >= 200 && result.status < 300) {
+        console.log(process.env.NEXT_PUBLIC_DOMAIN)
         setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
         // setCookie(REFRESH_TOKEN, result.data.refreshToken);
+        console.log(getCookie(ACCESS_TOKEN))
+        console.log(getCookie(REFRESH_TOKEN))
         router.push("/dashboard");
       } else {
         message.error(result.data?.message || "Failed to verify OTP");
