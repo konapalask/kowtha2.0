@@ -82,7 +82,7 @@ export const getVerifierLoansApi = () => {
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {
-  return axiosInstance.post<Verification>(`/loans/${loanId}/assign`, payload);
+  return axiosInstance.post<Verification>(`/loans/${loanId}/assign-field-executive`, payload);
 };
 
 export const getExecutivesApi = () => {
@@ -91,4 +91,8 @@ export const getExecutivesApi = () => {
 
 export const getFieldExecutivesApi = () => {
   return axiosInstance.get< any[]>(`/loans/field-executive`);
+};
+
+export const createLoanApi = (payload: any) => {
+  return axiosInstance.post<any>(`/loans`, payload);
 };
