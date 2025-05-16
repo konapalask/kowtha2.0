@@ -8,8 +8,9 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  ImageBackground,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {CommonActions, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import {requestAllPermissions} from '../utils/permissions';
@@ -19,6 +20,7 @@ import {colors} from '../constants/colors';
 import KowthaLightIcon from '../assets/Images/KowthaLightIcon.png';
 import KowthaDarkIcon from '../assets/Images/KowthaDarkIcon.png';
 import Toast from 'react-native-toast-message';
+import loginBackground from '../assets/Images/loginBackground.jpg';
 // import {REACT_APP_BASE_URL} from '@env';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -78,7 +80,13 @@ const LoginScreen = () => {
 
       // Request all permissions after successful login
       await requestAllPermissions();
-      navigation.navigate('VerificationList');
+      // navigation.navigate('VerificationList');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'VerificationList'}],
+        }),
+      );
     } catch (error: any) {
       Alert.alert(
         'Error',
@@ -91,68 +99,82 @@ const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Image source={KowthaDarkIcon} style={styles.logo} resizeMode="contain" />
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Mobile Number"
-        value={mobileNumber}
-        onChangeText={setMobileNumber}
-        keyboardType="phone-pad"
-        maxLength={10}
-        placeholderTextColor={'#c8c8c8'}
-        editable={!loading}
-      />
-      {!showOtpInput ? (
-        <TouchableOpacity
-          style={[styles.button, loading && styles.disabledButton]}
-          onPress={handleSendOtp}
-          disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Send OTP</Text>
-          )}
-        </TouchableOpacity>
-      ) : (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter OTP"
-            value={otp}
-            onChangeText={setOtp}
-            keyboardType="number-pad"
-            maxLength={6}
-            placeholderTextColor={'#c8c8c8'}
-            editable={!loading}
-          />
+    <ImageBackground
+      source={loginBackground}
+      style={styles.background}
+      resizeMode="cover">
+      <View style={styles.container}>
+        <Image
+          source={KowthaDarkIcon}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>Login</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Mobile Number"
+          value={mobileNumber}
+          onChangeText={setMobileNumber}
+          keyboardType="phone-pad"
+          maxLength={10}
+          placeholderTextColor={'#c8c8c8'}
+          editable={!loading}
+        />
+        {!showOtpInput ? (
           <TouchableOpacity
             style={[styles.button, loading && styles.disabledButton]}
-            onPress={handleVerifyOtp}
+            onPress={handleSendOtp}
             disabled={loading}>
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Verify OTP</Text>
+              <Text style={styles.buttonText}>Send OTP</Text>
             )}
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.resendButton, loading && styles.disabledButton]}
-            onPress={() => {
-              setOtp('');
-              handleSendOtp();
-            }}
-            disabled={loading}>
-            <Text style={styles.resendButtonText}>Resend OTP</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
+        ) : (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter OTP"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              maxLength={6}
+              placeholderTextColor={'#c8c8c8'}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={[styles.button, loading && styles.disabledButton]}
+              onPress={handleVerifyOtp}
+              disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Verify OTP</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.resendButton, loading && styles.disabledButton]}
+              onPress={() => {
+                setOtp('');
+                handleSendOtp();
+              }}
+              disabled={loading}>
+              <Text style={styles.resendButtonText}>Resend OTP</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

@@ -195,11 +195,19 @@ export default function Login() {
                 block
                 loading={loading}
                 style={{
-                  height: "40px",
-                  borderRadius: "6px",
-                  background: "var(--primary-800)",
+                  // height: "40px",
+                  // borderRadius: "6px",
+                  // background: "var(--primary-700)",
+                  // border: "none",
+                  // color: "#fff",
+                  background: "#F37920",
+                  color: "white",
                   border: "none",
-                  color: "#fff",
+                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  cursor: "pointer",
                 }}
               >
                 {otpSent ? "Verify OTP" : "Send OTP"}

@@ -1,10 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import {getItem} from '../helpers/utility';
 import {getFieldData, getUserDetails} from '../services/field.services';
+import Settings from '../components/Settings';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -14,14 +22,15 @@ type VerificationListScreenNavigationProp = NativeStackNavigationProp<
 interface VerificationItem {
   id: string;
   applicantName: string;
-  age: number;
-  sex: string;
-  address: string;
-  status: 'Pending' | 'In Progress' | 'Completed';
-  verificationType: 'CurrentAddress' | 'PermanentAddress' | 'Work';
-  verifications: Array<{
+  age?: number;
+  sex?: string;
+  applicationNumber?: string;
+  applicantAddress?: string;
+  verification: {
+    id: string;
     type: 'CurrentAddress' | 'PermanentAddress' | 'Work';
-  }>;
+    status: 'Pending' | 'In Progress' | 'Completed';
+  };
 }
 
 // Dummy data
@@ -51,20 +60,49 @@ const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
   const [data, setData] = useState<VerificationItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const response = await getFieldData();
+      // setData(response?.data?.data);
+      // console.log(response?.data?.data);
+      const transformedData = response?.data?.data?.reduce(
+        (acc: any[], curr: any) => {
+          const {verifications, ...rest} = curr;
+          const verificationItems = verifications.map((verification: any) => ({
+            ...rest,
+            verification: verification,
+          }));
+          return [...acc, ...verificationItems];
+        },
+        [],
+      );
+      setData(transformedData);
+      console.log(transformedData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   useEffect(() => {
-    getFieldData().then((response: any) => {
-      console.log(response?.data?.data);
-      setData(response?.data?.data);
-    });
-  }, []);
+    if (refreshing || data.length === 0) {
+      fetchData();
+    }
+  }, [refreshing]);
 
-  const filterOptions = ['All', 'Pending', 'In Progress', 'Completed'];
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  const filterOptions = ['All', 'Pending', 'Completed'];
 
   const filteredData =
     selectedFilter === 'All'
       ? data
-      : data.filter(item => item.status === selectedFilter);
+      : data.filter(item => item.verification.status === selectedFilter);
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
@@ -74,6 +112,8 @@ const VerificationListScreen = () => {
         return '#1E90FF';
       case 'Completed':
         return '#32CD32';
+      case 'All':
+        return '#9370DB';
       default:
         return '#666';
     }
@@ -81,14 +121,27 @@ const VerificationListScreen = () => {
 
   const getVerificationTypeColor = (type: string) => {
     switch (type) {
-      case 'Current Address':
+      case 'CurrentAddress':
         return '#4A90E2';
-      case 'Permanent Address':
+      case 'PermanentAddress':
         return '#50C878';
-      case 'Work Address':
+      case 'Work':
         return '#FF6B6B';
       default:
         return '#666';
+    }
+  };
+
+  const getVerificationTypeLabel = (type: string) => {
+    switch (type) {
+      case 'CurrentAddress':
+        return 'Current Address';
+      case 'PermanentAddress':
+        return 'Permanent Address';
+      case 'Work':
+        return 'Work Address';
+      default:
+        return type;
     }
   };
 
@@ -99,7 +152,14 @@ const VerificationListScreen = () => {
           key={option}
           style={[
             styles.filterBadge,
-            selectedFilter === option && styles.selectedFilterBadge,
+            selectedFilter === option && [
+              styles.selectedFilterBadge,
+              {
+                backgroundColor: getProgressColor(option),
+                borderColor: getProgressColor(option),
+              },
+            ],
+            ,
           ]}
           onPress={() => setSelectedFilter(option)}>
           <Text
@@ -115,81 +175,83 @@ const VerificationListScreen = () => {
   );
 
   const renderItem = ({item}: {item: VerificationItem}) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => {
+        const baseNavPayload = {
+          name: item.applicantName,
+          age: item.age,
+          sex: item.sex,
+          id: item.id,
+          applicationNumber: item.applicationNumber, // Main application ID
+        };
+
+        if (item.verification.type === 'Work') {
+          navigation.navigate('WorkVerification', {
+            item: baseNavPayload,
+            verificationType: 'Work', // Explicitly 'Work'
+          });
+        } else {
+          // Types for VerificationItemScreen are 'CurrentAddress' or 'PermanentAddress'
+          navigation.navigate('VerificationItemScreen', {
+            item: baseNavPayload,
+            verificationType: item.verification.type, // This will be 'CurrentAddress' or 'PermanentAddress'
+          });
+        }
+      }}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.applicantName}</Text>
         <View
           style={[
-            styles.verificationTypeTag,
-            {backgroundColor: getVerificationTypeColor(item.verificationType)},
+            styles.progressTag,
+            {
+              backgroundColor: getProgressColor(item.verification.status),
+            },
           ]}>
-          <Text style={styles.verificationTypeText}>
-            {item.verificationType}
-          </Text>
+          <Text style={styles.progressText}>{item.verification.status}</Text>
         </View>
       </View>
       <View style={styles.detailsRow}>
         <View style={styles.leftDetails}>
-          <Text style={styles.details}>Age: {item.age}</Text>
-          <Text style={styles.details}>Sex: {item.sex}</Text>
-        </View>
-        <View
-          style={[
-            styles.progressTag,
-            {backgroundColor: getProgressColor(item.status)},
-          ]}>
-          <Text style={styles.progressText}>{item.status}</Text>
+          <Text style={styles.details}>{item.applicationNumber}</Text>
+          <Text style={styles.details}>
+            Verification Type: {item.verification.type}
+          </Text>
         </View>
       </View>
-      <Text style={styles.details}>Address: {item.address}</Text>
-      <View style={styles.verificationButtonsContainer}>
-        {item.verifications.map((verification, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.verificationButton,
-              {backgroundColor: getVerificationTypeColor(verification.type)},
-            ]}
-            onPress={() => {
-              if (verification.type === 'Work') {
-                navigation.navigate('WorkVerification', {
-                  item: {
-                    name: item.applicantName || 'bheem',
-                    age: item.age || 23,
-                    sex: item.sex || 'Male',
-                    id: item.id,
-                  },
-                  verificationType: verification.type,
-                });
-              } else {
-                navigation.navigate('VerificationItemScreen', {
-                  item: {
-                    name: item.applicantName || 'bheem',
-                    age: item.age || 23,
-                    sex: item.sex || 'Male',
-                    id: item.id,
-                  },
-                  verificationType: verification.type,
-                });
-              }
-            }}>
-            <Text style={styles.verificationButtonText}>
-              {verification.type}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+      <Text style={styles.details}>Address: {item.applicantAddress}</Text>
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Verification List</Text>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'flex-end',
+            elevation: 1000,
+            zIndex: 1000,
+          }}>
+          <Settings />
+        </View>
+      </View>
       {renderFilterOptions()}
       <FlatList
         data={filteredData}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.verification.id}
+        // keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#007AFF']}
+            tintColor="#007AFF"
+          />
+        }
       />
     </View>
   );
@@ -199,6 +261,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   list: {
     padding: 16,
@@ -278,8 +353,8 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   selectedFilterBadge: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    // backgroundColor: '#007AFF',
+    // borderColor: '#007AFF',
   },
   filterText: {
     fontSize: 14,
@@ -300,11 +375,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flex: 1,
     alignItems: 'center',
+    borderWidth: 1,
+    // borderColor: '#666',
   },
   verificationButtonText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+    textAlign: 'center',
+    // borderColor: '#666',
+    // borderWidth: 1,
+    // borderRadius: 8,
   },
 });
 

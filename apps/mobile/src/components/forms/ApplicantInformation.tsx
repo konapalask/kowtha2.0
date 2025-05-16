@@ -17,7 +17,7 @@ const ApplicantInformation: React.FC<ApplicantInformationProps> = ({data}) => {
         </View>
       </View>
 
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <Text style={styles.label}>Applicant Age</Text>
         <View style={styles.readOnlyField}>
           <Text style={styles.readOnlyText}>{data.applicantAge}</Text>
@@ -29,7 +29,7 @@ const ApplicantInformation: React.FC<ApplicantInformationProps> = ({data}) => {
         <View style={styles.readOnlyField}>
           <Text style={styles.readOnlyText}>{data.applicantGender}</Text>
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Marital Status</Text>

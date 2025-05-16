@@ -38,13 +38,14 @@ import {submitVerification} from '../services/field.services';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  'VerificationItem'
+  'VerificationItemScreen'
 >;
 
 const VerificationItemScreen = () => {
   const navigation = useNavigation<VerificationItemScreenNavigationProp>();
   const route = useRoute();
   const {item} = route.params as {item: VerificationItem};
+  const {verificationType} = route.params as {verificationType: string};
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
@@ -62,9 +63,9 @@ const VerificationItemScreen = () => {
   const [validSections, setValidSections] = useState<{
     [key: string]: boolean;
   }>({
-    basicDetails: true,
+    basicDetails: false,
     photoCapture: false,
-    applicantInformation: true,
+    applicantInformation: false,
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
@@ -74,12 +75,12 @@ const VerificationItemScreen = () => {
 
   const [formData, setFormData] = useState<VerificationFormData>({
     basicDetails: {
-      verificationType: '',
-      verificationDate: '',
-      verificationTime: '',
-      verificationMode: '',
-      verificationStatus: '',
-      verificationRemarks: '',
+      verificationType: verificationType,
+      applicationNumber: item?.applicationNumber,
+      applicantName: item.name,
+      applicantMaritalStatus: '',
+      educationQualification: '',
+      category: '',
     },
     applicantInformation: {
       applicantName: '',
@@ -89,11 +90,12 @@ const VerificationItemScreen = () => {
       applicantEducation: '',
     },
     addressVerification: {
-      addressType: '',
       addressCategory: '',
-      addressSubCategory: '',
       addressDetails: '',
       geoTag: '',
+      address: '',
+      numberOfYearsAtCurrentResidence: '',
+      numberOfYearsAtCurrentCity: '',
     },
     residenceDetails: {
       residenceStatus: '',
@@ -107,7 +109,6 @@ const VerificationItemScreen = () => {
       houseArea: '',
       yearsAtCurrentAddress: '',
       nameplateVisible: '',
-      // politicalSymbolVisible: '',
     },
     familyEmploymentDetails: {
       totalFamilyMembers: '',
@@ -128,7 +129,6 @@ const VerificationItemScreen = () => {
       overallStatus: '',
       remarks: '',
     },
-    section8: {},
     uploadedItems: [],
   });
 
@@ -148,6 +148,7 @@ const VerificationItemScreen = () => {
       ...prev,
       basicDetails: true,
     }));
+    setExpandedSections(prev => ({...prev, basicDetails: false}));
   };
 
   const handleApplicantInformationSubmit = (
@@ -161,6 +162,7 @@ const VerificationItemScreen = () => {
       ...prev,
       applicantInformation: true,
     }));
+    setExpandedSections(prev => ({...prev, applicantInformation: false}));
   };
 
   const handleAddressVerificationSubmit = (
@@ -174,6 +176,7 @@ const VerificationItemScreen = () => {
       ...prev,
       addressVerification: true,
     }));
+    setExpandedSections(prev => ({...prev, addressVerification: false}));
   };
 
   const handleResidenceDetailsSubmit = (data: ResidenceDetailsFormData) => {
@@ -185,6 +188,7 @@ const VerificationItemScreen = () => {
       ...prev,
       residenceDetails: true,
     }));
+    setExpandedSections(prev => ({...prev, residenceDetails: false}));
   };
 
   const handleFamilyEmploymentDetailsSubmit = (
@@ -198,6 +202,7 @@ const VerificationItemScreen = () => {
       ...prev,
       familyEmploymentDetails: true,
     }));
+    setExpandedSections(prev => ({...prev, familyEmploymentDetails: false}));
   };
 
   const handleThirdPartyCheckSubmit = (data: ThirdPartyCheckFormData) => {
@@ -209,6 +214,7 @@ const VerificationItemScreen = () => {
       ...prev,
       thirdPartyCheck: true,
     }));
+    setExpandedSections(prev => ({...prev, thirdPartyCheck: false}));
   };
 
   const handleFinalObservationsSubmit = (data: FinalObservationsFormData) => {
@@ -220,6 +226,7 @@ const VerificationItemScreen = () => {
       ...prev,
       finalObservations: true,
     }));
+    setExpandedSections(prev => ({...prev, finalObservations: false}));
   };
 
   const handleUploadedItemsChange = (items: UploadedItem[]) => {
@@ -236,30 +243,13 @@ const VerificationItemScreen = () => {
 
   const handleSubmit = async () => {
     try {
-      // Check if all sections are valid
-      const allSectionsValid = Object.values(validSections).every(
-        isValid => isValid,
-      );
-
-      if (!allSectionsValid) {
-        Toast.show({
-          type: 'error',
-          text1: 'Validation Error',
-          text2: 'Please complete all sections',
-        });
-        return;
-      }
-
       const finalData = {
         verificationType: 'PermanentAddress',
         findings: 'Verification Findings Text',
         verificationData: formData,
-        // uploadedItems,
       };
 
       console.log('Submitting form data:', finalData);
-      // await api.submitVerification(finalData);
-
       await submitVerification(
         {
           verificationType: 'PermanentAddress',
@@ -285,16 +275,19 @@ const VerificationItemScreen = () => {
           isExpanded={expandedSections.basicDetails}
           onToggle={() => toggleSection('basicDetails')}
           isValid={validSections.basicDetails}>
-          <BasicDetails data={formData.basicDetails} />
+          <BasicDetails
+            initialData={formData.basicDetails}
+            onSubmit={handleBasicDetailsSubmit}
+          />
         </CollapsibleSection>
 
-        <CollapsibleSection
+        {/* <CollapsibleSection
           title="Applicant Information"
           isExpanded={expandedSections.applicantInformation}
           onToggle={() => toggleSection('applicantInformation')}
           isValid={validSections.applicantInformation}>
           <ApplicantInformation data={formData.applicantInformation} />
-        </CollapsibleSection>
+        </CollapsibleSection> */}
 
         <CollapsibleSection
           title="Address Verification"
@@ -351,7 +344,7 @@ const VerificationItemScreen = () => {
           />
         </CollapsibleSection>
 
-        <CollapsibleSection
+        {/* <CollapsibleSection
           title="Final Observations"
           isExpanded={expandedSections.finalObservations}
           onToggle={() => toggleSection('finalObservations')}
@@ -360,7 +353,7 @@ const VerificationItemScreen = () => {
             onSubmit={handleFinalObservationsSubmit}
             initialData={formData.finalObservations}
           />
-        </CollapsibleSection>
+        </CollapsibleSection> */}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit Verification</Text>

@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    flex: 1,
+    // flex: 1,
   },
   checkIcon: {
     marginLeft: 8,

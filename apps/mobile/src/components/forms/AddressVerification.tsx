@@ -7,7 +7,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import {useForm, Controller} from 'react-hook-form';
+import {useForm, Controller, useWatch} from 'react-hook-form';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {AddressVerificationFormData} from '../../types/verification';
 import {colors} from '../../constants/colors';
@@ -29,31 +29,44 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
     formState: {errors},
   } = useForm<AddressVerificationFormData>({
     defaultValues: initialData || {
-      addressType: '',
+      address: '',
       addressCategory: '',
-      addressSubCategory: '',
       addressDetails: '',
+      numberOfYearsAtCurrentResidence: '',
+      previousAddress: '',
+      previousAddressYears: '',
+      numberOfYearsAtCurrentCity: '',
+      previousCity: '',
+      numberOfYearsAtPreviousCity: '',
+      reasonForChange: '',
       geoTag: '',
     },
   });
 
-  const addressTypeSheetRef = useRef<ActionSheetRef>(null);
+  const addressSheetRef = useRef<ActionSheetRef>(null);
   const addressCategorySheetRef = useRef<ActionSheetRef>(null);
-  const addressSubCategorySheetRef = useRef<ActionSheetRef>(null);
+  const yearsAtResidenceSheetRef = useRef<ActionSheetRef>(null);
+  const yearsInCitySheetRef = useRef<ActionSheetRef>(null);
 
   const addressTypes = ['Residence', 'Office', 'Business', 'Other'];
   const addressCategories = ['Urban', 'Rural', 'Semi-Urban'];
-  const addressSubCategories = [
-    'Metropolitan',
-    'City',
-    'Town',
-    'Village',
-    'Industrial Area',
-    'Commercial Area',
-  ];
+  const yearsAtResidenceOptions: Array<
+    AddressVerificationFormData['numberOfYearsAtCurrentResidence']
+  > = ['<=1year', '1-3 years', '3-5 years', '>5 years'];
+  const yearsInCityOptions: Array<
+    AddressVerificationFormData['numberOfYearsAtCurrentCity']
+  > = ['<=3 years', '>3 years'];
+
+  const watchedNumberOfYearsAtCurrentResidence = useWatch({
+    control,
+    name: 'numberOfYearsAtCurrentResidence',
+  });
+  const watchedNumberOfYearsAtCurrentCity = useWatch({
+    control,
+    name: 'numberOfYearsAtCurrentCity',
+  });
 
   useEffect(() => {
-    // Request location permission and get coordinates
     Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
@@ -67,37 +80,41 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
     );
   }, [setValue]);
 
-  const showAddressTypeSheet = () => {
-    addressTypeSheetRef.current?.show();
+  const showAddressSheet = () => {
+    addressSheetRef.current?.show();
   };
 
   const showAddressCategorySheet = () => {
     addressCategorySheetRef.current?.show();
   };
 
-  const showAddressSubCategorySheet = () => {
-    addressSubCategorySheetRef.current?.show();
+  const showYearsAtResidenceSheet = () => {
+    yearsAtResidenceSheetRef.current?.show();
+  };
+
+  const showYearsInCitySheet = () => {
+    yearsInCitySheetRef.current?.show();
   };
 
   return (
     <ScrollView style={styles.container}>
       <Controller
         control={control}
-        name="addressType"
-        rules={{required: 'Address type is required'}}
+        name="address"
+        // rules={{required: 'Address type is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Type</Text>
             <TouchableOpacity
               style={styles.selectButton}
-              onPress={showAddressTypeSheet}>
+              onPress={showAddressSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select Address Type'}
               </Text>
             </TouchableOpacity>
-            {errors.addressType && (
-              <Text style={styles.errorText}>{errors.addressType.message}</Text>
+            {errors.address && (
+              <Text style={styles.errorText}>{errors.address.message}</Text>
             )}
           </View>
         )}
@@ -106,7 +123,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="addressCategory"
-        rules={{required: 'Address category is required'}}
+        // rules={{required: 'Address category is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Category</Text>
@@ -129,32 +146,8 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
 
       <Controller
         control={control}
-        name="addressSubCategory"
-        rules={{required: 'Address sub-category is required'}}
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Address Sub-Category</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={showAddressSubCategorySheet}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Address Sub-Category'}
-              </Text>
-            </TouchableOpacity>
-            {errors.addressSubCategory && (
-              <Text style={styles.errorText}>
-                {errors.addressSubCategory.message}
-              </Text>
-            )}
-          </View>
-        )}
-      />
-
-      <Controller
-        control={control}
         name="addressDetails"
-        rules={{required: 'Address details are required'}}
+        // rules={{required: 'Address details are required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Details</Text>
@@ -177,8 +170,197 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
 
       <Controller
         control={control}
+        name="numberOfYearsAtCurrentResidence"
+        // rules={{required: 'Number of years at current residence is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Number of Years at Current Residence
+            </Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showYearsAtResidenceSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select duration'}
+              </Text>
+            </TouchableOpacity>
+            {errors.numberOfYearsAtCurrentResidence && (
+              <Text style={styles.errorText}>
+                {errors.numberOfYearsAtCurrentResidence.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {watchedNumberOfYearsAtCurrentResidence === '<=1year' && (
+        <>
+          <Controller
+            control={control}
+            // name="previousAddress"
+            // rules={{
+            //   required: 'Previous address is required if stay is <=1 year',
+            // }}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Previous Address</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Enter previous address"
+                  value={value}
+                  onChangeText={onChange}
+                  multiline
+                  numberOfLines={3}
+                />
+                {errors.previousAddress && (
+                  <Text style={styles.errorText}>
+                    {errors.previousAddress.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="previousAddressYears"
+            // rules={{
+            //   required:
+            //     'Years at previous address is required if stay at current is <=1 year',
+            // }}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Number of Years at Previous Address
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter number of years"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                />
+                {errors.previousAddressYears && (
+                  <Text style={styles.errorText}>
+                    {errors.previousAddressYears.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+        </>
+      )}
+
+      <Controller
+        control={control}
+        name="numberOfYearsAtCurrentCity"
+        // rules={{required: 'Number of years at current city is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Number of Years in Current City</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showYearsInCitySheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select duration'}
+              </Text>
+            </TouchableOpacity>
+            {errors.numberOfYearsAtCurrentCity && (
+              <Text style={styles.errorText}>
+                {errors.numberOfYearsAtCurrentCity.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {watchedNumberOfYearsAtCurrentCity === '<=3 years' && (
+        <>
+          <Controller
+            control={control}
+            name="previousCity"
+            // rules={{
+            //   required:
+            //     'Previous city is required if stay in current city is <=3 years',
+            // }}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Previous City</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter previous city"
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.previousCity && (
+                  <Text style={styles.errorText}>
+                    {errors.previousCity.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="numberOfYearsAtPreviousCity"
+            // rules={{
+            //   required:
+            //     'Years at previous city is required if stay in current city is <=3 years',
+            // }}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Number of Years in Previous City
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter number of years"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                />
+                {errors.numberOfYearsAtPreviousCity && (
+                  <Text style={styles.errorText}>
+                    {errors.numberOfYearsAtPreviousCity.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="reasonForChange"
+            // rules={{
+            //   required:
+            //     'Reason for change is required if stay in current city is <=3 years',
+            // }}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Reason for Change</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Enter reason for change"
+                  value={value}
+                  onChangeText={onChange}
+                  multiline
+                  numberOfLines={3}
+                />
+                {errors.reasonForChange && (
+                  <Text style={styles.errorText}>
+                    {errors.reasonForChange.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+        </>
+      )}
+
+      <Controller
+        control={control}
         name="geoTag"
-        rules={{required: 'Geo tag is required'}}
+        // rules={{required: 'Geo tag is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Geo Tag</Text>
@@ -186,7 +368,8 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
               style={[styles.input, styles.readOnlyInput]}
               value={value}
               editable={false}
-              placeholder="Location coordinates will be captured automatically"
+              placeholder="Capturing location..."
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.geoTag && (
               <Text style={styles.errorText}>{errors.geoTag.message}</Text>
@@ -201,9 +384,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
 
-      <ActionSheet
-        ref={addressTypeSheetRef}
-        containerStyle={styles.actionSheet}>
+      <ActionSheet ref={addressSheetRef} containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Select Address Type</Text>
           {addressTypes.map((type, index) => (
@@ -211,8 +392,8 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
               key={index}
               style={styles.actionSheetItem}
               onPressIn={() => {
-                setValue('addressType', type);
-                addressTypeSheetRef.current?.hide();
+                setValue('address', type);
+                addressSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{type}</Text>
             </TouchableOpacity>
@@ -240,21 +421,42 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       </ActionSheet>
 
       <ActionSheet
-        ref={addressSubCategorySheetRef}
+        ref={yearsAtResidenceSheetRef}
         containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>
-            Select Address Sub-Category
+            Select Years at Current Residence
           </Text>
-          {addressSubCategories.map((subCategory, index) => (
+          {yearsAtResidenceOptions.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={styles.actionSheetItem}
               onPressIn={() => {
-                setValue('addressSubCategory', subCategory);
-                addressSubCategorySheetRef.current?.hide();
+                setValue('numberOfYearsAtCurrentResidence', option);
+                yearsAtResidenceSheetRef.current?.hide();
               }}>
-              <Text style={styles.actionSheetItemText}>{subCategory}</Text>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={yearsInCitySheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>
+            Select Years in Current City
+          </Text>
+          {yearsInCityOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('numberOfYearsAtCurrentCity', option);
+                yearsInCitySheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
           ))}
         </View>
