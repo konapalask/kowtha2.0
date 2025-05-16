@@ -40,3 +40,7 @@ export const generateOtpApi = (payload: GenerateOtpPayload) => {
 export const verifyOtpApi = (payload: VerifyOtpPayload) => {
   return axiosInstance.post<VerifyOtpResponse>("/accounts/otp/verify", payload);
 }; 
+
+export const getUserDetailsApi = () => {
+  return axiosInstance.get<any>("/accounts/profile");
+}; 

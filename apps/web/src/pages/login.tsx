@@ -13,9 +13,10 @@ import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { MobileOutlined, LockOutlined } from "@ant-design/icons";
 // import Image from "next/image";
-import { generateOtpApi, verifyOtpApi } from "@/services/auth.services";
+import { generateOtpApi, verifyOtpApi, getUserDetailsApi } from "@/services/auth.services";
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
+import { useUser } from "@/components/layout/UserContextProvider";
 
 const { Title, Text } = Typography;
 
@@ -25,6 +26,11 @@ export default function Login() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const { userDetails, loading: userLoading, setUserDetails } = useUser();
+
+  // useEffect(() => {
+  //   console.log('User Context:', { userDetails, userLoading });
+  // }, [userDetails, userLoading]);
 
   useEffect(() => {
     if (session) {
@@ -60,13 +66,18 @@ export default function Login() {
         otp: values.otp,
       });
       if (result.status >= 200 && result.status < 300) {
-        console.log(process.env.NEXT_PUBLIC_DOMAIN)
         setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
-        // setCookie(REFRESH_TOKEN, result.data.refreshToken);
-        console.log(getCookie(ACCESS_TOKEN))
-        console.log(getCookie(REFRESH_TOKEN))
+        // Fetch user details after successful login
+        try {
+          const userDetailsResponse = await getUserDetailsApi();
+          setUserDetails(userDetailsResponse.data);
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          message.error('Failed to fetch user details');
+        }
+
         router.push("/dashboard");
       } else {
         message.error(result.data?.message || "Failed to verify OTP");

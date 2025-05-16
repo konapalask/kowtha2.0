@@ -18,6 +18,8 @@ import {
   Checkbox,
   Row,
   Col,
+  InputNumber,
+  Divider,
 } from "antd";
 import {
   EditOutlined,
@@ -25,11 +27,13 @@ import {
   InfoCircleOutlined,
   UserOutlined,
   PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
+import { useUser } from "@/components/layout/UserContextProvider";
 // import type { UploadFile } from "antd/es/upload/interface";
 // import * as XLSX from "xlsx";
 import {
@@ -41,6 +45,7 @@ import {
   type Verification,
   assignExecutivesApi,
   getExecutivesApi,
+  createLoanApi,
 } from "@/services/loans.services";
 import { getOfficesApi, Office } from "@/services/settings.services";
 
@@ -121,6 +126,13 @@ export default function Loans() {
   const [form] = Form.useForm();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [refresh, setRefresh] = useState(false);
+  const { userDetails, loading: userLoading } = useUser();
+  const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] = useState(false);
+  const [bulkImportForm] = Form.useForm();
+
+  // useEffect(() => {
+  //   console.log('User Context in Loans:', { userDetails, userLoading });
+  // }, [userDetails, userLoading]);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -261,11 +273,39 @@ export default function Loans() {
     }
   };
 
+  const handleBulkImport = async (values: any) => {
+    try {
+      setLoading(true);
+      // Transform the form values into the required format
+      const loansData = values.loans.map((loan: any) => ({
+        ...loan,
+        officeId: userDetails?.officeId,
+        operationsExecutiveId: userDetails?.sub
+      }));
+      console.log(loansData)
+
+      const result = await createLoanApi(loansData);
+      if (result.data.data.successful && result.data.data.successful.length > 0) {
+        message.success(`Successfully created ${result.data.data.successfulCount} loans`);
+        setIsBulkImportDrawerVisible(false);
+        bulkImportForm.resetFields();
+        setRefresh(!refresh);
+      } else {
+        message.error("Failed to create loans");
+      }
+    } catch (error) {
+      message.error("Failed to create loans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns: ColumnsType<Loan> = [
     {
       title: "Application Number",
       dataIndex: "applicationNumber",
       key: "applicationNumber",
+      width: 200,
     },
     {
       title: "Applicant Name",
@@ -439,18 +479,17 @@ export default function Loans() {
           </Button>
           <Button
             type="primary"
-            icon={<UploadOutlined style={{ fontSize: 16 }} />}
-            onClick={() => setIsImportModalVisible(true)}
+            icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            onClick={() => setIsBulkImportDrawerVisible(true)}
           >
             Bulk Import
           </Button>
-          
           <Button
             type="primary"
             icon={<UploadOutlined style={{ fontSize: 16 }} />}
             onClick={() => setIsImportModalVisible(true)}
           >
-           CSV/Excel Import
+            CSV/Excel Import
           </Button>
         </div>
 
@@ -526,7 +565,7 @@ export default function Loans() {
       <Drawer
         title={
           <span>
-            Loan Details - {selectedLoan?.applicationNumber || "New Loan"}{" "}
+            {selectedLoan?.id ? `Loan Details - ${selectedLoan?.applicationNumber}` : "New Loan"}{" "}
             {selectedLoan?.status && (
               <Tag
                 color={
@@ -573,6 +612,7 @@ export default function Loans() {
           setSelectedLoan(null);
           setSelectedOffice("");
           setSameAddress(false);
+          setEditLoanInfo(false);
         }}
         open={isDrawerVisible}
         maskClosable={false}
@@ -590,7 +630,7 @@ export default function Loans() {
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   Loan Information
                 </Typography.Title>
-                {!editLoanInfo && (
+                {!editLoanInfo && selectedLoan.id && (
                   <Button
                     type="link"
                     onClick={() => setEditLoanInfo(true)}
@@ -600,7 +640,150 @@ export default function Loans() {
                   </Button>
                 )}
               </div>
-              {!editLoanInfo ? (
+              {(!selectedLoan.id || editLoanInfo) ? (
+                <Form
+                  layout="vertical"
+                  initialValues={{
+                    applicationNumber: selectedLoan?.applicationNumber,
+                    applicantName: selectedLoan?.applicantName,
+                    applicantMobile: selectedLoan?.applicantMobile,
+                    loanAmount: selectedLoan?.loanAmount,
+                    applicantAddress: selectedLoan?.applicantAddress,
+                    loanType: selectedLoan?.loanType,
+                    bankName: selectedLoan?.bankName,
+                  }}
+                  onFinish={async (values) => {
+                    try {
+                      setLoading(true);
+                      let result: any;
+                      if (!selectedLoan.id) {
+                        // Create new loan
+                        result = await createLoanApi([{...values,officeId:userDetails?.officeId,operationsExecutiveId:userDetails?.sub}]);
+                        // Handle the new response format
+                        if (result.data.data.successful && result.data.data.successful.length > 0) {
+                          const createdLoan = result.data.data.successful[0];
+                          // Create a new loan object with the loanId as id
+                          const newLoan = {
+                            ...values,
+                            id: createdLoan.loanId,
+                            applicationNumber: createdLoan.applicationNumber,
+                            status: "Pending",
+                            verifications: []
+                          };
+                          setSelectedLoan(newLoan);
+                          // Add the new loan to the loans list
+                          setLoans(prevLoans => [...prevLoans, newLoan]);
+                          message.success("Loan created successfully");
+                        } else {
+                          message.error("Failed to create loan");
+                        }
+                      } else {
+                        // Update existing loan
+                        result = await updateLoanApi(selectedLoan.id, values);
+                        setLoans(
+                          loans.map((loan) =>
+                            loan.id === selectedLoan.id ? result.data : loan
+                          )
+                        );
+                        message.success("Loan information updated");
+                      }
+                      setEditLoanInfo(false);
+                    } catch (error) {
+                      message.error(selectedLoan.id ? "Failed to update loan information" : "Failed to create loan");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                >
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Application Number"
+                        name="applicationNumber"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input disabled={!!selectedLoan.id} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Applicant Name"
+                        name="applicantName"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Mobile Number"
+                        name="applicantMobile"
+                        rules={[
+                          { required: true, message: "Required" },
+                          { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit mobile number" }
+                        ]}
+                      >
+                        <Input maxLength={10} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Loan Amount"
+                        name="loanAmount"
+                        rules={[
+                          { required: true, message: "Required" },
+                          { type: 'number', message: "Please enter a valid amount" }
+                        ]}
+                      >
+                        <InputNumber min={0} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Address"
+                        name="applicantAddress"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Loan Type"
+                        name="loanType"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Bank Name"
+                        name="bankName"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Form.Item>
+                    <Space>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={loading}
+                      >
+                        {selectedLoan.id ? "Save" : "Create Loan"}
+                      </Button>
+                      {selectedLoan.id && (
+                        <Button onClick={() => setEditLoanInfo(false)}>
+                          Cancel
+                        </Button>
+                      )}
+                    </Space>
+                  </Form.Item>
+                </Form>
+              ) : (
                 <Descriptions
                   className="loan-details-descriptions"
                   bordered
@@ -612,6 +795,12 @@ export default function Loans() {
                   </Descriptions.Item>
                   <Descriptions.Item label="Applicant Name">
                     {selectedLoan?.applicantName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Mobile Number">
+                    {selectedLoan?.applicantMobile}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Loan Amount">
+                    {selectedLoan?.loanAmount}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address">
                     {selectedLoan?.applicantAddress}
@@ -628,83 +817,6 @@ export default function Loans() {
                     ) : "-"}
                   </Descriptions.Item>
                 </Descriptions>
-              ) : (
-                <Form
-                  layout="vertical"
-                  initialValues={{
-                    applicationNumber: selectedLoan?.applicationNumber,
-                    applicantName: selectedLoan?.applicantName,
-                    applicantAddress: selectedLoan?.applicantAddress,
-                    loanType: selectedLoan?.loanType,
-                    bankName: selectedLoan?.bankName,
-                  }}
-                  onFinish={handleLoanInfoSave}
-                >
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Application Number"
-                        name="applicationNumber"
-                      >
-                        <Input disabled />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Applicant Name"
-                        name="applicantName"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        {" "}
-                        <Input />{" "}
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Address"
-                        name="applicantAddress"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        {" "}
-                        <Input />{" "}
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Loan Type"
-                        name="loanType"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        {" "}
-                        <Input />{" "}
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Bank Name"
-                        name="bankName"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        {" "}
-                        <Input />{" "}
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Form.Item>
-                    <Space>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={loading}
-                      >
-                        Save
-                      </Button>
-                      <Button onClick={() => setEditLoanInfo(false)}>
-                        Cancel
-                      </Button>
-                    </Space>
-                  </Form.Item>
-                </Form>
               )}
             </div>
 
@@ -1048,6 +1160,138 @@ export default function Loans() {
             </div>
           </>
         )}
+      </Drawer>
+
+      {/* Bulk Import Drawer */}
+      <Drawer
+        title="Bulk Import Loans"
+        placement="right"
+        width="80%"
+        onClose={() => {
+          setIsBulkImportDrawerVisible(false);
+          bulkImportForm.resetFields();
+        }}
+        open={isBulkImportDrawerVisible}
+        maskClosable={false}
+      >
+        <Form
+          form={bulkImportForm}
+          onFinish={handleBulkImport}
+          layout="vertical"
+        >
+          <Form.List name="loans">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card 
+                    key={key} 
+                    style={{ marginBottom: 16 }}
+                    extra={
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => remove(name)}
+                      />
+                    }
+                  >
+                    <Row gutter={16}>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'applicantName']}
+                          label="Applicant Name"
+                          rules={[{ required: true, message: 'Required' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'applicantMobile']}
+                          label="Mobile Number"
+                          rules={[
+                            { required: true, message: 'Required' },
+                            { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit mobile number' }
+                          ]}
+                        >
+                          <Input maxLength={10} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'applicantAddress']}
+                          label="Address"
+                          rules={[{ required: true, message: 'Required' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'loanType']}
+                          label="Loan Type"
+                          rules={[{ required: true, message: 'Required' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'bankName']}
+                          label="Bank Name"
+                          rules={[{ required: true, message: 'Required' }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'loanAmount']}
+                          label="Loan Amount"
+                          rules={[
+                            { required: true, message: 'Required' },
+                            { type: 'number', message: 'Please enter a valid amount' }
+                          ]}
+                        >
+                          <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Card>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add Loan
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Create Loans
+              </Button>
+              <Button onClick={() => {
+                setIsBulkImportDrawerVisible(false);
+                bulkImportForm.resetFields();
+              }}>
+                Cancel
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
       </Drawer>
     </DashboardLayout>
   );
