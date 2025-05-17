@@ -26,36 +26,82 @@ export class LoanService {
 
   async createLoan(data: CreateLoanDto) {
     try {
-      const loanData: Prisma.LoanCreateInput = {
-        applicationNumber: data.applicationNumber || `LOAN-${Date.now()}`,
-        applicantName: data.applicantName,
-        applicantMobile: data.applicantMobile,
-        applicantAddress: data.applicantAddress,
-        isAddressSame: data.isAddressSame || false,
-        loanType: data.loanType,
-        bankName: data.bankName,
-        loanAmount: data.loanAmount,
-        office: { connect: { id: data.officeId } },
-        operationsExecutive: { connect: { id: data.operationsExecutiveId } },
-        status: data.status || LoanStatus.Unassigned,
-      };
+      // Start a transaction to ensure all operations succeed or fail together
+      return await this.prisma.$transaction(async (prisma) => {
+        // Create the loan
+        const loanData: Prisma.LoanCreateInput = {
+          applicationNumber: data.applicationNumber || `LOAN-${Date.now()}`,
+          applicantName: data.applicantName,
+          applicantMobile: data.applicantMobile,
+          applicantAddress: data.applicantAddress,
+          isAddressSame: data.isAddressSame || false,
+          loanType: data.loanType,
+          bankName: data.bankName,
+          loanAmount: data.loanAmount,
+          office: { connect: { id: data.officeId } },
+          operationsExecutive: { connect: { id: data.operationsExecutiveId } },
+          status: data.status || LoanStatus.Unassigned,
+        };
 
-      const loan = await this.prisma.loan.create({
-        data: loanData,
-        include: {
-          operationsExecutive: true,
-          office: true,
-        },
+        const loan = await prisma.loan.create({
+          data: loanData,
+          include: {
+            operationsExecutive: true,
+            office: true,
+          },
+        });
+
+        // If field executive ID is provided, create all three verifications
+        if (data.fieldExecutiveId) {
+          const verificationTypes = [
+            VerificationType.PermanentAddress,
+            VerificationType.CurrentAddress,
+            VerificationType.Work,
+          ];
+
+          // Create verifications for each type
+          await Promise.all(
+            verificationTypes.map((type) =>
+              prisma.verification.create({
+                data: {
+                  loanId: loan.id,
+                  type,
+                  fieldExecutiveId: data.fieldExecutiveId,
+                  status: VerificationStatus.Pending,
+                },
+              })
+            )
+          );
+
+          // Update loan status to Assigned since field executive is assigned
+          await prisma.loan.update({
+            where: { id: loan.id },
+            data: { status: LoanStatus.Assigned },
+          });
+        }
+
+        await this.loggingService.info('Loan created successfully with verifications', {
+          loanId: loan.id,
+          applicationNumber: loan.applicationNumber,
+          applicantName: loan.applicantName,
+          loanAmount: loan.loanAmount,
+          fieldExecutiveId: data.fieldExecutiveId,
+        });
+
+        // Fetch the complete loan data with verifications
+        return await prisma.loan.findUnique({
+          where: { id: loan.id },
+          include: {
+            operationsExecutive: true,
+            office: true,
+            verifications: {
+              include: {
+                fieldExecutive: true,
+              },
+            },
+          },
+        });
       });
-
-      await this.loggingService.info('Loan created successfully', {
-        loanId: loan.id,
-        applicationNumber: loan.applicationNumber,
-        applicantName: loan.applicantName,
-        loanAmount: loan.loanAmount,
-      });
-
-      return loan;
     } catch (error) {
       await this.loggingService.error('Failed to create loan', {
         data,

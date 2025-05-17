@@ -1,56 +1,56 @@
-import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum } from 'class-validator';
 import { LoanStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLoanDto {
+  @ApiProperty({ description: 'Application number', required: false })
+  @IsString()
+  @IsOptional()
+  applicationNumber?: string;
+
   @ApiProperty({ description: 'Applicant name' })
   @IsString()
   applicantName: string;
 
   @ApiProperty({ description: 'Applicant mobile number' })
   @IsString()
-  @IsOptional()
   applicantMobile: string;
 
   @ApiProperty({ description: 'Applicant address' })
   @IsString()
-  @IsOptional()
-  applicantAddress?: string;
+  applicantAddress: string;
 
-  @ApiProperty({ description: 'Whether current and permanent addresses are the same', default: false })
+  @ApiProperty({ description: 'Whether current address is same as permanent address', required: false })
+  @IsBoolean()
   @IsOptional()
   isAddressSame?: boolean;
 
-  @ApiProperty({ description: 'Application number' })
-  @IsString()
-  applicationNumber?: string;
-
   @ApiProperty({ description: 'Loan type' })
   @IsString()
-  @IsOptional()
-  loanType?: string;
+  loanType: string;
 
   @ApiProperty({ description: 'Bank name' })
   @IsString()
-  @IsOptional()
-  bankName?: string;
+  bankName: string;
 
   @ApiProperty({ description: 'Loan amount' })
   @IsNumber()
-  @IsOptional()
-  loanAmount?: number;
+  loanAmount: number;
 
   @ApiProperty({ description: 'Office ID' })
   @IsNumber()
-  @IsOptional()
-  officeId?: number;
+  officeId: number;
 
   @ApiProperty({ description: 'Operations executive ID' })
   @IsNumber()
-  @IsOptional()
-  operationsExecutiveId?: number;
+  operationsExecutiveId: number;
 
-  @ApiProperty({ description: 'Loan status', enum: LoanStatus, default: LoanStatus.Unassigned })
+  @ApiProperty({ description: 'Field executive ID', required: false })
+  @IsNumber()
+  @IsOptional()
+  fieldExecutiveId?: number;
+
+  @ApiProperty({ description: 'Loan status', enum: LoanStatus, required: false })
   @IsEnum(LoanStatus)
   @IsOptional()
   status?: LoanStatus;
