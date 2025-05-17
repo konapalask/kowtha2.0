@@ -48,6 +48,7 @@ import {
   createLoanApi,
 } from "@/services/loans.services";
 import { getOfficesApi, Office } from "@/services/settings.services";
+import { getUsersApi, getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
 
 dayjs.extend(relativeTime);
 
@@ -57,6 +58,8 @@ const { Option } = Select;
 interface FieldExecutive {
   id: number;
   name: string;
+  value: number;
+  label: string;
 }
 
 interface RemoteExecutives {
@@ -138,6 +141,9 @@ export default function Loans() {
   const { userDetails, loading: userLoading } = useUser();
   const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] = useState(false);
   const [bulkImportForm] = Form.useForm();
+  const [currentOffice, setCurrentOffice] = useState<string>(userDetails?.officeId || "");
+  const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
+  const [offices,setOffices] = useState<Office[]>([]);
 
   // useEffect(() => {
   //   console.log('User Context in Loans:', { userDetails, userLoading });
@@ -158,41 +164,18 @@ export default function Loans() {
     fetchLoans();
   }, [refresh]);
 
-  const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
-
-  const [selectedOffice, setSelectedOffice] = useState<string>("");
-  const [offices,setOffices] = useState<Office[]>([]);
-  // const [remoteExecutives, setRemoteExecutives] = useState<RemoteExecutives>({
-  //   Mumbai: [
-  //     { id: 3, name: "Raj Kumar" },
-  //     { id: 4, name: "Priya Shah" },
-  //   ],
-  //   Delhi: [
-  //     { id: 5, name: "Amit Singh" },
-  //     { id: 6, name: "Neha Gupta" },
-  //   ],
-  //   Bangalore: [
-  //     { id: 7, name: "Karthik R" },
-  //     { id: 8, name: "Divya M" },
-  //   ],
-  //   Chennai: [
-  //     { id: 9, name: "Senthil K" },
-  //     { id: 10, name: "Lakshmi N" },
-  //   ],
-  // });
-
-  useEffect(() => {
-    getExecutivesApi().then((res) => {
-      const options = res?.data?.data?.map((item: any) => ({
-        label: item.name,
-        value: item.id,
-      }))??[];
-      setFieldExecutives(options);
-    }).catch((err) => {
-      // message.error("Failed to fetch field executives");
-      console.log(err)
-    });
-  }, []);
+  // useEffect(() => {
+  //   getExecutivesApi().then((res) => {
+  //     const options = res?.data?.data?.map((item: any) => ({
+  //       label: item.name,
+  //       value: item.id,
+  //     }))??[];
+  //     setFieldExecutives(options);
+  //   }).catch((err) => {
+  //     // message.error("Failed to fetch field executives");
+  //     console.log(err)
+  //   });
+  // }, []);
 
   useEffect(() => {
     getOfficesApi().then((res) => {
@@ -206,6 +189,22 @@ export default function Loans() {
       console.log(err)
     });
   }, []);
+
+  useEffect(() => {
+    const fetchExecutives = async () => {
+      try {
+        const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
+        const options = result?.data?.data?.map((item: any) => ({
+          label: item.name,
+          value: item.id,
+        })) ?? [];
+        setFieldExecutives(options);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchExecutives();
+  }, [currentOffice]);
 
   const [sameAddress, setSameAddress] = useState(false);
   const [editLoanInfo, setEditLoanInfo] = useState(false);
@@ -234,7 +233,7 @@ export default function Loans() {
     }
   ) => {
     const finalData = {
-      // ...values,
+      ...values,
       verificationType,
       fieldExecutiveId:values.assignee
     }
@@ -621,7 +620,6 @@ export default function Loans() {
         onClose={() => {
           setIsDrawerVisible(false);
           setSelectedLoan(null);
-          setSelectedOffice("");
           setSameAddress(false);
           setEditLoanInfo(false);
         }}
@@ -779,11 +777,11 @@ export default function Loans() {
                   <Descriptions.Item label="Bank Name">
                     {selectedLoan?.bankName}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Uploaded At">
+                  {/* <Descriptions.Item label="Uploaded At">
                     {selectedLoan?.uploadedAt ? dayjs(selectedLoan.uploadedAt).format(
                       "YYYY-MM-DD HH:mm:ss"
                     ) : "-"}
-                  </Descriptions.Item>
+                  </Descriptions.Item> */}
                 </Descriptions>
               )}
             </div>
@@ -833,6 +831,17 @@ export default function Loans() {
                             )
                           }
                         >
+                          {verification && (
+                            <div style={{ marginBottom: 16 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
+                                <span>Currently assigned to:</span>
+                                <Tag color="blue">
+                                  {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
+                                </Tag>
+                              </div>
+                              <Divider style={{ margin: '8px 0' }} />
+                            </div>
+                          )}
                           <Form
                             layout="vertical"
                             initialValues={
@@ -843,7 +852,9 @@ export default function Loans() {
                                     office: verification.office,
                                     assignee: verification.assignee,
                                   }
-                                : undefined
+                                : {
+                                    assignmentMethod: "Local"
+                                  }
                             }
                             onFinish={(values) =>
                               handleVerificationAssign(
@@ -863,11 +874,13 @@ export default function Loans() {
                                 },
                               ]}
                             >
-                              <Radio.Group>
+                              <Radio.Group onChange={(e) => {
+                                if (e.target.value === "Local") {
+                                  setCurrentOffice(userDetails?.officeId || "");
+                                }
+                              }}>
                                 <Radio.Button value="Local">Local</Radio.Button>
-                                <Radio.Button value="Remote">
-                                  Remote
-                                </Radio.Button>
+                                <Radio.Button value="Remote">Remote</Radio.Button>
                               </Radio.Group>
                             </Form.Item>
                             <Form.Item
@@ -894,9 +907,9 @@ export default function Loans() {
                                     >
                                       <Select
                                         placeholder="Select office"
-                                        onChange={(value) =>
-                                          setSelectedOffice(value)
-                                        }
+                                        onChange={(value) => {
+                                          setCurrentOffice(value);
+                                        }}
                                         options={offices}
                                       />
                                     </Form.Item>
@@ -979,6 +992,17 @@ export default function Loans() {
                               )
                             }
                           >
+                            {verification && (
+                              <div style={{ marginBottom: 16 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
+                                  <span>Currently assigned to:</span>
+                                  <Tag color="blue">
+                                    {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
+                                  </Tag>
+                                </div>
+                                <Divider style={{ margin: '8px 0' }} />
+                              </div>
+                            )}
                             <Form
                               layout="vertical"
                               initialValues={
@@ -989,7 +1013,9 @@ export default function Loans() {
                                       office: verification.office,
                                       assignee: verification.assignee,
                                     }
-                                  : undefined
+                                  : {
+                                      assignmentMethod: "Local"
+                                    }
                               }
                               onFinish={(values) =>
                                 handleVerificationAssign(
@@ -1009,13 +1035,13 @@ export default function Loans() {
                                   },
                                 ]}
                               >
-                                <Radio.Group>
-                                  <Radio.Button value="Local">
-                                    Local
-                                  </Radio.Button>
-                                  <Radio.Button value="Remote">
-                                    Remote
-                                  </Radio.Button>
+                                <Radio.Group onChange={(e) => {
+                                  if (e.target.value === "Local") {
+                                    setCurrentOffice(userDetails?.officeId || "");
+                                  }
+                                }}>
+                                  <Radio.Button value="Local">Local</Radio.Button>
+                                  <Radio.Button value="Remote">Remote</Radio.Button>
                                 </Radio.Group>
                               </Form.Item>
                               <Form.Item
@@ -1042,13 +1068,11 @@ export default function Loans() {
                                       >
                                         <Select
                                           placeholder="Select office"
-                                          onChange={(value) =>
-                                            setSelectedOffice(value)
-                                          }
+                                          onChange={(value) => {
+                                            setCurrentOffice(value);
+                                          }}
                                           options={offices}
-                                         
                                         />
-                                        
                                       </Form.Item>
                                     );
                                   }
