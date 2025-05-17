@@ -124,9 +124,7 @@ const App = () => {
             component={WorkVerification}
             options={({route}) => ({
               title: route.params?.item
-                ? `${route.params.item.name}, ${
-                    route.params.item.age
-                  } ${route.params.item.sex.charAt(0).toUpperCase()}`
+                ? `${route.params.item.name}`
                 : 'Work Verification',
             })}
           />

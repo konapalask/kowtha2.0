@@ -7,6 +7,7 @@ import {
   Image,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import {
   launchCamera,
@@ -18,6 +19,10 @@ import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geocoding from 'react-native-geocoding';
 import {UploadedItem} from '../../types/verification';
 import {colors} from '../../constants/colors';
+import {
+  getImageUploadPresignedUrl,
+  uploadImageToS3,
+} from '../../services/field.services';
 
 // Initialize Geocoding
 Geocoding.init('YOUR_GOOGLE_MAPS_API_KEY');
@@ -33,6 +38,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 }) => {
   const [uploadedItems, setUploadedItems] =
     useState<UploadedItem[]>(initialItems);
+  const [isUploading, setIsUploading] = useState(false);
 
   const getLocationDetails = async (latitude: number, longitude: number) => {
     try {
@@ -69,6 +75,46 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     return `${day}, ${formattedDate}`;
   };
 
+  const uploadImage = async (imageUri: string, type: string) => {
+    try {
+      setIsUploading(true);
+
+      // Generate a unique filename
+      const timestamp = new Date().getTime();
+      const fileName = `verification/${timestamp}-${Math.random()
+        .toString(36)
+        .substring(7)}.jpg`;
+
+      // Get presigned URL
+      const {
+        data: {url: presignedUrl},
+      } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
+
+      // Upload to S3
+      await uploadImageToS3(presignedUrl, imageUri);
+
+      // Create new item with S3 URL
+      const newItem: UploadedItem = {
+        id: Date.now().toString(),
+        uri: imageUri,
+        s3Url: fileName, // Store the S3 path
+        type: 'photo',
+        timestamp: new Date().toISOString(),
+      };
+
+      const updatedItems = [...uploadedItems, newItem];
+      setUploadedItems(updatedItems);
+      onUploadedItemsChange(updatedItems);
+
+      Alert.alert('Success', 'Image uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleCapture = async () => {
     try {
       const result = await launchCamera({
@@ -77,16 +123,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       });
 
       if (result.assets && result.assets[0]) {
-        const newItem: UploadedItem = {
-          id: Date.now().toString(),
-          uri: result.assets[0].uri || '',
-          type: 'photo',
-          timestamp: new Date().toISOString(),
-        };
-
-        const updatedItems = [...uploadedItems, newItem];
-        setUploadedItems(updatedItems);
-        onUploadedItemsChange(updatedItems);
+        await uploadImage(result.assets[0].uri || '', 'photo');
       }
     } catch (error) {
       console.error('Error capturing photo:', error);
@@ -102,16 +139,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       });
 
       if (result.assets && result.assets[0]) {
-        const newItem: UploadedItem = {
-          id: Date.now().toString(),
-          uri: result.assets[0].uri || '',
-          type: 'photo',
-          timestamp: new Date().toISOString(),
-        };
-
-        const updatedItems = [...uploadedItems, newItem];
-        setUploadedItems(updatedItems);
-        onUploadedItemsChange(updatedItems);
+        await uploadImage(result.assets[0].uri || '', 'photo');
       }
     } catch (error) {
       console.error('Error selecting photo:', error);
@@ -128,13 +156,30 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleCapture}>
-          <Text style={styles.buttonText}>Take Photo</Text>
+        <TouchableOpacity
+          style={[styles.button, isUploading && styles.buttonDisabled]}
+          onPress={handleCapture}
+          disabled={isUploading}>
+          <Text style={styles.buttonText}>
+            {isUploading ? 'Uploading...' : 'Take Photo'}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleGallery}>
-          <Text style={styles.buttonText}>Choose from Gallery</Text>
+        <TouchableOpacity
+          style={[styles.button, isUploading && styles.buttonDisabled]}
+          onPress={handleGallery}
+          disabled={isUploading}>
+          <Text style={styles.buttonText}>
+            {isUploading ? 'Uploading...' : 'Choose from Gallery'}
+          </Text>
         </TouchableOpacity>
       </View>
+
+      {isUploading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Uploading image...</Text>
+        </View>
+      )}
 
       {uploadedItems.length === 0 ? (
         <View style={styles.emptyState}>
@@ -235,6 +280,25 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     marginTop: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: colors.text.primary,
   },
 });
 
