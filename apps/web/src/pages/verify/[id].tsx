@@ -17,6 +17,7 @@ import {
   Row,
   Col,
   message,
+  Tabs,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -28,12 +29,13 @@ import {
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
 import React from "react";
-import { getVerificationData } from "@/services/verifier.services";
+import { getVerificationData, generateFinalReport } from "@/services/verifier.services";
 
 // const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 // import "react-quill/dist/quill.snow.css";
 
 const { Title } = Typography;
+const { TabPane } = Tabs;
 
 interface FormData {
   basicDetails: {
@@ -320,129 +322,372 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
   );
 };
 
+const VerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  if (!verificationData) return null;
+
+  const data = verificationData?.verificationData?.verificationData || {};
+
+  return (
+    <>
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Basic Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("basicDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Verification Type">
+              {data?.basicDetails?.verificationType}
+            </Descriptions.Item>
+            <Descriptions.Item label="Verification Date">
+              {data?.basicDetails?.verificationDate}
+            </Descriptions.Item>
+            <Descriptions.Item label="Verification Time">
+              {data?.basicDetails?.verificationTime}
+            </Descriptions.Item>
+            <Descriptions.Item label="Verification Mode">
+              {data?.basicDetails?.verificationMode}
+            </Descriptions.Item>
+            <Descriptions.Item label="Verification Status">
+              {data?.basicDetails?.verificationStatus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Verification Remarks">
+              {data?.basicDetails?.verificationRemarks}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Address Verification"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("addressVerification")}
+              />
+            }
+          >
+            <Descriptions.Item label="Address Type">
+              {data?.addressVerification?.addressType}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address Category">
+              {data?.addressVerification?.addressCategory}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address Sub-Category">
+              {data?.addressVerification?.addressSubCategory}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address Details">
+              {data?.addressVerification?.addressDetails}
+            </Descriptions.Item>
+            <Descriptions.Item label="Geo Tag">
+              {data?.addressVerification?.geoTag}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Residence Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("residenceDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Residence Status">
+              {data?.residenceDetails?.residenceStatus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Rent Details">
+              {data?.residenceDetails?.rentDetails}
+            </Descriptions.Item>
+            <Descriptions.Item label="Type of Residence">
+              {data?.residenceDetails?.residenceType}
+            </Descriptions.Item>
+            <Descriptions.Item label="Construction Quality">
+              {data?.residenceDetails?.constructionQuality}
+            </Descriptions.Item>
+            <Descriptions.Item label="Standard of Living">
+              {data?.residenceDetails?.standardOfLiving}
+            </Descriptions.Item>
+            <Descriptions.Item label="Location Category">
+              {data?.residenceDetails?.locationCategory}
+            </Descriptions.Item>
+            <Descriptions.Item label="Locality Type">
+              {data?.residenceDetails?.localityType}
+            </Descriptions.Item>
+            <Descriptions.Item label="Accessibility">
+              {data?.residenceDetails?.accessibility}
+            </Descriptions.Item>
+            <Descriptions.Item label="House Area">
+              {data?.residenceDetails?.houseArea}
+            </Descriptions.Item>
+            <Descriptions.Item label="Years at Current Address">
+              {data?.residenceDetails?.yearsAtCurrentAddress}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nameplate Visible">
+              {data?.residenceDetails?.nameplateVisible}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Family & Employment Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("familyEmploymentDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Total Family Members">
+              {data?.familyEmploymentDetails?.totalFamilyMembers}
+            </Descriptions.Item>
+            <Descriptions.Item label="No. of Earning Members">
+              {data?.familyEmploymentDetails?.earningMembers}
+            </Descriptions.Item>
+            <Descriptions.Item label="No. of Dependents">
+              {data?.familyEmploymentDetails?.dependents}
+            </Descriptions.Item>
+            <Descriptions.Item label="Is Spouse Working">
+              {data?.familyEmploymentDetails?.isSpouseWorking}
+            </Descriptions.Item>
+            <Descriptions.Item label="Spouse's Employment Details">
+              {data?.familyEmploymentDetails?.spouseEmploymentDetails}
+            </Descriptions.Item>
+            <Descriptions.Item label="Assets Observed">
+              {data?.familyEmploymentDetails?.assetsObserved}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Third Party Check"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("thirdPartyCheck")}
+              />
+            }
+          >
+            <Descriptions.Item label="TPC Name">
+              {data?.thirdPartyCheck?.tpcName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Relationship">
+              {data?.thirdPartyCheck?.relationship}
+            </Descriptions.Item>
+            <Descriptions.Item label="Feedback Status">
+              {data?.thirdPartyCheck?.feedbackStatus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Comments">
+              {data?.thirdPartyCheck?.comments}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Final Observations"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("finalObservations")}
+              />
+            }
+          >
+            <Descriptions.Item label="Cooperativeness">
+              {data?.finalObservations?.cooperativeness}
+            </Descriptions.Item>
+            <Descriptions.Item label="Overall Status">
+              {data?.finalObservations?.overallStatus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Remarks">
+              {data?.finalObservations?.remarks}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions title="Photo Capture" bordered column={1}>
+            {data?.uploadedItems?.map((item: any, idx: number) => (
+              <Descriptions.Item
+                key={item.id}
+                label={`${item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo ${idx + 1}`}
+              >
+                <img
+                  src={item.uri}
+                  alt={`Photo ${idx + 1}`}
+                  style={{ maxWidth: '200px', borderRadius: '4px' }}
+                />
+              </Descriptions.Item>
+            ))}
+          </Descriptions>
+        </Card>
+      </section>
+    </>
+  );
+};
+
+const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  if (!verificationData) return null;
+
+  const data = verificationData?.verificationData?.verificationData || {};
+
+  return (
+    <section style={{ marginBottom: 24 }}>
+      <Card>
+        <Descriptions
+          title="Office Verification"
+          bordered
+          column={2}
+          extra={
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => onEdit("officeVerification")}
+            />
+          }
+        >
+          <Descriptions.Item label="Name of the Applicant">
+            {data?.officeVerification?.applicantName}
+          </Descriptions.Item>
+          <Descriptions.Item label="Name of the Bank">
+            {data?.officeVerification?.bankName}
+          </Descriptions.Item>
+          <Descriptions.Item label="Prospect Number">
+            {data?.officeVerification?.prospectNumber}
+          </Descriptions.Item>
+          <Descriptions.Item label="Purpose of Loan">
+            {data?.officeVerification?.purposeOfLoan}
+          </Descriptions.Item>
+          <Descriptions.Item label="Loan Amount">
+            {data?.officeVerification?.loanAmount}
+          </Descriptions.Item>
+          <Descriptions.Item label="Tenure">
+            {data?.officeVerification?.tenure}
+          </Descriptions.Item>
+          <Descriptions.Item label="PAN Number">
+            {data?.officeVerification?.panNumber}
+          </Descriptions.Item>
+          <Descriptions.Item label="Aadhar Number">
+            {data?.officeVerification?.aadharNumber}
+          </Descriptions.Item>
+          <Descriptions.Item label="Qualification">
+            {data?.officeVerification?.qualification}
+          </Descriptions.Item>
+          <Descriptions.Item label="Current Office Name">
+            {data?.officeVerification?.currentOfficeName}
+          </Descriptions.Item>
+          <Descriptions.Item label="Office Address">
+            {data?.officeVerification?.officeAddress}
+          </Descriptions.Item>
+          <Descriptions.Item label="Years in Current Job">
+            {data?.officeVerification?.yearsInCurrentJob}
+          </Descriptions.Item>
+          <Descriptions.Item label="Total Work Experience">
+            {data?.officeVerification?.totalWorkExperience}
+          </Descriptions.Item>
+          <Descriptions.Item label="Company Size">
+            {data?.officeVerification?.companySize}
+          </Descriptions.Item>
+          <Descriptions.Item label="Nature of Service/Business">
+            {data?.officeVerification?.natureOfService}
+          </Descriptions.Item>
+          <Descriptions.Item label="Office Locality">
+            {data?.officeVerification?.officeLocality}
+          </Descriptions.Item>
+          <Descriptions.Item label="ID Card Number">
+            {data?.officeVerification?.idCardNumber}
+          </Descriptions.Item>
+          <Descriptions.Item label="Designation">
+            {data?.officeVerification?.designation}
+          </Descriptions.Item>
+          <Descriptions.Item label="Mode of Salary">
+            {data?.officeVerification?.salaryMode}
+          </Descriptions.Item>
+          <Descriptions.Item label="Type of Employer">
+            {data?.officeVerification?.employerType}
+          </Descriptions.Item>
+          <Descriptions.Item label="Gross Salary per Month">
+            {data?.officeVerification?.grossSalary}
+          </Descriptions.Item>
+          <Descriptions.Item label="Net Salary per Month">
+            {data?.officeVerification?.netSalary}
+          </Descriptions.Item>
+          <Descriptions.Item label="Previous Company Name">
+            {data?.officeVerification?.previousCompanyName}
+          </Descriptions.Item>
+          <Descriptions.Item label="Work Experience">
+            {data?.officeVerification?.workExperience}
+          </Descriptions.Item>
+          <Descriptions.Item label="Existing Loans">
+            {data?.officeVerification?.existingLoans}
+          </Descriptions.Item>
+          <Descriptions.Item label="References (Colleagues)">
+            {data?.officeVerification?.references}
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
+    </section>
+  );
+};
+
 export default function LoanVerifyDetails() {
   const router = useRouter();
   const { id } = router.query;
-  const loan: any = 4;
-  const [report, setReport] = useState("");
+  const [verificationData, setVerificationData] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(
-    null
-  );
-  const [pdfPreviewUrl] = useState(
-    "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-  );
+  const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(null);
+  const [pdfPreviewUrl] = useState("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentFormKey, setCurrentFormKey] = useState("");
 
-  const defaultFormData: FormData = {
-    basicDetails: {
-      verificationType: "",
-      verificationDate: "",
-      verificationTime: "",
-      verificationMode: "",
-      verificationStatus: "",
-      verificationRemarks: "",
-    },
-    applicantInformation: {
-      applicantName: "",
-      applicantAge: "",
-      applicantGender: "",
-      applicantMaritalStatus: "",
-      applicantEducation: "",
-    },
-    residenceDetails: {
-      residenceStatus: "",
-      rentDetails: "",
-      residenceType: "",
-      constructionQuality: "",
-      standardOfLiving: "",
-      locationCategory: "",
-      localityType: "",
-      accessibility: "",
-      houseArea: "",
-      yearsAtCurrentAddress: "",
-      nameplateVisible: "",
-    },
-    familyEmploymentDetails: {
-      totalFamilyMembers: "",
-      earningMembers: "",
-      dependents: "",
-      isSpouseWorking: "",
-      spouseEmploymentDetails: "",
-      assetsObserved: "",
-    },
-    addressVerification: {
-      addressType: "",
-      addressCategory: "",
-      addressSubCategory: "",
-      addressDetails: "",
-      geoTag: "",
-    },
-    thirdPartyCheck: {
-      tpcName: "",
-      relationship: "",
-      feedbackStatus: "",
-      comments: "",
-    },
-    finalObservations: {
-      cooperativeness: "",
-      overallStatus: "",
-      remarks: "",
-    },
-    officeVerification: {
-      applicantName: "",
-      bankName: "",
-      prospectNumber: "",
-      purposeOfLoan: "",
-      loanAmount: "",
-      tenure: "",
-      panNumber: "",
-      aadharNumber: "",
-      qualification: "",
-      currentOfficeName: "",
-      officeAddress: "",
-      yearsInCurrentJob: "",
-      totalWorkExperience: "",
-      companySize: "",
-      natureOfService: "",
-      officeLocality: "",
-      idCardNumber: "",
-      designation: "",
-      salaryMode: "",
-      employerType: "",
-      grossSalary: "",
-      netSalary: "",
-      previousCompanyName: "",
-      workExperience: "",
-      existingLoans: "",
-      references: "",
-    },
-    section8: {},
-    uploadedItems: [],
-  };
-
-  const [formData, setFormData] = useState<FormData>(
-   defaultFormData
-  );
-
   useEffect(() => {
-    getVerificationData(id as string).then((res) => {
-      // setFormData(data);
-      // form.setFieldsValue(res?.data?.[0]?.verificationData)
-      setFormData(res?.data?.verifications?.filter((item: any) => item.type === "PermanentAddress")?.[0]?.verificationData?.verificationData);
-      // console.log(res?.data?.verifications?.[0]?.verificationData?.verificationData);
-      console.log(res?.data?.verifications?.filter((item: any) => item.type === "PermanentAddress")?.[0]?.verificationData?.verificationData);
-    });
+    if (id) {
+      getVerificationData(id as string).then((res) => {
+        setVerificationData(res?.data);
+      }).catch((err) => {
+        console.error(err);
+        message.error('Failed to fetch verification data');
+      });
+    }
   }, [id]);
-
-  if (!loan) {
-    return (
-      <DashboardLayout>
-        <div>Loan not found.</div>
-      </DashboardLayout>
-    );
-  }
 
   const handleEdit = (formKey: string) => {
     setCurrentFormKey(formKey);
@@ -450,484 +695,79 @@ export default function LoanVerifyDetails() {
   };
 
   const handleFormSave = (values: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [currentFormKey]: values,
-    }));
+    // Handle form save logic here
     setEditModalVisible(false);
   };
 
-  const handleApprove = () => {
-    // Collect all form data and prepare for API submission
-    const updatedData: any = {
-      loanId: loan?.id,
-      applicationNumber: loan?.applicationNumber,
-      forms: formData,
-      status: "Approved",
-      timestamp: new Date().toISOString(),
-    };
-    router.push(`/verify`);
-    message.success(`loan approved`);
+  const handleApprove = async () => {
+    try {
+      // Generate final report first
+      const reportResponse = await generateFinalReport(id as string);
+      console.log('Final Report Response:', reportResponse);
 
-    console.log("Updated data to be sent to API:", updatedData);
-    // Here you would typically make an API call
-    // await api.post('/api/loans/approve', updatedData);
+      // Then proceed with approval
+      // router.push(`/verify`);
+      message.success(`loan approved`);
+    } catch (error) {
+      console.error('Error generating final report:', error);
+      message.error('Failed to generate final report');
+    }
+  };
+
+  const getVerificationByType = (type: string) => {
+    return verificationData?.verifications?.find((v: any) => v.type === type);
   };
 
   return (
     <DashboardLayout>
       <div style={{ paddingBottom: "20px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 24,
-          }}
-        >
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}>
           <Title level={3} style={{ margin: 0 }}>
-            Loan Verification - {loan.applicationNumber}
+            Loan Verification - {verificationData?.applicationNumber}
           </Title>
         </div>
-        <div style={{ display: "flex", gap: 32 }}>
-          {/* Left column: forms and documents */}
-          <div style={{ flex: 1, minWidth: 320 }}>
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Basic Details"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("basicDetails")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Verification Type">
-                    {formData?.basicDetails?.verificationType}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Verification Date">
-                    {formData?.basicDetails?.verificationDate}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Verification Time">
-                    {formData?.basicDetails?.verificationTime}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Verification Mode">
-                    {formData?.basicDetails?.verificationMode}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Verification Status">
-                    {formData?.basicDetails?.verificationStatus}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Verification Remarks">
-                    {formData?.basicDetails?.verificationRemarks}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
 
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Applicant Information"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("applicantInformation")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Applicant Name">
-                    {formData?.applicantInformation?.applicantName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Applicant Age">
-                    {formData?.applicantInformation?.applicantAge}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Applicant Gender">
-                    {formData?.applicantInformation?.applicantGender}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Marital Status">
-                    {formData?.applicantInformation?.applicantMaritalStatus}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Education Level">
-                    {formData?.applicantInformation?.applicantEducation}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Office Verification"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("officeVerification")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Name of the Applicant">
-                    {formData?.officeVerification?.applicantName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Name of the Bank">
-                    {formData?.officeVerification?.bankName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Prospect Number">
-                    {formData?.officeVerification?.prospectNumber}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Purpose of Loan">
-                    {formData?.officeVerification?.purposeOfLoan}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Loan Amount">
-                    {formData?.officeVerification?.loanAmount}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Tenure">
-                    {formData?.officeVerification?.tenure}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="PAN Number">
-                    {formData?.officeVerification?.panNumber}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Aadhar Number">
-                    {formData?.officeVerification?.aadharNumber}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Qualification">
-                    {formData?.officeVerification?.qualification}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Current Office Name">
-                    {formData?.officeVerification?.currentOfficeName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Office Address">
-                    {formData?.officeVerification?.officeAddress}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Years in Current Job">
-                    {formData?.officeVerification?.yearsInCurrentJob}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Total Work Experience">
-                    {formData?.officeVerification?.totalWorkExperience}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Company Size">
-                    {formData?.officeVerification?.companySize}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Nature of Service/Business">
-                    {formData?.officeVerification?.natureOfService}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Office Locality">
-                    {formData?.officeVerification?.officeLocality}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="ID Card Number">
-                    {formData?.officeVerification?.idCardNumber}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Designation">
-                    {formData?.officeVerification?.designation}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Mode of Salary">
-                    {formData?.officeVerification?.salaryMode}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Type of Employer">
-                    {formData?.officeVerification?.employerType}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Gross Salary per Month">
-                    {formData?.officeVerification?.grossSalary}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Net Salary per Month">
-                    {formData?.officeVerification?.netSalary}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Previous Company Name">
-                    {formData?.officeVerification?.previousCompanyName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Work Experience">
-                    {formData?.officeVerification?.workExperience}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Existing Loans">
-                    {formData?.officeVerification?.existingLoans}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="References (Colleagues)">
-                    {formData?.officeVerification?.references}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Address Verification"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("addressVerification")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Address Type">
-                    {formData?.addressVerification?.addressType}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Address Category">
-                    {formData?.addressVerification?.addressCategory}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Address Sub-Category">
-                    {formData?.addressVerification?.addressSubCategory}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Address Details">
-                    {formData?.addressVerification?.addressDetails}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Geo Tag">
-                    {formData?.addressVerification?.geoTag}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Residence Details"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("residenceDetails")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Residence Status">
-                    {formData?.residenceDetails?.residenceStatus}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Rent Details">
-                    {formData?.residenceDetails?.rentDetails}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Type of Residence">
-                    {formData?.residenceDetails?.residenceType}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Construction Quality">
-                    {formData?.residenceDetails?.constructionQuality}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Standard of Living">
-                    {formData?.residenceDetails?.standardOfLiving}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Location Category">
-                    {formData?.residenceDetails?.locationCategory}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Locality Type">
-                    {formData?.residenceDetails?.localityType}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Accessibility">
-                    {formData?.residenceDetails?.accessibility}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="House Area">
-                    {formData?.residenceDetails?.houseArea}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Years at Current Address">
-                    {formData?.residenceDetails?.yearsAtCurrentAddress}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Nameplate Visible">
-                    {formData?.residenceDetails?.nameplateVisible}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Family & Employment Details"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("familyEmploymentDetails")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Total Family Members">
-                    {formData?.familyEmploymentDetails?.totalFamilyMembers}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="No. of Earning Members">
-                    {formData?.familyEmploymentDetails?.earningMembers}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="No. of Dependents">
-                    {formData?.familyEmploymentDetails?.dependents}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Is Spouse Working">
-                    {formData?.familyEmploymentDetails?.isSpouseWorking}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Spouse's Employment Details">
-                    {formData?.familyEmploymentDetails?.spouseEmploymentDetails}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Assets Observed">
-                    {formData?.familyEmploymentDetails?.assetsObserved}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Third Party Check"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("thirdPartyCheck")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="TPC Name">
-                    {formData?.thirdPartyCheck?.tpcName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Relationship">
-                    {formData?.thirdPartyCheck?.relationship}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Feedback Status">
-                    {formData?.thirdPartyCheck?.feedbackStatus}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Comments">
-                    {formData?.thirdPartyCheck?.comments}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions
-                  title="Final Observations"
-                  bordered
-                  column={2}
-                  extra={
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => handleEdit("finalObservations")}
-                    />
-                  }
-                >
-                  <Descriptions.Item label="Cooperativeness">
-                    {formData?.finalObservations?.cooperativeness}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Overall Status">
-                    {formData?.finalObservations?.overallStatus}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Remarks">
-                    {formData?.finalObservations?.remarks}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions title="Photo Capture" bordered column={1}>
-                  {formData?.uploadedItems?.map((item, idx) => (
-                    <Descriptions.Item
-                      label={`${
-                        item.type.charAt(0).toUpperCase() + item.type.slice(1)
-                      } Photo ${idx + 1}`}
-                    >
-                      {item.uri}
-                    </Descriptions.Item>
-                  ))}
-                </Descriptions>
-              </Card>
-            </section>
-
-            <section style={{ marginBottom: 24 }}>
-              <Card>
-                <Descriptions title="Documents & Photos" bordered column={1}>
-                  <Descriptions.Item label="Work Verification">
-                    <Space direction="vertical">
-                      {loan?.documents
-                        ?.filter((d: any) => d.type === "Work")
-                        .map((doc: any, idx: any) => (
-                          <a
-                            key={idx}
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {doc.name}
-                          </a>
-                        ))}
-                      {loan?.photos
-                        ?.filter((p: any) => p.type === "Work")
-                        .map((photo: any, idx: any) => (
-                          <img
-                            key={idx}
-                            src={photo.url}
-                            alt="Work Photo"
-                            style={{ width: 120, borderRadius: 4 }}
-                          />
-                        ))}
-                    </Space>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Address Verification">
-                    <Space direction="vertical">
-                      {loan?.documents
-                        ?.filter((d: any) => d.type === "Address")
-                        .map((doc: any, idx: any) => (
-                          <a
-                            key={idx}
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {doc.name}
-                          </a>
-                        ))}
-                      {loan?.photos
-                        ?.filter((p: any) => p.type === "Address")
-                        .map((photo: any, idx: any) => (
-                          <img
-                            key={idx}
-                            src={photo.url}
-                            alt="Address Photo"
-                            style={{ width: 120, borderRadius: 4 }}
-                          />
-                        ))}
-                    </Space>
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-          </div>
-        </div>
+        <Tabs defaultActiveKey="permanent">
+          <TabPane tab="Permanent Address" key="permanent">
+            <VerificationDetails 
+              verificationData={getVerificationByType('PermanentAddress')} 
+              onEdit={handleEdit}
+            />
+          </TabPane>
+          <TabPane tab="Current Address" key="current">
+            <VerificationDetails 
+              verificationData={getVerificationByType('CurrentAddress')} 
+              onEdit={handleEdit}
+            />
+          </TabPane>
+          <TabPane tab="Work Verification" key="work">
+            <WorkVerificationDetails 
+              verificationData={getVerificationByType('Work')} 
+              onEdit={handleEdit}
+            />
+          </TabPane>
+        </Tabs>
       </div>
 
-      <div
-        style={{
-          position: "sticky",
-          bottom: 0,
-          left: 120,
-          right: 40,
-          background: "#fff",
-          padding: "16px 24px",
-          borderTop: "1px solid #f0f0f0",
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "16px",
-          zIndex: 1000,
-          boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-        }}
-      >
+      <div style={{
+        position: "sticky",
+        bottom: 0,
+        left: 120,
+        right: 40,
+        background: "#fff",
+        padding: "16px 24px",
+        borderTop: "1px solid #f0f0f0",
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: "16px",
+        zIndex: 1000,
+        boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
+      }}>
         <Space>
           <Button
             danger
@@ -997,12 +837,13 @@ export default function LoanVerifyDetails() {
           <Button onClick={() => setModalVisible(false)}>Cancel</Button>
         </Space>
       </Modal>
+
       <EditFormModal
         visible={editModalVisible}
         onCancel={() => setEditModalVisible(false)}
         onSave={handleFormSave}
         formKey={currentFormKey}
-        initialValues={formData?.[currentFormKey as keyof FormData]}
+        initialValues={verificationData?.[currentFormKey as keyof FormData]}
       />
     </DashboardLayout>
   );
