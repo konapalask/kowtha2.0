@@ -8,6 +8,7 @@ export type VerificationItem = {
 export type UploadedItem = {
   id: string;
   uri: string;
+  s3Url?: string;
   type: string;
   timestamp: string;
 };

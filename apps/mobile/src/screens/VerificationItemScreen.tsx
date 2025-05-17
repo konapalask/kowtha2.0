@@ -244,7 +244,7 @@ const VerificationItemScreen = () => {
   const handleSubmit = async () => {
     try {
       const finalData = {
-        verificationType: 'PermanentAddress',
+        verificationType: verificationType,
         findings: 'Verification Findings Text',
         verificationData: formData,
       };
@@ -252,7 +252,7 @@ const VerificationItemScreen = () => {
       console.log('Submitting form data:', finalData);
       await submitVerification(
         {
-          verificationType: 'PermanentAddress',
+          verificationType: verificationType,
           findings: 'Verification Findings Text',
           verificationData: finalData,
         },
