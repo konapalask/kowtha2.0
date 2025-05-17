@@ -32,11 +32,11 @@ export default function Login() {
   //   console.log('User Context:', { userDetails, userLoading });
   // }, [userDetails, userLoading]);
 
-  useEffect(() => {
-    if (session) {
-      router.push("/dashboard");
-    }
-  }, [session, router]);
+  // useEffect(() => {
+  //   if (session) {
+  //     router.push("/dashboard");
+  //   }
+  // }, [session, router]);
 
   useEffect(() => {
     if (router.query.error) {

@@ -63,6 +63,15 @@ interface RemoteExecutives {
   [office: string]: FieldExecutive[];
 }
 
+// Define the loan type options
+const loanTypeOptions = [
+  { value: 'Personal Loan', label: 'Personal Loan' },
+  { value: 'Home Loan', label: 'Home Loan' },
+  { value: 'Vehicle Loan', label: 'Vehicle Loan' },
+  { value: 'Agricultural Loan', label: 'Agricultural Loan' },
+  { value: 'Mortgage Loan', label: 'Mortgage Loan' },
+];
+
 // const dummyLoans = [
 //   {
 //     id: 1,
@@ -323,8 +332,31 @@ export default function Loans() {
       key: "loanType",
     },
     {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        const color =
+          status === "Pending"
+            ? "orange"
+            : status === "Approved"
+            ? "green"
+            : status === "Rejected"
+            ? "red"
+            : "blue";
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
+    {
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      render: (date: string) => dayjs(date).fromNow(),
+    },
+   
+    {
       title: (
-        <Typography.Text style={{ color: "#4CAF50" }}>
+        <Typography.Text >
           Permanent Address
         </Typography.Text>
       ),
@@ -359,7 +391,7 @@ export default function Loans() {
     },
     {
       title: (
-        <Typography.Text style={{ color: "#2196F3" }}>
+        <Typography.Text>
           Current Address
         </Typography.Text>
       ),
@@ -394,7 +426,7 @@ export default function Loans() {
     },
     {
       title: (
-        <Typography.Text style={{ color: "#9C27B0" }}>Work</Typography.Text>
+        <Typography.Text>Work</Typography.Text>
       ),
       children: [
         {
@@ -421,28 +453,7 @@ export default function Loans() {
         },
       ],
     },
-    {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      render: (date: string) => dayjs(date).fromNow(),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        const color =
-          status === "Pending"
-            ? "orange"
-            : status === "Approved"
-            ? "green"
-            : status === "Rejected"
-            ? "red"
-            : "blue";
-        return <Tag color={color}>{status}</Tag>;
-      },
-    },
+   
     {
       title: "Actions",
       key: "actions",
@@ -695,75 +706,32 @@ export default function Loans() {
                     }
                   }}
                 >
-                  <Row gutter={16}>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Application Number"
-                        name="applicationNumber"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        <Input disabled={!!selectedLoan.id} />
+                  <Row gutter={8}>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Application Number" name="applicationNumber" rules={[{ required: true, message: "Required" }]}> <Input disabled={!!selectedLoan.id} /> </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Applicant Name" name="applicantName" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Mobile Number" name="applicantMobile" rules={[{ required: true, message: "Required" }, { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit mobile number" }]}> <Input maxLength={10} /> </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Loan Amount" name="loanAmount" rules={[{ required: true, message: "Required" }, { type: 'number', message: "Please enter a valid amount" }]}> <InputNumber min={0} /> </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Address" name="applicantAddress" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Loan Type" name="loanType" rules={[{ required: true, message: "Required" }]}>
+                        <Select
+                          placeholder="Select loan type"
+                          options={loanTypeOptions}
+                        />
                       </Form.Item>
                     </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Applicant Name"
-                        name="applicantName"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Mobile Number"
-                        name="applicantMobile"
-                        rules={[
-                          { required: true, message: "Required" },
-                          { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit mobile number" }
-                        ]}
-                      >
-                        <Input maxLength={10} />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Loan Amount"
-                        name="loanAmount"
-                        rules={[
-                          { required: true, message: "Required" },
-                          { type: 'number', message: "Please enter a valid amount" }
-                        ]}
-                      >
-                        <InputNumber min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Address"
-                        name="applicantAddress"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Loan Type"
-                        name="loanType"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={12}>
-                      <Form.Item
-                        label="Bank Name"
-                        name="bankName"
-                        rules={[{ required: true, message: "Required" }]}
-                      >
-                        <Input />
-                      </Form.Item>
+                    <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Bank Name" name="bankName" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
                     </Col>
                   </Row>
                   <Form.Item>
@@ -1166,13 +1134,29 @@ export default function Loans() {
       <Drawer
         title="Bulk Import Loans"
         placement="right"
-        width="80%"
+        width={1800}
         onClose={() => {
           setIsBulkImportDrawerVisible(false);
           bulkImportForm.resetFields();
         }}
+        bodyStyle={{ padding: '16px' }}
         open={isBulkImportDrawerVisible}
         maskClosable={false}
+        footer={
+          <div style={{ textAlign: 'right', padding: '10px' }}>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Create Loans
+              </Button>
+              <Button onClick={() => {
+                setIsBulkImportDrawerVisible(false);
+                bulkImportForm.resetFields();
+              }}>
+                Cancel
+              </Button>
+            </Space>
+          </div>
+        }
       >
         <Form
           form={bulkImportForm}
@@ -1183,87 +1167,88 @@ export default function Loans() {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card 
-                    key={key} 
-                    style={{ marginBottom: 16 }}
-                    extra={
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(name)}
-                      />
-                    }
-                  >
-                    <Row gutter={16}>
-                      <Col xs={24} sm={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'applicantName']}
-                          label="Applicant Name"
-                          rules={[{ required: true, message: 'Required' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} sm={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'applicantMobile']}
-                          label="Mobile Number"
-                          rules={[
-                            { required: true, message: 'Required' },
-                            { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit mobile number' }
-                          ]}
-                        >
-                          <Input maxLength={10} />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'applicantAddress']}
-                          label="Address"
-                          rules={[{ required: true, message: 'Required' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} sm={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'loanType']}
-                          label="Loan Type"
-                          rules={[{ required: true, message: 'Required' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} sm={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'bankName']}
-                          label="Bank Name"
-                          rules={[{ required: true, message: 'Required' }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={24} sm={12}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'loanAmount']}
-                          label="Loan Amount"
-                          rules={[
-                            { required: true, message: 'Required' },
-                            { type: 'number', message: 'Please enter a valid amount' }
-                          ]}
-                        >
-                          <InputNumber min={0} style={{ width: '100%' }} />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
+                 <div key={key} style={{ marginBottom: 12 }}>
+                   <Row gutter={[8, 8]} align="middle" wrap={false}>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'applicantName']} 
+                         label="Applicant Name" 
+                         rules={[{ required: true, message: 'Required' }]} 
+                       >
+                         <Input style={{ height: '32px' }} />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'applicantMobile']} 
+                         label="Mobile Number" 
+                         rules={[{ required: true, message: 'Required' }, { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit mobile number' }]} 
+                       >
+                         <Input maxLength={10} style={{ height: '32px' }} />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'applicantAddress']} 
+                         label="Address" 
+                         rules={[{ required: true, message: 'Required' }]} 
+                       >
+                         <Input />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'loanType']} 
+                         label="Loan Type" 
+                         rules={[{ required: true, message: 'Required' }]} 
+                       >
+                         <Select
+                           placeholder="Select loan type"
+                           options={loanTypeOptions}
+                           style={{ height: '32px' }}
+                         />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'bankName']} 
+                         label="Bank Name" 
+                         rules={[{ required: true, message: 'Required' }]} 
+                       >
+                         <Input style={{ height: '32px' }} />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'loanAmount']} 
+                         label="Loan Amount" 
+                         rules={[{ required: true, message: 'Required' }, { type: 'number', message: 'Please enter a valid amount' }]} 
+                       >
+                         <InputNumber min={0} style={{ width: '100%', height: '32px' }} />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: '0 4px 0 4px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                       <Button 
+                         type="text" 
+                         danger 
+                         icon={<DeleteOutlined />} 
+                         onClick={() => remove(name)} 
+                       />
+                     </Col>
+                   </Row>
+                 </div>
                 ))}
                 <Form.Item>
                   <Button
@@ -1278,21 +1263,13 @@ export default function Loans() {
               </>
             )}
           </Form.List>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                Create Loans
-              </Button>
-              <Button onClick={() => {
-                setIsBulkImportDrawerVisible(false);
-                bulkImportForm.resetFields();
-              }}>
-                Cancel
-              </Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Drawer>
+      <style jsx global>{`
+        .ant-form-item {
+          margin-bottom: 12px !important;
+        }
+      `}</style>
     </DashboardLayout>
   );
 }
