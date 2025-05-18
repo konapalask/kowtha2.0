@@ -221,6 +221,10 @@ export class AccountsService {
         where.role = filters.role;
       }
 
+      if (filters?.officeId) {
+        where.officeId = filters.officeId;
+      }
+
       const users = await this.prisma.user.findMany({
         where,
         select: {

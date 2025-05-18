@@ -101,7 +101,7 @@ model Verification {
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
-  path             String?            // S3 path for verification documents
+  paths            String[]           // Array of S3 paths for verification documents
   verificationData Json?              // JSON field to store address/work data
   pictureSource    PictureSource?     // Source of the uploaded picture
   createdAt        DateTime           @default(now())

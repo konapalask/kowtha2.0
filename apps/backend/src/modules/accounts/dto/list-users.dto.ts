@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsNumber } from 'class-validator';
 import { UserRole } from '@prisma/client';
 
 export class ListUsersDto {
@@ -11,4 +11,12 @@ export class ListUsersDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiProperty({
+    description: 'Filter users by office ID',
+    required: false
+  })
+  @IsNumber()
+  @IsOptional()
+  officeId?: number;
 } 

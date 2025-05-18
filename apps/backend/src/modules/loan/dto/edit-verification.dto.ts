@@ -1,4 +1,4 @@
-import { IsString, IsObject, IsOptional } from 'class-validator';
+import { IsString, IsObject, IsOptional, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditVerificationDto {
@@ -12,8 +12,13 @@ export class EditVerificationDto {
   @IsOptional()
   verificationData?: any;
 
-  @ApiProperty({ description: 'Path to verification document', required: false })
-  @IsString()
+  @ApiProperty({ 
+    description: 'Array of paths to verification documents', 
+    required: false,
+    type: [String]
+  })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  path?: string;
+  paths?: string[];
 } 

@@ -295,7 +295,7 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          path: path || null,
+          paths: path ? [path] : [],
           verificationData: verificationData || null,
           pictureSource: pictureSource || null,
         },
@@ -600,7 +600,7 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    path?: string,
+    paths?: string[],
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -622,7 +622,7 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          path: path || null,
+          paths: paths || [],
           verificationData: verificationData || null,
           updatedAt: new Date(),
         },
@@ -1030,7 +1030,7 @@ export class LoanService {
         type: verification.type,
         status: verification.status,
         verificationData: verification.verificationData,
-        path: verification.path,
+        paths: verification.paths,
         fieldExecutive: verification.fieldExecutive,
         createdAt: verification.createdAt,
         updatedAt: verification.updatedAt
