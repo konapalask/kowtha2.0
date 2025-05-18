@@ -22,13 +22,18 @@ import {
   Cell
 } from "recharts";
 import axiosInstance from "@/config/axios.config";
+import { getDashboardMetrics } from "@/services/dashboard.services";
 
-interface DashboardStats {
+interface DashboardMetrics {
   totalLoans: number;
   verifiedLoans: number;
   rejectedLoans: number;
   pendingLoans: number;
-  recentLoans: any[];
+  percentages: {
+    verified: number;
+    rejected: number;
+    pending: number;
+  };
 }
 
 // Add this dummy data at the top of the file, after imports
@@ -70,12 +75,16 @@ const DUMMY_RECENT_LOANS = [
 ];
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalLoans: 0,
     verifiedLoans: 0,
     rejectedLoans: 0,
     pendingLoans: 0,
-    recentLoans: [],
+    percentages: {
+      verified: 0,
+      rejected: 0,
+      pending: 0,
+    },
   });
 
   const [pendingLoans, setPendingLoans] = useState<any[]>([]);
@@ -83,53 +92,50 @@ export default function Dashboard() {
   const [employeeStats, setEmployeeStats] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchMetrics = async () => {
       try {
-        const response = await axiosInstance.get("/api/loans/stats", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setStats(response.data);
+        const response = await getDashboardMetrics();
+        setMetrics(response);
 
         // Use dummy data if API fails or for development
-        const pendingLoansData = response.data.allLoans || DUMMY_RECENT_LOANS;
-        setPendingLoans(
-          pendingLoansData
-            .filter((l: any) => l.status === "Pending")
-            .sort(
-              (a: any, b: any) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime()
-            )
-            .slice(0, 10)
-        );
+        // const pendingLoansData = response.data.allLoans || DUMMY_RECENT_LOANS;
+        // setPendingLoans(
+        //   pendingLoansData
+        //     .filter((l: any) => l.status === "Pending")
+        //     .sort(
+        //       (a: any, b: any) =>
+        //         new Date(a.createdAt).getTime() -
+        //         new Date(b.createdAt).getTime()
+        //     )
+        //     .slice(0, 10)
+        // );
 
         // Use dummy data for processing stats
+        // console.log(response)
         setProcessingStats([
-          { status: "Pending", count: response.data.pendingLoans || 6 },
-          { status: "Verified", count: response.data.verifiedLoans || 16 },
-          { status: "Rejected", count: response.data.rejectedLoans || 3 },
+          { status: "Pending", count: response.percentages.pending },
+          { status: "Verified", count: response.percentages.verified },
+          { status: "Rejected", count: response.percentages.rejected },
         ]);
 
         // Use dummy data for employee stats
         setEmployeeStats(response.data.employeeStats);
       } catch (error) {
-        console.error("Failed to fetch stats:", error);
+        console.error("Failed to fetch metrics:", error);
         // Fallback to dummy data if API fails
         setPendingLoans(
           DUMMY_RECENT_LOANS.filter((l) => l.status === "Pending")
         );
-        setProcessingStats([
-          { status: "Pending", count: 6 },
-          { status: "Verified", count: 16 },
-          { status: "Rejected", count: 3 },
-        ]);
+        // setProcessingStats([
+        //   { status: "Pending", count: 6 },
+        //   { status: "Verified", count: 16 },
+        //   { status: "Rejected", count: 3 },
+        // ]);
         setEmployeeStats(DUMMY_EMPLOYEE_STATS);
       }
     };
 
-    fetchStats();
+    fetchMetrics();
   }, []);
 
   const pendingLoansColumns = [
@@ -228,7 +234,7 @@ export default function Dashboard() {
                       Total Loans
                     </Typography>
                   }
-                  value={stats.totalLoans}
+                  value={metrics.totalLoans}
                   valueStyle={{
                     color: "#145886",
                     fontSize: "28px",
@@ -280,7 +286,7 @@ export default function Dashboard() {
                       Verified Loans
                     </Typography>
                   }
-                  value={stats.verifiedLoans}
+                  value={metrics.verifiedLoans}
                   valueStyle={{
                     color: "#2196F3",
                     fontSize: "28px",
@@ -332,7 +338,7 @@ export default function Dashboard() {
                       Rejected Loans
                     </Typography>
                   }
-                  value={stats.rejectedLoans}
+                  value={metrics.rejectedLoans}
                   valueStyle={{
                     color: "#F44336",
                     fontSize: "28px",
@@ -384,7 +390,7 @@ export default function Dashboard() {
                       Pending Loans
                     </Typography>
                   }
-                  value={stats.pendingLoans}
+                  value={metrics.pendingLoans}
                   valueStyle={{
                     color: "#FFC107",
                     fontSize: "28px",
@@ -420,9 +426,9 @@ export default function Dashboard() {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ _, percent }) => ` ${(percent * 100).toFixed(0)}%`}
                 >
-                  {processingStats.map((entry, index) => {
+                  {processingStats.map((_, index) => {
                     const COLORS = ["#FFC107", "#2196F3", "#F44336"];
                     return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
                   })}

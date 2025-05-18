@@ -26,7 +26,7 @@ export default function Login() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const { userDetails, loading: userLoading, setUserDetails } = useUser();
+  const { userDetails, setUserDetails } = useUser();
 
   // useEffect(() => {
   //   console.log('User Context:', { userDetails, userLoading });
@@ -73,12 +73,11 @@ export default function Login() {
         try {
           const userDetailsResponse = await getUserDetailsApi();
           setUserDetails(userDetailsResponse.data);
+          router.push("/dashboard");
         } catch (error) {
           console.error('Error fetching user details:', error);
           message.error('Failed to fetch user details');
         }
-
-        router.push("/dashboard");
       } else {
         message.error(result.data?.message || "Failed to verify OTP");
       }

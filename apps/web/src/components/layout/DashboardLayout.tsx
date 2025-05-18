@@ -20,10 +20,12 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
+import { UserContext } from "./UserContextProvider";
+import { getOfficesApi } from "@/services/settings.services";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -62,6 +64,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [office, setOffice] = useState<string>("");
+  const { userDetails } = useContext(UserContext);
+  
+  useEffect(()=>{
+    getOfficesApi().then((res)=>{
+      setOffice(res?.data?.find((office:any)=>office?.id === userDetails?.officeId)?.name);
+    }).catch((err)=>{
+      console.log(err);
+    })
+  },[])
+
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -120,7 +133,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const userId = (session?.user as any)?.id ?? 0;
   const avatarColor = getAvatarColor(userId);
   const initials = getInitials(session?.user);
-  const office = (session?.user as any)?.office ?? "Office";
+  // const office = (session?.user as any)?.office ?? "Office";
 
   const menu = (
     <Menu>
@@ -128,7 +141,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <a href="/profile">My Profile</a>
       </Menu.Item>
       <Menu.Item key="logout">
-        <a href="/api/auth/signout">Logout</a>
+        <a href="/logout">Logout</a>
       </Menu.Item>
     </Menu>
   );
@@ -230,8 +243,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </Header>
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            margin: 0,
+            padding: 16,
             // background: "var(--background-primary)",
             background: "#f5f5f5",
             fontFamily: "Noto Sans, sans-serif",

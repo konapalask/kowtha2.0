@@ -706,7 +706,7 @@ export default function LoanVerifyDetails() {
       console.log('Final Report Response:', reportResponse);
 
       // Then proceed with approval
-      // router.push(`/verify`);
+      router.push(`/verify`);
       message.success(`loan approved`);
     } catch (error) {
       console.error('Error generating final report:', error);
