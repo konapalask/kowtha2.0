@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import { ConfigProvider } from "antd";
 import { SessionProvider } from "next-auth/react";
-import { UserContextProvider } from "@/components/layout/UserContextProvider";
+import UserContextProvider from "@/components/layout/UserContextProvider";
 import "../styles/globals.css";
 
 export default function App({

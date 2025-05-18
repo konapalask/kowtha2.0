@@ -49,6 +49,7 @@ import {
 } from "@/services/loans.services";
 import { getOfficesApi, Office } from "@/services/settings.services";
 import { getUsersApi, getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
+import { colors } from "@/styles/colors";
 
 dayjs.extend(relativeTime);
 
@@ -73,6 +74,50 @@ const loanTypeOptions = [
   { value: 'Vehicle Loan', label: 'Vehicle Loan' },
   { value: 'Agricultural Loan', label: 'Agricultural Loan' },
   { value: 'Mortgage Loan', label: 'Mortgage Loan' },
+];
+
+const bankOptions = [
+  { value: 'TATA CAPITAL LIMITED', label: 'TATA CAPITAL LIMITED' },
+  { value: 'TATA CAPITAL HOUSING FINANCE LIMITED', label: 'TATA CAPITAL HOUSING FINANCE LIMITED' },
+  { value: 'INDIABULLS HOUSING FINANCE LTD', label: 'INDIABULLS HOUSING FINANCE LTD' },
+  { value: 'IDFC FIRST FINANCIAL SERVICES LIMITED', label: 'IDFC FIRST FINANCIAL SERVICES LIMITED' },
+  { value: 'IIFL HOUSING FINANCE LIMITED', label: 'IIFL HOUSING FINANCE LIMITED' },
+  { value: 'ADITYA BIRLA HOUSING FINANCE LIMITED', label: 'ADITYA BIRLA HOUSING FINANCE LIMITED' },
+  { value: 'PUNJAB NATIONAL BANK HOUSING FINANCE LIMITED', label: 'PUNJAB NATIONAL BANK HOUSING FINANCE LIMITED' },
+  { value: 'INDUSIND HOUSING FINANCE LIMITED', label: 'INDUSIND HOUSING FINANCE LIMITED' },
+  { value: 'INDUSIND BANK LIMITED', label: 'INDUSIND BANK LIMITED' },
+  { value: 'CENTRUM HOUSING FINANCE LTD', label: 'CENTRUM HOUSING FINANCE LTD' },
+  { value: 'STATE BANK OF INDIA –IT VERIFICATION AGENCY', label: 'STATE BANK OF INDIA –IT VERIFICATION AGENCY' },
+  { value: 'AXIS FINANCE LTD', label: 'AXIS FINANCE LTD' },
+  { value: 'FULLERTON HOUSING FINANCE LTD', label: 'FULLERTON HOUSING FINANCE LTD' },
+  { value: 'FULLERTON CREDIT COMPANY LTD', label: 'FULLERTON CREDIT COMPANY LTD' },
+  { value: 'AHAM HOUSING FINANCE LTD', label: 'AHAM HOUSING FINANCE LTD' },
+  { value: 'ICICI HOME FINANCE LTD', label: 'ICICI HOME FINANCE LTD' },
+  { value: 'PIRAMAL HOUSING FINANCE LTD', label: 'PIRAMAL HOUSING FINANCE LTD' },
+  { value: 'YES BANK LTD', label: 'YES BANK LTD' },
+  { value: 'INCRED HOUSING FINANCE LTD', label: 'INCRED HOUSING FINANCE LTD' },
+  { value: 'AMBIT FINVEST PVT.LTD', label: 'AMBIT FINVEST PVT.LTD' },
+  { value: 'INDOSTAR HOME FINANCE PRIVATE LIMITED', label: 'INDOSTAR HOME FINANCE PRIVATE LIMITED' },
+  { value: 'BANK OF INDIA – DUE DILIGENCE', label: 'BANK OF INDIA – DUE DILIGENCE' },
+  { value: 'NEOGROWTH CREDIT PRIVATE LIMITED', label: 'NEOGROWTH CREDIT PRIVATE LIMITED' },
+  { value: 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LTD', label: 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LTD' },
+  { value: 'HOUSING DEVELOPMENT FINANCE CORPORATION LIMITED', label: 'HOUSING DEVELOPMENT FINANCE CORPORATION LIMITED' },
+  { value: 'HIRANANDINI FINANCIAL SERVICES PRIVATE LTD', label: 'HIRANANDINI FINANCIAL SERVICES PRIVATE LTD' },
+  { value: 'MUTHOOT HOUSING FINANCE COMPANY LIMITED', label: 'MUTHOOT HOUSING FINANCE COMPANY LIMITED' },
+  { value: 'DCB BANK LTD', label: 'DCB BANK LTD' },
+  { value: 'CANARA BANK – DUE DILIGENCE FOR THE ENTIRE STATE OF ANDHRA PRADESH', label: 'CANARA BANK – DUE DILIGENCE FOR THE ENTIRE STATE OF ANDHRA PRADESH' },
+  { value: 'RBL BANK LIMITED', label: 'RBL BANK LIMITED' },
+  { value: 'NORTHEN ARC CAPITAL LTD', label: 'NORTHEN ARC CAPITAL LTD' },
+  { value: 'AXIS BANK LTD', label: 'AXIS BANK LTD' },
+  { value: 'ARKA FINCAP LIMITED', label: 'ARKA FINCAP LIMITED' },
+  { value: 'CENT BANK', label: 'CENT BANK' },
+  { value: 'NIDO HOME FINANCE LIMITED', label: 'NIDO HOME FINANCE LIMITED' },
+  { value: 'HERO FINCORP', label: 'HERO FINCORP' },
+  { value: 'KOTAK MAHINDRA BANK LIMITED', label: 'KOTAK MAHINDRA BANK LIMITED' },
+  { value: 'SHRIRAM HOUSING FINANCE LTD', label: 'SHRIRAM HOUSING FINANCE LTD' },
+  { value: 'SHRIRAM CITY UNION FINANCE LTD', label: 'SHRIRAM CITY UNION FINANCE LTD' },
+  { value: 'HERO HOUSING FINANCIAL LTD', label: 'HERO HOUSING FINANCIAL LTD' },
+  { value: 'GODREJ CAPITAL', label: 'GODREJ CAPITAL' },
 ];
 
 // const dummyLoans = [
@@ -138,16 +183,39 @@ export default function Loans() {
   const [form] = Form.useForm();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [refresh, setRefresh] = useState(false);
-  const { userDetails, loading: userLoading } = useUser();
+  const { userDetails } = useUser();
   const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] = useState(false);
   const [bulkImportForm] = Form.useForm();
   const [currentOffice, setCurrentOffice] = useState<string>(userDetails?.officeId || "");
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
   const [offices,setOffices] = useState<Office[]>([]);
+  const [sameAddress, setSameAddress] = useState(false);
+  const [editLoanInfo, setEditLoanInfo] = useState(false);
 
-  // useEffect(() => {
-  //   console.log('User Context in Loans:', { userDetails, userLoading });
-  // }, [userDetails, userLoading]);
+  // Reset form when selected loan changes
+  useEffect(() => {
+    if (selectedLoan) {
+      // Find the matching loan type option
+      const matchingLoanType = loanTypeOptions.find(
+        option => option.value.toLowerCase() === selectedLoan.loanType?.toLowerCase()
+      );
+
+      // Find the matching bank option
+      const matchingBank = bankOptions.find(
+        option => option.value.toLowerCase().includes(selectedLoan.bankName?.toLowerCase() || '')
+      );
+
+      form.setFieldsValue({
+        applicationNumber: selectedLoan.applicationNumber,
+        applicantName: selectedLoan.applicantName,
+        applicantMobile: selectedLoan.applicantMobile,
+        loanAmount: selectedLoan.loanAmount,
+        applicantAddress: selectedLoan.applicantAddress,
+        loanType: matchingLoanType?.value || selectedLoan.loanType,
+        bankName: matchingBank?.value || selectedLoan.bankName,
+      });
+    }
+  }, [selectedLoan, form]);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -205,9 +273,6 @@ export default function Loans() {
     };
     fetchExecutives();
   }, [currentOffice]);
-
-  const [sameAddress, setSameAddress] = useState(false);
-  const [editLoanInfo, setEditLoanInfo] = useState(false);
 
   const handleImport = async (file: File) => {
     try {
@@ -488,14 +553,15 @@ export default function Loans() {
             Import Loan
           </Button>
           <Button
-            type="primary"
-            icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            // type="primary"
+            // icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            style={{color:colors.secondary.main, borderColor:colors.secondary.main}}
             onClick={() => setIsBulkImportDrawerVisible(true)}
           >
             Bulk Import
           </Button>
           <Button
-            type="primary"
+            type="link"
             icon={<UploadOutlined style={{ fontSize: 16 }} />}
             onClick={() => setIsImportModalVisible(true)}
           >
@@ -642,7 +708,30 @@ export default function Loans() {
                 {!editLoanInfo && selectedLoan.id && (
                   <Button
                     type="link"
-                    onClick={() => setEditLoanInfo(true)}
+                    onClick={() => {
+                      setEditLoanInfo(true);
+                      if (selectedLoan) {
+                        // Find the matching loan type option
+                        const matchingLoanType = loanTypeOptions.find(
+                          option => option.value.toLowerCase() === selectedLoan.loanType?.toLowerCase()
+                        );
+
+                        // Find the matching bank option
+                        const matchingBank = bankOptions.find(
+                          option => option.value.toLowerCase().includes(selectedLoan.bankName?.toLowerCase() || '')
+                        );
+
+                        form.setFieldsValue({
+                          applicationNumber: selectedLoan.applicationNumber,
+                          applicantName: selectedLoan.applicantName,
+                          applicantMobile: selectedLoan.applicantMobile,
+                          loanAmount: selectedLoan.loanAmount,
+                          applicantAddress: selectedLoan.applicantAddress,
+                          loanType: matchingLoanType?.value || selectedLoan.loanType,
+                          bankName: matchingBank?.value || selectedLoan.bankName,
+                        });
+                      }
+                    }}
                     icon={<EditOutlined />}
                   >
                     Edit
@@ -652,15 +741,20 @@ export default function Loans() {
               {(!selectedLoan.id || editLoanInfo) ? (
                 <Form
                   layout="vertical"
-                  initialValues={{
-                    applicationNumber: selectedLoan?.applicationNumber,
-                    applicantName: selectedLoan?.applicantName,
-                    applicantMobile: selectedLoan?.applicantMobile,
-                    loanAmount: selectedLoan?.loanAmount,
-                    applicantAddress: selectedLoan?.applicantAddress,
-                    loanType: selectedLoan?.loanType,
-                    bankName: selectedLoan?.bankName,
-                  }}
+                  form={form}
+                  initialValues={selectedLoan ? {
+                    applicationNumber: selectedLoan.applicationNumber,
+                    applicantName: selectedLoan.applicantName,
+                    applicantMobile: selectedLoan.applicantMobile,
+                    loanAmount: selectedLoan.loanAmount,
+                    applicantAddress: selectedLoan.applicantAddress,
+                    loanType: loanTypeOptions.find(
+                      option => option.value.toLowerCase() === selectedLoan.loanType?.toLowerCase()
+                    )?.value || selectedLoan.loanType,
+                    bankName: bankOptions.find(
+                      option => option.value.toLowerCase().includes(selectedLoan.bankName?.toLowerCase() || '')
+                    )?.value || selectedLoan.bankName,
+                  } : undefined}
                   onFinish={async (values) => {
                     try {
                       setLoading(true);
@@ -729,7 +823,16 @@ export default function Loans() {
                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Bank Name" name="bankName" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
+                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Bank Name" name="bankName" rules={[{ required: true, message: "Required" }]}>
+                        <Select
+                          showSearch
+                          placeholder="Select bank"
+                          options={bankOptions}
+                          filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                          }
+                        />
+                      </Form.Item>
                     </Col>
                   </Row>
                   <Form.Item>
@@ -1249,7 +1352,15 @@ export default function Loans() {
                          label="Bank Name" 
                          rules={[{ required: true, message: 'Required' }]} 
                        >
-                         <Input style={{ height: '32px' }} />
+                         <Select
+                           showSearch
+                           placeholder="Select bank"
+                           options={bankOptions}
+                           filterOption={(input, option) =>
+                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                           }
+                           style={{ height: '32px' }}
+                         />
                        </Form.Item>
                      </Col>
                      <Col xs={24} sm={6} style={{ padding: 4 }}>
