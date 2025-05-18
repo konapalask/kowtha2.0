@@ -406,7 +406,7 @@ export class LoanController {
       req.user.sub,
       body.findings,
       body.verificationData,
-      body.path,
+      body.path ? [body.path] : undefined,
     );
     return {
       status: 200,
