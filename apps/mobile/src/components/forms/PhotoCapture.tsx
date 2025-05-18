@@ -90,14 +90,31 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         data: {url: presignedUrl},
       } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
 
-      // Upload to S3
-      await uploadImageToS3(presignedUrl, imageUri);
+      // Convert image to blob
+      const imageResponse = await fetch(imageUri);
+      const blob = await imageResponse.blob();
+
+      // Upload to S3 using PUT request
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: blob,
+        headers: {
+          'Content-Type': 'image/jpeg',
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        throw new Error(
+          `Upload failed with status: ${uploadResponse.status}, message: ${errorText}`,
+        );
+      }
 
       // Create new item with S3 URL
       const newItem: UploadedItem = {
         id: Date.now().toString(),
         uri: imageUri,
-        s3Url: fileName, // Store the S3 path
+        s3Url: fileName,
         type: 'photo',
         timestamp: new Date().toISOString(),
       };
@@ -109,7 +126,10 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       Alert.alert('Success', 'Image uploaded successfully');
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to upload image. Please try again.',
+      );
     } finally {
       setIsUploading(false);
     }
