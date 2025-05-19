@@ -1029,10 +1029,10 @@ export class LoanService {
       const file = { content: htmlTemplate };
 
       function createPdf(): Promise<Buffer> {
-        return htmlPdf.generatePdf(file, options); // ✅
+        return htmlPdf.generatePdf(file, options); 
       }
 
-      const pdfBuffer = await createPdf();
+      const pdfBuffer = (await createPdf()) as Buffer;
 
       await this.loggingService.info('PDF generated successfully', {
         loanId,

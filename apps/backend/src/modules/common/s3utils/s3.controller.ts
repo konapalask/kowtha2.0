@@ -45,7 +45,6 @@ export class S3Controller {
     },
   })
   async generatePresignedDownloadUrl(@Param('path') path: string) {
-    console.log('path', path);
     const url = await this.s3Service.generatePresignedDownloadUrl(path);
     return { url };
   }
