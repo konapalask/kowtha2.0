@@ -5,7 +5,7 @@ import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
 import { Logger } from '@nestjs/common';
-import * as htmlPdf from 'html-pdf-node';
+import * as puppeteer from 'puppeteer';
 import PDFDocument = require('pdfkit');
 import * as fs from 'fs';
 import * as path from 'path';
@@ -1018,21 +1018,35 @@ export class LoanService {
         </html>
       `;
 
+      // Launch a new browser instance
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      // Create a new page
+      const page = await browser.newPage();
+
+      // Set content to the HTML template
+      await page.setContent(htmlTemplate, {
+        waitUntil: 'networkidle0'
+      });
+
       // Generate PDF
-      const options = {
-        format: 'A4',
-        margin: { top: 20, right: 20, bottom: 20, left: 20 },
+      const pdfBuffer = await page.pdf({
+        format: 'a4',
+        margin: {
+          top: '20px',
+          right: '20px',
+          bottom: '20px',
+          left: '20px'
+        },
         printBackground: true,
         preferCSSPageSize: true
-      };
+      });
 
-      const file = { content: htmlTemplate };
-
-      function createPdf(): Promise<Buffer> {
-        return htmlPdf.generatePdf(file, options); 
-      }
-
-      const pdfBuffer = (await createPdf()) as Buffer;
+      // Close the browser
+      await browser.close();
 
       await this.loggingService.info('PDF generated successfully', {
         loanId,
