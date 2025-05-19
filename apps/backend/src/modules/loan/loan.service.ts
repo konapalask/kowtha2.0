@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
+import { S3Service } from '../common/s3utils/s3.service';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -22,6 +23,7 @@ export class LoanService {
     private prisma: PrismaService,
     private loggingService: LoggingService,
     private logger: Logger,
+    private s3Service: S3Service,
   ) {}
 
   async createLoan(data: CreateLoanDto) {
@@ -1024,16 +1026,33 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      // Format the verification data
-      const verificationData = loan.verifications.map(verification => ({
-        id: verification.id,
-        type: verification.type,
-        status: verification.status,
-        verificationData: verification.verificationData,
-        paths: verification.paths,
-        fieldExecutive: verification.fieldExecutive,
-        createdAt: verification.createdAt,
-        updatedAt: verification.updatedAt
+      // Format the verification data and generate presigned URLs for paths
+      const verificationData = await Promise.all(loan.verifications.map(async verification => {
+        const downloadUrls = await Promise.all(
+          (verification.paths || []).map(async path => {
+            try {
+              return await this.s3Service.generatePresignedDownloadUrl(path);
+            } catch (error) {
+              await this.loggingService.error('Failed to generate presigned URL', {
+                path,
+                error: error.message
+              });
+              return null;
+            }
+          })
+        );
+
+        return {
+          id: verification.id,
+          type: verification.type,
+          status: verification.status,
+          verificationData: verification.verificationData,
+          paths: verification.paths,
+          downloadUrls: downloadUrls.filter(url => url !== null),
+          fieldExecutive: verification.fieldExecutive,
+          createdAt: verification.createdAt,
+          updatedAt: verification.updatedAt
+        };
       }));
 
       await this.loggingService.info('Verification data retrieved successfully', {

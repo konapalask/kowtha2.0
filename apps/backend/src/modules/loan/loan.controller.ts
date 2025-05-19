@@ -25,9 +25,45 @@ import { EditVerificationDto } from './dto/edit-verification.dto';
 export class LoanController {
   constructor(private loanService: LoanService) {}
 
+  /*
+      The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
+  */
+
+  @Get('office/:officeId')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Get loans by office' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans for the specified office'
+  })
+  async getLoansByOffice(@Param('officeId') officeId: number) {
+    const result = await this.loanService.getLoansByOffice(officeId);
+    return {
+      status: 200,
+      message: 'Office loans fetched successfully',
+      data: result
+    };
+  }
+    
+  @Get()
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Get all loans with optional status filter' })
+  @ApiResponse({ 
+      status: 200, 
+      description: 'Returns a list of loans matching the filter criteria' 
+    })
+  async getLoans(@Query() filters: GetLoansDto) {
+    const result = await this.loanService.getLoans(filters);
+    return {
+      status: 200,
+      message: 'Loans fetched successfully',
+      data: result
+    };
+  }
+
   @Post()
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Create one or multiple loans' })
+  @ApiOperation({ summary: 'Operations Executive will Create one or multiple loans' })
   @ApiResponse({ 
     status: 201, 
     description: 'The loans have been successfully created',
@@ -61,7 +97,7 @@ export class LoanController {
   @Post('import')
   @Roles(UserRole.OperationsExecutive)
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Import loans from Excel file' })
+  @ApiOperation({ summary: 'Operations Executive will Import loans from Excel file' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -134,7 +170,7 @@ export class LoanController {
 
   @Post(':id/assign-field-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Assign a field executive to a loan verification' })
+  @ApiOperation({ summary: 'Operations Executive will Assign a field executive to a loan verification' })
   @ApiResponse({ 
     status: 200, 
     description: 'The verification has been successfully assigned',
@@ -177,98 +213,9 @@ export class LoanController {
     };
   }
 
-  @Post(':id/verify')
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({ summary: 'Verify a loan by field verifier' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'The loan has been successfully verified' 
-  })
-  async verifyLoan(
-    @Param('id') loanId: number,
-    @Body() verifyLoanDto: VerifyLoanDto,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    const result = await this.loanService.verifyLoan(
-      loanId,
-      req.user.sub,
-      verifyLoanDto.status,
-      verifyLoanDto.comments,
-    );
-    return {
-      status: 200,
-      message: 'Loan verified successfully',
-      data: result
-    };
-  }
-
-  @Get('office/:officeId')
+  @Patch(':id/update-field-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Get loans by office' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Returns a list of loans for the specified office'
-  })
-  async getLoansByOffice(@Param('officeId') officeId: number) {
-    const result = await this.loanService.getLoansByOffice(officeId);
-    return {
-      status: 200,
-      message: 'Office loans fetched successfully',
-      data: result
-    };
-  }
-
-  @Get('field-executive')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
-  @ApiOperation({ summary: 'Get loans assigned to field executive' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Returns a list of loans assigned to the field executive'
-  })
-  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByFieldExecutive(req.user.sub);
-    return {
-      status: 200,
-      message: 'Field executive loans fetched successfully',
-      data: result
-    };
-  }
-
-  @Get('verifier')
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({ summary: 'Get loans assigned to verifier' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Returns a list of loans assigned to the verifier'
-  })
-  async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByVerifier(req.user.sub);
-    return {
-      status: 200,
-      message: 'Verifier loans fetched successfully',
-      data: result
-    };
-  }
-
-  @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Get all loans with optional status filter' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Returns a list of loans matching the filter criteria' 
-  })
-  async getLoans(@Query() filters: GetLoansDto) {
-    const result = await this.loanService.getLoans(filters);
-    return {
-      status: 200,
-      message: 'Loans fetched successfully',
-      data: result
-    };
-  }
-
-  @Patch(':id/assign')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Update loan verification assignment' })
+  @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
   @ApiResponse({ 
     status: 200, 
     description: 'The loan verification assignment has been successfully updated',
@@ -307,6 +254,246 @@ export class LoanController {
     return {
       status: 200,
       message: 'Verification assignment updated successfully',
+      data: result
+    };
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Patch API to Edit loan details' })
+  @ApiResponse({
+    status: 200,
+    description: 'The loan has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Loan updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            applicantName: { type: 'string' },
+            applicantMobile: { type: 'string' },
+            applicantAddress: { type: 'string' },
+            loanType: { type: 'string' },
+            bankName: { type: 'string' },
+            loanAmount: { type: 'number' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async editLoan(
+    @Param('id') loanId: string,
+    @Body() editLoanDto: EditLoanDto
+  ) {
+    const result = await this.loanService.editLoan(Number(loanId), editLoanDto);
+    return {
+      status: 200,
+      message: 'Loan updated successfully',
+      data: result
+    };
+  }
+
+
+  /*
+      The below API's are used by only Verifier. His tasks include: Approve or Reject Loan, Edit Verification Data, Generate Final Report
+  */
+
+  @Get('get-verifier-loans')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Get loans assigned to verifier' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans assigned to the same verifier calling this API'
+  })
+  async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
+    const result = await this.loanService.getLoansByVerifier(req.user.sub);
+    return {
+      status: 200,
+      message: 'Verifier loans fetched successfully',
+      data: result
+    };
+  }
+
+
+  @Get(':id/generate-final-report')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Generate PDF for loan details' })
+  @ApiResponse({ status: 200, description: 'PDF generated successfully' })
+  @ApiResponse({ status: 404, description: 'Loan not found' })
+  async generatePDF(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const pdfBuffer = await this.loanService.generateLoanPDF(Number(id));
+      
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=loan-${id}.pdf`,
+        'Content-Length': pdfBuffer.length,
+      });
+
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to generate PDF', error: error.message });
+      }
+    }
+  }
+
+  @Get(':id/verification-data')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Get verification data for a loan' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns verification data for the specified loan',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification data retrieved successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            loanId: { type: 'number' },
+            applicationNumber: { type: 'string' },
+            applicantName: { type: 'string' },
+            verifications: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  type: { type: 'string', enum: Object.values(VerificationType) },
+                  status: { type: 'string', enum: Object.values(VerificationStatus) },
+                  verificationData: { type: 'object' },
+                  path: { type: 'string', nullable: true },
+                  fieldExecutive: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' },
+                      mobile: { type: 'string' }
+                    }
+                  },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            verificationReport: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                remarks: { type: 'string' },
+                verificationDate: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getVerificationData(@Param('id') loanId: string) {
+    const result = await this.loanService.getVerificationData(Number(loanId));
+    return {
+      status: 200,
+      message: 'Verification data retrieved successfully',
+      data: result
+    };
+  }
+
+  @Post(':id/verify')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Verifier will approve or reject a loan and add comments' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The loan has been successfully verified' 
+  })
+  async verifyLoan(
+    @Param('id') loanId: number,
+    @Body() verifyLoanDto: VerifyLoanDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const result = await this.loanService.verifyLoan(
+      loanId,
+      req.user.sub,
+      verifyLoanDto.status,
+      verifyLoanDto.comments,
+    );
+    return {
+      status: 200,
+      message: 'Loan verified successfully',
+      data: result
+    };
+  }
+
+  @Patch(':id/verification/:type')
+  @Roles(UserRole.Verifier)
+  @ApiOperation({ summary: 'Edit verification data' })
+  @ApiResponse({
+    status: 200,
+    description: 'The verification data has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification data updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            findings: { type: 'string' },
+            verificationData: { type: 'object' },
+            path: { type: 'string', nullable: true },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async editVerificationData(
+    @Param('id') loanId: string,
+    @Param('type') verificationType: VerificationType,
+    @Body() editVerificationDto: EditVerificationDto
+  ) {
+    const result = await this.loanService.editVerificationData(
+      Number(loanId),
+      verificationType,
+      editVerificationDto
+    );
+    return {
+      status: 200,
+      message: 'Verification data updated successfully',
+      data: result
+    };
+  }
+
+
+  /*
+      The below API's are used by only Field Executive. His tasks include: Edit Verification Report, Submit Verification Data and Upload Proofs
+  */
+
+  @Get('get-field-executive-loans')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Get loans assigned to field executive' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of loans assigned to the same field executive calling this API'
+  })
+  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
+    const result = await this.loanService.getLoansByFieldExecutive(req.user.sub);
+    return {
+      status: 200,
+      message: 'Field executive loans fetched successfully',
       data: result
     };
   }
@@ -415,33 +602,6 @@ export class LoanController {
     };
   }
 
-  @Get(':id/generate-final-report')
-  @ApiOperation({ summary: 'Generate PDF for loan details' })
-  @ApiResponse({ status: 200, description: 'PDF generated successfully' })
-  @ApiResponse({ status: 404, description: 'Loan not found' })
-  async generatePDF(
-    @Param('id') id: string,
-    @Res() res: Response,
-  ) {
-    try {
-      const pdfBuffer = await this.loanService.generateLoanPDF(Number(id));
-      
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename=loan-${id}.pdf`,
-        'Content-Length': pdfBuffer.length,
-      });
-
-      res.send(pdfBuffer);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        res.status(404).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: 'Failed to generate PDF', error: error.message });
-      }
-    }
-  }
-
   @Patch(':id/verification/status')
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Update verification status' })
@@ -484,147 +644,5 @@ export class LoanController {
     };
   }
 
-  @Get(':id/verification-data')
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({ summary: 'Get verification data for a loan' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Returns verification data for the specified loan',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Verification data retrieved successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            loanId: { type: 'number' },
-            applicationNumber: { type: 'string' },
-            applicantName: { type: 'string' },
-            verifications: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'number' },
-                  type: { type: 'string', enum: Object.values(VerificationType) },
-                  status: { type: 'string', enum: Object.values(VerificationStatus) },
-                  verificationData: { type: 'object' },
-                  path: { type: 'string', nullable: true },
-                  fieldExecutive: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' },
-                      mobile: { type: 'string' }
-                    }
-                  },
-                  createdAt: { type: 'string', format: 'date-time' },
-                  updatedAt: { type: 'string', format: 'date-time' }
-                }
-              }
-            },
-            verificationReport: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                remarks: { type: 'string' },
-                verificationDate: { type: 'string', format: 'date-time' }
-              }
-            }
-          }
-        }
-      }
-    }
-  })
-  async getVerificationData(@Param('id') loanId: string) {
-    const result = await this.loanService.getVerificationData(Number(loanId));
-    return {
-      status: 200,
-      message: 'Verification data retrieved successfully',
-      data: result
-    };
-  }
 
-  @Patch(':id')
-  @Roles(UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Edit loan details' })
-  @ApiResponse({
-    status: 200,
-    description: 'The loan has been successfully updated',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Loan updated successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            id: { type: 'number' },
-            applicantName: { type: 'string' },
-            applicantMobile: { type: 'string' },
-            applicantAddress: { type: 'string' },
-            loanType: { type: 'string' },
-            bankName: { type: 'string' },
-            loanAmount: { type: 'number' },
-            updatedAt: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    }
-  })
-  async editLoan(
-    @Param('id') loanId: string,
-    @Body() editLoanDto: EditLoanDto
-  ) {
-    const result = await this.loanService.editLoan(Number(loanId), editLoanDto);
-    return {
-      status: 200,
-      message: 'Loan updated successfully',
-      data: result
-    };
-  }
-
-  @Patch(':id/verification/:type')
-  @Roles(UserRole.Verifier)
-  @ApiOperation({ summary: 'Edit verification data' })
-  @ApiResponse({
-    status: 200,
-    description: 'The verification data has been successfully updated',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Verification data updated successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            id: { type: 'number' },
-            loanId: { type: 'number' },
-            type: { type: 'string', enum: Object.values(VerificationType) },
-            findings: { type: 'string' },
-            verificationData: { type: 'object' },
-            path: { type: 'string', nullable: true },
-            updatedAt: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    }
-  })
-  async editVerificationData(
-    @Param('id') loanId: string,
-    @Param('type') verificationType: VerificationType,
-    @Body() editVerificationDto: EditVerificationDto
-  ) {
-    const result = await this.loanService.editVerificationData(
-      Number(loanId),
-      verificationType,
-      editVerificationDto
-    );
-    return {
-      status: 200,
-      message: 'Verification data updated successfully',
-      data: result
-    };
-  }
 } 
