@@ -43,7 +43,6 @@ export class AccountsService {
       if (!fast2smsApiKey) {
         throw new Error('FAST2SMS_API_KEY is not configured');
       }
-      console.log("sendign message");
       
       const response = await axios.post(
         'https://www.fast2sms.com/dev/bulkV2',
@@ -67,7 +66,6 @@ export class AccountsService {
       if (response.data.return === false) {
         throw new Error(`SMS sending failed: ${response.data.message}`);
       }
-      console.log(response.data);
       
       await this.loggingService.info('SMS sent successfully', {
         mobile,
