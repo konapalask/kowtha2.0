@@ -18,6 +18,7 @@ import {
   Col,
   message,
   Tabs,
+  Table,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -25,14 +26,15 @@ import {
   DownloadOutlined,
   MailOutlined,
   EditOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
 import React from "react";
 import { getVerificationData, generateFinalReport } from "@/services/verifier.services";
 
-// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-// import "react-quill/dist/quill.snow.css";
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import "react-quill/dist/quill.snow.css";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -127,6 +129,21 @@ interface FormData {
     type: string;
     timestamp: string;
   }>;
+  financialDetails: {
+    fundsRequired: string;
+    sourceOfOwnFunds: string;
+    purchaseCost: string;
+    savings: string;
+    constructionEstimate: string;
+    familyFriends: string;
+    registrationCharges: string;
+    otherLoanAmount: string;
+    otherExpenses: string;
+    totalAmountSpent: string;
+    totalTransactionCost: string;
+    paymentModeCash: string;
+    paymentModeCheque: string;
+  };
 }
 
 interface EditFormModalProps {
@@ -145,13 +162,16 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
   initialValues,
 }) => {
   const [form] = Form.useForm();
+  const [editorContent, setEditorContent] = useState('');
 
-  // Reset form when modal opens with new values
   React.useEffect(() => {
     if (visible && initialValues) {
       form.setFieldsValue(initialValues);
+      if (formKey === 'finalObservations') {
+        setEditorContent(initialValues.remarks || '');
+      }
     }
-  }, [visible, initialValues, form]);
+  }, [visible, initialValues, form, formKey]);
 
   const getFormFields = () => {
     switch (formKey) {
@@ -245,6 +265,22 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
           { name: "existingLoans", label: "Existing Loans", type: "textarea" },
           { name: "references", label: "References (Colleagues)", type: "textarea" },
         ];
+      case "financialDetails":
+        return [
+          { name: "fundsRequired", label: "Funds Required", type: "input" },
+          { name: "sourceOfOwnFunds", label: "Source of Own Funds", type: "input" },
+          { name: "purchaseCost", label: "Purchase Cost", type: "input" },
+          { name: "savings", label: "Savings", type: "input" },
+          { name: "constructionEstimate", label: "Construction Estimate", type: "input" },
+          { name: "familyFriends", label: "Family/Friends", type: "input" },
+          { name: "registrationCharges", label: "Registration/Stamp Duty Charges", type: "input" },
+          { name: "otherLoanAmount", label: "Other Loan Amount Taken", type: "input" },
+          { name: "otherExpenses", label: "Other Expenses", type: "input" },
+          { name: "totalAmountSpent", label: "Total Amount Spent", type: "input" },
+          { name: "totalTransactionCost", label: "Total Transaction Cost", type: "input" },
+          { name: "paymentModeCash", label: "Mode of Payment to Seller (Cash)", type: "input" },
+          { name: "paymentModeCheque", label: "Mode of Payment to Seller (Cheque)", type: "input" },
+        ];
       default:
         return [];
     }
@@ -256,6 +292,29 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
     name: string;
     label: string;
   }) => {
+    if (formKey === 'finalObservations' && field.name === 'remarks') {
+      return (
+        <div style={{ height: '300px', marginBottom: '20px' }}>
+          <ReactQuill
+            theme="snow"
+            value={editorContent}
+            onChange={setEditorContent}
+            style={{ height: '200px' }}
+            modules={{
+              toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'color': [] }, { 'background': [] }],
+                ['link', 'image'],
+                ['clean']
+              ],
+            }}
+          />
+        </div>
+      );
+    }
+
     switch (field.type) {
       case "input":
         return <Input />;
@@ -282,6 +341,9 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
+      if (formKey === 'finalObservations') {
+        values.remarks = editorContent;
+      }
       onSave(values);
       form.resetFields();
     });
@@ -306,7 +368,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
       >
         <Row gutter={[16, 16]}>
           {getFormFields().map((field) => (
-            <Col span={8} key={field.name}>
+            <Col span={field.name === 'remarks' ? 24 : 8} key={field.name}>
               <Form.Item
                 name={field.name}
                 label={field.label}
@@ -329,6 +391,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
 
   return (
     <>
+      {/* Basic Details Section */}
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
@@ -346,25 +409,30 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
             <Descriptions.Item label="Verification Type">
               {data?.basicDetails?.verificationType}
             </Descriptions.Item>
-            <Descriptions.Item label="Verification Date">
-              {data?.basicDetails?.verificationDate}
+            <Descriptions.Item label="Application Number">
+              {data?.basicDetails?.applicationNumber}
             </Descriptions.Item>
-            <Descriptions.Item label="Verification Time">
-              {data?.basicDetails?.verificationTime}
+            <Descriptions.Item label="Applicant Name">
+              {data?.basicDetails?.applicantName}
             </Descriptions.Item>
-            <Descriptions.Item label="Verification Mode">
-              {data?.basicDetails?.verificationMode}
+            <Descriptions.Item label="Marital Status">
+              {data?.basicDetails?.applicantMaritalStatus}
+              {data?.basicDetails?.applicantMaritalStatus === 'Others' && 
+                ` - ${data?.basicDetails?.applicantMaritalStatusOther}`}
             </Descriptions.Item>
-            <Descriptions.Item label="Verification Status">
-              {data?.basicDetails?.verificationStatus}
+            <Descriptions.Item label="Education Qualification">
+              {data?.basicDetails?.educationQualification}
             </Descriptions.Item>
-            <Descriptions.Item label="Verification Remarks">
-              {data?.basicDetails?.verificationRemarks}
+            <Descriptions.Item label="Category">
+              {data?.basicDetails?.category}
+              {data?.basicDetails?.category === 'Others' && 
+                ` - ${data?.basicDetails?.categoryOther}`}
             </Descriptions.Item>
           </Descriptions>
         </Card>
       </section>
 
+      {/* Address Verification Section */}
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
@@ -380,17 +448,43 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
             }
           >
             <Descriptions.Item label="Address Type">
-              {data?.addressVerification?.addressType}
+              {data?.addressVerification?.address}
             </Descriptions.Item>
             <Descriptions.Item label="Address Category">
               {data?.addressVerification?.addressCategory}
             </Descriptions.Item>
-            <Descriptions.Item label="Address Sub-Category">
-              {data?.addressVerification?.addressSubCategory}
-            </Descriptions.Item>
             <Descriptions.Item label="Address Details">
               {data?.addressVerification?.addressDetails}
             </Descriptions.Item>
+            <Descriptions.Item label="Years at Current Residence">
+              {data?.addressVerification?.numberOfYearsAtCurrentResidence}
+            </Descriptions.Item>
+            {data?.addressVerification?.numberOfYearsAtCurrentResidence === '<=1year' && (
+              <>
+                <Descriptions.Item label="Previous Address">
+                  {data?.addressVerification?.previousAddress}
+                </Descriptions.Item>
+                <Descriptions.Item label="Years at Previous Address">
+                  {data?.addressVerification?.previousAddressYears}
+                </Descriptions.Item>
+              </>
+            )}
+            <Descriptions.Item label="Years in Current City">
+              {data?.addressVerification?.numberOfYearsAtCurrentCity}
+            </Descriptions.Item>
+            {data?.addressVerification?.numberOfYearsAtCurrentCity === '<=3 years' && (
+              <>
+                <Descriptions.Item label="Previous City">
+                  {data?.addressVerification?.previousCity}
+                </Descriptions.Item>
+                <Descriptions.Item label="Years in Previous City">
+                  {data?.addressVerification?.numberOfYearsAtPreviousCity}
+                </Descriptions.Item>
+                <Descriptions.Item label="Reason for Change">
+                  {data?.addressVerification?.reasonForChange}
+                </Descriptions.Item>
+              </>
+            )}
             <Descriptions.Item label="Geo Tag">
               {data?.addressVerification?.geoTag}
             </Descriptions.Item>
@@ -398,6 +492,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
         </Card>
       </section>
 
+      {/* Residence Details Section */}
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
@@ -415,9 +510,11 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
             <Descriptions.Item label="Residence Status">
               {data?.residenceDetails?.residenceStatus}
             </Descriptions.Item>
-            <Descriptions.Item label="Rent Details">
-              {data?.residenceDetails?.rentDetails}
-            </Descriptions.Item>
+            {data?.residenceDetails?.residenceStatus === 'Rented' && (
+              <Descriptions.Item label="Rent Details">
+                {data?.residenceDetails?.rentDetails}
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="Type of Residence">
               {data?.residenceDetails?.residenceType}
             </Descriptions.Item>
@@ -449,6 +546,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
         </Card>
       </section>
 
+      {/* Family & Employment Details Section */}
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
@@ -485,6 +583,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
         </Card>
       </section>
 
+      {/* Third Party Check Section */}
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
@@ -502,6 +601,9 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
             <Descriptions.Item label="TPC Name">
               {data?.thirdPartyCheck?.tpcName}
             </Descriptions.Item>
+            <Descriptions.Item label="Mobile Number">
+              {data?.thirdPartyCheck?.mobileNumber}
+            </Descriptions.Item>
             <Descriptions.Item label="Relationship">
               {data?.thirdPartyCheck?.relationship}
             </Descriptions.Item>
@@ -515,49 +617,55 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
         </Card>
       </section>
 
+      {/* Photo Capture Section */}
       <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title="Final Observations"
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("finalObservations")}
-              />
-            }
-          >
-            <Descriptions.Item label="Cooperativeness">
-              {data?.finalObservations?.cooperativeness}
-            </Descriptions.Item>
-            <Descriptions.Item label="Overall Status">
-              {data?.finalObservations?.overallStatus}
-            </Descriptions.Item>
-            <Descriptions.Item label="Remarks">
-              {data?.finalObservations?.remarks}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
-
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions title="Photo Capture" bordered column={1}>
+        <Card title="Photo Capture">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
             {data?.uploadedItems?.map((item: any, idx: number) => (
-              <Descriptions.Item
-                key={item.id}
-                label={`${item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo ${idx + 1}`}
-              >
+              <div key={item.id} style={{ position: 'relative' }}>
                 <img
                   src={item.uri}
                   alt={`Photo ${idx + 1}`}
-                  style={{ maxWidth: '200px', borderRadius: '4px' }}
+                  style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    objectFit: 'cover',
+                    borderRadius: '4px'
+                  }}
                 />
-              </Descriptions.Item>
+                <Button
+                  type="text"
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '50%',
+                    padding: 4
+                  }}
+                  onClick={() => {
+                    // Handle photo removal
+                    const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
+                    onEdit("photoCapture");
+                  }}
+                />
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: 0, 
+                  left: 0, 
+                  right: 0, 
+                  background: 'rgba(0, 0, 0, 0.6)',
+                  color: 'white',
+                  padding: '4px 8px',
+                  fontSize: '12px'
+                }}>
+                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                </div>
+              </div>
             ))}
-          </Descriptions>
+          </div>
         </Card>
       </section>
     </>
@@ -567,104 +675,454 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
 const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
   if (!verificationData) return null;
 
-  const data = verificationData?.verificationData?.verificationData || {};
+  const data = verificationData?.verificationData || {};
 
   return (
-    <section style={{ marginBottom: 24 }}>
-      <Card>
-        <Descriptions
-          title="Office Verification"
-          bordered
-          column={2}
+    <>
+      {/* Basic Details Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Basic Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("basicDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Name of the Applicant">
+              {data?.basicDetails?.applicantName || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Name of the Bank">
+              {data?.basicDetails?.bankName || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Prospect Number">
+              {data?.basicDetails?.prospectNumber || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Purpose of Loan">
+              {data?.basicDetails?.purposeOfLoan || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Loan Amount">
+              {data?.basicDetails?.loanAmount || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tenure">
+              {data?.basicDetails?.tenure || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="PAN Number">
+              {data?.basicDetails?.panNumber || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Aadhar Number">
+              {data?.basicDetails?.aadharNumber || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Qualification">
+              {data?.basicDetails?.qualification || 'No data'}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      {/* Employment Details Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Employment Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("employmentDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Current Office Name">
+              {data?.employmentDetails?.currentOfficeName || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Office Address">
+              {data?.employmentDetails?.officeAddress || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Years in Current Job">
+              {data?.employmentDetails?.yearsInCurrentJob || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Work Experience">
+              {data?.employmentDetails?.totalWorkExperience || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Company Size">
+              {data?.employmentDetails?.companySize || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nature of Service/Business">
+              {data?.employmentDetails?.natureOfService || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Office Locality">
+              {data?.employmentDetails?.officeLocality || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="ID Card Number">
+              {data?.employmentDetails?.idCardNumber || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Designation">
+              {data?.employmentDetails?.designation || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Mode of Salary">
+              {data?.employmentDetails?.salaryMode || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Type of Employer">
+              {data?.employmentDetails?.employerType || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Gross Salary per Month">
+              {data?.employmentDetails?.grossSalary || 'No data'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Net Salary per Month">
+              {data?.employmentDetails?.netSalary || 'No data'}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      {/* Colleague References Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Colleague References"
           extra={
             <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEdit("officeVerification")}
-            />
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => onEdit("colleagueReferences")}
+            >
+              Add Reference
+            </Button>
           }
         >
-          <Descriptions.Item label="Name of the Applicant">
-            {data?.officeVerification?.applicantName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Name of the Bank">
-            {data?.officeVerification?.bankName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Prospect Number">
-            {data?.officeVerification?.prospectNumber}
-          </Descriptions.Item>
-          <Descriptions.Item label="Purpose of Loan">
-            {data?.officeVerification?.purposeOfLoan}
-          </Descriptions.Item>
-          <Descriptions.Item label="Loan Amount">
-            {data?.officeVerification?.loanAmount}
-          </Descriptions.Item>
-          <Descriptions.Item label="Tenure">
-            {data?.officeVerification?.tenure}
-          </Descriptions.Item>
-          <Descriptions.Item label="PAN Number">
-            {data?.officeVerification?.panNumber}
-          </Descriptions.Item>
-          <Descriptions.Item label="Aadhar Number">
-            {data?.officeVerification?.aadharNumber}
-          </Descriptions.Item>
-          <Descriptions.Item label="Qualification">
-            {data?.officeVerification?.qualification}
-          </Descriptions.Item>
-          <Descriptions.Item label="Current Office Name">
-            {data?.officeVerification?.currentOfficeName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Office Address">
-            {data?.officeVerification?.officeAddress}
-          </Descriptions.Item>
-          <Descriptions.Item label="Years in Current Job">
-            {data?.officeVerification?.yearsInCurrentJob}
-          </Descriptions.Item>
-          <Descriptions.Item label="Total Work Experience">
-            {data?.officeVerification?.totalWorkExperience}
-          </Descriptions.Item>
-          <Descriptions.Item label="Company Size">
-            {data?.officeVerification?.companySize}
-          </Descriptions.Item>
-          <Descriptions.Item label="Nature of Service/Business">
-            {data?.officeVerification?.natureOfService}
-          </Descriptions.Item>
-          <Descriptions.Item label="Office Locality">
-            {data?.officeVerification?.officeLocality}
-          </Descriptions.Item>
-          <Descriptions.Item label="ID Card Number">
-            {data?.officeVerification?.idCardNumber}
-          </Descriptions.Item>
-          <Descriptions.Item label="Designation">
-            {data?.officeVerification?.designation}
-          </Descriptions.Item>
-          <Descriptions.Item label="Mode of Salary">
-            {data?.officeVerification?.salaryMode}
-          </Descriptions.Item>
-          <Descriptions.Item label="Type of Employer">
-            {data?.officeVerification?.employerType}
-          </Descriptions.Item>
-          <Descriptions.Item label="Gross Salary per Month">
-            {data?.officeVerification?.grossSalary}
-          </Descriptions.Item>
-          <Descriptions.Item label="Net Salary per Month">
-            {data?.officeVerification?.netSalary}
-          </Descriptions.Item>
-          <Descriptions.Item label="Previous Company Name">
-            {data?.officeVerification?.previousCompanyName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Work Experience">
-            {data?.officeVerification?.workExperience}
-          </Descriptions.Item>
-          <Descriptions.Item label="Existing Loans">
-            {data?.officeVerification?.existingLoans}
-          </Descriptions.Item>
-          <Descriptions.Item label="References (Colleagues)">
-            {data?.officeVerification?.references}
-          </Descriptions.Item>
-        </Descriptions>
-      </Card>
-    </section>
+          <Table
+            dataSource={data?.colleagueReferences?.references || []}
+            columns={[
+              {
+                title: 'Name',
+                dataIndex: 'name',
+                key: 'name',
+              },
+              {
+                title: 'Designation',
+                dataIndex: 'designation',
+                key: 'designation',
+              },
+              {
+                title: 'Years Known',
+                dataIndex: 'yearsKnown',
+                key: 'yearsKnown',
+              },
+              {
+                title: 'Contact Number',
+                dataIndex: 'contactNumber',
+                key: 'contactNumber',
+              },
+              {
+                title: 'Email',
+                dataIndex: 'emailAddress',
+                key: 'emailAddress',
+              },
+              {
+                title: 'Actions',
+                key: 'actions',
+                render: (_, record) => (
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit("colleagueReferences")}
+                  />
+                ),
+              },
+            ]}
+            pagination={false}
+            locale={{ emptyText: 'No references added yet' }}
+          />
+        </Card>
+      </section>
+
+      {/* Past Employment Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Past Employment"
+          extra={
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => onEdit("pastEmployment")}
+            >
+              Add Employment
+            </Button>
+          }
+        >
+          <Table
+            dataSource={data?.pastEmployment?.employments || []}
+            columns={[
+              {
+                title: 'Employer Name',
+                dataIndex: 'employerName',
+                key: 'employerName',
+              },
+              {
+                title: 'Designation',
+                dataIndex: 'designation',
+                key: 'designation',
+              },
+              {
+                title: 'From Date',
+                dataIndex: 'fromDate',
+                key: 'fromDate',
+              },
+              {
+                title: 'To Date',
+                dataIndex: 'toDate',
+                key: 'toDate',
+              },
+              {
+                title: 'Contact Person',
+                dataIndex: 'contactPersonName',
+                key: 'contactPersonName',
+              },
+              {
+                title: 'Actions',
+                key: 'actions',
+                render: (_, record) => (
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit("pastEmployment")}
+                  />
+                ),
+              },
+            ]}
+            pagination={false}
+            locale={{ emptyText: 'No past employment records added yet' }}
+          />
+        </Card>
+      </section>
+
+      {/* Existing Loans Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Existing Loans"
+          extra={
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => onEdit("existingLoans")}
+            >
+              Add Loan
+            </Button>
+          }
+        >
+          <Table
+            dataSource={data?.existingLoans?.loans || []}
+            columns={[
+              {
+                title: 'Bank Name',
+                dataIndex: 'bankName',
+                key: 'bankName',
+              },
+              {
+                title: 'Purpose',
+                dataIndex: 'purpose',
+                key: 'purpose',
+              },
+              {
+                title: 'Loan Amount',
+                dataIndex: 'loanAmount',
+                key: 'loanAmount',
+              },
+              {
+                title: 'EMI',
+                dataIndex: 'emi',
+                key: 'emi',
+              },
+              {
+                title: 'Tenure',
+                dataIndex: 'tenure',
+                key: 'tenure',
+              },
+              {
+                title: 'Actions',
+                key: 'actions',
+                render: (_, record) => (
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit("existingLoans")}
+                  />
+                ),
+              },
+            ]}
+            pagination={false}
+            locale={{ emptyText: 'No existing loans added yet' }}
+          />
+        </Card>
+      </section>
+
+      {/* Photo Capture Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card title="Photo Capture">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+            {data?.uploadedItems?.length > 0 ? (
+              data.uploadedItems.map((item: any, idx: number) => (
+                <div key={item.id} style={{ position: 'relative' }}>
+                  <img
+                    src={item.uri}
+                    alt={`Photo ${idx + 1}`}
+                    style={{ 
+                      width: '100%', 
+                      height: '200px', 
+                      objectFit: 'cover',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    icon={<CloseCircleOutlined />}
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      borderRadius: '50%',
+                      padding: 4
+                    }}
+                    onClick={() => {
+                      // Handle photo removal
+                      const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
+                      onEdit("photoCapture");
+                    }}
+                  />
+                  <div style={{ 
+                    position: 'absolute', 
+                    bottom: 0, 
+                    left: 0, 
+                    right: 0, 
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    fontSize: '12px'
+                  }}>
+                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ 
+                gridColumn: '1 / -1', 
+                textAlign: 'center', 
+                padding: '40px',
+                color: '#999'
+              }}>
+                No photos uploaded yet
+              </div>
+            )}
+          </div>
+        </Card>
+      </section>
+    </>
+  );
+};
+
+const FinalObservationsDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  if (!verificationData) return null;
+
+  const data = verificationData?.verificationData?.verificationData || {};
+  const [editorContent, setEditorContent] = useState(data?.finalObservations?.remarks || '');
+
+  const handleEditorChange = (content: string) => {
+    setEditorContent(content);
+    // You can also trigger the onEdit callback here if you want to save changes immediately
+    onEdit("finalObservations");
+  };
+
+  return (
+    <>
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Financial Details"
+            bordered
+            column={2}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("financialDetails")}
+              />
+            }
+          >
+            <Descriptions.Item label="Funds Required">
+              {data?.financialDetails?.fundsRequired}
+            </Descriptions.Item>
+            <Descriptions.Item label="Source of Own Funds">
+              {data?.financialDetails?.sourceOfOwnFunds}
+            </Descriptions.Item>
+            <Descriptions.Item label="Purchase Cost">
+              {data?.financialDetails?.purchaseCost}
+            </Descriptions.Item>
+            <Descriptions.Item label="Savings">
+              {data?.financialDetails?.savings}
+            </Descriptions.Item>
+            <Descriptions.Item label="Construction Estimate">
+              {data?.financialDetails?.constructionEstimate}
+            </Descriptions.Item>
+            <Descriptions.Item label="Family/Friends">
+              {data?.financialDetails?.familyFriends}
+            </Descriptions.Item>
+            <Descriptions.Item label="Registration/Stamp Duty Charges">
+              {data?.financialDetails?.registrationCharges}
+            </Descriptions.Item>
+            <Descriptions.Item label="Other Loan Amount Taken">
+              {data?.financialDetails?.otherLoanAmount}
+            </Descriptions.Item>
+            <Descriptions.Item label="Other Expenses">
+              {data?.financialDetails?.otherExpenses}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Amount Spent">
+              {data?.financialDetails?.totalAmountSpent}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Transaction Cost">
+              {data?.financialDetails?.totalTransactionCost}
+            </Descriptions.Item>
+            <Descriptions.Item label="Mode of Payment to Seller (Cash)">
+              {data?.financialDetails?.paymentModeCash}
+            </Descriptions.Item>
+            <Descriptions.Item label="Mode of Payment to Seller (Cheque)">
+              {data?.financialDetails?.paymentModeCheque}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <Card title="Final Observations">
+          <div style={{ height: '400px', marginBottom: '20px' }}>
+            <ReactQuill
+              theme="snow"
+              value={editorContent}
+              onChange={handleEditorChange}
+              style={{ height: '300px' }}
+              modules={{
+                toolbar: [
+                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  [{ 'color': [] }, { 'background': [] }],
+                  ['link', 'image'],
+                  ['clean']
+                ],
+              }}
+            />
+          </div>
+        </Card>
+      </section>
+    </>
   );
 };
 
@@ -674,7 +1132,7 @@ export default function LoanVerifyDetails() {
   const [verificationData, setVerificationData] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(null);
-  const [pdfPreviewUrl] = useState("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentFormKey, setCurrentFormKey] = useState("");
 
@@ -703,16 +1161,38 @@ export default function LoanVerifyDetails() {
     try {
       // Generate final report first
       const reportResponse = await generateFinalReport(id as string);
-      console.log('Final Report Response:', reportResponse);
+      console.log('Report Response:', reportResponse);
+      
+      // Check if we have valid data
+      if (!reportResponse) {
+        throw new Error('No PDF data received');
+      }
 
-      // Then proceed with approval
-      // router.push(`/verify`);
-      message.success(`loan approved`);
+      // Create a blob URL directly from the response
+      const blob = new Blob([reportResponse], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      setPdfPreviewUrl(url);
+      
+      // Show the modal after setting the PDF URL
+      setModalAction("approve");
+      setModalVisible(true);
+
+      // Log for debugging
+      console.log('PDF URL created');
     } catch (error) {
       console.error('Error generating final report:', error);
-      message.error('Failed to generate final report');
+      message.error('Failed to generate final report: ' + (error as Error).message);
     }
   };
+
+  // Clean up the blob URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (pdfPreviewUrl) {
+        window.URL.revokeObjectURL(pdfPreviewUrl);
+      }
+    };
+  }, [pdfPreviewUrl]);
 
   const getVerificationByType = (type: string) => {
     return verificationData?.verifications?.find((v: any) => v.type === type);
@@ -751,50 +1231,61 @@ export default function LoanVerifyDetails() {
               onEdit={handleEdit}
             />
           </TabPane>
+          <TabPane tab="Final Observations" key="final">
+            <FinalObservationsDetails 
+              verificationData={getVerificationByType('Work')} 
+              onEdit={handleEdit}
+            />
+            <div style={{
+              position: "sticky",
+              bottom: 0,
+              left: 120,
+              right: 40,
+              background: "#fff",
+              padding: "16px 24px",
+              borderTop: "1px solid #f0f0f0",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "16px",
+              zIndex: 1000,
+              boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
+            }}>
+              <Space>
+                <Button
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  onClick={() => {
+                    setModalAction("reject");
+                    setModalVisible(true);
+                  }}
+                >
+                  Reject
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => {
+                    setModalAction("approve");
+                    setModalVisible(true);
+                  }}
+                >
+                  Approve
+                </Button>
+              </Space>
+            </div>
+          </TabPane>
         </Tabs>
-      </div>
-
-      <div style={{
-        position: "sticky",
-        bottom: 0,
-        left: 120,
-        right: 40,
-        background: "#fff",
-        padding: "16px 24px",
-        borderTop: "1px solid #f0f0f0",
-        display: "flex",
-        justifyContent: "flex-end",
-        gap: "16px",
-        zIndex: 1000,
-        boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-      }}>
-        <Space>
-          <Button
-            danger
-            icon={<CloseCircleOutlined />}
-            onClick={() => {
-              setModalAction("reject");
-              setModalVisible(true);
-            }}
-          >
-            Reject
-          </Button>
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            onClick={() => {
-              setModalAction("approve");
-              setModalVisible(true);
-            }}
-          >
-            Approve
-          </Button>
-        </Space>
       </div>
 
       <Modal
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          if (pdfPreviewUrl) {
+            window.URL.revokeObjectURL(pdfPreviewUrl);
+          }
+          setPdfPreviewUrl(null);
+        }}
         footer={null}
         width={900}
         title={
@@ -805,13 +1296,23 @@ export default function LoanVerifyDetails() {
       >
         <div style={{ marginBottom: 16 }}>
           <strong>PDF Preview:</strong>
-          <iframe
-            src={pdfPreviewUrl}
-            width="100%"
-            height={600}
-            style={{ border: "1px solid #eee", marginTop: 8 }}
-            title="PDF Preview"
-          />
+          {pdfPreviewUrl ? (
+            <object
+              data={pdfPreviewUrl}
+              type="application/pdf"
+              width="100%"
+              height={600}
+              style={{ border: "1px solid #eee", marginTop: 8 }}
+            >
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                Unable to display PDF file. <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">Download</a> instead.
+              </div>
+            </object>
+          ) : (
+            <div style={{ padding: '20px', textAlign: 'center' }}>
+              Loading PDF preview...
+            </div>
+          )}
         </div>
         <div style={{ marginBottom: 16 }}>
           Are you sure you want to{" "}

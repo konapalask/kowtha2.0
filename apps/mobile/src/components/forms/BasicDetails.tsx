@@ -140,7 +140,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <Controller
         control={control}
         name="applicantMaritalStatus"
-        // rules={{required: 'Marital status is required'}}
+        rules={{required: 'Marital status is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Applicant Marital Status</Text>
@@ -189,7 +189,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <Controller
         control={control}
         name="educationQualification"
-        // rules={{required: 'Education qualification is required'}}
+        rules={{required: 'Education qualification is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Education Qualification</Text>
@@ -214,7 +214,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <Controller
         control={control}
         name="category"
-        // rules={{required: 'Category is required'}}
+        rules={{required: 'Category is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Category</Text>
@@ -236,7 +236,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
         <Controller
           control={control}
           name="categoryOther"
-          // rules={{required: 'Please specify category'}}
+          rules={{required: 'Please specify category'}}
           render={({field: {onChange, onBlur, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Specify Category</Text>

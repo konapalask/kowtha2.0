@@ -125,14 +125,16 @@ export default function Verify() {
           dataSource={filteredLoans}
           rowKey={(record) => record?.id?.toString() ?? Math.random().toString()}
           loading={loading}
+          
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total ?? 0} items`,
             position: ["bottomCenter"],
           }}
-          size="small"
-          scroll={{ y: 400 }}
+          // size="small"
+          // scroll={{ y: 400 }}
+          sticky
         />
       </Card>
     </DashboardLayout>

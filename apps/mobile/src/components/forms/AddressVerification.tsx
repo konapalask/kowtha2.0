@@ -101,7 +101,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="address"
-        // rules={{required: 'Address type is required'}}
+        rules={{required: 'Address type is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Type</Text>
@@ -123,7 +123,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="addressCategory"
-        // rules={{required: 'Address category is required'}}
+        rules={{required: 'Address category is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Category</Text>
@@ -147,7 +147,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="addressDetails"
-        // rules={{required: 'Address details are required'}}
+        rules={{required: 'Address details are required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Details</Text>
@@ -171,7 +171,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="numberOfYearsAtCurrentResidence"
-        // rules={{required: 'Number of years at current residence is required'}}
+        rules={{required: 'Number of years at current residence is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>
@@ -199,9 +199,9 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <Controller
             control={control}
             name="previousAddress"
-            // rules={{
-            //   required: 'Previous address is required if stay is <=1 year',
-            // }}
+            rules={{
+              required: 'Previous address is required if stay is <=1 year',
+            }}
             render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Previous Address</Text>
@@ -224,10 +224,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <Controller
             control={control}
             name="previousAddressYears"
-            // rules={{
-            //   required:
-            //     'Years at previous address is required if stay at current is <=1 year',
-            // }}
+            rules={{
+              required:
+                'Years at previous address is required if stay at current is <=1 year',
+            }}
             render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>
@@ -254,7 +254,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="numberOfYearsAtCurrentCity"
-        // rules={{required: 'Number of years at current city is required'}}
+        rules={{required: 'Number of years at current city is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Number of Years in Current City</Text>
@@ -280,10 +280,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <Controller
             control={control}
             name="previousCity"
-            // rules={{
-            //   required:
-            //     'Previous city is required if stay in current city is <=3 years',
-            // }}
+            rules={{
+              required:
+                'Previous city is required if stay in current city is <=3 years',
+            }}
             render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Previous City</Text>
@@ -304,10 +304,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <Controller
             control={control}
             name="numberOfYearsAtPreviousCity"
-            // rules={{
-            //   required:
-            //     'Years at previous city is required if stay in current city is <=3 years',
-            // }}
+            rules={{
+              required:
+                'Years at previous city is required if stay in current city is <=3 years',
+            }}
             render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>
@@ -331,10 +331,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <Controller
             control={control}
             name="reasonForChange"
-            // rules={{
-            //   required:
-            //     'Reason for change is required if stay in current city is <=3 years',
-            // }}
+            rules={{
+              required:
+                'Reason for change is required if stay in current city is <=3 years',
+            }}
             render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Reason for Change</Text>
@@ -360,7 +360,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <Controller
         control={control}
         name="geoTag"
-        // rules={{required: 'Geo tag is required'}}
+        rules={{required: 'Geo tag is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Geo Tag</Text>
