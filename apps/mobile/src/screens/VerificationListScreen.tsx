@@ -7,7 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import {getItem} from '../helpers/utility';
@@ -65,8 +65,6 @@ const VerificationListScreen = () => {
   const fetchData = async () => {
     try {
       const response = await getFieldData();
-      // setData(response?.data?.data);
-      // console.log(response?.data?.data);
       const transformedData = response?.data?.data?.reduce(
         (acc: any[], curr: any) => {
           const {verifications, ...rest} = curr;
@@ -79,17 +77,22 @@ const VerificationListScreen = () => {
         [],
       );
       setData(transformedData);
-      console.log(transformedData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  // Call fetchData on initial mount
   useEffect(() => {
-    if (refreshing || data.length === 0) {
+    fetchData();
+  }, []);
+
+  // Call fetchData when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
       fetchData();
-    }
-  }, [refreshing]);
+    }, []),
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -180,22 +183,23 @@ const VerificationListScreen = () => {
       onPress={() => {
         const baseNavPayload = {
           name: item.applicantName,
-          age: item.age,
-          sex: item.sex,
           id: item.id,
           applicationNumber: item.applicationNumber, // Main application ID
+          verificationId: item.verification.loanId,
         };
 
         if (item.verification.type === 'Work') {
           navigation.navigate('WorkVerification', {
             item: baseNavPayload,
             verificationType: 'Work', // Explicitly 'Work'
+            userData: item,
           });
         } else {
           // Types for VerificationItemScreen are 'CurrentAddress' or 'PermanentAddress'
           navigation.navigate('VerificationItemScreen', {
             item: baseNavPayload,
             verificationType: item.verification.type, // This will be 'CurrentAddress' or 'PermanentAddress'
+            userData: item,
           });
         }
       }}>

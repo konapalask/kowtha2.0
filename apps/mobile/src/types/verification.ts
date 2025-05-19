@@ -8,9 +8,13 @@ export type VerificationItem = {
 export type UploadedItem = {
   id: string;
   uri: string;
-  s3Url?: string;
+  s3ImageUrl?: string;
   type: string;
   timestamp: string;
+  latitude?: number;
+  longitude?: number;
+  locality?: string;
+  pincode?: string;
 };
 
 export type BasicDetailsFormData = {
@@ -73,6 +77,7 @@ export type FamilyEmploymentDetailsFormData = {
 
 export type ThirdPartyCheckFormData = {
   tpcName: string;
+  mobileNumber: string;
   relationship: string;
   feedbackStatus: string;
   comments: string;

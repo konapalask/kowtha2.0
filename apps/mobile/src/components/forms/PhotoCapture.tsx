@@ -23,6 +23,7 @@ import {
   getImageUploadPresignedUrl,
   uploadImageToS3,
 } from '../../services/field.services';
+import Icons from 'react-native-vector-icons/AntDesign';
 
 // Initialize Geocoding
 Geocoding.init('YOUR_GOOGLE_MAPS_API_KEY');
@@ -75,7 +76,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     return `${day}, ${formattedDate}`;
   };
 
-  const uploadImage = async (imageUri: string, type: string) => {
+  const uploadImage = async (
+    imageUri: string,
+    type: string,
+    location?: {latitude: number; longitude: number},
+  ) => {
     try {
       setIsUploading(true);
 
@@ -114,10 +119,22 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       const newItem: UploadedItem = {
         id: Date.now().toString(),
         uri: imageUri,
-        s3Url: fileName,
+        s3ImageUrl: fileName,
         type: 'photo',
         timestamp: new Date().toISOString(),
       };
+
+      // Add location details if available (from camera)
+      if (location) {
+        const locationDetails = await getLocationDetails(
+          location.latitude,
+          location.longitude,
+        );
+        newItem.latitude = location.latitude;
+        newItem.longitude = location.longitude;
+        newItem.locality = locationDetails.locality;
+        newItem.pincode = locationDetails.pincode;
+      }
 
       const updatedItems = [...uploadedItems, newItem];
       setUploadedItems(updatedItems);
@@ -128,7 +145,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       console.error('Error uploading image:', error);
       Alert.alert(
         'Error',
-        error.message || 'Failed to upload image. Please try again.',
+        error instanceof Error
+          ? error.message
+          : 'Failed to upload image. Please try again.',
       );
     } finally {
       setIsUploading(false);
@@ -137,13 +156,39 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
   const handleCapture = async () => {
     try {
+      // Get location permission and coordinates
+      const locationPermission = await check(
+        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+      );
+      if (locationPermission !== RESULTS.GRANTED) {
+        const permissionResult = await request(
+          PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+        );
+        if (permissionResult !== RESULTS.GRANTED) {
+          Alert.alert(
+            'Permission Denied',
+            'Location permission is required to capture photos',
+          );
+          return;
+        }
+      }
+
+      const location = await RNLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+      });
+      console.log('location', location);
+
       const result = await launchCamera({
         mediaType: 'photo',
         quality: 0.8,
       });
 
       if (result.assets && result.assets[0]) {
-        await uploadImage(result.assets[0].uri || '', 'photo');
+        await uploadImage(result.assets[0].uri || '', 'photo', {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
       }
     } catch (error) {
       console.error('Error capturing photo:', error);
@@ -181,7 +226,15 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           onPress={handleCapture}
           disabled={isUploading}>
           <Text style={styles.buttonText}>
-            {isUploading ? 'Uploading...' : 'Take Photo'}
+            {isUploading ? (
+              'Uploading...'
+            ) : (
+              <Icons
+                name="camerao"
+                size={32}
+                color={colors.button.secondary.text}
+              />
+            )}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -189,7 +242,15 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           onPress={handleGallery}
           disabled={isUploading}>
           <Text style={styles.buttonText}>
-            {isUploading ? 'Uploading...' : 'Choose from Gallery'}
+            {isUploading ? (
+              'Uploading...'
+            ) : (
+              <Icons
+                name="picture"
+                size={32}
+                color={colors.button.secondary.text}
+              />
+            )}
           </Text>
         </TouchableOpacity>
       </View>

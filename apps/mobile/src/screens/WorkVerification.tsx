@@ -1,92 +1,91 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
-import {useForm, Controller} from 'react-hook-form';
-import {yupResolver} from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import {colors} from '../constants/colors';
+import CollapsibleSection from '../components/CollapsibleSection';
+import WorkBasicDetails from '../components/forms/WorkBasicDetails';
+import WorkEmploymentDetails from '../components/forms/WorkEmploymentDetails';
+import ExistingLoans from '../components/forms/ExistingLoans';
+import PhotoCapture from '../components/forms/PhotoCapture';
+import {UploadedItem} from '../types/verification';
+import {submitVerification} from '../services/field.services';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
-interface OfficeVerificationForm {
-  applicantName: string;
-  bankName: string;
-  prospectNumber: string;
-  purposeOfLoan: string;
-  loanAmount: string;
-  tenure: string;
-  panNumber: string;
-  aadharNumber: string;
-  qualification: string;
-  currentOfficeName: string;
-  officeAddress: string;
-  yearsInCurrentJob: string;
-  totalWorkExperience: string;
-  companySize: string;
-  natureOfService: string;
-  officeLocality: string;
-  idCardNumber: string;
-  designation: string;
-  salaryMode: string;
-  employerType: string;
-  grossSalary: string;
-  netSalary: string;
-  previousCompanyName: string;
-  workExperience: string;
-  existingLoans: string;
-  references: string;
+interface WorkVerificationFormData {
+  basicDetails: {
+    applicantName: string;
+    bankName: string;
+    prospectNumber: string;
+    purposeOfLoan: string;
+    loanAmount: string;
+    tenure: string;
+    panNumber: string;
+    aadharNumber: string;
+    qualification: string;
+  };
+  employmentDetails: {
+    currentOfficeName: string;
+    officeAddress: string;
+    yearsInCurrentJob: string;
+    totalWorkExperience: string;
+    companySize: string;
+    natureOfService: string;
+    officeLocality: string;
+    idCardNumber: string;
+    designation: string;
+    salaryMode: string;
+    employerType: string;
+    grossSalary: string;
+    netSalary: string;
+    previousCompanyName: string;
+    workExperience: string;
+  };
+  existingLoans: {
+    loans: Array<{
+      bankName: string;
+      purpose: string;
+      loanAmount: string;
+      emi: string;
+      tenure: string;
+    }>;
+  };
+  uploadedItems: UploadedItem[];
 }
 
-const schema = yup.object().shape({
-  applicantName: yup.string().required('Applicant name is required'),
-  bankName: yup.string().required('Bank name is required'),
-  prospectNumber: yup.string().required('Prospect number is required'),
-  purposeOfLoan: yup.string().required('Purpose of loan is required'),
-  loanAmount: yup.string().required('Loan amount is required'),
-  tenure: yup.string().required('Tenure is required'),
-  panNumber: yup
-    .string()
-    .required('PAN number is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN number'),
-  aadharNumber: yup
-    .string()
-    .required('Aadhar number is required')
-    .matches(/^[0-9]{12}$/, 'Invalid Aadhar number'),
-  qualification: yup.string().required('Qualification is required'),
-  currentOfficeName: yup.string().required('Current office name is required'),
-  officeAddress: yup.string().required('Office address is required'),
-  yearsInCurrentJob: yup.string().required('Years in current job is required'),
-  totalWorkExperience: yup
-    .string()
-    .required('Total work experience is required'),
-  companySize: yup.string().required('Company size is required'),
-  natureOfService: yup.string().required('Nature of service is required'),
-  officeLocality: yup.string().required('Office locality is required'),
-  idCardNumber: yup.string().required('ID card number is required'),
-  designation: yup.string().required('Designation is required'),
-  salaryMode: yup.string().required('Salary mode is required'),
-  employerType: yup.string().required('Employer type is required'),
-  grossSalary: yup.string().required('Gross salary is required'),
-  netSalary: yup.string().required('Net salary is required'),
-  previousCompanyName: yup.string(),
-  workExperience: yup.string(),
-  existingLoans: yup.string(),
-  references: yup.string(),
-});
-
 const WorkVerification = () => {
-  const {
-    control,
-    handleSubmit,
-    formState: {errors},
-  } = useForm<OfficeVerificationForm>({
-    resolver: yupResolver(schema),
-    defaultValues: {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const {item} = route.params as {item: any};
+  console.log('item', item);
+  const {userData} = route.params as {userData: any};
+  console.log('userData', userData);
+  const verificationType = 'Work';
+  const [expandedSections, setExpandedSections] = useState<{
+    [key: string]: boolean;
+  }>({
+    basicDetails: true,
+    employmentDetails: false,
+    existingLoans: false,
+    photoCapture: false,
+  });
+
+  const [validSections, setValidSections] = useState<{
+    [key: string]: boolean;
+  }>({
+    basicDetails: false,
+    employmentDetails: false,
+    existingLoans: false,
+    photoCapture: false,
+  });
+
+  const [formData, setFormData] = useState<WorkVerificationFormData>({
+    basicDetails: {
       applicantName: '',
       bankName: '',
       prospectNumber: '',
@@ -96,6 +95,8 @@ const WorkVerification = () => {
       panNumber: '',
       aadharNumber: '',
       qualification: '',
+    },
+    employmentDetails: {
       currentOfficeName: '',
       officeAddress: '',
       yearsInCurrentJob: '',
@@ -111,202 +112,176 @@ const WorkVerification = () => {
       netSalary: '',
       previousCompanyName: '',
       workExperience: '',
-      existingLoans: '',
-      references: '',
     },
+    existingLoans: {
+      loans: [
+        {
+          bankName: '',
+          purpose: '',
+          loanAmount: '',
+          emi: '',
+          tenure: '',
+        },
+      ],
+    },
+    uploadedItems: [],
   });
 
-  const onSubmit = (data: OfficeVerificationForm) => {
-    console.log(data);
-    Alert.alert('Success', 'Verification submitted successfully');
-    // Handle form submission
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
-  const renderInputField = (
-    label: string,
-    name: keyof OfficeVerificationForm,
-    keyboardType: 'default' | 'numeric' | 'email-address' = 'default',
-    multiline: boolean = false,
-  ) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <Controller
-        control={control}
-        name={name}
-        render={({field: {onChange, value}}) => (
-          <TextInput
-            style={[
-              styles.input,
-              multiline && styles.multilineInput,
-              errors[name] && styles.inputError,
-            ]}
-            value={value}
-            onChangeText={onChange}
-            keyboardType={keyboardType}
-            multiline={multiline}
-            numberOfLines={multiline ? 4 : 1}
-          />
-        )}
-      />
-      {errors[name] && (
-        <Text style={styles.errorText}>{errors[name]?.message}</Text>
-      )}
-    </View>
-  );
+  const handleBasicDetailsSubmit = (
+    data: WorkVerificationFormData['basicDetails'],
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      basicDetails: data,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      basicDetails: true,
+    }));
+    setExpandedSections(prev => ({...prev, basicDetails: false}));
+  };
 
-  const renderPickerField = (
-    label: string,
-    name: keyof OfficeVerificationForm,
-    options: string[],
-  ) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <Controller
-        control={control}
-        name={name}
-        render={({field: {onChange, value}}) => (
-          <View
-            style={[styles.pickerContainer, errors[name] && styles.inputError]}>
-            <Picker
-              selectedValue={value}
-              onValueChange={onChange}
-              style={styles.picker}>
-              <Picker.Item label="Select an option" value="" />
-              {options.map(option => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
-          </View>
-        )}
-      />
-      {errors[name] && (
-        <Text style={styles.errorText}>{errors[name]?.message}</Text>
-      )}
-    </View>
-  );
+  const handleEmploymentDetailsSubmit = (
+    data: WorkVerificationFormData['employmentDetails'],
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      employmentDetails: data,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      employmentDetails: true,
+    }));
+    setExpandedSections(prev => ({...prev, employmentDetails: false}));
+  };
+
+  const handleExistingLoansSubmit = (
+    data: WorkVerificationFormData['existingLoans'],
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      existingLoans: data,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      existingLoans: true,
+    }));
+    setExpandedSections(prev => ({...prev, existingLoans: false}));
+  };
+
+  const handleUploadedItemsChange = (items: UploadedItem[]) => {
+    setFormData(prev => ({
+      ...prev,
+      uploadedItems: items,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      photoCapture: items.length > 0,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const finalData = {
+        // verificationType: verificationType,
+        // findings: 'Work Verification Findings',
+        // ...{
+        verificationType: verificationType,
+        findings: 'Work Verification Findings',
+        verificationData: formData,
+        // },
+      };
+
+      console.log('Submitting form data:', finalData);
+      await submitVerification(finalData, item.verificationId);
+
+      Alert.alert('Success', 'Verification submitted successfully');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error submitting verification:', error);
+      Alert.alert('Error', 'Failed to submit verification');
+    }
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Office Verification</Text>
+    <View style={styles.container}>
+      <ScrollView>
+        <CollapsibleSection
+          title="Basic Details"
+          isExpanded={expandedSections.basicDetails}
+          onToggle={() => toggleSection('basicDetails')}
+          isValid={validSections.basicDetails}>
+          <WorkBasicDetails
+            initialData={formData.basicDetails}
+            onSubmit={handleBasicDetailsSubmit}
+          />
+        </CollapsibleSection>
 
-      {renderInputField('Name of the Applicant', 'applicantName')}
-      {renderInputField('Name of the Bank', 'bankName')}
-      {renderInputField('Prospect Number', 'prospectNumber')}
-      {renderInputField('Purpose of Loan', 'purposeOfLoan')}
-      {renderInputField('Loan Amount', 'loanAmount', 'numeric')}
-      {renderInputField('Tenure', 'tenure', 'numeric')}
-      {renderInputField('PAN Number', 'panNumber')}
-      {renderInputField('Aadhar Number', 'aadharNumber', 'numeric')}
-      {renderInputField('Qualification', 'qualification')}
-      {renderInputField('Current Office Name', 'currentOfficeName')}
-      {renderInputField('Office Address', 'officeAddress', 'default', true)}
-      {renderInputField('Years in Current Job', 'yearsInCurrentJob', 'numeric')}
-      {renderInputField(
-        'Total Work Experience',
-        'totalWorkExperience',
-        'numeric',
-      )}
-      {renderInputField('Company Size', 'companySize')}
-      {renderInputField('Nature of Service/Business', 'natureOfService')}
+        <CollapsibleSection
+          title="Employment Details"
+          isExpanded={expandedSections.employmentDetails}
+          onToggle={() => toggleSection('employmentDetails')}
+          isValid={validSections.employmentDetails}>
+          <WorkEmploymentDetails
+            initialData={formData.employmentDetails}
+            onSubmit={handleEmploymentDetailsSubmit}
+          />
+        </CollapsibleSection>
 
-      {renderPickerField('Office Locality', 'officeLocality', [
-        'Residential',
-        'Commercial',
-        'Industry',
-      ])}
+        <CollapsibleSection
+          title="Existing Loans"
+          isExpanded={expandedSections.existingLoans}
+          onToggle={() => toggleSection('existingLoans')}
+          isValid={validSections.existingLoans}>
+          <ExistingLoans
+            initialData={formData.existingLoans}
+            onSubmit={handleExistingLoansSubmit}
+          />
+        </CollapsibleSection>
 
-      {renderInputField('ID Card Number', 'idCardNumber')}
-      {renderInputField('Designation', 'designation')}
+        <CollapsibleSection
+          title="Photo Capture"
+          isExpanded={expandedSections.photoCapture}
+          onToggle={() => toggleSection('photoCapture')}
+          isValid={validSections.photoCapture}>
+          <PhotoCapture
+            onUploadedItemsChange={handleUploadedItemsChange}
+            initialItems={formData.uploadedItems}
+          />
+        </CollapsibleSection>
 
-      {renderPickerField('Mode of Salary', 'salaryMode', ['Cash', 'Online'])}
-
-      {renderPickerField('Type of Employer', 'employerType', [
-        'Government',
-        'Private',
-      ])}
-
-      {renderInputField('Gross Salary per Month', 'grossSalary', 'numeric')}
-      {renderInputField('Net Salary per Month', 'netSalary', 'numeric')}
-      {renderInputField('Previous Company Name', 'previousCompanyName')}
-      {renderInputField('Work Experience', 'workExperience')}
-      {renderInputField('Existing Loans', 'existingLoans', 'default', true)}
-      {renderInputField(
-        'References (Colleagues)',
-        'references',
-        'default',
-        true,
-      )}
-
-      <TouchableOpacity
-        style={styles.submitButton}
-        onPress={handleSubmit(onSubmit)}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit Verification</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#333',
-    fontWeight: '500',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  inputError: {
-    borderColor: '#ff4d4f',
-  },
-  errorText: {
-    color: '#ff4d4f',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  multilineInput: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-  },
-  picker: {
-    height: 50,
+    padding: 20,
+    backgroundColor: colors.background,
   },
   submitButton: {
-    backgroundColor: '#1890ff',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: colors.button.primary.background,
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.button.primary.text,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
