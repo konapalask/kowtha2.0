@@ -11,6 +11,8 @@ import {colors} from '../constants/colors';
 import CollapsibleSection from '../components/CollapsibleSection';
 import WorkBasicDetails from '../components/forms/WorkBasicDetails';
 import WorkEmploymentDetails from '../components/forms/WorkEmploymentDetails';
+import ColleagueReferences from '../components/forms/ColleagueReferences';
+import PastEmployment from '../components/forms/PastEmployment';
 import ExistingLoans from '../components/forms/ExistingLoans';
 import PhotoCapture from '../components/forms/PhotoCapture';
 import {UploadedItem} from '../types/verification';
@@ -43,8 +45,27 @@ interface WorkVerificationFormData {
     employerType: string;
     grossSalary: string;
     netSalary: string;
-    previousCompanyName: string;
-    workExperience: string;
+  };
+  colleagueReferences: {
+    references: Array<{
+      name: string;
+      address: string;
+      designation: string;
+      yearsKnown: string;
+      contactNumber: string;
+      emailAddress: string;
+    }>;
+  };
+  pastEmployment: {
+    employments: Array<{
+      employerName: string;
+      designation: string;
+      fromDate: string;
+      toDate: string;
+      contactPersonName: string;
+      contactPersonNumber: string;
+      reasonForMovement: string;
+    }>;
   };
   existingLoans: {
     loans: Array<{
@@ -71,6 +92,8 @@ const WorkVerification = () => {
   }>({
     basicDetails: true,
     employmentDetails: false,
+    colleagueReferences: false,
+    pastEmployment: false,
     existingLoans: false,
     photoCapture: false,
   });
@@ -80,6 +103,8 @@ const WorkVerification = () => {
   }>({
     basicDetails: false,
     employmentDetails: false,
+    colleagueReferences: false,
+    pastEmployment: false,
     existingLoans: false,
     photoCapture: false,
   });
@@ -110,8 +135,31 @@ const WorkVerification = () => {
       employerType: '',
       grossSalary: '',
       netSalary: '',
-      previousCompanyName: '',
-      workExperience: '',
+    },
+    colleagueReferences: {
+      references: [
+        {
+          name: '',
+          address: '',
+          designation: '',
+          yearsKnown: '',
+          contactNumber: '',
+          emailAddress: '',
+        },
+      ],
+    },
+    pastEmployment: {
+      employments: [
+        {
+          employerName: '',
+          designation: '',
+          fromDate: '',
+          toDate: '',
+          contactPersonName: '',
+          contactPersonNumber: '',
+          reasonForMovement: '',
+        },
+      ],
     },
     existingLoans: {
       loans: [
@@ -160,6 +208,34 @@ const WorkVerification = () => {
       employmentDetails: true,
     }));
     setExpandedSections(prev => ({...prev, employmentDetails: false}));
+  };
+
+  const handleColleagueReferencesSubmit = (
+    data: WorkVerificationFormData['colleagueReferences'],
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      colleagueReferences: data,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      colleagueReferences: true,
+    }));
+    setExpandedSections(prev => ({...prev, colleagueReferences: false}));
+  };
+
+  const handlePastEmploymentSubmit = (
+    data: WorkVerificationFormData['pastEmployment'],
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      pastEmployment: data,
+    }));
+    setValidSections(prev => ({
+      ...prev,
+      pastEmployment: true,
+    }));
+    setExpandedSections(prev => ({...prev, pastEmployment: false}));
   };
 
   const handleExistingLoansSubmit = (
@@ -232,6 +308,28 @@ const WorkVerification = () => {
           <WorkEmploymentDetails
             initialData={formData.employmentDetails}
             onSubmit={handleEmploymentDetailsSubmit}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Colleague References"
+          isExpanded={expandedSections.colleagueReferences}
+          onToggle={() => toggleSection('colleagueReferences')}
+          isValid={validSections.colleagueReferences}>
+          <ColleagueReferences
+            initialData={formData.colleagueReferences}
+            onSubmit={handleColleagueReferencesSubmit}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Past Employment"
+          isExpanded={expandedSections.pastEmployment}
+          onToggle={() => toggleSection('pastEmployment')}
+          isValid={validSections.pastEmployment}>
+          <PastEmployment
+            initialData={formData.pastEmployment}
+            onSubmit={handlePastEmploymentSubmit}
           />
         </CollapsibleSection>
 

@@ -551,7 +551,7 @@ export default function Loans() {
               setIsDrawerVisible(true);
             }}
           >
-            Import Loan
+            New Loan
           </Button>
           <Button
             // type="primary"
@@ -559,7 +559,7 @@ export default function Loans() {
             style={{color:colors.secondary.main, borderColor:colors.secondary.main}}
             onClick={() => setIsBulkImportDrawerVisible(true)}
           >
-            Bulk Import
+            Bulk Add
           </Button>
           <Button
             type="link"
@@ -584,6 +584,7 @@ export default function Loans() {
           }}
           size="small"
           scroll={{ x: 1500 }}
+          sticky
         />
       </Card>
       <Modal

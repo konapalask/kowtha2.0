@@ -6,6 +6,11 @@ export const getVerificationData = async (id: string) => {
 };
 
 export const generateFinalReport = async (id: string) => {
-  const response = await axiosInstance.get(`/loans/${id}/generate-final-report`);
+  const response = await axiosInstance.get(`/loans/${id}/generate-final-report`, {
+    responseType: 'blob',
+    headers: {
+      'Accept': 'application/pdf'
+    }
+    });
   return response.data;
 };

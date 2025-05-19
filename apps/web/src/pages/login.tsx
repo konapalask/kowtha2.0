@@ -26,17 +26,14 @@ export default function Login() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const { userDetails, setUserDetails } = useUser();
+  const { userDetails, setUserDetails, loading: userLoading } = useUser();
 
-  // useEffect(() => {
-  //   console.log('User Context:', { userDetails, userLoading });
-  // }, [userDetails, userLoading]);
-
-  // useEffect(() => {
-  //   if (session) {
-  //     router.push("/dashboard");
-  //   }
-  // }, [session, router]);
+  useEffect(() => {
+    // Redirect to dashboard if user is already logged in
+    if (userDetails && !userLoading) {
+      router.push("/dashboard");
+    }
+  }, [userDetails, userLoading, router]);
 
   useEffect(() => {
     if (router.query.error) {
@@ -65,18 +62,27 @@ export default function Login() {
         mobile: values.mobile,
         otp: values.otp,
       });
+      
       if (result.status >= 200 && result.status < 300) {
+        // Set tokens
         setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
-        // Fetch user details after successful login
+        // Fetch and set user details
         try {
           const userDetailsResponse = await getUserDetailsApi();
           setUserDetails(userDetailsResponse.data);
-          router.push("/dashboard");
+          
+          // Wait a bit to ensure context is updated
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 100);
         } catch (error) {
           console.error('Error fetching user details:', error);
           message.error('Failed to fetch user details');
+          // Clear tokens if user details fetch fails
+          setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+          setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         }
       } else {
         message.error(result.data?.message || "Failed to verify OTP");
@@ -88,6 +94,20 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking user context
+  if (userLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't show login form if user is already logged in
+  if (userDetails) {
+    return null;
+  }
 
   return (
     <div
@@ -107,12 +127,12 @@ export default function Login() {
         style={{
           width: "100%",
           maxWidth: "400px",
-          // boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.65)",
           borderRadius: "8px",
           borderColor:"transparent",
           // background: "var(--background-primary)",
-          // opacity: 0.2,
-          background:"transparent"
+          opacity: 0.7,
+          background:"#020847"
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
@@ -158,7 +178,7 @@ export default function Login() {
               ]}
               style={{
                 backgroundColor: "#fff",
-                // borderRadius: "6px",
+                borderRadius: "8px",
                 // height: "40px",
               }}
             >
@@ -169,7 +189,7 @@ export default function Login() {
                 placeholder="Enter mobile number"
                 disabled={otpSent}
                 style={{
-                  borderRadius: "6px",
+                  borderRadius: "8px",
                   height: "40px",
                 }}
                 maxLength={10}
@@ -194,7 +214,7 @@ export default function Login() {
                   }
                   placeholder="Enter 6-digit OTP"
                   style={{
-                    borderRadius: "6px",
+                    borderRadius: "8px",
                     height: "40px",
                   }}
                 />

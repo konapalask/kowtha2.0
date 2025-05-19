@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -20,15 +20,15 @@ interface WorkEmploymentDetailsFormData {
   totalWorkExperience: string;
   companySize: string;
   natureOfService: string;
+  natureOfServiceOther?: string;
   officeLocality: string;
   idCardNumber: string;
   designation: string;
   salaryMode: string;
   employerType: string;
+  employerTypeOther?: string;
   grossSalary: string;
   netSalary: string;
-  previousCompanyName: string;
-  workExperience: string;
 }
 
 interface Props {
@@ -52,21 +52,22 @@ const validationSchema = yup.object().shape({
   employerType: yup.string().required('Employer Type is required'),
   grossSalary: yup.string().required('Gross Salary is required'),
   netSalary: yup.string().required('Net Salary is required'),
-  previousCompanyName: yup
-    .string()
-    .required('Previous Company Name is required'),
-  workExperience: yup.string().required('Work Experience is required'),
 });
 
 const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const officeLocalitySheetRef = useRef<ActionSheetRef>(null);
   const salaryModeSheetRef = useRef<ActionSheetRef>(null);
   const employerTypeSheetRef = useRef<ActionSheetRef>(null);
+  const natureOfServiceSheetRef = useRef<ActionSheetRef>(null);
+  const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
+  const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
+    useState(false);
 
   const {
     control,
     handleSubmit,
     setValue,
+    watch,
     formState: {errors},
   } = useForm<WorkEmploymentDetailsFormData>({
     resolver: yupResolver(validationSchema),
@@ -77,21 +78,43 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       totalWorkExperience: '',
       companySize: '',
       natureOfService: '',
+      natureOfServiceOther: '',
       officeLocality: '',
       idCardNumber: '',
       designation: '',
       salaryMode: '',
       employerType: '',
+      employerTypeOther: '',
       grossSalary: '',
       netSalary: '',
-      previousCompanyName: '',
-      workExperience: '',
     },
   });
 
+  const employerType = watch('employerType');
+  const natureOfService = watch('natureOfService');
+
   const officeLocalityOptions = ['Residential', 'Commercial', 'Industry'];
-  const salaryModeOptions = ['Cash', 'Online'];
-  const employerTypeOptions = ['Government', 'Private'];
+  const salaryModeOptions = ['Cash', 'Online', 'Cheque', 'Mixed'];
+  const employerTypeOptions = [
+    'Government/PSU',
+    'Unlisted Pvt. Ltd',
+    'MNC/Listed Pvt. Ltd',
+    'Proprietorship/Partnership/NGO/Trust',
+    'Others',
+  ];
+
+  const natureOfServiceOptions = [
+    'Agricultural',
+    'Construction',
+    'Education',
+    'FMCG',
+    'Health Care',
+    'Manufacturing',
+    'Services',
+    'Travel & Tourism & Hotel',
+    'E-Commerce',
+    'Others',
+  ];
 
   const showOfficeLocalitySheet = () => {
     officeLocalitySheetRef.current?.show();
@@ -103,6 +126,10 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
 
   const showEmployerTypeSheet = () => {
     employerTypeSheetRef.current?.show();
+  };
+
+  const showNatureOfServiceSheet = () => {
+    natureOfServiceSheetRef.current?.show();
   };
 
   const onFormSubmit = (data: WorkEmploymentDetailsFormData) => {
@@ -229,17 +256,20 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <Controller
         control={control}
         name="natureOfService"
-        render={({field: {onChange, value}}) => (
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nature of Service/Business</Text>
-            <TextInput
+            <TouchableOpacity
               style={[
-                styles.input,
+                styles.selectButton,
                 errors.natureOfService && styles.inputError,
               ]}
-              value={value}
-              onChangeText={onChange}
-            />
+              onPress={showNatureOfServiceSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Nature of Service'}
+              </Text>
+            </TouchableOpacity>
             {errors.natureOfService && (
               <Text style={styles.errorText}>
                 {errors.natureOfService.message}
@@ -248,6 +278,31 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           </View>
         )}
       />
+
+      {natureOfService === 'Others' && (
+        <Controller
+          control={control}
+          name="natureOfServiceOther"
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Specify Nature of Service</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.natureOfServiceOther && styles.inputError,
+                ]}
+                value={value}
+                onChangeText={onChange}
+              />
+              {errors.natureOfServiceOther && (
+                <Text style={styles.errorText}>
+                  {errors.natureOfServiceOther.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -340,7 +395,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <Controller
         control={control}
         name="employerType"
-        render={({field: {onChange, value}}) => (
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Type of Employer</Text>
             <TouchableOpacity
@@ -362,6 +417,31 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           </View>
         )}
       />
+
+      {employerType === 'Others' && (
+        <Controller
+          control={control}
+          name="employerTypeOther"
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Specify Employer Type</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.employerTypeOther && styles.inputError,
+                ]}
+                value={value}
+                onChangeText={onChange}
+              />
+              {errors.employerTypeOther && (
+                <Text style={styles.errorText}>
+                  {errors.employerTypeOther.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -396,49 +476,6 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             />
             {errors.netSalary && (
               <Text style={styles.errorText}>{errors.netSalary.message}</Text>
-            )}
-          </View>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="previousCompanyName"
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Previous Company Name</Text>
-            <TextInput
-              style={[
-                styles.input,
-                errors.previousCompanyName && styles.inputError,
-              ]}
-              value={value}
-              onChangeText={onChange}
-            />
-            {errors.previousCompanyName && (
-              <Text style={styles.errorText}>
-                {errors.previousCompanyName.message}
-              </Text>
-            )}
-          </View>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="workExperience"
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Work Experience</Text>
-            <TextInput
-              style={[styles.input, errors.workExperience && styles.inputError]}
-              value={value}
-              onChangeText={onChange}
-            />
-            {errors.workExperience && (
-              <Text style={styles.errorText}>
-                {errors.workExperience.message}
-              </Text>
             )}
           </View>
         )}
@@ -498,6 +535,25 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPressIn={() => {
                 setValue('employerType', option);
                 employerTypeSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={natureOfServiceSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Select Nature of Service</Text>
+          {natureOfServiceOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('natureOfService', option);
+                natureOfServiceSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

@@ -141,17 +141,17 @@ export default function Users() {
       key: "mobile",
       width: 150,
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <span style={{ color: status === "Active" ? "green" : "red" }}>
-          {status}
-        </span>
-      ),
-      width: 150,
-    },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status: string) => (
+    //     <span style={{ color: status === "Active" ? "green" : "red" }}>
+    //       {status}
+    //     </span>
+    //   ),
+    //   width: 150,
+    // },
     {
       title: "Role",
       dataIndex: "role",
@@ -206,7 +206,8 @@ export default function Users() {
           dataSource={users}
           rowKey="id"
           loading={loading}
-          scroll={{ y: 400 }}
+          // scroll={{ y: 400 }}
+          sticky
           pagination={{
             showTotal: (total) => `Total ${total} users`,
             position: ["bottomCenter"],

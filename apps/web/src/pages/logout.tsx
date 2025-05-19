@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Spin } from "antd";
 import { useUser } from "@/components/layout/UserContextProvider";
 import { clear, clearAllCookies } from "@/helpers/localStorage";
-import { signOut } from "next-auth/react";
+// import { signOut } from "next-auth/react";
 
 const Logout = () => {
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ const Logout = () => {
         setUserDetails(null);
         
         // Sign out from next-auth
-        await signOut({ redirect: false });
+        // await signOut({ redirect: false });
         
         // Redirect to login page
         router.push("/login");
