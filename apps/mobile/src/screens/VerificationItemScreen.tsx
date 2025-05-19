@@ -120,6 +120,7 @@ const VerificationItemScreen = () => {
     },
     thirdPartyCheck: {
       tpcName: '',
+      mobileNumber: '',
       relationship: '',
       feedbackStatus: '',
       comments: '',

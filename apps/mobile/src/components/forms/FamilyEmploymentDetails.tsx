@@ -286,14 +286,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: colors.button.primary.background,
+    borderColor: colors.button.primary.background,
+    borderWidth: 1,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
   },
   submitButtonText: {
-    color: colors.button.primary.text,
+    color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   actionSheetContent: {
-    padding: 16,
+    // padding: 16,
   },
   actionSheetTitle: {
     fontSize: 18,

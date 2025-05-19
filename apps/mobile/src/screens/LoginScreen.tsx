@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import {CommonActions, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -99,73 +101,75 @@ const LoginScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={loginBackground}
-      style={styles.background}
-      resizeMode="cover">
-      <View style={styles.container}>
-        <Image
-          source={KowthaDarkIcon}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.title}>Login</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Mobile Number"
-          value={mobileNumber}
-          onChangeText={setMobileNumber}
-          keyboardType="phone-pad"
-          maxLength={10}
-          placeholderTextColor={'#c8c8c8'}
-          editable={!loading}
-        />
-        {!showOtpInput ? (
-          <TouchableOpacity
-            style={[styles.button, loading && styles.disabledButton]}
-            onPress={handleSendOtp}
-            disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Send OTP</Text>
-            )}
-          </TouchableOpacity>
-        ) : (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter OTP"
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              maxLength={6}
-              placeholderTextColor={'#c8c8c8'}
-              editable={!loading}
-            />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ImageBackground
+        source={loginBackground}
+        style={styles.background}
+        resizeMode="cover">
+        <View style={styles.container}>
+          <Image
+            source={KowthaDarkIcon}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>Login</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Mobile Number"
+            value={mobileNumber}
+            onChangeText={setMobileNumber}
+            keyboardType="phone-pad"
+            maxLength={10}
+            placeholderTextColor={'#c8c8c8'}
+            editable={!loading}
+          />
+          {!showOtpInput ? (
             <TouchableOpacity
               style={[styles.button, loading && styles.disabledButton]}
-              onPress={handleVerifyOtp}
+              onPress={handleSendOtp}
               disabled={loading}>
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Verify OTP</Text>
+                <Text style={styles.buttonText}>Send OTP</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.resendButton, loading && styles.disabledButton]}
-              onPress={() => {
-                setOtp('');
-                handleSendOtp();
-              }}
-              disabled={loading}>
-              <Text style={styles.resendButtonText}>Resend OTP</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-    </ImageBackground>
+          ) : (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter OTP"
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                maxLength={6}
+                placeholderTextColor={'#c8c8c8'}
+                editable={!loading}
+              />
+              <TouchableOpacity
+                style={[styles.button, loading && styles.disabledButton]}
+                onPress={handleVerifyOtp}
+                disabled={loading}>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Verify OTP</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.resendButton, loading && styles.disabledButton]}
+                onPress={() => {
+                  setOtp('');
+                  handleSendOtp();
+                }}
+                disabled={loading}>
+                <Text style={styles.resendButtonText}>Resend OTP</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 };
 

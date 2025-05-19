@@ -78,7 +78,7 @@ export const importLoansApi = (file: File) => {
 };
 
 export const getVerifierLoansApi = () => {
-  return axiosInstance.get<VerifierLoan[]>(`/loans/verifier`);
+  return axiosInstance.get<VerifierLoan[]>(`/loans/get-verifier-loans`);
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {

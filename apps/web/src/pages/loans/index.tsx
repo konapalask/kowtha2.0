@@ -347,6 +347,7 @@ export default function Loans() {
   };
 
   const handleBulkImport = async (values: any) => {
+    console.log(values)
     try {
       setLoading(true);
       // Transform the form values into the required format
@@ -761,13 +762,26 @@ export default function Loans() {
                       let result: any;
                       if (!selectedLoan.id) {
                         // Create new loan
-                        result = await createLoanApi([{...values,officeId:userDetails?.officeId,operationsExecutiveId:userDetails?.sub}]);
+                        const loanData = {
+                          ...values,
+                          officeId: userDetails?.officeId,
+                          operationsExecutiveId: userDetails?.sub,
+                          applicationNumber: values.applicationNumber?.trim(),
+                          applicantName: values.applicantName?.trim(),
+                          applicantMobile: values.applicantMobile?.trim(),
+                          applicantAddress: values.applicantAddress?.trim(),
+                          loanType: values.loanType,
+                          bankName: values.bankName,
+                          loanAmount: Number(values.loanAmount)
+                        };
+
+                        result = await createLoanApi([loanData]);
                         // Handle the new response format
                         if (result.data.data.successful && result.data.data.successful.length > 0) {
                           const createdLoan = result.data.data.successful[0];
                           // Create a new loan object with the loanId as id
                           const newLoan = {
-                            ...values,
+                            ...loanData,
                             id: createdLoan.loanId,
                             applicationNumber: createdLoan.applicationNumber,
                             status: "Pending",
@@ -777,6 +791,7 @@ export default function Loans() {
                           // Add the new loan to the loans list
                           setLoans(prevLoans => [...prevLoans, newLoan]);
                           message.success("Loan created successfully");
+                          setIsDrawerVisible(false);
                         } else {
                           message.error("Failed to create loan");
                         }
@@ -800,22 +815,79 @@ export default function Loans() {
                 >
                   <Row gutter={8}>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Application Number" name="applicationNumber" rules={[{ required: true, message: "Required" }]}> <Input disabled={!!selectedLoan.id} /> </Form.Item>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Application Number" 
+                        name="applicationNumber" 
+                        rules={[
+                          { required: true, message: "Required" },
+                          { whitespace: true, message: "Cannot be empty" }
+                        ]}
+                      > 
+                        <Input disabled={!!selectedLoan.id} /> 
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Applicant Name" name="applicantName" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Applicant Name" 
+                        name="applicantName" 
+                        rules={[
+                          { required: true, message: "Required" },
+                          { whitespace: true, message: "Cannot be empty" }
+                        ]}
+                      > 
+                        <Input /> 
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Mobile Number" name="applicantMobile" rules={[{ required: true, message: "Required" }, { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit mobile number" }]}> <Input maxLength={10} /> </Form.Item>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Mobile Number" 
+                        name="applicantMobile" 
+                        rules={[
+                          { required: true, message: "Required" },
+                          { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit mobile number" }
+                        ]}
+                      > 
+                        <Input maxLength={10} /> 
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Loan Amount" name="loanAmount" rules={[{ required: true, message: "Required" }, { type: 'number', message: "Please enter a valid amount" }]}> <InputNumber min={0} /> </Form.Item>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Loan Amount" 
+                        name="loanAmount" 
+                        rules={[
+                          { required: true, message: "Required" },
+                          { type: 'number', message: "Please enter a valid amount" }
+                        ]}
+                      > 
+                        <InputNumber min={0} style={{ width: '100%' }} /> 
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Address" name="applicantAddress" rules={[{ required: true, message: "Required" }]}> <Input /> </Form.Item>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Address" 
+                        name="applicantAddress" 
+                        rules={[
+                          { required: true, message: "Required" },
+                          { whitespace: true, message: "Cannot be empty" }
+                        ]}
+                      > 
+                        <Input /> 
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Loan Type" name="loanType" rules={[{ required: true, message: "Required" }]}>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Loan Type" 
+                        name="loanType" 
+                        rules={[
+                          { required: true, message: "Required" }
+                        ]}
+                      >
                         <Select
                           placeholder="Select loan type"
                           options={loanTypeOptions}
@@ -823,7 +895,14 @@ export default function Loans() {
                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={6} style={{ padding: 4 }}>
-                      <Form.Item labelCol={{ span: 24, style: { marginBottom: 0 } }} label="Bank Name" name="bankName" rules={[{ required: true, message: "Required" }]}>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Bank Name" 
+                        name="bankName" 
+                        rules={[
+                          { required: true, message: "Required" }
+                        ]}
+                      >
                         <Select
                           showSearch
                           placeholder="Select bank"
@@ -919,7 +998,16 @@ export default function Loans() {
                         <Card
                           key={label}
                           title={label}
-                          style={{ flex: 1 }}
+                          style={{ 
+                            flex: 1,
+                            height: verification?.status === "Completed" ? 'auto' : '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                          bodyStyle={{
+                            flex: verification?.status === "Completed" ? 'none' : 1,
+                            padding: verification?.status === "Completed" ? '12px' : '24px'
+                          }}
                           extra={
                             verification && (
                               <Tag
@@ -935,177 +1023,24 @@ export default function Loans() {
                           }
                         >
                           {verification && (
-                            <div style={{ marginBottom: 16 }}>
+                            <div style={{ marginBottom: verification?.status === "Completed" ? 0 : 16 }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
                                 <span>Currently assigned to:</span>
                                 <Tag color="blue">
                                   {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
                                 </Tag>
                               </div>
-                              <Divider style={{ margin: '8px 0' }} />
+                              {verification?.status !== "Completed" && (
+                                <Divider style={{ margin: '8px 0' }} />
+                              )}
                             </div>
                           )}
-                          <Form
-                            layout="vertical"
-                            initialValues={
-                              verification
-                                ? {
-                                    assignmentMethod:
-                                      verification.assignmentMethod,
-                                    office: verification.office,
-                                    assignee: verification.assignee,
-                                  }
-                                : {
-                                    assignmentMethod: "Local"
-                                  }
-                            }
-                            onFinish={(values) =>
-                              handleVerificationAssign(
-                                selectedLoan.id,
-                                type,
-                                {...values,isAddressSame:true}
-                              )
-                            }
-                          >
-                            <Form.Item
-                              name="assignmentMethod"
-                              label="Assignment Method"
-                              rules={[
-                                {
-                                  required: true,
-                                  message: "Please select assignment method",
-                                },
-                              ]}
-                            >
-                              <Radio.Group onChange={(e) => {
-                                if (e.target.value === "Local") {
-                                  setCurrentOffice(userDetails?.officeId || "");
-                                }
-                              }}>
-                                <Radio.Button value="Local">Local</Radio.Button>
-                                <Radio.Button value="Remote">Remote</Radio.Button>
-                              </Radio.Group>
-                            </Form.Item>
-                            <Form.Item
-                              noStyle
-                              shouldUpdate={(prevValues, currentValues) =>
-                                prevValues?.assignmentMethod !==
-                                currentValues?.assignmentMethod
-                              }
-                            >
-                              {({ getFieldValue }) => {
-                                const assignmentMethod =
-                                  getFieldValue("assignmentMethod");
-                                if (assignmentMethod === "Remote") {
-                                  return (
-                                    <Form.Item
-                                      name="office"
-                                      label="Select Office"
-                                      rules={[
-                                        {
-                                          required: true,
-                                          message: "Please select an office",
-                                        },
-                                      ]}
-                                    >
-                                      <Select
-                                        placeholder="Select office"
-                                        onChange={(value) => {
-                                          setCurrentOffice(value);
-                                        }}
-                                        options={offices}
-                                      />
-                                    </Form.Item>
-                                  );
-                                }
-                                return null;
-                              }}
-                            </Form.Item>
-                            <Form.Item
-                              noStyle
-                              shouldUpdate={(prevValues, currentValues) =>
-                                prevValues?.assignmentMethod !==
-                                  currentValues?.assignmentMethod ||
-                                prevValues?.office !== currentValues?.office
-                              }
-                            >
-                              {({ getFieldValue }) => {
-                                const assignmentMethod =
-                                  getFieldValue("assignmentMethod");
-                                const office = getFieldValue("office");
-                                return (
-                                  <Form.Item
-                                    name="assignee"
-                                    label="Assign Field Executive"
-                                    rules={[
-                                      {
-                                        required: true,
-                                        message:
-                                          "Please select a field executive",
-                                      },
-                                    ]}
-                                  >
-                                   <Select
-  placeholder="Select field executive"
-  style={{ width: '100%' }}
-  options={fieldExecutives}
-/>
-
-                                  </Form.Item>
-                                );
-                              }}
-                            </Form.Item>
-                            <Form.Item>
-                              <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={loading}
-                                icon={<UserOutlined />}
-                              >
-                                {verification
-                                  ? "Update Assignment"
-                                  : "Assign Executive"}
-                              </Button>
-                            </Form.Item>
-                          </Form>
-                        </Card>
-                      );
-                    })
-                  : ["PermanentAddress", "CurrentAddress", "Work"].map(
-                      (type) => {
-                        const verification = selectedLoan?.verifications?.find(
-                          (v: any) => v.type === type
-                        );
-                        return (
-                          <Card
-                            key={type}
-                            title={type}
-                            style={{ flex: 1 }}
-                            extra={
-                              verification && (
-                                <Tag
-                                  color={
-                                    verification.status === "Completed"
-                                      ? "green"
-                                      : "blue"
-                                  }
-                                >
-                                  {verification.status}
-                                </Tag>
-                              )
-                            }
-                          >
-                            {verification && (
-                              <div style={{ marginBottom: 16 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
-                                  <span>Currently assigned to:</span>
-                                  <Tag color="blue">
-                                    {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
-                                  </Tag>
-                                </div>
-                                <Divider style={{ margin: '8px 0' }} />
-                              </div>
-                            )}
+                          {verification?.status === "Completed" ? (
+                            <div style={{ textAlign: 'center', color: '#52c41a', padding: '8px 0' }}>
+                              <InfoCircleOutlined style={{ marginRight: 8 }} />
+                              Verification completed - No further updates required
+                            </div>
+                          ) : (
                             <Form
                               layout="vertical"
                               initialValues={
@@ -1206,30 +1141,12 @@ export default function Loans() {
                                         },
                                       ]}
                                     >
-                                      <Select placeholder="Select field executive" options={fieldExecutives}>
-                                        {/* {
-                                        assignmentMethod === "Local"
-                                          ?
-                                           fieldExecutives?.map((fe) => (
-                                              <Option
-                                                key={fe.id}
-                                                value={fe.name}
-                                              >
-                                                {fe.name}
-                                              </Option>
-                                            ))
-                                          : office &&
-                                            remoteExecutives[office]?.map(
-                                              (fe: FieldExecutive) => (
-                                                <Option
-                                                  key={fe.id}
-                                                  value={fe.name}
-                                                >
-                                                  {fe.name}
-                                                </Option>
-                                              )
-                                            )} */}
-                                      </Select>
+                                     <Select
+  placeholder="Select field executive"
+  style={{ width: '100%' }}
+  options={fieldExecutives}
+/>
+
                                     </Form.Item>
                                   );
                                 }}
@@ -1247,6 +1164,181 @@ export default function Loans() {
                                 </Button>
                               </Form.Item>
                             </Form>
+                          )}
+                        </Card>
+                      );
+                    })
+                  : ["PermanentAddress", "CurrentAddress", "Work"].map(
+                      (type) => {
+                        const verification = selectedLoan?.verifications?.find(
+                          (v: any) => v.type === type
+                        );
+                        return (
+                          <Card
+                            key={type}
+                            title={type}
+                            style={{ 
+                              flex: 1,
+                              height: verification?.status === "Completed" ? 'auto' : '100%',
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}
+                            bodyStyle={{
+                              flex: verification?.status === "Completed" ? 'none' : 1,
+                              padding: verification?.status === "Completed" ? '12px' : '24px'
+                            }}
+                            extra={
+                              verification && (
+                                <Tag
+                                  color={
+                                    verification.status === "Completed"
+                                      ? "green"
+                                      : "blue"
+                                  }
+                                >
+                                  {verification.status}
+                                </Tag>
+                              )
+                            }
+                          >
+                            {verification && (
+                              <div style={{ marginBottom: verification?.status === "Completed" ? 0 : 16 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
+                                  <span>Currently assigned to:</span>
+                                  <Tag color="blue">
+                                    {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
+                                  </Tag>
+                                </div>
+                                {verification?.status !== "Completed" && (
+                                  <Divider style={{ margin: '8px 0' }} />
+                                )}
+                              </div>
+                            )}
+                            {verification?.status === "Completed" ? (
+                              <div style={{ textAlign: 'center', color: '#52c41a', padding: '8px 0' }}>
+                                <InfoCircleOutlined style={{ marginRight: 8 }} />
+                                Verification completed - No further updates required
+                              </div>
+                            ) : (
+                              <Form
+                                layout="vertical"
+                                initialValues={
+                                  verification
+                                    ? {
+                                        assignmentMethod:
+                                          verification.assignmentMethod,
+                                        office: verification.office,
+                                        assignee: verification.assignee,
+                                      }
+                                    : {
+                                        assignmentMethod: "Local"
+                                      }
+                                }
+                                onFinish={(values) =>
+                                  handleVerificationAssign(
+                                    selectedLoan.id,
+                                    type,
+                                    values
+                                  )
+                                }
+                              >
+                                <Form.Item
+                                  name="assignmentMethod"
+                                  label="Assignment Method"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please select assignment method",
+                                    },
+                                  ]}
+                                >
+                                  <Radio.Group onChange={(e) => {
+                                    if (e.target.value === "Local") {
+                                      setCurrentOffice(userDetails?.officeId || "");
+                                    }
+                                  }}>
+                                    <Radio.Button value="Local">Local</Radio.Button>
+                                    <Radio.Button value="Remote">Remote</Radio.Button>
+                                  </Radio.Group>
+                                </Form.Item>
+                                <Form.Item
+                                  noStyle
+                                  shouldUpdate={(prevValues, currentValues) =>
+                                    prevValues?.assignmentMethod !==
+                                    currentValues?.assignmentMethod
+                                  }
+                                >
+                                  {({ getFieldValue }) => {
+                                    const assignmentMethod =
+                                      getFieldValue("assignmentMethod");
+                                    if (assignmentMethod === "Remote") {
+                                      return (
+                                        <Form.Item
+                                          name="office"
+                                          label="Select Office"
+                                          rules={[
+                                            {
+                                              required: true,
+                                              message: "Please select an office",
+                                            },
+                                          ]}
+                                        >
+                                          <Select
+                                            placeholder="Select office"
+                                            onChange={(value) => {
+                                              setCurrentOffice(value);
+                                            }}
+                                            options={offices}
+                                          />
+                                        </Form.Item>
+                                      );
+                                    }
+                                    return null;
+                                  }}
+                                </Form.Item>
+                                <Form.Item
+                                  noStyle
+                                  shouldUpdate={(prevValues, currentValues) =>
+                                    prevValues?.assignmentMethod !==
+                                      currentValues?.assignmentMethod ||
+                                    prevValues?.office !== currentValues?.office
+                                  }
+                                >
+                                  {({ getFieldValue }) => {
+                                    const assignmentMethod =
+                                      getFieldValue("assignmentMethod");
+                                    const office = getFieldValue("office");
+                                    return (
+                                      <Form.Item
+                                        name="assignee"
+                                        label="Assign Field Executive"
+                                        rules={[
+                                          {
+                                            required: true,
+                                            message:
+                                              "Please select a field executive",
+                                          },
+                                        ]}
+                                      >
+                                        <Select placeholder="Select field executive" options={fieldExecutives} />
+                                      </Form.Item>
+                                    );
+                                  }}
+                                </Form.Item>
+                                <Form.Item>
+                                  <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={loading}
+                                    icon={<UserOutlined />}
+                                  >
+                                    {verification
+                                      ? "Update Assignment"
+                                      : "Assign Executive"}
+                                  </Button>
+                                </Form.Item>
+                              </Form>
+                            )}
                           </Card>
                         );
                       }
@@ -1261,7 +1353,7 @@ export default function Loans() {
       <Drawer
         title="Bulk Import Loans"
         placement="right"
-        width={1800}
+        width={"100%"}
         onClose={() => {
           setIsBulkImportDrawerVisible(false);
           bulkImportForm.resetFields();
@@ -1272,7 +1364,11 @@ export default function Loans() {
         footer={
           <div style={{ textAlign: 'right', padding: '10px' }}>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button 
+                type="primary" 
+                loading={loading}
+                onClick={() => bulkImportForm.submit()}
+              >
                 Create Loans
               </Button>
               <Button onClick={() => {
@@ -1296,18 +1392,29 @@ export default function Loans() {
                 {fields.map(({ key, name, ...restField }) => (
                  <div key={key} style={{ marginBottom: 12 }}>
                    <Row gutter={[8, 8]} align="middle" wrap={false}>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={4} lg={4} xl={4} style={{ padding: 4 }}>
+                       <Form.Item 
+                         {...restField} 
+                         labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                         name={[name, 'applicationNumber']} 
+                         label="Application Number" 
+                         rules={[{ required: true, message: 'Required' }, { whitespace: true, message: 'Cannot be empty' }]} 
+                       >
+                         <Input style={{ height: '32px' }} />
+                       </Form.Item>
+                     </Col>
+                     <Col xs={24} md={5} lg={3} xl={3} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
                          name={[name, 'applicantName']} 
                          label="Applicant Name" 
-                         rules={[{ required: true, message: 'Required' }]} 
+                         rules={[{ required: true, message: 'Required' }, { whitespace: true, message: 'Cannot be empty' }]} 
                        >
                          <Input style={{ height: '32px' }} />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={4} lg={4} xl={3} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
@@ -1315,21 +1422,21 @@ export default function Loans() {
                          label="Mobile Number" 
                          rules={[{ required: true, message: 'Required' }, { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit mobile number' }]} 
                        >
-                         <Input maxLength={10} style={{ height: '32px' }} />
+                         <Input maxLength={10} style={{ height: '32px' }} addonBefore={"+91"} />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={7} lg={6} xl={6} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
                          name={[name, 'applicantAddress']} 
                          label="Address" 
-                         rules={[{ required: true, message: 'Required' }]} 
+                         rules={[{ required: true, message: 'Required' }, { whitespace: true, message: 'Cannot be empty' }]} 
                        >
                          <Input />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={4} lg={3} xl={2} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
@@ -1344,7 +1451,7 @@ export default function Loans() {
                          />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={6} lg={5} xl={5} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
@@ -1363,7 +1470,7 @@ export default function Loans() {
                          />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                     <Col xs={24} md={3} lg={2} xl={2} style={{ padding: 4 }}>
                        <Form.Item 
                          {...restField} 
                          labelCol={{ span: 24, style: { marginBottom: 0 } }} 
@@ -1371,10 +1478,10 @@ export default function Loans() {
                          label="Loan Amount" 
                          rules={[{ required: true, message: 'Required' }, { type: 'number', message: 'Please enter a valid amount' }]} 
                        >
-                         <InputNumber min={0} style={{ width: '100%', height: '32px' }} />
+                         <InputNumber min={0} style={{ width: '100%', height: '32px' }} addonAfter={"₹"} />
                        </Form.Item>
                      </Col>
-                     <Col xs={24} sm={6} style={{ padding: '0 4px 0 4px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                     <Col xs={24} md={3} lg={2} xl={2} style={{ padding: '0 4px 0 4px', display: 'flex', alignContent: "end" }}>
                        <Button 
                          type="text" 
                          danger 
@@ -1385,8 +1492,10 @@ export default function Loans() {
                    </Row>
                  </div>
                 ))}
-                <Form.Item>
+                <Form.Item style={{textAlign:"center"}}
+                >
                   <Button
+                  style={{maxWidth:500}}
                     type="dashed"
                     onClick={() => add()}
                     block
