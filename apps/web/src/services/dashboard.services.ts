@@ -5,7 +5,7 @@ export const getDashboardHealthCheck = async () => {
   return response.data;
 };
 
-export const getDashboardMetrics = async () => {
-  const response = await axiosInstance.get("/dashboard/metrics");
+export const getDashboardMetrics = async (params?: { startDate: string | null; endDate: string | null }) => {
+  const response = await axiosInstance.get("/dashboard/metrics", { params });
   return response.data.data;
 };
