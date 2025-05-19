@@ -20,7 +20,7 @@ export class AccountsService {
   private generateTokens(userId: number, mobile: string, role: UserRole) {
     const payload = { sub: userId, mobile, role };
     
-    // Generate access token (expires in 1 hour)
+    // Generate access token (expires in 24 hours)
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: '24h'
     });
@@ -84,8 +84,8 @@ export class AccountsService {
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
       // Generate a random 6-digit OTP
-      // const otp = this.generateRandomOTP();
       const otp = "123456";
+      // const otp = this.generateRandomOTP();
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       // Find or create user
