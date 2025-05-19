@@ -24,7 +24,7 @@ import {
 } from "recharts";
 import axiosInstance from "@/config/axios.config";
 import { getDashboardMetrics } from "@/services/dashboard.services";
-import { DateRange } from 'react-date-range';
+import DateRangePicker from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
@@ -114,7 +114,7 @@ export default function Dashboard() {
 
   const dateRangeDropdown = (
     <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-      <DateRange
+      <DateRangePicker
         ranges={[dateRange]}
         onChange={handleDateRangeChange}
         months={1}
