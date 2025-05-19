@@ -64,7 +64,7 @@ export class AccountsController {
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'List all users with optional role filter' })
   @ApiResponse({ 
     status: 200, 

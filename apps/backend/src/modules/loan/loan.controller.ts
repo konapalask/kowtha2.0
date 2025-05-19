@@ -46,7 +46,7 @@ export class LoanController {
   }
     
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
   @ApiResponse({ 
       status: 200, 
