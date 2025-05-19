@@ -303,7 +303,7 @@ export class LoanController {
   */
 
   @Get('get-verifier-loans')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to verifier' })
   @ApiResponse({ 
     status: 200, 
