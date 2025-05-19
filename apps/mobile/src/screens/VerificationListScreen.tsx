@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
+  TextInput,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -13,6 +14,8 @@ import {RootStackParamList} from '../../App';
 import {getItem} from '../helpers/utility';
 import {getFieldData, getUserDetails} from '../services/field.services';
 import Settings from '../components/Settings';
+import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -61,6 +64,8 @@ const VerificationListScreen = () => {
   const [data, setData] = useState<VerificationItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [refreshing, setRefreshing] = useState(false);
+  const [showAppNumberFilter, setShowAppNumberFilter] = useState(false);
+  const [appNumberFilter, setAppNumberFilter] = useState('');
 
   const fetchData = async () => {
     try {
@@ -102,10 +107,19 @@ const VerificationListScreen = () => {
 
   const filterOptions = ['All', 'Pending', 'Completed'];
 
-  const filteredData =
-    selectedFilter === 'All'
-      ? data
-      : data.filter(item => item.verification.status === selectedFilter);
+  const filteredData = data
+    .filter(
+      item =>
+        selectedFilter === 'All' || item.verification.status === selectedFilter,
+    )
+    .filter(
+      item =>
+        !appNumberFilter ||
+        (item.applicationNumber &&
+          item.applicationNumber
+            .toLowerCase()
+            .includes(appNumberFilter.toLowerCase())),
+    );
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
@@ -150,30 +164,69 @@ const VerificationListScreen = () => {
 
   const renderFilterOptions = () => (
     <View style={styles.filterContainer}>
-      {filterOptions.map(option => (
+      <View style={styles.filterRow}>
+        <View style={styles.statusFilters}>
+          {filterOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.filterBadge,
+                selectedFilter === option && [
+                  styles.selectedFilterBadge,
+                  {
+                    backgroundColor: getProgressColor(option),
+                    borderColor: getProgressColor(option),
+                  },
+                ],
+              ]}
+              onPress={() => setSelectedFilter(option)}>
+              <Text
+                style={[
+                  styles.filterText,
+                  selectedFilter === option && styles.selectedFilterText,
+                ]}>
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <TouchableOpacity
-          key={option}
           style={[
-            styles.filterBadge,
-            selectedFilter === option && [
-              styles.selectedFilterBadge,
-              {
-                backgroundColor: getProgressColor(option),
-                borderColor: getProgressColor(option),
-              },
-            ],
-            ,
+            styles.filterIcon,
+            showAppNumberFilter && styles.filterIconActive,
           ]}
-          onPress={() => setSelectedFilter(option)}>
-          <Text
-            style={[
-              styles.filterText,
-              selectedFilter === option && styles.selectedFilterText,
-            ]}>
-            {option}
-          </Text>
+          onPress={() => {
+            setShowAppNumberFilter(!showAppNumberFilter);
+            if (!showAppNumberFilter) {
+              setAppNumberFilter('');
+            }
+          }}>
+          <Icon
+            name="filter-list"
+            size={24}
+            color={showAppNumberFilter ? '#007AFF' : '#666'}
+          />
         </TouchableOpacity>
-      ))}
+      </View>
+      {showAppNumberFilter && (
+        <View style={styles.appNumberFilterContainer}>
+          <TextInput
+            style={styles.appNumberInput}
+            placeholder="Filter by application number"
+            value={appNumberFilter}
+            onChangeText={setAppNumberFilter}
+            placeholderTextColor="#999"
+            autoFocus={true}
+          />
+          {appNumberFilter ? (
+            <TouchableOpacity
+              style={styles.clearFilter}
+              onPress={() => setAppNumberFilter('')}>
+              <Icon name="close" size={20} color="#666" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      )}
     </View>
   );
 
@@ -181,30 +234,58 @@ const VerificationListScreen = () => {
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        const baseNavPayload = {
-          name: item.applicantName,
-          id: item.id,
-          applicationNumber: item.applicationNumber, // Main application ID
-          verificationId: item.verification.loanId,
-        };
+        if (item?.verification?.status === 'Pending') {
+          const baseNavPayload = {
+            name: item.applicantName,
+            id: item.id,
+            applicationNumber: item.applicationNumber, // Main application ID
+            verificationId: item.verification.loanId,
+          };
 
-        if (item.verification.type === 'Work') {
-          navigation.navigate('WorkVerification', {
-            item: baseNavPayload,
-            verificationType: 'Work', // Explicitly 'Work'
-            userData: item,
-          });
+          if (item.verification.type === 'Work') {
+            navigation.navigate('WorkVerification', {
+              item: baseNavPayload,
+              verificationType: 'Work', // Explicitly 'Work'
+              userData: item,
+            });
+          } else {
+            // Types for VerificationItemScreen are 'CurrentAddress' or 'PermanentAddress'
+            navigation.navigate('VerificationItemScreen', {
+              item: baseNavPayload,
+              verificationType: item.verification.type, // This will be 'CurrentAddress' or 'PermanentAddress'
+              userData: item,
+            });
+          }
         } else {
-          // Types for VerificationItemScreen are 'CurrentAddress' or 'PermanentAddress'
-          navigation.navigate('VerificationItemScreen', {
-            item: baseNavPayload,
-            verificationType: item.verification.type, // This will be 'CurrentAddress' or 'PermanentAddress'
-            userData: item,
+          Toast.show({
+            type: 'info',
+            text1: 'Verification Completed',
+            text2: `${getVerificationTypeLabel(
+              item.verification.type,
+            )} verification for application ${
+              item.applicationNumber
+            } is already completed.`,
+            position: 'bottom',
+            visibilityTime: 3000,
           });
         }
       }}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.applicantName}</Text>
+        <View
+          style={[
+            styles.verificationTypeTag,
+            {
+              backgroundColor: getVerificationTypeColor(item.verification.type),
+            },
+          ]}>
+          <Text style={styles.verificationTypeText}>
+            {getVerificationTypeLabel(item.verification.type)}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.detailsRow}>
+        <Text style={styles.details}>{item.applicationNumber}</Text>
         <View
           style={[
             styles.progressTag,
@@ -215,15 +296,11 @@ const VerificationListScreen = () => {
           <Text style={styles.progressText}>{item.verification.status}</Text>
         </View>
       </View>
-      <View style={styles.detailsRow}>
-        <View style={styles.leftDetails}>
-          <Text style={styles.details}>{item.applicationNumber}</Text>
-          <Text style={styles.details}>
-            Verification Type: {item.verification.type}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.details}>Address: {item.applicantAddress}</Text>
+      {item.applicantAddress && (
+        <Text style={[styles.details, styles.addressText]}>
+          {item.applicantAddress}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 
@@ -246,7 +323,6 @@ const VerificationListScreen = () => {
         data={filteredData}
         renderItem={renderItem}
         keyExtractor={item => item.verification.id}
-        // keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
@@ -343,10 +419,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   filterContainer: {
-    flexDirection: 'row',
     padding: 16,
     paddingBottom: 8,
-    gap: 8,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   filterBadge: {
     paddingHorizontal: 12,
@@ -390,6 +467,50 @@ const styles = StyleSheet.create({
     // borderColor: '#666',
     // borderWidth: 1,
     // borderRadius: 8,
+  },
+  addressText: {
+    marginTop: 4,
+    color: '#666',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  statusFilters: {
+    flexDirection: 'row',
+    gap: 8,
+    flex: 1,
+  },
+  filterIcon: {
+    padding: 8,
+    marginLeft: 8,
+    borderRadius: 8,
+  },
+  filterIconActive: {
+    backgroundColor: '#E3F2FD',
+  },
+  appNumberFilterContainer: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  appNumberInput: {
+    flex: 1,
+    height: 40,
+    color: '#333',
+    fontSize: 14,
+  },
+  clearFilter: {
+    padding: 4,
   },
 });
 

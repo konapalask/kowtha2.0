@@ -198,7 +198,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         <>
           <Controller
             control={control}
-            // name="previousAddress"
+            name="previousAddress"
             // rules={{
             //   required: 'Previous address is required if stay is <=1 year',
             // }}
