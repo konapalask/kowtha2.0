@@ -778,119 +778,244 @@ export class LoanService {
       // Get the first verification's data for the template
       const verificationData = loan.verifications[0]?.verificationData as VerificationData || {};
 
-      // Set your S3 download URL for the signature image here
-      const signatureUrl = 'https://your-bucket.s3.amazonaws.com/signature_kowtha.jpeg?AWSAccessKeyId=...';
-
-      // --- START: Main content block ---
-      const mainContent = `
-        <div class="header">
-          <div>
-            <div class="firm">KOWTHA & CO.</div>
-            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
+      const htmlTemplate = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background: #fff;
+              color: #222;
+            }
+            .header {
+              text-align: left;
+              padding: 24px 40px 8px 40px;
+              border-bottom: 2px solid #2c3e50;
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+            }
+            .header .firm {
+              font-size: 28px;
+              font-weight: bold;
+              color: #1a237e;
+              letter-spacing: 1px;
+            }
+            .header .subtitle {
+              color: #1976d2;
+              font-style: italic;
+              font-size: 18px;
+              margin-bottom: 8px;
+            }
+            .header .address {
+              font-size: 14px;
+              margin-bottom: 4px;
+            }
+            .header .contact {
+              font-size: 14px;
+              text-align: right;
+            }
+            .report-title {
+              text-align: center;
+              font-size: 20px;
+              font-weight: bold;
+              margin: 24px 0 0 0;
+              letter-spacing: 1px;
+              text-decoration: underline;
+            }
+            .align-wrapper {
+              width: 90%;
+              margin: 0 auto;
+            }
+            .branch-box {
+              width: 100%;
+              margin: 18px 0 0 0;
+              border: 2px solid #888;
+              border-radius: 4px;
+              background: #f8f9fa;
+            }
+            .branch-table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            .branch-table td {
+              border: none;
+              padding: 10px 16px;
+              font-size: 16px;
+            }
+            .branch-label {
+              font-weight: bold;
+              width: 160px;
+            }
+            .branch-value {
+              font-size: 18px;
+              font-weight: bold;
+              color: #222;
+            }
+            .branch-note {
+              background: #ffe0b2;
+              color: #b26a00;
+              font-size: 13px;
+              text-align: center;
+              border-radius: 3px;
+              font-weight: bold;
+            }
+            .section-table {
+              width: 100%;
+              margin: 24px 0 0 0;
+              border-collapse: collapse;
+              font-size: 15px;
+            }
+            .section-header {
+              background: #f5f5f5;
+              font-weight: bold;
+              font-size: 16px;
+              text-align: center;
+              border: 1px solid #888;
+              padding: 8px;
+              letter-spacing: 1px;
+            }
+            .section-table th, .section-table td {
+              border: 1px solid #888;
+              padding: 8px 10px;
+              vertical-align: top;
+            }
+            .section-table th {
+              background: #f5f5f5;
+              font-weight: bold;
+              text-align: center; 
+              width: 220px;
+            }
+            .highlight {
+              font-weight: bold;
+              color: #1a237e;
+            }
+            .tick {
+              font-weight: bold;
+              color: #388e3c;
+              font-size: 18px;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #7f8c8d;
+              font-size: 12px;
+              border-top: 1px solid #eee;
+              padding-top: 20px;
+            }
+            .logo {
+              margin-top: 24px;
+              text-align: center;
+              opacity: 0.15;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="firm">KOWTHA & CO.</div>
+              <div class="subtitle">CHARTERED ACCOUNTANTS</div>
+              <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
+            </div>
+            <div class="contact">
+              Mobile no: 9491821359<br>
+              Mail ID: kowthaBOI@gmail.com
+            </div>
           </div>
-          <div class="contact">
-            Mobile no: 9491821359<br>
-            Mail ID: kowthaBOI@gmail.com
-          </div>
-        </div>
 
-        <div class="report-title">DUE DILIGENCE REPORT</div>
+          <div class="report-title">DUE DILIGENCE REPORT</div>
 
-        <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
+          <div class="align-wrapper">
+            <div class="branch-box">
+              <table class="branch-table">
+                <tr>
+                  <td class="branch-label">Branch Name</td>
+                  <td class="branch-value">PIDUGURALLA</td>
+                  <td class="branch-note">NOTE: Please tick/circle as applicable</td>
+                </tr>
+              </table>
+            </div>
+            <table class="section-table">
+              <tr><td colspan="6" class="section-header">Basic Details</td></tr>
               <tr>
-                <td class="branch-label">Branch Name</td>
-                <td class="branch-value">PIDUGURALLA</td>
-                <td class="branch-note">NOTE: Please tick/circle as applicable</td>
+                <th>Name of Applicant</th>
+                <td colspan="2">${verificationData.applicantDetails?.applicantName || 'Mr. PADIRA MOHA YOGESH'}</td>
+                <th>PAN Number</th>
+                <td colspan="2">${verificationData.applicantDetails?.pan || 'DEIPP8976Q'}</td>
+              </tr>
+              <tr>
+                <th>Aadhar Number</th>
+                <td colspan="2">${verificationData.applicantDetails?.aadhar || '2656 5044 6168'}</td>
+                <th>Name Of the Co-Applicant</th>
+                <td colspan="2">${verificationData.applicantDetails?.coApplicantName || 'Mr. PADIRA SRINIVASA CHARY'}</td>
+              </tr>
+              <tr>
+                <th>PAN of the Co-Applicant</th>
+                <td colspan="2">${verificationData.applicantDetails?.coApplicantPan || 'BBJPB893D'}</td>
+                <th>Aadhar Of the Co-Applicant</th>
+                <td colspan="2">${verificationData.applicantDetails?.coApplicantAadhar || '7344 4827 4773'}</td>
+              </tr>
+              <tr>
+                <th>Residential Address</th>
+                <td colspan="5">${verificationData.applicantDetails?.address || 'Siri Mens Duplex Hostel, N Convention Road, Hi Tech City, Near Shilparamam, Hospital and Telangana.'}</td>
+              </tr>
+              <tr>
+                <th>Marital Status</th>
+                <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'Married'}</td>
+                <th>Educational Qualification</th>
+                <td colspan="2">${verificationData.basicDetails?.educationalQualification || 'Graduate'}</td>
+              </tr>
+              <tr>
+                <th>Category</th>
+                <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'General'}</td>
+                <th>Number of Dependents</th>
+                <td colspan="2">${verificationData.basicDetails?.educationalQualification || '3'}</td>
+              </tr>
+              <tr>
+                <th>Number of years in Current Residence</th>
+                <td colspan="2">${verificationData.basicDetails?.maritalStatus || '2'}</td>
+                <th>Current residence house size</th>
+                <td colspan="2">${verificationData.basicDetails?.educationalQualification || '3'}</td>
+              </tr>
+              <tr>
+                <th>If Less than 1 Year, then Previous Address</th>
+                <td colspan="5">${verificationData.basicDetails?.yearsInCurrentCity || 'Gachibowli, Hyderabad'}</td>
+              </tr>
+              <tr>
+                <th>Number of Years in Current City</th>
+                <td colspan="2">${verificationData.basicDetails?.previousAddress || 'NA'}</td>
+                <th>Number of Years stayed at that Address</th>
+                <td colspan="2">${verificationData.basicDetails?.yearsAtPreviousAddress || 'NA'}</td>
+              </tr>
+              <tr>
+                <th>If Less than 3 Years in current city, then mention</th>
+                <td colspan="5">${verificationData.basicDetails?.previousCity || 'NA'}</td>
+              </tr>
+              <tr>
+                <th>Reason for Change</th>
+                <td colspan="5">${verificationData.basicDetails?.reasonForChange || 'NA'}</td>
+              </tr>
+              <tr>
+                <th>Parents Staying with?</th>
+                <td colspan="5">${verificationData.basicDetails?.parentsStayingWith || 'Self'}</td>
               </tr>
             </table>
           </div>
-          <table class="section-table">
-            <tr><td colspan="6" class="section-header">Basic Details</td></tr>
-            <tr>
-              <th>Name of Applicant</th>
-              <td colspan="2">${verificationData.applicantDetails?.applicantName || 'Mr. PADIRA MOHA YOGESH'}</td>
-              <th>PAN Number</th>
-              <td colspan="2">${verificationData.applicantDetails?.pan || 'DEIPP8976Q'}</td>
-            </tr>
-            <tr>
-              <th>Aadhar Number</th>
-              <td colspan="2">${verificationData.applicantDetails?.aadhar || '2656 5044 6168'}</td>
-              <th>Name Of the Co-Applicant</th>
-              <td colspan="2">${verificationData.applicantDetails?.coApplicantName || 'Mr. PADIRA SRINIVASA CHARY'}</td>
-            </tr>
-            <tr>
-              <th>PAN of the Co-Applicant</th>
-              <td colspan="2">${verificationData.applicantDetails?.coApplicantPan || 'BBJPB893D'}</td>
-              <th>Aadhar Of the Co-Applicant</th>
-              <td colspan="2">${verificationData.applicantDetails?.coApplicantAadhar || '7344 4827 4773'}</td>
-            </tr>
-            <tr>
-              <th>Residential Address</th>
-              <td colspan="5">${verificationData.applicantDetails?.address || 'Siri Mens Duplex Hostel, N Convention Road, Hi Tech City, Near Shilparamam, Hospital and Telangana.'}</td>
-            </tr>
-            <tr>
-              <th>Marital Status</th>
-              <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'Married'}</td>
-              <th>Educational Qualification</th>
-              <td colspan="2">${verificationData.basicDetails?.educationalQualification || 'Graduate'}</td>
-            </tr>
-            <tr>
-              <th>Category</th>
-              <td colspan="2">${verificationData.basicDetails?.category || 'General'}</td>
-              <th>Number of Dependents</th>
-              <td colspan="2">${verificationData.basicDetails?.dependents || '03'}</td>
-            </tr>
-            <tr>
-              <th>Number of years in Current Residence</th>
-              <td colspan="2">${verificationData.basicDetails?.yearsInCurrentResidence || '3-5 Years'}</td>
-              <th>Current residence house size</th>
-              <td colspan="2">${verificationData.basicDetails?.houseSize || '1 BHK'}</td>
-            </tr>
-            <tr>
-              <th>If Less than 1 Year, then Previous Address</th>
-              <td colspan="5">${verificationData.basicDetails?.yearsInCurrentCity || 'Gachibowli, Hyderabad'}</td>
-            </tr>
-            <tr>
-              <th>Number of Years in Current City</th>
-              <td colspan="2">${verificationData.basicDetails?.previousAddress || 'NA'}</td>
-              <th>Number of Years stayed at that Address</th>
-              <td colspan="2">${verificationData.basicDetails?.yearsAtPreviousAddress || 'NA'}</td>
-            </tr>
-            <tr>
-              <th>If Less than 3 Years in current city, then mention</th>
-              <td colspan="5">${verificationData.basicDetails?.previousCity || 'NA'}</td>
-            </tr>
-            <tr>
-              <th>Reason for Change</th>
-              <td colspan="5">${verificationData.basicDetails?.reasonForChange || 'NA'}</td>
-            </tr>
-            <tr>
-              <th>Parents Staying with?</th>
-              <td colspan="5">${verificationData.basicDetails?.parentsStayingWith || 'Self'}</td>
-            </tr>
-          </table>
-        </div>
 
-        <div class="logo">
-          <img src="${signatureUrl}" width="120" alt="stamp" />
-        </div>
+          <div class="logo">
+            <img src="/Users/bys/Desktop/signature_kowtha.jpeg" width="120" alt="stamp" />
+          </div>
 
-        <div class="footer">
-          <span>BOI-AP</span><br>
-          Generated on ${new Date().toLocaleString()}
-        </div>
-      `;
-      // --- END: Main content block ---
-
-      const htmlTemplate = `
-        ${mainContent}
-        <div style="page-break-before: always;"></div>
-        ${mainContent}
-        <div style="page-break-before: always;"></div>
-        ${mainContent}
+          <div class="footer">
+            <span>BOI-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+        </body>
+        </html>
       `;
 
       // Generate PDF
