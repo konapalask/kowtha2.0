@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import { Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import PDFDocument = require('pdfkit');
+import { Buffer } from 'buffer'; // Import the Buffer type
 import * as fs from 'fs';
 import * as path from 'path';
 import { EditLoanDto } from './dto/edit-loan.dto';
@@ -1033,7 +1034,7 @@ export class LoanService {
       });
 
       // Generate PDF
-      const pdfBuffer = await page.pdf({
+      const pdfArray = await page.pdf({
         format: 'a4',
         margin: {
           top: '20px',
@@ -1044,7 +1045,7 @@ export class LoanService {
         printBackground: true,
         preferCSSPageSize: true
       });
-
+      const pdfBuffer: Buffer = Buffer.from(pdfArray);
       // Close the browser
       await browser.close();
 
