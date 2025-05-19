@@ -220,7 +220,7 @@ export class AccountsService {
       }
 
       if (filters?.officeId) {
-        where.officeId = filters.officeId;
+        where.officeId = Number(filters.officeId);
       }
 
       const users = await this.prisma.user.findMany({
