@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Tag, Space, Typography } from "antd";
+import { Card, Row, Col, Statistic, Table, Tag, Space, Typography, Input, Dropdown } from "antd";
 import {
   FileOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 // import api from "@/utils/axios";
@@ -23,6 +24,9 @@ import {
 } from "recharts";
 import axiosInstance from "@/config/axios.config";
 import { getDashboardMetrics } from "@/services/dashboard.services";
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 interface DashboardMetrics {
   totalLoans: number;
@@ -90,52 +94,87 @@ export default function Dashboard() {
   const [pendingLoans, setPendingLoans] = useState<any[]>([]);
   const [processingStats, setProcessingStats] = useState<any[]>([]);
   const [employeeStats, setEmployeeStats] = useState<any[]>([]);
+  const [dateRange, setDateRange] = useState({
+    startDate: null as Date | null,
+    endDate: null as Date | null,
+    key: 'selection'
+  });
+
+  const handleDateRangeChange = (ranges: any) => {
+    if (ranges.selection.startDate && ranges.selection.endDate) {
+      setDateRange(ranges.selection);
+      fetchMetrics(ranges.selection.startDate, ranges.selection.endDate);
+    }
+  };
+
+  const formatDateRange = () => {
+    if (!dateRange.startDate || !dateRange.endDate) return '';
+    return `${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()}`;
+  };
+
+  const dateRangeDropdown = (
+    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+      <DateRange
+        ranges={[dateRange]}
+        onChange={handleDateRangeChange}
+        months={1}
+        direction="horizontal"
+        showDateDisplay={false}
+        rangeColors={['#145886']}
+        minDate={new Date(2024, 0, 1)}
+        maxDate={new Date()}
+      />
+    </div>
+  );
+
+  const fetchMetrics = async (startDate?: Date | null, endDate?: Date | null) => {
+    try {
+      const response = await getDashboardMetrics({
+        startDate: startDate?.toISOString() || null,
+        endDate: endDate?.toISOString() || null
+      });
+      setMetrics(response);
+
+      // Use dummy data if API fails or for development
+      // const pendingLoansData = response.data.allLoans || DUMMY_RECENT_LOANS;
+      // setPendingLoans(
+      //   pendingLoansData
+      //     .filter((l: any) => l.status === "Pending")
+      //     .sort(
+      //       (a: any, b: any) =>
+      //         new Date(a.createdAt).getTime() -
+      //         new Date(b.createdAt).getTime()
+      //     )
+      //     .slice(0, 10)
+      // );
+
+      // Use dummy data for processing stats
+      // console.log(response)
+      setProcessingStats([
+        { status: "Pending", count: response.percentages.pending },
+        { status: "Verified", count: response.percentages.verified },
+        { status: "Rejected", count: response.percentages.rejected },
+      ]);
+
+      // Use dummy data for employee stats
+      setEmployeeStats(response.data.employeeStats);
+    } catch (error) {
+      console.error("Failed to fetch metrics:", error);
+      // Fallback to dummy data if API fails
+      setPendingLoans(
+        DUMMY_RECENT_LOANS.filter((l) => l.status === "Pending")
+      );
+      // setProcessingStats([
+      //   { status: "Pending", count: 6 },
+      //   { status: "Verified", count: 16 },
+      //   { status: "Rejected", count: 3 },
+      // ]);
+      setEmployeeStats(DUMMY_EMPLOYEE_STATS);
+    }
+  };
 
   useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const response = await getDashboardMetrics();
-        setMetrics(response);
-
-        // Use dummy data if API fails or for development
-        // const pendingLoansData = response.data.allLoans || DUMMY_RECENT_LOANS;
-        // setPendingLoans(
-        //   pendingLoansData
-        //     .filter((l: any) => l.status === "Pending")
-        //     .sort(
-        //       (a: any, b: any) =>
-        //         new Date(a.createdAt).getTime() -
-        //         new Date(b.createdAt).getTime()
-        //     )
-        //     .slice(0, 10)
-        // );
-
-        // Use dummy data for processing stats
-        // console.log(response)
-        setProcessingStats([
-          { status: "Pending", count: response.percentages.pending },
-          { status: "Verified", count: response.percentages.verified },
-          { status: "Rejected", count: response.percentages.rejected },
-        ]);
-
-        // Use dummy data for employee stats
-        setEmployeeStats(response.data.employeeStats);
-      } catch (error) {
-        console.error("Failed to fetch metrics:", error);
-        // Fallback to dummy data if API fails
-        setPendingLoans(
-          DUMMY_RECENT_LOANS.filter((l) => l.status === "Pending")
-        );
-        // setProcessingStats([
-        //   { status: "Pending", count: 6 },
-        //   { status: "Verified", count: 16 },
-        //   { status: "Rejected", count: 3 },
-        // ]);
-        setEmployeeStats(DUMMY_EMPLOYEE_STATS);
-      }
-    };
-
-    fetchMetrics();
+    fetchMetrics(null, null);
   }, []);
 
   const pendingLoansColumns = [
@@ -194,6 +233,22 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
+      <div className="flex-end" style={{ marginBottom: 16 }}>
+        <Dropdown
+          overlay={dateRangeDropdown}
+          trigger={['click']}
+          placement="bottomRight"
+        >
+          <Input
+            placeholder="Select date range"
+            value={formatDateRange()}
+            suffix={<CalendarOutlined />}
+            readOnly
+            style={{ width: '200px' }}
+          />
+        </Dropdown>
+      </div>
+
       <Row gutter={[16, 16]}>
         <Col sm={12} md={12} lg={6}>
           <Card
@@ -402,7 +457,7 @@ export default function Dashboard() {
           </Card>
         </Col>
       </Row>
-
+{/* 
       <Card title="Loans Pending Since Longest" style={{ marginTop: 16 }}>
         <Table
           columns={pendingLoansColumns}
@@ -412,7 +467,7 @@ export default function Dashboard() {
           size="small"
           scroll={{ y: 200 }}
         />
-      </Card>
+      </Card> */}
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col md={24} lg={12}>

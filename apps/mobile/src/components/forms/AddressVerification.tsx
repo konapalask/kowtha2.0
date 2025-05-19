@@ -198,7 +198,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         <>
           <Controller
             control={control}
-            // name="previousAddress"
+            name="previousAddress"
             // rules={{
             //   required: 'Previous address is required if stay is <=1 year',
             // }}
@@ -514,14 +514,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: colors.button.primary.background,
+    borderColor: colors.button.primary.background,
+    borderWidth: 1,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
   },
   submitButtonText: {
-    color: colors.button.primary.text,
+    color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
   },

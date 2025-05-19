@@ -41,6 +41,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   } = useForm<ThirdPartyCheckFormData>({
     defaultValues: initialData || {
       tpcName: '',
+      mobileNumber: '',
       relationship: '',
       feedbackStatus: '',
       comments: '',
@@ -79,6 +80,30 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
             </View>
           )}
           name="tpcName"
+        />
+
+        <Controller
+          control={control}
+          // rules={{required: 'Mobile number is required'}}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mobile Number*</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Enter mobile number"
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+              {errors.mobileNumber && (
+                <Text style={styles.errorText}>
+                  {errors.mobileNumber.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="mobileNumber"
         />
 
         <Controller
@@ -241,14 +266,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: colors.button.primary.background,
+    borderColor: colors.button.primary.background,
+    borderWidth: 1,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
   },
   submitButtonText: {
-    color: colors.button.primary.text,
+    color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
   },

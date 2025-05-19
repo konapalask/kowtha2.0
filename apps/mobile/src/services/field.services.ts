@@ -9,7 +9,7 @@ export const getUserDetails = async () => {
 };
 
 export const submitVerification = async (data: any, id: string) => {
-  return axiosInstance.patch(`/loans/${id}/verification-report`, data);
+  return axiosInstance.patch(`/loans/${id}/submit-verification-report`, data);
 };
 
 export const getPresignedUrl = async (id: string) => {
