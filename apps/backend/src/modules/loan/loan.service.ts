@@ -17,6 +17,90 @@ import { S3Service } from '../common/s3utils/s3.service';
 // TODO: Replace with import from @prisma/client if/when available
 // type VerificationType = 'PermanentAddress' | 'CurrentAddress' | 'Work';
 
+interface VerificationData {
+  applicantDetails?: {
+    applicantName: string;
+    pan: string;
+    aadhar: string;
+    coApplicantName: string;
+    coApplicantPan: string;
+    coApplicantAadhar: string;
+    address: string;
+  };
+  basicDetails?: {
+    verificationDate: string;
+    verificationMode: string;
+    verificationTime: string;
+    verificationType: string;
+    verificationStatus: string;
+    verificationRemarks: string;
+    maritalStatus: string;
+    educationalQualification: string;
+    dependents: string;
+    yearsInCurrentResidence: string;
+    houseSize: string;
+    previousAddress: string;
+    yearsAtPreviousAddress: string;
+    yearsInCurrentCity: string;
+    previousCity: string;
+    yearsInPreviousCity: string;
+    reasonForChange: string;
+    parentsStayingWith: string;
+    category: string;
+  };
+  applicantInformation?: {
+    applicantAge: string;
+    applicantGender: string;
+    applicantEducation: string;
+    applicantMaritalStatus: string;
+  };
+  residenceDetails?: {
+    houseArea: string;
+    rentDetails: string;
+    localityType: string;
+    accessibility: string;
+    residenceType: string;
+    residenceStatus: string;
+    locationCategory: string;
+    nameplateVisible: string;
+    standardOfLiving: string;
+    constructionQuality: string;
+    yearsAtCurrentAddress: string;
+  };
+  familyEmploymentDetails?: {
+    totalFamilyMembers: string;
+    earningMembers: string;
+    dependents: string;
+    isSpouseWorking: string;
+    spouseEmploymentDetails: string;
+    assetsObserved: string;
+  };
+  thirdPartyCheck?: {
+    tpcName: string;
+    relationship: string;
+    comments: string;
+    feedbackStatus: string;
+  };
+  addressVerification?: {
+    addressType: string;
+    addressCategory: string;
+    addressSubCategory: string;
+    addressDetails: string;
+    geoTag: string;
+  };
+  finalObservations?: {
+    overallStatus: string;
+    cooperativeness: string;
+    remarks: string;
+  };
+  uploadedItems?: Array<{
+    id: string;
+    uri: string;
+    type: string;
+    timestamp: string;
+  }>;
+}
+
 @Injectable()
 export class LoanService {
   constructor(
@@ -659,7 +743,7 @@ export class LoanService {
 
   async generateLoanPDF(loanId: number): Promise<Buffer> {
     try {
-      // Fetch only necessary loan details
+      // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
         select: {
@@ -678,11 +762,12 @@ export class LoanService {
               type: true,
               status: true,
               updatedAt: true,
+              verificationData: true,
+              paths: true,
               fieldExecutive: { select: { name: true } }
             }
           },
-          verificationReport: { select: { remarks: true, verificationDate: true } },
-          documents: { select: { type: true, url: true } }
+          verificationReport: { select: { remarks: true, verificationDate: true } }
         }
       });
 
@@ -690,204 +775,122 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
+      // Get the first verification's data for the template
+      const verificationData = loan.verifications[0]?.verificationData as VerificationData || {};
+
+      // Set your S3 download URL for the signature image here
+      const signatureUrl = 'https://your-bucket.s3.amazonaws.com/signature_kowtha.jpeg?AWSAccessKeyId=...';
+
+      // --- START: Main content block ---
+      const mainContent = `
+        <div class="header">
+          <div>
+            <div class="firm">KOWTHA & CO.</div>
+            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
+            <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
+          </div>
+          <div class="contact">
+            Mobile no: 9491821359<br>
+            Mail ID: kowthaBOI@gmail.com
+          </div>
+        </div>
+
+        <div class="report-title">DUE DILIGENCE REPORT</div>
+
+        <div class="align-wrapper">
+          <div class="branch-box">
+            <table class="branch-table">
+              <tr>
+                <td class="branch-label">Branch Name</td>
+                <td class="branch-value">PIDUGURALLA</td>
+                <td class="branch-note">NOTE: Please tick/circle as applicable</td>
+              </tr>
+            </table>
+          </div>
+          <table class="section-table">
+            <tr><td colspan="6" class="section-header">Basic Details</td></tr>
+            <tr>
+              <th>Name of Applicant</th>
+              <td colspan="2">${verificationData.applicantDetails?.applicantName || 'Mr. PADIRA MOHA YOGESH'}</td>
+              <th>PAN Number</th>
+              <td colspan="2">${verificationData.applicantDetails?.pan || 'DEIPP8976Q'}</td>
+            </tr>
+            <tr>
+              <th>Aadhar Number</th>
+              <td colspan="2">${verificationData.applicantDetails?.aadhar || '2656 5044 6168'}</td>
+              <th>Name Of the Co-Applicant</th>
+              <td colspan="2">${verificationData.applicantDetails?.coApplicantName || 'Mr. PADIRA SRINIVASA CHARY'}</td>
+            </tr>
+            <tr>
+              <th>PAN of the Co-Applicant</th>
+              <td colspan="2">${verificationData.applicantDetails?.coApplicantPan || 'BBJPB893D'}</td>
+              <th>Aadhar Of the Co-Applicant</th>
+              <td colspan="2">${verificationData.applicantDetails?.coApplicantAadhar || '7344 4827 4773'}</td>
+            </tr>
+            <tr>
+              <th>Residential Address</th>
+              <td colspan="5">${verificationData.applicantDetails?.address || 'Siri Mens Duplex Hostel, N Convention Road, Hi Tech City, Near Shilparamam, Hospital and Telangana.'}</td>
+            </tr>
+            <tr>
+              <th>Marital Status</th>
+              <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'Married'}</td>
+              <th>Educational Qualification</th>
+              <td colspan="2">${verificationData.basicDetails?.educationalQualification || 'Graduate'}</td>
+            </tr>
+            <tr>
+              <th>Category</th>
+              <td colspan="2">${verificationData.basicDetails?.category || 'General'}</td>
+              <th>Number of Dependents</th>
+              <td colspan="2">${verificationData.basicDetails?.dependents || '03'}</td>
+            </tr>
+            <tr>
+              <th>Number of years in Current Residence</th>
+              <td colspan="2">${verificationData.basicDetails?.yearsInCurrentResidence || '3-5 Years'}</td>
+              <th>Current residence house size</th>
+              <td colspan="2">${verificationData.basicDetails?.houseSize || '1 BHK'}</td>
+            </tr>
+            <tr>
+              <th>If Less than 1 Year, then Previous Address</th>
+              <td colspan="5">${verificationData.basicDetails?.yearsInCurrentCity || 'Gachibowli, Hyderabad'}</td>
+            </tr>
+            <tr>
+              <th>Number of Years in Current City</th>
+              <td colspan="2">${verificationData.basicDetails?.previousAddress || 'NA'}</td>
+              <th>Number of Years stayed at that Address</th>
+              <td colspan="2">${verificationData.basicDetails?.yearsAtPreviousAddress || 'NA'}</td>
+            </tr>
+            <tr>
+              <th>If Less than 3 Years in current city, then mention</th>
+              <td colspan="5">${verificationData.basicDetails?.previousCity || 'NA'}</td>
+            </tr>
+            <tr>
+              <th>Reason for Change</th>
+              <td colspan="5">${verificationData.basicDetails?.reasonForChange || 'NA'}</td>
+            </tr>
+            <tr>
+              <th>Parents Staying with?</th>
+              <td colspan="5">${verificationData.basicDetails?.parentsStayingWith || 'Self'}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="logo">
+          <img src="${signatureUrl}" width="120" alt="stamp" />
+        </div>
+
+        <div class="footer">
+          <span>BOI-AP</span><br>
+          Generated on ${new Date().toLocaleString()}
+        </div>
+      `;
+      // --- END: Main content block ---
+
       const htmlTemplate = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 40px;
-              color: #333;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 30px;
-              border-bottom: 2px solid #2c3e50;
-              padding-bottom: 20px;
-            }
-            .header h1 {
-              color: #2c3e50;
-              margin: 0;
-              font-size: 24px;
-            }
-            .header p {
-              color: #7f8c8d;
-              margin: 10px 0 0;
-            }
-            .section {
-              margin-bottom: 30px;
-              background: #fff;
-              padding: 20px;
-              border-radius: 5px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .section-title {
-              color: #2c3e50;
-              font-size: 18px;
-              font-weight: bold;
-              margin-bottom: 15px;
-              padding-bottom: 10px;
-              border-bottom: 1px solid #eee;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 20px;
-            }
-            th, td {
-              padding: 12px;
-              text-align: left;
-              border-bottom: 1px solid #ddd;
-            }
-            th {
-              background-color: #f8f9fa;
-              color: #2c3e50;
-              font-weight: bold;
-            }
-            tr:nth-child(even) {
-              background-color: #f8f9fa;
-            }
-            .status {
-              display: inline-block;
-              padding: 5px 10px;
-              border-radius: 3px;
-              font-size: 12px;
-              font-weight: bold;
-            }
-            .status-pending { background-color: #ffeeba; color: #856404; }
-            .status-completed { background-color: #d4edda; color: #155724; }
-            .status-rejected { background-color: #f8d7da; color: #721c24; }
-            .document-list {
-              list-style: none;
-              padding: 0;
-            }
-            .document-list li {
-              padding: 8px 0;
-              border-bottom: 1px solid #eee;
-            }
-            .document-list li:last-child {
-              border-bottom: none;
-            }
-            .footer {
-              margin-top: 40px;
-              text-align: center;
-              color: #7f8c8d;
-              font-size: 12px;
-              border-top: 1px solid #eee;
-              padding-top: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Loan Application Details</h1>
-            <p>Application Number: ${loan.applicationNumber}</p>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Applicant Information</div>
-            <table>
-              <tr>
-                <th>Name</th>
-                <td>${loan.applicantName}</td>
-              </tr>
-              <tr>
-                <th>Mobile</th>
-                <td>${loan.applicantMobile}</td>
-              </tr>
-              <tr>
-                <th>Address</th>
-                <td>${loan.applicantAddress}</td>
-              </tr>
-              <tr>
-                <th>Loan Type</th>
-                <td>${loan.loanType}</td>
-              </tr>
-              <tr>
-                <th>Bank Name</th>
-                <td>${loan.bankName}</td>
-              </tr>
-              <tr>
-                <th>Loan Amount</th>
-                <td>₹${loan.loanAmount}</td>
-              </tr>
-              <tr>
-                <th>Status</th>
-                <td><span class="status status-${loan.status.toLowerCase()}">${loan.status}</span></td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Office & Executive Details</div>
-            <table>
-              <tr>
-                <th>Office</th>
-                <td>${loan.office?.name || 'N/A'}</td>
-              </tr>
-              <tr>
-                <th>Operations Executive</th>
-                <td>${loan.operationsExecutive?.name || 'N/A'}</td>
-              </tr>
-            </table>
-          </div>
-
-          ${loan.verifications.length > 0 ? `
-            <div class="section">
-              <div class="section-title">Verification Details</div>
-              <table>
-                <tr>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Field Executive</th>
-                  <th>Completed Date</th>
-                </tr>
-                ${loan.verifications.map(v => `
-                  <tr>
-                    <td>${v.type}</td>
-                    <td><span class="status status-${v.status.toLowerCase()}">${v.status}</span></td>
-                    <td>${v.fieldExecutive?.name || 'N/A'}</td>
-                    <td>${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString() : 'N/A'}</td>
-                  </tr>
-                `).join('')}
-              </table>
-            </div>
-          ` : ''}
-
-          ${loan.verificationReport ? `
-            <div class="section">
-              <div class="section-title">Verification Report</div>
-              <table>
-                <tr>
-                  <th>Remarks</th>
-                  <td>${loan.verificationReport.remarks || 'No remarks'}</td>
-                </tr>
-                <tr>
-                  <th>Verification Date</th>
-                  <td>${new Date(loan.verificationReport.verificationDate).toLocaleDateString()}</td>
-                </tr>
-              </table>
-            </div>
-          ` : ''}
-
-          ${loan.documents.length > 0 ? `
-            <div class="section">
-              <div class="section-title">Supporting Documents</div>
-              <ul class="document-list">
-                ${loan.documents.map(doc => `
-                  <li>${doc.type}: ${doc.url}</li>
-                `).join('')}
-              </ul>
-            </div>
-          ` : ''}
-
-          <div class="footer">
-            <p>Generated on ${new Date().toLocaleString()}</p>
-          </div>
-        </body>
-        </html>
+        ${mainContent}
+        <div style="page-break-before: always;"></div>
+        ${mainContent}
+        <div style="page-break-before: always;"></div>
+        ${mainContent}
       `;
 
       // Generate PDF

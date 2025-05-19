@@ -45,23 +45,23 @@ export class S3Service {
     }
   }
 
-  async generatePresignedDownloadUrl(fileName: string): Promise<string> {
+  async generatePresignedDownloadUrl(path: string): Promise<string> {
     try {
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
-        Key: fileName,
+        Key: path,
       });
 
       const signedUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 }); // URL expires in 1 hour
 
       await this.loggingService.info('Generated presigned download URL', {
-        fileName,
+        path,
       });
 
       return signedUrl;
     } catch (error) {
       await this.loggingService.error('Failed to generate presigned download URL', {
-        fileName,
+        path,
         error: error.message,
       });
       throw error;

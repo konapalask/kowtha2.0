@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { S3Service } from './s3.service';
 import { JwtAuthGuard } from '../../accounts/jwt-auth.guard';
+import { PutBucketInventoryConfigurationRequestFilterSensitiveLog } from '@aws-sdk/client-s3';
 
 @ApiTags('s3')
 @Controller('s3')
@@ -44,6 +45,7 @@ export class S3Controller {
     },
   })
   async generatePresignedDownloadUrl(@Param('path') path: string) {
+    console.log('path', path);
     const url = await this.s3Service.generatePresignedDownloadUrl(path);
     return { url };
   }
