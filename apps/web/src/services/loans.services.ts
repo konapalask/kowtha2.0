@@ -49,7 +49,7 @@ export const getLoansApi = () => {
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {
-  return axiosInstance.put<Loan>(`/loans/${loanId}`, payload);
+  return axiosInstance.patch<Loan>(`/loans/${loanId}`, payload);
 };
 
 export const assignVerificationApi = (

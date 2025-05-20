@@ -82,13 +82,6 @@ const VerificationItemScreen = () => {
       educationQualification: '',
       category: '',
     },
-    applicantInformation: {
-      applicantName: '',
-      applicantAge: '',
-      applicantGender: '',
-      applicantMaritalStatus: '',
-      applicantEducation: '',
-    },
     addressVerification: {
       addressCategory: '',
       addressDetails: '',
@@ -124,11 +117,6 @@ const VerificationItemScreen = () => {
       relationship: '',
       feedbackStatus: '',
       comments: '',
-    },
-    finalObservations: {
-      cooperativeness: '',
-      overallStatus: '',
-      remarks: '',
     },
     uploadedItems: [],
   });
@@ -252,11 +240,12 @@ const VerificationItemScreen = () => {
 
       console.log('Submitting form data:', finalData);
       await submitVerification(
-        {
-          verificationType: verificationType,
-          findings: 'Verification Findings Text',
-          verificationData: finalData,
-        },
+        // {
+        //   verificationType: verificationType,
+        //   findings: 'Verification Findings Text',
+        //   verificationData: finalData,
+        // },
+        finalData,
         item?.id,
       );
 

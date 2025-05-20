@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext, useContext } from "react";
 import {
   Button,
   Typography,
@@ -19,6 +19,7 @@ import {
   message,
   Tabs,
   Table,
+  Image,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -32,6 +33,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
 import React from "react";
 import { getVerificationData, generateFinalReport } from "@/services/verifier.services";
+import { getS3ImageUrl } from "@/utils/utility";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
@@ -152,6 +154,18 @@ interface EditFormModalProps {
   onSave: (values: any) => void;
   formKey: string;
   initialValues: any;
+  currentTab: string;
+}
+
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  options?: string[];
+  value?: string;
+  showWhen?: (values: any) => boolean;
+  readOnly?: boolean;
 }
 
 const EditFormModal: React.FC<EditFormModalProps> = ({
@@ -160,75 +174,141 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
   onSave,
   formKey,
   initialValues,
+  currentTab,
 }) => {
   const [form] = Form.useForm();
   const [editorContent, setEditorContent] = useState('');
 
   React.useEffect(() => {
     if (visible && initialValues) {
-      form.setFieldsValue(initialValues);
+      const currentVerification = initialValues?.verifications?.find((v: any) => v.type === currentTab);
+      form.setFieldsValue(currentVerification?.verificationData || {});
       if (formKey === 'finalObservations') {
-        setEditorContent(initialValues.remarks || '');
+        setEditorContent(currentVerification?.verificationData?.remarks || '');
       }
     }
-  }, [visible, initialValues, form, formKey]);
+  }, [visible, initialValues, form, formKey, currentTab]);
 
   const getFormFields = () => {
     switch (formKey) {
       case "basicDetails":
         return [
-          { name: "verificationType", label: "Verification Type", type: "input" },
-          { name: "verificationDate", label: "Verification Date", type: "input" },
-          { name: "verificationTime", label: "Verification Time", type: "input" },
-          { name: "verificationMode", label: "Verification Mode", type: "input" },
-          { name: "verificationStatus", label: "Verification Status", type: "input" },
-          { name: "verificationRemarks", label: "Verification Remarks", type: "textarea" },
+          { 
+            name: "verificationType", 
+            label: "Verification Type", 
+            type: "input", 
+            required: true,
+            value: currentTab === 'PermanentAddress' ? 'Permanent Address' : 
+                   currentTab === 'CurrentAddress' ? 'Current Address' : 
+                   currentTab === 'Work' ? 'Work Verification' : 'Final Observations'
+          },
+          { 
+            name: "applicationNumber", 
+            label: "Application Number", 
+            type: "input", 
+            required: true 
+          },
+          { 
+            name: "applicantName", 
+            label: "Applicant Name", 
+            type: "input", 
+            required: true 
+          },
+          { 
+            name: "applicantMaritalStatus", 
+            label: "Marital Status", 
+            type: "select", 
+            options: ['Single', 'Married', 'Divorced', 'Others'],
+            required: true
+          },
+          { 
+            name: "applicantMaritalStatusOther", 
+            label: "Specify Marital Status", 
+            type: "input",
+            // showWhen: (values) => values.applicantMaritalStatus === 'Others',
+            // required: true
+          },
+          { 
+            name: "educationQualification", 
+            label: "Education Qualification", 
+            type: "select",
+            options: [
+              'Below 10th',
+              '10th pass',
+              '12th pass',
+              'Diploma/ITI certification',
+              'Graduate',
+              'PG/Professional Certification'
+            ],
+            required: true
+          },
+          { 
+            name: "category", 
+            label: "Category", 
+            type: "select",
+            options: ['General', 'SC', 'ST', 'OBC', 'Others'],
+            required: true
+          },
+          { 
+            name: "categoryOther", 
+            label: "Specify Category", 
+            type: "input",
+            // showWhen: (values) => values.category === 'Others',
+            // required: true
+          }
         ];
-      case "applicantInformation":
-        return [
-          { name: "applicantName", label: "Applicant Name", type: "input" },
-          { name: "applicantAge", label: "Applicant Age", type: "input" },
-          { name: "applicantGender", label: "Applicant Gender", type: "select", options: ["Male", "Female", "Other"] },
-          { name: "applicantMaritalStatus", label: "Marital Status", type: "select", options: ["Single", "Married", "Divorced", "Widowed"] },
-          { name: "applicantEducation", label: "Education Level", type: "input" },
-        ];
+      // case "applicantInformation":
+      //   return [
+      //     { name: "applicantName", label: "Applicant Name", type: "input" },
+      //     { name: "applicantAge", label: "Applicant Age", type: "input" },
+      //     { name: "applicantGender", label: "Applicant Gender", type: "select", options: ["Male", "Female", "Other"] },
+      //     { name: "applicantMaritalStatus", label: "Marital Status", type: "select", options: ["Single", "Married", "Divorced", "Widowed"] },
+      //     { name: "applicantEducation", label: "Education Level", type: "input" },
+      //   ];
       case "residenceDetails":
         return [
-          { name: "residenceStatus", label: "Residence Status", type: "select", options: ["Owned", "Rented", "Leased"] },
+          { name: "residenceStatus", label: "Residence Status", type: "select", options: ["Owned", "Rented", "Leased"], required: true },
           { name: "rentDetails", label: "Rent Details", type: "input" },
-          { name: "residenceType", label: "Type of Residence", type: "select", options: ["House", "Apartment", "Villa"] },
-          { name: "constructionQuality", label: "Construction Quality", type: "select", options: ["Excellent", "Good", "Average", "Poor"] },
-          { name: "standardOfLiving", label: "Standard of Living", type: "select", options: ["Excellent", "Good", "Average", "Poor"] },
-          { name: "locationCategory", label: "Location Category", type: "select", options: ["Urban", "Semi-Urban", "Rural"] },
-          { name: "localityType", label: "Locality Type", type: "select", options: ["Residential", "Commercial", "Mixed"] },
-          { name: "accessibility", label: "Accessibility", type: "select", options: ["Easy", "Moderate", "Difficult"] },
-          { name: "houseArea", label: "House Area", type: "input" },
-          { name: "yearsAtCurrentAddress", label: "Years at Current Address", type: "input" },
-          { name: "nameplateVisible", label: "Nameplate Visible", type: "select", options: ["Yes", "No"] },
+          { name: "residenceType", label: "Type of Residence", type: "select", options: ["House", "Apartment", "Villa"], required: true },
+          { name: "constructionQuality", label: "Construction Quality", type: "select", options: ["Excellent", "Good", "Average", "Poor"], required: true },
+          { name: "standardOfLiving", label: "Standard of Living", type: "select", options: ["Excellent", "Good", "Average", "Poor"], required: true },
+          { name: "locationCategory", label: "Location Category", type: "select", options: ["Urban", "Semi-Urban", "Rural"], required: true },
+          { name: "localityType", label: "Locality Type", type: "select", options: ["Residential", "Commercial", "Mixed"], required: true },
+          { name: "accessibility", label: "Accessibility", type: "select", options: ["Easy", "Moderate", "Difficult"], required: true },
+          { name: "houseArea", label: "House Area", type: "input", required: true },
+          { name: "yearsAtCurrentAddress", label: "Years at Current Address", type: "input", required: true },
+          { name: "nameplateVisible", label: "Nameplate Visible", type: "select", options: ["Yes", "No"], required: true },
         ];
       case "familyEmploymentDetails":
         return [
-          { name: "totalFamilyMembers", label: "Total Family Members", type: "input" },
-          { name: "earningMembers", label: "No. of Earning Members", type: "input" },
-          { name: "dependents", label: "No. of Dependents", type: "input" },
-          { name: "isSpouseWorking", label: "Is Spouse Working", type: "select", options: ["Yes", "No"] },
+          { name: "totalFamilyMembers", label: "Total Family Members", type: "input", required: true },
+          { name: "earningMembers", label: "No. of Earning Members", type: "input", required: true },
+          { name: "dependents", label: "No. of Dependents", type: "input", required: true },
+          { name: "isSpouseWorking", label: "Is Spouse Working", type: "select", options: ["Yes", "No"], required: true },
           { name: "spouseEmploymentDetails", label: "Spouse's Employment Details", type: "input" },
-          { name: "assetsObserved", label: "Assets Observed", type: "input" },
+          { name: "assetsObserved", label: "Assets Observed", type: "input", required: true },
         ];
       case "addressVerification":
         return [
-          { name: "addressType", label: "Address Type", type: "select", options: ["Residence", "Office", "Business", "Other"] },
-          { name: "addressCategory", label: "Address Category", type: "select", options: ["Urban", "Rural", "Semi-Urban"] },
-          { name: "addressSubCategory", label: "Address Sub-Category", type: "select", options: ["Metropolitan", "City", "Town", "Village", "Industrial Area", "Commercial Area"] },
-          { name: "addressDetails", label: "Address Details", type: "textarea" },
-          { name: "geoTag", label: "Geo Tag", type: "input" },
+          { name: "address", label: "Address Type", type: "select", options: ["Residence", "Office", "Business", "Other"] , required: true},
+          { name: "addressCategory", label: "Address Category", type: "select", options: ["Urban", "Rural", "Semi-Urban"], required: true },
+          { name: "addressDetails", label: "Address Details", type: "textarea", required: true },
+          {name:"numberOfYearsAtCurrentResidence",label:"No. of Years at Current Residence",type:"select", options:["<=1 year","1-3 years","3-5 years",">5 years"],required:true},
+          {name:"previousAddress",label:"Previous Address",type:"input"},
+          {name:"numberOfYearsAtPreviousAddress",label:"No. of Years at Previous Address",type:"input"},
+          {name:"numberOfYearsAtCurrentCity",label:"No. of Years at Current City",type:"select",options:["<=3 years",">3 years"], required:true},
+          {name:"previousCity",label:"Previous City",type:"input"},
+          {name:"numberOfYearsAtPreviousCity",label:"No. of Years at Previous City",type:"input"},
+          {name:"reasonForChange",label:"Reason for Change",type:"textarea"},
+          { name: "geoTag", label: "Geo Tag", type: "input", required: true },
         ];
       case "thirdPartyCheck":
         return [
-          { name: "tpcName", label: "Name of TPC/Neighbor", type: "input" },
-          { name: "relationship", label: "Relationship to Applicant", type: "select", options: ["Neighbor", "Friend", "Local Shop Owner", "Other"] },
-          { name: "feedbackStatus", label: "Feedback Status", type: "select", options: ["Positive", "Negative", "Could Not Confirm"] },
-          { name: "comments", label: "Comments/Remarks", type: "textarea" },
+          { name: "tpcName", label: "Name of TPC/Neighbor", type: "input", required: true },
+          {name:"mobileNumber",label:"Mobile Number",type:"input",required:true},
+          { name: "relationship", label: "Relationship to Applicant", type: "select", options: ["Neighbor", "Friend", "Local Shop Owner", "Other"], required: true },
+          { name: "feedbackStatus", label: "Feedback Status", type: "select", options: ["Positive", "Negative", "Could Not Confirm"], required: true },
+          { name: "comments", label: "Comments/Remarks", type: "textarea", required: true },
         ];
       case "finalObservations":
         return [
@@ -286,38 +366,17 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
     }
   };
 
-  const renderFormField = (field: {
-    type: string;
-    options?: string[];
-    name: string;
-    label: string;
-  }) => {
-    if (formKey === 'finalObservations' && field.name === 'remarks') {
-      return (
-        <div style={{ height: '300px', marginBottom: '20px' }}>
-          <ReactQuill
-            theme="snow"
-            value={editorContent}
-            onChange={setEditorContent}
-            style={{ height: '200px' }}
-            modules={{
-              toolbar: [
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'color': [] }, { 'background': [] }],
-                ['link', 'image'],
-                ['clean']
-              ],
-            }}
-          />
-        </div>
-      );
+  const renderFormField = (field: FormField) => {
+    const formValues = form.getFieldsValue();
+    
+    // Check if field should be shown
+    if (field.showWhen && !field.showWhen(formValues)) {
+      return null;
     }
 
     switch (field.type) {
       case "input":
-        return <Input />;
+        return <Input disabled={field.readOnly} />;
       case "textarea":
         return <Input.TextArea rows={4} />;
       case "select":
@@ -327,7 +386,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
             placeholder={`Select ${field.label}`}
             notFoundContent="No options available"
           >
-            {field.options?.filter(Boolean).map((option: string) => (
+            {field.options?.map((option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
@@ -363,16 +422,16 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
       <Form
         form={form}
         layout="vertical"
-        initialValues={initialValues}
+        initialValues={initialValues?.verifications?.find((v: any) => v.type === currentTab)?.verificationData?.[formKey]}
         preserve={false}
       >
         <Row gutter={[16, 16]}>
           {getFormFields().map((field) => (
-            <Col span={field.name === 'remarks' ? 24 : 8} key={field.name}>
+            <Col span={ 8} key={field.name}>
               <Form.Item
                 name={field.name}
                 label={field.label}
-                rules={[{ required: true, message: `Please enter ${field.label}` }]}
+                rules={[{ required: field.required, message: `Please ${field.type === 'select' ? 'select' : 'enter'} ${field.label.toLowerCase()}` }]}
               >
                 {renderFormField(field)}
               </Form.Item>
@@ -385,9 +444,10 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
 };
 
 const VerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  const { activeTab } = useTabContext();
   if (!verificationData) return null;
 
-  const data = verificationData?.verificationData?.verificationData || {};
+  const data = verificationData || {};
 
   return (
     <>
@@ -395,7 +455,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
       <section style={{ marginBottom: 24 }}>
         <Card>
           <Descriptions
-            title="Basic Details"
+            title={`${activeTab === 'permanent' ? 'Permanent' : 'Current'} Address Details`}
             bordered
             column={2}
             extra={
@@ -623,8 +683,8 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
             {data?.uploadedItems?.map((item: any, idx: number) => (
               <div key={item.id} style={{ position: 'relative' }}>
-                <img
-                  src={item.uri}
+                <Image
+                  src={getS3ImageUrl(item.s3ImageUrl)}
                   alt={`Photo ${idx + 1}`}
                   style={{ 
                     width: '100%', 
@@ -632,6 +692,7 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
                     objectFit: 'cover',
                     borderRadius: '4px'
                   }}
+                  preview={false}
                 />
                 <Button
                   type="text"
@@ -673,9 +734,10 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
 };
 
 const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  const { activeTab } = useTabContext();
   if (!verificationData) return null;
 
-  const data = verificationData?.verificationData || {};
+  const data = verificationData || {};
 
   return (
     <>
@@ -970,8 +1032,8 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
             {data?.uploadedItems?.length > 0 ? (
               data.uploadedItems.map((item: any, idx: number) => (
                 <div key={item.id} style={{ position: 'relative' }}>
-                  <img
-                    src={item.uri}
+                  <Image
+                    src={getS3ImageUrl(item.s3ImageUrl)}
                     alt={`Photo ${idx + 1}`}
                     style={{ 
                       width: '100%', 
@@ -979,6 +1041,7 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
                       objectFit: 'cover',
                       borderRadius: '4px'
                     }}
+                    preview={false}
                   />
                   <Button
                     type="text"
@@ -1030,6 +1093,7 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
 };
 
 const FinalObservationsDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+  const { activeTab } = useTabContext();
   if (!verificationData) return null;
 
   const data = verificationData?.verificationData?.verificationData || {};
@@ -1126,6 +1190,19 @@ const FinalObservationsDetails = ({ verificationData, onEdit }: { verificationDa
   );
 };
 
+// Create Tab Context
+interface TabContextType {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+const TabContext = createContext<TabContextType>({
+  activeTab: 'PermanentAddress',
+  setActiveTab: () => {},
+});
+
+const useTabContext = () => useContext(TabContext);
+
 export default function LoanVerifyDetails() {
   const router = useRouter();
   const { id } = router.query;
@@ -1135,6 +1212,7 @@ export default function LoanVerifyDetails() {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentFormKey, setCurrentFormKey] = useState("");
+  const [activeTab, setActiveTab] = useState("PermanentAddress");
 
   useEffect(() => {
     if (id) {
@@ -1160,18 +1238,18 @@ export default function LoanVerifyDetails() {
   const handleApprove = async () => {
     try {
       // Generate final report first
-      const reportResponse = await generateFinalReport(id as string);
-      console.log('Report Response:', reportResponse);
+      // const reportResponse = await generateFinalReport(id as string);
+      // console.log('Report Response:', reportResponse);
       
-      // Check if we have valid data
-      if (!reportResponse) {
-        throw new Error('No PDF data received');
-      }
+      // // Check if we have valid data
+      // if (!reportResponse) {
+      //   throw new Error('No PDF data received');
+      // }
 
-      // Create a blob URL directly from the response
-      const blob = new Blob([reportResponse], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      setPdfPreviewUrl(url);
+      // // Create a blob URL directly from the response
+      // const blob = new Blob([reportResponse], { type: 'application/pdf' });
+      // const url = window.URL.createObjectURL(blob);
+      // setPdfPreviewUrl(url);
       
       // Show the modal after setting the PDF URL
       setModalAction("approve");
@@ -1195,157 +1273,194 @@ export default function LoanVerifyDetails() {
   }, [pdfPreviewUrl]);
 
   const getVerificationByType = (type: string) => {
-    return verificationData?.verifications?.find((v: any) => v.type === type);
+    // Map tab keys to verification types
+    const typeMapping: { [key: string]: string } = {
+      PermanentAddress: 'PermanentAddress',
+      CurrentAddress: 'CurrentAddress',
+      Work: 'Work',
+      Final: 'Work' // Using Work verification for final observations
+    };
+
+    // Get the verification type based on the current tab
+    const verificationType = typeMapping[activeTab];
+    
+    // Find the verification data for the current type
+    const verification = verificationData?.verifications?.find((v: any) => v.type === verificationType);
+    
+    // Return the verification data with the correct structure
+    return verification?.verificationData || {};
+  };
+
+  const fetchPdf = async () => {
+    const reportResponse = await generateFinalReport(id as string);
+      console.log('Report Response:', reportResponse);
+      
+      // Check if we have valid data
+      if (!reportResponse) {
+        throw new Error('No PDF data received');
+      }
+
+      // Create a blob URL directly from the response
+      const blob = new Blob([reportResponse], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      setPdfPreviewUrl(url);
   };
 
   return (
-    <DashboardLayout>
-      <div style={{ paddingBottom: "20px" }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
-        }}>
-          <Title level={3} style={{ margin: 0 }}>
-            Loan Verification - {verificationData?.applicationNumber}
-          </Title>
-        </div>
+    <TabContext.Provider value={{ activeTab, setActiveTab }}>
+      <DashboardLayout>
+        <div style={{ paddingBottom: "20px" }}>
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}>
+            <Title level={3} style={{ margin: 0 }}>
+              Loan Verification - {verificationData?.applicationNumber}
+            </Title>
+          </div>
 
-        <Tabs defaultActiveKey="permanent">
-          <TabPane tab="Permanent Address" key="permanent">
-            <VerificationDetails 
-              verificationData={getVerificationByType('PermanentAddress')} 
-              onEdit={handleEdit}
-            />
-          </TabPane>
-          <TabPane tab="Current Address" key="current">
-            <VerificationDetails 
-              verificationData={getVerificationByType('CurrentAddress')} 
-              onEdit={handleEdit}
-            />
-          </TabPane>
-          <TabPane tab="Work Verification" key="work">
-            <WorkVerificationDetails 
-              verificationData={getVerificationByType('Work')} 
-              onEdit={handleEdit}
-            />
-          </TabPane>
-          <TabPane tab="Final Observations" key="final">
-            <FinalObservationsDetails 
-              verificationData={getVerificationByType('Work')} 
-              onEdit={handleEdit}
-            />
-            <div style={{
-              position: "sticky",
-              bottom: 0,
-              left: 120,
-              right: 40,
-              background: "#fff",
-              padding: "16px 24px",
-              borderTop: "1px solid #f0f0f0",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "16px",
-              zIndex: 1000,
-              boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-            }}>
-              <Space>
-                <Button
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => {
-                    setModalAction("reject");
-                    setModalVisible(true);
-                  }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => {
-                    setModalAction("approve");
-                    setModalVisible(true);
-                  }}
-                >
-                  Approve
-                </Button>
-              </Space>
-            </div>
-          </TabPane>
-        </Tabs>
-      </div>
-
-      <Modal
-        open={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          if (pdfPreviewUrl) {
-            window.URL.revokeObjectURL(pdfPreviewUrl);
-          }
-          setPdfPreviewUrl(null);
-        }}
-        footer={null}
-        width={900}
-        title={
-          modalAction === "approve"
-            ? "Approve Loan Verification"
-            : "Reject Loan Verification"
-        }
-      >
-        <div style={{ marginBottom: 16 }}>
-          <strong>PDF Preview:</strong>
-          {pdfPreviewUrl ? (
-            <object
-              data={pdfPreviewUrl}
-              type="application/pdf"
-              width="100%"
-              height={600}
-              style={{ border: "1px solid #eee", marginTop: 8 }}
-            >
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                Unable to display PDF file. <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">Download</a> instead.
+          <Tabs 
+            activeKey={activeTab}
+            onChange={(key) => setActiveTab(key)}
+          >
+            <TabPane tab="Permanent Address" key="PermanentAddress">
+              <VerificationDetails 
+                verificationData={getVerificationByType('PermanentAddress')} 
+                onEdit={handleEdit}
+              />
+            </TabPane>
+            <TabPane tab="Current Address" key="CurrentAddress">
+              <VerificationDetails 
+                verificationData={getVerificationByType('CurrentAddress')} 
+                onEdit={handleEdit}
+              />
+            </TabPane>
+            <TabPane tab="Work Verification" key="Work">
+              <WorkVerificationDetails 
+                verificationData={getVerificationByType('Work')} 
+                onEdit={handleEdit}
+              />
+            </TabPane>
+            <TabPane tab="Final Observations" key="Final">
+              <FinalObservationsDetails 
+                verificationData={getVerificationByType('Work')} 
+                onEdit={handleEdit}
+              />
+              <div style={{
+                position: "sticky",
+                bottom: 0,
+                left: 120,
+                right: 40,
+                background: "#fff",
+                padding: "16px 24px",
+                borderTop: "1px solid #f0f0f0",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "16px",
+                zIndex: 1000,
+                boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
+              }}>
+                <Space>
+                  <Button
+                    danger
+                    icon={<CloseCircleOutlined />}
+                    onClick={() => {
+                      setModalAction("reject");
+                      setModalVisible(true);
+                    }}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<CheckCircleOutlined />}
+                    onClick={() => {
+                      setModalAction("approve");
+                      setModalVisible(true);
+                      fetchPdf();
+                    }}
+                  >
+                    Approve
+                  </Button>
+                </Space>
               </div>
-            </object>
-          ) : (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              Loading PDF preview...
-            </div>
-          )}
+            </TabPane>
+          </Tabs>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          Are you sure you want to{" "}
-          {modalAction === "approve" ? "approve" : "reject"} this loan
-          verification?
-        </div>
-        <Space>
-          {modalAction === "approve" && (
+
+        <Modal
+          open={modalVisible}
+          onCancel={() => {
+            setModalVisible(false);
+            if (pdfPreviewUrl) {
+              window.URL.revokeObjectURL(pdfPreviewUrl);
+            }
+            setPdfPreviewUrl(null);
+          }}
+          footer={null}
+          width={900}
+          title={
+            modalAction === "approve"
+              ? "Approve Loan Verification"
+              : "Reject Loan Verification"
+          }
+        >
+          <div style={{ marginBottom: 16 }}>
+            <strong>PDF Preview:</strong>
+            {pdfPreviewUrl ? (
+              <object
+                data={pdfPreviewUrl}
+                type="application/pdf"
+                width="100%"
+                height={600}
+                style={{ border: "1px solid #eee", marginTop: 8 }}
+              >
+                <div style={{ padding: '20px', textAlign: 'center' }}>
+                  Unable to display PDF file. <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">Download</a> instead.
+                </div>
+              </object>
+            ) : (
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                Loading PDF preview...
+              </div>
+            )}
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            Are you sure you want to{" "}
+            {modalAction === "approve" ? "approve" : "reject"} this loan
+            verification?
+          </div>
+          <Space>
+            {modalAction === "approve" && (
+              <Button
+                icon={<DownloadOutlined />}
+                type="primary"
+                onClick={handleApprove}
+              >
+                Approve & Download PDF
+              </Button>
+            )}
             <Button
-              icon={<DownloadOutlined />}
-              type="primary"
+              type={modalAction === "approve" ? "default" : "primary"}
               onClick={handleApprove}
             >
-              Approve & Download PDF
+              {modalAction === "approve" ? "Approve" : "Reject"}
             </Button>
-          )}
-          <Button
-            type={modalAction === "approve" ? "default" : "primary"}
-            onClick={handleApprove}
-          >
-            {modalAction === "approve" ? "Approve" : "Reject"}
-          </Button>
-          <Button onClick={() => setModalVisible(false)}>Cancel</Button>
-        </Space>
-      </Modal>
+            <Button onClick={() => setModalVisible(false)}>Cancel</Button>
+          </Space>
+        </Modal>
 
-      <EditFormModal
-        visible={editModalVisible}
-        onCancel={() => setEditModalVisible(false)}
-        onSave={handleFormSave}
-        formKey={currentFormKey}
-        initialValues={verificationData?.[currentFormKey as keyof FormData]}
-      />
-    </DashboardLayout>
+        <EditFormModal
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          onSave={handleFormSave}
+          formKey={currentFormKey}
+          initialValues={verificationData}
+          currentTab={activeTab}
+        />
+      </DashboardLayout>
+    </TabContext.Provider>
   );
 }
