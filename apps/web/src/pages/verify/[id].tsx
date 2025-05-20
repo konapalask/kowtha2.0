@@ -426,7 +426,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
         preserve={false}
       >
         <Row gutter={[16, 16]}>
-          {getFormFields().map((field) => (
+          {getFormFields().map((field:any) => (
             <Col span={ 8} key={field.name}>
               <Form.Item
                 name={field.name}
@@ -684,7 +684,8 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
             {data?.uploadedItems?.map((item: any, idx: number) => (
               <div key={item.id} style={{ position: 'relative' }}>
                 <Image
-                  src={getS3ImageUrl(item.s3ImageUrl)}
+                  // src={ getS3ImageUrl(item.s3ImageUrl)}
+                  src={item.s3ImageUrl}
                   alt={`Photo ${idx + 1}`}
                   style={{ 
                     width: '100%', 
@@ -1033,7 +1034,8 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
               data.uploadedItems.map((item: any, idx: number) => (
                 <div key={item.id} style={{ position: 'relative' }}>
                   <Image
-                    src={getS3ImageUrl(item.s3ImageUrl)}
+                    // src={getS3ImageUrl(item.s3ImageUrl)}
+                    src={item.s3ImageUrl}
                     alt={`Photo ${idx + 1}`}
                     style={{ 
                       width: '100%', 
