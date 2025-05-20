@@ -430,7 +430,7 @@ export default function Loans() {
           title: "Assignee",
           key: "pavAssignee",
           render: (_, record: Loan) => {
-            const pav = record.verifications.find(
+            const pav = record?.verifications?.find(
               (v: any) => v.type === "PermanentAddress"
             );
             return pav ? pav.assignee : "-";
@@ -440,7 +440,7 @@ export default function Loans() {
           title: "Status",
           key: "pavStatus",
           render: (_, record: Loan) => {
-            const pav = record.verifications.find(
+            const pav = record?.verifications?.find(
               (v: any) => v.type === "PermanentAddress"
             );
             return pav ? (
@@ -465,7 +465,7 @@ export default function Loans() {
           title: "Assignee",
           key: "cavAssignee",
           render: (_, record: Loan) => {
-            const cav = record.verifications.find(
+            const cav = record?.verifications?.find(
               (v: any) => v.type === "CurrentAddress"
             );
             return cav ? cav.assignee : "-";
@@ -475,7 +475,7 @@ export default function Loans() {
           title: "Status",
           key: "cavStatus",
           render: (_, record: Loan) => {
-            const cav = record.verifications.find(
+            const cav = record?.verifications?.find(
               (v: any) => v.type === "CurrentAddress"
             );
             return cav ? (
@@ -498,7 +498,9 @@ export default function Loans() {
           title: "Assignee",
           key: "wvAssignee",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v: any) => v.type === "Work");
+            const wv = record?.verifications?.find(
+              (v: any) => v.type === "Work"
+            );
             return wv ? wv.assignee : "-";
           },
         },
@@ -506,7 +508,9 @@ export default function Loans() {
           title: "Status",
           key: "wvStatus",
           render: (_, record: Loan) => {
-            const wv = record.verifications.find((v: any) => v.type === "Work");
+            const wv = record?.verifications?.find(
+              (v: any) => v.type === "Work"
+            );
             return wv ? (
               <Tag color={wv.status === "Completed" ? "green" : "blue"}>
                 {wv.status}
@@ -1028,7 +1032,7 @@ export default function Loans() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
                                 <span>Currently assigned to:</span>
                                 <Tag color="blue">
-                                  {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
+                                  {fieldExecutives?.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
                                 </Tag>
                               </div>
                               {verification?.status !== "Completed" && (
@@ -1047,10 +1051,9 @@ export default function Loans() {
                               initialValues={
                                 verification
                                   ? {
-                                      assignmentMethod:
-                                        verification.assignmentMethod,
-                                      office: verification.office,
-                                      assignee: verification.assignee,
+                                      assignmentMethod: verification?.assignmentMethod,
+                                      office: verification?.office,
+                                      assignee: verification?.assignee,
                                     }
                                   : {
                                       assignmentMethod: "Local"
@@ -1207,7 +1210,7 @@ export default function Loans() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 8 }}>
                                   <span>Currently assigned to:</span>
                                   <Tag color="blue">
-                                    {fieldExecutives.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
+                                    {fieldExecutives?.find(fe => fe.value === verification.fieldExecutiveId)?.label || "-"}
                                   </Tag>
                                 </div>
                                 {verification?.status !== "Completed" && (

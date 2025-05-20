@@ -14,3 +14,12 @@ export const generateFinalReport = async (id: string) => {
     });
   return response.data;
 };
+
+export const verifierEditApi = async(id:string, verificationType:string,payload:any)=>{
+  return await axiosInstance.patch(`/loans/${id}/verification/${verificationType}`,payload)
+}
+
+export const getPresignedDownloadUrl = async(path:string)=>{
+  console.log(path)
+  return await axiosInstance.get(`/s3/presigned-download-url/${path}`)
+}

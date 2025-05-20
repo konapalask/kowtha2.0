@@ -100,11 +100,9 @@ export type Section8FormData = {};
 
 export type VerificationFormData = {
   basicDetails: BasicDetailsFormData;
-  applicantInformation: ApplicantInformationFormData;
   addressVerification: AddressVerificationFormData;
   residenceDetails: ResidenceDetailsFormData;
   familyEmploymentDetails: FamilyEmploymentDetailsFormData;
   thirdPartyCheck: ThirdPartyCheckFormData;
-  finalObservations: FinalObservationsFormData;
   uploadedItems: UploadedItem[];
 };
