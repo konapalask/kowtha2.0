@@ -484,19 +484,15 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
   useEffect(() => {
     const fetchImageUrls = async () => {
       if (verificationData?.uploadedItems) {
-        console.log('Uploaded Items:', verificationData.uploadedItems);
         const urls: {[key: string]: string} = {};
         for (const item of verificationData.uploadedItems) {
           try {
-            console.log('Fetching URL for item:', item);
             const response = await getS3ImageUrl(item.s3ImageUrl);
-            console.log('S3 URL Response:', response);
             urls[item.id] = response;
           } catch (error) {
             console.error('Error fetching image URL:', error);
           }
         }
-        console.log('Setting image URLs:', urls);
         setImageUrls(urls);
       }
     };
@@ -507,7 +503,6 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
   if (!verificationData) return null;
 
   const data = verificationData || {};
-  console.log('Current imageUrls state:', imageUrls);
 
   return (
     <>
@@ -742,7 +737,6 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
         <Card title="Photo Capture">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
             {data?.uploadedItems?.map((item: any, idx: number) => {
-              console.log('Rendering image for item:', item, 'with URL:', imageUrls[item.id]);
               return (
                 <div key={item.id} style={{ position: 'relative' }}>
                   <Image
@@ -807,7 +801,7 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
         for (const item of verificationData.uploadedItems) {
           try {
             const response = await getS3ImageUrl(item.s3ImageUrl);
-            urls[item.id] = response.url;
+            urls[item.id] = response;
           } catch (error) {
             console.error('Error fetching image URL:', error);
           }
@@ -1333,7 +1327,6 @@ export default function LoanVerifyDetails() {
       setModalVisible(true);
 
       // Log for debugging
-      console.log('PDF URL created');
     } catch (error) {
       console.error('Error generating final report:', error);
       message.error('Failed to generate final report: ' + (error as Error).message);
@@ -1370,7 +1363,6 @@ export default function LoanVerifyDetails() {
 
   const fetchPdf = async () => {
     const reportResponse = await generateFinalReport(id as string);
-      console.log('Report Response:', reportResponse);
       
       // Check if we have valid data
       if (!reportResponse) {
