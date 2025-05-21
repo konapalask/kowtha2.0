@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,15 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from 'react-native';
 import {useForm, Controller, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import dayjs from 'dayjs';
 
 interface Employment {
   employerName: string;
@@ -58,10 +61,15 @@ const validationSchema = yup.object().shape({
 });
 
 const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
+  const [isFromDatePickerVisible, setFromDatePickerVisible] = useState(false);
+  const [isToDatePickerVisible, setToDatePickerVisible] = useState(false);
+  const [currentDateIndex, setCurrentDateIndex] = useState(0);
+
   const {
     control,
     handleSubmit,
     formState: {errors},
+    setValue,
   } = useForm<PastEmploymentFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -86,6 +94,26 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
 
   const onFormSubmit = (data: PastEmploymentFormData) => {
     onSubmit(data);
+  };
+
+  const handleFromDateConfirm = (date: Date) => {
+    if (date) {
+      setValue(
+        `employments.${currentDateIndex}.fromDate`,
+        dayjs(date).format('DD/MM/YYYY'),
+      );
+    }
+    setFromDatePickerVisible(false);
+  };
+
+  const handleToDateConfirm = (date: Date) => {
+    if (date) {
+      setValue(
+        `employments.${currentDateIndex}.toDate`,
+        dayjs(date).format('DD/MM/YYYY'),
+      );
+    }
+    setToDatePickerVisible(false);
   };
 
   const renderEmploymentFields = (index: number) => {
@@ -152,18 +180,23 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
         <Controller
           control={control}
           name={`employments.${index}.fromDate`}
-          render={({field: {onChange, value}}) => (
+          render={({field: {value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>From Date</Text>
-              <TextInput
+              <TouchableOpacity
                 style={[
                   styles.input,
+                  styles.dateInput,
                   errors.employments?.[index]?.fromDate && styles.inputError,
                 ]}
-                value={value}
-                onChangeText={onChange}
-                placeholder="DD/MM/YYYY"
-              />
+                onPress={() => {
+                  setCurrentDateIndex(index);
+                  setFromDatePickerVisible(true);
+                }}>
+                <Text style={value ? styles.dateText : styles.placeholder}>
+                  {value || 'Select From Date'}
+                </Text>
+              </TouchableOpacity>
               {errors.employments?.[index]?.fromDate && (
                 <Text style={styles.errorText}>
                   {errors.employments[index]?.fromDate?.message}
@@ -176,18 +209,23 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
         <Controller
           control={control}
           name={`employments.${index}.toDate`}
-          render={({field: {onChange, value}}) => (
+          render={({field: {value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>To Date</Text>
-              <TextInput
+              <TouchableOpacity
                 style={[
                   styles.input,
+                  styles.dateInput,
                   errors.employments?.[index]?.toDate && styles.inputError,
                 ]}
-                value={value}
-                onChangeText={onChange}
-                placeholder="DD/MM/YYYY"
-              />
+                onPress={() => {
+                  setCurrentDateIndex(index);
+                  setToDatePickerVisible(true);
+                }}>
+                <Text style={value ? styles.dateText : styles.placeholder}>
+                  {value || 'Select To Date'}
+                </Text>
+              </TouchableOpacity>
               {errors.employments?.[index]?.toDate && (
                 <Text style={styles.errorText}>
                   {errors.employments[index]?.toDate?.message}
@@ -301,6 +339,28 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
         onPress={handleSubmit(onFormSubmit)}>
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
+
+      <DateTimePickerModal
+        isVisible={isFromDatePickerVisible}
+        mode="date"
+        onConfirm={handleFromDateConfirm}
+        onCancel={() => setFromDatePickerVisible(false)}
+        date={new Date()}
+        minimumDate={new Date(1900, 0, 1)}
+        maximumDate={new Date()}
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+      />
+
+      <DateTimePickerModal
+        isVisible={isToDatePickerVisible}
+        mode="date"
+        onConfirm={handleToDateConfirm}
+        onCancel={() => setToDatePickerVisible(false)}
+        date={new Date()}
+        minimumDate={new Date(1900, 0, 1)}
+        maximumDate={new Date()}
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+      />
     </ScrollView>
   );
 };
@@ -390,6 +450,17 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 4,
+  },
+  dateInput: {
+    justifyContent: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: colors.text.primary,
+  },
+  placeholder: {
+    fontSize: 16,
+    color: colors.text.disabled,
   },
 });
 

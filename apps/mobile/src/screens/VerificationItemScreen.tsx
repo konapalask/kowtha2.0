@@ -65,12 +65,10 @@ const VerificationItemScreen = () => {
   }>({
     basicDetails: false,
     photoCapture: false,
-    applicantInformation: false,
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
     thirdPartyCheck: false,
-    finalObservations: false,
   });
 
   const [formData, setFormData] = useState<VerificationFormData>({
@@ -231,6 +229,21 @@ const VerificationItemScreen = () => {
   };
 
   const handleSubmit = async () => {
+    // Check if all sections are validated
+    const allSectionsValid = Object.values(validSections).every(
+      isValid => isValid,
+    );
+
+    if (!allSectionsValid) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please fill all mandatory fields before submitting',
+        position: 'bottom',
+      });
+      return;
+    }
+
     try {
       const finalData = {
         verificationType: verificationType,
@@ -239,15 +252,7 @@ const VerificationItemScreen = () => {
       };
 
       console.log('Submitting form data:', finalData);
-      await submitVerification(
-        // {
-        //   verificationType: verificationType,
-        //   findings: 'Verification Findings Text',
-        //   verificationData: finalData,
-        // },
-        finalData,
-        item?.id,
-      );
+      await submitVerification(finalData, item?.id);
 
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();

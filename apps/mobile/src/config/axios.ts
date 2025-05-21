@@ -49,10 +49,16 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (errorStatusCode === 401) {
+      clearAll();
+      RNRestart.Restart();
+    }
+
     //Prevent infinite loops
     if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
       clearAll();
       RNRestart.Restart();
+
       return Promise.reject(error);
     }
 
@@ -60,6 +66,13 @@ axiosInstance.interceptors.response.use(
     if (errorMessage === accountNotFound && errorStatusCode === 401) {
       clearAll();
       RNRestart.Restart();
+    }
+
+    // Handle general 401 unauthorized errors
+    if (errorStatusCode === 401) {
+      clearAll();
+      RNRestart.Restart();
+      return Promise.reject(error);
     }
 
     //triggers when user session is expired

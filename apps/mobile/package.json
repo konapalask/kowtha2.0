@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-community/geolocation": "^3.4.0",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-native-firebase/app": "^22.0.0",
@@ -19,6 +20,7 @@
     "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/stack": "^7.2.10",
     "axios": "^1.9.0",
+    "dayjs": "^1.11.13",
     "react": "19.0.0",
     "react-hook-form": "^7.56.1",
     "react-native": "0.79.1",
@@ -30,6 +32,7 @@
     "react-native-gesture-handler": "^2.25.0",
     "react-native-get-location": "^5.0.0",
     "react-native-image-picker": "^8.2.0",
+    "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-permissions": "^5.4.0",
     "react-native-restart": "^0.0.27",
     "react-native-screens": "^4.10.0",
