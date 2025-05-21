@@ -863,6 +863,8 @@ export class LoanService {
       )?.verificationData as WorkVerificationData || {};
 
       const imagePath = path.resolve('/home/ubuntu/kowtha/signature_kowtha.jpeg');
+      // /home/ubuntu/kowtha/signature_kowtha.jpeg
+      // /Users/bys/Desktop/signature_kowtha.jpeg
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
@@ -1079,27 +1081,15 @@ export class LoanService {
               </tr>
               <tr>
                 <th>PAN Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || ''}</span></td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || 'BQBUU2345R'}</span></td>
               </tr>
               <tr>
                 <th>Aadhar Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Name Of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>PAN of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantPan || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Aadhar Of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantAadhar || ''}</span></td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || '9801 7691 7654'}</span></td>
               </tr>
               <tr>
                 <th>Residential Address</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.address || ''}</span></td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.addressDetails || '1-1-1, Gandhi Nagar, Vijayawada'}</span></td>
               </tr>
               <tr>
                 <th>Marital Status</th>
@@ -1224,75 +1214,33 @@ export class LoanService {
 
           <div class="align-wrapper">
             <table class="section-table">
-              <tr><td colspan="6" class="section-header">Basic Details</td></tr>
+              <tr><td colspan="6" class="section-header">Loan Details</td></tr>
               <tr>
-                <th>Name of Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantName || ''}</span></td>
+                <th>Purpose of Loan</th>
+                <td colspan="5"><span class="var-value">${workVerification.basicDetails?.purposeOfLoan || 'Home Loan'}</span></td>
               </tr>
               <tr>
-                <th>PAN Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || ''}</span></td>
+                <th>Minimum Loan Amount Required</th>
+                <td colspan="5"><span class="var-value">${workVerification.basicDetails?.loanAmount || '700000'}</span></td>
+              </tr>
+              <tr><td colspan="6" class="section-header">Exisiting Loan Details</td></tr>
+              <tr>
+                <th>Bank Name</th>
+                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.bankName || ''}</span></td>
               </tr>
               <tr>
-                <th>Aadhar Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || ''}</span></td>
+                <th>EMI</th>
+                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.emi || ''}</span></td>
               </tr>
               <tr>
-                <th>Name Of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantName || ''}</span></td>
+                <th>Tenure</th>
+                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.tenure || ''}</span></td>
               </tr>
               <tr>
-                <th>PAN of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantPan || ''}</span></td>
+                <th>Purpose</th>
+                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.purpose || ''}</span></td>
               </tr>
-              <tr>
-                <th>Aadhar Of the Co-Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantAadhar || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Residential Address</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.address || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Marital Status</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantMaritalStatus || ''}</span></td>
-                <th>Educational Qualification</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.educationQualification || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Category</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.category || ''}</span></td>
-                <th>Number of Dependents</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.familyEmploymentDetails?.dependents || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of years in Current Residence</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
-                <th>Current residence house size</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.residenceDetails?.houseArea || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of Years in Current City</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
-                <th>Number of Years stayed in the Current City</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>If Less than 1 Year, then Previous Address</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.previousCity || ''}</span></td>
-              </tr> 
-              <tr>
-                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>Reason for Change</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>Parents Staying with?</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || ''}</span></td>
-              </tr>
+              
             </table>
           </div>
 
