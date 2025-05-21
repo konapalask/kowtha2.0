@@ -862,7 +862,7 @@ export class LoanService {
         v => v.type === 'Work'
       )?.verificationData as WorkVerificationData || {};
 
-      const imagePath = path.resolve('/Users/bys/Desktop/signature_kowtha.jpeg');
+      const imagePath = path.resolve('/home/ubuntu/kowtha/signature_kowtha.jpeg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
