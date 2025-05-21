@@ -72,26 +72,19 @@ export default function Verify() {
       width: 150,
       render: (text) => text ?? '-'
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status?: string) => {
-        let color = "blue";
-        if (status === "Pending") color = "orange";
-        else if (status === "Approved") color = "green";
-        else if (status === "Rejected") color = "red";
-        return <Tag color={color}>{status ?? 'Unknown'}</Tag>;
-      },
-      width: 150,
-    },
-    {
-      title: "Uploaded At",
-      dataIndex: "uploadedAt",
-      key: "uploadedAt",
-      render: (date?: string) => date ? dayjs(date).fromNow() : '-',
-      width: 150,
-    },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status?: string) => {
+    //     let color = "blue";
+    //     if (status === "Pending") color = "orange";
+    //     else if (status === "Approved") color = "green";
+    //     else if (status === "Rejected") color = "red";
+    //     return <Tag color={color}>{status ?? 'Unknown'}</Tag>;
+    //   },
+    //   width: 150,
+    // },
     {
       title: "Updated At",
       dataIndex: "updatedAt",

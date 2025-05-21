@@ -132,7 +132,7 @@ export default function Login() {
           borderColor:"transparent",
           // background: "var(--background-primary)",
           opacity: 0.7,
-          background:"#020847"
+          background:"#00396e"
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>

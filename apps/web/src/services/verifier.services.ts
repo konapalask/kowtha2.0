@@ -21,5 +21,5 @@ export const verifierEditApi = async(id:string, verificationType:string,payload:
 
 export const getPresignedDownloadUrl = async(path:string)=>{
   console.log(path)
-  return await axiosInstance.get(`/s3/presigned-download-url/${path}`)
+  return await axiosInstance.get(`/s3/presigned-download-url`)
 }
