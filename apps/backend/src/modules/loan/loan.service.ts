@@ -29,25 +29,14 @@ interface VerificationData {
     address: string;
   };
   basicDetails?: {
-    verificationDate: string;
-    verificationMode: string;
-    verificationTime: string;
-    verificationType: string;
-    verificationStatus: string;
-    verificationRemarks: string;
-    maritalStatus: string;
-    educationalQualification: string;
-    dependents: string;
-    yearsInCurrentResidence: string;
-    houseSize: string;
-    previousAddress: string;
-    yearsAtPreviousAddress: string;
-    yearsInCurrentCity: string;
-    previousCity: string;
-    yearsInPreviousCity: string;
-    reasonForChange: string;
-    parentsStayingWith: string;
     category: string;
+    applicantName: string;
+    categoryOther: string;
+    verificationType: string;
+    applicationNumber: string;
+    applicantMaritalStatus: string;
+    educationQualification: string;
+    applicantMaritalStatusOther: string;
   };
   applicantInformation?: {
     applicantAge: string;
@@ -81,13 +70,20 @@ interface VerificationData {
     relationship: string;
     comments: string;
     feedbackStatus: string;
+    mobileNumber: string;
   };
   addressVerification?: {
+    address: string;
     addressType: string;
+    previousCity: string;
     addressCategory: string;
+    reasonForChange: string;
     addressSubCategory: string;
     addressDetails: string;
     geoTag: string;
+    numberOfYearsAtCurrentCity: string;
+    numberOfYearsAtPreviousCity: string;
+    numberOfYearsAtCurrentResidence: string;
   };
   finalObservations?: {
     overallStatus: string;
@@ -99,9 +95,86 @@ interface VerificationData {
     uri: string;
     type: string;
     timestamp: string;
+    s3ImageUrl: string;
   }>;
 }
 
+
+interface WorkVerificationData {
+    basicDetails?: {
+      tenure: string;
+      bankName: string;
+      panNumber: string;
+      loanAmount: string;
+      aadharNumber: string;
+      applicantName: string;
+      purposeOfLoan: string;
+      qualification: string;
+      prospectNumber: string;
+    };
+    existingLoans?: {
+      loans: Array<{
+        emi: string;
+        tenure: string;
+        purpose: string;
+        bankName: string;
+        loanAmount: string;
+      }>;
+    };
+    pastEmployment?: {
+      employments: Array<{
+        toDate: string;
+        fromDate: string;
+        designation: string;
+        employerName: string;
+        contactPersonName: string;
+        reasonForMovement: string;
+        contactPersonNumber: string;
+      }>;
+    };
+    employmentDetails?: {
+      netSalary: string;
+      salaryMode: string;
+      companySize: string;
+      designation: string;
+      grossSalary: string;
+      employerType: string;
+      idCardNumber: string;
+      officeAddress: string;
+      officeLocality: string;
+      natureOfService: string;
+      currentOfficeName: string;
+      yearsInCurrentJob: string;
+      totalWorkExperience: string;
+      natureOfServiceOther: string;
+    };
+    colleagueReferences?: {
+      references: Array<{
+        name: string;
+        address: string;
+        yearsKnown: string;
+        designation: string;
+        emailAddress: string;
+        contactNumber: string;
+      }>;
+    };
+    finalObservations?: {
+      overallStatus: string;
+      cooperativeness: string;
+      remarks: string;
+    };
+    uploadedItems?: Array<{
+      id: string;
+      uri: string;
+      type: string;
+      pincode: string;
+      latitude: string;
+      locality: string;
+      longitude: string;
+      timestamp: string;
+      s3ImageUrl: string;
+    }>;
+}
 @Injectable()
 export class LoanService {
   constructor(
@@ -776,8 +849,49 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      // Get the first verification's data for the template
-      const verificationData = loan.verifications[0]?.verificationData as VerificationData || {};
+      // Get the verification data for each type
+      const permanentAddressVerification = loan.verifications.find(
+        v => v.type === 'PermanentAddress'
+      )?.verificationData as VerificationData || {};
+
+      const currentAddressVerification = loan.verifications.find(
+        v => v.type === 'CurrentAddress'
+      )?.verificationData as VerificationData || {};
+
+      const workVerification = loan.verifications.find(
+        v => v.type === 'Work'
+      )?.verificationData as WorkVerificationData || {};
+
+      const imagePath = path.resolve('/Users/bys/Desktop/signature_kowtha.jpeg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+      // Get all uploaded items from all verifications
+      const allUploadedItems = loan.verifications.reduce((acc, verification) => {
+        const verificationData = verification.verificationData as VerificationData;
+        if (verificationData?.uploadedItems) {
+          return [...acc, ...verificationData.uploadedItems];
+        }
+        return acc;
+      }, []);
+
+      // Generate presigned URLs for all images
+      const imageUrls = await Promise.all(
+        allUploadedItems.map(async (item) => {
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+          } catch (error) {
+            await this.loggingService.error('Failed to generate presigned URL for image', {
+              s3ImageUrl: item.s3ImageUrl,
+              error: error.message
+            });
+            return null;
+          }
+        })
+      );
+
+      // Filter out any failed URL generations
+      const validImageUrls = imageUrls.filter(url => url !== null);
 
       const htmlTemplate = `
         <!DOCTYPE html>
@@ -791,6 +905,8 @@ export class LoanService {
               padding: 0;
               background: #fff;
               color: #222;
+              position: relative;
+              min-height: 60vh;
             }
             .header {
               text-align: left;
@@ -819,6 +935,15 @@ export class LoanService {
             .header .contact {
               font-size: 14px;
               text-align: right;
+            }
+            .logo {
+              display: block;
+              width: 220px;
+              filter: contrast(200%) brightness(80%) saturate(150%);
+              background: white;
+              image-rendering: auto;
+              margin-left: 0; /* aligns to left */
+              margin-bottom: 20px;
             }
             .report-title {
               text-align: center;
@@ -901,17 +1026,24 @@ export class LoanService {
               font-size: 18px;
             }
             .footer {
-              margin-top: 40px;
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              width: 100%;
               text-align: center;
               color: #7f8c8d;
               font-size: 12px;
               border-top: 1px solid #eee;
-              padding-top: 20px;
+              padding: 8px 0 6px 0;
+              background-color: white; /* Optional, helps avoid overlay */
             }
             .logo {
               margin-top: 24px;
               text-align: center;
               opacity: 0.15;
+            }
+            .var-value {
+              font-weight: bold;
             }
           </style>
         </head>
@@ -936,7 +1068,6 @@ export class LoanService {
                 <tr>
                   <td class="branch-label">Branch Name</td>
                   <td class="branch-value">PIDUGURALLA</td>
-                  <td class="branch-note">NOTE: Please tick/circle as applicable</td>
                 </tr>
               </table>
             </div>
@@ -944,75 +1075,268 @@ export class LoanService {
               <tr><td colspan="6" class="section-header">Basic Details</td></tr>
               <tr>
                 <th>Name of Applicant</th>
-                <td colspan="2">${verificationData.applicantDetails?.applicantName || 'Mr. PADIRA MOHA YOGESH'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantName || ''}</span></td>
+              </tr>
+              <tr>
                 <th>PAN Number</th>
-                <td colspan="2">${verificationData.applicantDetails?.pan || 'DEIPP8976Q'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || ''}</span></td>
               </tr>
               <tr>
                 <th>Aadhar Number</th>
-                <td colspan="2">${verificationData.applicantDetails?.aadhar || '2656 5044 6168'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || ''}</span></td>
+              </tr>
+              <tr>
                 <th>Name Of the Co-Applicant</th>
-                <td colspan="2">${verificationData.applicantDetails?.coApplicantName || 'Mr. PADIRA SRINIVASA CHARY'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantName || ''}</span></td>
               </tr>
               <tr>
                 <th>PAN of the Co-Applicant</th>
-                <td colspan="2">${verificationData.applicantDetails?.coApplicantPan || 'BBJPB893D'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantPan || ''}</span></td>
+              </tr>
+              <tr>
                 <th>Aadhar Of the Co-Applicant</th>
-                <td colspan="2">${verificationData.applicantDetails?.coApplicantAadhar || '7344 4827 4773'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantAadhar || ''}</span></td>
               </tr>
               <tr>
                 <th>Residential Address</th>
-                <td colspan="5">${verificationData.applicantDetails?.address || 'Siri Mens Duplex Hostel, N Convention Road, Hi Tech City, Near Shilparamam, Hospital and Telangana.'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.address || ''}</span></td>
               </tr>
               <tr>
                 <th>Marital Status</th>
-                <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'Married'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantMaritalStatus || ''}</span></td>
                 <th>Educational Qualification</th>
-                <td colspan="2">${verificationData.basicDetails?.educationalQualification || 'Graduate'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.educationQualification || ''}</span></td>
               </tr>
               <tr>
                 <th>Category</th>
-                <td colspan="2">${verificationData.basicDetails?.maritalStatus || 'General'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.category || ''}</span></td>
                 <th>Number of Dependents</th>
-                <td colspan="2">${verificationData.basicDetails?.educationalQualification || '3'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.familyEmploymentDetails?.dependents || ''}</span></td>
               </tr>
               <tr>
                 <th>Number of years in Current Residence</th>
-                <td colspan="2">${verificationData.basicDetails?.maritalStatus || '2'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
                 <th>Current residence house size</th>
-                <td colspan="2">${verificationData.basicDetails?.educationalQualification || '3'}</td>
-              </tr>
-              <tr>
-                <th>If Less than 1 Year, then Previous Address</th>
-                <td colspan="5">${verificationData.basicDetails?.yearsInCurrentCity || 'Gachibowli, Hyderabad'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.residenceDetails?.houseArea || ''}</span></td>
               </tr>
               <tr>
                 <th>Number of Years in Current City</th>
-                <td colspan="2">${verificationData.basicDetails?.previousAddress || 'NA'}</td>
-                <th>Number of Years stayed at that Address</th>
-                <td colspan="2">${verificationData.basicDetails?.yearsAtPreviousAddress || 'NA'}</td>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
+                <th>Number of Years stayed in the Current City</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
               </tr>
               <tr>
-                <th>If Less than 3 Years in current city, then mention</th>
-                <td colspan="5">${verificationData.basicDetails?.previousCity || 'NA'}</td>
+                <th>If Less than 1 Year, then Previous Address</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.previousCity || ''}</span></td>
+              </tr> 
+              <tr>
+                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
               </tr>
               <tr>
                 <th>Reason for Change</th>
-                <td colspan="5">${verificationData.basicDetails?.reasonForChange || 'NA'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
               </tr>
               <tr>
                 <th>Parents Staying with?</th>
-                <td colspan="5">${verificationData.basicDetails?.parentsStayingWith || 'Self'}</td>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || ''}</span></td>
               </tr>
             </table>
           </div>
 
-          <div class="logo">
-            <img src="/Users/bys/Desktop/signature_kowtha.jpeg" width="120" alt="stamp" />
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+
+          <div style="page-break-before: always;"></div>
+
+          <div class="align-wrapper">
+            <table class="section-table">
+            <tr><td colspan="6" class="section-header">Employment Details</td></tr>
+              <tr>
+                <th>Name of the Current Employer</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.currentOfficeName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Curent Office Address</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.officeAddress || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of years in Current Job</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.yearsInCurrentJob || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Total Work Experience</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.totalWorkExperience || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Office Email ID</th>
+                <td colspan="5"><span class="var-value">${''}</span></td>
+              </tr>
+              <tr>
+                <th>Office Phone Number/Landline Number</th>
+                <td colspan="5"><span class="var-value">${''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of Employees in the Company</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.companySize || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Employee ID(Copy/Photograph Mandatory)</th>
+                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.idCardNumber || ''}</span></td>
+                <th>Designation</th>
+                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.designation || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Mode of Salary</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.salaryMode || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Employer</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.employerType || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Industry</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.natureOfService || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Office Locality</th>
+                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.officeLocality || ''}</span></td>
+              </tr>
+            <tr><td colspan="6" class="section-header">Financial Details</td></tr>
+              <tr>
+                <th>Monthly Gross Salary</th>
+                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.grossSalary || ''}</span></td>
+                <th>Monthly Net Salary</th>
+                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.netSalary || ''}</span></td>
+              </tr>
+              
+            </table>
           </div>
 
           <div class="footer">
-            <span>BOI-AP</span><br>
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+
+          <div style="page-break-before: always;"></div>
+
+          <div class="align-wrapper">
+            <table class="section-table">
+              <tr><td colspan="6" class="section-header">Basic Details</td></tr>
+              <tr>
+                <th>Name of Applicant</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>PAN Number</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Aadhar Number</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Name Of the Co-Applicant</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>PAN of the Co-Applicant</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantPan || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Aadhar Of the Co-Applicant</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.coApplicantAadhar || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Residential Address</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.address || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Marital Status</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantMaritalStatus || ''}</span></td>
+                <th>Educational Qualification</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.educationQualification || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Category</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.category || ''}</span></td>
+                <th>Number of Dependents</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.familyEmploymentDetails?.dependents || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of years in Current Residence</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
+                <th>Current residence house size</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.residenceDetails?.houseArea || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of Years in Current City</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
+                <th>Number of Years stayed in the Current City</th>
+                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
+              </tr>
+              <tr>
+                <th>If Less than 1 Year, then Previous Address</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.previousCity || ''}</span></td>
+              </tr> 
+              <tr>
+                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
+              </tr>
+              <tr>
+                <th>Reason for Change</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
+              </tr>
+              <tr>
+                <th>Parents Staying with?</th>
+                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || ''}</span></td>
+              </tr>
+            </table>
+          </div>
+
+          <canvas id="logoCanvas" width="250" height="140"></canvas>
+
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           <script>
+              const canvas = document.getElementById('logoCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.onload = function () {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const offsetX = 20;
+                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
+              };
+              img.src = '${imageDataUri}';
+          </script>
+
+          <div style="page-break-before: always;"></div>
+
+          <div class="align-wrapper">
+            <table class="section-table">
+              <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+              <tr>
+                <td colspan="6">
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                    ${validImageUrls.map(url => `
+                      <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                        <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                        <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
         </body>
