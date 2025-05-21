@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { S3Service } from './s3.service';
 import { JwtAuthGuard } from '../../accounts/jwt-auth.guard';
@@ -32,7 +32,7 @@ export class S3Controller {
     return { url };
   }
 
-  @Get('presigned-download-url/:path')
+  @Get('presigned-download-url')
   @ApiOperation({ summary: 'Generate a pre-signed URL for file download' })
   @ApiResponse({
     status: 200,
@@ -44,7 +44,7 @@ export class S3Controller {
       },
     },
   })
-  async generatePresignedDownloadUrl(@Param('path') path: string) {
+  async getPresignedDownloadUrl(@Query('path') path: string) {
     const url = await this.s3Service.generatePresignedDownloadUrl(path);
     return { url };
   }
