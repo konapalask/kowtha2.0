@@ -1502,17 +1502,18 @@ export default function LoanVerifyDetails() {
             verification?
           </div>
           <Space>
-            {modalAction === "approve" && (
+            {/* {modalAction === "approve" && (
               <Button
-                icon={<DownloadOutlined />}
+                icon={<CheckCircleOutlined />}
                 type="primary"
                 onClick={handleApprove}
               >
-                Approve & Download PDF
+                Approve 
               </Button>
-            )}
+            )} */}
             <Button
-              type={modalAction === "approve" ? "default" : "primary"}
+              icon={modalAction === "approve" ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+              type={"primary"}
               onClick={handleApprove}
             >
               {modalAction === "approve" ? "Approve" : "Reject"}

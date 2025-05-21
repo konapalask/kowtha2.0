@@ -141,7 +141,7 @@ const VerificationListScreen = () => {
       case 'CurrentAddress':
         return '#4A90E2';
       case 'PermanentAddress':
-        return '#50C878';
+        return '#893f91';
       case 'Work':
         return '#FF6B6B';
       default:
@@ -156,7 +156,7 @@ const VerificationListScreen = () => {
       case 'PermanentAddress':
         return 'Permanent Address';
       case 'Work':
-        return 'Work Address';
+        return 'Work';
       default:
         return type;
     }

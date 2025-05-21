@@ -22,7 +22,6 @@ import {
   Pie,
   Cell
 } from "recharts";
-import axiosInstance from "@/config/axios.config";
 import { getDashboardMetrics } from "@/services/dashboard.services";
 import DateRangePicker from 'react-date-range';
 import 'react-date-range/dist/styles.css';
@@ -94,22 +93,30 @@ export default function Dashboard() {
   const [pendingLoans, setPendingLoans] = useState<any[]>([]);
   const [processingStats, setProcessingStats] = useState<any[]>([]);
   const [employeeStats, setEmployeeStats] = useState<any[]>([]);
-  const [dateRange, setDateRange] = useState({
-    startDate: null as Date | null,
-    endDate: null as Date | null,
-    key: 'selection'
+  const [dateRange, setDateRange] = useState(() => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 6);
+    return {
+      startDate,
+      endDate,
+      key: 'selection'
+    };
   });
 
   const handleDateRangeChange = (ranges: any) => {
-    if (ranges.selection.startDate && ranges.selection.endDate) {
-      setDateRange(ranges.selection);
-      fetchMetrics(ranges.selection.startDate, ranges.selection.endDate);
-    }
+    setDateRange(ranges.selection);
+    fetchMetrics(ranges.selection.startDate, ranges.selection.endDate);
   };
 
   const formatDateRange = () => {
-    if (!dateRange.startDate || !dateRange.endDate) return '';
-    return `${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()}`;
+    const formatDate = (date: Date) => {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+    return `${formatDate(dateRange.startDate)} - ${formatDate(dateRange.endDate)}`;
   };
 
   const dateRangeDropdown = (

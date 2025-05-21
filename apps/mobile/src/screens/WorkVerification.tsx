@@ -18,6 +18,7 @@ import PhotoCapture from '../components/forms/PhotoCapture';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 interface WorkVerificationFormData {
   basicDetails: {
@@ -111,11 +112,11 @@ const WorkVerification = () => {
 
   const [formData, setFormData] = useState<WorkVerificationFormData>({
     basicDetails: {
-      applicantName: '',
-      bankName: '',
-      prospectNumber: '',
-      purposeOfLoan: '',
-      loanAmount: '',
+      applicantName: userData.applicantName,
+      bankName: userData.bankName,
+      prospectNumber: userData.applicationNumber,
+      purposeOfLoan: userData.loanType,
+      loanAmount: userData.loanAmount.toString(),
       tenure: '',
       panNumber: '',
       aadharNumber: '',
@@ -264,15 +265,26 @@ const WorkVerification = () => {
   };
 
   const handleSubmit = async () => {
+    // Check if all sections are validated
+    const allSectionsValid = Object.values(validSections).every(
+      isValid => isValid,
+    );
+
+    if (!allSectionsValid) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please fill all mandatory fields before submitting',
+        position: 'bottom',
+      });
+      return;
+    }
+
     try {
       const finalData = {
-        // verificationType: verificationType,
-        // findings: 'Work Verification Findings',
-        // ...{
         verificationType: verificationType,
         findings: 'Work Verification Findings',
         verificationData: formData,
-        // },
       };
 
       console.log('Submitting form data:', finalData);

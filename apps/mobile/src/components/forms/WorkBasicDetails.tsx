@@ -91,9 +91,14 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Applicant Name</Text>
             <TextInput
-              style={[styles.input, errors.applicantName && styles.inputError]}
+              style={[
+                styles.input,
+                styles.readOnlyInput,
+                errors.applicantName && styles.inputError,
+              ]}
               value={value}
               onChangeText={onChange}
+              editable={false}
             />
             {errors.applicantName && (
               <Text style={styles.errorText}>
@@ -111,9 +116,14 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Bank Name</Text>
             <TextInput
-              style={[styles.input, errors.bankName && styles.inputError]}
+              style={[
+                styles.input,
+                styles.readOnlyInput,
+                errors.bankName && styles.inputError,
+              ]}
               value={value}
               onChangeText={onChange}
+              editable={false}
             />
             {errors.bankName && (
               <Text style={styles.errorText}>{errors.bankName.message}</Text>
@@ -129,9 +139,14 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Prospect Number</Text>
             <TextInput
-              style={[styles.input, errors.prospectNumber && styles.inputError]}
+              style={[
+                styles.input,
+                styles.readOnlyInput,
+                errors.prospectNumber && styles.inputError,
+              ]}
               value={value}
               onChangeText={onChange}
+              editable={false}
             />
             {errors.prospectNumber && (
               <Text style={styles.errorText}>
@@ -149,9 +164,14 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Purpose of Loan</Text>
             <TextInput
-              style={[styles.input, errors.purposeOfLoan && styles.inputError]}
+              style={[
+                styles.input,
+                styles.readOnlyInput,
+                errors.purposeOfLoan && styles.inputError,
+              ]}
               value={value}
               onChangeText={onChange}
+              editable={false}
             />
             {errors.purposeOfLoan && (
               <Text style={styles.errorText}>
@@ -169,13 +189,57 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Loan Amount</Text>
             <TextInput
-              style={[styles.input, errors.loanAmount && styles.inputError]}
+              style={[
+                styles.input,
+                styles.readOnlyInput,
+                errors.loanAmount && styles.inputError,
+              ]}
+              value={value}
+              onChangeText={onChange}
+              keyboardType="numeric"
+              editable={false}
+            />
+            {errors.loanAmount && (
+              <Text style={styles.errorText}>{errors.loanAmount.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="panNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>PAN Number</Text>
+            <TextInput
+              style={[styles.input, errors.panNumber && styles.inputError]}
+              value={value}
+              onChangeText={onChange}
+            />
+            {errors.panNumber && (
+              <Text style={styles.errorText}>{errors.panNumber.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="aadharNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Aadhar Number</Text>
+            <TextInput
+              style={[styles.input, errors.aadharNumber && styles.inputError]}
               value={value}
               onChangeText={onChange}
               keyboardType="numeric"
             />
-            {errors.loanAmount && (
-              <Text style={styles.errorText}>{errors.loanAmount.message}</Text>
+            {errors.aadharNumber && (
+              <Text style={styles.errorText}>
+                {errors.aadharNumber.message}
+              </Text>
             )}
           </View>
         )}
@@ -275,10 +339,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: colors.background,
+    backgroundColor: colors.input.background,
   },
   inputError: {
     borderColor: colors.error,
+  },
+  readOnlyInput: {
+    backgroundColor: colors.input.disabled,
+    color: colors.text.primary,
   },
   errorText: {
     color: colors.error,
