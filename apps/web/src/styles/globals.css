@@ -5,17 +5,16 @@
 
 :root {
   /* Primary Colors */
-  --primary-900: #1a0044;  /* Deep indigo */
-  --primary-800: #2a0a6e;  
-  --primary-700: #3a1a8a;  
-  --primary-600: #4a2aa6;  
-  --primary-500: #5c3dc2;  /* Base (vivid bluish-purple) */
-  --primary-400: #7a5acf;  
-  --primary-300: #987ddb;  
-  --primary-200: #b6a0e7;  
-  --primary-100: #d4c3f3;  
-  --primary-50:  #f0e6ff;  /* Light lavender */
-
+  --primary-900: #001326;   /* Near-black navy */
+  --primary-800: #001d3a;   /* Super deep blue */
+  --primary-700: #002b55;   /* Midnight navy */
+  --primary-600: #00396e;   /* Base color */
+  --primary-500: #1f4f84;   /* Accessible deep blue */
+  --primary-400: #3f6a9a;   /* Muted royal */
+  --primary-300: #6c8fbb;   /* Steel blue */
+  --primary-200: #a1bddb;   /* Soft sky blue */
+  --primary-100: #d2e2f1;   /* Misty pale blue */
+  --primary-50:  #f0f7fb; 
   /* Neutral Colors */
   --neutral-900: #1a1a1a;
   --neutral-800: #333333;

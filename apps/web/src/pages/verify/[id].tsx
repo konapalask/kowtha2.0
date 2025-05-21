@@ -32,7 +32,7 @@ import {
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dynamic from "next/dynamic";
 import React from "react";
-import { getVerificationData, generateFinalReport } from "@/services/verifier.services";
+import { getVerificationData, generateFinalReport, verifierEditApi } from "@/services/verifier.services";
 import { getS3ImageUrl } from "@/utils/utility";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -155,6 +155,7 @@ interface EditFormModalProps {
   formKey: string;
   initialValues: any;
   currentTab: string;
+  fetchVerificationData: () => void;
 }
 
 interface FormField {
@@ -175,9 +176,13 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
   formKey,
   initialValues,
   currentTab,
+  fetchVerificationData,
 }) => {
   const [form] = Form.useForm();
   const [editorContent, setEditorContent] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { id } = router.query;
 
   React.useEffect(() => {
     if (visible && initialValues) {
@@ -188,6 +193,44 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
       }
     }
   }, [visible, initialValues, form, formKey, currentTab]);
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const values = await form.validateFields();
+      
+      if (formKey === 'finalObservations') {
+        values.remarks = editorContent;
+      }
+
+      // Find current verification data
+      const currentVerification = initialValues?.verifications?.find((v: any) => v.type === currentTab);
+      const currentVerificationData = currentVerification?.verificationData || {};
+
+      // Create payload with updated data
+      const payload = {
+        verificationData: {
+          ...currentVerificationData,
+          [formKey]: values
+        }
+      };
+
+      // Call API to update verification data
+      await verifierEditApi(id as string, currentTab, payload);
+      
+      message.success('Changes saved successfully');
+      onSave(values);
+      form.resetFields();
+      onCancel();
+      // Refresh verification data
+      fetchVerificationData();
+    } catch (error) {
+      console.error('Error saving form:', error);
+      message.error('Failed to save changes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getFormFields = () => {
     switch (formKey) {
@@ -398,16 +441,6 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    form.validateFields().then((values) => {
-      if (formKey === 'finalObservations') {
-        values.remarks = editorContent;
-      }
-      onSave(values);
-      form.resetFields();
-    });
-  };
-
   return (
     <Modal
       title={`Edit ${formKey.replace(/([A-Z])/g, " $1").trim()}`}
@@ -418,6 +451,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
       }}
       onOk={handleSubmit}
       width={1000}
+      confirmLoading={loading}
     >
       <Form
         form={form}
@@ -445,9 +479,35 @@ const EditFormModal: React.FC<EditFormModalProps> = ({
 
 const VerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
   const { activeTab } = useTabContext();
+  const [imageUrls, setImageUrls] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    const fetchImageUrls = async () => {
+      if (verificationData?.uploadedItems) {
+        console.log('Uploaded Items:', verificationData.uploadedItems);
+        const urls: {[key: string]: string} = {};
+        for (const item of verificationData.uploadedItems) {
+          try {
+            console.log('Fetching URL for item:', item);
+            const response = await getS3ImageUrl(item.s3ImageUrl);
+            console.log('S3 URL Response:', response);
+            urls[item.id] = response;
+          } catch (error) {
+            console.error('Error fetching image URL:', error);
+          }
+        }
+        console.log('Setting image URLs:', urls);
+        setImageUrls(urls);
+      }
+    };
+
+    fetchImageUrls();
+  }, [verificationData?.uploadedItems]);
+
   if (!verificationData) return null;
 
   const data = verificationData || {};
+  console.log('Current imageUrls state:', imageUrls);
 
   return (
     <>
@@ -681,52 +741,54 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
       <section style={{ marginBottom: 24 }}>
         <Card title="Photo Capture">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-            {data?.uploadedItems?.map((item: any, idx: number) => (
-              <div key={item.id} style={{ position: 'relative' }}>
-                <Image
-                  // src={ getS3ImageUrl(item.s3ImageUrl)}
-                  src={item.s3ImageUrl}
-                  alt={`Photo ${idx + 1}`}
-                  style={{ 
-                    width: '100%', 
-                    height: '200px', 
-                    objectFit: 'cover',
-                    borderRadius: '4px'
-                  }}
-                  preview={false}
-                />
-                <Button
-                  type="text"
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  style={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    borderRadius: '50%',
-                    padding: 4
-                  }}
-                  onClick={() => {
-                    // Handle photo removal
-                    const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
-                    onEdit("photoCapture");
-                  }}
-                />
-                <div style={{ 
-                  position: 'absolute', 
-                  bottom: 0, 
-                  left: 0, 
-                  right: 0, 
-                  background: 'rgba(0, 0, 0, 0.6)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  fontSize: '12px'
-                }}>
-                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+            {data?.uploadedItems?.map((item: any, idx: number) => {
+              console.log('Rendering image for item:', item, 'with URL:', imageUrls[item.id]);
+              return (
+                <div key={item.id} style={{ position: 'relative' }}>
+                  <Image
+                    src={imageUrls[item.id] || ''}
+                    alt={`Photo ${idx + 1}`}
+                    style={{ 
+                      width: '100%', 
+                      height: '200px', 
+                      objectFit: 'cover',
+                      borderRadius: '4px'
+                    }}
+                    preview={false}
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    icon={<CloseCircleOutlined />}
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      borderRadius: '50%',
+                      padding: 4
+                    }}
+                    onClick={() => {
+                      // Handle photo removal
+                      const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
+                      onEdit("photoCapture");
+                    }}
+                  />
+                  <div style={{ 
+                    position: 'absolute', 
+                    bottom: 0, 
+                    left: 0, 
+                    right: 0, 
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    fontSize: '12px'
+                  }}>
+                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       </section>
@@ -736,6 +798,27 @@ const VerificationDetails = ({ verificationData, onEdit }: { verificationData: a
 
 const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
   const { activeTab } = useTabContext();
+  const [imageUrls, setImageUrls] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    const fetchImageUrls = async () => {
+      if (verificationData?.uploadedItems) {
+        const urls: {[key: string]: string} = {};
+        for (const item of verificationData.uploadedItems) {
+          try {
+            const response = await getS3ImageUrl(item.s3ImageUrl);
+            urls[item.id] = response.url;
+          } catch (error) {
+            console.error('Error fetching image URL:', error);
+          }
+        }
+        setImageUrls(urls);
+      }
+    };
+
+    fetchImageUrls();
+  }, [verificationData?.uploadedItems]);
+
   if (!verificationData) return null;
 
   const data = verificationData || {};
@@ -1030,63 +1113,51 @@ const WorkVerificationDetails = ({ verificationData, onEdit }: { verificationDat
       <section style={{ marginBottom: 24 }}>
         <Card title="Photo Capture">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-            {data?.uploadedItems?.length > 0 ? (
-              data.uploadedItems.map((item: any, idx: number) => (
-                <div key={item.id} style={{ position: 'relative' }}>
-                  <Image
-                    // src={getS3ImageUrl(item.s3ImageUrl)}
-                    src={item.s3ImageUrl}
-                    alt={`Photo ${idx + 1}`}
-                    style={{ 
-                      width: '100%', 
-                      height: '200px', 
-                      objectFit: 'cover',
-                      borderRadius: '4px'
-                    }}
-                    preview={false}
-                  />
-                  <Button
-                    type="text"
-                    danger
-                    icon={<CloseCircleOutlined />}
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      borderRadius: '50%',
-                      padding: 4
-                    }}
-                    onClick={() => {
-                      // Handle photo removal
-                      const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
-                      onEdit("photoCapture");
-                    }}
-                  />
-                  <div style={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    left: 0, 
-                    right: 0, 
-                    background: 'rgba(0, 0, 0, 0.6)',
-                    color: 'white',
-                    padding: '4px 8px',
-                    fontSize: '12px'
-                  }}>
-                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
-                  </div>
+            {data?.uploadedItems?.map((item: any, idx: number) => (
+              <div key={item.id} style={{ position: 'relative' }}>
+                <Image
+                  src={imageUrls[item.id] || ''}
+                  alt={`Photo ${idx + 1}`}
+                  style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    objectFit: 'cover',
+                    borderRadius: '4px'
+                  }}
+                  preview={false}
+                />
+                <Button
+                  type="text"
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '50%',
+                    padding: 4
+                  }}
+                  onClick={() => {
+                    // Handle photo removal
+                    const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
+                    onEdit("photoCapture");
+                  }}
+                />
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: 0, 
+                  left: 0, 
+                  right: 0, 
+                  background: 'rgba(0, 0, 0, 0.6)',
+                  color: 'white',
+                  padding: '4px 8px',
+                  fontSize: '12px'
+                }}>
+                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
                 </div>
-              ))
-            ) : (
-              <div style={{ 
-                gridColumn: '1 / -1', 
-                textAlign: 'center', 
-                padding: '40px',
-                color: '#999'
-              }}>
-                No photos uploaded yet
               </div>
-            )}
+            ))}
           </div>
         </Card>
       </section>
@@ -1216,14 +1287,18 @@ export default function LoanVerifyDetails() {
   const [currentFormKey, setCurrentFormKey] = useState("");
   const [activeTab, setActiveTab] = useState("PermanentAddress");
 
+  const fetchVerificationData = async () => {
+    getVerificationData(id as string).then((res) => {
+      setVerificationData(res?.data);
+    }).catch((err) => {
+      console.error(err);
+      message.error('Failed to fetch verification data');
+    });
+  }
+
   useEffect(() => {
     if (id) {
-      getVerificationData(id as string).then((res) => {
-        setVerificationData(res?.data);
-      }).catch((err) => {
-        console.error(err);
-        message.error('Failed to fetch verification data');
-      });
+     fetchVerificationData();
     }
   }, [id]);
 
@@ -1461,6 +1536,7 @@ export default function LoanVerifyDetails() {
           formKey={currentFormKey}
           initialValues={verificationData}
           currentTab={activeTab}
+          fetchVerificationData={fetchVerificationData}
         />
       </DashboardLayout>
     </TabContext.Provider>
