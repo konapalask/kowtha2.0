@@ -37,8 +37,16 @@ const validationSchema = yup.object().shape({
   purposeOfLoan: yup.string().required('Purpose of Loan is required'),
   loanAmount: yup.string().required('Loan Amount is required'),
   tenure: yup.string().required('Tenure is required'),
-  panNumber: yup.string().optional().default(''),
-  aadharNumber: yup.string().optional().default(''),
+  panNumber: yup
+    .string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    .optional()
+    .default(''),
+  aadharNumber: yup
+    .string()
+    .matches(/^\d{12}$/, 'Aadhar number must be 12 digits')
+    .optional()
+    .default(''),
   qualification: yup.string().required('Qualification is required'),
 });
 
@@ -215,7 +223,16 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             <TextInput
               style={[styles.input, errors.panNumber && styles.inputError]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                // Convert to uppercase and remove any non-alphanumeric characters
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter PAN number"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.panNumber && (
               <Text style={styles.errorText}>{errors.panNumber.message}</Text>
@@ -233,8 +250,15 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             <TextInput
               style={[styles.input, errors.aadharNumber && styles.inputError]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                // Only allow numbers
+                const numericValue = text.replace(/[^0-9]/g, '');
+                onChange(numericValue);
+              }}
+              maxLength={12}
               keyboardType="numeric"
+              placeholder="Enter Aadhar number"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.aadharNumber && (
               <Text style={styles.errorText}>
@@ -250,11 +274,14 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         name="tenure"
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Tenure</Text>
+            <Text style={styles.label}>Tenure (in months)</Text>
             <TextInput
               style={[styles.input, errors.tenure && styles.inputError]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                const num = parseInt(text) || 0;
+                onChange(Math.max(0, num).toString());
+              }}
               keyboardType="numeric"
             />
             {errors.tenure && (

@@ -89,7 +89,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => residenceStatusRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select residence status'}
               </Text>
             </TouchableOpacity>
@@ -117,6 +118,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
                 placeholder="Enter rent details"
                 multiline
                 numberOfLines={4}
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.rentDetails && (
                 <Text style={styles.errorText}>
@@ -138,7 +140,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => residenceTypeRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select residence type'}
               </Text>
             </TouchableOpacity>
@@ -161,7 +164,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => constructionQualityRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select construction quality'}
               </Text>
             </TouchableOpacity>
@@ -184,7 +188,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => standardOfLivingRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select standard of living'}
               </Text>
             </TouchableOpacity>
@@ -207,7 +212,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => locationCategoryRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select location category'}
               </Text>
             </TouchableOpacity>
@@ -230,7 +236,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => localityTypeRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select locality type'}
               </Text>
             </TouchableOpacity>
@@ -253,7 +260,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => accessibilityRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select accessibility'}
               </Text>
             </TouchableOpacity>
@@ -275,7 +283,10 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <Text style={styles.label}>Approx. Area of House (Sq ft)*</Text>
             <TextInput
               style={styles.input}
-              onChangeText={onChange}
+              onChangeText={text => {
+                const num = parseInt(text) || 0;
+                onChange(Math.max(0, num).toString());
+              }}
               value={value}
               placeholder="Enter house area"
               keyboardType="numeric"
@@ -296,7 +307,10 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <Text style={styles.label}>No. of Years at Current Address*</Text>
             <TextInput
               style={styles.input}
-              onChangeText={onChange}
+              onChangeText={text => {
+                const num = parseInt(text) || 0;
+                onChange(Math.max(0, num).toString());
+              }}
               value={value}
               placeholder="Enter number of years"
               keyboardType="numeric"
@@ -322,7 +336,8 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => nameplateVisibleRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select visibility'}
               </Text>
             </TouchableOpacity>
@@ -577,10 +592,11 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

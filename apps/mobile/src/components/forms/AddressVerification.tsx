@@ -11,7 +11,7 @@ import {useForm, Controller, useWatch} from 'react-hook-form';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {AddressVerificationFormData} from '../../types/verification';
 import {colors} from '../../constants/colors';
-import Geolocation from '@react-native-community/geolocation';
+import GetLocation from 'react-native-get-location';
 
 type AddressVerificationProps = {
   onSubmit: (data: AddressVerificationFormData) => void;
@@ -67,17 +67,18 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
   });
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+      .then(location => {
+        const {latitude, longitude} = location;
         setValue('geoTag', `${latitude},${longitude}`);
-      },
-      error => {
+      })
+      .catch(error => {
         console.error('Error getting location:', error);
         setValue('geoTag', 'Location not available');
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
+      });
   }, [setValue]);
 
   const showAddressSheet = () => {
@@ -237,7 +238,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
                   style={styles.input}
                   placeholder="Enter number of years"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={text => {
+                    const num = parseInt(text) || 0;
+                    onChange(Math.max(0, num).toString());
+                  }}
                   keyboardType="numeric"
                 />
                 {errors.previousAddressYears && (
@@ -317,7 +321,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
                   style={styles.input}
                   placeholder="Enter number of years"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={text => {
+                    const num = parseInt(text) || 0;
+                    onChange(Math.max(0, num).toString());
+                  }}
                   keyboardType="numeric"
                 />
                 {errors.numberOfYearsAtPreviousCity && (
@@ -516,10 +523,11 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

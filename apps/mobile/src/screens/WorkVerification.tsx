@@ -84,9 +84,7 @@ const WorkVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params as {item: any};
-  console.log('item', item);
   const {userData} = route.params as {userData: any};
-  console.log('userData', userData);
   const verificationType = 'Work';
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;

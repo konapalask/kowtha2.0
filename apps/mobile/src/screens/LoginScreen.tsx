@@ -100,6 +100,18 @@ const LoginScreen = () => {
     }
   };
 
+  const handleResendOtp = () => {
+    Toast.show({
+      text1: 'New OTP has been sent to your mobile number',
+      type: 'success',
+    });
+  };
+
+  const handleBackToLogin = () => {
+    setShowOtpInput(false);
+    setOtp('');
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ImageBackground
@@ -112,16 +124,18 @@ const LoginScreen = () => {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Login</Text>
+          <Text style={styles.title}>
+            {showOtpInput ? 'Verify OTP' : 'Login'}
+          </Text>
           <TextInput
             style={styles.input}
             placeholder="Mobile Number"
             value={mobileNumber}
-            onChangeText={setMobileNumber}
+            onChangeText={(value: string) => setMobileNumber(value.trim())}
             keyboardType="phone-pad"
             maxLength={10}
             placeholderTextColor={'#c8c8c8'}
-            editable={!loading}
+            editable={!showOtpInput}
           />
           {!showOtpInput ? (
             <TouchableOpacity
@@ -156,15 +170,20 @@ const LoginScreen = () => {
                   <Text style={styles.buttonText}>Verify OTP</Text>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.resendButton, loading && styles.disabledButton]}
-                onPress={() => {
-                  setOtp('');
-                  handleSendOtp();
-                }}
-                disabled={loading}>
-                <Text style={styles.resendButtonText}>Resend OTP</Text>
-              </TouchableOpacity>
+              <View style={styles.linkButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.linkButton}
+                  onPress={handleBackToLogin}
+                  disabled={loading}>
+                  <Text style={styles.linkButtonText}>Back to Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.linkButton}
+                  onPress={handleResendOtp}
+                  disabled={loading}>
+                  <Text style={styles.linkButtonText}>Resend OTP</Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </View>
@@ -224,16 +243,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  resendButton: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+  linkButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
-  resendButtonText: {
-    color: colors.button.secondary.background,
-    fontSize: 16,
-    fontWeight: 'bold',
+  linkButton: {
+    padding: 10,
+  },
+  linkButtonText: {
+    color: colors.button.primary.background,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

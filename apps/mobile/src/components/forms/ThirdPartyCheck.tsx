@@ -90,10 +90,14 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
               <Text style={styles.label}>Mobile Number*</Text>
               <TextInput
                 style={styles.input}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  // Only allow numbers
+                  const numericValue = text.replace(/[^0-9]/g, '');
+                  onChange(numericValue);
+                }}
                 value={value}
                 placeholder="Enter mobile number"
-                keyboardType="phone-pad"
+                keyboardType="numeric"
                 maxLength={10}
               />
               {errors.mobileNumber && (
@@ -115,7 +119,8 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
               <TouchableOpacity
                 style={styles.selectButton}
                 onPress={() => relationshipRef.current?.show()}>
-                <Text style={styles.selectButtonText}>
+                <Text
+                  style={value ? styles.selectButtonText : styles.placeholder}>
                   {value || 'Select relationship'}
                 </Text>
               </TouchableOpacity>
@@ -138,7 +143,8 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
               <TouchableOpacity
                 style={styles.selectButton}
                 onPress={() => feedbackStatusRef.current?.show()}>
-                <Text style={styles.selectButtonText}>
+                <Text
+                  style={value ? styles.selectButtonText : styles.placeholder}>
                   {value || 'Select feedback status'}
                 </Text>
               </TouchableOpacity>
@@ -268,10 +274,11 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

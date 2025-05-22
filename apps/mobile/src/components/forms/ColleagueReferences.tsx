@@ -40,7 +40,17 @@ const validationSchema = yup.object().shape({
         address: yup.string().required('Address is required'),
         designation: yup.string().required('Designation is required'),
         yearsKnown: yup.string().required('Number of Years Known is required'),
-        contactNumber: yup.string().required('Contact Number is required'),
+        contactNumber: yup
+          .string()
+          .required('Contact Number is required')
+          .matches(/^[0-9]{10}$/, 'Contact number must be exactly 10 digits')
+          .test(
+            'no-symbols',
+            'Contact number should not contain symbols',
+            value => {
+              return /^[0-9]+$/.test(value);
+            },
+          ),
         emailAddress: yup
           .string()
           .email('Invalid email address')
@@ -203,8 +213,14 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                     styles.inputError,
                 ]}
                 value={value}
-                onChangeText={onChange}
-                keyboardType="phone-pad"
+                onChangeText={text => {
+                  // Only allow numbers and limit to 10 digits
+                  const numericValue = text.replace(/[^0-9]/g, '').slice(0, 10);
+                  onChange(numericValue);
+                }}
+                keyboardType="numeric"
+                maxLength={10}
+                placeholder="Enter 10 digit number"
               />
               {errors.references?.[index]?.contactNumber && (
                 <Text style={styles.errorText}>

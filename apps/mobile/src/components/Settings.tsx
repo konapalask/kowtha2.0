@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {clearAll} from '../helpers/utility';
@@ -44,18 +45,26 @@ const Settings = () => {
           <Icon name="person-outline" size={24} color="#000" />
         </TouchableOpacity>
 
-        {visible && (
-          <View style={styles.menuOverlay}>
-            <Pressable style={styles.menuItem} onPress={handleProfilePress}>
-              <Icon name="person" size={20} color="#000" />
-              <Text style={styles.menuText}>Profile</Text>
-            </Pressable>
-            <Pressable style={styles.menuItem} onPress={handleLogout}>
-              <Icon name="log-out-outline" size={20} color="#000" />
-              <Text style={styles.menuText}>Logout</Text>
-            </Pressable>
-          </View>
-        )}
+        <Modal
+          visible={visible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setVisible(false)}>
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setVisible(false)}>
+            <View style={styles.menuOverlay}>
+              <Pressable style={styles.menuItem} onPress={handleProfilePress}>
+                <Icon name="person" size={20} color="#000" />
+                <Text style={styles.menuText}>Profile</Text>
+              </Pressable>
+              <Pressable style={styles.menuItem} onPress={handleLogout}>
+                <Icon name="log-out-outline" size={20} color="#000" />
+                <Text style={styles.menuText}>Logout</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Modal>
       </View>
     </View>
   );
@@ -69,10 +78,15 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignSelf: 'flex-start',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 45,
+    paddingRight: 10,
+  },
   menuOverlay: {
-    position: 'absolute',
-    top: 35,
-    right: 0,
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 8,

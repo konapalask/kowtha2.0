@@ -71,7 +71,10 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
               <Text style={styles.label}>Total Family Members*</Text>
               <TextInput
                 style={styles.input}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  const num = parseInt(text) || 0;
+                  onChange(Math.max(0, num).toString());
+                }}
                 value={value}
                 placeholder="Enter total family members"
                 keyboardType="numeric"
@@ -94,7 +97,10 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
               <Text style={styles.label}>No. of Earning Members*</Text>
               <TextInput
                 style={styles.input}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  const num = parseInt(text) || 0;
+                  onChange(Math.max(0, num).toString());
+                }}
                 value={value}
                 placeholder="Enter number of earning members"
                 keyboardType="numeric"
@@ -117,7 +123,10 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
               <Text style={styles.label}>No. of Dependents*</Text>
               <TextInput
                 style={styles.input}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  const num = parseInt(text) || 0;
+                  onChange(Math.max(0, num).toString());
+                }}
                 value={value}
                 placeholder="Enter number of dependents"
                 keyboardType="numeric"
@@ -141,7 +150,8 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
               <TouchableOpacity
                 style={styles.selectButton}
                 onPress={() => isSpouseWorkingRef.current?.show()}>
-                <Text style={styles.selectButtonText}>
+                <Text
+                  style={value ? styles.selectButtonText : styles.placeholder}>
                   {value || 'Select working status'}
                 </Text>
               </TouchableOpacity>
@@ -288,10 +298,11 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,
