@@ -6,11 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {useForm, Controller} from 'react-hook-form';
 import {FamilyEmploymentDetailsFormData} from '../../types/verification';
 import {colors} from '../../constants/colors';
+import Toast from 'react-native-toast-message';
 
 interface FamilyEmploymentDetailsProps {
   onSubmit: (data: FamilyEmploymentDetailsFormData) => void;
@@ -44,7 +46,9 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
   });
 
   const isSpouseWorking = watch('isSpouseWorking');
-
+  const totalFamilyMembers = watch('totalFamilyMembers');
+  const earningMembers = watch('earningMembers');
+  const dependents = watch('dependents');
   React.useEffect(() => {
     setShowSpouseDetails(isSpouseWorking === 'Yes');
   }, [isSpouseWorking]);
@@ -65,15 +69,29 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
       <ScrollView>
         <Controller
           control={control}
-          rules={{required: 'Total family members is required'}}
+          rules={{
+            required: 'Total family members is required',
+            validate: value => {
+              if (
+                earningMembers &&
+                dependents &&
+                parseInt(earningMembers) + parseInt(dependents) !==
+                  parseInt(value)
+              ) {
+                return 'Earning members and Dependents should sum up to total family members';
+              }
+              return true;
+            },
+          }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Total Family Members*</Text>
               <TextInput
                 style={styles.input}
                 onChangeText={text => {
-                  const num = parseInt(text) || 0;
-                  onChange(Math.max(0, num).toString());
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
                 }}
                 value={value}
                 placeholder="Enter total family members"
@@ -91,15 +109,27 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
 
         <Controller
           control={control}
-          rules={{required: 'Number of earning members is required'}}
+          rules={{
+            required: 'Number of earning members is required',
+            validate: value => {
+              if (
+                totalFamilyMembers &&
+                parseInt(totalFamilyMembers) < parseInt(value)
+              ) {
+                return 'Number of earning members cannot be greater than total family members';
+              }
+              return true;
+            },
+          }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>No. of Earning Members*</Text>
               <TextInput
                 style={styles.input}
                 onChangeText={text => {
-                  const num = parseInt(text) || 0;
-                  onChange(Math.max(0, num).toString());
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
                 }}
                 value={value}
                 placeholder="Enter number of earning members"
@@ -117,15 +147,27 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
 
         <Controller
           control={control}
-          rules={{required: 'Number of dependents is required'}}
+          rules={{
+            required: 'Number of dependents is required',
+            validate: value => {
+              if (
+                totalFamilyMembers &&
+                parseInt(totalFamilyMembers) < parseInt(value)
+              ) {
+                return 'Number of dependents cannot be greater than total family members';
+              }
+              return true;
+            },
+          }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>No. of Dependents*</Text>
               <TextInput
                 style={styles.input}
                 onChangeText={text => {
-                  const num = parseInt(text) || 0;
-                  onChange(Math.max(0, num).toString());
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
                 }}
                 value={value}
                 placeholder="Enter number of dependents"

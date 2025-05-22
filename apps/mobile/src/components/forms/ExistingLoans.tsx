@@ -144,9 +144,15 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                 style={[
                   styles.input,
                   errors.loans?.[index]?.loanAmount && styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  // Only allow numbers and limit to 1 decimal place
+                  if (/^\d*\.?\d{0,1}$/.test(text)) {
+                    onChange(text);
+                  }
+                }}
                 keyboardType="numeric"
               />
               {errors.loans?.[index]?.loanAmount && (
@@ -168,9 +174,15 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                 style={[
                   styles.input,
                   errors.loans?.[index]?.emi && styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  // Only allow numbers and limit to 1 decimal place
+                  if (/^\d*\.?\d{0,1}$/.test(text)) {
+                    onChange(text);
+                  }
+                }}
                 keyboardType="numeric"
               />
               {errors.loans?.[index]?.emi && (
@@ -192,9 +204,15 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                 style={[
                   styles.input,
                   errors.loans?.[index]?.tenure && styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  // Only allow numbers and limit to 1 decimal place
+                  if (/^\d*\.?\d{0,1}$/.test(text)) {
+                    onChange(text);
+                  }
+                }}
                 keyboardType="numeric"
               />
               {errors.loans?.[index]?.tenure && (
@@ -303,12 +321,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

@@ -40,6 +40,17 @@ export const clearAll = async (): Promise<void> => {
   }
 };
 
+export const getAllItems = async (): Promise<any> => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const items = await AsyncStorage.multiGet(keys);
+    return items.map(([key, value]) => ({key, value}));
+  } catch (error) {
+    console.error('Error getting all items:', error);
+    return [];
+  }
+};
+
 export const switchAll = async (selectedUser: any): Promise<void> => {
   try {
     await setItem('user', selectedUser);

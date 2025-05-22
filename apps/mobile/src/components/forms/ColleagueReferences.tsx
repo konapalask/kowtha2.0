@@ -186,10 +186,18 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 style={[
                   styles.input,
                   errors.references?.[index]?.yearsKnown && styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
-                onChangeText={onChange}
-                keyboardType="numeric"
+                onChangeText={text => {
+                  // Allow numbers with up to 1 decimal place
+                  if (/^\d*\.?\d{0,1}$/.test(text)) {
+                    onChange(text);
+                  }
+                }}
+                keyboardType="decimal-pad"
+                placeholder="Enter number of years"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.yearsKnown && (
                 <Text style={styles.errorText}>
@@ -211,6 +219,7 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                   styles.input,
                   errors.references?.[index]?.contactNumber &&
                     styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
                 onChangeText={text => {
@@ -221,6 +230,7 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 keyboardType="numeric"
                 maxLength={10}
                 placeholder="Enter 10 digit number"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.contactNumber && (
                 <Text style={styles.errorText}>
@@ -358,12 +368,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

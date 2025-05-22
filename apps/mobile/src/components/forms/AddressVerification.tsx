@@ -239,10 +239,11 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
                   placeholder="Enter number of years"
                   value={value}
                   onChangeText={text => {
-                    const num = parseInt(text) || 0;
-                    onChange(Math.max(0, num).toString());
+                    if (/^\d*\.?\d{0,1}$/.test(text)) {
+                      onChange(text);
+                    }
                   }}
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                 />
                 {errors.previousAddressYears && (
                   <Text style={styles.errorText}>
@@ -322,10 +323,11 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
                   placeholder="Enter number of years"
                   value={value}
                   onChangeText={text => {
-                    const num = parseInt(text) || 0;
-                    onChange(Math.max(0, num).toString());
+                    if (/^\d*\.?\d{0,1}$/.test(text)) {
+                      onChange(text);
+                    }
                   }}
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                 />
                 {errors.numberOfYearsAtPreviousCity && (
                   <Text style={styles.errorText}>

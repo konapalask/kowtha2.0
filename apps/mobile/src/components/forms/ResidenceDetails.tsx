@@ -284,12 +284,13 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TextInput
               style={styles.input}
               onChangeText={text => {
-                const num = parseInt(text) || 0;
-                onChange(Math.max(0, num).toString());
+                if (/^\d*\.?\d{0,1}$/.test(text)) {
+                  onChange(text);
+                }
               }}
               value={value}
               placeholder="Enter house area"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
             {errors.houseArea && (
               <Text style={styles.errorText}>{errors.houseArea.message}</Text>
@@ -308,12 +309,13 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <TextInput
               style={styles.input}
               onChangeText={text => {
-                const num = parseInt(text) || 0;
-                onChange(Math.max(0, num).toString());
+                if (/^\d*\.?\d{0,1}$/.test(text)) {
+                  onChange(text);
+                }
               }}
               value={value}
               placeholder="Enter number of years"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
             {errors.yearsAtCurrentAddress && (
               <Text style={styles.errorText}>

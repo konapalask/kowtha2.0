@@ -8,7 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {clearAll} from '../helpers/utility';
+import {clearAll, clearItem} from '../helpers/utility';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -30,7 +30,8 @@ const Settings = () => {
   };
 
   const handleLogout = () => {
-    clearAll();
+    clearItem('accessToken');
+    clearItem('refreshToken');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],

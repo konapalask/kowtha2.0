@@ -45,18 +45,18 @@ axiosInstance.interceptors.response.use(
     const accountNotFound = 'UNAUTHORIZED_USER';
 
     if ('auth/'.includes(originalRequest.url)) {
-      clearAll();
+      // clearAll();
       return Promise.reject(error);
     }
 
     if (errorStatusCode === 401) {
-      clearAll();
+      // clearAll();
       RNRestart.Restart();
     }
 
     //Prevent infinite loops
     if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
-      clearAll();
+      // clearAll();
       RNRestart.Restart();
 
       return Promise.reject(error);
@@ -64,13 +64,13 @@ axiosInstance.interceptors.response.use(
 
     //Invalid credentials or user not exist
     if (errorMessage === accountNotFound && errorStatusCode === 401) {
-      clearAll();
+      // clearAll();
       RNRestart.Restart();
     }
 
     // Handle general 401 unauthorized errors
     if (errorStatusCode === 401) {
-      clearAll();
+      // clearAll();
       RNRestart.Restart();
       return Promise.reject(error);
     }
@@ -97,19 +97,19 @@ axiosInstance.interceptors.response.use(
               })
               .catch(err => {
                 console.log(err);
-                clearAll();
+                // clearAll();
                 RNRestart.Restart();
               });
           } else {
-            clearAll();
+            // clearAll();
             RNRestart.Restart();
           }
         } else {
-          clearAll();
+          // clearAll();
           RNRestart.Restart();
         }
       } else {
-        clearAll();
+        // clearAll();
         RNRestart.Restart();
       }
     }

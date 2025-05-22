@@ -131,8 +131,13 @@ const LoginScreen = () => {
             style={styles.input}
             placeholder="Mobile Number"
             value={mobileNumber}
-            onChangeText={(value: string) => setMobileNumber(value.trim())}
-            keyboardType="phone-pad"
+            onChangeText={(value: string) => {
+              // Only accept numeric input
+              if (/^\d*$/.test(value)) {
+                setMobileNumber(value);
+              }
+            }}
+            keyboardType="numeric"
             maxLength={10}
             placeholderTextColor={'#c8c8c8'}
             editable={!showOtpInput}
@@ -154,8 +159,13 @@ const LoginScreen = () => {
                 style={styles.input}
                 placeholder="Enter OTP"
                 value={otp}
-                onChangeText={setOtp}
-                keyboardType="number-pad"
+                onChangeText={(value: string) => {
+                  // Only accept numeric input
+                  if (/^\d*$/.test(value)) {
+                    setOtp(value);
+                  }
+                }}
+                keyboardType="numeric"
                 maxLength={6}
                 placeholderTextColor={'#c8c8c8'}
                 editable={!loading}

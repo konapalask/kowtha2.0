@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -23,21 +23,27 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: {errors},
   } = useForm<BasicDetailsFormData>({
-    defaultValues: initialData
-      ? initialData
-      : {
-          verificationType: '', // Set a default if initialData is not present
-          applicationNumber: '',
-          applicantName: '',
-          applicantMaritalStatus: '',
-          applicantMaritalStatusOther: '',
-          educationQualification: '',
-          category: '',
-          categoryOther: '',
-        },
+    defaultValues: initialData || {
+      verificationType: '',
+      applicationNumber: '',
+      applicantName: '',
+      applicantMaritalStatus: '',
+      applicantMaritalStatusOther: '',
+      educationQualification: '',
+      category: '',
+      categoryOther: '',
+    },
   });
+
+  // Add useEffect to update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const maritalStatusSheetRef = useRef<ActionSheetRef>(null);
   const educationQualificationSheetRef = useRef<ActionSheetRef>(null);

@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,6 @@ interface WorkBasicDetailsFormData {
   loanAmount: string;
   tenure: string;
   panNumber: string;
-  aadharNumber: string;
   qualification: string;
 }
 
@@ -42,11 +41,7 @@ const validationSchema = yup.object().shape({
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
     .optional()
     .default(''),
-  aadharNumber: yup
-    .string()
-    .matches(/^\d{12}$/, 'Aadhar number must be 12 digits')
-    .optional()
-    .default(''),
+
   qualification: yup.string().required('Qualification is required'),
 });
 
@@ -67,6 +62,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     handleSubmit,
     formState: {errors},
     setValue,
+    reset,
   } = useForm<WorkBasicDetailsFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: initialData || {
@@ -77,10 +73,15 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       loanAmount: '',
       tenure: '',
       panNumber: '',
-      aadharNumber: '',
       qualification: '',
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const showQualificationSheet = () => {
     qualificationSheetRef.current?.show();
@@ -221,7 +222,11 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>PAN Number</Text>
             <TextInput
-              style={[styles.input, errors.panNumber && styles.inputError]}
+              style={[
+                styles.input,
+                errors.panNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
               onChangeText={text => {
                 // Convert to uppercase and remove any non-alphanumeric characters
@@ -241,7 +246,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="aadharNumber"
         render={({field: {onChange, value}}) => (
@@ -251,9 +256,10 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               style={[styles.input, errors.aadharNumber && styles.inputError]}
               value={value}
               onChangeText={text => {
-                // Only allow numbers
-                const numericValue = text.replace(/[^0-9]/g, '');
-                onChange(numericValue);
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
               }}
               maxLength={12}
               keyboardType="numeric"
@@ -267,7 +273,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
       <Controller
         control={control}
@@ -276,13 +282,21 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Tenure (in months)</Text>
             <TextInput
-              style={[styles.input, errors.tenure && styles.inputError]}
+              style={[
+                styles.input,
+                errors.tenure && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
               onChangeText={text => {
-                const num = parseInt(text) || 0;
-                onChange(Math.max(0, num).toString());
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
               }}
               keyboardType="numeric"
+              placeholder="Enter tenure in months"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.tenure && (
               <Text style={styles.errorText}>{errors.tenure.message}</Text>
@@ -383,12 +397,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

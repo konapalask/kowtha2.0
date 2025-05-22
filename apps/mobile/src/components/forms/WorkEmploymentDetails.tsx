@@ -197,10 +197,16 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               style={[
                 styles.input,
                 errors.yearsInCurrentJob && styles.inputError,
+                {color: colors.text.primary},
               ]}
               value={value}
-              onChangeText={onChange}
-              keyboardType="numeric"
+              onChangeText={text => {
+                if (/^\d*\.?\d{0,1}$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              keyboardType="decimal-pad"
+              placeholder="Enter years in current job"
             />
             {errors.yearsInCurrentJob && (
               <Text style={styles.errorText}>
@@ -221,10 +227,16 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               style={[
                 styles.input,
                 errors.totalWorkExperience && styles.inputError,
+                {color: colors.text.primary},
               ]}
               value={value}
-              onChangeText={onChange}
-              keyboardType="numeric"
+              onChangeText={text => {
+                if (/^\d*\.?\d{0,1}$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              keyboardType="decimal-pad"
+              placeholder="Enter total work experience"
             />
             {errors.totalWorkExperience && (
               <Text style={styles.errorText}>
@@ -242,9 +254,19 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Company Size</Text>
             <TextInput
-              style={[styles.input, errors.companySize && styles.inputError]}
+              style={[
+                styles.input,
+                errors.companySize && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              keyboardType="numeric"
+              placeholder="Enter company size"
             />
             {errors.companySize && (
               <Text style={styles.errorText}>{errors.companySize.message}</Text>
@@ -337,9 +359,19 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>ID Card Number</Text>
             <TextInput
-              style={[styles.input, errors.idCardNumber && styles.inputError]}
+              style={[
+                styles.input,
+                errors.idCardNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                if (/^[A-Za-z0-9]*$/.test(text)) {
+                  onChange(text.toUpperCase());
+                }
+              }}
+              placeholder="Enter ID card number"
+              autoCapitalize="characters"
             />
             {errors.idCardNumber && (
               <Text style={styles.errorText}>
@@ -450,10 +482,19 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Gross Salary per Month</Text>
             <TextInput
-              style={[styles.input, errors.grossSalary && styles.inputError]}
+              style={[
+                styles.input,
+                errors.grossSalary && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
               keyboardType="numeric"
+              placeholder="Enter gross salary"
             />
             {errors.grossSalary && (
               <Text style={styles.errorText}>{errors.grossSalary.message}</Text>
@@ -469,10 +510,19 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Net Salary per Month</Text>
             <TextInput
-              style={[styles.input, errors.netSalary && styles.inputError]}
+              style={[
+                styles.input,
+                errors.netSalary && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
               keyboardType="numeric"
+              placeholder="Enter net salary"
             />
             {errors.netSalary && (
               <Text style={styles.errorText}>{errors.netSalary.message}</Text>
@@ -640,12 +690,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,
