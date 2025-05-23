@@ -259,12 +259,10 @@ const VerificationListScreen = () => {
         } else {
           Toast.show({
             type: 'info',
-            text1: 'Verification Completed',
-            text2: `${getVerificationTypeLabel(
+            text1: `${getVerificationTypeLabel(
               item.verification.type,
-            )} verification for application ${
-              item.applicationNumber
-            } is already completed.`,
+            )} verification is completed`,
+            text2: `for application ${item.applicationNumber}.`,
             position: 'bottom',
             visibilityTime: 3000,
           });
@@ -319,20 +317,29 @@ const VerificationListScreen = () => {
         </View>
       </View>
       {renderFilterOptions()}
-      <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={item => item.verification.id}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={['#007AFF']}
-            tintColor="#007AFF"
-          />
-        }
-      />
+      {filteredData.length === 0 ? (
+        <View style={styles.noResultsContainer}>
+          <Icon name="search-off" size={48} color="#999" />
+          <Text style={styles.noResultsText}>
+            No matching applications found
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={item => item.verification.id}
+          contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#007AFF']}
+              tintColor="#007AFF"
+            />
+          }
+        />
+      )}
     </View>
   );
 };
@@ -511,6 +518,18 @@ const styles = StyleSheet.create({
   },
   clearFilter: {
     padding: 4,
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noResultsText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

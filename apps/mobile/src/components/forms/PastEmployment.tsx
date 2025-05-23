@@ -51,7 +51,8 @@ const validationSchema = yup.object().shape({
           .required('Contact Person Name is required'),
         contactPersonNumber: yup
           .string()
-          .required('Contact Person Number is required'),
+          .required('Contact Person Number is required')
+          .matches(/^\d{10}$/, 'Contact number must be exactly 10 digits'),
         reasonForMovement: yup
           .string()
           .required('Reason for Movement is required'),
@@ -270,10 +271,19 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
                   styles.input,
                   errors.employments?.[index]?.contactPersonNumber &&
                     styles.inputError,
+                  {color: colors.text.primary},
                 ]}
                 value={value}
-                onChangeText={onChange}
-                keyboardType="phone-pad"
+                onChangeText={text => {
+                  // Only allow numbers and limit to 10 digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text.slice(0, 10));
+                  }
+                }}
+                keyboardType="numeric"
+                maxLength={10}
+                placeholder="Enter 10 digit number"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.employments?.[index]?.contactPersonNumber && (
                 <Text style={styles.errorText}>
@@ -436,12 +446,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

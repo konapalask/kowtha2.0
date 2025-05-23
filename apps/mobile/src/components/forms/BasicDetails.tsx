@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -23,25 +23,34 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: {errors},
   } = useForm<BasicDetailsFormData>({
-    defaultValues: initialData
-      ? initialData
-      : {
-          verificationType: '', // Set a default if initialData is not present
-          applicationNumber: '',
-          applicantName: '',
-          applicantMaritalStatus: '',
-          applicantMaritalStatusOther: '',
-          educationQualification: '',
-          category: '',
-          categoryOther: '',
-        },
+    defaultValues: initialData || {
+      verificationType: '',
+      applicationNumber: '',
+      applicantName: '',
+      applicantMaritalStatus: '',
+      applicantMaritalStatusOther: '',
+      educationQualification: '',
+      category: '',
+      categoryOther: '',
+      isApplicantAvailable: '',
+      availablePersonName: '',
+    },
   });
+
+  // Add useEffect to update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const maritalStatusSheetRef = useRef<ActionSheetRef>(null);
   const educationQualificationSheetRef = useRef<ActionSheetRef>(null);
   const categorySheetRef = useRef<ActionSheetRef>(null);
+  const isApplicantAvailableSheetRef = useRef<ActionSheetRef>(null);
 
   const maritalStatusOptions = ['Single', 'Married', 'Divorced', 'Others'];
   const educationQualificationOptions = [
@@ -53,9 +62,11 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
     'PG/Professional Certification',
   ];
   const categoryOptions = ['General', 'SC', 'ST', 'OBC', 'Others'];
+  const yesNoOptions = ['Yes', 'No'];
 
   const watchedMaritalStatus = watch('applicantMaritalStatus');
   const watchedCategory = watch('category');
+  const watchedIsApplicantAvailable = watch('isApplicantAvailable');
 
   return (
     <ScrollView style={styles.container}>
@@ -257,6 +268,59 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
         />
       )}
 
+      {/* Is Applicant Available */}
+      <Controller
+        control={control}
+        name="isApplicantAvailable"
+        rules={{required: 'Please specify if applicant is available'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Is the applicant available at the time of verification?
+            </Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isApplicantAvailableSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Availability'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isApplicantAvailable && (
+              <Text style={styles.errorText}>
+                {errors.isApplicantAvailable.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {/* Available Person Name - Only show if applicant is not available */}
+      {watchedIsApplicantAvailable === 'No' && (
+        <Controller
+          control={control}
+          name="availablePersonName"
+          rules={{required: 'Name of available person is required'}}
+          render={({field: {onChange, onBlur, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Name of Person Available</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter name of person available"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+              {errors.availablePersonName && (
+                <Text style={styles.errorText}>
+                  {errors.availablePersonName.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
+
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onSubmit)}>
@@ -326,6 +390,28 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
           ))}
         </View>
       </ActionSheet>
+
+      <ActionSheet
+        ref={isApplicantAvailableSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Is Applicant Available?</Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPress={() => {
+                setValue('isApplicantAvailable', option);
+                if (option === 'Yes') {
+                  setValue('availablePersonName', ''); // Clear name if Yes is selected
+                }
+                isApplicantAvailableSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
     </ScrollView>
   );
 };
@@ -377,10 +463,11 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import {getItem, setItem, clearItem} from '../helpers/utility';
 
 interface WorkVerificationFormData {
   basicDetails: {
@@ -84,9 +85,7 @@ const WorkVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params as {item: any};
-  console.log('item', item);
   const {userData} = route.params as {userData: any};
-  console.log('userData', userData);
   const verificationType = 'Work';
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
@@ -176,6 +175,76 @@ const WorkVerification = () => {
     uploadedItems: [],
   });
 
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const savedData = await getItem(
+          `${item.verificationId}_${verificationType}`,
+        );
+        if (savedData) {
+          const completeFormData = {
+            ...formData,
+            ...savedData,
+            basicDetails: {
+              ...formData.basicDetails,
+              ...savedData.basicDetails,
+            },
+            employmentDetails: {
+              ...formData.employmentDetails,
+              ...savedData.employmentDetails,
+            },
+            colleagueReferences: {
+              ...formData.colleagueReferences,
+              ...savedData.colleagueReferences,
+            },
+            pastEmployment: {
+              ...formData.pastEmployment,
+              ...savedData.pastEmployment,
+            },
+            existingLoans: {
+              ...formData.existingLoans,
+              ...savedData.existingLoans,
+            },
+            uploadedItems: savedData.uploadedItems || [],
+          };
+          setFormData(completeFormData);
+          setValidSections({
+            basicDetails: !!savedData.basicDetails,
+            employmentDetails: !!savedData.employmentDetails,
+            colleagueReferences: !!savedData.colleagueReferences,
+            pastEmployment: !!savedData.pastEmployment,
+            existingLoans: !!savedData.existingLoans,
+            photoCapture: savedData.uploadedItems?.length > 0,
+          });
+          if (savedData.basicDetails) {
+            setExpandedSections(prev => ({
+              ...prev,
+              basicDetails: true,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+      }
+    };
+
+    loadSavedData();
+  }, [item.verificationId, verificationType]);
+
+  const saveFormData = async (section: string, data: any) => {
+    try {
+      const savedData =
+        (await getItem(`${item.verificationId}_${verificationType}`)) || {};
+      const updatedData = {
+        ...savedData,
+        [section]: data,
+      };
+      await setItem(`${item.verificationId}_${verificationType}`, updatedData);
+    } catch (error) {
+      console.error('Error saving form data:', error);
+    }
+  };
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -183,85 +252,97 @@ const WorkVerification = () => {
     }));
   };
 
-  const handleBasicDetailsSubmit = (
+  const handleBasicDetailsSubmit = async (
     data: WorkVerificationFormData['basicDetails'],
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       basicDetails: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       basicDetails: true,
     }));
     setExpandedSections(prev => ({...prev, basicDetails: false}));
+    await saveFormData('basicDetails', data);
   };
 
-  const handleEmploymentDetailsSubmit = (
+  const handleEmploymentDetailsSubmit = async (
     data: WorkVerificationFormData['employmentDetails'],
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       employmentDetails: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       employmentDetails: true,
     }));
     setExpandedSections(prev => ({...prev, employmentDetails: false}));
+    await saveFormData('employmentDetails', data);
   };
 
-  const handleColleagueReferencesSubmit = (
+  const handleColleagueReferencesSubmit = async (
     data: WorkVerificationFormData['colleagueReferences'],
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       colleagueReferences: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       colleagueReferences: true,
     }));
     setExpandedSections(prev => ({...prev, colleagueReferences: false}));
+    await saveFormData('colleagueReferences', data);
   };
 
-  const handlePastEmploymentSubmit = (
+  const handlePastEmploymentSubmit = async (
     data: WorkVerificationFormData['pastEmployment'],
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       pastEmployment: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       pastEmployment: true,
     }));
     setExpandedSections(prev => ({...prev, pastEmployment: false}));
+    await saveFormData('pastEmployment', data);
   };
 
-  const handleExistingLoansSubmit = (
+  const handleExistingLoansSubmit = async (
     data: WorkVerificationFormData['existingLoans'],
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       existingLoans: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       existingLoans: true,
     }));
     setExpandedSections(prev => ({...prev, existingLoans: false}));
+    await saveFormData('existingLoans', data);
   };
 
-  const handleUploadedItemsChange = (items: UploadedItem[]) => {
-    setFormData(prev => ({
-      ...prev,
+  const handleUploadedItemsChange = async (items: UploadedItem[]) => {
+    const updatedData = {
+      ...formData,
       uploadedItems: items,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       photoCapture: items.length > 0,
     }));
+    await saveFormData('uploadedItems', items);
   };
 
   const handleSubmit = async () => {
@@ -289,6 +370,9 @@ const WorkVerification = () => {
 
       console.log('Submitting form data:', finalData);
       await submitVerification(finalData, item.verificationId);
+
+      // Clear the saved data after successful submission
+      await clearItem(`${item.verificationId}_${verificationType}`);
 
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();

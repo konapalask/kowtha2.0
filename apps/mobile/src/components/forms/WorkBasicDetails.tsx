@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,9 @@ interface WorkBasicDetailsFormData {
   panNumber: string;
   aadharNumber: string;
   qualification: string;
+  coApplicantName: string;
+  coApplicantPanNumber: string;
+  coApplicantAadharNumber: string;
 }
 
 interface Props {
@@ -37,9 +40,28 @@ const validationSchema = yup.object().shape({
   purposeOfLoan: yup.string().required('Purpose of Loan is required'),
   loanAmount: yup.string().required('Loan Amount is required'),
   tenure: yup.string().required('Tenure is required'),
-  panNumber: yup.string().optional().default(''),
-  aadharNumber: yup.string().optional().default(''),
+  panNumber: yup
+    .string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    .optional()
+    .default(''),
+  aadharNumber: yup
+    .string()
+    .matches(/^\d{12}$/, 'Invalid Aadhar number')
+    .optional()
+    .default(''),
   qualification: yup.string().required('Qualification is required'),
+  coApplicantName: yup.string().required('Co-Applicant Name is required'),
+  coApplicantPanNumber: yup
+    .string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    .optional()
+    .default(''),
+  coApplicantAadharNumber: yup
+    .string()
+    .matches(/^\d{12}$/, 'Invalid Aadhar number')
+    .optional()
+    .default(''),
 });
 
 const QUALIFICATION_OPTIONS = [
@@ -59,6 +81,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     handleSubmit,
     formState: {errors},
     setValue,
+    reset,
   } = useForm<WorkBasicDetailsFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: initialData || {
@@ -71,8 +94,17 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       panNumber: '',
       aadharNumber: '',
       qualification: '',
+      coApplicantName: '',
+      coApplicantPanNumber: '',
+      coApplicantAadharNumber: '',
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const showQualificationSheet = () => {
     qualificationSheetRef.current?.show();
@@ -213,9 +245,22 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>PAN Number</Text>
             <TextInput
-              style={[styles.input, errors.panNumber && styles.inputError]}
+              style={[
+                styles.input,
+                errors.panNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                // Convert to uppercase and remove any non-alphanumeric characters
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter PAN number"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.panNumber && (
               <Text style={styles.errorText}>{errors.panNumber.message}</Text>
@@ -233,8 +278,16 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             <TextInput
               style={[styles.input, errors.aadharNumber && styles.inputError]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              maxLength={12}
               keyboardType="numeric"
+              placeholder="Enter Aadhar number"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.aadharNumber && (
               <Text style={styles.errorText}>
@@ -250,12 +303,23 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         name="tenure"
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Tenure</Text>
+            <Text style={styles.label}>Tenure (in months)</Text>
             <TextInput
-              style={[styles.input, errors.tenure && styles.inputError]}
+              style={[
+                styles.input,
+                errors.tenure && styles.inputError,
+                {color: colors.text.primary},
+              ]}
               value={value}
-              onChangeText={onChange}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
               keyboardType="numeric"
+              placeholder="Enter tenure in months"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.tenure && (
               <Text style={styles.errorText}>{errors.tenure.message}</Text>
@@ -284,6 +348,102 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             {errors.qualification && (
               <Text style={styles.errorText}>
                 {errors.qualification.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Text style={[styles.label, styles.sectionTitle]}>
+        Co-Applicant Details
+      </Text>
+
+      <Controller
+        control={control}
+        name="coApplicantName"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant Name</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantName && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={onChange}
+              placeholder="Enter co-applicant name"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantName && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantName.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="coApplicantPanNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant PAN Number</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantPanNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={text => {
+                // Convert to uppercase and remove any non-alphanumeric characters
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter co-applicant PAN number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantPanNumber && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantPanNumber.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="coApplicantAadharNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant Aadhar Number</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantAadharNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              maxLength={12}
+              keyboardType="numeric"
+              placeholder="Enter co-applicant Aadhar number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantAadharNumber && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantAadharNumber.message}
               </Text>
             )}
           </View>
@@ -356,12 +516,13 @@ const styles = StyleSheet.create({
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
     marginHorizontal: 16,
     marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
     color: colors.button.secondary.text,
@@ -405,6 +566,12 @@ const styles = StyleSheet.create({
   actionSheetItemText: {
     fontSize: 16,
     color: colors.text.primary,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 24,
+    marginBottom: 16,
   },
 });
 

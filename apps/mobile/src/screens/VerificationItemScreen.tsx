@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   FamilyEmploymentDetailsFormData,
   ThirdPartyCheckFormData,
   FinalObservationsFormData,
+  FamilyMember,
 } from '../types/verification';
 import BasicDetails from '../components/forms/BasicDetails';
 import PhotoCapture from '../components/forms/PhotoCapture';
@@ -35,6 +36,8 @@ import CollapsibleSection from '../components/CollapsibleSection';
 import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
 import {submitVerification} from '../services/field.services';
+import {getItem, setItem, clearItem} from '../helpers/utility';
+import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -56,6 +59,7 @@ const VerificationItemScreen = () => {
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
+    familyMemberDetails: false,
     thirdPartyCheck: false,
     finalObservations: false,
   });
@@ -68,6 +72,7 @@ const VerificationItemScreen = () => {
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
+    familyMemberDetails: false,
     thirdPartyCheck: false,
   });
 
@@ -77,8 +82,12 @@ const VerificationItemScreen = () => {
       applicationNumber: item?.applicationNumber,
       applicantName: item.name,
       applicantMaritalStatus: '',
+      applicantMaritalStatusOther: '',
       educationQualification: '',
       category: '',
+      categoryOther: '',
+      isApplicantAvailable: 'false',
+      availablePersonName: '',
     },
     addressVerification: {
       addressCategory: '',
@@ -109,6 +118,7 @@ const VerificationItemScreen = () => {
       spouseEmploymentDetails: '',
       assetsObserved: '',
     },
+    familyMemberDetails: [],
     thirdPartyCheck: {
       tpcName: '',
       mobileNumber: '',
@@ -119,6 +129,76 @@ const VerificationItemScreen = () => {
     uploadedItems: [],
   });
 
+  useEffect(() => {
+    const loadSavedData = async () => {
+      try {
+        const savedData = await getItem(`${item?.id}_${verificationType}`);
+        if (savedData) {
+          const completeFormData = {
+            ...formData,
+            ...savedData,
+            basicDetails: {
+              ...formData.basicDetails,
+              ...savedData.basicDetails,
+            },
+            addressVerification: {
+              ...formData.addressVerification,
+              ...savedData.addressVerification,
+            },
+            residenceDetails: {
+              ...formData.residenceDetails,
+              ...savedData.residenceDetails,
+            },
+            familyEmploymentDetails: {
+              ...formData.familyEmploymentDetails,
+              ...savedData.familyEmploymentDetails,
+            },
+            familyMemberDetails: savedData.familyMemberDetails || [],
+            thirdPartyCheck: {
+              ...formData.thirdPartyCheck,
+              ...savedData.thirdPartyCheck,
+            },
+            uploadedItems: savedData.uploadedItems || [],
+          };
+          setFormData(completeFormData);
+          setValidSections({
+            basicDetails: !!savedData.basicDetails,
+            photoCapture: savedData.uploadedItems?.length > 0,
+            addressVerification: !!savedData.addressVerification,
+            residenceDetails: !!savedData.residenceDetails,
+            familyEmploymentDetails: !!savedData.familyEmploymentDetails,
+            familyMemberDetails: savedData.familyMemberDetails?.length > 0,
+            thirdPartyCheck: !!savedData.thirdPartyCheck,
+          });
+          if (savedData.basicDetails) {
+            setExpandedSections(prev => ({
+              ...prev,
+              basicDetails: true,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+      }
+    };
+
+    loadSavedData();
+  }, [item?.id, verificationType]);
+
+  const saveFormData = async (section: string, data: any) => {
+    try {
+      const savedData =
+        (await getItem(`${item?.id}_${verificationType}`)) || {};
+      const updatedData = {
+        ...savedData,
+        [section]: data,
+      };
+      await setItem(`${item?.id}_${verificationType}`, updatedData);
+    } catch (error) {
+      console.error('Error saving form data:', error);
+    }
+  };
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -126,106 +206,108 @@ const VerificationItemScreen = () => {
     }));
   };
 
-  const handleBasicDetailsSubmit = (data: BasicDetailsFormData) => {
-    setFormData(prev => ({
-      ...prev,
+  const handleBasicDetailsSubmit = async (data: BasicDetailsFormData) => {
+    const updatedData = {
+      ...formData,
       basicDetails: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       basicDetails: true,
     }));
     setExpandedSections(prev => ({...prev, basicDetails: false}));
+    await saveFormData('basicDetails', data);
   };
 
-  const handleApplicantInformationSubmit = (
-    data: ApplicantInformationFormData,
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      applicantInformation: data,
-    }));
-    setValidSections(prev => ({
-      ...prev,
-      applicantInformation: true,
-    }));
-    setExpandedSections(prev => ({...prev, applicantInformation: false}));
-  };
-
-  const handleAddressVerificationSubmit = (
+  const handleAddressVerificationSubmit = async (
     data: AddressVerificationFormData,
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       addressVerification: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       addressVerification: true,
     }));
     setExpandedSections(prev => ({...prev, addressVerification: false}));
+    await saveFormData('addressVerification', data);
   };
 
-  const handleResidenceDetailsSubmit = (data: ResidenceDetailsFormData) => {
-    setFormData(prev => ({
-      ...prev,
+  const handleResidenceDetailsSubmit = async (
+    data: ResidenceDetailsFormData,
+  ) => {
+    const updatedData = {
+      ...formData,
       residenceDetails: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       residenceDetails: true,
     }));
     setExpandedSections(prev => ({...prev, residenceDetails: false}));
+    await saveFormData('residenceDetails', data);
   };
 
-  const handleFamilyEmploymentDetailsSubmit = (
+  const handleFamilyEmploymentDetailsSubmit = async (
     data: FamilyEmploymentDetailsFormData,
   ) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       familyEmploymentDetails: data,
-    }));
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       familyEmploymentDetails: true,
     }));
     setExpandedSections(prev => ({...prev, familyEmploymentDetails: false}));
+    await saveFormData('familyEmploymentDetails', data);
   };
 
-  const handleThirdPartyCheckSubmit = (data: ThirdPartyCheckFormData) => {
-    setFormData(prev => ({
+  const handleFamilyMemberDetailsSubmit = async (data: FamilyMember[]) => {
+    const updatedData = {
+      ...formData,
+      familyMemberDetails: data,
+    };
+    setFormData(updatedData);
+    setValidSections(prev => ({
       ...prev,
-      thirdPartyCheck: data,
+      familyMemberDetails: data.length > 0,
     }));
+    setExpandedSections(prev => ({...prev, familyMemberDetails: false}));
+    await saveFormData('familyMemberDetails', data);
+  };
+
+  const handleThirdPartyCheckSubmit = async (data: ThirdPartyCheckFormData) => {
+    const updatedData = {
+      ...formData,
+      thirdPartyCheck: data,
+    };
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       thirdPartyCheck: true,
     }));
     setExpandedSections(prev => ({...prev, thirdPartyCheck: false}));
+    await saveFormData('thirdPartyCheck', data);
   };
 
-  const handleFinalObservationsSubmit = (data: FinalObservationsFormData) => {
-    setFormData(prev => ({
-      ...prev,
-      finalObservations: data,
-    }));
-    setValidSections(prev => ({
-      ...prev,
-      finalObservations: true,
-    }));
-    setExpandedSections(prev => ({...prev, finalObservations: false}));
-  };
-
-  const handleUploadedItemsChange = (items: UploadedItem[]) => {
-    setUploadedItems(items);
-    setFormData(prev => ({
-      ...prev,
+  const handleUploadedItemsChange = async (items: UploadedItem[]) => {
+    const updatedData = {
+      ...formData,
       uploadedItems: items,
-    }));
+    };
+    setUploadedItems(items);
+    setFormData(updatedData);
     setValidSections(prev => ({
       ...prev,
       photoCapture: items.length > 0,
     }));
+    await saveFormData('uploadedItems', items);
   };
 
   const handleSubmit = async () => {
@@ -253,6 +335,9 @@ const VerificationItemScreen = () => {
 
       console.log('Submitting form data:', finalData);
       await submitVerification(finalData, item?.id);
+
+      // Clear the saved data after successful submission
+      await clearItem(`${item?.id}_${verificationType}`);
 
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();
@@ -314,6 +399,22 @@ const VerificationItemScreen = () => {
           <FamilyEmploymentDetails
             onSubmit={handleFamilyEmploymentDetailsSubmit}
             initialData={formData.familyEmploymentDetails}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Family Member Details"
+          isExpanded={expandedSections.familyMemberDetails}
+          onToggle={() => toggleSection('familyMemberDetails')}
+          isValid={validSections.familyMemberDetails}>
+          <FamilyMemberDetails
+            onSubmit={handleFamilyMemberDetailsSubmit}
+            initialData={formData.familyMemberDetails}
+            maxFamilyMembers={
+              formData.familyEmploymentDetails.totalFamilyMembers
+                ? parseInt(formData.familyEmploymentDetails.totalFamilyMembers)
+                : undefined
+            }
           />
         </CollapsibleSection>
 
