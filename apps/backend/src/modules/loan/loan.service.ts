@@ -642,7 +642,17 @@ export class LoanService {
           operationsExecutive: true,
           verifier: true,
           verificationReport: true,
-          verifications: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
+              }
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
@@ -862,9 +872,8 @@ export class LoanService {
         v => v.type === 'Work'
       )?.verificationData as WorkVerificationData || {};
 
-      const imagePath = path.resolve('/home/ubuntu/kowtha/signature_kowtha.jpeg');
-      // /home/ubuntu/kowtha/signature_kowtha.jpeg
-      // /Users/bys/Desktop/signature_kowtha.jpeg
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
+      
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
@@ -1633,5 +1642,265 @@ export class LoanService {
       });
       throw error;
     }
+  }
+
+  async generateVerificationPDF(loanId: number, verificationType: VerificationType): Promise<Buffer> {
+    try {
+      // Fetch loan details with verification data
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        select: {
+          applicationNumber: true,
+          applicantName: true,
+          applicantMobile: true,
+          applicantAddress: true,
+          loanType: true,
+          bankName: true,
+          loanAmount: true,
+          status: true,
+          office: { select: { name: true } },
+          operationsExecutive: { select: { name: true } },
+          verifications: {
+            where: { type: verificationType },
+            select: {
+              type: true,
+              status: true,
+              updatedAt: true,
+              verificationData: true,
+              paths: true,
+              fieldExecutive: { select: { name: true } }
+            }
+          },
+          verificationReport: { select: { remarks: true, verificationDate: true } }
+        }
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      const verification = loan.verifications[0];
+      if (!verification) {
+        throw new NotFoundException(`Verification of type ${verificationType} not found`);
+      }
+
+      // Get the verification data based on type
+      let verificationData: VerificationData | WorkVerificationData = {};
+      if (verificationType === 'Work') {
+        verificationData = verification.verificationData as WorkVerificationData || {};
+      } else {
+        verificationData = verification.verificationData as VerificationData || {};
+      }
+
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+      // Get uploaded items for this verification only
+      const uploadedItems = verificationData?.uploadedItems || [];
+
+      // Generate presigned URLs for images
+      const imageUrls = await Promise.all(
+        uploadedItems.map(async (item) => {
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+          } catch (error) {
+            await this.loggingService.error('Failed to generate presigned URL for image', {
+              s3ImageUrl: item.s3ImageUrl,
+              error: error.message
+            });
+            return null;
+          }
+        })
+      );
+
+      // Filter out any failed URL generations
+      const validImageUrls = imageUrls.filter(url => url !== null);
+
+      // Generate HTML template based on verification type
+      let htmlTemplate = this.generateBaseHTMLTemplate(loan, imageDataUri);
+
+      // Add verification-specific content
+      if (verificationType === 'Work') {
+        htmlTemplate += this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls);
+      } else {
+        htmlTemplate += this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls);
+      }
+
+      // Launch a new browser instance
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      // Create a new page
+      const page = await browser.newPage();
+
+      // Set content to the HTML template
+      await page.setContent(htmlTemplate, {
+        waitUntil: 'networkidle0'
+      });
+
+      // Generate PDF
+      const pdfArray = await page.pdf({
+        format: 'a4',
+        margin: {
+          top: '20px',
+          right: '20px',
+          bottom: '20px',
+          left: '20px'
+        },
+        printBackground: true,
+        preferCSSPageSize: true
+      });
+      const pdfBuffer: Buffer = Buffer.from(pdfArray);
+
+      // Close the browser
+      await browser.close();
+
+      await this.loggingService.info('Verification PDF generated successfully', {
+        loanId,
+        verificationType,
+        applicationNumber: loan.applicationNumber,
+      });
+
+      return pdfBuffer;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate verification PDF', {
+        loanId,
+        verificationType,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  private generateBaseHTMLTemplate(loan: any, imageDataUri: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          /* ... existing styles ... */
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="firm">KOWTHA & CO.</div>
+            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
+            <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
+          </div>
+          <div class="contact">
+            Mobile no: 9491821359<br>
+            Mail ID: kowthaBOI@gmail.com
+          </div>
+        </div>
+
+        <div class="report-title">DUE DILIGENCE REPORT</div>
+
+        <div class="align-wrapper">
+          <div class="branch-box">
+            <table class="branch-table">
+              <tr>
+                <td class="branch-label">Branch Name</td>
+                <td class="branch-value">PIDUGURALLA</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+    `;
+  }
+
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[]): string {
+    return `
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Employment Details</td></tr>
+          <tr>
+            <th>Name of the Current Employer</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
+          </tr>
+          <!-- ... rest of the work verification fields ... -->
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${imageUrls.map(url => `
+                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+    `;
+  }
+
+  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[]): string {
+    return `
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Address Verification Details</td></tr>
+          <tr>
+            <th>Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
+          </tr>
+          <!-- ... rest of the address verification fields ... -->
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${imageUrls.map(url => `
+                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+    `;
   }
 } 

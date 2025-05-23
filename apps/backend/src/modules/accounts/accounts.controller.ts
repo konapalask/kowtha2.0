@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Request, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -101,6 +101,34 @@ export class AccountsController {
     return {
       message: 'Users fetched successfully',
       data: result
+    };
+  }
+
+  @Post('refresh-token')
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Access token has been successfully refreshed',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Token refreshed successfully' },
+        accessToken: { 
+          type: 'string',
+          description: 'New JWT access token valid for 24 hours'
+        }
+      }
+    }
+  })
+  async refreshToken(@Body() body: { refresh_token: string }) {
+    if (!body.refresh_token) {
+      throw new UnauthorizedException('Refresh token is required');
+    }
+
+    const result = await this.accountsService.refreshToken(body.refresh_token);
+    return {
+      message: 'Token refreshed successfully',
+      accessToken: result.accessToken
     };
   }
 } 

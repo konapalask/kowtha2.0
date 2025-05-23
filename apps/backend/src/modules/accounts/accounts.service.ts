@@ -258,4 +258,45 @@ export class AccountsService {
       throw error;
     }
   }
+
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    try {
+      // Verify the refresh token
+      const payload = this.jwtService.verify(refreshToken);
+      
+      // Get the user from the database
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub }
+      });
+
+      if (!user) {
+        await this.loggingService.warn('Token refresh failed - User not found', { 
+          userId: payload.sub 
+        });
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // Generate new access token
+      const accessToken = this.jwtService.sign(
+        { sub: user.id, mobile: user.mobile, role: user.role },
+        { expiresIn: '24h' }
+      );
+
+      await this.loggingService.info('Token refreshed successfully', { 
+        userId: user.id,
+        role: user.role 
+      });
+
+      return { accessToken };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to refresh token', { 
+        error: error.message,
+        stack: error.stack 
+      });
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
 } 
