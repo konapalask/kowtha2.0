@@ -92,8 +92,9 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
                 style={styles.input}
                 onChangeText={text => {
                   // Only allow numbers
-                  const numericValue = text.replace(/[^0-9]/g, '');
-                  onChange(numericValue);
+                  if (/^\d*$/.test(text)) {
+                    onChange(text.slice(0, 10));
+                  }
                 }}
                 value={value}
                 placeholder="Enter mobile number"

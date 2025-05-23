@@ -15,19 +15,21 @@ export type UploadedItem = {
   longitude?: number;
   locality?: string;
   pincode?: string;
+  isCamera?: boolean;
 };
 
-export type BasicDetailsFormData = {
+export interface BasicDetailsFormData {
   verificationType: string;
-  // verificationDate: string;
   applicationNumber: string;
   applicantName: string;
   applicantMaritalStatus: string;
-  applicantMaritalStatusOther?: string;
+  applicantMaritalStatusOther: string;
   educationQualification: string;
   category: string;
-  categoryOther?: string;
-};
+  categoryOther: string;
+  isApplicantAvailable: string;
+  availablePersonName: string;
+}
 
 export type ApplicantInformationFormData = {
   applicantName: string;
@@ -98,11 +100,23 @@ export type Section6FormData = {};
 export type Section7FormData = {};
 export type Section8FormData = {};
 
-export type VerificationFormData = {
+export interface FamilyMember {
+  name: string;
+  relation: string;
+  otherRelation?: string;
+  age: string;
+  employmentType: string;
+  educationalQualification: string;
+  mobileNumber: string;
+  stayingWithApplicant: string;
+}
+
+export interface VerificationFormData {
   basicDetails: BasicDetailsFormData;
   addressVerification: AddressVerificationFormData;
   residenceDetails: ResidenceDetailsFormData;
   familyEmploymentDetails: FamilyEmploymentDetailsFormData;
+  familyMemberDetails: FamilyMember[];
   thirdPartyCheck: ThirdPartyCheckFormData;
   uploadedItems: UploadedItem[];
-};
+}

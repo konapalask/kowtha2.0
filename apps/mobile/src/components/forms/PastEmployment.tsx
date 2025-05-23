@@ -51,7 +51,8 @@ const validationSchema = yup.object().shape({
           .required('Contact Person Name is required'),
         contactPersonNumber: yup
           .string()
-          .required('Contact Person Number is required'),
+          .required('Contact Person Number is required')
+          .matches(/^\d{10}$/, 'Contact number must be exactly 10 digits'),
         reasonForMovement: yup
           .string()
           .required('Reason for Movement is required'),

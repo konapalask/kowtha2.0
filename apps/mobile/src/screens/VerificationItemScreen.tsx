@@ -22,6 +22,7 @@ import {
   FamilyEmploymentDetailsFormData,
   ThirdPartyCheckFormData,
   FinalObservationsFormData,
+  FamilyMember,
 } from '../types/verification';
 import BasicDetails from '../components/forms/BasicDetails';
 import PhotoCapture from '../components/forms/PhotoCapture';
@@ -36,6 +37,7 @@ import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
 import {submitVerification} from '../services/field.services';
 import {getItem, setItem, clearItem} from '../helpers/utility';
+import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -57,6 +59,7 @@ const VerificationItemScreen = () => {
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
+    familyMemberDetails: false,
     thirdPartyCheck: false,
     finalObservations: false,
   });
@@ -69,6 +72,7 @@ const VerificationItemScreen = () => {
     addressVerification: false,
     residenceDetails: false,
     familyEmploymentDetails: false,
+    familyMemberDetails: false,
     thirdPartyCheck: false,
   });
 
@@ -78,8 +82,12 @@ const VerificationItemScreen = () => {
       applicationNumber: item?.applicationNumber,
       applicantName: item.name,
       applicantMaritalStatus: '',
+      applicantMaritalStatusOther: '',
       educationQualification: '',
       category: '',
+      categoryOther: '',
+      isApplicantAvailable: 'false',
+      availablePersonName: '',
     },
     addressVerification: {
       addressCategory: '',
@@ -110,6 +118,7 @@ const VerificationItemScreen = () => {
       spouseEmploymentDetails: '',
       assetsObserved: '',
     },
+    familyMemberDetails: [],
     thirdPartyCheck: {
       tpcName: '',
       mobileNumber: '',
@@ -144,6 +153,7 @@ const VerificationItemScreen = () => {
               ...formData.familyEmploymentDetails,
               ...savedData.familyEmploymentDetails,
             },
+            familyMemberDetails: savedData.familyMemberDetails || [],
             thirdPartyCheck: {
               ...formData.thirdPartyCheck,
               ...savedData.thirdPartyCheck,
@@ -157,6 +167,7 @@ const VerificationItemScreen = () => {
             addressVerification: !!savedData.addressVerification,
             residenceDetails: !!savedData.residenceDetails,
             familyEmploymentDetails: !!savedData.familyEmploymentDetails,
+            familyMemberDetails: savedData.familyMemberDetails?.length > 0,
             thirdPartyCheck: !!savedData.thirdPartyCheck,
           });
           if (savedData.basicDetails) {
@@ -255,6 +266,20 @@ const VerificationItemScreen = () => {
     }));
     setExpandedSections(prev => ({...prev, familyEmploymentDetails: false}));
     await saveFormData('familyEmploymentDetails', data);
+  };
+
+  const handleFamilyMemberDetailsSubmit = async (data: FamilyMember[]) => {
+    const updatedData = {
+      ...formData,
+      familyMemberDetails: data,
+    };
+    setFormData(updatedData);
+    setValidSections(prev => ({
+      ...prev,
+      familyMemberDetails: data.length > 0,
+    }));
+    setExpandedSections(prev => ({...prev, familyMemberDetails: false}));
+    await saveFormData('familyMemberDetails', data);
   };
 
   const handleThirdPartyCheckSubmit = async (data: ThirdPartyCheckFormData) => {
@@ -374,6 +399,22 @@ const VerificationItemScreen = () => {
           <FamilyEmploymentDetails
             onSubmit={handleFamilyEmploymentDetailsSubmit}
             initialData={formData.familyEmploymentDetails}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Family Member Details"
+          isExpanded={expandedSections.familyMemberDetails}
+          onToggle={() => toggleSection('familyMemberDetails')}
+          isValid={validSections.familyMemberDetails}>
+          <FamilyMemberDetails
+            onSubmit={handleFamilyMemberDetailsSubmit}
+            initialData={formData.familyMemberDetails}
+            maxFamilyMembers={
+              formData.familyEmploymentDetails.totalFamilyMembers
+                ? parseInt(formData.familyEmploymentDetails.totalFamilyMembers)
+                : undefined
+            }
           />
         </CollapsibleSection>
 

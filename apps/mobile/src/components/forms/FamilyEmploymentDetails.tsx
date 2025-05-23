@@ -34,6 +34,7 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
     formState: {errors},
     setValue,
     watch,
+    trigger,
   } = useForm<FamilyEmploymentDetailsFormData>({
     defaultValues: initialData || {
       totalFamilyMembers: '',
@@ -43,15 +44,38 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
       spouseEmploymentDetails: '',
       assetsObserved: '',
     },
+    mode: 'onChange',
   });
 
   const isSpouseWorking = watch('isSpouseWorking');
   const totalFamilyMembers = watch('totalFamilyMembers');
   const earningMembers = watch('earningMembers');
   const dependents = watch('dependents');
+
   React.useEffect(() => {
     setShowSpouseDetails(isSpouseWorking === 'Yes');
   }, [isSpouseWorking]);
+
+  // Add validation effect for total family members
+  React.useEffect(() => {
+    if (totalFamilyMembers) {
+      trigger('totalFamilyMembers');
+    }
+  }, [totalFamilyMembers, earningMembers, dependents]);
+
+  // Add validation effect for earning members
+  React.useEffect(() => {
+    if (earningMembers) {
+      trigger('earningMembers');
+    }
+  }, [earningMembers, totalFamilyMembers]);
+
+  // Add validation effect for dependents
+  React.useEffect(() => {
+    if (dependents) {
+      trigger('dependents');
+    }
+  }, [dependents, totalFamilyMembers]);
 
   const handleSelect = (
     value: string,
@@ -59,6 +83,7 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
     ref: React.RefObject<ActionSheetRef | null>,
   ) => {
     setValue(field, value);
+    trigger(field);
     if (ref.current) {
       ref.current.hide();
     }
@@ -87,10 +112,14 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Total Family Members*</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  errors.totalFamilyMembers && styles.inputError,
+                ]}
                 onChangeText={text => {
                   if (/^\d*$/.test(text)) {
                     onChange(text);
+                    trigger('totalFamilyMembers');
                   }
                 }}
                 value={value}
@@ -125,10 +154,14 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
             <View style={styles.inputContainer}>
               <Text style={styles.label}>No. of Earning Members*</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  errors.earningMembers && styles.inputError,
+                ]}
                 onChangeText={text => {
                   if (/^\d*$/.test(text)) {
                     onChange(text);
+                    trigger('earningMembers');
                   }
                 }}
                 value={value}
@@ -163,10 +196,11 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
             <View style={styles.inputContainer}>
               <Text style={styles.label}>No. of Dependents*</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.dependents && styles.inputError]}
                 onChangeText={text => {
                   if (/^\d*$/.test(text)) {
                     onChange(text);
+                    trigger('dependents');
                   }
                 }}
                 value={value}
@@ -374,6 +408,9 @@ const styles = StyleSheet.create({
   actionSheetItemText: {
     fontSize: 16,
     color: colors.text.primary,
+  },
+  inputError: {
+    borderColor: colors.error,
   },
 });
 

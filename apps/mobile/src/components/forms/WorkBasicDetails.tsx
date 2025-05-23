@@ -21,7 +21,11 @@ interface WorkBasicDetailsFormData {
   loanAmount: string;
   tenure: string;
   panNumber: string;
+  aadharNumber: string;
   qualification: string;
+  coApplicantName: string;
+  coApplicantPanNumber: string;
+  coApplicantAadharNumber: string;
 }
 
 interface Props {
@@ -41,8 +45,23 @@ const validationSchema = yup.object().shape({
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
     .optional()
     .default(''),
-
+  aadharNumber: yup
+    .string()
+    .matches(/^\d{12}$/, 'Invalid Aadhar number')
+    .optional()
+    .default(''),
   qualification: yup.string().required('Qualification is required'),
+  coApplicantName: yup.string().required('Co-Applicant Name is required'),
+  coApplicantPanNumber: yup
+    .string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    .optional()
+    .default(''),
+  coApplicantAadharNumber: yup
+    .string()
+    .matches(/^\d{12}$/, 'Invalid Aadhar number')
+    .optional()
+    .default(''),
 });
 
 const QUALIFICATION_OPTIONS = [
@@ -73,7 +92,11 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       loanAmount: '',
       tenure: '',
       panNumber: '',
+      aadharNumber: '',
       qualification: '',
+      coApplicantName: '',
+      coApplicantPanNumber: '',
+      coApplicantAadharNumber: '',
     },
   });
 
@@ -246,7 +269,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      {/* <Controller
+      <Controller
         control={control}
         name="aadharNumber"
         render={({field: {onChange, value}}) => (
@@ -273,7 +296,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      /> */}
+      />
 
       <Controller
         control={control}
@@ -325,6 +348,102 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             {errors.qualification && (
               <Text style={styles.errorText}>
                 {errors.qualification.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Text style={[styles.label, styles.sectionTitle]}>
+        Co-Applicant Details
+      </Text>
+
+      <Controller
+        control={control}
+        name="coApplicantName"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant Name</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantName && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={onChange}
+              placeholder="Enter co-applicant name"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantName && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantName.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="coApplicantPanNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant PAN Number</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantPanNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={text => {
+                // Convert to uppercase and remove any non-alphanumeric characters
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter co-applicant PAN number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantPanNumber && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantPanNumber.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="coApplicantAadharNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Co-Applicant Aadhar Number</Text>
+            <TextInput
+              style={[
+                styles.input,
+                errors.coApplicantAadharNumber && styles.inputError,
+                {color: colors.text.primary},
+              ]}
+              value={value}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              maxLength={12}
+              keyboardType="numeric"
+              placeholder="Enter co-applicant Aadhar number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.coApplicantAadharNumber && (
+              <Text style={styles.errorText}>
+                {errors.coApplicantAadharNumber.message}
               </Text>
             )}
           </View>
@@ -447,6 +566,12 @@ const styles = StyleSheet.create({
   actionSheetItemText: {
     fontSize: 16,
     color: colors.text.primary,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 24,
+    marginBottom: 16,
   },
 });
 

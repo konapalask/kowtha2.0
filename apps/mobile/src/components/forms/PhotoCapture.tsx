@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -19,14 +19,10 @@ import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geocoding from 'react-native-geocoding';
 import {UploadedItem} from '../../types/verification';
 import {colors} from '../../constants/colors';
-import {
-  getImageUploadPresignedUrl,
-  uploadImageToS3,
-} from '../../services/field.services';
+import {getImageUploadPresignedUrl} from '../../services/field.services';
 import Icons from 'react-native-vector-icons/AntDesign';
 
-// Initialize Geocoding
-Geocoding.init('YOUR_GOOGLE_MAPS_API_KEY');
+const MAX_UPLOADS = 20;
 
 type PhotoCaptureProps = {
   onUploadedItemsChange: (items: UploadedItem[]) => void;
@@ -39,13 +35,39 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 }) => {
   const [uploadedItems, setUploadedItems] =
     useState<UploadedItem[]>(initialItems);
+  console.log(uploadedItems);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeocodingInitialized, setIsGeocodingInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeGeocoding = async () => {
+      try {
+        await Geocoding.init(process.env.GOOGLE_MAPS_API_KEY || '');
+        setIsGeocodingInitialized(true);
+      } catch (error) {
+        console.error('Error initializing Geocoding:', error);
+        setIsGeocodingInitialized(false);
+      }
+    };
+
+    initializeGeocoding();
+  }, []);
 
   const getLocationDetails = async (latitude: number, longitude: number) => {
+    if (!isGeocodingInitialized) {
+      console.warn('Geocoding not initialized, returning default values');
+      return {locality: 'Unknown', pincode: 'Unknown'};
+    }
+
     try {
       const response = await Geocoding.from(latitude, longitude);
-      const address = response.results[0].address_components;
 
+      if (!response.results || response.results.length === 0) {
+        console.warn('No geocoding results found');
+        return {locality: 'Unknown', pincode: 'Unknown'};
+      }
+
+      const address = response.results[0].address_components;
       let locality = '';
       let pincode = '';
 
@@ -57,8 +79,13 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           pincode = component.long_name;
         }
       });
+      console.log('locality', locality);
+      console.log('pincode', pincode);
 
-      return {locality, pincode};
+      return {
+        locality: locality || 'Unknown',
+        pincode: pincode || 'Unknown',
+      };
     } catch (error) {
       console.error('Error getting location details:', error);
       return {locality: 'Unknown', pincode: 'Unknown'};
@@ -80,6 +107,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     imageUri: string,
     type: string,
     location?: {latitude: number; longitude: number},
+    isCamera?: boolean,
   ) => {
     try {
       setIsUploading(true);
@@ -122,18 +150,28 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         s3ImageUrl: fileName,
         type: 'photo',
         timestamp: new Date().toISOString(),
+        isCamera: isCamera || false,
       };
 
       // Add location details if available (from camera)
       if (location) {
-        const locationDetails = await getLocationDetails(
-          location.latitude,
-          location.longitude,
-        );
-        newItem.latitude = location.latitude;
-        newItem.longitude = location.longitude;
-        newItem.locality = locationDetails.locality;
-        newItem.pincode = locationDetails.pincode;
+        try {
+          const locationDetails = await getLocationDetails(
+            location.latitude,
+            location.longitude,
+          );
+          newItem.latitude = location.latitude;
+          newItem.longitude = location.longitude;
+          newItem.locality = locationDetails.locality;
+          newItem.pincode = locationDetails.pincode;
+        } catch (locationError) {
+          console.error('Error getting location details:', locationError);
+          // Continue with upload even if location details fail
+          newItem.latitude = location.latitude;
+          newItem.longitude = location.longitude;
+          newItem.locality = 'Unknown';
+          newItem.pincode = 'Unknown';
+        }
       }
 
       const updatedItems = [...uploadedItems, newItem];
@@ -156,6 +194,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
   const handleCapture = async () => {
     try {
+      if (uploadedItems.length >= MAX_UPLOADS) {
+        Alert.alert(
+          'Upload Limit Reached',
+          `You can only upload up to ${MAX_UPLOADS} photos. Please remove some photos before adding more.`,
+        );
+        return;
+      }
+
       // Get location permission and coordinates
       const locationPermission = await check(
         PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
@@ -166,8 +212,30 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         );
         if (permissionResult !== RESULTS.GRANTED) {
           Alert.alert(
-            'Permission Denied',
-            'Location permission is required to capture photos',
+            'Permission Required',
+            'Location permission is required to capture photos. Would you like to grant permission?',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'Grant Permission',
+                onPress: async () => {
+                  const result = await request(
+                    PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+                  );
+                  if (result === RESULTS.GRANTED) {
+                    handleCapture();
+                  } else {
+                    Alert.alert(
+                      'Permission Denied',
+                      'Location permission is required to capture photos',
+                    );
+                  }
+                },
+              },
+            ],
           );
           return;
         }
@@ -185,10 +253,15 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       });
 
       if (result.assets && result.assets[0]) {
-        await uploadImage(result.assets[0].uri || '', 'photo', {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
+        await uploadImage(
+          result.assets[0].uri || '',
+          'photo',
+          {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+          true,
+        );
       }
     } catch (error) {
       console.error('Error capturing photo:', error);
@@ -198,6 +271,53 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
   const handleGallery = async () => {
     try {
+      if (uploadedItems.length >= MAX_UPLOADS) {
+        Alert.alert(
+          'Upload Limit Reached',
+          `You can only upload up to ${MAX_UPLOADS} photos. Please remove some photos before adding more.`,
+        );
+        return;
+      }
+
+      // Check for storage permissions
+      const storagePermission = await check(
+        PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      );
+      if (storagePermission !== RESULTS.GRANTED) {
+        const permissionResult = await request(
+          PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+        );
+        if (permissionResult !== RESULTS.GRANTED) {
+          Alert.alert(
+            'Permission Required',
+            'Storage permission is required to access photos from gallery. Would you like to grant permission?',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'Grant Permission',
+                onPress: async () => {
+                  const result = await request(
+                    PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+                  );
+                  if (result === RESULTS.GRANTED) {
+                    handleGallery();
+                  } else {
+                    Alert.alert(
+                      'Permission Denied',
+                      'Storage permission is required to access photos from gallery',
+                    );
+                  }
+                },
+              },
+            ],
+          );
+          return;
+        }
+      }
+
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
@@ -222,9 +342,13 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, isUploading && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            (isUploading || uploadedItems.length >= MAX_UPLOADS) &&
+              styles.buttonDisabled,
+          ]}
           onPress={handleCapture}
-          disabled={isUploading}>
+          disabled={isUploading || uploadedItems.length >= MAX_UPLOADS}>
           <Text style={styles.buttonText}>
             {isUploading ? (
               'Uploading...'
@@ -238,9 +362,13 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, isUploading && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            (isUploading || uploadedItems.length >= MAX_UPLOADS) &&
+              styles.buttonDisabled,
+          ]}
           onPress={handleGallery}
-          disabled={isUploading}>
+          disabled={isUploading || uploadedItems.length >= MAX_UPLOADS}>
           <Text style={styles.buttonText}>
             {isUploading ? (
               'Uploading...'
@@ -254,6 +382,12 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+
+      {uploadedItems.length > 0 && (
+        <Text style={styles.uploadCount}>
+          {uploadedItems.length}/{MAX_UPLOADS} photos uploaded
+        </Text>
+      )}
 
       {isUploading && (
         <View style={styles.loadingContainer}>
@@ -380,6 +514,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: colors.text.primary,
+  },
+  uploadCount: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: 16,
   },
 });
 
