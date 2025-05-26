@@ -53,6 +53,12 @@ enum FieldExecutiveStatus {
   Completed
 }
 
+enum EditRequestStatus {
+  Pending
+  Approved
+  Rejected
+}
+
 model User {
   id                       Int                  @id @default(autoincrement())
   mobile                   String               @unique
@@ -70,6 +76,8 @@ model User {
   uploadedDocuments        Document[]           @relation("uploadedBy")
   verifications            Verification[]       @relation("VerificationFieldExecutive")
   sessions                 Session[]
+  editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
+  editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
 }
 
 model Organization {
@@ -132,6 +140,7 @@ model Loan {
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
+  editRequests          EditRequest[]
 }
 
 model VerificationReport {
@@ -167,4 +176,19 @@ model Session {
   createdAt   DateTime  @default(now())
   lastLoginAt DateTime?
   isActive    Boolean   @default(true)
+}
+
+model EditRequest {
+  id          Int              @id @default(autoincrement())
+  loanId      Int
+  loan        Loan             @relation(fields: [loanId], references: [id])
+  requestedBy Int
+  requester   User             @relation("EditRequestRequester", fields: [requestedBy], references: [id])
+  approvedBy  Int?
+  approver    User?            @relation("EditRequestApprover", fields: [approvedBy], references: [id])
+  status      EditRequestStatus
+  changes     Json             // Stores the proposed changes
+  remarks     String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
