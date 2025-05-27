@@ -20,16 +20,21 @@ export class EditRequestService {
       const loan = await this.prisma.loan.findUnique({
         where: { id: createEditRequestDto.loanId },
       });
-
+      console.log(userId);
+      
       if (!loan) {
         throw new NotFoundException('Loan not found');
       }
-
+      
       // Create edit request
       const editRequest = await this.prisma.editRequest.create({
         data: {
-          loanId: createEditRequestDto.loanId,
-          requestedBy: userId,
+          loan: {
+            connect: { id: loan.id }
+          },
+          requester: {
+            connect: { id: userId }
+          },
           status: EditRequestStatus.Pending,
           changes: createEditRequestDto.changes,
           remarks: createEditRequestDto.remarks,
