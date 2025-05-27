@@ -8,7 +8,7 @@ export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
     // if (!response.data.ok) {
     //   throw new Error(response.data.message || 'Failed to get presigned URL');
     // }
-    console.log(response.data)
+    // console.log(response.data)
     return response.data.url;
   } catch (error) {
     console.error('Error getting S3 image URL:', error);

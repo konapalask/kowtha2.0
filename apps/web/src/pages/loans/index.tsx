@@ -20,6 +20,7 @@ import {
   Col,
   InputNumber,
   Divider,
+  Switch,
 } from "antd";
 import {
   EditOutlined,
@@ -120,6 +121,17 @@ const bankOptions = [
   { value: 'GODREJ CAPITAL', label: 'GODREJ CAPITAL' },
 ];
 
+const applicantTypeOptions= [
+  {label:"Primary Applicant",value:"Primary Applicant"},
+  {label:"Co-applicant 1 ",value:"Co-applicant 1"},
+  {label:"Co-applicant 2 ",value:"Co-applicant 2"},
+  {label:"Co-applicant 3 ",value:"Co-applicant 3"},
+  {label:"Co-applicant 4 ",value:"Co-applicant 4"},
+  {label:"Co-applicant 5 ",value:"Co-applicant 5"},
+  {label:"Co-applicant 6 ",value:"Co-applicant 6"},
+  {label:"Guarteer",value:"Guarnteer"}
+]
+
 // const dummyLoans = [
 //   {
 //     id: 1,
@@ -191,6 +203,9 @@ export default function Loans() {
   const [offices,setOffices] = useState<Office[]>([]);
   const [sameAddress, setSameAddress] = useState(false);
   const [editLoanInfo, setEditLoanInfo] = useState(false);
+  const [permanentAddressDisabled, setPermanentAddressDisabled] = useState(false)
+  const [currentAddressDisabled, setCurrentAddressDisabled] = useState(false)
+  const [workDisabled, setWorkDisabled] = useState(false)
 
   // Reset form when selected loan changes
   useEffect(() => {
@@ -918,6 +933,25 @@ export default function Loans() {
                         />
                       </Form.Item>
                     </Col>
+                     <Col xs={24} sm={6} style={{ padding: 4 }}>
+                      <Form.Item 
+                        labelCol={{ span: 24, style: { marginBottom: 0 } }} 
+                        label="Applicant Type" 
+                        name="applicantType" 
+                        rules={[
+                          { required: true, message: "Required" }
+                        ]}
+                      >
+                        <Select
+                          // showSearch
+                          placeholder="Select Applicant Type"
+                          options={applicantTypeOptions}
+                          // filterOption={(input, option) =>
+                          //   (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                          // }
+                        />
+                      </Form.Item>
+                    </Col>
                   </Row>
                   <Form.Item>
                     <Space>
@@ -1014,17 +1048,43 @@ export default function Loans() {
                             padding: verification?.status === "Completed" ? '12px' : '24px'
                           }}
                           extra={
-                            verification && (
-                              <Tag
-                                color={
-                                  verification.status === "Completed"
-                                    ? "green"
-                                    : "blue"
-                                }
-                              >
-                                {verification.status}
-                              </Tag>
-                            )
+                            <>
+                           { verification && (
+                              <>
+                               {verification && <Tag
+                                  color={
+                                    verification.status === "Completed"
+                                      ? "green"
+                                      : "blue"
+                                  }
+                                >
+                                  {verification.status}
+                                </Tag>}
+                                
+                              </>
+                            )}
+                            <Switch
+                                  checked={
+                                    type === "PermanentAddress"
+                                      ? !permanentAddressDisabled
+                                      : type === "CurrentAddress"
+                                      ? !currentAddressDisabled
+                                      : !workDisabled
+                                  }
+                                  checkedChildren="Enabled"
+                                  unCheckedChildren="Disabled"
+                                  style={{ marginLeft: 8 }}
+                                  onChange={(checked) => {
+                                    if (type === "PermanentAddress") {
+                                      setPermanentAddressDisabled(!checked);
+                                    } else if (type === "CurrentAddress") {
+                                      setCurrentAddressDisabled(!checked);
+                                    } else if (type === "Work") {
+                                      setWorkDisabled(!checked);
+                                    }
+                                  }}
+                                />
+                                </>
                           }
                         >
                           {verification && (
@@ -1066,6 +1126,13 @@ export default function Loans() {
                                   values
                                 )
                               }
+                              disabled={
+                                type === "PermanentAddress"
+                                  ? permanentAddressDisabled
+                                  : type === "CurrentAddress"
+                                  ? currentAddressDisabled
+                                  : workDisabled
+                              }
                             >
                               <Form.Item
                                 name="assignmentMethod"
@@ -1100,16 +1167,16 @@ export default function Loans() {
                                     return (
                                       <Form.Item
                                         name="office"
-                                        label="Select Office"
+                                        label="Select Branch"
                                         rules={[
                                           {
                                             required: true,
-                                            message: "Please select an office",
+                                            message: "Please select a branch",
                                           },
                                         ]}
                                       >
                                         <Select
-                                          placeholder="Select office"
+                                          placeholder="Select branch"
                                           onChange={(value) => {
                                             setCurrentOffice(value);
                                           }}
@@ -1192,7 +1259,8 @@ export default function Loans() {
                               padding: verification?.status === "Completed" ? '12px' : '24px'
                             }}
                             extra={
-                              verification && (
+                              <>
+                             { verification && (
                                 <Tag
                                   color={
                                     verification.status === "Completed"
@@ -1202,7 +1270,29 @@ export default function Loans() {
                                 >
                                   {verification.status}
                                 </Tag>
-                              )
+                              )}
+                              <Switch
+                                  checked={
+                                    type === "PermanentAddress"
+                                      ? !permanentAddressDisabled
+                                      : type === "CurrentAddress"
+                                      ? !currentAddressDisabled
+                                      : !workDisabled
+                                  }
+                                  checkedChildren="Enabled"
+                                  unCheckedChildren="Disabled"
+                                  style={{ marginLeft: 8 }}
+                                  onChange={(checked) => {
+                                    if (type === "PermanentAddress") {
+                                      setPermanentAddressDisabled(!checked);
+                                    } else if (type === "CurrentAddress") {
+                                      setCurrentAddressDisabled(!checked);
+                                    } else if (type === "Work") {
+                                      setWorkDisabled(!checked);
+                                    }
+                                  }}
+                                />
+                              </>
                             }
                           >
                             {verification && (
@@ -1245,6 +1335,13 @@ export default function Loans() {
                                     values
                                   )
                                 }
+                                disabled={
+                                  type === "PermanentAddress"
+                                    ? permanentAddressDisabled
+                                    : type === "CurrentAddress"
+                                    ? currentAddressDisabled
+                                    : workDisabled
+                                }
                               >
                                 <Form.Item
                                   name="assignmentMethod"
@@ -1279,16 +1376,16 @@ export default function Loans() {
                                       return (
                                         <Form.Item
                                           name="office"
-                                          label="Select Office"
+                                          label="Select Branch"
                                           rules={[
                                             {
                                               required: true,
-                                              message: "Please select an office",
+                                              message: "Please select a branch",
                                             },
                                           ]}
                                         >
                                           <Select
-                                            placeholder="Select office"
+                                            placeholder="Select branch"
                                             onChange={(value) => {
                                               setCurrentOffice(value);
                                             }}

@@ -269,3 +269,7 @@ body {
 .ant-descriptions {
   /* background-color: var(--background-primary); */
 }
+
+.tabs-center .ant-tabs-nav-wrap{
+  justify-content: center;
+}
