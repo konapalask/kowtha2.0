@@ -86,8 +86,11 @@ const VerificationItemScreen = () => {
       educationQualification: '',
       category: '',
       categoryOther: '',
-      isApplicantAvailable: 'false',
+      isApplicantAvailable: '',
       availablePersonName: '',
+      availablePersonMobile: '',
+      availablePersonRelation: '',
+      availablePersonRelationOther: '',
     },
     addressVerification: {
       addressCategory: '',
@@ -437,6 +440,7 @@ const VerificationItemScreen = () => {
           <PhotoCapture
             onUploadedItemsChange={handleUploadedItemsChange}
             initialItems={uploadedItems}
+            loanId={item?.id}
           />
         </CollapsibleSection>
 

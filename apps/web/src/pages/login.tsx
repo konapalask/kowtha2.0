@@ -62,8 +62,6 @@ export default function Login() {
         mobile: values.mobile,
         otp: values.otp,
       });
-      
-      if (result.status >= 200 && result.status < 300) {
         // Set tokens
         setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
@@ -84,12 +82,9 @@ export default function Login() {
           setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
           setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         }
-      } else {
-        message.error(result.data?.message || "Failed to verify OTP");
-      }
-    } catch (error) {
+    } catch (error:any) {
       console.error("OTP verify error:", error);
-      message.error("Failed to verify OTP");
+      message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
     }

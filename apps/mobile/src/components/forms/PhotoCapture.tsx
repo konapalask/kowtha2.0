@@ -27,11 +27,13 @@ const MAX_UPLOADS = 20;
 type PhotoCaptureProps = {
   onUploadedItemsChange: (items: UploadedItem[]) => void;
   initialItems?: UploadedItem[];
+  loanId: string;
 };
 
 const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   onUploadedItemsChange,
   initialItems = [],
+  loanId,
 }) => {
   const [uploadedItems, setUploadedItems] =
     useState<UploadedItem[]>(initialItems);
@@ -114,7 +116,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
       // Generate a unique filename
       const timestamp = new Date().getTime();
-      const fileName = `verification/${timestamp}-${Math.random()
+      const fileName = `verification/${loanId}/${timestamp}-${Math.random()
         .toString(36)
         .substring(7)}.jpg`;
 
