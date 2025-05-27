@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,9 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       categoryOther: '',
       isApplicantAvailable: '',
       availablePersonName: '',
+      availablePersonMobile: '',
+      availablePersonRelation: '',
+      availablePersonRelationOther: '',
     },
   });
 
@@ -51,6 +54,8 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
   const educationQualificationSheetRef = useRef<ActionSheetRef>(null);
   const categorySheetRef = useRef<ActionSheetRef>(null);
   const isApplicantAvailableSheetRef = useRef<ActionSheetRef>(null);
+  const relationSheetRef = useRef<ActionSheetRef>(null);
+  const [showRelationSheet, setShowRelationSheet] = useState(false);
 
   const maritalStatusOptions = ['Single', 'Married', 'Divorced', 'Others'];
   const educationQualificationOptions = [
@@ -63,10 +68,20 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
   ];
   const categoryOptions = ['General', 'SC', 'ST', 'OBC', 'Others'];
   const yesNoOptions = ['Yes', 'No'];
+  const relationOptions = ['Co Applicant', 'Family', 'Colleague', 'Others'];
 
   const watchedMaritalStatus = watch('applicantMaritalStatus');
   const watchedCategory = watch('category');
   const watchedIsApplicantAvailable = watch('isApplicantAvailable');
+  const watchedAvailablePersonRelation = watch('availablePersonRelation');
+
+  useEffect(() => {
+    if (showRelationSheet) {
+      relationSheetRef.current?.show();
+    } else {
+      relationSheetRef.current?.hide();
+    }
+  }, [showRelationSheet]);
 
   return (
     <ScrollView style={styles.container}>
@@ -297,28 +312,105 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
 
       {/* Available Person Name - Only show if applicant is not available */}
       {watchedIsApplicantAvailable === 'No' && (
-        <Controller
-          control={control}
-          name="availablePersonName"
-          rules={{required: 'Name of available person is required'}}
-          render={({field: {onChange, onBlur, value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Name of Person Available</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter name of person available"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-              {errors.availablePersonName && (
-                <Text style={styles.errorText}>
-                  {errors.availablePersonName.message}
+        <>
+          <Controller
+            control={control}
+            name="availablePersonName"
+            rules={{required: 'Name of available person is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Name of Person Available</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter name of person available"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonName && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonName.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonMobile"
+            rules={{required: 'Mobile number is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Mobile Number of Person Available
                 </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter mobile number"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonMobile && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonMobile.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonRelation"
+            rules={{required: 'Relation is required'}}
+            render={({field: {value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Relation to Applicant</Text>
+                <TouchableOpacity
+                  style={styles.selectButton}
+                  onPress={() => setShowRelationSheet(true)}>
+                  <Text
+                    style={
+                      value ? styles.selectButtonText : styles.placeholder
+                    }>
+                    {value || 'Select Relation'}
+                  </Text>
+                </TouchableOpacity>
+                {errors.availablePersonRelation && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonRelation.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          {watchedAvailablePersonRelation === 'Others' && (
+            <Controller
+              control={control}
+              name="availablePersonRelationOther"
+              rules={{required: 'Please specify relation'}}
+              render={({field: {onChange, onBlur, value}}) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Specify Relation</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Specify relation"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors.availablePersonRelationOther && (
+                    <Text style={styles.errorText}>
+                      {errors.availablePersonRelationOther.message}
+                    </Text>
+                  )}
+                </View>
               )}
-            </View>
+            />
           )}
-        />
+        </>
       )}
 
       <TouchableOpacity
@@ -406,6 +498,26 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
                   setValue('availablePersonName', ''); // Clear name if Yes is selected
                 }
                 isApplicantAvailableSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet ref={relationSheetRef} containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Select Relation</Text>
+          {relationOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPress={() => {
+                setValue('availablePersonRelation', option);
+                if (option !== 'Others') {
+                  setValue('availablePersonRelationOther', '');
+                }
+                setShowRelationSheet(false);
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

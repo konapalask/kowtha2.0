@@ -2,7 +2,7 @@ import axios from 'axios';
 // import {REACT_APP_BASE_URL} from '@env';
 import RNRestart from 'react-native-restart';
 import {clearAll, clearItem, getItem, setItem} from '../helpers/utility';
-console;
+
 const axiosConfig = {
   // baseURL: REACT_APP_BASE_URL,
   baseURL: process.env.REACT_APP_BASE_URL,
@@ -12,7 +12,6 @@ const axiosConfig = {
     'Cache-Control': 'no-cache',
   },
 };
-
 const axiosInstance = axios.create(axiosConfig);
 
 axiosInstance.interceptors.request.use(async config => {
@@ -51,6 +50,8 @@ axiosInstance.interceptors.response.use(
 
     if (errorStatusCode === 401) {
       // clearAll();
+      clearItem('accessToken');
+      clearItem('refreshToken');
       RNRestart.Restart();
     }
 

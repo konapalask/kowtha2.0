@@ -29,8 +29,8 @@ interface WorkVerificationFormData {
     purposeOfLoan: string;
     loanAmount: string;
     tenure: string;
-    panNumber: string;
-    aadharNumber: string;
+    // panNumber: string;
+    // aadharNumber: string;
     qualification: string;
   };
   employmentDetails: {
@@ -117,8 +117,8 @@ const WorkVerification = () => {
       purposeOfLoan: userData.loanType,
       loanAmount: userData.loanAmount.toString(),
       tenure: '',
-      panNumber: '',
-      aadharNumber: '',
+      // panNumber: '',
+      // aadharNumber: '',
       qualification: '',
     },
     employmentDetails: {

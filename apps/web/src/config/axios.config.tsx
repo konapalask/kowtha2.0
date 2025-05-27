@@ -39,66 +39,79 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 const handleLogout = () => {
-  clear();
-  clearAllCookies();
+  console.log('Logging out');
+  // clear();
+  // clearAllCookies();
   // Use window.location.replace instead of href for more reliable navigation
-  window.location.replace(`${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/logout`);
+  // window.location.replace(`${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/logout`);
 };
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const refreshTokenApi = "/account/refresh-token";
+    const refreshTokenApi = "/accounts/refresh-token";
+    console.log('error',error)
     const originalRequest = error?.config;
-    const errorMessage =
-      error?.response?.data?.detail?.code || error?.response?.data?.code;
+    
+    const errorMessage = error?.response?.data?.message || error?.response?.data?.message;
+    
     const errorStatusCode = error?.response?.status;
-    console.log(errorStatusCode, "err-status-code");
-    const tokenInvalid = "TOKEN_EXPIRED";
+    const tokenInvalid = "Unauthorized";
     const accountNotFound = "UNAUTHORIZED_USER";
+    console.log(originalRequest)
 
-    // Handle 401 errors
-    if (errorStatusCode === 401) {
-      handleLogout(); //temporary logout
-      // If it's a refresh token request that failed, logout immediately
-      if (originalRequest.url === refreshTokenApi) {
-        handleLogout();
-        return Promise.reject(error);
-      }
+    // Prevent infinite loops
+    if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
+      console.log('refresh logout');
+      handleLogout();
+      return Promise.reject(error);
+    }
 
-      // Handle unauthorized user
-      if (errorMessage === accountNotFound) {
-        handleLogout();
-        return Promise.reject(error);
-      }
+    // Invalid credentials or user not exist
+    if (errorMessage === accountNotFound && errorStatusCode === 401) {
+      console.log('account not found logout');
+      handleLogout();
+      return Promise.reject(error);
+    }
 
-      // Handle token expiration
-      if (errorMessage === tokenInvalid) {
-        const refreshToken = getCookie(REFRESH_TOKEN);
-        
-        if (!refreshToken) {
-          handleLogout();
-          customToast({
-            type: "error",
-            message: "Your session has been expired, please login again",
-          });
-          return Promise.reject(error);
-        }
+    // Triggers when user session is expired
+    if (errorMessage === tokenInvalid && errorStatusCode === 401) {
+      const refreshToken = getCookie(REFRESH_TOKEN);
+      const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL;
+      const mainDomain = mainDomainUrl ? extractDomainFromUrl(mainDomainUrl) : '';
 
+      if (refreshToken) {
         const regex = new RegExp(
           "^[A-Za-z0-9-_=]+.[A-Za-z0-9-_=]+.?[A-Za-z0-9-_.+/=]*$"
         );
 
-        if (!regex.test(refreshToken)) {
-          handleLogout();
-          return Promise.reject(error);
-        }
-
-        try {
+        if (regex.test(refreshToken)) {
           const tokenParts = JSON.parse(atob(refreshToken.split(".")[1]));
           const now = Math.ceil(Date.now() / 1000);
 
-          if (tokenParts.exp <= now) {
+          // Triggers if refresh token is not expired
+          if (tokenParts.exp > now) {
+            try {
+              const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}${refreshTokenApi}`,
+                { refreshToken: refreshToken }
+              );
+              
+              setCookie(
+                ACCESS_TOKEN,
+                response?.data?.access,
+                `.${process.env.NEXT_PUBLIC_DOMAIN}`,
+                "/"
+              );
+              
+              return axiosInstance(originalRequest);
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
+              handleLogout();
+              return Promise.reject(refreshError);
+            }
+          } else {
+            console.log('token expired logout');
             handleLogout();
             customToast({
               type: "error",
@@ -106,24 +119,19 @@ axiosInstance.interceptors.response.use(
             });
             return Promise.reject(error);
           }
-
-          const response = await axiosInstance.post(refreshTokenApi, { refresh_token: refreshToken });
-          setCookie(
-            ACCESS_TOKEN,
-            response.data.access_token,
-            `.${process.env.NEXT_PUBLIC_DOMAIN}`,
-            "/"
-          );
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
+        } else {
+          console.log(`regex refresh token failed`);
           handleLogout();
-          customToast({
-            type: "error",
-            message: "Your session has been expired, please login again",
-          });
-          return Promise.reject(refreshError);
+          return Promise.reject(error);
         }
+      } else {
+        console.log('refresh token not found logout');
+        handleLogout();
+        customToast({
+          type: "error",
+          message: "Your session has been expired, please login again",
+        });
+        return Promise.reject(error);
       }
     }
 

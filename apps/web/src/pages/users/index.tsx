@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Table,
   Card,
@@ -17,7 +17,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useSession } from "next-auth/react";
 import { ColumnsType } from "antd/es/table";
 import { getUsersApi } from "@/services/users.services";
-
+import { UserContext } from "@/components/layout/UserContextProvider";
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -43,6 +43,7 @@ export default function Users() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const {userDetails} = useContext(UserContext);
 
   const [offices] = useState<Office[]>([
     { id: 1, name: "Head Office" },
@@ -123,35 +124,12 @@ export default function Users() {
       key: "name",
       width: 150,
     },
-    // {
-    //   title: "First Name",
-    //   dataIndex: "firstName",
-    //   key: "firstName",
-    //   width: 150,
-    // },
-    // {
-    //   title: "Last Name",
-    //   dataIndex: "lastName",
-    //   key: "lastName",
-    //   width: 150,
-    // },
     {
       title: "Mobile",
       dataIndex: "mobile",
       key: "mobile",
       width: 150,
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status: string) => (
-    //     <span style={{ color: status === "Active" ? "green" : "red" }}>
-    //       {status}
-    //     </span>
-    //   ),
-    //   width: 150,
-    // },
     {
       title: "Role",
       dataIndex: "role",
@@ -159,54 +137,57 @@ export default function Users() {
       width: 150,
     },
     {
-      title: "Office",
+      title: "Branch",
       dataIndex: "office",
       key: "office",
       width: 150,
       render: (office: any) => office?.name
     },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: User) => (
-        <Space>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-        </Space>
-      ),
-      fixed: "right",
-      width: 100,
-    },
+    ...(userDetails?.role === "Admin" ? [
+      {
+        title: "Actions",
+        key: "actions",
+        render: (_: any, record: User) => (
+          <Space>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            >
+              Edit
+            </Button>
+          </Space>
+        ),
+        fixed: "right" as const,
+        width: 100,
+      }
+    ] : []),
   ];
 
   return (
     <DashboardLayout>
       <Card>
-        <div className="flex-end" style={{ marginBottom: 16 }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingUser(null);
-              form.resetFields();
-              setIsModalVisible(true);
-            }}
-          >
-            Add User
-          </Button>
-        </div>
+        {userDetails?.role === "Admin" && (
+          <div className="flex-end" style={{ marginBottom: 16 }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setEditingUser(null);
+                form.resetFields();
+                setIsModalVisible(true);
+              }}
+            >
+              Add User
+            </Button>
+          </div>
+        )}
 
         <Table
           columns={columns}
           dataSource={users}
           rowKey="id"
           loading={loading}
-          // scroll={{ y: 400 }}
           sticky
           pagination={{
             showTotal: (total) => `Total ${total} users`,
@@ -270,8 +251,8 @@ export default function Users() {
           </Form.Item>
           <Form.Item
             name="office"
-            label="Office"
-            rules={[{ required: true, message: "Please select office" }]}
+            label="Branch"
+            rules={[{ required: true, message: "Please select branch" }]}
             style={{ marginBottom: 8 }}
           >
             <Select>
@@ -312,27 +293,6 @@ export default function Users() {
               </Button>
             </Space>
           </Form.Item>
-          {/* {editingUser && (
-            <div style={{ marginTop: 16, textAlign: "right" }}>
-              <Popconfirm
-                title="Are you sure you want to deactivate the user?"
-                onConfirm={handleDeactivateUser}
-                okText="Yes"
-                cancelText="No"
-              >
-                <a
-                  style={{
-                    color: "#ff4d4f",
-                    border: "1px solid #ff4d4f",
-                    borderRadius: 6,
-                    padding: "4px 8px",
-                  }}
-                >
-                  Deactivate User
-                </a>
-              </Popconfirm>
-            </div>
-          )} */}
         </Form>
       </Modal>
     </DashboardLayout>

@@ -18,6 +18,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   CheckCircleOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
@@ -118,6 +119,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/verify">Verify</Link>,
     },
+    ...(userDetails?.role === "Admin" ? [
+      {
+        key: "edit-requests",
+        icon: (
+          <AuditOutlined
+            style={{ fontSize: 20, color: "var(--primary-800)" }}
+          />
+        ),
+        label: <Link href="/edit-requests">Edit Requests</Link>,
+      }
+    ] : []),
     {
       key: "settings",
       icon: (

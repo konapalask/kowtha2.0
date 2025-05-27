@@ -75,14 +75,10 @@ export default function OrganizationSettings() {
     const fetchOffices = async () => {
       try {
         const result = await getOfficesApi();
-        if (result && result.status >= 200 && result.status < 300) {
           setOffices(result.data);
-        } else {
-          message.error("Failed to load offices");
-        }
       } catch (error) {
         console.error("Fetch offices error:", error);
-        message.error("Failed to load offices");
+        message.error("Failed to load branches");
       }
     };
     fetchOffices();
@@ -91,16 +87,13 @@ export default function OrganizationSettings() {
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-      const result = await axiosInstance.put(
+       await axiosInstance.put(
         `/org/organization/${organization.id}`,
         values
       );
-      if (result && result.status >= 200 && result.status < 300) {
         setOrganization({ ...organization, ...values });
         message.success("Organization details updated successfully");
-      } else {
-        message.error("Failed to update organization details");
-      }
+      
     } catch (error) {
       message.error("Failed to update organization details");
     } finally {
@@ -118,29 +111,25 @@ export default function OrganizationSettings() {
           `/org/offices/${editingOffice.id}`,
           values
         );
-        if (result && result.status >= 200 && result.status < 300) {
           setOffices(
             offices.map((office) =>
               office.id === editingOffice.id ? { ...office, ...values } : office
             )
           );
-          message.success("Office updated successfully");
-        }
+          message.success("Branch updated successfully");
       } else {
         // Create new office
         const result = await axiosInstance.post("/org/offices", values);
-        if (result && result.status >= 200 && result.status < 300) {
           setOffices([...offices, result.data]);
-          message.success("Office added successfully");
-        }
+          message.success("Branch added successfully");
       }
 
       setIsModalVisible(false);
       officeForm.resetFields();
       setEditingOffice(null);
     } catch (error) {
-      console.error("Failed to save office:", error);
-      message.error("Failed to save office");
+      console.error("Failed to save Branch:", error);
+      message.error("Failed to save Branch");
     } finally {
       setLoading(false);
     }
@@ -158,9 +147,9 @@ export default function OrganizationSettings() {
       // Mock API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setOffices(offices.filter((office) => office.id !== id));
-      message.success("Office deleted successfully");
+      message.success("Branch deleted successfully");
     } catch (error) {
-      message.error("Failed to delete office");
+      message.error("Failed to delete Branch");
     } finally {
       setLoading(false);
     }
@@ -246,7 +235,7 @@ export default function OrganizationSettings() {
           </Card>
         </TabPane>
 
-        <TabPane tab="Offices" key="2">
+        <TabPane tab="Branches" key="2">
           <Card>
             <div style={{ marginBottom: 16 }} className="flex-end">
               <Button
@@ -258,7 +247,7 @@ export default function OrganizationSettings() {
                   setIsModalVisible(true);
                 }}
               >
-                Add Office
+                Add Branch
               </Button>
             </div>
 
@@ -274,7 +263,7 @@ export default function OrganizationSettings() {
       </Tabs>
 
       <Modal
-        title={editingOffice ? "Edit Office" : "Add Office"}
+        title={editingOffice ? "Edit Branch" : "Add Branch"}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);
@@ -286,8 +275,8 @@ export default function OrganizationSettings() {
         <Form form={officeForm} layout="vertical" onFinish={handleOfficeSubmit}>
           <Form.Item
             name="name"
-            label="Office Name"
-            rules={[{ required: true, message: "Please enter office name" }]}
+            label="Branch Name"
+            rules={[{ required: true, message: "Please enter branch name" }]}
           >
             <Input />
           </Form.Item>
@@ -311,7 +300,7 @@ export default function OrganizationSettings() {
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={loading}>
-                {editingOffice ? "Update" : "Add"} Office
+                {editingOffice ? "Update" : "Add"} Branch
               </Button>
               <Button
                 onClick={() => {
@@ -344,7 +333,7 @@ export default function OrganizationSettings() {
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  message.success("Office archived");
+                  message.success("Branch archived");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
