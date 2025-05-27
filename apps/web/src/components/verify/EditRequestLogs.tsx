@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Card, Typography, Row, Col, Descriptions, Button, message, Space } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined, LeftOutlined } from "@ant-design/icons";
+import { UserContext } from "../layout/UserContextProvider";
 
 const { Text } = Typography;
 
@@ -10,6 +11,7 @@ interface EditRequestLogsProps {
 }
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
+  const {userDetails} = useContext(UserContext);
   const currentData = {
     name: "John Doe",
     age: 30,
@@ -69,7 +71,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           </Descriptions>
         </Col>
         <Col span={12}>
-          <Descriptions title="Edit Request Data" bordered column={1} size="small" extra={<Space>
+          <Descriptions title="Edit Request Data" bordered column={1} size="small" extra={userDetails?.role === "Admin" && <Space>
                   <Button
                     danger
                     icon={<CloseCircleOutlined />}
