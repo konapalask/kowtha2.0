@@ -45,9 +45,10 @@ export class EditRequestController {
   @Get()
   findAll(
     @Query('status') status?: EditRequestStatus,
-    @Query('loanId') loanId?: number,
+    @Query('loanId') loanId?: string,
   ) {
-    return this.editRequestService.getEditRequests({ status, loanId });
+    const loanIdNumber = parseInt(loanId);
+    return this.editRequestService.getEditRequests({ status, loanId: loanIdNumber });
   }
 
   @Get(':id')
