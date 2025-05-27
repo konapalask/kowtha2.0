@@ -4,12 +4,14 @@ import { EditRequestStatus, Prisma } from '@prisma/client';
 import { CreateEditRequestDto } from './dto/create-edit-request.dto';
 import { UpdateEditRequestDto } from './dto/update-edit-request.dto';
 import { LoggingService } from '../common/logging/logging.service';
+import { S3Service } from '../common/s3utils/s3.service';
 
 @Injectable()
 export class EditRequestService {
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService,
+    private s3Service: S3Service,
   ) {}
 
   async createEditRequest(userId: number, createEditRequestDto: CreateEditRequestDto) {
@@ -197,6 +199,53 @@ export class EditRequestService {
     } catch (error) {
       await this.loggingService.error('Failed to get edit request by ID', {
         editRequestId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async getImageCoordinates(s3ImageUrl: string, applicationNumber: string) {
+    try {
+      // Find the loan by application number
+      const loan = await this.prisma.loan.findUnique({
+        where: { applicationNumber },
+        include: {
+          verifications: {
+            select: {
+              verificationData: true,
+            },
+          },
+        },
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      // Search through all verifications for the image
+      for (const verification of loan.verifications) {
+        const verificationData = verification.verificationData as any;
+        if (verificationData?.uploadedItems) {
+          const image = verificationData.uploadedItems.find(
+            (item: any) => item.s3ImageUrl === s3ImageUrl
+          );
+          if (image) {
+            return {
+              latitude: image.latitude,
+              longitude: image.longitude,
+              timestamp: image.timestamp,
+            };
+          }
+        }
+      }
+
+      throw new NotFoundException('Image not found in any verification');
+    } catch (error) {
+      await this.loggingService.error('Failed to get image coordinates', {
+        s3ImageUrl,
+        applicationNumber,
         error: error.message,
         stack: error.stack,
       });

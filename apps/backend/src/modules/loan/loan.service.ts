@@ -1678,7 +1678,7 @@ export class LoanService {
       if (!loan) {
         throw new NotFoundException('Loan not found');
       }
-
+      
       const verification = loan.verifications[0];
       if (!verification) {
         throw new NotFoundException(`Verification of type ${verificationType} not found`);
@@ -1691,6 +1691,7 @@ export class LoanService {
       } else {
         verificationData = verification.verificationData as VerificationData || {};
       }
+      console.log(verificationData);
 
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
@@ -1718,13 +1719,13 @@ export class LoanService {
       const validImageUrls = imageUrls.filter(url => url !== null);
 
       // Generate HTML template based on verification type
-      let htmlTemplate = this.generateBaseHTMLTemplate(loan, imageDataUri);
+      let htmlTemplate = this.generateBaseHTMLTemplate(loan);
 
       // Add verification-specific content
       if (verificationType === 'Work') {
-        htmlTemplate += this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls);
+        htmlTemplate += this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
       } else {
-        htmlTemplate += this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls);
+        htmlTemplate += this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri);
       }
 
       // Launch a new browser instance
@@ -1776,7 +1777,7 @@ export class LoanService {
     }
   }
 
-  private generateBaseHTMLTemplate(loan: any, imageDataUri: string): string {
+  private generateBaseHTMLTemplate(loan: any): string {
     return `
       <!DOCTYPE html>
       <html>
@@ -1959,7 +1960,7 @@ export class LoanService {
     `;
   }
 
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[]): string {
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string): string {
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -1968,14 +1969,163 @@ export class LoanService {
             <th>Name of the Current Employer</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
           </tr>
-          <!-- ... rest of the work verification fields ... -->
+          <tr>
+                <th>Name of the Current Employer</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Curent Office Address</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of years in Current Job</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Total Work Experience</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Office Email ID</th>
+                <td colspan="5"><span class="var-value">${''}</span></td>
+              </tr>
+              <tr>
+                <th>Office Phone Number/Landline Number</th>
+                <td colspan="5"><span class="var-value">${''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of Employees in the Company</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Employee ID(Copy/Photograph Mandatory)</th>
+                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
+                <th>Designation</th>
+                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Mode of Salary</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Employer</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.employerType || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Industry</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.natureOfService || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Type of Office Locality</th>
+                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeLocality || ''}</span></td>
+              </tr>
+            <tr><td colspan="6" class="section-header">Financial Details</td></tr>
+              <tr>
+                <th>Monthly Gross Salary</th>
+                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.grossSalary || ''}</span></td>
+                <th>Monthly Net Salary</th>
+                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
+              </tr>
         </table>
       </div>
-
       <div class="footer">
         <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
+
+      <div style="page-break-before: always;"></div>
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
+          <tr>
+            <th>Employer Name</th>
+            <th>Designation</th>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Contact Person</th>
+            <th>Contact Number</th>
+            <th>Reason for Movement</th>
+          </tr>
+          ${verificationData.pastEmployment?.employments?.map(employment => `
+            <tr>
+              <td><span class="var-value">${employment.employerName || ''}</span></td>
+              <td><span class="var-value">${employment.designation || ''}</span></td>
+              <td><span class="var-value">${employment.fromDate || ''}</span></td>
+              <td><span class="var-value">${employment.toDate || ''}</span></td>
+              <td><span class="var-value">${employment.contactPersonName || ''}</span></td>
+              <td><span class="var-value">${employment.contactPersonNumber || ''}</span></td>
+              <td><span class="var-value">${employment.reasonForMovement || ''}</span></td>
+            </tr>
+          `).join('') || '<tr><td colspan="7" style="text-align: center;">No past employment history found</td></tr>'}
+        </table>
+      </div>
+
+      
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Colleague References</td></tr>
+          <tr>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Contact Number</th>
+            <th>Email Address</th>
+            <th>Address</th>
+            <th>Years Known</th>
+          </tr>
+          ${verificationData.colleagueReferences?.references?.map(reference => `
+            <tr>
+              <td><span class="var-value">${reference.name || ''}</span></td>
+              <td><span class="var-value">${reference.designation || ''}</span></td>
+              <td><span class="var-value">${reference.contactNumber || ''}</span></td>
+              <td><span class="var-value">${reference.emailAddress || ''}</span></td>
+              <td><span class="var-value">${reference.address || ''}</span></td>
+              <td><span class="var-value">${reference.yearsKnown || ''}</span></td>
+            </tr>
+          `).join('') || '<tr><td colspan="6" style="text-align: center;">No colleague references found</td></tr>'}
+        </table>
+      </div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Existing Loans</td></tr>
+          <tr>
+            <th>Bank Name</th>
+            <th>Loan Amount</th>
+            <th>EMI</th>
+            <th>Tenure</th>
+            <th>Purpose</th>
+          </tr>
+          ${verificationData.existingLoans?.loans?.map(loan => `
+            <tr>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.loanAmount || ''}</span></td>
+              <td><span class="var-value">${loan.emi || ''}</span></td>
+              <td><span class="var-value">${loan.tenure || ''}</span></td>
+              <td><span class="var-value">${loan.purpose || ''}</span></td>
+            </tr>
+          `).join('') || '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
+        </table>
+      </div>
+
+      <canvas id="logoCanvas" width="250" height="140"></canvas>
+
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           <script>
+              const canvas = document.getElementById('logoCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.onload = function () {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const offsetX = 20;
+                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
+              };
+              img.src = '${imageDataUri}';
+          </script>
 
       <div style="page-break-before: always;"></div>
 
@@ -2004,7 +2154,7 @@ export class LoanService {
     `;
   }
 
-  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[]): string {
+  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string): string {
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -2013,7 +2163,79 @@ export class LoanService {
             <th>Address</th>
             <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
           </tr>
-          <!-- ... rest of the address verification fields ... -->
+          <tr>
+                <th>Name of Applicant</th>
+                <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>PAN Number</th>
+                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || 'BQBUU2345R'}</span></td>
+              </tr>
+              <tr>
+                <th>Aadhar Number</th>
+                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || '9801 7691 7654'}</span></td>
+              </tr>
+              <tr>
+                <th>Residential Address</th>
+                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || '1-1-1, Gandhi Nagar, Vijayawada'}</span></td>
+              </tr>
+              <tr>
+                <th>Marital Status</th>
+                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.applicantMaritalStatus || ''}</span></td>
+                <th>Educational Qualification</th>
+                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.educationQualification || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Category</th>
+                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.category || ''}</span></td>
+                <th>Number of Dependents</th>
+                <td colspan="2"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of years in Current Residence</th>
+                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
+                <th>Current residence house size</th>
+                <td colspan="2"><span class="var-value">${verificationData.residenceDetails?.houseArea || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Number of Years in Current City</th>
+                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
+                <th>Number of Years stayed in the Current City</th>
+                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
+              </tr>
+              <tr>
+                <th>If Less than 1 Year, then Previous Address</th>
+                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
+              </tr> 
+              <tr>
+                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
+                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
+              </tr>
+              <tr>
+                <th>Reason for Change</th>
+                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
+              </tr>
+          <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
+              <tr>
+                <th>Name</th>
+                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.tpcName || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Mobile Number</th>
+                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.mobileNumber || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Relationship</th>
+                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.relationship || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Feedback Status</th>
+                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.feedbackStatus || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Comments</th>
+                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.comments || ''}</span></td>
+              </tr>          
         </table>
       </div>
 
@@ -2021,6 +2243,102 @@ export class LoanService {
         <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Residence Details</td></tr>
+          <tr>
+            <th>House Area</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.houseArea || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Rent Details</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Locality Type</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.localityType || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Accessibility</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Residence Type</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceType || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Residence Status</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceStatus || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Location Category</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.localityType || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Name Plate Visible</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.nameplateVisible || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Standard of Living</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.standardOfLiving || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Construction Quality</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.constructionQuality || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Years at Current Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
+          </tr>
+          <tr><td colspan="6" class="section-header">Family Employment Details</td></tr>
+          <tr>
+            <th>Dependents</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Assets Observed</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.assetsObserved || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Earning Members</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.earningMembers || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Is Spouse Working</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.isSpouseWorking || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Spouse Employment Details</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.spouseEmploymentDetails || 'NA'}</span></td>
+          </tr>
+          <tr>
+            <th>Total Family Members</th>
+            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.totalFamilyMembers || 'NA'}</span></td>
+          </tr>      
+        </table>
+      </div>
+
+     <canvas id="logoCanvas" width="250" height="140"></canvas>
+
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           <script>
+              const canvas = document.getElementById('logoCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.onload = function () {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const offsetX = 20;
+                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
+              };
+              img.src = '${imageDataUri}';
+          </script>
 
       <div style="page-break-before: always;"></div>
 

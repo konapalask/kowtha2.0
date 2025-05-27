@@ -330,6 +330,7 @@ export class LoanController {
     @Res() res: Response,
   ) {
     try {
+      
       const pdfBuffer = type 
         ? await this.loanService.generateVerificationPDF(Number(id), type)
         : await this.loanService.generateLoanPDF(Number(id));

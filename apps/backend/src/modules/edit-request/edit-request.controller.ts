@@ -16,6 +16,7 @@ import { CreateEditRequestDto } from './dto/create-edit-request.dto';
 import { UpdateEditRequestDto } from './dto/update-edit-request.dto';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { EditRequestStatus } from '@prisma/client';
+import { Public } from '../accounts/public.decorator';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
@@ -53,5 +54,14 @@ export class EditRequestController {
     @Body() updateEditRequestDto: UpdateEditRequestDto,
   ) {
     return this.editRequestService.updateEditRequest(id, req.user.id, updateEditRequestDto);
+  }
+
+  @Public()
+  @Get('image-coordinates')
+  async getImageCoordinates(
+    @Query('path') path: string,
+    @Query('id') id: string,
+  ) {
+    return this.editRequestService.getImageCoordinates(path, id);
   }
 } 
