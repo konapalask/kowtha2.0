@@ -53,7 +53,7 @@ export default function LoanVerifyDetails() {
       console.log(res.data);
     }).catch((err) => {
       console.error(err);
-      message.error('Failed to fetch edit requests');
+      // message.error('Failed to fetch edit requests');
     })
   },[id])
 
