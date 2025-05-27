@@ -29,6 +29,9 @@ export interface BasicDetailsFormData {
   categoryOther: string;
   isApplicantAvailable: string;
   availablePersonName: string;
+  availablePersonMobile: string;
+  availablePersonRelation: string;
+  availablePersonRelationOther: string;
 }
 
 export type ApplicantInformationFormData = {
