@@ -67,15 +67,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [office, setOffice] = useState<string>("");
   const { userDetails } = useContext(UserContext);
-  
-  useEffect(()=>{
-    getOfficesApi().then((res)=>{
-      setOffice(res?.data?.find((office:any)=>office?.id === userDetails?.officeId)?.name);
-    }).catch((err)=>{
-      console.log(err);
-    })
-  },[])
 
+  useEffect(() => {
+    getOfficesApi()
+      .then((res) => {
+        setOffice(
+          res?.data?.find((office: any) => office?.id === userDetails?.officeId)
+            ?.name
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -119,17 +123,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/verify">Verify</Link>,
     },
-    ...(userDetails?.role === "Admin" ? [
-      {
-        key: "edit-requests",
-        icon: (
-          <AuditOutlined
-            style={{ fontSize: 20, color: "var(--primary-800)" }}
-          />
-        ),
-        label: <Link href="/edit-requests">Edit Requests</Link>,
-      }
-    ] : []),
+    ...(userDetails?.role === "Admin"
+      ? [
+          {
+            key: "edit-requests",
+            icon: (
+              <AuditOutlined
+                style={{ fontSize: 20, color: "var(--primary-800)" }}
+              />
+            ),
+            label: <Link href="/edit-requests">Edit Requests</Link>,
+          },
+        ]
+      : []),
     {
       key: "settings",
       icon: (
@@ -180,20 +186,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             fontFamily: "Noto Sans, sans-serif",
           }}
         >
-         
-         {collapsed? <Image
-            src={smallLogo}
-            alt="Kowtha Logo"
-            width={120}
-            height={60}
-            style={{ objectFit: "contain" }}
-          />: <Image
-          src={logo}
-          alt="Kowtha Logo"
-          width={120}
-          height={60}
-          style={{ objectFit: "contain" }}
-        />}
+          {collapsed ? (
+            <Image
+              src={smallLogo}
+              alt="Kowtha Logo"
+              width={120}
+              height={60}
+              style={{ objectFit: "contain" }}
+            />
+          ) : (
+            <Image
+              src={logo}
+              alt="Kowtha Logo"
+              width={120}
+              height={60}
+              style={{ objectFit: "contain" }}
+            />
+          )}
         </div>
         <Menu
           mode="inline"

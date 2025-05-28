@@ -12,8 +12,9 @@ interface EditRequestLogsProps {
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const {userDetails} = useContext(UserContext);
+  console.log("User Details:", userDetails);
   const currentData = {
-    name: "John Doe",
+    name: "John Doe", 
     age: 30,
     status: "Active",
     email: "john@example.com",
@@ -50,7 +51,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
 
   return (
     <Card title={<div style={{ display: "flex", alignItems: "center" }}>
-    <LeftOutlined style={{ cursor: "pointer", marginRight: 8 }} onClick={() => window.history.back()} />
+   {userDetails?.role==="Admin"&& <LeftOutlined style={{ cursor: "pointer", marginRight: 8 }} onClick={() => window.history.back()} />}
     <Typography>Request Logs</Typography>
     </div>}>
       <Row gutter={24}>
