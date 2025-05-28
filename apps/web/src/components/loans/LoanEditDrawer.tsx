@@ -371,7 +371,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               )}
                             </div>
                           )}
-                          {verification?.status === "Completed" ? (
+                          {verification?.status === "Completed" && (
                             <div
                               style={{
                                 textAlign: "center",
@@ -383,7 +383,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               Verification completed - No further updates
                               required
                             </div>
-                          ) : (
+                          )}
+                          {!verification && (
                             <FieldAssignmentForm
                               verification={verification}
                               type={type}
@@ -509,7 +510,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                 )}
                               </div>
                             )}
-                            {verification?.status === "Completed" ? (
+                            {verification?.status === "Completed" && (
                               <div
                                 style={{
                                   textAlign: "center",
@@ -523,7 +524,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                 Verification completed - No further updates
                                 required
                               </div>
-                            ) : (
+                            )}
+                            {!verification && (
                               <FieldAssignmentForm
                                 verification={verification}
                                 type={type}
