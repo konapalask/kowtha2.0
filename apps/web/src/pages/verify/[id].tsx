@@ -49,7 +49,7 @@ export default function LoanVerifyDetails() {
   }
   
   useEffect(()=>{
-    getEditRequestsApi("pending", id as string).then((res) => {
+    getEditRequestsApi("Pending", id as string).then((res) => {
       console.log(res.data);
     }).catch((err) => {
       console.error(err);
