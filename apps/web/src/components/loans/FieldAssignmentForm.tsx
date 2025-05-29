@@ -1,12 +1,12 @@
-import { Form, Radio, Select, Button } from "antd";
+import { Form, Radio, Select, Button, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import React from "react";
+import { assignExecutivesApi } from "@/services/loans.services";
 
 interface FieldAssignmentFormProps {
   verification: any;
   type: string;
   selectedLoan: any;
-  handleVerificationAssign: (loanId: number, type: string, values: any) => void;
   permanentAddressDisabled: boolean;
   currentAddressDisabled: boolean;
   workDisabled: boolean;
@@ -15,13 +15,14 @@ interface FieldAssignmentFormProps {
   offices: any[];
   fieldExecutives: any[];
   loading: boolean;
+  setLoading: (loading: boolean) => void;
+  verifiers?: any[];
 }
 
 const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   verification,
   type,
   selectedLoan,
-  handleVerificationAssign,
   permanentAddressDisabled,
   currentAddressDisabled,
   workDisabled,
@@ -30,7 +31,34 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   offices,
   fieldExecutives,
   loading,
+  setLoading,
+  verifiers = [],
 }) => {
+  const handleVerificationAssign = async (
+    loanId: number,
+    verificationType: string,
+    values: {
+      assignmentMethod: "Local" | "Remote";
+      office?: string;
+      assignee: string;
+    }
+  ) => {
+    const finalData = {
+      ...values,
+      verificationType,
+      fieldExecutiveId: values.assignee,
+    };
+    try {
+      setLoading(true);
+      await assignExecutivesApi(loanId, finalData);
+      message.success("Field executive assigned successfully");
+    } catch (error) {
+      message.error("Failed to assign field executive");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <Form
@@ -124,7 +152,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             return (
               <Form.Item
                 name="assignee"
-                label="Assign Field Executive"
+                label="Field Executive"
                 rules={[
                   {
                     required: true,
@@ -141,6 +169,24 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             );
           }}
         </Form.Item>
+
+        <Form.Item
+          name={"verifier"}
+          label="Verifier"
+          rules={[
+            {
+              required: true,
+              message: "Please select a verifier",
+            },
+          ]}
+        >
+          <Select
+            placeholder="Select verifier"
+            style={{ width: "100%" }}
+            options={verifiers}
+          />
+        </Form.Item>
+
         <Form.Item>
           <Button
             type="primary"
