@@ -2388,7 +2388,12 @@ export class LoanService {
           </tr>      
         </table>
       </div>
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
 
+      <div style="page-break-before: always;"></div>
       <div class="align-wrapper">
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
