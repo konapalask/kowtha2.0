@@ -1961,6 +1961,29 @@ export class LoanService {
   }
 
   private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string): string {
+    // Use standardized list of remarks
+    const defaultRemarks = [
+      'Applicant is joined as a Project Manager at "M/s. Tekis Hub Consulting Services Pvt. Ltd" since Jan 2024',
+      'Applicant designation is "Project Manager"',
+      'Applicant receives present Net Salary Rs. 75,529/- Per month though Bank',
+      'Applicant submitted the Previous company pay slips and present company pay slip and offer letter',
+      'Applicant having a 07 years of experience in his field',
+      'Co-applicant Mr.Padira srinivasa chary (Father to Applicant) Currtently residing In rented house Rs.2,000/- Per Month with his family in D.no 8-196/2, Chichala Donka, Piduguralla – 522413',
+      'Co-applicant doing wood works and he earns around Rs. 30,000/- per month',
+      'Co-applicant gets the Contracts from out and gets the work',
+      'Co-aplicant gets Income in the Form of cash',
+      'Co-applicant submitted Gas and Current bill For Residential Proof',
+      'Applicant availing this loan for house Constriction',
+      'Neighbor check done. And we got positive feedback about the applicant'
+    ];
+
+    // Use provided remarks or default list
+    const remarks = verificationData.finalObservations?.remarks 
+      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
+      : defaultRemarks;
+    
+    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -2108,6 +2131,28 @@ export class LoanService {
         </table>
       </div>
 
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+          <tr>
+            <th>Overall Status</th>
+            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
+          </tr>
+          <tr>
+            <th>Cooperativeness</th>
+            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Remarks</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${remarksHtml}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+
       <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
@@ -2155,6 +2200,29 @@ export class LoanService {
   }
 
   private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string): string {
+    // Use standardized list of remarks
+    const defaultRemarks = [
+      'Applicant is joined as a Project Manager at "M/s. Tekis Hub Consulting Services Pvt. Ltd" since Jan 2024',
+      'Applicant designation is "Project Manager"',
+      'Applicant receives present Net Salary Rs. 75,529/- Per month though Bank',
+      'Applicant submitted the Previous company pay slips and present company pay slip and offer letter',
+      'Applicant having a 07 years of experience in his field',
+      'Co-applicant Mr.Padira srinivasa chary (Father to Applicant) Currtently residing In rented house Rs.2,000/- Per Month with his family in D.no 8-196/2, Chichala Donka, Piduguralla – 522413',
+      'Co-applicant doing wood works and he earns around Rs. 30,000/- per month',
+      'Co-applicant gets the Contracts from out and gets the work',
+      'Co-aplicant gets Income in the Form of cash',
+      'Co-applicant submitted Gas and Current bill For Residential Proof',
+      'Applicant availing this loan for house Constriction',
+      'Neighbor check done. And we got positive feedback about the applicant'
+    ];
+
+    // Use provided remarks or default list
+    const remarks = verificationData.finalObservations?.remarks 
+      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
+      : defaultRemarks;
+    
+    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -2321,7 +2389,25 @@ export class LoanService {
         </table>
       </div>
 
-     <canvas id="logoCanvas" width="250" height="140"></canvas>
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+          <tr>
+            <th>Overall Status</th>
+            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
+          </tr>
+          <tr>
+            <th>Remarks</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${remarksHtml}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
             <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
