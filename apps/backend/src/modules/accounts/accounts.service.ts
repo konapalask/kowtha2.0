@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
@@ -6,6 +6,8 @@ import { LoggingService } from '../common/logging/logging.service';
 import { UserRole } from '@prisma/client';
 import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -297,6 +299,137 @@ export class AccountsService {
         stack: error.stack 
       });
       throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async createUser(createUserDto: CreateUserDto) {
+    try {
+      // Check if mobile number already exists
+      const existingUser = await this.prisma.user.findUnique({
+        where: { mobile: createUserDto.mobile },
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('Mobile number already registered');
+      }
+
+      // Check if email is provided and already exists
+      if (createUserDto.email) {
+        const existingEmail = await this.prisma.user.findUnique({
+          where: { email: createUserDto.email },
+        });
+
+        if (existingEmail) {
+          throw new BadRequestException('Email already registered');
+        }
+      }
+
+      // Check if employee code is provided and already exists
+      if (createUserDto.employeeCode) {
+        const existingEmployeeCode = await this.prisma.user.findFirst({
+          where: { employeeCode: createUserDto.employeeCode },
+        });
+
+        if (existingEmployeeCode) {
+          throw new BadRequestException('Employee code already registered');
+        }
+      }
+
+      // Check if office exists
+      const office = await this.prisma.office.findUnique({
+        where: { id: createUserDto.officeId },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      // Create user
+      const user = await this.prisma.user.create({
+        data: createUserDto,
+      });
+
+      await this.loggingService.info('User created successfully', {
+        userId: user.id,
+        role: user.role,
+        officeId: user.officeId,
+      });
+
+      return user;
+    } catch (error) {
+      await this.loggingService.error('Failed to create user', {
+        data: createUserDto,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if email is being updated and already exists
+      if (updateUserDto.email && updateUserDto.email !== user.email) {
+        const existingEmail = await this.prisma.user.findUnique({
+          where: { email: updateUserDto.email },
+        });
+
+        if (existingEmail) {
+          throw new BadRequestException('Email already registered');
+        }
+      }
+
+      // Check if employee code is being updated and already exists
+      if (updateUserDto.employeeCode && updateUserDto.employeeCode !== user.employeeCode) {
+        const existingEmployeeCode = await this.prisma.user.findFirst({
+          where: { employeeCode: updateUserDto.employeeCode },
+        });
+
+        if (existingEmployeeCode) {
+          throw new BadRequestException('Employee code already registered');
+        }
+      }
+
+      // Check if office exists if being updated
+      if (updateUserDto.officeId) {
+        const office = await this.prisma.office.findUnique({
+          where: { id: updateUserDto.officeId },
+        });
+
+        if (!office) {
+          throw new NotFoundException('Office not found');
+        }
+      }
+
+      // Update user
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: updateUserDto,
+      });
+
+      await this.loggingService.info('User updated successfully', {
+        userId,
+        updatedFields: Object.keys(updateUserDto),
+      });
+
+      return updatedUser;
+    } catch (error) {
+      await this.loggingService.error('Failed to update user', {
+        userId,
+        data: updateUserDto,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
     }
   }
 } 

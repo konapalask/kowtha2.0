@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException, Patch, Param } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -7,6 +7,9 @@ import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ParseIntPipe } from '@nestjs/common';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -129,6 +132,81 @@ export class AccountsController {
     return {
       message: 'Token refreshed successfully',
       accessToken: result.accessToken
+    };
+  }
+
+  @Post('users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'User has been successfully created',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            mobile: { type: 'string' },
+            email: { type: 'string' },
+            employeeCode: { type: 'string' },
+            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
+            officeId: { type: 'number' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    const user = await this.accountsService.createUser(createUserDto);
+    return {
+      message: 'User created successfully',
+      data: user
+    };
+  }
+
+  @Patch('users/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update an existing user' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            mobile: { type: 'string' },
+            email: { type: 'string' },
+            employeeCode: { type: 'string' },
+            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
+            officeId: { type: 'number' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    const user = await this.accountsService.updateUser(id, updateUserDto);
+    return {
+      message: 'User updated successfully',
+      data: user
     };
   }
 } 
