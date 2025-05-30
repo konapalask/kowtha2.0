@@ -11,7 +11,7 @@ export class EditRequestService {
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService,
-    private s3Service: S3Service,
+    // private s3Service: S3Service,
   ) {}
 
   async createEditRequest(userId: number, createEditRequestDto: CreateEditRequestDto) {
@@ -25,6 +25,20 @@ export class EditRequestService {
       if (!loan) {
         throw new NotFoundException('Loan not found');
       }
+
+      // If verificationId is provided, verify it exists and belongs to the loan
+      if (createEditRequestDto.verificationId) {
+        const verification = await this.prisma.verification.findFirst({
+          where: {
+            id: createEditRequestDto.verificationId,
+            loanId: createEditRequestDto.loanId,
+          },
+        });
+
+        if (!verification) {
+          throw new NotFoundException('Verification not found or does not belong to this loan');
+        }
+      }
       
       // Create edit request
       const editRequest = await this.prisma.editRequest.create({
@@ -32,6 +46,11 @@ export class EditRequestService {
           loan: {
             connect: { id: loan.id }
           },
+          ...(createEditRequestDto.verificationId && {
+            verification: {
+              connect: { id: createEditRequestDto.verificationId }
+            }
+          }),
           requester: {
             connect: { id: userId }
           },
@@ -42,12 +61,14 @@ export class EditRequestService {
         include: {
           loan: true,
           requester: true,
+          verification: true,
         },
       });
 
       await this.loggingService.info('Edit request created successfully', {
         editRequestId: editRequest.id,
         loanId: editRequest.loanId,
+        verificationId: editRequest.verificationId,
         requestedBy: userId,
       });
 
@@ -56,6 +77,7 @@ export class EditRequestService {
       await this.loggingService.error('Failed to create edit request', {
         userId,
         loanId: createEditRequestDto.loanId,
+        verificationId: createEditRequestDto.verificationId,
         error: error.message,
         stack: error.stack,
       });
@@ -163,6 +185,7 @@ export class EditRequestService {
           loan: true,
           requester: true,
           approver: true,
+          verification: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -193,6 +216,7 @@ export class EditRequestService {
           loan: true,
           requester: true,
           approver: true,
+          verification: true,
         },
       });
 

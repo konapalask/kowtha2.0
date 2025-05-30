@@ -116,6 +116,7 @@ model Verification {
   pictureSource    PictureSource?     // Source of the uploaded picture
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  editRequests     EditRequest[]      // Add this relation
 
   @@unique([loanId, type])
 }
@@ -184,16 +185,18 @@ model Session {
 }
 
 model EditRequest {
-  id          Int              @id @default(autoincrement())
-  loanId      Int
-  loan        Loan             @relation(fields: [loanId], references: [id])
-  requestedBy Int
-  requester   User             @relation("EditRequestRequester", fields: [requestedBy], references: [id])
-  approvedBy  Int?
-  approver    User?            @relation("EditRequestApprover", fields: [approvedBy], references: [id])
-  status      EditRequestStatus
-  changes     Json             // Stores the proposed changes
-  remarks     String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id             Int              @id @default(autoincrement())
+  loanId         Int
+  loan           Loan             @relation(fields: [loanId], references: [id])
+  verificationId Int?
+  verification   Verification?    @relation(fields: [verificationId], references: [id])
+  requestedBy    Int
+  requester      User             @relation("EditRequestRequester", fields: [requestedBy], references: [id])
+  approvedBy     Int?
+  approver       User?            @relation("EditRequestApprover", fields: [approvedBy], references: [id])
+  status         EditRequestStatus
+  changes        Json             // Stores the proposed changes
+  remarks        String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }

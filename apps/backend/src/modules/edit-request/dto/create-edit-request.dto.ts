@@ -5,6 +5,10 @@ export class CreateEditRequestDto {
   @IsNotEmpty()
   loanId: number;
 
+  @IsInt()
+  @IsOptional()
+  verificationId?: number;
+
   @IsObject()
   @IsNotEmpty()
   changes: Record<string, any>;
