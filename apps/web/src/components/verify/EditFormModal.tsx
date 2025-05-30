@@ -48,6 +48,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
         const db = event.target.result;
         if (!db.objectStoreNames.contains("logs")) {
           db.createObjectStore("logs", { keyPath: "id" });
+          console.log("Object store 'logs' created with keyPath 'id'");
         }
       };
 
@@ -66,6 +67,8 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
 
         const store = transaction.objectStore("logs");
 
+        console.log(`${id}_${activeTab}`);
+
         const getRequest = store.get(`${id}_${activeTab}`);
 
         getRequest.onsuccess = () => {
@@ -77,6 +80,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
             ...finalData,
             timestamp: new Date().toISOString(),
           };
+          console.log("Log Entry:", logEntry);
 
           const putRequest = store.put(logEntry);
 

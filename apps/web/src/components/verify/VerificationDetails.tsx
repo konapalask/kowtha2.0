@@ -27,7 +27,7 @@ export const VerificationDetails = ({
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || ""
+    verificationData?.finalObservations?.remarks || "<ul><li></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
 
@@ -52,22 +52,38 @@ export const VerificationDetails = ({
 
   useEffect(() => {
     const request = indexedDB.open("editLogs", 1);
-    request.onerror = (event) => {
-      console.error("Database error:", request.error);
+
+    request.onupgradeneeded = (event: any) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains("logs")) {
+        db.createObjectStore("logs", { keyPath: "id" });
+        console.log("Created object store 'logs'");
+      }
     };
+
     request.onsuccess = (event: any) => {
       const db = event.target.result;
+
+      // Check if the store exists before using it
+      if (!db.objectStoreNames.contains("logs")) {
+        console.error("Object store 'logs' not found in DB");
+        db.close();
+        return;
+      }
+
       const transaction = db.transaction("logs", "readwrite");
-      transaction.onComplete = () => {
+
+      transaction.oncomplete = () => {
         db.close();
         console.log("Connection closed");
       };
-      transaction.onerror = (event: any) => {
+
+      transaction.onerror = () => {
         console.error("Transaction error:", transaction.error);
       };
+
       const store = transaction.objectStore("logs");
 
-      // Fetch existing logs
       const getRequest = store.get(`${id}_${activeTab}`);
       getRequest.onsuccess = (event: any) => {
         const existingLogs = event.target.result || {};
@@ -75,10 +91,13 @@ export const VerificationDetails = ({
         setChangedData(rest);
       };
 
-      // Handle errors
-      getRequest.onerror = (event: any) => {
+      getRequest.onerror = () => {
         console.error("Error fetching logs:", getRequest.error);
       };
+    };
+
+    request.onerror = () => {
+      console.error("Database error:", request.error);
     };
   }, []);
 
@@ -87,7 +106,9 @@ export const VerificationDetails = ({
   const data = verificationData || {};
 
   const handleEditorChange = (content: string) => {
+    // if (editorContent !== "<ul><li></li></ul>") {
     setEditorContent(content);
+    // }
     // onEdit("finalObservations");
   };
 
@@ -219,15 +240,10 @@ export const VerificationDetails = ({
               onChange={handleEditorChange}
               style={{ height: "300px" }}
               modules={{
-                toolbar: [
-                  [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                  ["bold", "italic", "underline", "strike"],
-                  [{ list: "ordered" }, { list: "bullet" }],
-                  [{ color: [] }, { background: [] }],
-                  ["link", "image"],
-                  ["clean"],
-                ],
+                toolbar: [],
               }}
+              formats={["list"]}
+              placeholder=" Enter final observations here..."
             />
           </div>
         </Card>
