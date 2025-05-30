@@ -29,7 +29,6 @@ export const VerificationDetails = ({
   const [editorContent, setEditorContent] = useState(
     verificationData?.finalObservations?.remarks || "<ul><li></li></ul>"
   );
-  console.log(editorContent);
   const [changedData, setChangedData] = useState<any>({});
 
   useEffect(() => {
