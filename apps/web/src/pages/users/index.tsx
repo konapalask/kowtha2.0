@@ -8,17 +8,20 @@ import {
   Form,
   Input,
   Select,
-  Typography,
   message,
   Popconfirm,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useSession } from "next-auth/react";
 import { ColumnsType } from "antd/es/table";
-import { getUsersApi } from "@/services/users.services";
+import {
+  createUserApi,
+  getUsersApi,
+  updateUserApi,
+} from "@/services/users.services";
 import { UserContext } from "@/components/layout/UserContextProvider";
-const { Title } = Typography;
+import { getOfficesApi } from "@/services/settings.services";
 const { Option } = Select;
 
 interface User {
@@ -28,7 +31,7 @@ interface User {
   mobile: string;
   status: "Active" | "Inactive";
   role: string;
-  office?: string;
+  office?: any;
 }
 
 interface Office {
@@ -37,46 +40,61 @@ interface Office {
 }
 
 export default function Users() {
-  const { data: session } = useSession();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  const {userDetails} = useContext(UserContext);
+  const { userDetails } = useContext(UserContext);
+  const [offices, setOffices] = useState<Office[]>([]);
 
-  const [offices] = useState<Office[]>([
-    { id: 1, name: "Head Office" },
-    { id: 2, name: "Branch Office" },
-  ]);
+  const fetchUsers = async () => {
+    getUsersApi()
+      .then((res) => {
+        setUsers(res?.data?.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
-    getUsersApi().then((res) => {
-      setUsers(res?.data?.data);
-      console.log(res?.data?.data)
-    }).catch((err) => {
-      console.log(err)
-    });
+    fetchUsers();
+    getOfficesApi()
+      .then((res) => {
+        const options =
+          res?.data?.map((item: any) => ({
+            label: `${item.name} - ${item.location}`,
+            value: item.id,
+          })) ?? [];
+        console.log("Offices:", options);
+        setOffices(options);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (editingUser) {
-        setUsers(
-          users.map((user) =>
-            user.id === editingUser.id ? { ...user, ...values } : user
-          )
-        );
+        // setUsers(
+        //   users.map((user) =>
+        //     user.id === editingUser.id ? { ...user, ...values } : user
+        //   )
+        // );
+        const response = await updateUserApi(editingUser?.id, values);
+        console.log(response);
         message.success("User updated successfully");
+        fetchUsers();
       } else {
-        setUsers([...users, { id: Date.now(), ...values }]);
+        const response = await createUserApi(values);
+        console.log(response);
         message.success("User added successfully");
       }
-
+      fetchUsers();
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
@@ -89,7 +107,10 @@ export default function Users() {
 
   const handleEdit = (user: User) => {
     setEditingUser(user);
-    form.setFieldsValue(user);
+    form.setFieldsValue({
+      ...user,
+      officeId: user?.office?.id,
+    });
     setIsModalVisible(true);
   };
 
@@ -119,6 +140,12 @@ export default function Users() {
 
   const columns: ColumnsType<User> = [
     {
+      title: "Employee Code",
+      dataIndex: "EmployeeCode",
+      key: "EmployeeCode",
+      width: 150,
+    },
+    {
       title: "Name",
       dataIndex: "name",
       key: "name",
@@ -131,6 +158,12 @@ export default function Users() {
       width: 150,
     },
     {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 200,
+    },
+    {
       title: "Role",
       dataIndex: "role",
       key: "role",
@@ -141,27 +174,29 @@ export default function Users() {
       dataIndex: "office",
       key: "office",
       width: 150,
-      render: (office: any) => office?.name
+      render: (office: any) => office?.name,
     },
-    ...(userDetails?.role === "Admin" ? [
-      {
-        title: "Actions",
-        key: "actions",
-        render: (_: any, record: User) => (
-          <Space>
-            <Button
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            >
-              Edit
-            </Button>
-          </Space>
-        ),
-        fixed: "right" as const,
-        width: 100,
-      }
-    ] : []),
+    ...(userDetails?.role === "Admin"
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            render: (_: any, record: User) => (
+              <Space>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                >
+                  Edit
+                </Button>
+              </Space>
+            ),
+            fixed: "right" as const,
+            width: 100,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -213,17 +248,9 @@ export default function Users() {
           style={{ gap: 8, display: "flex", flexDirection: "column" }}
         >
           <Form.Item
-            name="firstName"
-            label="First Name"
-            rules={[{ required: true, message: "Please enter first name" }]}
-            style={{ marginBottom: 8 }}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="lastName"
-            label="Last Name"
-            rules={[{ required: true, message: "Please enter last name" }]}
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: "Please enter name" }]}
             style={{ marginBottom: 8 }}
           >
             <Input />
@@ -234,7 +261,35 @@ export default function Users() {
             rules={[{ required: true, message: "Please enter mobile number" }]}
             style={{ marginBottom: 8 }}
           >
+            <Input maxLength={10} prefix="+91" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            style={{ marginBottom: 8 }}
+            rules={[
+              {
+                required: true,
+                message: "Please input your email!",
+              },
+              {
+                type: "email",
+                message: "Please enter a valid email address!",
+              },
+            ]}
+          >
             <Input />
+          </Form.Item>
+          <Form.Item
+            name="employeeCode"
+            label="Employee Code"
+            style={{ marginBottom: 8 }}
+          >
+            <Input
+              onInput={(e: any) => {
+                e.target.value = e.target.value.toUpperCase();
+              }}
+            />
           </Form.Item>
           <Form.Item
             name="role"
@@ -250,18 +305,12 @@ export default function Users() {
             </Select>
           </Form.Item>
           <Form.Item
-            name="office"
+            name="officeId"
             label="Branch"
             rules={[{ required: true, message: "Please select branch" }]}
             style={{ marginBottom: 8 }}
           >
-            <Select>
-              {offices.map((office) => (
-                <Option key={office.id} value={office.name}>
-                  {office.name}
-                </Option>
-              ))}
-            </Select>
+            <Select options={offices} placeholder="Select branch" />
           </Form.Item>
           {editingUser && (
             <Form.Item style={{ marginBottom: 8 }}>

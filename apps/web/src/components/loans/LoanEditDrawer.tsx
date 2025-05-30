@@ -214,9 +214,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   <Descriptions.Item label="Loan Amount">
                     {selectedLoan?.loanAmount}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Address">
+                  {/* <Descriptions.Item label="Address">
                     {selectedLoan?.applicantAddress}
-                  </Descriptions.Item>
+                  </Descriptions.Item> */}
                   <Descriptions.Item label="Loan Type">
                     {selectedLoan?.loanType}
                   </Descriptions.Item>

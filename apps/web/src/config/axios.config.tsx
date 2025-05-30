@@ -39,7 +39,7 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 const handleLogout = () => {
-  console.log('Logging out');
+  console.log("Logging out");
   // clear();
   // clearAllCookies();
   // Use window.location.replace instead of href for more reliable navigation
@@ -50,26 +50,27 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const refreshTokenApi = "/accounts/refresh-token";
-    console.log('error',error)
+    console.log("error", error);
     const originalRequest = error?.config;
-    
-    const errorMessage = error?.response?.data?.message || error?.response?.data?.message;
-    
+
+    const errorMessage =
+      error?.response?.data?.message || error?.response?.data?.message;
+
     const errorStatusCode = error?.response?.status;
     const tokenInvalid = "Unauthorized";
     const accountNotFound = "UNAUTHORIZED_USER";
-    console.log(originalRequest)
+    console.log(originalRequest);
 
     // Prevent infinite loops
     if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
-      console.log('refresh logout');
+      console.log("refresh logout");
       handleLogout();
       return Promise.reject(error);
     }
 
     // Invalid credentials or user not exist
     if (errorMessage === accountNotFound && errorStatusCode === 401) {
-      console.log('account not found logout');
+      console.log("account not found logout");
       handleLogout();
       return Promise.reject(error);
     }
@@ -78,7 +79,9 @@ axiosInstance.interceptors.response.use(
     if (errorMessage === tokenInvalid && errorStatusCode === 401) {
       const refreshToken = getCookie(REFRESH_TOKEN);
       const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL;
-      const mainDomain = mainDomainUrl ? extractDomainFromUrl(mainDomainUrl) : '';
+      const mainDomain = mainDomainUrl
+        ? extractDomainFromUrl(mainDomainUrl)
+        : "";
 
       if (refreshToken) {
         const regex = new RegExp(
@@ -94,24 +97,26 @@ axiosInstance.interceptors.response.use(
             try {
               const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}${refreshTokenApi}`,
-                { refreshToken: refreshToken }
+                { refresh_token: refreshToken }
               );
-              
+
+              console.log(response);
+
               setCookie(
                 ACCESS_TOKEN,
-                response?.data?.access,
+                response?.data?.accessToken,
                 `.${process.env.NEXT_PUBLIC_DOMAIN}`,
                 "/"
               );
-              
+
               return axiosInstance(originalRequest);
             } catch (refreshError) {
-              console.error('Token refresh failed:', refreshError);
+              console.error("Token refresh failed:", refreshError);
               handleLogout();
               return Promise.reject(refreshError);
             }
           } else {
-            console.log('token expired logout');
+            console.log("token expired logout");
             handleLogout();
             customToast({
               type: "error",
@@ -125,7 +130,7 @@ axiosInstance.interceptors.response.use(
           return Promise.reject(error);
         }
       } else {
-        console.log('refresh token not found logout');
+        console.log("refresh token not found logout");
         handleLogout();
         customToast({
           type: "error",

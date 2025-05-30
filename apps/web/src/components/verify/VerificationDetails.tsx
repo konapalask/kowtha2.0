@@ -8,22 +8,39 @@ import { useEffect, useState } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
+import { useRouter } from "next/router";
+import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
+import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
+import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescription";
+import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
+import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 
-export const VerificationDetails = ({ verificationData, onEdit }: { verificationData: any; onEdit: (formKey: string) => void }) => {
+export const VerificationDetails = ({
+  verificationData,
+  onEdit,
+}: {
+  verificationData: any;
+  onEdit: (formKey: string) => void;
+}) => {
+  const router = useRouter();
+  const { id } = router.query;
   const { activeTab } = useTabContext();
-  const [imageUrls, setImageUrls] = useState<{[key: string]: string}>({});
-  const [editorContent, setEditorContent] = useState(verificationData?.finalObservations?.remarks || '');
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  const [editorContent, setEditorContent] = useState(
+    verificationData?.finalObservations?.remarks || ""
+  );
+  const [changedData, setChangedData] = useState<any>({});
 
   useEffect(() => {
     const fetchImageUrls = async () => {
       if (verificationData?.uploadedItems) {
-        const urls: {[key: string]: string} = {};
+        const urls: { [key: string]: string } = {};
         for (const item of verificationData.uploadedItems) {
           try {
             const response = await getS3ImageUrl(item.s3ImageUrl);
             urls[item.id] = response;
           } catch (error) {
-            console.error('Error fetching image URL:', error);
+            console.error("Error fetching image URL:", error);
           }
         }
         setImageUrls(urls);
@@ -33,258 +50,113 @@ export const VerificationDetails = ({ verificationData, onEdit }: { verification
     fetchImageUrls();
   }, [verificationData?.uploadedItems]);
 
+  useEffect(() => {
+    const request = indexedDB.open("editLogs", 1);
+    request.onerror = (event) => {
+      console.error("Database error:", request.error);
+    };
+    request.onsuccess = (event: any) => {
+      const db = event.target.result;
+      const transaction = db.transaction("logs", "readwrite");
+      transaction.onComplete = () => {
+        db.close();
+        console.log("Connection closed");
+      };
+      transaction.onerror = (event: any) => {
+        console.error("Transaction error:", transaction.error);
+      };
+      const store = transaction.objectStore("logs");
+
+      // Fetch existing logs
+      const getRequest = store.get(`${id}_${activeTab}`);
+      getRequest.onsuccess = (event: any) => {
+        const existingLogs = event.target.result || {};
+        const { id, timestamp, ...rest } = existingLogs;
+        setChangedData(rest);
+      };
+
+      // Handle errors
+      getRequest.onerror = (event: any) => {
+        console.error("Error fetching logs:", getRequest.error);
+      };
+    };
+  }, []);
+
   if (!verificationData) return null;
 
   const data = verificationData || {};
 
   const handleEditorChange = (content: string) => {
     setEditorContent(content);
-    onEdit("finalObservations");
+    // onEdit("finalObservations");
   };
+
+  const getButton = (formKey: string) => (
+    <Button
+      type="text"
+      icon={<EditOutlined />}
+      onClick={() => onEdit(formKey)}
+    />
+  );
 
   return (
     <>
       {/* Basic Details Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title={"Basic Details"}
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("basicDetails")}
-              />
-            }
-          >
-            <Descriptions.Item label="Verification Type">
-              {data?.basicDetails?.verificationType}
-            </Descriptions.Item>
-            <Descriptions.Item label="Application Number">
-              {data?.basicDetails?.applicationNumber}
-            </Descriptions.Item>
-            <Descriptions.Item label="Applicant Name">
-              {data?.basicDetails?.applicantName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Marital Status">
-              {data?.basicDetails?.applicantMaritalStatus}
-              {data?.basicDetails?.applicantMaritalStatus === 'Others' && 
-                ` - ${data?.basicDetails?.applicantMaritalStatusOther}`}
-            </Descriptions.Item>
-            <Descriptions.Item label="Education Qualification">
-              {data?.basicDetails?.educationQualification}
-            </Descriptions.Item>
-            <Descriptions.Item label="Category">
-              {data?.basicDetails?.category}
-              {data?.basicDetails?.category === 'Others' && 
-                ` - ${data?.basicDetails?.categoryOther}`}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
+      <BasicDetailsDescription
+        data={data}
+        extra={getButton("basicDetails")}
+        logs={false}
+      />
 
       {/* Address Verification Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title="Address Verification"
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("addressVerification")}
-              />
-            }
-          >
-            <Descriptions.Item label="Address Type">
-              {data?.addressVerification?.address}
-            </Descriptions.Item>
-            <Descriptions.Item label="Address Category">
-              {data?.addressVerification?.addressCategory}
-            </Descriptions.Item>
-            <Descriptions.Item label="Address Details">
-              {data?.addressVerification?.addressDetails}
-            </Descriptions.Item>
-            <Descriptions.Item label="Years at Current Residence">
-              {data?.addressVerification?.numberOfYearsAtCurrentResidence}
-            </Descriptions.Item>
-            {data?.addressVerification?.numberOfYearsAtCurrentResidence === '<=1year' && (
-              <>
-                <Descriptions.Item label="Previous Address">
-                  {data?.addressVerification?.previousAddress}
-                </Descriptions.Item>
-                <Descriptions.Item label="Years at Previous Address">
-                  {data?.addressVerification?.previousAddressYears}
-                </Descriptions.Item>
-              </>
-            )}
-            <Descriptions.Item label="Years in Current City">
-              {data?.addressVerification?.numberOfYearsAtCurrentCity}
-            </Descriptions.Item>
-            {data?.addressVerification?.numberOfYearsAtCurrentCity === '<=3 years' && (
-              <>
-                <Descriptions.Item label="Previous City">
-                  {data?.addressVerification?.previousCity}
-                </Descriptions.Item>
-                <Descriptions.Item label="Years in Previous City">
-                  {data?.addressVerification?.numberOfYearsAtPreviousCity}
-                </Descriptions.Item>
-                <Descriptions.Item label="Reason for Change">
-                  {data?.addressVerification?.reasonForChange}
-                </Descriptions.Item>
-              </>
-            )}
-            <Descriptions.Item label="Geo Tag">
-              {data?.addressVerification?.geoTag}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
+      <AddressVerificationDescription
+        data={data}
+        extra={getButton("addressVerification")}
+        logs={false}
+      />
 
       {/* Residence Details Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title="Residence Details"
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("residenceDetails")}
-              />
-            }
-          >
-            <Descriptions.Item label="Residence Status">
-              {data?.residenceDetails?.residenceStatus}
-            </Descriptions.Item>
-            {data?.residenceDetails?.residenceStatus === 'Rented' && (
-              <Descriptions.Item label="Rent Details">
-                {data?.residenceDetails?.rentDetails}
-              </Descriptions.Item>
-            )}
-            <Descriptions.Item label="Type of Residence">
-              {data?.residenceDetails?.residenceType}
-            </Descriptions.Item>
-            <Descriptions.Item label="Construction Quality">
-              {data?.residenceDetails?.constructionQuality}
-            </Descriptions.Item>
-            <Descriptions.Item label="Standard of Living">
-              {data?.residenceDetails?.standardOfLiving}
-            </Descriptions.Item>
-            <Descriptions.Item label="Location Category">
-              {data?.residenceDetails?.locationCategory}
-            </Descriptions.Item>
-            <Descriptions.Item label="Locality Type">
-              {data?.residenceDetails?.localityType}
-            </Descriptions.Item>
-            <Descriptions.Item label="Accessibility">
-              {data?.residenceDetails?.accessibility}
-            </Descriptions.Item>
-            <Descriptions.Item label="House Area">
-              {data?.residenceDetails?.houseArea}
-            </Descriptions.Item>
-            <Descriptions.Item label="Years at Current Address">
-              {data?.residenceDetails?.yearsAtCurrentAddress}
-            </Descriptions.Item>
-            <Descriptions.Item label="Nameplate Visible">
-              {data?.residenceDetails?.nameplateVisible}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
+      <ResidenceDetailsDescription
+        data={data}
+        extra={getButton("residenceDetails")}
+        logs={false}
+      />
 
       {/* Family & Employment Details Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title="Family & Employment Details"
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("familyEmploymentDetails")}
-              />
-            }
-          >
-            <Descriptions.Item label="Total Family Members">
-              {data?.familyEmploymentDetails?.totalFamilyMembers}
-            </Descriptions.Item>
-            <Descriptions.Item label="No. of Earning Members">
-              {data?.familyEmploymentDetails?.earningMembers}
-            </Descriptions.Item>
-            <Descriptions.Item label="No. of Dependents">
-              {data?.familyEmploymentDetails?.dependents}
-            </Descriptions.Item>
-            <Descriptions.Item label="Is Spouse Working">
-              {data?.familyEmploymentDetails?.isSpouseWorking}
-            </Descriptions.Item>
-            <Descriptions.Item label="Spouse's Employment Details">
-              {data?.familyEmploymentDetails?.spouseEmploymentDetails}
-            </Descriptions.Item>
-            <Descriptions.Item label="Assets Observed">
-              {data?.familyEmploymentDetails?.assetsObserved}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
+      <FamilyEmploymentDescription
+        data={data}
+        extra={getButton("familyEmploymentDetails")}
+        logs={false}
+      />
 
       {/* Third Party Check Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card>
-          <Descriptions
-            title="Third Party Check"
-            bordered
-            column={2}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("thirdPartyCheck")}
-              />
-            }
-          >
-            <Descriptions.Item label="TPC Name">
-              {data?.thirdPartyCheck?.tpcName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Mobile Number">
-              {data?.thirdPartyCheck?.mobileNumber}
-            </Descriptions.Item>
-            <Descriptions.Item label="Relationship">
-              {data?.thirdPartyCheck?.relationship}
-            </Descriptions.Item>
-            <Descriptions.Item label="Feedback Status">
-              {data?.thirdPartyCheck?.feedbackStatus}
-            </Descriptions.Item>
-            <Descriptions.Item label="Comments">
-              {data?.thirdPartyCheck?.comments}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </section>
+      <ThirdPartyCheckDescription
+        data={data}
+        extra={getButton("thirdPartyCheck")}
+        logs={false}
+      />
 
       {/* Photo Capture Section */}
       <section style={{ marginBottom: 24 }}>
         <Card title="Photo Capture">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "16px",
+            }}
+          >
             {data?.uploadedItems?.map((item: any, idx: number) => {
               return (
-                <div key={item.id} style={{ position: 'relative' }}>
+                <div key={item.id} style={{ position: "relative" }}>
                   <Image
-                    src={imageUrls[item.id] || ''}
+                    src={imageUrls[item.id] || ""}
                     alt={`Photo ${idx + 1}`}
-                    style={{ 
-                      width: '100%', 
-                      height: '200px', 
-                      objectFit: 'cover',
-                      borderRadius: '4px'
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "cover",
+                      borderRadius: "4px",
                     }}
                     preview={false}
                   />
@@ -293,30 +165,35 @@ export const VerificationDetails = ({ verificationData, onEdit }: { verification
                     danger
                     icon={<CloseCircleOutlined />}
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       top: 8,
                       right: 8,
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      borderRadius: '50%',
-                      padding: 4
+                      background: "rgba(255, 255, 255, 0.8)",
+                      borderRadius: "50%",
+                      padding: 4,
                     }}
                     onClick={() => {
                       // Handle photo removal
-                      const updatedItems = data.uploadedItems.filter((i: any) => i.id !== item.id);
+                      const updatedItems = data.uploadedItems.filter(
+                        (i: any) => i.id !== item.id
+                      );
                       onEdit("photoCapture");
                     }}
                   />
-                  <div style={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    left: 0, 
-                    right: 0, 
-                    background: 'rgba(0, 0, 0, 0.6)',
-                    color: 'white',
-                    padding: '4px 8px',
-                    fontSize: '12px'
-                  }}>
-                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: "rgba(0, 0, 0, 0.6)",
+                      color: "white",
+                      padding: "4px 8px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)}{" "}
+                    Photo {idx + 1}
                   </div>
                 </div>
               );
@@ -326,26 +203,29 @@ export const VerificationDetails = ({ verificationData, onEdit }: { verification
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={verificationData} editRequestData={verificationData?.editRequestData} />
+        <EditRequestLogs
+          currentData={verificationData}
+          editRequestData={changedData}
+        />
       </section>
 
       {/* Final Observations Section */}
       <section style={{ marginBottom: 24 }}>
         <Card title="Final Observations">
-          <div style={{ height: '400px', marginBottom: '20px' }}>
+          <div style={{ height: "400px", marginBottom: "20px" }}>
             <ReactQuill
               theme="snow"
               value={editorContent}
               onChange={handleEditorChange}
-              style={{ height: '300px' }}
+              style={{ height: "300px" }}
               modules={{
                 toolbar: [
-                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  [{ 'color': [] }, { 'background': [] }],
-                  ['link', 'image'],
-                  ['clean']
+                  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                  ["bold", "italic", "underline", "strike"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                  [{ color: [] }, { background: [] }],
+                  ["link", "image"],
+                  ["clean"],
                 ],
               }}
             />
