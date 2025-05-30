@@ -50,8 +50,6 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
   const id = router?.query?.slug?.[0] || null;
-  console.log(router?.query?.slug);
-  console.log(id);
   const { userDetails } = useContext(UserContext);
   const { currentData, editRequestData } = _props;
 
