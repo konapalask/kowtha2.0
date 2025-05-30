@@ -38,7 +38,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
       };
 
       // IndexedDB operation
-      const request = indexedDB.open("editLogs", 2);
+      const request = indexedDB.open("editLogs", 1);
 
       request.onerror = (event) => {
         console.error("Database error:", request.error);
