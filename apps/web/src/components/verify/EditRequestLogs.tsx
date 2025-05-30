@@ -1,37 +1,59 @@
 import React, { useContext } from "react";
-import { Card, Typography, Row, Col, Descriptions, Button, message, Space } from "antd";
-import { CheckCircleOutlined, CloseCircleOutlined, LeftOutlined } from "@ant-design/icons";
+import { Card, Typography, Row, Col, Button, message, Space } from "antd";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  LeftOutlined,
+} from "@ant-design/icons";
 import { UserContext } from "../layout/UserContextProvider";
+import { updateEditRequestApi } from "@/services/verifier.services";
+import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
+import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
+import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
+import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescription";
+import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
+import { useRouter } from "next/router";
 
 const { Text } = Typography;
+
+const getLabels = {
+  basicDetails: "Basic Details",
+  addressVerification: "Address Verification",
+  familyEmploymentDetails: "Family & Employment Details",
+  residenceDetails: "Residence Details",
+  thirdPartyCheck: "Third Party Check",
+};
+
+const getDescriptions = {
+  basicDetails: BasicDetailsDescription,
+  addressVerification: AddressVerificationDescription,
+  familyEmploymentDetails: FamilyEmploymentDescription,
+  residenceDetails: ResidenceDetailsDescription,
+  thirdPartyCheck: ThirdPartyCheckDescription,
+};
 
 interface EditRequestLogsProps {
   currentData: any;
   editRequestData: any;
 }
 
-const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
-  const {userDetails} = useContext(UserContext);
-  console.log("User Details:", userDetails);
-  const currentData = {
-    name: "John Doe", 
-    age: 30,
-    status: "Active",
-    email: "john@example.com",
-    city: "New York",
-  };
-  const editRequestData = {
-    name: "John Doe",
-    age: 31,
-    status: "Pending",
-    email: "john.doe@newmail.com",
-    city: "New York",
-  };
-
-  // Find changed keys (fix TS error by using type assertion)
-  const changedKeys = Object.keys(currentData).filter(
-    (key) => JSON.stringify(currentData[key as keyof typeof currentData]) !== JSON.stringify(editRequestData[key as keyof typeof editRequestData])
+// Helper to get changed keys for a section
+const getChangedKeys = (currentSection: any, editSection: any) => {
+  if (!currentSection || !editSection) return [];
+  return Object.keys({ ...currentSection, ...editSection }).filter(
+    (key) =>
+      JSON.stringify(currentSection?.[key]) !==
+      JSON.stringify(editSection?.[key])
   );
+};
+
+const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
+  const router: any = useRouter();
+  const id = router?.query?.slug?.[0] || null;
+  console.log(router?.query?.slug);
+  console.log(id);
+  const { userDetails } = useContext(UserContext);
+  const { currentData, editRequestData } = _props;
 
   if (!editRequestData) {
     return (
@@ -41,68 +63,106 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     );
   }
 
-  const handleApprove = () => {
-    message.success("Response saved successfully");
-  }
+  const handleApprove = async () => {
+    try {
+      await updateEditRequestApi(id, {
+        status: "Approved",
+      });
+      message.success("Response saved successfully");
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to save response");
+    }
+  };
 
-  // const handleReject = () => {
-  //   message.error("Request rejected");
-  // };
+  const handleRequest = () => {
+    // postEditRequestApi(editRequestData) //need verification type
+  };
 
   return (
-    <Card title={<div style={{ display: "flex", alignItems: "center" }}>
-   {userDetails?.role==="Admin"&& <LeftOutlined style={{ cursor: "pointer", marginRight: 8 }} onClick={() => window.history.back()} />}
-    <Typography>Request Logs</Typography>
-    </div>}>
-      <Row gutter={24}>
-        <Col span={12}>
-          <Descriptions title="Current Data" bordered column={1} size="small">
-            {Object.entries(currentData || {})
-              .slice(0, 5)
-              .map(([key, value]) => (
-                <Descriptions.Item
-                  key={key}
-                  label={key}
-                  labelStyle={changedKeys.includes(key) ? { color: "red" } : undefined}
-                  contentStyle={changedKeys.includes(key) ? { color: "red" } : undefined}
-                >
-                  {String(value)}
-                </Descriptions.Item>
-              ))}
-          </Descriptions>
-        </Col>
-        <Col span={12}>
-          <Descriptions title="Edit Request Data" bordered column={1} size="small" extra={userDetails?.role === "Admin" && <Space>
-                  <Button
-                    danger
-                    icon={<CloseCircleOutlined />}
-                    onClick={handleApprove}
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<CheckCircleOutlined />}
-                    onClick={handleApprove}
-                  >
-                    Approve
-                  </Button>
-                </Space>}>
-            {Object.entries(editRequestData || {})
-              .slice(0, 5)
-              .map(([key, value]) => (
-                <Descriptions.Item
-                  key={key}
-                  label={key}
-                  labelStyle={changedKeys.includes(key) ? { color: "green" } : undefined}
-                  contentStyle={changedKeys.includes(key) ? { color: "green" } : undefined}
-                >
-                  {String(value)}
-                </Descriptions.Item>
-              ))}
-          </Descriptions>
-        </Col>
-      </Row>
+    <Card
+      title={
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {userDetails?.role === "Admin" && (
+            <LeftOutlined
+              style={{ cursor: "pointer", marginRight: 8 }}
+              onClick={() => window.history.back()}
+            />
+          )}
+          <Typography>Request Logs</Typography>
+        </div>
+      }
+      extra={
+        <>
+          {userDetails?.role !== "Admin" && (
+            <Button
+              type="primary"
+              onClick={handleRequest}
+              style={{ marginLeft: "auto" }}
+            >
+              Request Approval
+            </Button>
+          )}
+        </>
+      }
+    >
+      {Object.keys(editRequestData)
+        .filter((sectionKey) => getLabels[sectionKey as keyof typeof getLabels])
+        .map((sectionKey) => {
+          const SectionDescription =
+            getDescriptions[sectionKey as keyof typeof getDescriptions];
+          const currentSection = currentData?.[sectionKey];
+          const editSection = editRequestData?.[sectionKey];
+          if (!SectionDescription) return null;
+          const changedKeys = getChangedKeys(currentSection, editSection);
+          return (
+            <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
+              <Col span={12}>
+                <SectionDescription
+                  data={{ [sectionKey]: currentSection }}
+                  extra={null}
+                  logs={true}
+                />
+                {changedKeys.length > 0 && (
+                  <div style={{ color: "#faad14", fontSize: 12, marginTop: 4 }}>
+                    Changed fields: {changedKeys.join(", ")}
+                  </div>
+                )}
+              </Col>
+              <Col span={12}>
+                <SectionDescription
+                  data={{ [sectionKey]: editSection }}
+                  extra={
+                    userDetails?.role === "Admin" && (
+                      <Space>
+                        <Button
+                          danger
+                          icon={<CloseCircleOutlined />}
+                          onClick={handleApprove}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          type="primary"
+                          icon={<CheckCircleOutlined />}
+                          onClick={handleApprove}
+                        >
+                          Approve
+                        </Button>
+                      </Space>
+                    )
+                  }
+                  logs={true}
+                />
+                {changedKeys.length > 0 && (
+                  <div style={{ color: "#52c41a", fontSize: 12, marginTop: 4 }}>
+                    Changed fields: {changedKeys.join(", ")}
+                  </div>
+                )}
+              </Col>
+            </Row>
+          );
+        })}
     </Card>
   );
 };

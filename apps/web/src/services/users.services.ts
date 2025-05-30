@@ -13,3 +13,11 @@ export const getFieldExecutivesByOfficeIdApi = async (officeId: string) => {
 export const getVerifiersApi = async () => {
   return axiosInstance.get("/accounts/users?role=Verifier");
 };
+
+export const createUserApi = async (userData: any) => {
+  return axiosInstance.post("/accounts/users", userData);
+};
+
+export const updateUserApi = async (userId: number, userData: any) => {
+  return axiosInstance.patch(`/accounts/users/${userId}`, userData);
+};
