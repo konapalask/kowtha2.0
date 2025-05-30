@@ -20,7 +20,22 @@ export class CreateLoanDto {
   @IsString()
   applicantAddress: string;
 
-  @ApiProperty({ description: 'Whether current address is same as permanent address', required: false })
+  @ApiProperty({ description: 'Applicant address line 1', required: false })
+  @IsString()
+  @IsOptional()
+  applicantAddress1?: string;
+
+  @ApiProperty({ description: 'Applicant address line 2', required: false })
+  @IsString()
+  @IsOptional()
+  applicantAddress2?: string;
+
+  @ApiProperty({ description: 'Type of applicant', required: false })
+  @IsString()
+  @IsOptional()
+  applicantType?: string;
+
+  @ApiProperty({ description: 'Whether the address is same as permanent address', required: false })
   @IsBoolean()
   @IsOptional()
   isAddressSame?: boolean;

@@ -111,6 +111,7 @@ model Verification {
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
   paths            String[]           // Array of S3 paths for verification documents
+  applicantAddress String?           
   verificationData Json?              // JSON field to store address/work data
   pictureSource    PictureSource?     // Source of the uploaded picture
   createdAt        DateTime           @default(now())
@@ -125,6 +126,8 @@ model Loan {
   applicantName         String
   applicantMobile       String
   applicantAddress      String
+  applicantAddress1     String?
+  applicantAddress2     String?
   isAddressSame         Boolean             @default(false)
   loanType              String
   bankName              String
@@ -142,6 +145,7 @@ model Loan {
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   editRequests          EditRequest[]
+  applicantType         String?             // New optional field
 }
 
 model VerificationReport {

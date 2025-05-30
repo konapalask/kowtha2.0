@@ -194,6 +194,9 @@ export class LoanService {
           applicantName: data.applicantName,
           applicantMobile: data.applicantMobile,
           applicantAddress: data.applicantAddress,
+          applicantAddress1: data.applicantAddress1,
+          applicantAddress2: data.applicantAddress2,
+          applicantType: data.applicantType,
           isAddressSame: data.isAddressSame || false,
           loanType: data.loanType,
           bankName: data.bankName,
@@ -297,6 +300,8 @@ export class LoanService {
             applicantName: row['NAME OF THE APPLICANT'],
             applicantMobile: row['CONTACT NUMBER'].toString(),
             applicantAddress: row['FULL ADDRESS'],
+            applicantAddress1: row['ADDRESS LINE 1'] || null,
+            applicantAddress2: row['ADDRESS LINE 2'] || null,
             isAddressSame: row['IS_ADDRESS_SAME'] === 'YES' || false,
             applicationNumber: row['APPLICATION ID'],
             loanType: 'Personal', // Default to Personal if not specified
@@ -362,7 +367,9 @@ export class LoanService {
   async assignVerification(
     loanId: number,
     verificationType: VerificationType,
-    fieldExecutiveId: number
+    fieldExecutiveId: number,
+    address?: string,
+    verifierId?: number
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -371,40 +378,60 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      const verification = await this.prisma.verification.upsert({
-        where: {
-          loanId_type: {
+      // If field executive is provided, address is mandatory
+      if (fieldExecutiveId && !address) {
+        throw new BadRequestException('Address is required when assigning a field executive');
+      }
+
+      // Start a transaction to ensure all operations succeed or fail together
+      return await this.prisma.$transaction(async (prisma) => {
+        // Update loan with verifier if provided
+        if (verifierId) {
+          await prisma.loan.update({
+            where: { id: loanId },
+            data: { verifierId }
+          });
+        }
+
+        const verification = await prisma.verification.upsert({
+          where: {
+            loanId_type: {
+              loanId,
+              type: verificationType,
+            },
+          },
+          update: {
+            fieldExecutiveId,
+            status: 'Pending',
+            applicantAddress: address || null,
+          },
+          create: {
             loanId,
             type: verificationType,
+            fieldExecutiveId,
+            status: 'Pending',
+            applicantAddress: address || null,
           },
-        },
-        update: {
-          fieldExecutiveId,
-          status: 'Pending',
-        },
-        create: {
+        });
+
+        const loanStatusChange = await prisma.loan.update({
+          where: { id: loanId },
+          data: { status: 'Assigned' },
+        });
+
+        await this.loggingService.info('Verification assigned successfully', {
           loanId,
-          type: verificationType,
+          verificationType,
           fieldExecutiveId,
-          status: 'Pending',
-        },
-      });
+          hasAddress: !!address,
+          verifierId,
+          verificationId: verification.id
+        });
 
-      const loanStatusChange = await this.prisma.loan.update({
-        where: { id: loanId },
-        data: { status: 'Assigned' },
+        return verification;
       });
-
-      await this.loggingService.info('Verification assigned successfully', {
-        loanId,
-        verificationType,
-        fieldExecutiveId,
-        verificationId: verification.id
-      });
-
-      return verification;
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
       await this.loggingService.error('Failed to assign verification', {
@@ -679,6 +706,8 @@ export class LoanService {
     loanId: number,
     verificationType?: VerificationType,
     fieldExecutiveId?: number,
+    address?: string,
+    verifierId?: number,
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -687,38 +716,57 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
+      // If field executive is provided, address is mandatory
+      if (fieldExecutiveId && !address) {
+        throw new BadRequestException('Address is required when assigning a field executive');
+      }
+
       // If no updates provided, return current verification
-      if (!verificationType && !fieldExecutiveId) {
+      if (!verificationType && !fieldExecutiveId && !verifierId) {
         const verification = await this.prisma.verification.findFirst({
           where: { loanId }
         });
         return verification;
       }
 
-      // Update verification
-      const verification = await this.prisma.verification.update({
-        where: {
-          loanId_type: {
-            loanId,
-            type: verificationType,
+      // Start a transaction to ensure all operations succeed or fail together
+      return await this.prisma.$transaction(async (prisma) => {
+        // Update loan with verifier if provided
+        if (verifierId) {
+          await prisma.loan.update({
+            where: { id: loanId },
+            data: { verifierId }
+          });
+        }
+
+        // Update verification
+        const verification = await prisma.verification.update({
+          where: {
+            loanId_type: {
+              loanId,
+              type: verificationType,
+            },
           },
-        },
-        data: {
-          ...(fieldExecutiveId && { fieldExecutiveId }),
-          status: 'Pending', // Reset status when assignment is updated
-        },
-      });
+          data: {
+            ...(fieldExecutiveId && { fieldExecutiveId }),
+            ...(address && { applicantAddress: address }),
+            status: 'Pending', // Reset status when assignment is updated
+          },
+        });
 
-      await this.loggingService.info('Verification assignment updated successfully', {
-        loanId,
-        verificationType,
-        fieldExecutiveId,
-        verificationId: verification.id
-      });
+        await this.loggingService.info('Verification assignment updated successfully', {
+          loanId,
+          verificationType,
+          fieldExecutiveId,
+          hasAddress: !!address,
+          verifierId,
+          verificationId: verification.id
+        });
 
-      return verification;
+        return verification;
+      });
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
       await this.loggingService.error('Failed to update verification assignment', {

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditLoanDto {
@@ -16,6 +16,26 @@ export class EditLoanDto {
   @IsString()
   @IsOptional()
   applicantAddress?: string;
+
+  @ApiProperty({ description: 'Applicant address line 1', required: false })
+  @IsString()
+  @IsOptional()
+  applicantAddress1?: string;
+
+  @ApiProperty({ description: 'Applicant address line 2', required: false })
+  @IsString()
+  @IsOptional()
+  applicantAddress2?: string;
+
+  @ApiProperty({ description: 'Type of applicant', required: false })
+  @IsString()
+  @IsOptional()
+  applicantType?: string;
+
+  @ApiProperty({ description: 'Whether the address is same as permanent address', required: false })
+  @IsBoolean()
+  @IsOptional()
+  isAddressSame?: boolean;
 
   @ApiProperty({ description: 'Loan type', required: false })
   @IsString()

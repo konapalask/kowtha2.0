@@ -168,7 +168,7 @@ export class LoanController {
     };
   }
 
-  @Post(':id/assign-field-executive')
+  @Post(':id/assign-loan-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Assign a field executive to a loan verification' })
   @ApiResponse({ 
@@ -213,7 +213,7 @@ export class LoanController {
     };
   }
 
-  @Patch(':id/update-field-executive')
+  @Patch(':id/update-loan-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
   @ApiResponse({ 
