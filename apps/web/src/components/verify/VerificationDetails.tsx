@@ -56,7 +56,7 @@ export const VerificationDetails = ({
     request.onupgradeneeded = (event: any) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains("logs")) {
-        db.createObjectStore("logs");
+        db.createObjectStore("logs", { keyPath: "id" });
         console.log("Created object store 'logs'");
       }
     };
