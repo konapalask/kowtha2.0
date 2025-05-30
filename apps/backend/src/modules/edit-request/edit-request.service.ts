@@ -20,7 +20,6 @@ export class EditRequestService {
       const loan = await this.prisma.loan.findUnique({
         where: { id: createEditRequestDto.loanId },
       });
-      console.log(userId);
       
       if (!loan) {
         throw new NotFoundException('Loan not found');
@@ -93,7 +92,10 @@ export class EditRequestService {
     try {
       const editRequest = await this.prisma.editRequest.findUnique({
         where: { id: editRequestId },
-        include: { loan: true },
+        include: { 
+          loan: true,
+          verification: true 
+        },
       });
 
       if (!editRequest) {
@@ -116,41 +118,50 @@ export class EditRequestService {
           loan: true,
           requester: true,
           approver: true,
+          verification: true,
         },
       });
 
-      // If approved, apply the changes to the loan and verifications
+      // If approved, apply the changes
       if (updateEditRequestDto.status === EditRequestStatus.Approved) {
         // Update loan data
-        await this.prisma.loan.update({
-          where: { id: editRequest.loanId },
-          data: editRequest.changes as Prisma.LoanUpdateInput,
-        });
+        // await this.prisma.loan.update({
+        //   where: { id: editRequest.loanId },
+        //   data: editRequest.changes as Prisma.LoanUpdateInput,
+        // });
 
-        // Update verification data for all verifications of this loan
-        const verifications = await this.prisma.verification.findMany({
-          where: { loanId: editRequest.loanId },
-        });
+        // If this edit request is for a specific verification, update only that verification
+        if (editRequest.verificationId) {
+          await this.prisma.verification.update({
+            where: { id: editRequest.verificationId },
+            data: {
+              verificationData: editRequest.changes,
+            },
+          });
+        } else {
+          // If no specific verification, update all verifications of this loan
+          const verifications = await this.prisma.verification.findMany({
+            where: { loanId: editRequest.loanId },
+          });
 
-        // Update each verification's data
-        await Promise.all(
-          verifications.map(verification =>
-            this.prisma.verification.update({
-              where: { id: verification.id },
-              data: {
-                verificationData: {
-                  ...(verification.verificationData as object),
-                  ...(editRequest.changes as object),
+          // Update each verification's data
+          await Promise.all(
+            verifications.map(verification =>
+              this.prisma.verification.update({
+                where: { id: verification.id },
+                data: {
+                  verificationData: editRequest.changes,
                 },
-              },
-            })
-          )
-        );
+              })
+            )
+          );
+        }
       }
 
       await this.loggingService.info('Edit request updated successfully', {
         editRequestId,
         loanId: editRequest.loanId,
+        verificationId: editRequest.verificationId,
         status: updateEditRequestDto.status,
         approvedBy: userId,
       });
