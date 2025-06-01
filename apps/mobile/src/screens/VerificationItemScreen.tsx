@@ -33,9 +33,6 @@ import Toast from 'react-native-toast-message';
 import {submitVerification} from '../services/field.services';
 import {getItem, setItem, clearItem} from '../helpers/utility';
 import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
-import BusinessBasicDetails from '../components/forms/BusinessBasicDetails';
-import BusinessDetails from '../components/forms/BusinessDetails';
-import BusinessMiscellaneous from '../components/forms/BusinessMiscellaneous';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -361,8 +358,7 @@ const VerificationItemScreen = () => {
           isExpanded={expandedSections.basicDetails}
           onToggle={() => toggleSection('basicDetails')}
           isValid={validSections.basicDetails}>
-          {/* <BasicDetails */}
-          <BusinessBasicDetails
+          <BasicDetails
             initialData={formData.basicDetails}
             onSubmit={handleBasicDetailsSubmit}
           />
@@ -377,24 +373,22 @@ const VerificationItemScreen = () => {
         </CollapsibleSection> */}
 
         <CollapsibleSection
-          title="Business Details"
+          title="Address Verification"
           isExpanded={expandedSections.addressVerification}
           onToggle={() => toggleSection('addressVerification')}
           isValid={validSections.addressVerification}>
-          {/* <AddressVerification */}
-          <BusinessDetails
+          <AddressVerification
             onSubmit={handleAddressVerificationSubmit}
             initialData={formData.addressVerification}
           />
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Miscelleanous"
+          title="Residence Details"
           isExpanded={expandedSections.residenceDetails}
           onToggle={() => toggleSection('residenceDetails')}
           isValid={validSections.residenceDetails}>
-          {/* <ResidenceDetails */}
-          <BusinessMiscellaneous
+          <ResidenceDetails
             onSubmit={handleResidenceDetailsSubmit}
             initialData={formData.residenceDetails}
           />
