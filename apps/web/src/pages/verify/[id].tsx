@@ -10,7 +10,6 @@ import { VerificationDetails } from "@/components/verify/VerificationDetails";
 import { WorkVerificationDetails } from "@/components/verify/WorkVerificationDetails";
 import { EditFormModal } from "@/components/verify/EditFormModal";
 import { TabContextType } from "@/utils/verifierInterface";
-import Footer from "@/components/verify/Footer";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -130,7 +129,6 @@ export default function LoanVerifyDetails() {
               />
             </TabPane> */}
           </Tabs>
-          <Footer />
         </div>
 
         <EditFormModal

@@ -14,6 +14,7 @@ import AddressVerificationDescription from "./Descriptions/AddressVerificationDe
 import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescription";
 import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
+import Footer from "./Footer";
 
 export const VerificationDetails = ({
   verificationData,
@@ -29,6 +30,7 @@ export const VerificationDetails = ({
   const [editorContent, setEditorContent] = useState(
     verificationData?.finalObservations?.remarks || "<ul><li></li></ul>"
   );
+  console.log(editorContent);
   const [changedData, setChangedData] = useState<any>({});
 
   useEffect(() => {
@@ -106,18 +108,30 @@ export const VerificationDetails = ({
   const data = verificationData || {};
 
   const handleEditorChange = (content: string) => {
-    // if (editorContent !== "<ul><li></li></ul>") {
-    setEditorContent(content);
-    // }
-    // onEdit("finalObservations");
-  };
+    const liMatch = content.match(/<li>/g);
+    const liCount = liMatch ? liMatch.length : 0;
 
+    if (liCount === 0) {
+      // force at least one <li>
+      setEditorContent("<ul><li></li></ul>");
+    } else {
+      setEditorContent(content);
+    }
+  };
   const getButton = (formKey: string) => (
     <Button
       type="text"
       icon={<EditOutlined />}
       onClick={() => onEdit(formKey)}
     />
+  );
+
+  const CustomToolbar = () => (
+    <div id="custom-toolbar" style={{ padding: "8px" }}>
+      <span style={{ marginLeft: 8, fontWeight: "bold", fontSize: "16px" }}>
+        Final Observations
+      </span>
+    </div>
   );
 
   return (
@@ -232,22 +246,28 @@ export const VerificationDetails = ({
 
       {/* Final Observations Section */}
       <section style={{ marginBottom: 24 }}>
-        <Card title="Final Observations">
-          <div style={{ height: "400px", marginBottom: "20px" }}>
-            <ReactQuill
-              theme="snow"
-              value={editorContent}
-              onChange={handleEditorChange}
-              style={{ height: "300px" }}
-              modules={{
-                toolbar: [],
-              }}
-              formats={["list"]}
-              placeholder=" Enter final observations here..."
-            />
-          </div>
-        </Card>
+        {/* <Card title="Final Observations"> */}
+        <div
+          style={{ height: "400px", marginBottom: "20px", background: "#fff" }}
+        >
+          <CustomToolbar />
+          <ReactQuill
+            theme="snow"
+            value={editorContent}
+            onChange={handleEditorChange}
+            style={{ height: "300px" }}
+            modules={{
+              toolbar: {
+                container: "#custom-toolbar",
+              },
+            }}
+            formats={["list"]}
+            placeholder=" Enter final observations here..."
+          />
+        </div>
+        {/* </Card> */}
       </section>
+      <Footer editorContent={editorContent} />
     </>
   );
 };

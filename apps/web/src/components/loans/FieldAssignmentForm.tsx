@@ -47,6 +47,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       ...values,
       verificationType,
       fieldExecutiveId: values.assignee,
+      address: "Anakapalli",
     };
     try {
       setLoading(true);
@@ -171,7 +172,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         </Form.Item>
 
         <Form.Item
-          name={"verifier"}
+          name={"verifierId"}
           label="Verifier"
           rules={[
             {

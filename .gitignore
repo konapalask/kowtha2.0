@@ -28,8 +28,6 @@ out/
 # Expo / React Native
 .expo/
 .expo-shared/
-ios/
-android/
 build/
 *.apk
 *.ipa
