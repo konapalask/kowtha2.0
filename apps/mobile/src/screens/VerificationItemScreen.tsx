@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ToastAndroid,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -16,22 +15,18 @@ import {
   UploadedItem,
   BasicDetailsFormData,
   VerificationFormData,
-  ApplicantInformationFormData,
   AddressVerificationFormData,
   ResidenceDetailsFormData,
   FamilyEmploymentDetailsFormData,
   ThirdPartyCheckFormData,
-  FinalObservationsFormData,
   FamilyMember,
 } from '../types/verification';
 import BasicDetails from '../components/forms/BasicDetails';
 import PhotoCapture from '../components/forms/PhotoCapture';
-import ApplicantInformation from '../components/forms/ApplicantInformation';
 import AddressVerification from '../components/forms/AddressVerification';
 import ResidenceDetails from '../components/forms/ResidenceDetails';
 import FamilyEmploymentDetails from '../components/forms/FamilyEmploymentDetails';
 import ThirdPartyCheck from '../components/forms/ThirdPartyCheck';
-import FinalObservations from '../components/forms/FinalObservations';
 import CollapsibleSection from '../components/CollapsibleSection';
 import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
@@ -93,25 +88,31 @@ const VerificationItemScreen = () => {
       availablePersonRelationOther: '',
     },
     addressVerification: {
-      addressCategory: '',
-      addressDetails: '',
-      geoTag: '',
       address: '',
+      addressCategory: '',
+      addressDetails: item?.address,
+      addressMismatch: '',
       numberOfYearsAtCurrentResidence: '',
+      previousAddress: '',
+      previousAddressYears: '',
       numberOfYearsAtCurrentCity: '',
+      previousCity: '',
+      numberOfYearsAtPreviousCity: '',
+      reasonForChange: '',
+      geoTag: '',
     },
     residenceDetails: {
       residenceStatus: '',
       rentDetails: '',
       residenceType: '',
-      constructionQuality: '',
+      specifyResidenceType: '',
       standardOfLiving: '',
-      locationCategory: '',
       localityType: '',
       accessibility: '',
       houseArea: '',
       yearsAtCurrentAddress: '',
-      nameplateVisible: '',
+      nameBoardVisible: '',
+      politicalSymbolVisible: '',
     },
     familyEmploymentDetails: {
       totalFamilyMembers: '',
@@ -315,9 +316,8 @@ const VerificationItemScreen = () => {
 
   const handleSubmit = async () => {
     // Check if all sections are validated
-    const allSectionsValid = Object.values(validSections).every(
-      isValid => isValid,
-    );
+    const {familyMemberDetails, ...rest} = validSections;
+    const allSectionsValid = Object.values(rest).every(isValid => isValid);
 
     if (!allSectionsValid) {
       Toast.show({
@@ -402,10 +402,13 @@ const VerificationItemScreen = () => {
           <FamilyEmploymentDetails
             onSubmit={handleFamilyEmploymentDetailsSubmit}
             initialData={formData.familyEmploymentDetails}
+            showSpouse={
+              formData.basicDetails.applicantMaritalStatus === 'Married'
+            }
           />
         </CollapsibleSection>
 
-        <CollapsibleSection
+        {/* <CollapsibleSection
           title="Family Member Details"
           isExpanded={expandedSections.familyMemberDetails}
           onToggle={() => toggleSection('familyMemberDetails')}
@@ -419,7 +422,7 @@ const VerificationItemScreen = () => {
                 : undefined
             }
           />
-        </CollapsibleSection>
+        </CollapsibleSection> */}
 
         <CollapsibleSection
           title="Third-Party Check"

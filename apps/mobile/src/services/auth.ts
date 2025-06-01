@@ -37,11 +37,13 @@ export const generateOTP = async (mobileNumber: string): Promise<void> => {
 export const verifyOTP = async (
   mobileNumber: string,
   otp: string,
+  deviceId?: string,
 ): Promise<OTPResponse> => {
   try {
     const response = await axiosInstance.post('/accounts/otp/verify', {
       mobile: mobileNumber,
       otp,
+      deviceId: deviceId || null,
     });
 
     // if (response.status !== 200) {

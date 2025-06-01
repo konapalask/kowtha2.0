@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message';
 interface FamilyEmploymentDetailsProps {
   onSubmit: (data: FamilyEmploymentDetailsFormData) => void;
   initialData?: FamilyEmploymentDetailsFormData;
+  showSpouse: boolean;
 }
 
 const YES_NO_OPTIONS = ['Yes', 'No'];
@@ -24,6 +25,7 @@ const YES_NO_OPTIONS = ['Yes', 'No'];
 const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
   onSubmit,
   initialData,
+  showSpouse,
 }) => {
   const isSpouseWorkingRef = React.useRef<ActionSheetRef>(null);
   const [showSpouseDetails, setShowSpouseDetails] = useState(false);
@@ -217,29 +219,33 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
           name="dependents"
         />
 
-        <Controller
-          control={control}
-          rules={{required: 'Spouse working status is required'}}
-          render={({field: {value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Is Spouse Working?*</Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => isSpouseWorkingRef.current?.show()}>
-                <Text
-                  style={value ? styles.selectButtonText : styles.placeholder}>
-                  {value || 'Select working status'}
-                </Text>
-              </TouchableOpacity>
-              {errors.isSpouseWorking && (
-                <Text style={styles.errorText}>
-                  {errors.isSpouseWorking.message}
-                </Text>
-              )}
-            </View>
-          )}
-          name="isSpouseWorking"
-        />
+        {showSpouse && (
+          <Controller
+            control={control}
+            rules={{required: 'Spouse working status is required'}}
+            render={({field: {value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Is Spouse Working?*</Text>
+                <TouchableOpacity
+                  style={styles.selectButton}
+                  onPress={() => isSpouseWorkingRef.current?.show()}>
+                  <Text
+                    style={
+                      value ? styles.selectButtonText : styles.placeholder
+                    }>
+                    {value || 'Select working status'}
+                  </Text>
+                </TouchableOpacity>
+                {errors.isSpouseWorking && (
+                  <Text style={styles.errorText}>
+                    {errors.isSpouseWorking.message}
+                  </Text>
+                )}
+              </View>
+            )}
+            name="isSpouseWorking"
+          />
+        )}
 
         {showSpouseDetails && (
           <Controller

@@ -18,7 +18,7 @@ interface ResidenceDetailsProps {
 }
 
 const RESIDENCE_STATUS_OPTIONS = ['Owned', 'Rented', 'Leased'];
-const RESIDENCE_TYPE_OPTIONS = ['House', 'Apartment', 'Villa'];
+const RESIDENCE_TYPE_OPTIONS = ['House', 'Apartment', 'Villa', 'Others'];
 const QUALITY_OPTIONS = ['Excellent', 'Good', 'Average', 'Poor'];
 const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
 const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
@@ -39,15 +39,14 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
     defaultValues: initialData || {
       residenceStatus: '',
       residenceType: '',
-      constructionQuality: '',
+      specifyResidenceType: '',
       standardOfLiving: '',
-      locationCategory: '',
       localityType: '',
       accessibility: '',
-      nameplateVisible: '',
+      nameBoardVisible: '',
       rentDetails: '',
       yearsAtCurrentAddress: '',
-      // politicalSymbolVisible: '',
+      politicalSymbolVisible: '',
     },
   });
 
@@ -58,14 +57,12 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
   const locationCategoryRef = useRef<ActionSheetRef>(null);
   const localityTypeRef = useRef<ActionSheetRef>(null);
   const accessibilityRef = useRef<ActionSheetRef>(null);
-  const nameplateVisibleRef = useRef<ActionSheetRef>(null);
+  const nameBoardVisibleRef = useRef<ActionSheetRef>(null);
+  const politicalSymbolVisibleRef = useRef<ActionSheetRef>(null);
   const [showRentDetails, setShowRentDetails] = useState(false);
 
   const residenceStatus = watch('residenceStatus');
-
-  React.useEffect(() => {
-    setShowRentDetails(residenceStatus === 'Rented');
-  }, [residenceStatus]);
+  const residenceType = watch('residenceType');
 
   const handleSelect = (
     value: string,
@@ -104,7 +101,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="residenceStatus"
       />
 
-      {showRentDetails && (
+      {residenceStatus === 'Rented' && (
         <Controller
           control={control}
           rules={{required: 'Rent details are required'}}
@@ -155,29 +152,32 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="residenceType"
       />
 
-      <Controller
-        control={control}
-        rules={{required: 'Construction quality is required'}}
-        render={({field: {value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Construction Quality*</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => constructionQualityRef.current?.show()}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select construction quality'}
-              </Text>
-            </TouchableOpacity>
-            {errors.constructionQuality && (
-              <Text style={styles.errorText}>
-                {errors.constructionQuality.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name="constructionQuality"
-      />
+      {residenceType === 'Others' && (
+        <Controller
+          control={control}
+          rules={{required: 'Specify Residence type is required'}}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Rent Details*</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Specify residence type"
+                multiline
+                numberOfLines={1}
+                placeholderTextColor={colors.text.disabled}
+              />
+              {errors.rentDetails && (
+                <Text style={styles.errorText}>
+                  {errors.rentDetails.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="specifyResidenceType"
+        />
+      )}
 
       <Controller
         control={control}
@@ -201,30 +201,6 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           </View>
         )}
         name="standardOfLiving"
-      />
-
-      <Controller
-        control={control}
-        rules={{required: 'Location category is required'}}
-        render={({field: {value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Location Category*</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => locationCategoryRef.current?.show()}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select location category'}
-              </Text>
-            </TouchableOpacity>
-            {errors.locationCategory && (
-              <Text style={styles.errorText}>
-                {errors.locationCategory.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name="locationCategory"
       />
 
       <Controller
@@ -332,28 +308,26 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         rules={{required: 'Nameplate visibility is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>
-              Nameplate or Political Symbol Visible?*
-            </Text>
+            <Text style={styles.label}>Nameplate Visible?*</Text>
             <TouchableOpacity
               style={styles.selectButton}
-              onPress={() => nameplateVisibleRef.current?.show()}>
+              onPress={() => nameBoardVisibleRef.current?.show()}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select visibility'}
               </Text>
             </TouchableOpacity>
-            {errors.nameplateVisible && (
+            {errors.nameBoardVisible && (
               <Text style={styles.errorText}>
-                {errors.nameplateVisible.message}
+                {errors.nameBoardVisible.message}
               </Text>
             )}
           </View>
         )}
-        name="nameplateVisible"
+        name="nameBoardVisible"
       />
 
-      {/* <Controller
+      <Controller
         control={control}
         rules={{required: 'Political symbol visibility is required'}}
         render={({field: {value}}) => (
@@ -361,8 +335,9 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             <Text style={styles.label}>Political Symbol Visible?*</Text>
             <TouchableOpacity
               style={styles.selectButton}
-              onPress={() => nameplateVisibleRef.current?.show()}>
-              <Text style={styles.selectButtonText}>
+              onPress={() => politicalSymbolVisibleRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select visibility'}
               </Text>
             </TouchableOpacity>
@@ -374,7 +349,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           </View>
         )}
         name="politicalSymbolVisible"
-      /> */}
+      />
 
       <TouchableOpacity
         style={styles.submitButton}
@@ -421,31 +396,6 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       </ActionSheet>
 
       <ActionSheet
-        ref={constructionQualityRef}
-        containerStyle={styles.actionSheet}
-        gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
-          <Text style={styles.actionSheetTitle}>
-            Select Construction Quality
-          </Text>
-          {QUALITY_OPTIONS.map(option => (
-            <TouchableOpacity
-              key={option}
-              style={styles.actionSheetItem}
-              onPressIn={() =>
-                handleSelect(
-                  option,
-                  'constructionQuality',
-                  constructionQualityRef,
-                )
-              }>
-              <Text style={styles.actionSheetItemText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ActionSheet>
-
-      <ActionSheet
         ref={standardOfLivingRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
@@ -457,25 +407,6 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
               style={styles.actionSheetItem}
               onPressIn={() =>
                 handleSelect(option, 'standardOfLiving', standardOfLivingRef)
-              }>
-              <Text style={styles.actionSheetItemText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ActionSheet>
-
-      <ActionSheet
-        ref={locationCategoryRef}
-        containerStyle={styles.actionSheet}
-        gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
-          <Text style={styles.actionSheetTitle}>Select Location Category</Text>
-          {LOCATION_CATEGORY_OPTIONS.map(option => (
-            <TouchableOpacity
-              key={option}
-              style={styles.actionSheetItem}
-              onPressIn={() =>
-                handleSelect(option, 'locationCategory', locationCategoryRef)
               }>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
@@ -522,7 +453,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       </ActionSheet>
 
       <ActionSheet
-        ref={nameplateVisibleRef}
+        ref={nameBoardVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
         <View style={styles.actionSheetContent}>
@@ -532,7 +463,30 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
               key={option}
               style={styles.actionSheetItem}
               onPressIn={() =>
-                handleSelect(option, 'nameplateVisible', nameplateVisibleRef)
+                handleSelect(option, 'nameBoardVisible', nameBoardVisibleRef)
+              }>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={politicalSymbolVisibleRef}
+        containerStyle={styles.actionSheet}
+        gestureEnabled={true}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Select Visibility</Text>
+          {YES_NO_OPTIONS.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() =>
+                handleSelect(
+                  option,
+                  'politicalSymbolVisible',
+                  politicalSymbolVisibleRef,
+                )
               }>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
