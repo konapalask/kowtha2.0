@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
   TextInput,
+  Animated,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -67,6 +68,28 @@ const VerificationListScreen = () => {
   const [showAppNumberFilter, setShowAppNumberFilter] = useState(false);
   const [appNumberFilter, setAppNumberFilter] = useState('');
 
+  const opacity = useRef(new Animated.Value(1)).current;
+  // useEffect(() => {
+  //   if (status === 'pending') {
+  //     Animated.loop(
+  //       Animated.sequence([
+  //         Animated.timing(opacity, {
+  //           toValue: 0,
+  //           duration: 500,
+  //           useNativeDriver: true,
+  //         }),
+  //         Animated.timing(opacity, {
+  //           toValue: 1,
+  //           duration: 500,
+  //           useNativeDriver: true,
+  //         }),
+  //       ]),
+  //     ).start();
+  //   } else {
+  //     opacity.setValue(1);
+  //   }
+  // }, [status]);
+
   const fetchData = async () => {
     try {
       const response = await getFieldData();
@@ -120,6 +143,34 @@ const VerificationListScreen = () => {
             .toLowerCase()
             .includes(appNumberFilter.toLowerCase())),
     );
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 2,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 2,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    if (filteredData.some(item => item.verification.status === 'Pending')) {
+      pulse.start();
+    } else {
+      scaleAnim.setValue(1);
+      pulse.stop();
+    }
+
+    return () => pulse.stop();
+  }, [filteredData]);
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
@@ -240,6 +291,7 @@ const VerificationListScreen = () => {
             id: item.id,
             applicationNumber: item.applicationNumber, // Main application ID
             verificationId: item.verification.loanId,
+            address: item.applicantAddress, // Address for CurrentAddress or PermanentAddress
           };
 
           if (item.verification.type === 'Work') {
@@ -270,6 +322,40 @@ const VerificationListScreen = () => {
       }}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.applicantName}</Text>
+
+        <View style={styles.statusDotWrapper}>
+          {item.verification.status === 'Pending' && (
+            <Animated.View
+              style={[
+                styles.dotAura,
+                {
+                  transform: [{scale: scaleAnim}],
+                  opacity: scaleAnim.interpolate({
+                    inputRange: [1, 2],
+                    outputRange: [0.4, 0],
+                  }),
+                },
+              ]}
+            />
+          )}
+          <View
+            style={[
+              styles.statusDot,
+              {
+                backgroundColor:
+                  item.verification.status === 'Pending'
+                    ? '#FFA500'
+                    : item.verification.status === 'Completed'
+                    ? '#32CD32'
+                    : 'transparent',
+              },
+            ]}
+          />
+        </View>
+        {/* <Animated.View style={[styles.detailsRow,{item.verification.status==="Pending"?"orange":"green",opacity}]} /> */}
+      </View>
+      <View style={styles.detailsRow}>
+        <Text style={styles.details}>{item.applicationNumber}</Text>
         <View
           style={[
             styles.verificationTypeTag,
@@ -280,18 +366,6 @@ const VerificationListScreen = () => {
           <Text style={styles.verificationTypeText}>
             {getVerificationTypeLabel(item.verification.type)}
           </Text>
-        </View>
-      </View>
-      <View style={styles.detailsRow}>
-        <Text style={styles.details}>{item.applicationNumber}</Text>
-        <View
-          style={[
-            styles.progressTag,
-            {
-              backgroundColor: getProgressColor(item.verification.status),
-            },
-          ]}>
-          <Text style={styles.progressText}>{item.verification.status}</Text>
         </View>
       </View>
       {item.applicantAddress && (
@@ -530,6 +604,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+  },
+  statusDotWrapper: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#fff',
+    zIndex: 2,
+  },
+
+  dotAura: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 12,
+    backgroundColor: '#FFA500',
+    zIndex: 1,
   },
 });
 

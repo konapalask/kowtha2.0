@@ -80,7 +80,6 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
             ...finalData,
             timestamp: new Date().toISOString(),
           };
-          console.log("Log Entry:", logEntry);
 
           const putRequest = store.put(logEntry);
 

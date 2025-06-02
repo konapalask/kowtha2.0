@@ -34,6 +34,8 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       addressDetails: '',
       numberOfYearsAtCurrentResidence: '',
       previousAddress: '',
+      addressMismatch: '',
+      addressCorrectionDetails: '',
       previousAddressYears: '',
       numberOfYearsAtCurrentCity: '',
       previousCity: '',
@@ -47,15 +49,22 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
   const addressCategorySheetRef = useRef<ActionSheetRef>(null);
   const yearsAtResidenceSheetRef = useRef<ActionSheetRef>(null);
   const yearsInCitySheetRef = useRef<ActionSheetRef>(null);
+  const addressMismatchSheetRef = useRef<ActionSheetRef>(null);
 
-  const addressTypes = ['Residence', 'Office', 'Business', 'Other'];
+  const addressTypes = ['Permanent', 'Current'];
   const addressCategories = ['Urban', 'Rural', 'Semi-Urban'];
   const yearsAtResidenceOptions: Array<
     AddressVerificationFormData['numberOfYearsAtCurrentResidence']
-  > = ['<=1year', '1-3 years', '3-5 years', '>5 years'];
+  > = ['<=2years', '>2years'];
   const yearsInCityOptions: Array<
     AddressVerificationFormData['numberOfYearsAtCurrentCity']
   > = ['<=3 years', '>3 years'];
+  const addressMismatchOptions = ['Yes', 'No'];
+
+  const watchedAddressMismatch = useWatch({
+    control,
+    name: 'addressMismatch',
+  });
 
   const watchedNumberOfYearsAtCurrentResidence = useWatch({
     control,
@@ -95,6 +104,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
 
   const showYearsInCitySheet = () => {
     yearsInCitySheetRef.current?.show();
+  };
+
+  const showAddressMismatchSheet = () => {
+    addressMismatchSheetRef.current?.show();
   };
 
   return (
@@ -153,12 +166,13 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address Details</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, styles.readOnlyInput]}
               placeholder="Enter address details"
               value={value}
               onChangeText={onChange}
               multiline
               numberOfLines={4}
+              editable={false}
             />
             {errors.addressDetails && (
               <Text style={styles.errorText}>
@@ -168,6 +182,58 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="addressMismatch"
+        // rules={{required: 'Address Mismatch? is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Address Mismatch? (if any)</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showAddressMismatchSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select duration'}
+              </Text>
+            </TouchableOpacity>
+            {errors.numberOfYearsAtCurrentResidence && (
+              <Text style={styles.errorText}>
+                {errors.numberOfYearsAtCurrentResidence.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {watchedAddressMismatch === 'Yes' && (
+        <Controller
+          control={control}
+          name="addressCorrectionDetails"
+          rules={{
+            required: 'Previous address is required if stay is <=1 year',
+          }}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Enter Address Correction Details</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Enter Details"
+                value={value}
+                onChangeText={onChange}
+                multiline
+                numberOfLines={3}
+              />
+              {errors.previousAddress && (
+                <Text style={styles.errorText}>
+                  {errors.previousAddress.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -195,7 +261,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         )}
       />
 
-      {watchedNumberOfYearsAtCurrentResidence === '<=1year' && (
+      {watchedNumberOfYearsAtCurrentResidence === '<=2years' && (
         <>
           <Controller
             control={control}
@@ -470,6 +536,27 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           ))}
         </View>
       </ActionSheet>
+
+      <ActionSheet
+        ref={addressMismatchSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>
+            Is there an Address Mismatch?
+          </Text>
+          {addressMismatchOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('addressMismatch', option);
+                addressMismatchSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
     </ScrollView>
   );
 };
@@ -561,7 +648,7 @@ const styles = StyleSheet.create({
   },
   readOnlyInput: {
     backgroundColor: colors.input.disabled,
-    color: colors.text.disabled,
+    color: colors.text.primary,
   },
 });
 

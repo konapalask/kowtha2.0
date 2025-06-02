@@ -23,12 +23,20 @@ import KowthaLightIcon from '../assets/Images/KowthaLightIcon.png';
 import KowthaDarkIcon from '../assets/Images/KowthaDarkIcon.png';
 import Toast from 'react-native-toast-message';
 import loginBackground from '../assets/Images/loginBackground.jpg';
+import DeviceInfo from 'react-native-device-info';
+import {get} from 'http';
 // import {REACT_APP_BASE_URL} from '@env';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
 >;
+
+const getDeviceId = async () => {
+  const deviceId = await DeviceInfo.getUniqueId();
+  console.log('Device ID:', deviceId);
+  return deviceId;
+};
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -73,16 +81,15 @@ const LoginScreen = () => {
     }
 
     try {
+      const deviceId = await getDeviceId();
       setLoading(true);
-      const response = await verifyOTP(mobileNumber, otp);
-      // console.log('RESPONSE', response?.access_token);
+      const response = await verifyOTP(mobileNumber, otp, deviceId);
       // Store the tokens
       await setItem('accessToken', response?.accessToken);
       await setItem('refreshToken', response?.refreshToken);
 
       // Request all permissions after successful login
       await requestAllPermissions();
-      // navigation.navigate('VerificationList');
       navigation.dispatch(
         CommonActions.reset({
           index: 0,

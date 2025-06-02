@@ -55,7 +55,13 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
 
   if (!editRequestData) {
     return (
-      <Card title="Request Logs">
+      <Card
+        title={
+          <Typography style={{ fontSize: 16, fontWeight: 600 }}>
+            Request Logs
+          </Typography>
+        }
+      >
         <Text type="secondary">No request logs found</Text>
       </Card>
     );
@@ -87,7 +93,9 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               onClick={() => window.history.back()}
             />
           )}
-          <Typography>Request Logs</Typography>
+          <Typography style={{ fontSize: 16, fontWeight: 600 }}>
+            Request Logs
+          </Typography>
         </div>
       }
       extra={

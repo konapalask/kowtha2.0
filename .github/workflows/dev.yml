@@ -20,7 +20,7 @@ jobs:
         working-directory: /home/ubuntu/kowtha/apps/backend
 
       - name: Run DB Migration
-        run: npx prisma migrate dev
+        run: npx prisma migrate deploy
         working-directory: /home/ubuntu/kowtha/apps/backend
 
       - name: Build backend

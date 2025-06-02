@@ -27,15 +27,15 @@ export interface Loan {
 
 export interface VerifierLoan {
   data: {
-   data:{
-    id: number;
-    applicationNumber: string;
-    applicantName: string;
-    status: string;
-    uploadedAt: string;
-    updatedAt: string;
-    documents: string[];
-   }
+    data: {
+      id: number;
+      applicationNumber: string;
+      applicantName: string;
+      status: string;
+      uploadedAt: string;
+      updatedAt: string;
+      documents: string[];
+    };
   };
 }
 
@@ -82,7 +82,10 @@ export const getVerifierLoansApi = () => {
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {
-  return axiosInstance.post<Verification>(`/loans/${loanId}/assign-field-executive`, payload);
+  return axiosInstance.post<Verification>(
+    `/loans/${loanId}/assign-loan-executive`,
+    payload
+  );
 };
 
 export const getExecutivesApi = () => {
@@ -90,7 +93,7 @@ export const getExecutivesApi = () => {
 };
 
 export const getFieldExecutivesApi = () => {
-  return axiosInstance.get< any[]>(`/loans/field-executive`);
+  return axiosInstance.get<any[]>(`/loans/field-executive`);
 };
 
 export const createLoanApi = (payload: any) => {

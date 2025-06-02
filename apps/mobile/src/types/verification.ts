@@ -3,6 +3,7 @@ export type VerificationItem = {
   name: string;
   applicationNumber: string;
   description: string;
+  address: string;
 };
 
 export type UploadedItem = {
@@ -46,6 +47,8 @@ export type AddressVerificationFormData = {
   address: string;
   addressCategory: string;
   addressDetails: string;
+  addressMismatch: string;
+  addressCorrectionDetails?: string;
   numberOfYearsAtCurrentResidence: string;
   previousAddress?: string;
   previousAddressYears?: string;
@@ -60,15 +63,14 @@ export type ResidenceDetailsFormData = {
   residenceStatus: string;
   rentDetails: string;
   residenceType: string;
-  constructionQuality: string;
+  specifyResidenceType: string;
   standardOfLiving: string;
-  locationCategory: string;
   localityType: string;
   accessibility: string;
   houseArea: string;
   yearsAtCurrentAddress: string;
-  nameplateVisible: string;
-  // politicalSymbolVisible: string;
+  nameBoardVisible: string;
+  politicalSymbolVisible: string;
 };
 
 export type FamilyEmploymentDetailsFormData = {
