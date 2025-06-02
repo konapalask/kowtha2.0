@@ -126,14 +126,18 @@ export class AccountsService {
     }
   }
 
-  async verifyOTP(mobile: string, otp: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async verifyOTP(mobile: string, otp: string, isMobile: boolean): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const user = await this.prisma.user.findUnique({ where: { mobile } });
       if (!user) {
         await this.loggingService.warn('OTP verification failed - User not found', { mobile });
         throw new UnauthorizedException('User not found');
       }
-
+      if(isMobile){
+        if(user.role !== UserRole.FieldExecutive){
+          throw new UnauthorizedException('Admin cannot verify OTP');
+        }
+      }
       // Find the latest active session for this user
       const session = await this.prisma.session.findFirst({
         where: {
@@ -232,6 +236,7 @@ export class AccountsService {
           name: true,
           mobile: true,
           role: true,
+          employeeCode: true,
           office: {
             select: {
               id: true,

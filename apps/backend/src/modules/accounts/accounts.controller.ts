@@ -49,8 +49,8 @@ export class AccountsController {
       }
     }
   })
-  async verifyOTP(@Body() body: { mobile: string; otp: string }) {
-    const result = await this.accountsService.verifyOTP(body.mobile, body.otp);
+  async verifyOTP(@Body() body: { mobile: string; otp: string; isMobile: boolean }) {
+    const result = await this.accountsService.verifyOTP(body.mobile, body.otp, body.isMobile);
     
     return {
       message: 'OTP verified successfully',
@@ -62,7 +62,16 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    return req.user;
+    const user = await this.accountsService.validateUser(req.user.sub);
+    return {
+      sub: user.id,
+      mobile: user.mobile,
+      role: user.role,
+      officeId: user.officeId,
+      employeeCode: user.employeeCode,
+      name: user.name,
+      email: user.email
+    };
   }
 
   @Get('users')

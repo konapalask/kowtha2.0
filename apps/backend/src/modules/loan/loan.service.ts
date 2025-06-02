@@ -572,10 +572,38 @@ export class LoanService {
       const loans = await this.prisma.loan.findMany({
         where: { officeId },
         include: {
-          operationsExecutive: true,
-          verifier: true,
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verifier: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
           verificationReport: true,
-          verifications: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
         },
       });
 
@@ -606,9 +634,29 @@ export class LoanService {
       const loans = await this.prisma.loan.findMany({
         where: { id: { in: loanIds } },
         include: {
-          operationsExecutive: true,
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
           verificationReport: true,
-          verifications: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
         },
       });
 
@@ -633,9 +681,29 @@ export class LoanService {
       const loans = await this.prisma.loan.findMany({
         where: { verifierId },
         include: {
-          operationsExecutive: true,
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
           verificationReport: true,
-          verifications: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
         },
       });
 
@@ -666,8 +734,24 @@ export class LoanService {
       const loans = await this.prisma.loan.findMany({
         where,
         include: {
-          operationsExecutive: true,
-          verifier: true,
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verifier: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
           verificationReport: true,
           verifications: {
             include: {
@@ -675,7 +759,9 @@ export class LoanService {
                 select: {
                   id: true,
                   name: true,
-                  mobile: true
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
                 }
               }
             }

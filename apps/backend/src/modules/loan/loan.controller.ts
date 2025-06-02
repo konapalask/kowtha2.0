@@ -213,7 +213,7 @@ export class LoanController {
     };
   }
 
-  @Patch(':id/update-loan-executive')
+  @Patch(':id/update-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
   @ApiResponse({ 
