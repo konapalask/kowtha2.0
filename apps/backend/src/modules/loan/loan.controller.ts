@@ -194,7 +194,7 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType: VerificationType; fieldExecutiveId: number },
+    @Body() body: { verificationType: VerificationType; fieldExecutiveId: number; address?: string; verifierId?: number },
   ) {
     const parsedLoanId = parseInt(loanId, 10);
     if (isNaN(parsedLoanId)) {
@@ -204,7 +204,9 @@ export class LoanController {
     const result = await this.loanService.assignVerification(
       parsedLoanId,
       body.verificationType,
-      body.fieldExecutiveId
+      body.fieldExecutiveId,
+      body.address,
+      body.verifierId
     );
     return {
       status: 200,
