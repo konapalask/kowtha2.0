@@ -21,3 +21,7 @@ export const createUserApi = async (userData: any) => {
 export const updateUserApi = async (userId: number, userData: any) => {
   return axiosInstance.patch(`/accounts/users/${userId}`, userData);
 };
+
+export const getAllFieldExecutivesApi = async () => {
+  return axiosInstance.get("/accounts/users?role=FieldExecutive");
+};

@@ -8,10 +8,6 @@ interface FieldAssignmentFormProps {
   verification: any;
   type: string;
   selectedLoan: any;
-  address1Disabled: boolean;
-  address2Disabled: boolean;
-  workDisabled: boolean;
-  businessDisabled: boolean;
   setCurrentOffice: (office: string) => void;
   userDetails: any;
   offices: any[];
@@ -27,10 +23,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   verification,
   type,
   selectedLoan,
-  address1Disabled,
-  address2Disabled,
-  workDisabled,
-  businessDisabled,
   setCurrentOffice,
   userDetails,
   offices,
@@ -100,15 +92,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         }
         onFinish={(values) =>
           handleVerificationAssign(selectedLoan.id, type, values)
-        }
-        disabled={
-          type === "Address1"
-            ? address1Disabled
-            : type === "Address2"
-              ? address2Disabled
-              : type === "Work"
-                ? workDisabled
-                : businessDisabled
         }
       >
         <Form.Item

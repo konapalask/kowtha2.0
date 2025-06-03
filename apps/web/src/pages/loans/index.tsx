@@ -235,7 +235,7 @@ export default function Loans() {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
-            return pav ? pav?.fieldExecutive?.id : "-";
+            return pav ? pav?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
         },
@@ -267,7 +267,7 @@ export default function Loans() {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
-            return cav ? cav?.fieldExecutive?.id : "-";
+            return cav ? cav?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
         },
@@ -299,7 +299,7 @@ export default function Loans() {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
-            return wv ? wv?.fieldExecutive?.id : "-";
+            return wv ? wv?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
         },
@@ -309,6 +309,38 @@ export default function Loans() {
           render: (_, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
+            );
+            return wv ? (
+              <Tag color={wv.status === "Completed" ? "green" : "orange"}>
+                {wv.status}
+              </Tag>
+            ) : (
+              "-"
+            );
+          },
+        },
+      ],
+    },
+    {
+      title: <Typography.Text>Business</Typography.Text>,
+      children: [
+        {
+          title: "Assignee",
+          key: "wvAssignee",
+          render: (_, record: Loan) => {
+            const wv = record?.verifications?.find(
+              (v: any) => v.type === "Business"
+            );
+            return wv ? wv?.fieldExecutive?.employeeCode : "-";
+          },
+          align: "center",
+        },
+        {
+          title: "Status",
+          key: "wvStatus",
+          render: (_, record: Loan) => {
+            const wv = record?.verifications?.find(
+              (v: any) => v.type === "Business"
             );
             return wv ? (
               <Tag color={wv.status === "Completed" ? "green" : "orange"}>
@@ -341,7 +373,6 @@ export default function Loans() {
       ),
     },
   ];
-console.log(isDrawerVisible)
   return (
     <DashboardLayout>
       <Card>
@@ -428,6 +459,7 @@ console.log(isDrawerVisible)
         loading={loading}
         setLoading={setLoading}
         setRefresh={setRefresh}
+        verifiers={verifiers}
       />
 
       <style jsx global>{`
