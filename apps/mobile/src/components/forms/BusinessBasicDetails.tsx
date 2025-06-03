@@ -53,7 +53,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       personMet: '',
       personMetName: '',
       personMetRelation: '',
-      businessAddress: 'Anakapalli',
+      businessAddress: '',
       isAddressSame: '',
       addressCorrection: '',
     },
@@ -82,12 +82,13 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Name of the Applicant</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.readOnlyInput]}
               placeholder="Enter applicant name"
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
               placeholderTextColor={colors.text.disabled}
+              readOnly
             />
             {errors.applicantName && (
               <Text style={styles.errorText}>
@@ -158,7 +159,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
                 Specify Relationship to Applicant
               </Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.readOnlyInput]}
                 placeholder="Specify relationship"
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -188,10 +189,11 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
               placeholder="Enter business address"
               onBlur={onBlur}
               onChangeText={onChange}
-              value={'Anakapalli'}
+              value={value}
               placeholderTextColor={colors.text.disabled}
               multiline
               numberOfLines={3}
+              readOnly
             />
             {errors.businessAddress && (
               <Text style={styles.errorText}>
@@ -389,6 +391,10 @@ const styles = StyleSheet.create({
   },
   actionSheetItemText: {
     fontSize: 16,
+    color: colors.text.primary,
+  },
+  readOnlyInput: {
+    backgroundColor: colors.input.disabled,
     color: colors.text.primary,
   },
 });

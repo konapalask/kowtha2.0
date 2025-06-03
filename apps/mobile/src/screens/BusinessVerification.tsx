@@ -61,6 +61,7 @@ const BusinessVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params as {item: any};
+  console.log(item);
   const {userData} = route.params as {userData: any};
   const verificationType = 'Business';
 
@@ -88,7 +89,7 @@ const BusinessVerification = () => {
       personMet: '',
       personMetName: '',
       personMetRelation: '',
-      businessAddress: '',
+      businessAddress: item.address,
       isAddressSame: '',
       addressCorrection: '',
     },
@@ -181,7 +182,9 @@ const BusinessVerification = () => {
     }));
   };
 
-  const handleBasicDetailsSubmit = async (data: BusinessVerificationFormData['basicDetails']) => {
+  const handleBasicDetailsSubmit = async (
+    data: BusinessVerificationFormData['basicDetails'],
+  ) => {
     const updatedData = {
       ...formData,
       basicDetails: data,
@@ -195,7 +198,9 @@ const BusinessVerification = () => {
     await saveFormData('basicDetails', data);
   };
 
-  const handleBusinessDetailsSubmit = async (data: BusinessVerificationFormData['businessDetails']) => {
+  const handleBusinessDetailsSubmit = async (
+    data: BusinessVerificationFormData['businessDetails'],
+  ) => {
     const updatedData = {
       ...formData,
       businessDetails: data,
@@ -209,7 +214,9 @@ const BusinessVerification = () => {
     await saveFormData('businessDetails', data);
   };
 
-  const handleMiscellaneousSubmit = async (data: BusinessVerificationFormData['miscellaneous']) => {
+  const handleMiscellaneousSubmit = async (
+    data: BusinessVerificationFormData['miscellaneous'],
+  ) => {
     const updatedData = {
       ...formData,
       miscellaneous: data,
