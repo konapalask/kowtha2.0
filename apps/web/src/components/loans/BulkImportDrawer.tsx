@@ -9,12 +9,15 @@ import {
   Row,
   Select,
   Space,
+  Tag,
+  Typography,
 } from "antd";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
 import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { getAllFieldExecutivesApi } from "@/services/users.services";
 
 interface BulkImportProps {
   isBulkImportDrawerVisible: boolean;
@@ -23,7 +26,6 @@ interface BulkImportProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
-  fieldExecutives?: any[];
   verifiers?: any[];
 }
 
@@ -34,12 +36,26 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
   loading,
   setLoading,
   setRefresh,
-  fieldExecutives = [],
   verifiers = [],
 }) => {
   const { userDetails } = useContext(UserContext);
+  const [fieldExecutives, setFieldExecutives] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchFieldExecutives = async () => {
+      const response = await getAllFieldExecutivesApi();
+      console.log(response.data.data);
+      const options = response?.data?.data?.map((user: any) => ({
+        label: <Typography.Text>{user.name} <Tag color="blue">{user.employeeCode}</Tag></Typography.Text>,
+        value: user.id,
+        searchValue: `${user.name} ${user.employeeCode}`.toLowerCase()
+      }));
+      setFieldExecutives(options);
+    };
+    fetchFieldExecutives();
+  }, []);
+
+  useEffect(() => {
     if (isBulkImportDrawerVisible) {
       // Initialize with one empty form
       bulkImportForm.setFieldsValue({
@@ -284,9 +300,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                             placeholder="Select field executive"
                             options={fieldExecutives}
                             filterOption={(input, option) =>
-                              (option?.label ?? "")
-                                .toLowerCase()
-                                .includes(input.toLowerCase())
+                              option?.searchValue?.includes(input.toLowerCase())
                             }
                             style={{ height: "32px" }}
                           />
