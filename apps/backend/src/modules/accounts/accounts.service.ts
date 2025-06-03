@@ -221,7 +221,9 @@ export class AccountsService {
 
   async listUsers(filters?: ListUsersDto) {
     try {
-      const where: any = {};
+      const where: any = {
+        status: filters?.status || 'Active' // Default to Active users if not specified
+      };
       
       if (filters?.role) {
         where.role = filters.role;
@@ -239,6 +241,7 @@ export class AccountsService {
           mobile: true,
           role: true,
           employeeCode: true,
+          status: true,
           office: {
             select: {
               id: true,

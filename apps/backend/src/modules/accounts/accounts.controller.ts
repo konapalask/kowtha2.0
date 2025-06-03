@@ -72,7 +72,8 @@ export class AccountsController {
       officeId: user.officeId,
       employeeCode: user.employeeCode,
       name: user.name,
-      email: user.email
+      email: user.email,
+      status: user.status
     };
   }
 

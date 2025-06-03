@@ -15,6 +15,11 @@ enum UserRole {
   Verifier
 }
 
+enum UserStatus {
+  Active
+  Inactive
+}
+
 enum VerificationType {
   AddressOne
   AddressTwo
@@ -75,6 +80,7 @@ model User {
   employeeCode             String?              // Removed @unique constraint temporarily
   officeId                 Int
   office                   Office               @relation(fields: [officeId], references: [id])
+  status                   UserStatus           @default(Active)
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt
   // Relations
