@@ -13,7 +13,7 @@ const ResidenceDetailsDescription: React.FC<{
           <Descriptions
             title="Residence Details"
             bordered
-            column={logs ? 1 : 2}
+            column={logs ? 1 : 3}
             extra={extra || null}
           >
             <Descriptions.Item label="Residence Status">

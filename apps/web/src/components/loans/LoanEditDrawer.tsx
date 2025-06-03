@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   Descriptions,
-  Divider,
   Switch,
 } from "antd";
 import {
@@ -13,7 +12,7 @@ import {
   EditOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
 import { UserContext } from "../layout/UserContextProvider";
 import FieldAssignmentForm from "./FieldAssignmentForm";
@@ -35,6 +34,8 @@ interface LoanEditProps {
   setCurrentOffice?: (officeId: string) => void;
   offices?: any[];
   verifiers?: any[];
+  fetchLoans: () => void;
+  setRefresh: (refresh: boolean) => void;
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
@@ -53,24 +54,29 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   setCurrentOffice = () => {},
   offices = [],
   verifiers = [],
+  fetchLoans,
+  setRefresh,
 }) => {
   const { userDetails } = useContext(UserContext);
-  const [permanentAddressDisabled, setPermanentAddressDisabled] =
-    useState(false);
-  const [currentAddressDisabled, setCurrentAddressDisabled] = useState(false);
+  const [address1Disabled, setAddress1Disabled] = useState(false);
+  const [address2Disabled, setAddress2Disabled] = useState(false);
   const [workDisabled, setWorkDisabled] = useState(false);
+  const [businessDisabled, setBusinessDisabled] = useState(false);
   const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
     Record<string, boolean>
   >({
-    PermanentAddress: false,
-    CurrentAddress: false,
+    Address1: false,
+    Address2: false,
     Work: false,
+    Business: false,
   });
 
   // useEffect(()=> {
 
   // })
-
+  function hasVerificationType( type:string) {
+    return selectedLoan.verifications?.some((v:any) => v.type === type) || false;
+  }
   return (
     <div>
       <Drawer
@@ -194,6 +200,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   loading={loading}
                   loans={loans}
                   setLoading={setLoading}
+                  fetchLoans={fetchLoans}
                 />
               ) : (
                 <Descriptions
@@ -228,31 +235,70 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
             </div>
 
             <div style={{ marginTop: 24 }}>
-              <Typography.Title level={4}>Verifications</Typography.Title>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <Typography.Title level={4} style={{ margin: 0 }}>Verifications</Typography.Title>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  {!hasVerificationType("AddressOne") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>Address 1:</span>
+                    <Switch
+                      checked={!address1Disabled}
+                      checkedChildren="Enabled"
+                      unCheckedChildren="Disabled"
+                      onChange={(checked) => setAddress1Disabled(!checked)}
+                    />
+                  </div>}
+                  {!hasVerificationType("AddressTwo") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>Address 2:</span>
+                    <Switch
+                      checked={!address2Disabled}
+                      checkedChildren="Enabled"
+                      unCheckedChildren="Disabled"
+                      onChange={(checked) => setAddress2Disabled(!checked)}
+                    />
+                    </div>}
+                  {!hasVerificationType("Work") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>Work:</span>
+                    <Switch
+                      checked={!workDisabled}
+                      checkedChildren="Enabled"
+                      unCheckedChildren="Disabled"
+                      onChange={(checked) => setWorkDisabled(!checked)}
+                    />
+                  </div>}
+                  {!hasVerificationType("Business") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>Business:</span>
+                    <Switch
+                      checked={!businessDisabled}
+                      checkedChildren="Enabled"
+                      unCheckedChildren="Disabled"
+                      onChange={(checked) => setBusinessDisabled(!checked)}
+                    />
+                  </div>}
+                </div>
+              </div>
               <div style={{ display: "flex", gap: 16 }}>
-                {["PermanentAddress", "CurrentAddress", "Work"].map((type) => {
+                {[
+                  { type: "AddressOne", label: "Address 1", disabled: address1Disabled },
+                  { type: "AddressTwo", label: "Address 2", disabled: address2Disabled },
+                  { type: "Work", label: "Work", disabled: workDisabled },
+                  { type: "Business", label: "Business", disabled: businessDisabled }
+                ].filter(item => !item.disabled).map(({ type, label }) => {
                   const verification = selectedLoan?.verifications?.find(
                     (v: any) => v.type === type
                   );
                   return (
                     <Card
                       key={type}
-                      title={type}
+                      title={label}
                       style={{
                         flex: 1,
-                        height:
-                          verification?.status === "Completed"
-                            ? "auto"
-                            : "100%",
+                        height: "100%",
                         display: "flex",
                         flexDirection: "column",
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
-                        padding:
-                          verification?.status === "Completed"
-                            ? "12px"
-                            : "24px",
+                        padding: 12
                       }}
                       extra={
                         <>
@@ -267,50 +313,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               {verification.status}
                             </Tag>
                           )}
-                          <Switch
-                            checked={
-                              type === "PermanentAddress"
-                                ? !permanentAddressDisabled
-                                : type === "CurrentAddress"
-                                  ? !currentAddressDisabled
-                                  : !workDisabled
-                            }
-                            checkedChildren="Enabled"
-                            unCheckedChildren="Disabled"
-                            style={{ marginLeft: 8 }}
-                            onChange={(checked) => {
-                              if (type === "PermanentAddress") {
-                                setPermanentAddressDisabled(!checked);
-                              } else if (type === "CurrentAddress") {
-                                setCurrentAddressDisabled(!checked);
-                              } else if (type === "Work") {
-                                setWorkDisabled(!checked);
-                              }
-                            }}
-                          />
                         </>
                       }
                     >
                       {verification && (
                         <div
                           style={{
-                            marginBottom:
-                              verification?.status === "Completed" ? 0 : 16,
+                            marginBottom: 0
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              marginBottom: 8,
-                            }}
-                          >
-                            <span>Assigned Field Executive:</span>
-                            <Tag color="blue">
-                              Id: {verification.fieldExecutiveId}
-                            </Tag>
-
+                          <div className="flex-end">
                             {verification?.status === "Pending" &&
                               (fieldExecutiveEdit[type] ? (
                                 <Button
@@ -343,6 +355,28 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                 </Button>
                               ))}
                           </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "left",
+                              gap: "8px",
+                              marginBottom: 8,
+                            }}
+                          >
+                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"row"}}>
+                              <span>Field Executive:</span>
+                              <Tag color="blue">
+                                Id: {verification.fieldExecutive?.employeeCode}
+                              </Tag>
+                            </div>
+                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"row"}}>
+                              <span>Verifier:</span>
+                              <Tag color="blue">
+                                Id: {verification.verifier?.employeeCode}
+                              </Tag>    
+                            </div>                       
+                          </div>
                         </div>
                       )}
                       {verification?.status === "Completed" && (
@@ -362,9 +396,10 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           verification={verification}
                           type={type}
                           selectedLoan={selectedLoan}
-                          permanentAddressDisabled={permanentAddressDisabled}
-                          currentAddressDisabled={currentAddressDisabled}
+                          address1Disabled={address1Disabled}
+                          address2Disabled={address2Disabled}
                           workDisabled={workDisabled}
+                          businessDisabled={businessDisabled}
                           setCurrentOffice={setCurrentOffice}
                           userDetails={userDetails}
                           offices={offices}
@@ -372,6 +407,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           loading={loading}
                           setLoading={setLoading}
                           verifiers={verifiers}
+                          fetchLoans={fetchLoans}
+                          setRefresh={setRefresh}
                         />
                       )}
                     </Card>

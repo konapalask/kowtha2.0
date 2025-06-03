@@ -1,15 +1,17 @@
-import { Form, Radio, Select, Button, message } from "antd";
+import { Form, Radio, Select, Button, message, Input, Row, Col } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import React from "react";
 import { assignExecutivesApi } from "@/services/loans.services";
+import styles from "./FieldAssignmentForm.module.css";
 
 interface FieldAssignmentFormProps {
   verification: any;
   type: string;
   selectedLoan: any;
-  permanentAddressDisabled: boolean;
-  currentAddressDisabled: boolean;
+  address1Disabled: boolean;
+  address2Disabled: boolean;
   workDisabled: boolean;
+  businessDisabled: boolean;
   setCurrentOffice: (office: string) => void;
   userDetails: any;
   offices: any[];
@@ -17,15 +19,18 @@ interface FieldAssignmentFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   verifiers?: any[];
+  fetchLoans: () => void;
+  setRefresh: any;
 }
 
 const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   verification,
   type,
   selectedLoan,
-  permanentAddressDisabled,
-  currentAddressDisabled,
+  address1Disabled,
+  address2Disabled,
   workDisabled,
+  businessDisabled,
   setCurrentOffice,
   userDetails,
   offices,
@@ -33,26 +38,42 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   loading,
   setLoading,
   verifiers = [],
+  fetchLoans,
+  setRefresh,
 }) => {
+  const getVerificationType = (type: string) => {
+    switch (type) {
+      case "Address1":
+        return "AddressOne";
+      case "Address2":
+        return "AddressTwo";
+      default:
+        return type;
+    }
+  };
+  
   const handleVerificationAssign = async (
     loanId: number,
-    verificationType: string,
+    type: string,
     values: {
       assignmentMethod: "Local" | "Remote";
       office?: string;
-      assignee: string;
+      fieldExecutiveId: string;
+      address: string;  
+      verifierId: string;
     }
   ) => {
     const finalData = {
-      ...values,
-      verificationType,
-      fieldExecutiveId: values.assignee,
-      address: "Anakapalli",
+      verifierId: values.verifierId,
+      verificationType: getVerificationType(type),
+      fieldExecutiveId: values.fieldExecutiveId,
+      address: values.address,
     };
     try {
       setLoading(true);
       await assignExecutivesApi(loanId, finalData);
       message.success("Field executive assigned successfully");
+      fetchLoans();
     } catch (error) {
       message.error("Failed to assign field executive");
     } finally {
@@ -69,44 +90,40 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             ? {
                 assignmentMethod: verification?.assignmentMethod,
                 office: verification?.office,
-                assignee: verification?.assignee,
+                fieldExecutiveId: verification?.fieldExecutiveId,
+                address: verification?.address || "",
               }
             : {
                 assignmentMethod: "Local",
+                address: "",
               }
         }
         onFinish={(values) =>
           handleVerificationAssign(selectedLoan.id, type, values)
         }
         disabled={
-          type === "PermanentAddress"
-            ? permanentAddressDisabled
-            : type === "CurrentAddress"
-              ? currentAddressDisabled
-              : workDisabled
+          type === "Address1"
+            ? address1Disabled
+            : type === "Address2"
+              ? address2Disabled
+              : type === "Work"
+                ? workDisabled
+                : businessDisabled
         }
       >
         <Form.Item
-          name="assignmentMethod"
-          label="Assignment Method"
+          name="address"
+          label="Address"
           rules={[
             {
               required: true,
-              message: "Please select assignment method",
+              message: "Please enter the address",
             },
           ]}
         >
-          <Radio.Group
-            onChange={(e) => {
-              if (e.target.value === "Local") {
-                setCurrentOffice(userDetails?.officeId || "");
-              }
-            }}
-          >
-            <Radio.Button value="Local">Local</Radio.Button>
-            <Radio.Button value="Remote">Remote</Radio.Button>
-          </Radio.Group>
+          <Input.TextArea rows={3} placeholder="Enter address for verification" />
         </Form.Item>
+
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -115,31 +132,56 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         >
           {({ getFieldValue }) => {
             const assignmentMethod = getFieldValue("assignmentMethod");
-            if (assignmentMethod === "Remote") {
-              return (
-                <Form.Item
-                  name="office"
-                  label="Select Branch"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select a branch",
-                    },
-                  ]}
-                >
-                  <Select
-                    placeholder="Select branch"
-                    onChange={(value) => {
-                      setCurrentOffice(value);
-                    }}
-                    options={offices}
-                  />
-                </Form.Item>
-              );
-            }
-            return null;
+            return (
+              <>
+                  <Form.Item
+                    name="assignmentMethod"
+                    label="Assignment Method"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select assignment method",
+                      },
+                    ]}
+                  >
+                    <Radio.Group
+                      style={{ width: "100%" }}
+                      className={styles.customRadioGroup}
+                      onChange={(e) => {
+                        if (e.target.value === "Local") {
+                          setCurrentOffice(userDetails?.officeId || "");
+                        }
+                      }}
+                    >
+                      <Radio.Button value="Local">Local</Radio.Button>
+                      <Radio.Button value="Remote">Remote</Radio.Button>
+                    </Radio.Group>
+                  </Form.Item>
+                {assignmentMethod === "Remote" && (
+                    <Form.Item
+                      name="office"
+                      label="Select Branch"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select a branch",
+                        },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Select branch"
+                        onChange={(value) => {
+                          setCurrentOffice(value);
+                        }}
+                        options={offices}
+                      />
+                    </Form.Item>
+                )}
+              </>
+            );
           }}
         </Form.Item>
+
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
@@ -147,32 +189,28 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             prevValues?.office !== currentValues?.office
           }
         >
-          {({ getFieldValue }) => {
-            // const assignmentMethod = getFieldValue("assignmentMethod");
-            // const office = getFieldValue("office");
-            return (
-              <Form.Item
-                name="assignee"
-                label="Field Executive"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select a field executive",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Select field executive"
-                  style={{ width: "100%" }}
-                  options={fieldExecutives}
-                />
-              </Form.Item>
-            );
-          }}
+          {() => (
+            <Form.Item
+              name="fieldExecutiveId"
+              label="Field Executive"
+              rules={[
+                {
+                  required: true,
+                  message: "Please select a field executive",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Select field executive"
+                style={{ width: "100%" }}
+                options={fieldExecutives}
+              />
+            </Form.Item>
+          )}
         </Form.Item>
 
         <Form.Item
-          name={"verifierId"}
+          name="verifierId"
           label="Verifier"
           rules={[
             {

@@ -13,7 +13,7 @@ import {
 import React, { useContext } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
-import { bankOptions, loanTypeOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 
 interface BulkImportProps {
@@ -23,6 +23,8 @@ interface BulkImportProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  fieldExecutives?: any[];
+  verifiers?: any[];
 }
 
 const BulkImportDrawer: React.FC<BulkImportProps> = ({
@@ -32,8 +34,20 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
   loading,
   setLoading,
   setRefresh,
+  fieldExecutives = [],
+  verifiers = [],
 }) => {
   const { userDetails } = useContext(UserContext);
+
+  React.useEffect(() => {
+    if (isBulkImportDrawerVisible) {
+      // Initialize with one empty form
+      bulkImportForm.setFieldsValue({
+        loans: [{}],
+      });
+    }
+  }, [isBulkImportDrawerVisible, bulkImportForm]);
+
   const handleBulkImport = async (values: any) => {
     console.log(values);
     try {
@@ -80,6 +94,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
         bodyStyle={{ padding: "16px" }}
         open={isBulkImportDrawerVisible}
         maskClosable={false}
+        destroyOnClose
         footer={
           <div style={{ textAlign: "right", padding: "10px" }}>
             <Space>
@@ -113,7 +128,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                 {fields.map(({ key, name, ...restField }) => (
                   <div key={key} style={{ marginBottom: 12 }}>
                     <Row gutter={[8, 8]} align="middle" wrap={false}>
-                      <Col xs={24} md={4} lg={4} xl={4} style={{ padding: 4 }}>
+                      <Col xs={24} md={4} lg={4} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
                           labelCol={{ span: 24, style: { marginBottom: 0 } }}
@@ -122,6 +137,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           rules={[
                             { required: true, message: "Required" },
                             { whitespace: true, message: "Cannot be empty" },
+                            { max: 20, message: "Cannot be more than 20 characters" },
                           ]}
                         >
                           <Input style={{ height: "32px" }} />
@@ -139,6 +155,21 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           ]}
                         >
                           <Input style={{ height: "32px" }} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={4} lg={3} xl={3} style={{ padding: 4 }}>
+                        <Form.Item
+                          {...restField}
+                          labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                          name={[name, "applicantType"]}
+                          label="Applicant Type"
+                          rules={[{ required: true, message: "Required" }]}
+                        >
+                          <Select
+                            placeholder="Select Applicant Type"
+                            options={applicantTypeOptions}
+                            style={{ height: "32px" }}
+                          />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4} lg={4} xl={3} style={{ padding: 4 }}>
@@ -163,21 +194,27 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           />
                         </Form.Item>
                       </Col>
-                      <Col xs={24} md={7} lg={6} xl={6} style={{ padding: 4 }}>
+                      <Col xs={24} md={7} lg={6} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
                           labelCol={{ span: 24, style: { marginBottom: 0 } }}
-                          name={[name, "applicantAddress"]}
-                          label="Address"
-                          rules={[
-                            { required: true, message: "Required" },
-                            { whitespace: true, message: "Cannot be empty" },
-                          ]}
+                          name={[name, "address1"]}
+                          label="Address 1"
                         >
-                          <Input />
+                          <Input style={{ height: "32px" }} />
                         </Form.Item>
                       </Col>
-                      <Col xs={24} md={4} lg={3} xl={2} style={{ padding: 4 }}>
+                      <Col xs={24} md={7} lg={6} xl={3} style={{ padding: 4 }}>
+                        <Form.Item
+                          {...restField}
+                          labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                          name={[name, "address2"]}
+                          label="Address 2"
+                        >
+                          <Input style={{ height: "32px" }} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={4} lg={3} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
                           labelCol={{ span: 24, style: { marginBottom: 0 } }}
@@ -192,7 +229,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           />
                         </Form.Item>
                       </Col>
-                      <Col xs={24} md={6} lg={5} xl={5} style={{ padding: 4 }}>
+                      <Col xs={24} md={6} lg={5} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
                           labelCol={{ span: 24, style: { marginBottom: 0 } }}
@@ -213,7 +250,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           />
                         </Form.Item>
                       </Col>
-                      <Col xs={24} md={3} lg={2} xl={2} style={{ padding: 4 }}>
+                      <Col xs={24} md={3} lg={3} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}
                           labelCol={{ span: 24, style: { marginBottom: 0 } }}
@@ -231,6 +268,48 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                             min={0}
                             style={{ width: "100%", height: "32px" }}
                             addonAfter={"₹"}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={6} lg={5} xl={3} style={{ padding: 4 }}>
+                        <Form.Item
+                          {...restField}
+                          labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                          name={[name, "fieldExecutiveId"]}
+                          label="Field Executive"
+                          rules={[{ required: true, message: "Required" }]}
+                        >
+                          <Select
+                            showSearch
+                            placeholder="Select field executive"
+                            options={fieldExecutives}
+                            filterOption={(input, option) =>
+                              (option?.label ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
+                            }
+                            style={{ height: "32px" }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={6} lg={5} xl={3} style={{ padding: 4 }}>
+                        <Form.Item
+                          {...restField}
+                          labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                          name={[name, "verifierId"]}
+                          label="Verifier"
+                          rules={[{ required: true, message: "Required" }]}
+                        >
+                          <Select
+                            showSearch
+                            placeholder="Select verifier"
+                            options={verifiers}
+                            filterOption={(input, option) =>
+                              (option?.label ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
+                            }
+                            style={{ height: "32px" }}
                           />
                         </Form.Item>
                       </Col>

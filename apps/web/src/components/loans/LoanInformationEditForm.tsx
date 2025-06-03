@@ -28,6 +28,7 @@ interface LoanInfoFormProps {
   loading: boolean;
   loans: any[];
   setLoading: (loading: boolean) => void;
+  fetchLoans: () => void;
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
@@ -40,6 +41,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   loading,
   loans,
   setLoading,
+  fetchLoans,
 }) => {
   const { userDetails } = useContext(UserContext);
 
@@ -107,22 +109,17 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 };
                 setSelectedLoan(newLoan);
                 // Add the new loan to the loans list
-                setLoans((prevLoans: any) => [...prevLoans, newLoan]);
                 message.success("Loan created successfully");
-                setIsDrawerVisible(false);
+                // setIsDrawerVisible(false);
               } else {
                 message.error("Failed to create loan");
               }
             } else {
               // Update existing loan
               result = await updateLoanApi(selectedLoan.id, values);
-              setLoans(
-                loans.map((loan) =>
-                  loan.id === selectedLoan.id ? result.data : loan
-                )
-              );
               message.success("Loan information updated");
             }
+            fetchLoans();
             setEditLoanInfo(false);
           } catch (error) {
             message.error(
@@ -144,9 +141,10 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               rules={[
                 { required: true, message: "Required" },
                 { whitespace: true, message: "Cannot be empty" },
+                { max: 20, message: "Cannot be more than 20 characters" },
               ]}
             >
-              <Input disabled={!!selectedLoan.id} />
+              <Input />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>
@@ -194,7 +192,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <InputNumber min={0} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={6} style={{ padding: 4 }}>
+          {/* <Col xs={24} sm={6} style={{ padding: 4 }}>
             <Form.Item
               labelCol={{ span: 24, style: { marginBottom: 0 } }}
               label="Address"
@@ -206,7 +204,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
             >
               <Input />
             </Form.Item>
-          </Col>
+          </Col> */}
           <Col xs={24} sm={6} style={{ padding: 4 }}>
             <Form.Item
               labelCol={{ span: 24, style: { marginBottom: 0 } }}

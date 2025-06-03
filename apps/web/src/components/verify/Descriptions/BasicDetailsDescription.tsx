@@ -13,7 +13,7 @@ const BasicDetailsDescription: React.FC<{
           <Descriptions
             title={"Basic Details"}
             bordered
-            column={logs ? 1 : 2}
+            column={logs ? 1 : 3}
             extra={extra || null}
           >
             <Descriptions.Item label="Verification Type">
