@@ -134,7 +134,7 @@ model Loan {
   applicationNumber     String              @unique
   applicantName         String
   applicantMobile       String
-  applicantAddress      String
+  applicantAddress      String?
   applicantAddress1     String?
   applicantAddress2     String?
   isAddressSame         Boolean             @default(false)

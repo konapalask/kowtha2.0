@@ -18,7 +18,7 @@ export class CreateLoanDto {
 
   @ApiProperty({ description: 'Applicant address' })
   @IsString()
-  applicantAddress: string;
+  applicantAddress?: string;
 
   @ApiProperty({ description: 'Applicant address line 1', required: false })
   @IsString()
