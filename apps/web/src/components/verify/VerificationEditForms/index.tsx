@@ -10,13 +10,13 @@ import OfficeVerificationForm from './OfficeVerificationForm';
 interface FormSelectorProps {
   form: any;
   formKey: string;
-  currentTab: string;
+  currentTab: any;
 }
 
 export const FormSelector: React.FC<FormSelectorProps> = ({form, formKey, currentTab }) => {
   switch (formKey) {
     case 'basicDetails':
-      return <BasicDetailsForm form={form} currentTab={currentTab} />;
+      return <BasicDetailsForm form={form} />;
     case 'residenceDetails':
       return <ResidenceDetailsForm />;
     case 'familyEmploymentDetails':
