@@ -25,6 +25,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import WorkVerification from './src/screens/WorkVerification';
 import {getItem} from './src/helpers/utility';
+import BusinessVerification from './src/screens/BusinessVerification';
 
 // Configure XMLHttpRequest
 
@@ -32,12 +33,16 @@ export type RootStackParamList = {
   Login: undefined;
   VerificationList: undefined;
   VerificationItemScreen: {
-    item: {name: string; age: number; sex: string};
+    item: {name: string; applicationNumber: string};
     verificationType: 'CurrentAddress' | 'PermanentAddress';
   };
   WorkVerification: {
-    item: {name: string; age: number; sex: string};
+    item: {name: string; applicationNumber: string};
     verificationType: 'Work';
+  };
+  BusinessVerification: {
+    item: {name: string; applicationNumber: string};
+    verificationType: 'Business';
   };
 };
 
@@ -124,10 +129,21 @@ const App = () => {
             component={WorkVerification}
             options={({route}) => ({
               title: route.params?.item
-                ? `${route.params.item.name}`
+                ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
                 : 'Work Verification',
             })}
           />
+
+          <Stack.Screen
+            name="BusinessVerification"
+            component={BusinessVerification}
+            options={({route}) => ({
+              title: route.params?.item
+                ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
+                : 'Business Verification',
+            })}
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />
