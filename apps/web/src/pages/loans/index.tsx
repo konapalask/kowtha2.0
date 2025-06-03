@@ -85,18 +85,20 @@ export default function Loans() {
     }
   }, [selectedLoan, form]);
 
+  const fetchLoans = async () => {
+    try {
+      setLoading(true);
+      const result = await getLoansApi();
+      setLoans(result.data.data ?? []);
+    } catch (error) {
+      message.error("Failed to fetch loans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchLoans = async () => {
-      try {
-        setLoading(true);
-        const result = await getLoansApi();
-        setLoans(result.data.data ?? []);
-      } catch (error) {
-        message.error("Failed to fetch loans");
-      } finally {
-        setLoading(false);
-      }
-    };
+   
     fetchLoans();
   }, [refresh]);
 
@@ -224,14 +226,14 @@ export default function Loans() {
     },
 
     {
-      title: <Typography.Text>Permanent Address</Typography.Text>,
+      title: <Typography.Text>Address 1</Typography.Text>,
       children: [
         {
           title: "Assignee",
           key: "pavAssignee",
           render: (_, record: Loan) => {
             const pav = record?.verifications?.find(
-              (v: any) => v.type === "PermanentAddress"
+              (v: any) => v.type === "AddressOne"
             );
             return pav ? pav?.fieldExecutive?.id : "-";
           },
@@ -242,7 +244,7 @@ export default function Loans() {
           key: "pavStatus",
           render: (_, record: Loan) => {
             const pav = record?.verifications?.find(
-              (v: any) => v.type === "PermanentAddress"
+              (v: any) => v.type === "AddressOne"
             );
             return pav ? (
               <Tag color={pav.status === "Completed" ? "green" : "orange"}>
@@ -256,14 +258,14 @@ export default function Loans() {
       ],
     },
     {
-      title: <Typography.Text>Current Address</Typography.Text>,
+      title: <Typography.Text>Address 2</Typography.Text>,
       children: [
         {
           title: "Assignee",
           key: "cavAssignee",
           render: (_, record: Loan) => {
             const cav = record?.verifications?.find(
-              (v: any) => v.type === "CurrentAddress"
+              (v: any) => v.type === "AddressTwo"
             );
             return cav ? cav?.fieldExecutive?.id : "-";
           },
@@ -274,7 +276,7 @@ export default function Loans() {
           key: "cavStatus",
           render: (_, record: Loan) => {
             const cav = record?.verifications?.find(
-              (v: any) => v.type === "CurrentAddress"
+              (v: any) => v.type === "AddressTwo"
             );
             return cav ? (
               <Tag color={cav.status === "Completed" ? "green" : "orange"}>
@@ -339,7 +341,7 @@ export default function Loans() {
       ),
     },
   ];
-
+console.log(isDrawerVisible)
   return (
     <DashboardLayout>
       <Card>
@@ -415,6 +417,8 @@ export default function Loans() {
         setCurrentOffice={setCurrentOffice}
         offices={offices}
         verifiers={verifiers}
+        fetchLoans={fetchLoans}
+        setRefresh={setRefresh}
       />
 
       <BulkImportDrawer

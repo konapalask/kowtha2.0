@@ -1,14 +1,13 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { getFormFields } from "@/utils/constants";
-import { EditFormModalProps, FormField } from "@/utils/verifierInterface";
-import { Col, Form, Input, message, Modal, Row, Select } from "antd";
+import { EditFormModalProps } from "@/utils/verifierInterface";
+import { Form, message, Modal, Row } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { FormSelector } from "./VerificationEditForms";
 
 export const EditFormModal: React.FC<EditFormModalProps> = ({
   visible,
   onCancel,
-  //   onSave,
   formKey,
   initialValues,
   currentTab,
@@ -126,38 +125,6 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
     }
   };
 
-  const renderFormField = (field: FormField) => {
-    const formValues = form.getFieldsValue();
-
-    // Check if field should be shown
-    if (field.showWhen && !field.showWhen(formValues)) {
-      return null;
-    }
-
-    switch (field.type) {
-      case "input":
-        return <Input disabled={field.readOnly} />;
-      case "textarea":
-        return <Input.TextArea rows={4} />;
-      case "select":
-        return (
-          <Select
-            allowClear
-            placeholder={`Select ${field.label}`}
-            notFoundContent="No options available"
-          >
-            {field.options?.map((option: string) => (
-              <Select.Option key={option} value={option}>
-                {option}
-              </Select.Option>
-            ))}
-          </Select>
-        );
-      default:
-        return <Input />;
-    }
-  };
-
   return (
     <Modal
       title={`Edit ${formKey.replace(/([A-Z])/g, " $1").trim()}`}
@@ -180,22 +147,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
         preserve={false}
       >
         <Row gutter={[16, 16]}>
-          {getFormFields(formKey, currentTab).map((field: any) => (
-            <Col span={8} key={field.name}>
-              <Form.Item
-                name={field.name}
-                label={field.label}
-                rules={[
-                  {
-                    required: field.required,
-                    message: `Please ${field.type === "select" ? "select" : "enter"} ${field.label.toLowerCase()}`,
-                  },
-                ]}
-              >
-                {renderFormField(field)}
-              </Form.Item>
-            </Col>
-          ))}
+          <FormSelector form={form} formKey={formKey} currentTab={currentTab} />
         </Row>
       </Form>
     </Modal>

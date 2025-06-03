@@ -13,7 +13,7 @@ const FamilyEmploymentDescription: React.FC<{
           <Descriptions
             title="Family & Employment Details"
             bordered
-            column={logs ? 1 : 2}
+            column={logs ? 1 : 3}
             extra={extra || null}
           >
             <Descriptions.Item label="Total Family Members">

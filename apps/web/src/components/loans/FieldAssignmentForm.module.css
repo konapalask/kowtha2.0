@@ -1,0 +1,15 @@
+.customRadioGroup :global(.ant-radio-button-wrapper-checked) {
+  background-color: var(--primary-200) !important;
+  color: var(--primary-800) !important;
+  border-color: var(--primary-200) !important;
+}
+
+.customRadioGroup :global(.ant-radio-button-wrapper-checked:hover) {
+  background-color: var(--primary-200) !important;
+  color: var(--primary-800) !important;
+  border-color: var(--primary-200) !important;
+}
+
+.customRadioGroup :global(.ant-radio-button-wrapper:hover) {
+  color: var(--primary-800);
+} 

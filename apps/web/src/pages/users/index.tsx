@@ -141,8 +141,8 @@ export default function Users() {
   const columns: ColumnsType<User> = [
     {
       title: "Employee Code",
-      dataIndex: "EmployeeCode",
-      key: "EmployeeCode",
+      dataIndex: "employeeCode",
+      key: "employeeCode",
       width: 150,
     },
     {
@@ -157,12 +157,12 @@ export default function Users() {
       key: "mobile",
       width: 150,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: 200,
-    },
+    // {
+    //   title: "Email",
+    //   dataIndex: "email",
+    //   key: "email",
+    //   width: 200,
+    // },
     {
       title: "Role",
       dataIndex: "role",
@@ -258,7 +258,7 @@ export default function Users() {
           <Form.Item
             name="mobile"
             label="Mobile Number"
-            rules={[{ required: true, message: "Please enter mobile number" }]}
+            rules={[{ required: true, message: "Please enter mobile number" }, { max: 10, message: "Cannot be more than 10 characters" }, { pattern: /^[0-9]+$/, message: "Please enter a valid mobile number" }]}
             style={{ marginBottom: 8 }}
           >
             <Input maxLength={10} prefix="+91" />
