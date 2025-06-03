@@ -316,8 +316,8 @@ export class LoanService {
           };
 
           // Validate required fields
-          if (!loanData.applicantName || !loanData.applicantMobile || !loanData.applicantAddress) {
-            throw new Error('Missing required fields: Applicant Name, Contact Number, or Full Address');
+          if (!loanData.applicantName || !loanData.applicantMobile) {
+            throw new Error('Missing required fields: Applicant Name or Contact Number');
           }
 
           if (!loanData.applicationNumber) {
