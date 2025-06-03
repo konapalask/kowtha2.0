@@ -137,7 +137,7 @@ export default function Loans() {
         const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
         const options =
           result?.data?.data?.map((item: any) => ({
-            label: item.name,
+            label: <Typography.Text>{item.name} <Tag color="blue">{item.employeeCode}</Tag></Typography.Text>,
             value: item.id,
           })) ?? [];
         setFieldExecutives(options);
