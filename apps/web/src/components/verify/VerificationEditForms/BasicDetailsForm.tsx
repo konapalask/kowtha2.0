@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Select, Col } from 'antd';
+import { Form, Input, Select, Col, FormInstance } from 'antd';
 
 const { Option } = Select;
 
@@ -14,7 +14,7 @@ const educationQualificationOptions = [
   'PG/Professional Certification',
 ];
 
-const BasicDetailsForm: React.FC = ({form}) => {
+const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
   const maritalStatus = Form.useWatch('maritalStatus', form);
   const category = Form.useWatch('category', form);
   const isApplicantAvailable = Form.useWatch('isApplicantAvailable', form);
