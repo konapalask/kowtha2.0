@@ -22,14 +22,22 @@ const constitutionOptions = [
   'Trust',
   'Others',
 ];
+const relationshipOptions = [
+  'Applicant',
+  'Co-Applicant',
+  'Guarantor',
+  'Family',
+  'Others',
+];
 
 export type BusinessDetailsFormData = {
   nameBoardSeen: string;
   nameBoardMatched: string;
   constitution: string;
   constitutionOther?: string;
-  keyManager: string;
   keyManagerRelation: string;
+  keyManagerRelationOther?: string;
+  keyManager?: string;
   businessStartYear: string;
   totalExperience: string;
   isAddressTraceable: string;
@@ -50,8 +58,9 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       nameBoardMatched: '',
       constitution: '',
       constitutionOther: '',
-      keyManager: '',
       keyManagerRelation: '',
+      keyManagerRelationOther: '',
+      keyManager: '',
       businessStartYear: '',
       totalExperience: '',
       isAddressTraceable: '',
@@ -73,8 +82,10 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
   const nameBoardMatchedSheetRef = useRef<ActionSheetRef>(null);
   const constitutionSheetRef = useRef<ActionSheetRef>(null);
   const isAddressTraceableSheetRef = useRef<ActionSheetRef>(null);
+  const keyManagerRelationSheetRef = useRef<ActionSheetRef>(null);
 
   const watchedConstitution = watch('constitution');
+  const watchedKeyManagerRelation = watch('keyManagerRelation');
 
   return (
     <ScrollView style={styles.container}>
@@ -145,46 +156,69 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           )}
         />
       )}
-      {/* Key manager person of the Business */}
-      <Controller
-        control={control}
-        name="keyManager"
-        rules={{ required: 'Required' }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Key manager person of the Business</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter key manager name"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholderTextColor={colors.text.disabled}
-            />
-            {errors.keyManager && <Text style={styles.errorText}>{errors.keyManager.message}</Text>}
-          </View>
-        )}
-      />
-      {/* Relationship to the applicant */}
+      {/* Key manager relationship to the applicant */}
       <Controller
         control={control}
         name="keyManagerRelation"
         rules={{ required: 'Required' }}
-        render={({ field: { onChange, onBlur, value } }) => (
+        render={({ field: { value } }) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Relationship to the applicant</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter relationship"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholderTextColor={colors.text.disabled}
-            />
+            <Text style={styles.label}>Key manager relationship to the applicant</Text>
+            <TouchableOpacity style={styles.selectButton} onPress={() => keyManagerRelationSheetRef.current?.show()}>
+              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select relationship'}
+              </Text>
+            </TouchableOpacity>
             {errors.keyManagerRelation && <Text style={styles.errorText}>{errors.keyManagerRelation.message}</Text>}
           </View>
         )}
       />
+      {/* If Others, specify relationship */}
+      {watchedKeyManagerRelation === 'Others' && (
+        <Controller
+          control={control}
+          name="keyManagerRelationOther"
+          rules={{ required: 'Please specify relationship' }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Specify Relationship</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Specify relationship"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+              />
+              {errors.keyManagerRelationOther && (
+                <Text style={styles.errorText}>{errors.keyManagerRelationOther.message}</Text>
+              )}
+            </View>
+          )}
+        />
+      )}
+      {/* Key manager person of the Business (conditional) */}
+      {watchedKeyManagerRelation !== '' && watchedKeyManagerRelation !== 'Applicant' && (
+        <Controller
+          control={control}
+          name="keyManager"
+          rules={{ required: 'Required' }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Key manager person of the Business</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter key manager name"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+              />
+              {errors.keyManager && <Text style={styles.errorText}>{errors.keyManager.message}</Text>}
+            </View>
+          )}
+        />
+      )}
       {/* Business started in the year */}
       <Controller
         control={control}
@@ -325,6 +359,25 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
               onPress={() => {
                 setValue('isAddressTraceable', option);
                 isAddressTraceableSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      {/* Key Manager Relationship ActionSheet */}
+      <ActionSheet ref={keyManagerRelationSheetRef} containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Select Relationship</Text>
+          {relationshipOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPress={() => {
+                setValue('keyManagerRelation', option);
+                if (option !== 'Others') setValue('keyManagerRelationOther', '');
+                if (option === 'Applicant') setValue('keyManager', '');
+                keyManagerRelationSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
