@@ -5,7 +5,9 @@ import {
   Button,
   Card,
   Descriptions,
-  Switch,
+  Select,
+  Checkbox,
+  message,
 } from "antd";
 import {
   CloseOutlined,
@@ -76,6 +78,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   // })
   function hasVerificationType( type:string) {
     return selectedLoan.verifications?.some((v:any) => v.type === type) || false;
+  }
+  
+  const handleVerifierSelect = (value: string) => {
+    console.log(value);
+    message.success("Verifier Assigned Successfully");
   }
   return (
     <div>
@@ -234,46 +241,42 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
               )}
             </div>
 
-            <div style={{ marginTop: 24 }}>
+            {selectedLoan?.id && <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Typography.Title level={4} style={{ margin: 0 }}>Verifications</Typography.Title>
+                <Select placeholder="Select Verifiers" options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                  {!hasVerificationType("AddressOne") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>Address 1:</span>
-                    <Switch
+                  {!hasVerificationType("AddressOne") && 
+                    <Checkbox
                       checked={!address1Disabled}
-                      checkedChildren="Enabled"
-                      unCheckedChildren="Disabled"
-                      onChange={(checked) => setAddress1Disabled(!checked)}
-                    />
-                  </div>}
-                  {!hasVerificationType("AddressTwo") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>Address 2:</span>
-                    <Switch
+                      onChange={(e) => setAddress1Disabled(!e.target.checked)}
+                    >
+                      Address 1
+                    </Checkbox>
+                  }
+                  {!hasVerificationType("AddressTwo") && 
+                    <Checkbox
                       checked={!address2Disabled}
-                      checkedChildren="Enabled"
-                      unCheckedChildren="Disabled"
-                      onChange={(checked) => setAddress2Disabled(!checked)}
-                    />
-                    </div>}
-                  {!hasVerificationType("Work") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>Work:</span>
-                    <Switch
+                      onChange={(e) => setAddress2Disabled(!e.target.checked)}
+                    >
+                      Address 2
+                    </Checkbox>
+                  }
+                  {!hasVerificationType("Work") && 
+                    <Checkbox
                       checked={!workDisabled}
-                      checkedChildren="Enabled"
-                      unCheckedChildren="Disabled"
-                      onChange={(checked) => setWorkDisabled(!checked)}
-                    />
-                  </div>}
-                  {!hasVerificationType("Business") && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>Business:</span>
-                    <Switch
+                      onChange={(e) => setWorkDisabled(!e.target.checked)}
+                    >
+                      Work
+                    </Checkbox>
+                  }
+                  {!hasVerificationType("Business") && 
+                    <Checkbox
                       checked={!businessDisabled}
-                      checkedChildren="Enabled"
-                      unCheckedChildren="Disabled"
-                      onChange={(checked) => setBusinessDisabled(!checked)}
-                    />
-                  </div>}
+                      onChange={(e) => setBusinessDisabled(!e.target.checked)}
+                    >
+                      Business
+                    </Checkbox>
+                  }
                 </div>
               </div>
               <div style={{ display: "flex", gap: 16 }}>
@@ -289,12 +292,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   return (
                     <Card
                       key={type}
-                      title={label}
+                      // title={label}
                       style={{
                         flex: 1,
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
+                      }}
+                      headStyle={{
+                        display: "none"
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
@@ -411,7 +417,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   );
                 })}
               </div>
-            </div>
+            </div>}
           </>
         )}
       </Drawer>
