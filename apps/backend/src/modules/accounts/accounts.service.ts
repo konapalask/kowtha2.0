@@ -8,6 +8,8 @@ import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateOfficeDto } from './dto/create-office.dto';
+import { UpdateOfficeDto } from './dto/update-office.dto';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -431,6 +433,133 @@ export class AccountsService {
       await this.loggingService.error('Failed to update user', {
         userId,
         data: updateUserDto,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createOffice(createOfficeDto: CreateOfficeDto) {
+    try {
+      // Check if office with same name already exists
+      const existingOffice = await this.prisma.office.findFirst({
+        where: { name: createOfficeDto.name },
+      });
+
+      if (existingOffice) {
+        throw new BadRequestException('Office with this name already exists');
+      }
+
+      const office = await this.prisma.office.create({
+        data: createOfficeDto,
+      });
+
+      await this.loggingService.info('Office created successfully', {
+        officeId: office.id,
+        name: office.name,
+      });
+
+      return office;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create office', {
+        data: createOfficeDto,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async updateOffice(officeId: number, updateOfficeDto: UpdateOfficeDto) {
+    try {
+      // Check if office exists
+      const office = await this.prisma.office.findUnique({
+        where: { id: officeId },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      // If name is being updated, check if it already exists
+      if (updateOfficeDto.name && updateOfficeDto.name !== office.name) {
+        const existingOffice = await this.prisma.office.findFirst({
+          where: { name: updateOfficeDto.name },
+        });
+
+        if (existingOffice) {
+          throw new BadRequestException('Office with this name already exists');
+        }
+      }
+
+      const updatedOffice = await this.prisma.office.update({
+        where: { id: officeId },
+        data: updateOfficeDto,
+      });
+
+      await this.loggingService.info('Office updated successfully', {
+        officeId,
+        updatedFields: Object.keys(updateOfficeDto),
+      });
+
+      return updatedOffice;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update office', {
+        officeId,
+        data: updateOfficeDto,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async listOffices() {
+    try {
+      const offices = await this.prisma.office.findMany({
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      await this.loggingService.debug('Offices listed successfully', {
+        count: offices.length,
+      });
+
+      return offices;
+    } catch (error) {
+      await this.loggingService.error('Failed to list offices', {
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async getOffice(officeId: number) {
+    try {
+      const office = await this.prisma.office.findUnique({
+        where: { id: officeId },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      return office;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to get office', {
+        officeId,
         error: error.message,
         stack: error.stack,
       });

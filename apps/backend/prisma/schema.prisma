@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -15,10 +16,15 @@ enum UserRole {
 }
 
 enum VerificationType {
-  PermanentAddress
-  CurrentAddress
+  AddressOne
+  AddressTwo
   Work
   Business
+}
+
+enum AddressType {
+  PermanentAddress
+  CurrentAddress
 }
 
 enum PictureSource {
@@ -108,6 +114,7 @@ model Verification {
   loanId           Int
   loan             Loan               @relation(fields: [loanId], references: [id])
   type             VerificationType
+  addressType      AddressType
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus

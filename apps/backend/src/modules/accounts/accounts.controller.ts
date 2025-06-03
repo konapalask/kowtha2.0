@@ -10,6 +10,8 @@ import { UserRole } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ParseIntPipe } from '@nestjs/common';
+import { CreateOfficeDto } from './dto/create-office.dto';
+import { UpdateOfficeDto } from './dto/update-office.dto';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -216,6 +218,150 @@ export class AccountsController {
     return {
       message: 'User updated successfully',
       data: user
+    };
+  }
+
+  @Post('offices')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Create a new office/branch' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Office has been successfully created',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Office created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            location: { type: 'string' },
+            address: { type: 'string' },
+            contactNumber: { type: 'string' },
+            email: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async createOffice(@Body() createOfficeDto: CreateOfficeDto) {
+    const office = await this.accountsService.createOffice(createOfficeDto);
+    return {
+      message: 'Office created successfully',
+      data: office
+    };
+  }
+
+  @Patch('offices/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update an existing office/branch' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Office has been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Office updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            location: { type: 'string' },
+            address: { type: 'string' },
+            contactNumber: { type: 'string' },
+            email: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async updateOffice(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateOfficeDto: UpdateOfficeDto
+  ) {
+    const office = await this.accountsService.updateOffice(id, updateOfficeDto);
+    return {
+      message: 'Office updated successfully',
+      data: office
+    };
+  }
+
+  @Get('offices')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'List all offices/branches' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a list of all offices',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Offices fetched successfully' },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              name: { type: 'string' },
+              location: { type: 'string' },
+              address: { type: 'string' },
+              contactNumber: { type: 'string' },
+              email: { type: 'string' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        }
+      }
+    }
+  })
+  async listOffices() {
+    const offices = await this.accountsService.listOffices();
+    return {
+      message: 'Offices fetched successfully',
+      data: offices
+    };
+  }
+
+  @Get('offices/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get details of a specific office/branch' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns the details of the specified office',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Office fetched successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            location: { type: 'string' },
+            address: { type: 'string' },
+            contactNumber: { type: 'string' },
+            email: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  async getOffice(@Param('id', ParseIntPipe) id: number) {
+    const office = await this.accountsService.getOffice(id);
+    return {
+      message: 'Office fetched successfully',
+      data: office
     };
   }
 } 

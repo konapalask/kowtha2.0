@@ -217,9 +217,10 @@ export class LoanService {
         // If field executive ID is provided, create all three verifications
         if (data.fieldExecutiveId) {
           const verificationTypes = [
-            VerificationType.PermanentAddress,
-            VerificationType.CurrentAddress,
+            VerificationType.AddressOne,
+            VerificationType.AddressTwo,
             VerificationType.Work,
+            VerificationType.Business,
           ];
 
           // Create verifications for each type
@@ -227,10 +228,11 @@ export class LoanService {
             verificationTypes.map((type) =>
               prisma.verification.create({
                 data: {
-                  loanId: loan.id,
+                  loan: { connect: { id: loan.id } },
                   type,
-                  fieldExecutiveId: data.fieldExecutiveId,
-                  status: VerificationStatus.Pending,
+                  addressType: type === 'Work' ? 'PermanentAddress' : 'CurrentAddress',
+                  fieldExecutive: { connect: { id: data.fieldExecutiveId } },
+                  status: 'Pending',
                 },
               })
             )
@@ -406,9 +408,10 @@ export class LoanService {
             applicantAddress: address || null,
           },
           create: {
-            loanId,
+            loan: { connect: { id: loan.id } },
             type: verificationType,
-            fieldExecutiveId,
+            addressType: verificationType === 'Work' ? 'PermanentAddress' : 'CurrentAddress',
+            fieldExecutive: { connect: { id: fieldExecutiveId } },
             status: 'Pending',
             applicantAddress: address || null,
           },
@@ -995,11 +998,11 @@ export class LoanService {
 
       // Get the verification data for each type
       const permanentAddressVerification = loan.verifications.find(
-        v => v.type === 'PermanentAddress'
+        v => v.type === 'AddressOne'
       )?.verificationData as VerificationData || {};
 
       const currentAddressVerification = loan.verifications.find(
-        v => v.type === 'CurrentAddress'
+        v => v.type === 'AddressTwo'
       )?.verificationData as VerificationData || {};
 
       const workVerification = loan.verifications.find(
