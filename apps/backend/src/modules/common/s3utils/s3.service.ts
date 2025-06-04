@@ -180,4 +180,55 @@ export class S3Service {
     await new Promise<void>(resolve => out.on('finish', () => resolve()));
     console.log(`Processed image saved to ${outputPath}`);
   }
+
+  async processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number): Promise<string> {
+    try {
+      // Download the image from S3
+      const response = await fetch(s3ImageUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const imageBuffer = Buffer.from(arrayBuffer);
+      
+      // Create temporary files for input and output
+      const tempInputPath = `/tmp/input_${Date.now()}.jpg`;
+      const tempOutputPath = `/tmp/output_${Date.now()}.jpg`;
+      
+      // Write the downloaded image to temp file
+      fs.writeFileSync(tempInputPath, imageBuffer);
+      
+      // Process the image
+      await this.processImage(tempInputPath, tempOutputPath, latitude, longitude);
+      
+      // Read the processed image
+      const processedImageBuffer = fs.readFileSync(tempOutputPath);
+      
+      // Upload the processed image back to S3 with the same key
+      const key = s3ImageUrl.split('/').pop(); // Get the filename from the URL
+      if (!key) {
+        throw new Error('Invalid S3 URL - could not extract key');
+      }
+      
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: processedImageBuffer,
+        ContentType: 'image/jpeg',
+      });
+      
+      await this.s3Client.send(command);
+      
+      // Clean up temporary files
+      fs.unlinkSync(tempInputPath);
+      fs.unlinkSync(tempOutputPath);
+      
+      // Return the same S3 URL since we're overwriting the file
+      return s3ImageUrl;
+    } catch (error) {
+      await this.loggingService.error('Failed to process and upload image', {
+        s3ImageUrl,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
 } 

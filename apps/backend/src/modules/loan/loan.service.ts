@@ -96,6 +96,8 @@ interface VerificationData {
     type: string;
     timestamp: string;
     s3ImageUrl: string;
+    latitude?: string;
+    longitude?: string;
   }>;
 }
 
@@ -928,6 +930,36 @@ export class LoanService {
         throw new Error('Verification not found or not assigned to this field executive');
       }
 
+      // Process all images in verificationData if it exists
+      if (verificationData?.uploadedItems) {
+        const processedItems = await Promise.all(
+          verificationData.uploadedItems.map(async (item) => {
+            try {
+              if (item.s3ImageUrl && item.latitude && item.longitude) {
+                // Process and update the image
+                const processedUrl = await this.s3Service.processAndUploadImage(
+                  item.s3ImageUrl,
+                  parseFloat(item.latitude),
+                  parseFloat(item.longitude)
+                );
+                return { ...item, s3ImageUrl: processedUrl };
+              }
+              return item;
+            } catch (error) {
+              await this.loggingService.error('Failed to process image', {
+                loanId,
+                verificationType,
+                itemId: item.id,
+                error: error.message
+              });
+              // Return original item if processing fails
+              return item;
+            }
+          })
+        );
+        verificationData.uploadedItems = processedItems;
+      }
+
       // Update verification status
       const updatedVerification = await this.prisma.verification.update({
         where: {
@@ -956,6 +988,13 @@ export class LoanService {
           verificationDate: new Date(),
           remarks: findings,
         },
+      });
+
+      await this.loggingService.info('Verification report updated successfully with processed images', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        processedImagesCount: verificationData?.uploadedItems?.length || 0
       });
 
       return {
