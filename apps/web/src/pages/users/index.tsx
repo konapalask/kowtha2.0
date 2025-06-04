@@ -10,6 +10,7 @@ import {
   Select,
   message,
   Popconfirm,
+  Tag,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -175,6 +176,13 @@ export default function Users() {
       key: "office",
       width: 150,
       render: (office: any) => office?.name,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 150,
+      render: (status: string) => status === "Active" ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
     },
     ...(userDetails?.role === "Admin"
       ? [

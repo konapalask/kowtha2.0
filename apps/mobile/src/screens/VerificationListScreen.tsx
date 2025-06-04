@@ -32,7 +32,7 @@ interface VerificationItem {
   applicantAddress?: string;
   verification: {
     id: string;
-    type: 'CurrentAddress' | 'PermanentAddress' | 'Work';
+    type: 'AddressOne' | 'AddressTwo' | 'Work' | 'Business';
     status: 'Pending' | 'In Progress' | 'Completed';
   };
 }
@@ -202,12 +202,10 @@ const VerificationListScreen = () => {
 
   const getVerificationTypeLabel = (type: string) => {
     switch (type) {
-      case 'CurrentAddress':
-        return 'Current Address';
-      case 'PermanentAddress':
-        return 'Permanent Address';
-      case 'Work':
-        return 'Work';
+      case 'AddressTwo':
+        return 'Address 2';
+      case 'AddressOne':
+        return 'Address 1';
       default:
         return type;
     }
@@ -298,6 +296,12 @@ const VerificationListScreen = () => {
             navigation.navigate('WorkVerification', {
               item: baseNavPayload,
               verificationType: 'Work', // Explicitly 'Work'
+              userData: item,
+            });
+          } else if (item.verification.type === 'Business') {
+            navigation.navigate('BusinessVerification', {
+              item: baseNavPayload,
+              verificationType: 'Business',
               userData: item,
             });
           } else {

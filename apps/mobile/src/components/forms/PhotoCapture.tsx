@@ -13,6 +13,7 @@ import {
   launchCamera,
   launchImageLibrary,
   MediaType,
+  Asset,
 } from 'react-native-image-picker';
 import RNLocation from 'react-native-get-location';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
@@ -23,6 +24,10 @@ import {getImageUploadPresignedUrl} from '../../services/field.services';
 import Icons from 'react-native-vector-icons/AntDesign';
 
 const MAX_UPLOADS = 20;
+
+interface ExtendedUploadedItem extends UploadedItem {
+  isOverlayNeeded?: boolean;
+}
 
 type PhotoCaptureProps = {
   onUploadedItemsChange: (items: UploadedItem[]) => void;
@@ -35,9 +40,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   initialItems = [],
   loanId,
 }) => {
-  const [uploadedItems, setUploadedItems] =
-    useState<UploadedItem[]>(initialItems);
-  console.log(uploadedItems);
+  const [uploadedItems, setUploadedItems] = useState<ExtendedUploadedItem[]>(initialItems);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeocodingInitialized, setIsGeocodingInitialized] = useState(false);
 
@@ -108,7 +111,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   const uploadImage = async (
     imageUri: string,
     type: string,
-    location?: {latitude: number; longitude: number},
+    locationOrOverlay: {latitude: number; longitude: number} | {isOverlayNeeded: boolean},
     isCamera?: boolean,
   ) => {
     try {
@@ -146,7 +149,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       }
 
       // Create new item with S3 URL
-      const newItem: UploadedItem = {
+      const newItem: ExtendedUploadedItem = {
         id: Date.now().toString(),
         uri: imageUri,
         s3ImageUrl: fileName,
@@ -155,25 +158,26 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         isCamera: isCamera || false,
       };
 
-      // Add location details if available (from camera)
-      if (location) {
+      // Add location details if available and overlay is needed
+      if ('latitude' in locationOrOverlay && 'longitude' in locationOrOverlay) {
         try {
           const locationDetails = await getLocationDetails(
-            location.latitude,
-            location.longitude,
+            locationOrOverlay.latitude,
+            locationOrOverlay.longitude,
           );
-          newItem.latitude = location.latitude;
-          newItem.longitude = location.longitude;
+          newItem.latitude = locationOrOverlay.latitude;
+          newItem.longitude = locationOrOverlay.longitude;
           newItem.locality = locationDetails.locality;
           newItem.pincode = locationDetails.pincode;
         } catch (locationError) {
           console.error('Error getting location details:', locationError);
-          // Continue with upload even if location details fail
-          newItem.latitude = location.latitude;
-          newItem.longitude = location.longitude;
+          newItem.latitude = locationOrOverlay.latitude;
+          newItem.longitude = locationOrOverlay.longitude;
           newItem.locality = 'Unknown';
           newItem.pincode = 'Unknown';
         }
+      } else if ('isOverlayNeeded' in locationOrOverlay) {
+        newItem.isOverlayNeeded = locationOrOverlay.isOverlayNeeded;
       }
 
       const updatedItems = [...uploadedItems, newItem];
@@ -204,67 +208,117 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         return;
       }
 
-      // Get location permission and coordinates
-      const locationPermission = await check(
-        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-      );
-      if (locationPermission !== RESULTS.GRANTED) {
-        const permissionResult = await request(
-          PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-        );
-        if (permissionResult !== RESULTS.GRANTED) {
-          Alert.alert(
-            'Permission Required',
-            'Location permission is required to capture photos. Would you like to grant permission?',
-            [
-              {
-                text: 'Cancel',
-                style: 'cancel',
-              },
-              {
-                text: 'Grant Permission',
-                onPress: async () => {
-                  const result = await request(
-                    PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-                  );
-                  if (result === RESULTS.GRANTED) {
-                    handleCapture();
-                  } else {
-                    Alert.alert(
-                      'Permission Denied',
-                      'Location permission is required to capture photos',
-                    );
-                  }
-                },
-              },
-            ],
-          );
-          return;
-        }
-      }
-
-      const location = await RNLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-      });
-      console.log('location', location);
-
       const result = await launchCamera({
         mediaType: 'photo',
         quality: 0.8,
       });
 
-      if (result.assets && result.assets[0]) {
-        await uploadImage(
-          result.assets[0].uri || '',
-          'photo',
-          {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-          true,
-        );
+      const photoUri = result.assets?.[0]?.uri;
+      if (!photoUri) {
+        return;
       }
+
+      // Ask user if they want to overlay geotag
+      Alert.alert(
+        'Geotag Overlay',
+        'Would you like to overlay geotag information on this photo?',
+        [
+          {
+            text: 'No',
+            onPress: () => {
+              uploadImage(
+                photoUri,
+                'photo',
+                {isOverlayNeeded: false},
+                true,
+              );
+            },
+          },
+          {
+            text: 'Yes',
+            onPress: async () => {
+              try {
+                // Get location permission and coordinates
+                const locationPermission = await check(
+                  PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+                );
+                if (locationPermission !== RESULTS.GRANTED) {
+                  const permissionResult = await request(
+                    PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+                  );
+                  if (permissionResult !== RESULTS.GRANTED) {
+                    Alert.alert(
+                      'Permission Required',
+                      'Location permission is required for geotagging. Would you like to grant permission?',
+                      [
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                          onPress: () => {
+                            uploadImage(
+                              photoUri,
+                              'photo',
+                              {isOverlayNeeded: false},
+                              true,
+                            );
+                          },
+                        },
+                        {
+                          text: 'Grant Permission',
+                          onPress: async () => {
+                            const result = await request(
+                              PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+                            );
+                            if (result === RESULTS.GRANTED) {
+                              handleCapture();
+                            } else {
+                              uploadImage(
+                                photoUri,
+                                'photo',
+                                {isOverlayNeeded: false},
+                                true,
+                              );
+                            }
+                          },
+                        },
+                      ],
+                    );
+                    return;
+                  }
+                }
+
+                const location = await RNLocation.getCurrentPosition({
+                  enableHighAccuracy: true,
+                  timeout: 15000,
+                });
+
+                await uploadImage(
+                  photoUri,
+                  'photo',
+                  {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  },
+                  true,
+                );
+              } catch (error) {
+                console.error('Error getting location:', error);
+                Alert.alert(
+                  'Location Error',
+                  'Failed to get location. Uploading without geotag.',
+                );
+                uploadImage(
+                  photoUri,
+                  'photo',
+                  {isOverlayNeeded: false},
+                  true,
+                );
+              }
+            },
+          },
+        ],
+        {cancelable: false},
+      );
     } catch (error) {
       console.error('Error capturing photo:', error);
       Alert.alert('Error', 'Failed to capture photo');
@@ -326,7 +380,12 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       });
 
       if (result.assets && result.assets[0]) {
-        await uploadImage(result.assets[0].uri || '', 'photo');
+        await uploadImage(
+          result.assets[0].uri || '',
+          'photo',
+          {isOverlayNeeded: false},
+          false,
+        );
       }
     } catch (error) {
       console.error('Error selecting photo:', error);

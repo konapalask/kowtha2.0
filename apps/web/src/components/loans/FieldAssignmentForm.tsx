@@ -52,11 +52,11 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       office?: string;
       fieldExecutiveId: string;
       address: string;  
-      verifierId: string;
+      // verifierId: string;
     }
   ) => {
     const finalData = {
-      verifierId: values.verifierId,
+      // verifierId: values.verifierId,
       verificationType: getVerificationType(type),
       fieldExecutiveId: values.fieldExecutiveId,
       address: values.address,
@@ -96,7 +96,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       >
         <Form.Item
           name="address"
-          label="Address"
+          label={type === "AddressOne" ? "Address 1" :type === "AddressTwo" ? "Address 2" : type === "Work" ? "Work Address" : type === "Business" ? "Business Address" : "Address"}
           rules={[
             {
               required: true,
@@ -192,7 +192,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           )}
         </Form.Item>
 
-        <Form.Item
+        {/* <Form.Item
           name="verifierId"
           label="Verifier"
           rules={[
@@ -207,7 +207,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             style={{ width: "100%" }}
             options={verifiers}
           />
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item>
           <Button
