@@ -127,7 +127,7 @@ const VerificationItemScreen = () => {
       tpcName: '',
       mobileNumber: '',
       relationship: '',
-      feedbackStatus: '',
+      // feedbackStatus: '',
       comments: '',
     },
     uploadedItems: [],
@@ -333,7 +333,10 @@ const VerificationItemScreen = () => {
       const finalData = {
         verificationType: verificationType,
         findings: 'Verification Findings Text',
-        verificationData: formData,
+        verificationData: {
+          ...formData,
+          addressType: formData.addressVerification.address,
+        },
       };
 
       console.log('Submitting form data:', finalData);

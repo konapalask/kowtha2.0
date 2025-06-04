@@ -365,7 +365,10 @@ const WorkVerification = () => {
       const finalData = {
         verificationType: verificationType,
         findings: 'Work Verification Findings',
-        verificationData: formData,
+        verificationData: {
+          ...formData,
+          addressType: "Work",
+        },
       };
 
       console.log('Submitting form data:', finalData);

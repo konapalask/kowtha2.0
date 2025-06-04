@@ -31,7 +31,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   initialData,
 }) => {
   const relationshipRef = React.useRef<ActionSheetRef>(null);
-  const feedbackStatusRef = React.useRef<ActionSheetRef>(null);
+  // const feedbackStatusRef = React.useRef<ActionSheetRef>(null);
 
   const {
     control,
@@ -43,7 +43,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
       tpcName: '',
       mobileNumber: '',
       relationship: '',
-      feedbackStatus: '',
+      // feedbackStatus: '',
       comments: '',
     },
   });
@@ -135,7 +135,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
           name="relationship"
         />
 
-        <Controller
+        {/* <Controller
           control={control}
           rules={{required: 'Feedback status is required'}}
           render={({field: {value}}) => (
@@ -157,7 +157,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
             </View>
           )}
           name="feedbackStatus"
-        />
+        /> */}
 
         <Controller
           control={control}
@@ -199,7 +199,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet ref={feedbackStatusRef}>
+      {/* <ActionSheet ref={feedbackStatusRef}>
         <View style={styles.actionSheet}>
           <Text style={styles.actionSheetTitle}>Select Feedback Status</Text>
           {FEEDBACK_STATUS_OPTIONS.map(option => (
@@ -213,7 +213,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <TouchableOpacity
         style={styles.submitButton}
