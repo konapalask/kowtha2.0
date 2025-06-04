@@ -1612,6 +1612,7 @@ export class LoanService {
           id: verification.id,
           type: verification.type,
           status: verification.status,
+          addressType: verification.addressType,
           verificationData: verification.verificationData,
           paths: verification.paths,
           downloadUrls: downloadUrls.filter(url => url !== null),
