@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
@@ -915,6 +915,7 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
+    addressType?: AddressType,
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -967,24 +968,8 @@ export class LoanService {
         data: {
           status: 'Completed',
           verificationData: verificationData || null,
+          addressType: addressType || null,
           updatedAt: new Date(),
-        },
-      });
-
-      // Create or update verification report
-      const verificationReport = await this.prisma.verificationReport.upsert({
-        where: {
-          loanId,
-        },
-        update: {
-          remarks: findings,
-          updatedAt: new Date(),
-        },
-        create: {
-          loanId,
-          verifierId: fieldExecutiveId,
-          verificationDate: new Date(),
-          remarks: findings,
         },
       });
 
@@ -997,7 +982,6 @@ export class LoanService {
 
       return {
         verification: updatedVerification,
-        report: verificationReport,
       };
     } catch (error) {
       this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
