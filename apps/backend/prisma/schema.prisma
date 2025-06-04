@@ -30,6 +30,8 @@ enum VerificationType {
 enum AddressType {
   PermanentAddress
   CurrentAddress
+  Work
+  Business
 }
 
 enum PictureSource {

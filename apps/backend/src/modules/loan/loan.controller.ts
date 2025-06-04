@@ -590,7 +590,6 @@ export class LoanController {
       addressType: AddressType; 
       findings: string; 
       verificationData?: any;
-      path?: string;
     },
     @Request() req: AuthenticatedRequest,
   ) {
@@ -600,7 +599,6 @@ export class LoanController {
       req.user.sub,
       body.findings,
       body.verificationData,
-      body.path ? [body.path] : undefined,
     );
     return {
       status: 200,

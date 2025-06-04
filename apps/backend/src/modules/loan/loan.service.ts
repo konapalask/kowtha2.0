@@ -915,7 +915,6 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    paths?: string[],
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -967,7 +966,6 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          paths: paths || [],
           verificationData: verificationData || null,
           updatedAt: new Date(),
         },
