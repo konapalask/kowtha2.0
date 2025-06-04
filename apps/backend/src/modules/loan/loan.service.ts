@@ -368,8 +368,8 @@ export class LoanService {
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    verificationType: VerificationType,
-    fieldExecutiveId: number,
+    verificationType?: VerificationType,
+    fieldExecutiveId?: number,
     address?: string,
     verifierId?: number
   ) {
@@ -380,22 +380,28 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      // If field executive is provided, address is mandatory
-      if (fieldExecutiveId && !address) {
-        throw new BadRequestException('Address is required when assigning a field executive');
+      if (!fieldExecutiveId && !verifierId) {
+        throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
       }
 
-      // Start a transaction to ensure all operations succeed or fail together
+      if (verifierId) {
+        // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
         // Update loan with verifier if provided
-        if (verifierId) {
-          await prisma.loan.update({
-            where: { id: loanId },
-            data: { verifierId }
-          });
-        }
+        await prisma.loan.update({
+          where: { id: loanId },
+          data: { verifierId }
+        });
+      });
+    }
 
-        const verification = await prisma.verification.upsert({
+    else{
+      // If field executive is provided, address is mandatory
+      if (!fieldExecutiveId || !address || !verificationType) {
+        throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
+      }
+
+        const verification = await this.prisma.verification.upsert({
           where: {
             loanId_type: {
               loanId,
@@ -417,7 +423,7 @@ export class LoanService {
           },
         });
 
-        const loanStatusChange = await prisma.loan.update({
+        const loanStatusChange = await this.prisma.loan.update({
           where: { id: loanId },
           data: { status: 'Assigned' },
         });
@@ -432,7 +438,7 @@ export class LoanService {
         });
 
         return verification;
-      });
+      };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
