@@ -23,7 +23,7 @@ import {
   Cell
 } from "recharts";
 import { getDashboardMetrics } from "@/services/dashboard.services";
-import { DateRange } from 'react-date-range';
+import DateRangePicker from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
@@ -93,15 +93,20 @@ export default function Dashboard() {
   const [pendingLoans, setPendingLoans] = useState<any[]>([]);
   const [processingStats, setProcessingStats] = useState<any[]>([]);
   const [employeeStats, setEmployeeStats] = useState<any[]>([]);
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)),
-    endDate: new Date(),
-    key: 'selection'
+  const [dateRange, setDateRange] = useState(() => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 6);
+    return {
+      startDate,
+      endDate,
+      key: 'selection'
+    };
   });
 
-  const handleDateRangeChange = (item: any) => {
-    setDateRange(item.selection);
-    fetchMetrics(item.selection.startDate, item.selection.endDate);
+  const handleDateRangeChange = (ranges: any) => {
+    setDateRange(ranges.selection);
+    fetchMetrics(ranges.selection.startDate, ranges.selection.endDate);
   };
 
   const formatDateRange = () => {
@@ -115,14 +120,8 @@ export default function Dashboard() {
   };
 
   const dateRangeDropdown = (
-    <div style={{ 
-      padding: '12px', 
-      backgroundColor: 'white', 
-      borderRadius: '8px', 
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-      zIndex: 1000 // Add this to ensure the dropdown appears above other elements
-    }}>
-      <DateRange
+    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+      <DateRangePicker
         ranges={[dateRange]}
         onChange={handleDateRangeChange}
         months={1}
@@ -241,23 +240,18 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div style={{ 
-        marginBottom: 16, 
-        display: 'flex', 
-        justifyContent: 'flex-end' 
-      }}>
+      <div className="flex-end" style={{ marginBottom: 16 }}>
         <Dropdown
           overlay={dateRangeDropdown}
           trigger={['click']}
           placement="bottomRight"
-          getPopupContainer={(trigger) => trigger.parentElement!}  // Add this line
         >
           <Input
             placeholder="Select date range"
             value={formatDateRange()}
             suffix={<CalendarOutlined />}
             readOnly
-            style={{ width: '200px', cursor: 'pointer' }}
+            style={{ width: '200px' }}
           />
         </Dropdown>
       </div>

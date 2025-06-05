@@ -1,6 +1,5 @@
 import React from 'react';
 import { Form, Input, Select, Col, Button } from 'antd';
-import * as yup from 'yup';
 
 const QUALIFICATION_OPTIONS = [
   'Below 10th',
