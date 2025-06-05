@@ -333,10 +333,8 @@ const VerificationItemScreen = () => {
       const finalData = {
         verificationType: verificationType,
         findings: 'Verification Findings Text',
-        verificationData: {
-          ...formData,
-          addressType: formData.addressVerification.address,
-        },
+        addressType: formData.addressVerification.address,
+        verificationData: formData,
       };
 
       console.log('Submitting form data:', finalData);

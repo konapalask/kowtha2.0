@@ -262,11 +262,11 @@ const BusinessVerification = () => {
       const finalData = {
         verificationType: verificationType,
         findings: 'Business Verification Findings',
-        verificationData: {
-          ...formData,
-          addressType: "Business",
-        },
+        addressType: 'Business',
+        verificationData: formData,
       };
+
+      console.log(finalData);
 
       await submitVerification(finalData, item.verificationId);
       await clearItem(`${item.verificationId}_${verificationType}`);
