@@ -418,7 +418,7 @@ export class LoanService {
           create: {
             loan: { connect: { id: loan.id } },
             type: verificationType,
-            addressType: verificationType === 'Work' ? 'PermanentAddress' : 'CurrentAddress',
+            addressType: null,
             fieldExecutive: { connect: { id: fieldExecutiveId } },
             status: 'Pending',
             applicantAddress: address || null,
