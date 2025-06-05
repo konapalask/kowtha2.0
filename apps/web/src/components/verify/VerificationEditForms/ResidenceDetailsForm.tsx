@@ -5,13 +5,12 @@ const { Option } = Select;
 
 const RESIDENCE_STATUS_OPTIONS = ['Owned', 'Rented', 'Leased'];
 const RESIDENCE_TYPE_OPTIONS = ['House', 'Apartment', 'Villa', 'Others'];
-const QUALITY_OPTIONS = ['Excellent', 'Good', 'Average', 'Poor'];
 const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
+const STANDARD_OF_LIVING_OPTIONS = ['Excellent', 'Good', 'Average', 'Poor'];
 const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
 const ACCESSIBILITY_OPTIONS = ['Easy', 'Moderate', 'Difficult'];
 
-const ResidenceDetailsForm: React.FC = () => {
-  const [form] = Form.useForm();
+const ResidenceDetailsForm: React.FC<{form: any}> = ({form}) => {
   const residenceStatus = Form.useWatch('residenceStatus', form);
   const residenceType = Form.useWatch('residenceType', form);
 
@@ -74,27 +73,13 @@ const ResidenceDetailsForm: React.FC = () => {
 
       <Col span={8}>
         <Form.Item
-          name="constructionQuality"
-          label="Construction Quality"
-          rules={[{ required: true, message: "Please select construction quality" }]}
+          name="standardOfLiving"
+          label="Standard of Living"
+          rules={[{ required: true, message: "Please select standard of living" }]}
         >
           <Select>
-            {QUALITY_OPTIONS.map(quality => (
-              <Option key={quality} value={quality}>{quality}</Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
-
-      <Col span={8}>
-        <Form.Item
-          name="locationCategory"
-          label="Location Category"
-          rules={[{ required: true, message: "Please select location category" }]}
-        >
-          <Select>
-            {LOCATION_CATEGORY_OPTIONS.map(category => (
-              <Option key={category} value={category}>{category}</Option>
+            {STANDARD_OF_LIVING_OPTIONS.map(option => (
+              <Option key={option} value={option}>{option}</Option>
             ))}
           </Select>
         </Form.Item>
@@ -128,15 +113,40 @@ const ResidenceDetailsForm: React.FC = () => {
         </Form.Item>
       </Col>
 
-      <Col span={16}>
+      <Col span={6}>
         <Form.Item
           name="yearsAtCurrentAddress"
           label="Years at Current Address"
           rules={[{ required: true, message: "Please enter years at current address" }]}
         >
-          <Input type="number" min={0} />
+          <Input type="number" min={0} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
+      <Col span={6}>
+        <Form.Item
+          name="nameBoardVisible"
+          label="Nameboard Visible"
+          rules={[{ required: true, message: "Please select if nameboard is visible" }]}
+        >
+          <Select>
+            <Option value="Yes">Yes</Option>
+            <Option value="No">No</Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      <Col span={6}>
+        <Form.Item
+          name="politicalSymbolVisible"
+          label="Political Symbol Visible"
+          rules={[{ required: true, message: "Please select if political symbol is visible" }]}
+        >
+          <Select>
+            <Option value="Yes">Yes</Option>
+            <Option value="No">No</Option>
+          </Select>
+        </Form.Item>
+      </Col>
+
     </>
   );
 };

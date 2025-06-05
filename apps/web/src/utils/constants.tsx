@@ -271,13 +271,13 @@ export const getFormFields = (formKey: string, currentTab: string) => {
           options: ["Neighbor", "Friend", "Local Shop Owner", "Other"],
           required: true,
         },
-        {
-          name: "feedbackStatus",
-          label: "Feedback Status",
-          type: "select",
-          options: ["Positive", "Negative", "Could Not Confirm"],
-          required: true,
-        },
+        // {
+        //   name: "feedbackStatus",
+        //   label: "Feedback Status",
+        //   type: "select",
+        //   options: ["Positive", "Negative", "Could Not Confirm"],
+        //   required: true,
+        // },
         {
           name: "comments",
           label: "Comments/Remarks",

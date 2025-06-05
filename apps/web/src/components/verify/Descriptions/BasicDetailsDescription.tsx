@@ -16,9 +16,6 @@ const BasicDetailsDescription: React.FC<{
             column={logs ? 1 : 3}
             extra={extra || null}
           >
-            <Descriptions.Item label="Verification Type">
-              {data?.basicDetails?.verificationType}
-            </Descriptions.Item>
             <Descriptions.Item label="Application Number">
               {data?.basicDetails?.applicationNumber}
             </Descriptions.Item>
@@ -38,6 +35,21 @@ const BasicDetailsDescription: React.FC<{
               {data?.basicDetails?.category === "Others" &&
                 ` - ${data?.basicDetails?.categoryOther}`}
             </Descriptions.Item>
+            <Descriptions.Item label="Is Applicant Available?">
+              {data?.basicDetails?.isApplicantAvailable}
+            </Descriptions.Item>
+            {data?.basicDetails?.isApplicantAvailable==="No"&&<>
+            <Descriptions.Item label="Name of the person met">
+              {data?.basicDetails?.availablePersonName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Contact Number">
+              {data?.basicDetails?.availablePersonMobile}
+            </Descriptions.Item>
+            <Descriptions.Item label="Relation to the applicant">
+              {data?.basicDetails?.availablePersonRelation}
+              {data?.basicDetails?.availablePersonRelation==="Others"&&` - ${data?.basicDetails?.availablePersonRelationOther}`}
+            </Descriptions.Item>
+            </>}
           </Descriptions>
         </Card>
       </section>

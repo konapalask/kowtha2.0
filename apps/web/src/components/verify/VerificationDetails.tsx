@@ -4,7 +4,6 @@ import { CloseCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Card, Descriptions, Image } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-// import ReactQuill from "react-quill";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
@@ -16,21 +15,25 @@ import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescript
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import Footer from "./Footer";
 
-export const VerificationDetails = ({
-  verificationData,
-  onEdit,
-}: {
+interface VerificationDetailsProps {
   verificationData: any;
   onEdit: (formKey: string) => void;
+  editLogsUpdated: number;
+}
+
+export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
+  verificationData,
+  onEdit,
+  editLogsUpdated,
 }) => {
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li></li></ul>"
+    verificationData?.finalObservations?.remarks || ""
   );
-  console.log(editorContent);
+  console.log("editorContent: ", editorContent);
   const [changedData, setChangedData] = useState<any>({});
 
   useEffect(() => {
@@ -55,68 +58,34 @@ export const VerificationDetails = ({
   useEffect(() => {
     const request = indexedDB.open("editLogs", 1);
 
-    request.onupgradeneeded = (event: any) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains("logs")) {
-        db.createObjectStore("logs", { keyPath: "id" });
-        console.log("Created object store 'logs'");
-      }
-    };
-
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-
-      // Check if the store exists before using it
       if (!db.objectStoreNames.contains("logs")) {
-        console.error("Object store 'logs' not found in DB");
-        db.close();
         return;
       }
 
       const transaction = db.transaction("logs", "readwrite");
-
-      transaction.oncomplete = () => {
-        db.close();
-        console.log("Connection closed");
-      };
-
-      transaction.onerror = () => {
-        console.error("Transaction error:", transaction.error);
-      };
-
       const store = transaction.objectStore("logs");
-
       const getRequest = store.get(`${id}_${activeTab}`);
+
       getRequest.onsuccess = (event: any) => {
         const existingLogs = event.target.result || {};
-        const { id, timestamp, ...rest } = existingLogs;
+        const {id, timestamp, ...rest } = existingLogs;
         setChangedData(rest);
       };
 
-      getRequest.onerror = () => {
-        console.error("Error fetching logs:", getRequest.error);
+      transaction.oncomplete = () => {
+        db.close();
       };
     };
-
-    request.onerror = () => {
-      console.error("Database error:", request.error);
-    };
-  }, []);
+  }, [id, activeTab, editLogsUpdated]);
 
   if (!verificationData) return null;
 
   const data = verificationData || {};
 
   const handleEditorChange = (content: string) => {
-    const liMatch = content.match(/<li>/g);
-    const liCount = liMatch ? liMatch.length : 0;
-
-    if (liCount === 0) {
-      // force at least one <li>
-      setEditorContent("<ul><li></li></ul>");
-    } else {
-      setEditorContent(content);
-    }
+    setEditorContent(content);
   };
   const getButton = (formKey: string) => (
     <Button
@@ -240,34 +209,38 @@ export const VerificationDetails = ({
       <section style={{ marginBottom: 24 }}>
         <EditRequestLogs
           currentData={verificationData}
-          editRequestData={changedData}
+          changedData={changedData}
         />
       </section>
 
       {/* Final Observations Section */}
       <section style={{ marginBottom: 24 }}>
-        {/* <Card title="Final Observations"> */}
+        <Card title="Final Observations">
         <div
           style={{ height: "400px", marginBottom: "20px", background: "#fff" }}
         >
-          <CustomToolbar />
           <ReactQuill
             theme="snow"
             value={editorContent}
             onChange={handleEditorChange}
-            style={{ height: "300px" }}
+            style={{ height: '300px' }}
             modules={{
-              toolbar: {
-                container: "#custom-toolbar",
-              },
+              toolbar: [
+                [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                ["bold", "italic", "underline", "strike"],
+                [{ list: "ordered" }, { list: "bullet" }],
+                [{ color: [] }, { background: [] }],
+                ["link"],
+                ["clean"],
+              ],
             }}
-            formats={["list"]}
             placeholder=" Enter final observations here..."
           />
         </div>
-        {/* </Card> */}
+        </Card>
       </section>
       <Footer editorContent={editorContent} />
     </>
   );
 };
+

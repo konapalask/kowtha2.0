@@ -5,7 +5,7 @@ import {
   EditOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, Table } from "antd";
+import { Button, Card, Image } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -13,26 +13,17 @@ import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import { useRouter } from "next/router";
-import WorkBasicDetailsDescription from "./Descriptions/WorkBasicDetailsDescription";
-import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
+import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
+import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
+import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 
-// interface TabContextType {
-//   activeTab: string;
-//   setActiveTab: (tab: string) => void;
-// }
-// const TabContext = createContext<TabContextType>({
-//   activeTab: 'PermanentAddress',
-//   setActiveTab: () => {},
-// });
-// const useTabContext = () =>useContext(TabContext)
-
-interface WorkVerificationDetailsProps {
+interface BusinessVerificationDetailsProps {
   verificationData: any;
   onEdit: (formKey: string) => void;
   editLogsUpdated: number;
 }
 
-export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = ({
+export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsProps> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
@@ -81,7 +72,6 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       getRequest.onsuccess = (event: any) => {
         const existingLogs = event.target.result || {};
         const {id, timestamp, ...rest } = existingLogs;
-        // console.log(id,"yipeeeeeeeeee")
         setChangedData(rest);
       };
 
@@ -100,12 +90,12 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
     const liCount = liMatch ? liMatch.length : 0;
 
     if (liCount === 0) {
-      // force at least one <li>
       setEditorContent("<ul><li></li></ul>");
     } else {
       setEditorContent(content);
     }
   };
+
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -117,198 +107,25 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
   return (
     <>
       {/* Basic Details Section */}
-      <WorkBasicDetailsDescription
+      <BusinessBasicDetailsDescription
         data={data}
-        extra={getButton("workBasicDetails")}
+        extra={getButton("businessBasicDetails")}
         logs={false}
       />
 
-      {/* Employment Details Section */}
-      <WorkEmploymentDetailsDescription
+      {/* Business Details Section */}
+      <BusinessDetailsDescription
         data={data}
-        extra={getButton("employmentDetails")}
+        extra={getButton("businessDetails")}
         logs={false}
       />
 
-      {/* Colleague References Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card
-          title="Colleague References"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("colleagueReferences")}
-            >
-              Add Reference
-            </Button>
-          }
-        >
-          <Table
-            dataSource={data?.colleagueReferences?.references || []}
-            columns={[
-              {
-                title: "Name",
-                dataIndex: "name",
-                key: "name",
-              },
-              {
-                title: "Designation",
-                dataIndex: "designation",
-                key: "designation",
-              },
-              {
-                title: "Years Known",
-                dataIndex: "yearsKnown",
-                key: "yearsKnown",
-              },
-              {
-                title: "Contact Number",
-                dataIndex: "contactNumber",
-                key: "contactNumber",
-              },
-              {
-                title: "Email",
-                dataIndex: "emailAddress",
-                key: "emailAddress",
-              },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("colleagueReferences")}
-                  />
-                ),
-              },
-            ]}
-            pagination={false}
-            locale={{ emptyText: "No references added yet" }}
-          />
-        </Card>
-      </section>
-
-      {/* Past Employment Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card
-          title="Past Employment"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("pastEmployment")}
-            >
-              Add Employment
-            </Button>
-          }
-        >
-          <Table
-            dataSource={data?.pastEmployment?.employments || []}
-            columns={[
-              {
-                title: "Employer Name",
-                dataIndex: "employerName",
-                key: "employerName",
-              },
-              {
-                title: "Designation",
-                dataIndex: "designation",
-                key: "designation",
-              },
-              {
-                title: "From Date",
-                dataIndex: "fromDate",
-                key: "fromDate",
-              },
-              {
-                title: "To Date",
-                dataIndex: "toDate",
-                key: "toDate",
-              },
-              {
-                title: "Contact Person",
-                dataIndex: "contactPersonName",
-                key: "contactPersonName",
-              },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("pastEmployment")}
-                  />
-                ),
-              },
-            ]}
-            pagination={false}
-            locale={{ emptyText: "No past employment records added yet" }}
-          />
-        </Card>
-      </section>
-
-      {/* Existing Loans Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card
-          title="Existing Loans"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("existingLoans")}
-            >
-              Add Loan
-            </Button>
-          }
-        >
-          <Table
-            dataSource={data?.existingLoans?.loans || []}
-            columns={[
-              {
-                title: "Bank Name",
-                dataIndex: "bankName",
-                key: "bankName",
-              },
-              {
-                title: "Purpose",
-                dataIndex: "purpose",
-                key: "purpose",
-              },
-              {
-                title: "Loan Amount",
-                dataIndex: "loanAmount",
-                key: "loanAmount",
-              },
-              {
-                title: "EMI",
-                dataIndex: "emi",
-                key: "emi",
-              },
-              {
-                title: "Tenure",
-                dataIndex: "tenure",
-                key: "tenure",
-              },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("existingLoans")}
-                  />
-                ),
-              },
-            ]}
-            pagination={false}
-            locale={{ emptyText: "No existing loans added yet" }}
-          />
-        </Card>
-      </section>
+      {/* Business Miscellaneous Section */}
+      <BusinessMiscellaneousDescription
+        data={data}
+        extra={getButton("miscellaneous")}
+        logs={false}
+      />
 
       {/* Photo Capture Section */}
       <section style={{ marginBottom: 24 }}>
@@ -346,7 +163,6 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     padding: 4,
                   }}
                   onClick={() => {
-                    // Handle photo removal
                     const updatedItems = data.uploadedItems.filter(
                       (i: any) => i.id !== item.id
                     );
