@@ -593,7 +593,6 @@ export class LoanController {
     },
     @Request() req: AuthenticatedRequest,
   ) {
-    console.log(body.verificationData, "===========");
     
     const result = await this.loanService.editVerificationReport(
       Number(loanId),
