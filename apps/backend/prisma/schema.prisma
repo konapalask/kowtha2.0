@@ -122,7 +122,7 @@ model Verification {
   loanId           Int
   loan             Loan               @relation(fields: [loanId], references: [id])
   type             VerificationType
-  addressType      AddressType?
+  addressType      String?
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
