@@ -3,17 +3,16 @@ import { Form, Input, Select, Col, Typography } from 'antd';
 
 const { Title } = Typography;
 
-const OfficeVerificationForm: React.FC = () => {
-  const [form] = Form.useForm();
+const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
   const employerType = Form.useWatch('employerType', form);
   const salaryMode = Form.useWatch('salaryMode', form);
 
   return (
     <>
       {/* Basic Information */}
-      <Col span={24}>
+      {/* <Col span={24}>
         <Title level={5}>Basic Information</Title>
-      </Col>
+      </Col> */}
       <Col span={8}>
         <Form.Item
           name="currentOfficeName"
@@ -47,9 +46,9 @@ const OfficeVerificationForm: React.FC = () => {
       </Col>
 
       {/* Employment Details */}
-      <Col span={24}>
+      {/* <Col span={24}>
         <Title level={5} style={{ marginTop: 16 }}>Employment Details</Title>
-      </Col>
+      </Col> */}
       <Col span={8}>
         <Form.Item
           name="employerType"
@@ -118,9 +117,9 @@ const OfficeVerificationForm: React.FC = () => {
       </Col>
 
       {/* Salary Details */}
-      <Col span={24}>
+      {/* <Col span={24}>
         <Title level={5} style={{ marginTop: 16 }}>Salary Details</Title>
-      </Col>
+      </Col> */}
       <Col span={8}>
         <Form.Item
           name="salaryMode"
@@ -153,7 +152,7 @@ const OfficeVerificationForm: React.FC = () => {
       </Col>
 
       {/* Previous Employment */}
-      <Col span={24}>
+      {/* <Col span={24}>
         <Title level={5} style={{ marginTop: 16 }}>Previous Employment</Title>
       </Col>
       <Col span={8}>
@@ -171,13 +170,13 @@ const OfficeVerificationForm: React.FC = () => {
         >
           <Input type="number" min={0} />
         </Form.Item>
-      </Col>
+      </Col> */}
 
       {/* Additional Information */}
-      <Col span={24}>
+      {/* <Col span={24}>
         <Title level={5} style={{ marginTop: 16 }}>Additional Information</Title>
-      </Col>
-      <Col span={12}>
+      </Col> */}
+      {/* <Col span={12}>
         <Form.Item
           name="existingLoans"
           label="Existing Loans"
@@ -193,7 +192,7 @@ const OfficeVerificationForm: React.FC = () => {
         >
           <Input.TextArea rows={2} placeholder="Enter colleague references with contact details" />
         </Form.Item>
-      </Col>
+      </Col> */}
     </>
   );
 };

@@ -25,9 +25,6 @@ const ThirdPartyCheckDescription: React.FC<{
             <Descriptions.Item label="Relationship">
               {data?.thirdPartyCheck?.relationship}
             </Descriptions.Item>
-            <Descriptions.Item label="Feedback Status">
-              {data?.thirdPartyCheck?.feedbackStatus}
-            </Descriptions.Item>
             <Descriptions.Item label="Comments">
               {data?.thirdPartyCheck?.comments}
             </Descriptions.Item>

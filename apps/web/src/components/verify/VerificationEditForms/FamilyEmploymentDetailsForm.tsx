@@ -3,10 +3,9 @@ import { Form, Input, Select, Col } from 'antd';
 
 const { Option } = Select;
 
-const FamilyEmploymentDetailsForm: React.FC = () => {
-  const [form] = Form.useForm();
+const FamilyEmploymentDetailsForm: React.FC<{form: any, getMaritalStatus: any}> = ({form, getMaritalStatus}) => {
   const isSpouseWorking = Form.useWatch('isSpouseWorking', form);
-
+  const maritalStatus = getMaritalStatus();
   return (
     <>
       <Col span={8}>
@@ -18,7 +17,7 @@ const FamilyEmploymentDetailsForm: React.FC = () => {
             { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={1} />
+          <Input type="number" min={1} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
       <Col span={8}>
@@ -30,7 +29,7 @@ const FamilyEmploymentDetailsForm: React.FC = () => {
             { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={0} />
+          <Input type="number" min={0} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
       <Col span={8}>
@@ -42,21 +41,21 @@ const FamilyEmploymentDetailsForm: React.FC = () => {
             { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={0} />
+          <Input type="number" min={0} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
-      <Col span={8}>
+     { maritalStatus === 'Married' && <Col span={6}>
         <Form.Item
           name="isSpouseWorking"
           label="Is Spouse Working"
           rules={[{ required: true, message: "Please select if spouse is working" }]}
         >
-          <Select>
+          <Select style={{maxWidth: 70}}>
             <Option value="Yes">Yes</Option>
             <Option value="No">No</Option>
           </Select>
         </Form.Item>
-      </Col>
+      </Col>}
       {isSpouseWorking === 'Yes' && (
         <>
           <Col span={16}>
@@ -97,18 +96,7 @@ const FamilyEmploymentDetailsForm: React.FC = () => {
           />
         </Form.Item>
       </Col>
-      <Col span={16}>
-        <Form.Item
-          name="familyExpenses"
-          label="Monthly Family Expenses"
-          rules={[
-            { required: true, message: "Please enter monthly family expenses" },
-            { type: 'number', message: "Please enter a valid number" }
-          ]}
-        >
-          <Input type="number" min={0} prefix="₹" />
-        </Form.Item>
-      </Col>
+     
     </>
   );
 };

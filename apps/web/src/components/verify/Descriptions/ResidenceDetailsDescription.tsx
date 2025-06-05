@@ -27,14 +27,8 @@ const ResidenceDetailsDescription: React.FC<{
             <Descriptions.Item label="Type of Residence">
               {data?.residenceDetails?.residenceType}
             </Descriptions.Item>
-            <Descriptions.Item label="Construction Quality">
-              {data?.residenceDetails?.constructionQuality}
-            </Descriptions.Item>
             <Descriptions.Item label="Standard of Living">
               {data?.residenceDetails?.standardOfLiving}
-            </Descriptions.Item>
-            <Descriptions.Item label="Location Category">
-              {data?.residenceDetails?.locationCategory}
             </Descriptions.Item>
             <Descriptions.Item label="Locality Type">
               {data?.residenceDetails?.localityType}
@@ -42,14 +36,17 @@ const ResidenceDetailsDescription: React.FC<{
             <Descriptions.Item label="Accessibility">
               {data?.residenceDetails?.accessibility}
             </Descriptions.Item>
-            <Descriptions.Item label="House Area">
+            <Descriptions.Item label="House Area (sq.ft)">
               {data?.residenceDetails?.houseArea}
             </Descriptions.Item>
             <Descriptions.Item label="Years at Current Address">
               {data?.residenceDetails?.yearsAtCurrentAddress}
             </Descriptions.Item>
-            <Descriptions.Item label="Nameplate Visible">
-              {data?.residenceDetails?.nameplateVisible}
+            <Descriptions.Item label="Nameboard Visible">
+              {data?.residenceDetails?.nameBoardVisible}
+            </Descriptions.Item>
+            <Descriptions.Item label="Political Symbol Visible">
+              {data?.residenceDetails?.politicalSymbolVisible}
             </Descriptions.Item>
           </Descriptions>
         </Card>

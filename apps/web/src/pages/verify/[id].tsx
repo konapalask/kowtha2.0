@@ -10,6 +10,7 @@ import { VerificationDetails } from "@/components/verify/VerificationDetails";
 import { WorkVerificationDetails } from "@/components/verify/WorkVerificationDetails";
 import { EditFormModal } from "@/components/verify/EditFormModal";
 import { TabContextType } from "@/utils/verifierInterface";
+import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -27,12 +28,23 @@ export default function LoanVerifyDetails() {
   const [verificationData, setVerificationData] = useState<any>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentFormKey, setCurrentFormKey] = useState("");
-  const [activeTab, setActiveTab] = useState("PermanentAddress");
+  const [activeTab, setActiveTab] = useState<string>("");
+  const [editLogsUpdated, setEditLogsUpdated] = useState(0);
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
       .then((res) => {
         setVerificationData(res?.data);
+        // Set the first available tab as active
+        if (res?.data?.verifications?.length > 0) {
+          const verificationOrder = ["PermanentAddress", "CurrentAddress", "Work", "Business"];
+          const firstAvailableTab = verificationOrder.find(type => 
+            res.data.verifications.some((v: any) => v.addressType === type)
+          );
+          if (firstAvailableTab && activeTab === "") {
+            setActiveTab(firstAvailableTab);
+          }
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -66,7 +78,7 @@ export default function LoanVerifyDetails() {
       PermanentAddress: "PermanentAddress",
       CurrentAddress: "CurrentAddress",
       Work: "Work",
-      Final: "Work", // Using Work verification for final observations
+      Business: "Business",
     };
 
     // Get the verification type based on the current tab
@@ -74,12 +86,73 @@ export default function LoanVerifyDetails() {
 
     // Find the verification data for the current type
     const verification = verificationData?.verifications?.find(
-      (v: any) => v.type === verificationType
+      (v: any) => v.addressType === verificationType
     );
 
     // Return the verification data with the correct structure
     return verification?.verificationData || {};
   };
+
+  // console.log(verificationData);
+
+  const getLabel = (type: string) => {
+    switch (type) {
+      case "PermanentAddress":
+        return "Permanent Address";
+      case "CurrentAddress":
+        return "Current Address";
+      case "Work":
+        return "Work Verification";
+      case "Business":
+        return "Business Verification";
+    }
+  };
+
+  const getComponentByType = (type: string) => {
+    switch (type) {
+      case "PermanentAddress":
+        return  <VerificationDetails
+          verificationData={getVerificationByType("PermanentAddress")}
+          onEdit={handleEdit}
+          editLogsUpdated={editLogsUpdated}
+        />
+      case "CurrentAddress":
+        return <VerificationDetails
+          verificationData={getVerificationByType("CurrentAddress")}
+          onEdit={handleEdit}
+          editLogsUpdated={editLogsUpdated}
+        />
+      case "Work":
+        return <WorkVerificationDetails 
+          verificationData={getVerificationByType("Work")} 
+          onEdit={handleEdit}
+          editLogsUpdated={editLogsUpdated}
+        />;
+      case "Business":
+        return <BusinessVerificationDetails 
+          verificationData={getVerificationByType("Business")} 
+          onEdit={handleEdit}
+          editLogsUpdated={editLogsUpdated}
+        />;
+    }
+  };
+
+  // Define the desired order of verification types
+  const verificationOrder = ["PermanentAddress", "CurrentAddress", "Work", "Business"];
+  
+  // Sort and filter tabItems based on the defined order
+  const tabItems = verificationOrder
+    .map(orderType => {
+      const verification = verificationData?.verifications?.find(
+        (v: any) => v.addressType === orderType
+      );
+      return verification ? {
+        key: verification.addressType,
+        label: getLabel(verification.addressType),
+        children: getComponentByType(verification.addressType),
+      } : null;
+    })
+    .filter(Boolean);
 
   return (
     <TabContext.Provider value={{ activeTab, setActiveTab }}>
@@ -104,7 +177,12 @@ export default function LoanVerifyDetails() {
             // style={{justifyContent:"center"}}
             className="tabs-center"
           >
-            <TabPane tab="Permanent Address" key="PermanentAddress">
+            {tabItems?.map((item: any) => (
+              <TabPane tab={item.label} key={item.key}>
+                {item.children}
+              </TabPane>
+            ))}
+            {/* <TabPane tab="Permanent Address" key="PermanentAddress">
               <VerificationDetails
                 verificationData={getVerificationByType("PermanentAddress")}
                 onEdit={handleEdit}
@@ -122,9 +200,9 @@ export default function LoanVerifyDetails() {
                 onEdit={handleEdit}
               />
             </TabPane>
-            {/* <TabPane tab="Final Observations" key="Final">
-              <FinalObservationsDetails 
-                verificationData={getVerificationByType('Work')} 
+            <TabPane tab="Business Verification" key="Business">
+              <BusinessVerificationDetails 
+                verificationData={getVerificationByType('Business')} 
                 onEdit={handleEdit}
               />
             </TabPane> */}
@@ -138,6 +216,7 @@ export default function LoanVerifyDetails() {
           initialValues={verificationData}
           currentTab={activeTab}
           fetchVerificationData={fetchVerificationData}
+          onEditSuccess={() => setEditLogsUpdated(prev => prev + 1)}
         />
       </DashboardLayout>
     </TabContext.Provider>

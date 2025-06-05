@@ -51,7 +51,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
   const yearsInCitySheetRef = useRef<ActionSheetRef>(null);
   const addressMismatchSheetRef = useRef<ActionSheetRef>(null);
 
-  const addressTypes = ['Permanent', 'Current'];
+  const addressTypes = [
+    {label: 'Permanent Address', value: 'PermanentAddress'},
+    {label: 'Current Address', value: 'CurrentAddress'},
+  ];
   const addressCategories = ['Urban', 'Rural', 'Semi-Urban'];
   const yearsAtResidenceOptions: Array<
     AddressVerificationFormData['numberOfYearsAtCurrentResidence']
@@ -462,15 +465,15 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet ref={addressSheetRef} containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Select Address Type</Text>
-          {addressTypes.map((type, index) => (
+          {addressTypes.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={styles.actionSheetItem}
               onPressIn={() => {
-                setValue('address', type);
+                setValue('address', option.value);
                 addressSheetRef.current?.hide();
               }}>
-              <Text style={styles.actionSheetItemText}>{type}</Text>
+              <Text style={styles.actionSheetItemText}>{option.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
