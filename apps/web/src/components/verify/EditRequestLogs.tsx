@@ -18,6 +18,7 @@ import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetai
 import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import { useRouter } from "next/router";
+import { useTabContext } from "@/pages/verify/[id]";
 
 const { Text } = Typography;
 
@@ -34,10 +35,10 @@ const getLabels = {
   miscellaneous: "Business Miscellaneous Details",
 };
 
-const getDescriptions = (verificationType: string) => ({
-  basicDetails: verificationType === "Work" 
+const getDescriptions = (activeTab: string) => ({
+  basicDetails: activeTab === "Work" 
     ? WorkBasicDetailsDescription 
-    : verificationType === "Business" 
+    : activeTab === "Business" 
       ? BusinessBasicDetailsDescription 
       : BasicDetailsDescription,
   workBasicDetails: WorkBasicDetailsDescription,
@@ -86,7 +87,8 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
   const verifiedId = router?.query?.id || null;
-  const verificationType = router?.query?.activeTab || "PermanentAddress";
+  // const verificationType = router?.query?.activeTab || "PermanentAddress";
+  const {activeTab} = useTabContext()
   const { userDetails } = useContext(UserContext);
   const { currentData, changedData } = _props;
   // console.log("currentData", currentData);
@@ -119,10 +121,10 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   };
 
   const handleRequest = () => {
-    // postEditRequestApi(editRequestData) //need verification type
+    
   };
 
-  const descriptions = getDescriptions(verificationType);
+  const descriptions = getDescriptions(activeTab);
 
   return (
     <Card
