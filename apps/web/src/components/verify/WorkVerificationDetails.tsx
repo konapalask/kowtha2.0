@@ -86,7 +86,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           setChangedData(rest);
         };
 
-        getRequest.onerror = (event) => {
+        getRequest.onerror = (event: any) => {
           console.error("Error fetching logs:", event);
         };
 
@@ -143,15 +143,15 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Colleague References"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("colleagueReferences")}
-            >
-              Add Reference
-            </Button>
-          }
+          // extra={
+          //   <Button
+          //     type="primary"
+          //     icon={<PlusOutlined />}
+          //     onClick={() => onEdit("colleagueReferences")}
+          //   >
+          //     Add Reference
+          //   </Button>
+          // }
         >
           <Table
             dataSource={data?.colleagueReferences?.references || []}
@@ -203,15 +203,15 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Past Employment"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("pastEmployment")}
-            >
-              Add Employment
-            </Button>
-          }
+          // extra={
+          //   <Button
+          //     type="primary"
+          //     icon={<PlusOutlined />}
+          //     onClick={() => onEdit("pastEmployment")}
+          //   >
+          //     Add Employment
+          //   </Button>
+          // }
         >
           <Table
             dataSource={data?.pastEmployment?.employments || []}
@@ -263,15 +263,15 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Existing Loans"
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => onEdit("existingLoans")}
-            >
-              Add Loan
-            </Button>
-          }
+          // extra={
+          //   <Button
+          //     type="primary"
+          //     icon={<PlusOutlined />}
+          //     onClick={() => onEdit("existingLoans")}
+          //   >
+          //     Add Loan
+          //   </Button>
+          // }
         >
           <Table
             dataSource={data?.existingLoans?.loans || []}

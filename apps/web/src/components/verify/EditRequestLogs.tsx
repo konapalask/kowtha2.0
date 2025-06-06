@@ -6,7 +6,7 @@ import {
   LeftOutlined,
 } from "@ant-design/icons";
 import { UserContext } from "../layout/UserContextProvider";
-import { updateEditRequestApi } from "@/services/verifier.services";
+import { postEditRequestApi, updateEditRequestApi } from "@/services/verifier.services";
 import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
 import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
 import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
@@ -120,8 +120,51 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     }
   };
 
-  const handleRequest = () => {
-    
+  const handleRequest = async() => {
+    try {
+      await postEditRequestApi({
+        verificationId: verifiedId,
+        changes: changedData,
+      });
+      
+      // After successful API call, delete the entry from IndexedDB
+      const request = indexedDB.open("editLogs", 1);
+
+      request.onerror = (event) => {
+        console.error("Database error:", request.error);
+      };
+
+      request.onsuccess = (event: any) => {
+        const db = event.target.result;
+        
+        try {
+          const transaction = db.transaction("logs", "readwrite");
+          const store = transaction.objectStore("logs");
+          
+          // Delete the entry using the composite key
+          const deleteRequest = store.delete(`${verifiedId}_${activeTab}`);
+
+          deleteRequest.onsuccess = () => {
+            message.success("Request sent successfully");
+            // Optionally trigger a refresh of the parent component if needed
+          };
+
+          deleteRequest.onerror = () => {
+            console.error("Error deleting from IndexedDB:", deleteRequest.error);
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+          };
+        } catch (error) {
+          console.error("Transaction error:", error);
+          db.close();
+        }
+      };
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to send request");
+    }
   };
 
   const descriptions = getDescriptions(activeTab);
