@@ -55,6 +55,9 @@ const getDescriptions = (activeTab: string) => ({
 interface EditRequestLogsProps {
   currentData: any;
   changedData: any;
+  verificationId: string;
+  fetchEditRequests: () => void;
+  disabled: boolean;
 }
 
 // Helper to get changed keys for a section
@@ -86,11 +89,11 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
-  const verifiedId = router?.query?.id || null;
+  const loanId = router?.query?.id || null;
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const {activeTab} = useTabContext()
   const { userDetails } = useContext(UserContext);
-  const { currentData, changedData } = _props;
+  const { currentData, changedData, verificationId, fetchEditRequests, disabled } = _props;
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);
 
@@ -110,7 +113,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
 
   const handleApprove = async () => {
     try {
-      await updateEditRequestApi(verifiedId, {
+      await updateEditRequestApi(verificationId, {
         status: "Approved",
       });
       message.success("Response saved successfully");
@@ -123,14 +126,14 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const handleRequest = async() => {
     try {
       await postEditRequestApi({
-        verificationId: verifiedId,
+        verificationId: verificationId,
         changes: changedData,
       });
       
       // After successful API call, delete the entry from IndexedDB
       const request = indexedDB.open("editLogs", 1);
 
-      request.onerror = (event) => {
+      request.onerror = (event: any) => {
         console.error("Database error:", request.error);
       };
 
@@ -142,7 +145,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           const store = transaction.objectStore("logs");
           
           // Delete the entry using the composite key
-          const deleteRequest = store.delete(`${verifiedId}_${activeTab}`);
+          const deleteRequest = store.delete(`${loanId}_${activeTab}`);
 
           deleteRequest.onsuccess = () => {
             message.success("Request sent successfully");
@@ -161,6 +164,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           db.close();
         }
       };
+      fetchEditRequests();
+
     } catch (err) {
       console.error(err);
       message.error("Failed to send request");
@@ -190,7 +195,10 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
             <Button
               type="primary"
               onClick={handleRequest}
-              style={{ marginLeft: "auto" }}
+              style={{ marginLeft: "auto", backgroundColor: disabled ? "#f5f5f5" : undefined,
+                borderColor: disabled ? "#d9d9d9" : undefined,
+                color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined }}
+              disabled={disabled}
             >
               Request Approval
             </Button>
@@ -198,6 +206,18 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
         </>
       }
     >
+      {disabled && (
+        <div style={{ 
+          marginBottom: 16, 
+          padding: "12px 16px", 
+          background: "#fffbe6", 
+          border: "1px solid #ffe58f",
+          borderRadius: "4px",
+          color: "#d48806"
+        }}>
+          Awaiting approval from admin
+        </div>
+      )}
       {Object.keys(changedData)
         .filter((sectionKey) => getLabels[sectionKey as keyof typeof getLabels])
         .map((sectionKey) => {

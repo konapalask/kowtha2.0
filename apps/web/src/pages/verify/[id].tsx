@@ -30,6 +30,7 @@ export default function LoanVerifyDetails() {
   const [currentFormKey, setCurrentFormKey] = useState("");
   const [activeTab, setActiveTab] = useState<string>("");
   const [editLogsUpdated, setEditLogsUpdated] = useState(0);
+  const [editRequests, setEditRequests] = useState<any>([]);
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
@@ -52,16 +53,21 @@ export default function LoanVerifyDetails() {
       });
   };
 
+
+  const fetchEditRequests = async () => {
+    getEditRequestsApi("Pending", id as string)
+      .then((res) => {
+        // console.log(res.data);
+        setEditRequests(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   useEffect(() => {
     if (id) {
-      getEditRequestsApi("Pending", id as string)
-        .then((res) => {
-          console.log(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-          // message.error('Failed to fetch edit requests');
-        });
+      fetchEditRequests();
 
       fetchVerificationData();
     }
@@ -81,13 +87,13 @@ export default function LoanVerifyDetails() {
       // Create the logs store if it doesn't exist
       if (!db.objectStoreNames.contains("logs")) {
         db.createObjectStore("logs", { keyPath: "id" });
-        console.log("Object store 'logs' created successfully");
+        // console.log("Object store 'logs' created successfully");
       }
     };
 
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-      console.log("Database opened successfully");
+      // console.log("Database opened successfully");
       db.close();
     };
   }, []); // Run only once when component mounts
@@ -133,6 +139,16 @@ export default function LoanVerifyDetails() {
     }
   };
 
+  const getVerificationId = (type: string) => {
+    return verificationData?.verifications?.find(
+      (v: any) => v.addressType === type
+    )?.id;
+  };
+
+  const hasEditRequest = (type: string) => {
+    return editRequests?.some((request: any) => request.verificationId === getVerificationId(type));
+  };
+
   const getComponentByType = (type: string) => {
     switch (type) {
       case "PermanentAddress":
@@ -140,24 +156,36 @@ export default function LoanVerifyDetails() {
           verificationData={getVerificationByType("PermanentAddress")}
           onEdit={handleEdit}
           editLogsUpdated={editLogsUpdated}
+          verificationId={getVerificationId("PermanentAddress")}
+          fetchEditRequests={fetchEditRequests}
+          hasEditRequest={hasEditRequest("PermanentAddress")}
         />
       case "CurrentAddress":
         return <VerificationDetails
           verificationData={getVerificationByType("CurrentAddress")}
           onEdit={handleEdit}
           editLogsUpdated={editLogsUpdated}
+          verificationId={getVerificationId("CurrentAddress")}
+          fetchEditRequests={fetchEditRequests}
+          hasEditRequest={hasEditRequest("CurrentAddress")}
         />
       case "Work":
         return <WorkVerificationDetails 
           verificationData={getVerificationByType("Work")} 
           onEdit={handleEdit}
           editLogsUpdated={editLogsUpdated}
+          verificationId={getVerificationId("Work")}
+          fetchEditRequests={fetchEditRequests}
+          hasEditRequest={hasEditRequest("Work")}
         />;
       case "Business":
         return <BusinessVerificationDetails 
           verificationData={getVerificationByType("Business")} 
           onEdit={handleEdit}
           editLogsUpdated={editLogsUpdated}
+          verificationId={getVerificationId("Business")}
+          fetchEditRequests={fetchEditRequests}
+          hasEditRequest={hasEditRequest("Business")}
         />;
     }
   };

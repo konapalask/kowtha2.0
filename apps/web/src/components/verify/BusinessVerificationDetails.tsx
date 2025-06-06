@@ -21,12 +21,18 @@ interface BusinessVerificationDetailsProps {
   verificationData: any;
   onEdit: (formKey: string) => void;
   editLogsUpdated: number;
+  verificationId: string;
+  fetchEditRequests: () => void;
+  hasEditRequest: boolean;
 }
 
 export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsProps> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
+  verificationId,
+  fetchEditRequests,
+  hasEditRequest
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -111,6 +117,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
       type="text"
       icon={<EditOutlined />}
       onClick={() => onEdit(formKey)}
+      disabled={hasEditRequest}
     />
   );
 
@@ -172,6 +179,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
                     borderRadius: "50%",
                     padding: 4,
                   }}
+                  disabled={hasEditRequest}
                   onClick={() => {
                     const updatedItems = data.uploadedItems.filter(
                       (i: any) => i.id !== item.id
@@ -201,7 +209,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={data} changedData={changedData} />
+        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} />
       </section>
 
       {/* Final Observations Section */}
@@ -209,6 +217,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
         <Card title="Final Observations">
           <div style={{ height: "400px", marginBottom: "20px", background: "#fff" }}>
             <ReactQuill
+              readOnly={hasEditRequest}
               theme="snow"
               value={editorContent}
               onChange={handleEditorChange}
@@ -228,7 +237,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
           </div>
         </Card>
       </section>
-      <Footer editorContent={editorContent} />
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
     </>
   );
 };
