@@ -55,3 +55,7 @@ export const updateEditRequestApi = async (id: string, payload: any) => {
 export const getAllEditRequestsApi = async () => {
   return await axiosInstance.get(`/edit-requests`);
 };
+
+// export const editRequestApproveApi = async (id: string, payload: any) => {
+//   return await axiosInstance.patch(`/edit-requests/${id}/update`, payload);
+// };

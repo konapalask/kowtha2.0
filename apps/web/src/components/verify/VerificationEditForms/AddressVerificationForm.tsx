@@ -42,6 +42,20 @@ const AddressVerificationForm: React.FC<{form: any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={6}>
+     <Form.Item name="addressMismatch" label="Address Mismatch?" rules={[{ required: true, message: "Please select address mismatch" }]}>
+      <Select style={{maxWidth:100}}>
+        <Select.Option value="Yes">Yes</Select.Option>
+        <Select.Option value="No">No</Select.Option>
+      </Select>
+     </Form.Item>
+      </Col>
+      <Col span={18}>
+        <Form.Item name="correctedAddress" label="Corrected Address" rules={[{ required: true, message: "Please enter corrected address" }]}>
+          <Input />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
         <Form.Item
           name="numberOfYearsAtCurrentResidence"
           label="No. of Years at Current Residence"
