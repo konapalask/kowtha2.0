@@ -33,7 +33,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li></li></ul>"
+    verificationData?.finalObservations?.remarks || ""
   );
   const [changedData, setChangedData] = useState<any>({});
 
@@ -77,7 +77,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
           setChangedData(rest);
         };
 
-        getRequest.onerror = (event) => {
+        getRequest.onerror = (event: any) => {
           console.error("Error fetching logs:", event);
         };
 
@@ -96,14 +96,14 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
   const data = verificationData || {};
 
   const handleEditorChange = (content: string) => {
-    const liMatch = content.match(/<li>/g);
-    const liCount = liMatch ? liMatch.length : 0;
+    // const liMatch = content.match(/<li>/g);
+    // const liCount = liMatch ? liMatch.length : 0;
 
-    if (liCount === 0) {
-      setEditorContent("<ul><li></li></ul>");
-    } else {
+    // if (liCount === 0) {
+    //   setEditorContent("<ul><li></li></ul>");
+    // } else {
       setEditorContent(content);
-    }
+    // }
   };
 
   const getButton = (formKey: string) => (
