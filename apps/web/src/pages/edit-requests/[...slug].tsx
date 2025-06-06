@@ -47,6 +47,9 @@ const EditRequestDetails = () => {
       <EditRequestLogs
         currentData={currentData}
         changedData={editRequestData}
+        fetchEditRequests={()=>{}}
+        disabled={false}
+        verificationId={id as string}
       />
     </div>
   );
