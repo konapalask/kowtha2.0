@@ -21,13 +21,22 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
 
   return (
     <>
+    <Col span={8}>
+        <Form.Item
+          name="applicationNumber"
+          label="Application Number"
+          rules={[{ required: true, message: "Please enter application number" }]}
+        >
+          <Input disabled />
+        </Form.Item>
+      </Col>
       <Col span={8}>
         <Form.Item
           name="applicantName"
           label="Applicant Name"
           rules={[{ required: true, message: "Please enter applicant name" }]}
         >
-          <Input />
+          <Input disabled />
         </Form.Item>
       </Col>
 

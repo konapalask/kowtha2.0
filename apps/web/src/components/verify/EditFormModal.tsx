@@ -47,89 +47,82 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         [mappedKey]: values,
       };
 
-      // IndexedDB operation
       const request = indexedDB.open("editLogs", 1);
 
       request.onerror = (event) => {
         console.error("Database error:", request.error);
+        message.error("Failed to save changes: Database error");
       };
 
-      request.onupgradeneeded = (event: any) => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains("logs")) {
-          db.createObjectStore("logs", { keyPath: "id" });
-          console.log("Object store 'logs' created with keyPath 'id'");
+      request.onsuccess = (event: any) => {
+        const db = request.result;
+        
+        try {
+          const transaction = db.transaction("logs", "readwrite");
+          const store = transaction.objectStore("logs");
+
+          const getRequest = store.get(`${id}_${activeTab}`);
+
+          getRequest.onsuccess = () => {
+            const existingData = getRequest.result || {};
+
+            const logEntry = {
+              id: `${id}_${activeTab}`,
+              ...existingData,
+              ...finalData,
+              timestamp: new Date().toISOString(),
+            };
+
+            const putRequest = store.put(logEntry);
+
+            putRequest.onsuccess = () => {
+              message.success("Changes saved to edit logs successfully");
+              form.resetFields();
+              fetchVerificationData();
+              onEditSuccess?.();
+              onCancel();
+            };
+
+            putRequest.onerror = () => {
+              console.error("Error saving log:", putRequest.error);
+              message.error("Failed to save edit log");
+            };
+          };
+
+          getRequest.onerror = () => {
+            console.error("Error fetching existing log:", getRequest.error);
+            // If we can't read existing data, just save the new data
+            const logEntry = {
+              id: `${id}_${activeTab}`,
+              ...finalData,
+              timestamp: new Date().toISOString(),
+            };
+
+            const putRequest = store.put(logEntry);
+            putRequest.onsuccess = () => {
+              message.success("Changes saved to edit logs successfully");
+              form.resetFields();
+              fetchVerificationData();
+              onEditSuccess?.();
+              onCancel();
+            };
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+          };
+
+          transaction.onerror = () => {
+            console.error("Transaction error:", transaction.error);
+            message.error("Failed to save changes: Transaction error");
+            db.close();
+          };
+        } catch (error) {
+          console.error("Error in database operation:", error);
+          message.error("Failed to save changes: Operation error");
+          db.close();
         }
       };
-
-      request.onsuccess = (event) => {
-        const db = request.result;
-        const transaction = db.transaction("logs", "readwrite");
-
-        transaction.oncomplete = () => {
-          db.close();
-          console.log("Connection closed");
-        };
-        transaction.onerror = () => {
-          db.close();
-          console.error("Transaction failed");
-        };
-
-        const store = transaction.objectStore("logs");
-
-        console.log(`${id}_${activeTab}`);
-
-        const getRequest = store.get(`${id}_${activeTab}`);
-
-        getRequest.onsuccess = () => {
-          const existingData = getRequest.result || {};
-
-          const logEntry = {
-            id: `${id}_${activeTab}`,
-            ...existingData,
-            ...finalData,
-            timestamp: new Date().toISOString(),
-          };
-
-          const putRequest = store.put(logEntry);
-
-          putRequest.onsuccess = () => {
-            message.success("Changes saved to edit logs successfully");
-            form.resetFields();
-            fetchVerificationData();
-            onEditSuccess?.();
-          };
-
-          putRequest.onerror = () => {
-            console.error("Error saving log:", putRequest.error);
-            message.error("Failed to save edit log");
-          };
-        };
-
-        getRequest.onerror = () => {
-          console.error("Error fetching existing log:", getRequest.error);
-          // If we can't read existing data, just save the new data
-          const logEntry = {
-            id: `${id}_${activeTab}`,
-            ...finalData,
-            timestamp: new Date().toISOString(),
-          };
-
-          const putRequest = store.put(logEntry);
-          putRequest.onsuccess = () => {
-            message.success("Changes saved to edit logs successfully");
-            form.resetFields();
-            fetchVerificationData();
-            onEditSuccess?.();
-          };
-
-          putRequest.onerror = () => {
-            console.error("Error saving log:", putRequest.error);
-            message.error("Failed to save edit log");
-          };
-        };
-      };
-      onCancel();
     } catch (error) {
       console.error("Error saving form:", error);
       message.error("Failed to save changes");

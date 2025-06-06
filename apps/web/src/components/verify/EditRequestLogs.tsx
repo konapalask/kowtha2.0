@@ -59,11 +59,28 @@ interface EditRequestLogsProps {
 // Helper to get changed keys for a section
 const getChangedKeys = (currentSection: any, editSection: any) => {
   if (!currentSection || !editSection) return [];
-  return Object.keys({ ...currentSection, ...editSection }).filter(
-    (key) =>
-      JSON.stringify(currentSection?.[key]) !==
-      JSON.stringify(editSection?.[key])
-  );
+  
+  return Object.keys({ ...currentSection, ...editSection }).filter(key => {
+    // Skip if both values are undefined or null
+    if (!currentSection[key] && !editSection[key]) return false;
+    
+    // If one value exists and the other doesn't, it's a change
+    if (!currentSection[key] || !editSection[key]) return true;
+    
+    // For arrays, compare length and contents
+    if (Array.isArray(currentSection[key]) && Array.isArray(editSection[key])) {
+      if (currentSection[key].length !== editSection[key].length) return true;
+      return JSON.stringify(currentSection[key]) !== JSON.stringify(editSection[key]);
+    }
+    
+    // For objects, do deep comparison
+    if (typeof currentSection[key] === 'object' && typeof editSection[key] === 'object') {
+      return JSON.stringify(currentSection[key]) !== JSON.stringify(editSection[key]);
+    }
+    
+    // For primitive values, do direct comparison
+    return currentSection[key] !== editSection[key];
+  });
 };
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
@@ -72,6 +89,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const verificationType = router?.query?.activeTab || "PermanentAddress";
   const { userDetails } = useContext(UserContext);
   const { currentData, changedData } = _props;
+  // console.log("currentData", currentData);
+  // console.log("changedData", changedData);
 
   if (!changedData) {
     return (
@@ -141,7 +160,10 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           const currentSection = currentData?.[sectionKey];
           const editSection = changedData?.[sectionKey];
           if (!SectionDescription) return null;
+          
           const changedKeys = getChangedKeys(currentSection, editSection);
+          if (changedKeys.length === 0) return null; // Don't show sections with no changes
+          
           return (
             <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
               <Col span={12}>
@@ -149,12 +171,9 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                   data={{ [sectionKey]: currentSection }}
                   extra={null}
                   logs={true}
+                  changedFields={changedKeys}
+                  isCurrentVersion={true}
                 />
-                {/* {changedKeys.length > 0 && (
-                  <div style={{ color: "#faad14", fontSize: 12, marginTop: 4 }}>
-                    Changed fields: {changedKeys.join(", ")}
-                  </div>
-                )} */}
               </Col>
               <Col span={12}>
                 <SectionDescription
@@ -180,12 +199,14 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                     )
                   }
                   logs={true}
+                  changedFields={changedKeys}
+                  isCurrentVersion={false}
                 />
-                {changedKeys.length > 0 && (
+                {/* {changedKeys.length > 0 && (
                   <div style={{ color: "#52c41a", fontSize: 12, marginTop: 4 }}>
                     Changed fields: {changedKeys.join(", ")}
                   </div>
-                )}
+                )} */}
               </Col>
             </Row>
           );

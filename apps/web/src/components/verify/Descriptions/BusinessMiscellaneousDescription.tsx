@@ -5,7 +5,17 @@ const BusinessMiscellaneousDescription: React.FC<{
   data: any;
   extra: any;
   logs: boolean;
-}> = ({ data, extra, logs = false }) => {
+  changedFields?: string[];
+  isCurrentVersion?: boolean;
+}> = ({ data, extra, logs = false, changedFields = [], isCurrentVersion = false }) => {
+  const getItemStyle = (fieldName: string) => {
+    if (!changedFields.includes(fieldName)) return {};
+    
+    return {
+      backgroundColor: isCurrentVersion ? '#fff1f0' : '#f6ffed'  // Red for current version, green for new version
+    };
+  };
+
   return (
     <section style={{ marginBottom: 24 }}>
       <Card>
@@ -15,40 +25,73 @@ const BusinessMiscellaneousDescription: React.FC<{
           column={logs ? 1 : 2}
           extra={extra}
         >
-          <Descriptions.Item label="Ownership of Premises">
+          <Descriptions.Item 
+            label="Ownership of Premises"
+            contentStyle={getItemStyle('ownershipOfPremises')}
+          >
             {data?.miscellaneous?.ownershipOfPremises}
           </Descriptions.Item>
           {data?.miscellaneous?.ownershipOfPremises === "Rented" && (
-            <Descriptions.Item label="Rental Amount">
+            <Descriptions.Item 
+              label="Rental Amount"
+              contentStyle={getItemStyle('rentalAmount')}
+            >
               {data?.miscellaneous?.rentalAmount}
             </Descriptions.Item>
           )}
-          <Descriptions.Item label="Years in Current Premises">
+          <Descriptions.Item 
+            label="Years in Current Premises"
+            contentStyle={getItemStyle('yearsInCurrentPremises')}
+          >
             {data?.miscellaneous?.yearsInCurrentPremises}
           </Descriptions.Item>
-          <Descriptions.Item label="Stock Seen">
+          <Descriptions.Item 
+            label="Stock Seen"
+            contentStyle={getItemStyle('stockSeen')}
+          >
             {data?.miscellaneous?.stockSeen}
           </Descriptions.Item>
-          <Descriptions.Item label="Employees Seen">
+          <Descriptions.Item 
+            label="Employees Seen"
+            contentStyle={getItemStyle('employeesSeen')}
+          >
             {data?.miscellaneous?.employeesSeen}
           </Descriptions.Item>
-          <Descriptions.Item label="Other Setup Observed">
+          <Descriptions.Item 
+            label="Other Setup Observed"
+            contentStyle={getItemStyle('otherSetupObserved')}
+          >
             {data?.miscellaneous?.otherSetupObserved}
           </Descriptions.Item>
-          <Descriptions.Item label="Illegal Setup Observed">
+          <Descriptions.Item 
+            label="Illegal Setup Observed"
+            contentStyle={getItemStyle('illegalSetupObserved')}
+          >
             {data?.miscellaneous?.illegalSetupObserved}
           </Descriptions.Item>
-          <Descriptions.Item label="Politically Connected">
+          <Descriptions.Item 
+            label="Politically Connected"
+            contentStyle={getItemStyle('politicallyConnected')}
+          >
             {data?.miscellaneous?.politicallyConnected}
           </Descriptions.Item>
-          <Descriptions.Item label="Private Finance/Chits">
+          <Descriptions.Item 
+            label="Private Finance/Chits"
+            contentStyle={getItemStyle('privateFinanceOrChits')}
+          >
             {data?.miscellaneous?.privateFinanceOrChits}
           </Descriptions.Item>
-          <Descriptions.Item label="Business Activity">
+          <Descriptions.Item 
+            label="Business Activity"
+            contentStyle={getItemStyle('businessActivity')}
+          >
             {data?.miscellaneous?.businessActivity}
           </Descriptions.Item>
           {data?.miscellaneous?.businessActivity === "Others" && (
-            <Descriptions.Item label="Other Business Activity">
+            <Descriptions.Item 
+              label="Other Business Activity"
+              contentStyle={getItemStyle('businessActivityOther')}
+            >
               {data?.miscellaneous?.businessActivityOther}
             </Descriptions.Item>
           )}
