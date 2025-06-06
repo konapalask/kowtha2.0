@@ -57,6 +57,9 @@ export default function Verify() {
     ["Unassigned","Assigned", "FVCompleted", "Approved", "Rejected", "Pending"].includes(loan?.status ?? '')
   ) ?? [];
 
+  const getStatusTags = (record: any) => {
+  //  const 
+  };
   const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",
@@ -76,12 +79,8 @@ export default function Verify() {
     //   title: "Status",
     //   dataIndex: "status",
     //   key: "status",
-    //   render: (status?: string) => {
-    //     let color = "blue";
-    //     if (status === "Pending") color = "orange";
-    //     else if (status === "Approved") color = "green";
-    //     else if (status === "Rejected") color = "red";
-    //     return <Tag color={color}>{status ?? 'Unknown'}</Tag>;
+    //   render: (_,record) => {
+    //    return getStatusTag(record)
     //   },
     //   width: 150,
     // },

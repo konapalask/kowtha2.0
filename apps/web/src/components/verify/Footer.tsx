@@ -5,7 +5,7 @@ import { Button, message, Modal, Space } from "antd";
 import { useRouter } from "next/router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
+const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorContent, disabled }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
   const { id } = router.query;
@@ -95,6 +95,12 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
               setModalAction("reject");
               setModalVisible(true);
             }}
+            disabled={disabled}
+            style={{
+              backgroundColor: disabled ? "#f5f5f5" : undefined,
+              borderColor: disabled ? "#d9d9d9" : undefined,
+              color: disabled ? "rgba(0, 0, 0, 0.25)" : undefined
+            }}
           >
             Negative
           </Button>
@@ -105,7 +111,12 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
               setModalAction("approve");
               setModalVisible(true);
               fetchPdf();
-              // console.log(activeTab)
+            }}
+            disabled={disabled}
+            style={{
+              backgroundColor: disabled ? "#f5f5f5" : undefined,
+              borderColor: disabled ? "#d9d9d9" : undefined,
+              color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined
             }}
           >
             Positive

@@ -19,13 +19,20 @@ interface VerificationDetailsProps {
   verificationData: any;
   onEdit: (formKey: string) => void;
   editLogsUpdated: number;
+  verificationId: string;
+  fetchEditRequests: () => void;
+  hasEditRequest: boolean;
 }
 
 export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
+  verificationId,
+  fetchEditRequests,
+  hasEditRequest
 }) => {
+  console.log("hasEditRequest: ", hasEditRequest);
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
@@ -102,6 +109,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       type="text"
       icon={<EditOutlined />}
       onClick={() => onEdit(formKey)}
+      disabled={hasEditRequest}
     />
   );
 
@@ -186,6 +194,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       borderRadius: "50%",
                       padding: 4,
                     }}
+                    disabled={hasEditRequest}
                     onClick={() => {
                       // Handle photo removal
                       const updatedItems = data.uploadedItems.filter(
@@ -220,6 +229,9 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         <EditRequestLogs
           currentData={verificationData}
           changedData={changedData}
+          verificationId={verificationId}
+          fetchEditRequests={fetchEditRequests}
+          disabled={hasEditRequest}
         />
       </section>
 
@@ -230,6 +242,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           style={{ height: "400px", marginBottom: "20px", background: "#fff" }}
         >
           <ReactQuill
+            readOnly={hasEditRequest}
             theme="snow"
             value={editorContent}
             onChange={handleEditorChange}
@@ -249,7 +262,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         </div>
         </Card>
       </section>
-      <Footer editorContent={editorContent} />
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
     </>
   );
 };
