@@ -20,17 +20,17 @@ export class EditRequestService {
 
       if (!createEditRequestDto.verificationId) {
         throw new NotFoundException('Verification Id is required');
-
       }
-        const verification = await this.prisma.verification.findFirst({
-          where: {
-            id: Number(createEditRequestDto.verificationId),
-          },
-        });
-        
-        if (!verification) {
-          throw new NotFoundException('Verification not found or does not belong to this loan');
-        }
+
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          id: Number(createEditRequestDto.verificationId),
+        },
+      });
+      
+      if (!verification) {
+        throw new NotFoundException('Verification not found or does not belong to this loan');
+      }
             
       // Create edit request
       const editRequest = await this.prisma.editRequest.create({

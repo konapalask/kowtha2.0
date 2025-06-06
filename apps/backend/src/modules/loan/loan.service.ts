@@ -1806,7 +1806,7 @@ export class LoanService {
     }
   }
 
-  async generateVerificationPDF(loanId: number, verificationType: VerificationType): Promise<Buffer> {
+  async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -1823,7 +1823,7 @@ export class LoanService {
           office: { select: { name: true } },
           operationsExecutive: { select: { name: true } },
           verifications: {
-            where: { type: verificationType },
+            where: { addressType: addressType },
             select: {
               type: true,
               status: true,
@@ -1843,17 +1843,11 @@ export class LoanService {
       
       const verification = loan.verifications[0];
       if (!verification) {
-        throw new NotFoundException(`Verification of type ${verificationType} not found`);
+        throw new NotFoundException(`Verification for address type ${addressType} not found`);
       }
 
-      // Get the verification data based on type
-      let verificationData: VerificationData | WorkVerificationData = {};
-      if (verificationType === 'Work') {
-        verificationData = verification.verificationData as WorkVerificationData || {};
-      } else {
-        verificationData = verification.verificationData as VerificationData || {};
-      }
-      console.log(verificationData);
+      // Get the verification data
+      const verificationData = verification.verificationData as VerificationData || {};
 
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
@@ -1880,15 +1874,9 @@ export class LoanService {
       // Filter out any failed URL generations
       const validImageUrls = imageUrls.filter(url => url !== null);
 
-      // Generate HTML template based on verification type
-      let htmlTemplate = this.generateBaseHTMLTemplate(loan);
-
-      // Add verification-specific content
-      if (verificationType === 'Work') {
-        htmlTemplate += this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
-      } else {
-        htmlTemplate += this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri);
-      }
+      // Generate HTML template
+      const htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        this.generateAddressVerificationContent(verificationData, validImageUrls, imageDataUri);
 
       // Launch a new browser instance
       const browser = await puppeteer.launch({
@@ -1923,7 +1911,7 @@ export class LoanService {
 
       await this.loggingService.info('Verification PDF generated successfully', {
         loanId,
-        verificationType,
+        addressType,
         applicationNumber: loan.applicationNumber,
       });
 
@@ -1931,7 +1919,7 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to generate verification PDF', {
         loanId,
-        verificationType,
+        addressType,
         error: error.message,
         stack: error.stack,
       });

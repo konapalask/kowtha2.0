@@ -328,11 +328,10 @@ export class LoanController {
   @ApiResponse({ status: 404, description: 'Loan not found' })
   async generatePDF(
     @Param('id') id: string,
-    @Query('type') type: VerificationType,
+    @Query('type') type: AddressType,
     @Res() res: Response,
   ) {
     try {
-      
       const pdfBuffer = type 
         ? await this.loanService.generateVerificationPDF(Number(id), type)
         : await this.loanService.generateLoanPDF(Number(id));
