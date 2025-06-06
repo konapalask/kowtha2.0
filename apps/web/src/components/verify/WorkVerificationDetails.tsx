@@ -395,7 +395,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} />
+        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} admin={false} verificationType={activeTab} />
       </section>
 
       {/* Final Observations Section */}
