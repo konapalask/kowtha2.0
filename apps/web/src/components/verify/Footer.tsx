@@ -1,5 +1,5 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { generateFinalReport } from "@/services/verifier.services";
+import { generateFinalReport, loanApproveRejectApi } from "@/services/verifier.services";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space } from "antd";
 import { useRouter } from "next/router";
@@ -45,6 +45,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
   };
 
   const fetchPdf = async () => {
+   try{
     const reportResponse = await generateFinalReport(id as string, activeTab);
 
     // Check if we have valid data
@@ -56,9 +57,34 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
     const blob = new Blob([reportResponse], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
     setPdfPreviewUrl(url);
+   } catch (error) {
+    console.error("Error generating final report:", error);
+    // message.error(
+    //   "Failed to generate final report: " + (error as Error).message
+    // );
+   }
   };
 
-  const approveLoan = async () => {};
+  const approveLoan = async () => {
+    try{
+      const response = await loanApproveRejectApi(id as string, {
+        status: "Approved",comments:""
+      });
+    } catch (error) {
+      console.error("Error approving loan:", error);
+    }
+  };
+
+  const rejectLoan = async () => {
+    try{
+      const response = await loanApproveRejectApi(id as string, {
+        status: "Rejected",
+        comments:""
+      });
+    } catch (error) {
+      console.error("Error rejecting loan:", error);
+    }
+  };
 
   // Clean up the blob URL when component unmounts
   useEffect(() => {
@@ -94,6 +120,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
             onClick={() => {
               setModalAction("reject");
               setModalVisible(true);
+              rejectLoan();
             }}
             disabled={disabled}
             style={{
@@ -111,6 +138,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
               setModalAction("approve");
               setModalVisible(true);
               fetchPdf();
+              approveLoan();
             }}
             disabled={disabled}
             style={{
@@ -131,6 +159,11 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
             window.URL.revokeObjectURL(pdfPreviewUrl);
           }
           setPdfPreviewUrl(null);
+        }}
+        cancelButtonProps={{
+          style: {
+            display: "none"
+          }
         }}
         footer={null}
         width={900}
@@ -196,7 +229,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
           >
             Confirm
           </Button>
-          <Button onClick={() => setModalVisible(false)}>Cancel</Button>
+          {/* <Button onClick={() => setModalVisible(false)}>Cancel</Button> */}
         </Space>
       </Modal>
     </>
