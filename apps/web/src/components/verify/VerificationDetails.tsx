@@ -231,6 +231,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           verificationId={verificationId}
           fetchEditRequests={fetchEditRequests}
           disabled={hasEditRequest}
+          admin={false}
+          verificationType={activeTab}
         />
       </section>
 
