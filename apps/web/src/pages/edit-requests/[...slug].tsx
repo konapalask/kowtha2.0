@@ -46,7 +46,7 @@ const EditRequestDetails = () => {
     <div>
       <EditRequestLogs
         currentData={currentData}
-        editRequestData={editRequestData}
+        changedData={editRequestData}
       />
     </div>
   );

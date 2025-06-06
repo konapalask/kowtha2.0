@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Table, Card, Typography, Tag, Space, Button } from "antd";
+import { Table, Card, Typography, Tag, Space, Button, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
 
 const { Title } = Typography;
@@ -20,32 +20,38 @@ interface EditRequest {
   requestedAt: string;
 }
 
+interface LoginRequest {
+  id: string;
+  employeeCode: string;
+  name: string;
+  phoneNumber: string;
+}
+
 const EditRequests: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [editRequests, setEditRequests] = useState<EditRequest[]>([
-    // {
-    //   id: "1",
-    //   loanId: "1001",
-    //   applicantName: "Alice Smith",
-    //   fieldName: "Email",
-    //   oldValue: "alice.old@email.com",
-    //   newValue: "alice.new@email.com",
-    //   status: "pending",
-    //   requestedBy: "Verifier1",
-    //   requestedAt: "2025-05-25T10:00:00Z",
-    // },
-    // {
-    //   id: "2",
-    //   loanId: "1002",
-    //   applicantName: "Bob Johnson",
-    //   fieldName: "City",
-    //   oldValue: "New York",
-    //   newValue: "San Francisco",
-    //   status: "approved",
-    //   requestedBy: "Verifier2",
-    //   requestedAt: "2025-05-24T15:30:00Z",
-    // },
+  const [editRequests, setEditRequests] = useState<EditRequest[]>([]);
+  
+  // Add dummy login requests data
+  const [loginRequests] = useState<LoginRequest[]>([
+    {
+      id: "1",
+      employeeCode: "EMP001",
+      name: "John Doe",
+      phoneNumber: "+91 9876543210",
+    },
+    {
+      id: "2",
+      employeeCode: "EMP002",
+      name: "Jane Smith",
+      phoneNumber: "+91 9876543211",
+    },
+    {
+      id: "3",
+      employeeCode: "EMP003",
+      name: "Mike Johnson",
+      phoneNumber: "+91 9876543212",
+    },
   ]);
 
   const fetchEditRequests = async () => {
@@ -144,40 +150,89 @@ const EditRequests: React.FC = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchEditRequests = async () => {
-      setLoading(true);
-      try {
-        // const response = await getEditRequestsApi();
-        // setEditRequests(response.data);
-      } catch (error) {
-        console.error("Error fetching edit requests:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleApprove = (record: LoginRequest) => {
+    message.success(`Login request for ${record.name} approved`);
+  };
 
-    fetchEditRequests();
-  }, []);
+  const handleReject = (record: LoginRequest) => {
+    message.success(`Login request for ${record.name} rejected`);
+  };
+
+  const loginRequestColumns: ColumnsType<LoginRequest> = [
+    {
+      title: "Employee Code",
+      dataIndex: "employeeCode",
+      key: "employeeCode",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="text"
+            icon={<CheckCircleOutlined style={{ color: '#52c41a', fontSize: '20px' }} />}
+            onClick={() => handleApprove(record)}
+          />
+          <Button
+            type="text"
+            icon={<CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '20px' }} />}
+            onClick={() => handleReject(record)}
+          />
+        </Space>
+      ),
+      align: "center",
+    },
+  ];
 
   return (
     <DashboardLayout>
-      <Card>
-        <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Title level={4}>Edit Requests</Title>
-          <Table
-            columns={columns}
-            dataSource={editRequests}
-            loading={loading}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} items`,
-            }}
-          />
-        </Space>
-      </Card>
+      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Card title="Edit Requests">
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            {/* <Title level={4}>Edit Requests</Title> */}
+            <Table
+              columns={columns}
+              dataSource={editRequests}
+              loading={loading}
+              rowKey="id"
+              pagination={false}
+              // pagination={{
+              //   pageSize: 10,
+              //   showSizeChanger: true,
+              //   showTotal: (total) => `Total ${total} items`,
+              // }}
+            />
+          </Space>
+        </Card>
+
+        <Card title="Login Requests">
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            {/* <Title level={4}>Login Requests</Title> */}
+            <Table
+              columns={loginRequestColumns}
+              dataSource={loginRequests}
+              rowKey="id"
+              pagination={false}
+              // pagination={{
+              //   pageSize: 10,
+              //   showSizeChanger: true,
+              //   showTotal: (total) => `Total ${total} items`,
+              // }}
+            />
+          </Space>
+        </Card>
+      </Space>
     </DashboardLayout>
   );
 };

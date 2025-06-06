@@ -365,6 +365,7 @@ const WorkVerification = () => {
       const finalData = {
         verificationType: verificationType,
         findings: 'Work Verification Findings',
+        addressType: 'Work',
         verificationData: formData,
       };
 

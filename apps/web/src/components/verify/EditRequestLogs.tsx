@@ -12,29 +12,48 @@ import AddressVerificationDescription from "./Descriptions/AddressVerificationDe
 import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
 import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
+import WorkBasicDetailsDescription from "./Descriptions/WorkBasicDetailsDescription";
+import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
+import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
+import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
+import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import { useRouter } from "next/router";
 
 const { Text } = Typography;
 
 const getLabels = {
   basicDetails: "Basic Details",
+  workBasicDetails: "Basic Details",
+  businessBasicDetails: "Basic Details",
   addressVerification: "Address Verification",
   familyEmploymentDetails: "Family & Employment Details",
   residenceDetails: "Residence Details",
   thirdPartyCheck: "Third Party Check",
+  employmentDetails: "Employment Details",
+  businessDetails: "Business Details",
+  miscellaneous: "Business Miscellaneous Details",
 };
 
-const getDescriptions = {
-  basicDetails: BasicDetailsDescription,
+const getDescriptions = (verificationType: string) => ({
+  basicDetails: verificationType === "Work" 
+    ? WorkBasicDetailsDescription 
+    : verificationType === "Business" 
+      ? BusinessBasicDetailsDescription 
+      : BasicDetailsDescription,
+  workBasicDetails: WorkBasicDetailsDescription,
+  businessBasicDetails: BusinessBasicDetailsDescription,
   addressVerification: AddressVerificationDescription,
   familyEmploymentDetails: FamilyEmploymentDescription,
   residenceDetails: ResidenceDetailsDescription,
   thirdPartyCheck: ThirdPartyCheckDescription,
-};
+  employmentDetails: WorkEmploymentDetailsDescription,
+  businessDetails: BusinessDetailsDescription,
+  miscellaneous: BusinessMiscellaneousDescription,
+});
 
 interface EditRequestLogsProps {
   currentData: any;
-  editRequestData: any;
+  changedData: any;
 }
 
 // Helper to get changed keys for a section
@@ -49,11 +68,12 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
-  const id = router?.query?.slug?.[0] || null;
+  const verifiedId = router?.query?.id || null;
+  const verificationType = router?.query?.activeTab || "PermanentAddress";
   const { userDetails } = useContext(UserContext);
-  const { currentData, editRequestData } = _props;
+  const { currentData, changedData } = _props;
 
-  if (!editRequestData) {
+  if (!changedData) {
     return (
       <Card
         title={
@@ -69,7 +89,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
 
   const handleApprove = async () => {
     try {
-      await updateEditRequestApi(id, {
+      await updateEditRequestApi(verifiedId, {
         status: "Approved",
       });
       message.success("Response saved successfully");
@@ -82,6 +102,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const handleRequest = () => {
     // postEditRequestApi(editRequestData) //need verification type
   };
+
+  const descriptions = getDescriptions(verificationType);
 
   return (
     <Card
@@ -112,13 +134,12 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
         </>
       }
     >
-      {Object.keys(editRequestData)
+      {Object.keys(changedData)
         .filter((sectionKey) => getLabels[sectionKey as keyof typeof getLabels])
         .map((sectionKey) => {
-          const SectionDescription =
-            getDescriptions[sectionKey as keyof typeof getDescriptions];
+          const SectionDescription = descriptions[sectionKey as keyof typeof descriptions];
           const currentSection = currentData?.[sectionKey];
-          const editSection = editRequestData?.[sectionKey];
+          const editSection = changedData?.[sectionKey];
           if (!SectionDescription) return null;
           const changedKeys = getChangedKeys(currentSection, editSection);
           return (
@@ -129,11 +150,11 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                   extra={null}
                   logs={true}
                 />
-                {changedKeys.length > 0 && (
+                {/* {changedKeys.length > 0 && (
                   <div style={{ color: "#faad14", fontSize: 12, marginTop: 4 }}>
                     Changed fields: {changedKeys.join(", ")}
                   </div>
-                )}
+                )} */}
               </Col>
               <Col span={12}>
                 <SectionDescription

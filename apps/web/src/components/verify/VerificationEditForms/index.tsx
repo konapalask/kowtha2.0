@@ -6,29 +6,43 @@ import AddressVerificationForm from './AddressVerificationForm';
 import ThirdPartyCheckForm from './ThirdPartyCheckForm';
 import FinalObservationsForm from './FinalObservationsForm';
 import OfficeVerificationForm from './OfficeVerificationForm';
+import WorkBasicDetails from './WorkBasicDetails';
+import BusinessBasicDetails from './BusinessBasicDetails';
+import BusinessDetails from './BusinessDetails';
+import BusinessMiscellaneous from './BusinessMiscellaneous';
 
 interface FormSelectorProps {
   form: any;
   formKey: string;
   currentTab: any;
+  getMaritalStatus: any;
 }
 
-export const FormSelector: React.FC<FormSelectorProps> = ({form, formKey, currentTab }) => {
+export const FormSelector: React.FC<FormSelectorProps> = ({form, formKey, currentTab, getMaritalStatus }) => {
   switch (formKey) {
     case 'basicDetails':
       return <BasicDetailsForm form={form} />;
+      case 'addressVerification':
+        return <AddressVerificationForm form={form} />;
     case 'residenceDetails':
-      return <ResidenceDetailsForm />;
+      return <ResidenceDetailsForm form={form} />;
     case 'familyEmploymentDetails':
-      return <FamilyEmploymentDetailsForm />;
-    case 'addressVerification':
-      return <AddressVerificationForm />;
+      return <FamilyEmploymentDetailsForm form={form} getMaritalStatus={getMaritalStatus} />;
+   
     case 'thirdPartyCheck':
-      return <ThirdPartyCheckForm />;
-    case 'finalObservations':
-      return <FinalObservationsForm />;
-    case 'officeVerification':
-      return <OfficeVerificationForm />;
+      return <ThirdPartyCheckForm form={form} />;
+    // case 'finalObservations':
+    //   return <FinalObservationsForm form={form} />;
+    case 'employmentDetails':
+      return <OfficeVerificationForm form={form} />;
+    case 'workBasicDetails':
+      return <WorkBasicDetails form={form} />;
+    case 'businessBasicDetails':
+      return <BusinessBasicDetails form={form} />;
+    case 'businessDetails':
+      return <BusinessDetails form={form} />;
+    case 'miscellaneous':
+      return <BusinessMiscellaneous form={form} />;
     default:
       return null;
   }

@@ -429,7 +429,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
             <TouchableOpacity
               key={status}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('applicantMaritalStatus', status);
                 if (status !== 'Others') {
                   setValue('applicantMaritalStatusOther', ''); // Clear other field
@@ -453,7 +453,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
             <TouchableOpacity
               key={qualification}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('educationQualification', qualification);
                 educationQualificationSheetRef.current?.hide();
               }}>
@@ -470,7 +470,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
             <TouchableOpacity
               key={cat}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('category', cat);
                 if (cat !== 'Others') {
                   setValue('categoryOther', ''); // Clear other field
@@ -492,7 +492,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('isApplicantAvailable', option);
                 if (option === 'Yes') {
                   setValue('availablePersonName', ''); // Clear name if Yes is selected
@@ -512,7 +512,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('availablePersonRelation', option);
                 if (option !== 'Others') {
                   setValue('availablePersonRelationOther', '');

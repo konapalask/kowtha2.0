@@ -189,9 +189,9 @@ const VerificationListScreen = () => {
 
   const getVerificationTypeColor = (type: string) => {
     switch (type) {
-      case 'CurrentAddress':
+      case 'AddressTwo':
         return '#4A90E2';
-      case 'PermanentAddress':
+      case 'AddressOne':
         return '#893f91';
       case 'Work':
         return '#FF6B6B';
@@ -289,7 +289,7 @@ const VerificationListScreen = () => {
             id: item.id,
             applicationNumber: item.applicationNumber, // Main application ID
             verificationId: item.verification.loanId,
-            address: item.applicantAddress, // Address for CurrentAddress or PermanentAddress
+            address: item.verification.applicantAddress, // Address for CurrentAddress or PermanentAddress
           };
 
           if (item.verification.type === 'Work') {

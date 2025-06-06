@@ -25,12 +25,15 @@ const FamilyEmploymentDescription: React.FC<{
             <Descriptions.Item label="No. of Dependents">
               {data?.familyEmploymentDetails?.dependents}
             </Descriptions.Item>
-            <Descriptions.Item label="Is Spouse Working">
+          {data?.basicDetails?.maritalStatus==="Married"&&
+          <Descriptions.Item label="Is Spouse Working">
               {data?.familyEmploymentDetails?.isSpouseWorking}
             </Descriptions.Item>
-            <Descriptions.Item label="Spouse's Employment Details">
+          }
+         {data?.familyEmploymentDetails?.isSpouseWorking==="Yes"&&
+         <Descriptions.Item label="Spouse's Employment Details">
               {data?.familyEmploymentDetails?.spouseEmploymentDetails}
-            </Descriptions.Item>
+            </Descriptions.Item>}
             <Descriptions.Item label="Assets Observed">
               {data?.familyEmploymentDetails?.assetsObserved}
             </Descriptions.Item>

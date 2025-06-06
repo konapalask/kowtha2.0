@@ -4,10 +4,9 @@ import { Form, Input, Select, Col } from 'antd';
 const { Option } = Select;
 
 const RELATIONSHIP_OPTIONS = ['Neighbor', 'Friend', 'Local Shop Owner', 'Other'];
-const FEEDBACK_STATUS_OPTIONS = ['Positive', 'Negative', 'Could Not Confirm'];
+// const FEEDBACK_STATUS_OPTIONS = ['Positive', 'Negative', 'Could Not Confirm'];
 
-const ThirdPartyCheckForm: React.FC = () => {
-  const [form] = Form.useForm();
+const ThirdPartyCheckForm: React.FC<{form:any}> = ({form}) => {
   const relationship = Form.useWatch('relationship', form);
 
   return (
@@ -60,7 +59,7 @@ const ThirdPartyCheckForm: React.FC = () => {
           </Form.Item>
         </Col>
       )}
-      <Col span={8}>
+      {/* <Col span={8}>
         <Form.Item
           name="feedbackStatus"
           label="Feedback Status"
@@ -72,7 +71,7 @@ const ThirdPartyCheckForm: React.FC = () => {
             ))}
           </Select>
         </Form.Item>
-      </Col>
+      </Col> */}
       <Col span={16}>
         <Form.Item
           name="comments"

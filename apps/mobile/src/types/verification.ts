@@ -86,7 +86,7 @@ export type ThirdPartyCheckFormData = {
   tpcName: string;
   mobileNumber: string;
   relationship: string;
-  feedbackStatus: string;
+  // feedbackStatus: string;
   comments: string;
 };
 

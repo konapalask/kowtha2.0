@@ -16,15 +16,20 @@ const AddressVerificationDescription: React.FC<{
             column={logs ? 1 : 3}
             extra={extra}
           >
-            <Descriptions.Item label="Address Type">
-              {data?.addressVerification?.address}
-            </Descriptions.Item>
             <Descriptions.Item label="Address Category">
               {data?.addressVerification?.addressCategory}
             </Descriptions.Item>
             <Descriptions.Item label="Address Details">
               {data?.addressVerification?.addressDetails}
             </Descriptions.Item>
+            <Descriptions.Item label="Address Mismatch?">
+              {data?.addressVerification?.addressMismatch}
+            </Descriptions.Item>
+            {data?.addressVerification?.addressMismatch==="Yes"&&<>
+            <Descriptions.Item label="Corrected Address">
+              {data?.addressVerification?.addressCorrectionDetails}
+            </Descriptions.Item>
+            </>}
             <Descriptions.Item label="Years at Current Residence">
               {data?.addressVerification?.numberOfYearsAtCurrentResidence}
             </Descriptions.Item>

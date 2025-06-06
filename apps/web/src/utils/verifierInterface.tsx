@@ -45,7 +45,7 @@ export interface FormData {
   thirdPartyCheck: {
     tpcName: string;
     relationship: string;
-    feedbackStatus: string;
+    // feedbackStatus: string;
     comments: string;
   };
   finalObservations: {

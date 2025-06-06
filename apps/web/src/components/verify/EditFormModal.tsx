@@ -5,13 +5,23 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FormSelector } from "./VerificationEditForms";
 
-export const EditFormModal: React.FC<EditFormModalProps> = ({
+const formKeyMapping: Record<string, string> = {
+  businessBasicDetails: 'basicDetails',
+  workBasicDetails: 'basicDetails'
+};
+
+interface ExtendedEditFormModalProps extends EditFormModalProps {
+  onEditSuccess?: () => void;
+}
+
+export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
   visible,
   onCancel,
   formKey,
   initialValues,
   currentTab,
   fetchVerificationData,
+  onEditSuccess,
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -32,8 +42,9 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
+      const mappedKey = formKeyMapping[formKey] || formKey;
       const finalData = {
-        [formKey]: values,
+        [mappedKey]: values,
       };
 
       // IndexedDB operation
@@ -86,6 +97,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
             message.success("Changes saved to edit logs successfully");
             form.resetFields();
             fetchVerificationData();
+            onEditSuccess?.();
           };
 
           putRequest.onerror = () => {
@@ -108,6 +120,7 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
             message.success("Changes saved to edit logs successfully");
             form.resetFields();
             fetchVerificationData();
+            onEditSuccess?.();
           };
 
           putRequest.onerror = () => {
@@ -123,6 +136,10 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const getMaritalStatus = () => {
+    return initialValues?.verifications?.find((v: any) => v.addressType === currentTab)?.verificationData?.basicDetails?.maritalStatus;
   };
 
   return (
@@ -141,13 +158,13 @@ export const EditFormModal: React.FC<EditFormModalProps> = ({
         form={form}
         layout="vertical"
         initialValues={
-          initialValues?.verifications?.find((v: any) => v.type === currentTab)
-            ?.verificationData?.[formKey]
+          initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
+            ?.verificationData?.[formKeyMapping[formKey] || formKey]
         }
         preserve={false}
       >
         <Row gutter={[16, 16]}>
-          <FormSelector form={form} formKey={formKey} currentTab={currentTab} />
+          <FormSelector form={form} formKey={formKey} currentTab={currentTab} getMaritalStatus={getMaritalStatus} />
         </Row>
       </Form>
     </Modal>
