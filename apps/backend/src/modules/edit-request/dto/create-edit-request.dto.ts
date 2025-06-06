@@ -1,9 +1,6 @@
 import { IsInt, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateEditRequestDto {
-  @IsInt()
-  @IsNotEmpty()
-  loanId: number;
 
   @IsInt()
   @IsOptional()

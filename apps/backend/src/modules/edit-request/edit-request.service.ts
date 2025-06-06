@@ -16,38 +16,31 @@ export class EditRequestService {
 
   async createEditRequest(userId: number, createEditRequestDto: CreateEditRequestDto) {
     try {
-      // Check if loan exists
-      const loan = await this.prisma.loan.findUnique({
-        where: { id: createEditRequestDto.loanId },
-      });
-      
-      if (!loan) {
-        throw new NotFoundException('Loan not found');
-      }
-
       // If verificationId is provided, verify it exists and belongs to the loan
-      if (createEditRequestDto.verificationId) {
+
+      if (!createEditRequestDto.verificationId) {
+        throw new NotFoundException('Verification Id is required');
+
+      }
         const verification = await this.prisma.verification.findFirst({
           where: {
-            id: createEditRequestDto.verificationId,
-            loanId: createEditRequestDto.loanId,
+            id: Number(createEditRequestDto.verificationId),
           },
         });
-
+        
         if (!verification) {
           throw new NotFoundException('Verification not found or does not belong to this loan');
         }
-      }
-      
+            
       // Create edit request
       const editRequest = await this.prisma.editRequest.create({
         data: {
           loan: {
-            connect: { id: loan.id }
+            connect: { id: Number(verification.loanId) }
           },
           ...(createEditRequestDto.verificationId && {
             verification: {
-              connect: { id: createEditRequestDto.verificationId }
+              connect: { id: Number(createEditRequestDto.verificationId) }
             }
           }),
           requester: {
@@ -75,7 +68,6 @@ export class EditRequestService {
     } catch (error) {
       await this.loggingService.error('Failed to create edit request', {
         userId,
-        loanId: createEditRequestDto.loanId,
         verificationId: createEditRequestDto.verificationId,
         error: error.message,
         stack: error.stack,
