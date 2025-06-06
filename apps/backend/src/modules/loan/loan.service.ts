@@ -1847,8 +1847,13 @@ export class LoanService {
       }
 
       // Get the verification data
-      const verificationData = verification.verificationData as VerificationData || {};
-
+      let verificationData: VerificationData | WorkVerificationData = {};
+      if (addressType === 'Work' || addressType === 'Business') {
+        verificationData = verification.verificationData as WorkVerificationData || {};
+      } else {
+        verificationData = verification.verificationData as VerificationData || {};
+      }
+      
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
@@ -1874,9 +1879,21 @@ export class LoanService {
       // Filter out any failed URL generations
       const validImageUrls = imageUrls.filter(url => url !== null);
 
-      // Generate HTML template
-      const htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateAddressVerificationContent(verificationData, validImageUrls, imageDataUri);
+
+      let htmlTemplate = '';
+
+      if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
+        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri);
+      }
+      else if(addressType === 'Work' || addressType === 'Business') {
+        
+        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
+      }
+      else {
+        throw new NotFoundException('Invalid address type');
+      }
 
       // Launch a new browser instance
       const browser = await puppeteer.launch({
