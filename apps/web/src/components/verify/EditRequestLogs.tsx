@@ -58,6 +58,8 @@ interface EditRequestLogsProps {
   verificationId: string;
   fetchEditRequests: () => void;
   disabled: boolean;
+  verificationType: string;
+  admin: boolean;
 }
 
 // Helper to get changed keys for a section
@@ -92,8 +94,9 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const loanId = router?.query?.id || null;
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const {activeTab} = useTabContext()
+  // console.log("activeTab", activeTab);
   const { userDetails } = useContext(UserContext);
-  const { currentData, changedData, verificationId, fetchEditRequests, disabled } = _props;
+  const { currentData, changedData, verificationId, fetchEditRequests, disabled, verificationType, admin } = _props;
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);
 
@@ -117,6 +120,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
         status: "Approved",
       });
       message.success("Response saved successfully");
+      router.push(`/edit-requests`)
     } catch (err) {
       console.error(err);
       message.error("Failed to save response");
@@ -172,7 +176,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     }
   };
 
-  const descriptions = getDescriptions(activeTab);
+  const descriptions = admin ? getDescriptions(verificationType) : getDescriptions(activeTab);
 
   return (
     <Card
