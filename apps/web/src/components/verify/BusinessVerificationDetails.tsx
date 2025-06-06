@@ -77,7 +77,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
           setChangedData(rest);
         };
 
-        getRequest.onerror = (event) => {
+        getRequest.onerror = (event: any) => {
           console.error("Error fetching logs:", event);
         };
 
