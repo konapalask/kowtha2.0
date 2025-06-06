@@ -32,7 +32,6 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   fetchEditRequests,
   hasEditRequest
 }) => {
-  console.log("hasEditRequest: ", hasEditRequest);
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();

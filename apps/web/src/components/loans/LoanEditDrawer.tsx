@@ -8,6 +8,7 @@ import {
   Select,
   Checkbox,
   message,
+  Form,
 } from "antd";
 import {
   CloseOutlined,
@@ -262,7 +263,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 
             {selectedLoan?.id && <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Select placeholder="Select Verifiers" value={selectedLoan?.verifierId||null} options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
+               <Form.Item layout="vertical" label="Select Verifier">
+               <Select placeholder="Select Verifiers" value={selectedLoan?.verifierId||null} options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
+               </Form.Item>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                   {!hasVerificationType("AddressOne") && 
                     <Checkbox
