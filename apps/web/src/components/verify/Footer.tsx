@@ -120,6 +120,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
             onClick={() => {
               setModalAction("reject");
               setModalVisible(true);
+              fetchPdf()
               rejectLoan();
             }}
             disabled={disabled}
