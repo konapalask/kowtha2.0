@@ -30,12 +30,18 @@ interface WorkVerificationDetailsProps {
   verificationData: any;
   onEdit: (formKey: string) => void;
   editLogsUpdated: number;
+  verificationId: string;
+  fetchEditRequests: () => void;
+  hasEditRequest: boolean;
 }
 
 export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
+  verificationId,
+  fetchEditRequests,
+  hasEditRequest
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -120,6 +126,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       type="text"
       icon={<EditOutlined />}
       onClick={() => onEdit(formKey)}
+      disabled={hasEditRequest}
     />
   );
 
@@ -189,6 +196,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => onEdit("colleagueReferences")}
+                    disabled={hasEditRequest}
                   />
                 ),
               },
@@ -249,6 +257,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => onEdit("pastEmployment")}
+                    disabled={hasEditRequest}
                   />
                 ),
               },
@@ -309,6 +318,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => onEdit("existingLoans")}
+                    disabled={hasEditRequest}
                   />
                 ),
               },
@@ -354,6 +364,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     borderRadius: "50%",
                     padding: 4,
                   }}
+                  disabled={hasEditRequest}
                   onClick={() => {
                     // Handle photo removal
                     const updatedItems = data.uploadedItems.filter(
@@ -384,7 +395,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={data} changedData={changedData} />
+        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} admin={false} verificationType={activeTab} />
       </section>
 
       {/* Final Observations Section */}
@@ -392,6 +403,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
         <Card title="Final Observations">
           <div style={{ height: "400px", marginBottom: "20px", background: "#fff" }}>
             <ReactQuill
+              readOnly={hasEditRequest}
               theme="snow"
               value={editorContent}
               onChange={handleEditorChange}
@@ -411,7 +423,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           </div>
         </Card>
       </section>
-      <Footer editorContent={editorContent} />
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
     </>
   );
 };

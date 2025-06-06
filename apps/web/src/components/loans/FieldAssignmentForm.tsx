@@ -73,8 +73,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     }
   };
 
-  console.log(verification)
-
   return (
     <div>
       <Form
