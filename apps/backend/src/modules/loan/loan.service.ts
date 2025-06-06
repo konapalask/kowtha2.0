@@ -928,22 +928,22 @@ export class LoanService {
       if (!verification) {
         throw new Error('Verification not found or not assigned to this field executive');
       }
-
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
-        const processedItems = await Promise.all(
-          verificationData.uploadedItems.map(async (item) => {
+        console.log('sending signal to processs images in verificationData');
+        await Promise.all(
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean;}) => {
             try {
-              if (item.s3ImageUrl && item.latitude && item.longitude) {
-                // Process and update the image
+              console.log('item', item, item.s3ImageUrl, item.latitude, item.longitude);
+              
+              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
-                  parseFloat(item.longitude)
+                  parseFloat(item.longitude),
+                  item.timestamp,
                 );
-                return { ...item, s3ImageUrl: processedUrl };
               }
-              return item;
             } catch (error) {
               await this.loggingService.error('Failed to process image', {
                 loanId,
@@ -952,11 +952,9 @@ export class LoanService {
                 error: error.message
               });
               // Return original item if processing fails
-              return item;
             }
           })
         );
-        verificationData.uploadedItems = processedItems;
       }
 
       // Update verification status

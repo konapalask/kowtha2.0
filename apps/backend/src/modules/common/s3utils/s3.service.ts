@@ -181,48 +181,100 @@ export class S3Service {
     console.log(`Processed image saved to ${outputPath}`);
   }
 
-  async processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number): Promise<string> {
+  async processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number, timestamp: string): Promise<string> {
     try {
+      console.log('received signal into processAndUploadImage', s3ImageUrl);
       // Download the image from S3
-      const response = await fetch(s3ImageUrl);
-      const arrayBuffer = await response.arrayBuffer();
-      const imageBuffer = Buffer.from(arrayBuffer);
-      
-      // Create temporary files for input and output
-      const tempInputPath = `/tmp/input_${Date.now()}.jpg`;
-      const tempOutputPath = `/tmp/output_${Date.now()}.jpg`;
-      
-      // Write the downloaded image to temp file
-      fs.writeFileSync(tempInputPath, imageBuffer);
-      
-      // Process the image
-      await this.processImage(tempInputPath, tempOutputPath, latitude, longitude);
-      
-      // Read the processed image
-      const processedImageBuffer = fs.readFileSync(tempOutputPath);
-      
-      // Upload the processed image back to S3 with the same key
-      const key = s3ImageUrl.split('/').pop(); // Get the filename from the URL
-      if (!key) {
-        throw new Error('Invalid S3 URL - could not extract key');
-      }
-      
-      const command = new PutObjectCommand({
+      const getCommand = new GetObjectCommand({
         Bucket: this.bucketName,
-        Key: key,
-        Body: processedImageBuffer,
+        Key: s3ImageUrl,
+      });
+    
+      const s3Response = await this.s3Client.send(getCommand);
+      console.log('s3Response', s3Response);
+      const chunks: Buffer[] = [];
+      for await (const chunk of s3Response.Body as any) {
+        chunks.push(chunk);
+      }
+      const imageBuffer = Buffer.concat(chunks);
+    
+      // Load image from buffer
+      const img = await loadImage(imageBuffer);
+    
+      // Determine size
+      let preferredWidth: number, preferredHeight: number;
+      console.log('img', img.width, img.height);
+      if (img.width > img.height) {
+        preferredWidth = 960;
+        preferredHeight = 650;
+      } else {
+        preferredWidth = 650;
+        preferredHeight = 960;
+      }
+    
+      // Create canvas and draw resized image
+      const canvas = createCanvas(preferredWidth, preferredHeight);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, preferredWidth, preferredHeight);
+
+      // Prepare text
+      let address = ''; // or fetch via getAddressFromLatLon() 
+      if(latitude && longitude) {
+        address = await this.getAddressFromLatLon(latitude, longitude);
+        address = await this.cleanAddress(address);
+      }
+      const latlonText = `Lat: ${latitude.toFixed(6)}   Lon: ${longitude.toFixed(6)}`;
+      ctx.font = '20px Arial';
+      const maxTextWidth = preferredWidth - 80;
+      const addressLines = await this.wrapText(ctx, address, maxTextWidth);
+      // const now = new Date();
+      // const timestamp = now.toLocaleString('en-GB', { hour12: true, timeZone: 'Asia/Kolkata' }) + ' IST';
+    
+      // Position text
+      const lineSpacing = 15;
+      const latlonHeight = 20;
+      const addressHeights = addressLines.length * (20 + lineSpacing);
+      const timestampHeight = 20;
+      const totalTextHeight = latlonHeight + addressHeights + timestampHeight + 3 * lineSpacing;
+      const padding = 20;
+      const bottomPadding = 50;
+      const x = padding;
+      const y = preferredHeight - totalTextHeight - padding - bottomPadding;
+    
+      // Draw background and text
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = 'rgb(255,255,204)';
+      ctx.fillRect(x - padding, y - padding, maxTextWidth + 2 * padding, totalTextHeight + 2 * padding);
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = 'black';
+      ctx.font = '20px Arial';
+      let currentY = y;
+      ctx.fillText(latlonText, x, currentY + 20);
+      currentY += latlonHeight + lineSpacing;
+      for (const line of addressLines) {
+        ctx.fillText(line, x, currentY + 20);
+        currentY += 20 + lineSpacing;
+      }
+      ctx.fillText(timestamp, x, currentY + 20);
+    
+      // Convert canvas to buffer
+      const jpegBuffer = canvas.toBuffer('image/jpeg');
+    
+      // Upload back to S3 (overwrite)
+      const putCommand = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: s3ImageUrl,
+        Body: jpegBuffer,
         ContentType: 'image/jpeg',
       });
-      
-      await this.s3Client.send(command);
-      
-      // Clean up temporary files
-      fs.unlinkSync(tempInputPath);
-      fs.unlinkSync(tempOutputPath);
-      
-      // Return the same S3 URL since we're overwriting the file
-      return s3ImageUrl;
-    } catch (error) {
+    
+      await this.s3Client.send(putCommand);
+      console.log('Processed image uploaded back to S3:', s3ImageUrl);
+    
+      // Return the same URL
+      return `https://${this.bucketName}.s3.amazonaws.com/${s3ImageUrl}`;
+    }
+     catch (error) {
       await this.loggingService.error('Failed to process and upload image', {
         s3ImageUrl,
         error: error.message,
