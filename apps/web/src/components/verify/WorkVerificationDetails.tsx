@@ -68,26 +68,35 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
   useEffect(() => {
     const request = indexedDB.open("editLogs", 1);
 
+    request.onerror = (event) => {
+      console.error("Database error:", request.error);
+    };
+
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-      if (!db.objectStoreNames.contains("logs")) {
-        return;
-      }
+      
+      try {
+        const transaction = db.transaction("logs", "readonly");
+        const store = transaction.objectStore("logs");
+        const getRequest = store.get(`${id}_${activeTab}`);
 
-      const transaction = db.transaction("logs", "readwrite");
-      const store = transaction.objectStore("logs");
-      const getRequest = store.get(`${id}_${activeTab}`);
+        getRequest.onsuccess = (event: any) => {
+          const existingLogs = event.target.result || {};
+          const { id, timestamp, ...rest } = existingLogs;
+          setChangedData(rest);
+        };
 
-      getRequest.onsuccess = (event: any) => {
-        const existingLogs = event.target.result || {};
-        const {id, timestamp, ...rest } = existingLogs;
-        // console.log(id,"yipeeeeeeeeee")
-        setChangedData(rest);
-      };
+        getRequest.onerror = (event) => {
+          console.error("Error fetching logs:", event);
+        };
 
-      transaction.oncomplete = () => {
+        transaction.oncomplete = () => {
+          db.close();
+        };
+      } catch (error) {
+        console.error("Transaction error:", error);
         db.close();
-      };
+      }
     };
   }, [id, activeTab, editLogsUpdated]);
 

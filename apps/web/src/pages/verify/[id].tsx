@@ -67,6 +67,31 @@ export default function LoanVerifyDetails() {
     }
   }, [id]);
 
+  // Add this useEffect for IndexedDB initialization
+  useEffect(() => {
+    // Initialize IndexedDB
+    const request = indexedDB.open("editLogs", 1);
+
+    request.onerror = (event) => {
+      console.error("Database error:", request.error);
+    };
+
+    request.onupgradeneeded = (event: any) => {
+      const db = event.target.result;
+      // Create the logs store if it doesn't exist
+      if (!db.objectStoreNames.contains("logs")) {
+        db.createObjectStore("logs", { keyPath: "id" });
+        console.log("Object store 'logs' created successfully");
+      }
+    };
+
+    request.onsuccess = (event: any) => {
+      const db = event.target.result;
+      console.log("Database opened successfully");
+      db.close();
+    };
+  }, []); // Run only once when component mounts
+
   const handleEdit = (formKey: string) => {
     setCurrentFormKey(formKey);
     setEditModalVisible(true);
