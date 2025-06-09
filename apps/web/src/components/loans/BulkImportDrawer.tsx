@@ -43,14 +43,18 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
 
   useEffect(() => {
     const fetchFieldExecutives = async () => {
+    try{
       const response = await getAllFieldExecutivesApi();
       console.log(response.data.data);
       const options = response?.data?.data?.map((user: any) => ({
         label: <Typography.Text>{user.name} <Tag color="blue">{user.employeeCode}</Tag></Typography.Text>,
         value: user.id,
         searchValue: `${user.name} ${user.employeeCode}`.toLowerCase()
-      }));
+      }))||[];
       setFieldExecutives(options);
+    }catch(error){
+      console.log(error)
+    }
     };
     fetchFieldExecutives();
   }, []);

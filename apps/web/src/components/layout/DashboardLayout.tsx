@@ -132,7 +132,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 style={{ fontSize: 20, color: "var(--primary-800)" }}
               />
             ),
-            label: <Link href="/edit-requests">Edit Requests</Link>,
+            label: <Link href="/edit-requests">Requests</Link>,
           },
         ]
       : []),

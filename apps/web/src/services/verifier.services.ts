@@ -53,5 +53,13 @@ export const updateEditRequestApi = async (id: string, payload: any) => {
 };
 
 export const getAllEditRequestsApi = async () => {
-  return await axiosInstance.get(`/edit-requests`);
+  return await axiosInstance.get(`/edit-requests?status=Pending`);
+};
+
+// export const editRequestApproveApi = async (id: string, payload: any) => {
+//   return await axiosInstance.patch(`/edit-requests/${id}/update`, payload);
+// };
+
+export const loanApproveRejectApi = async (id: string, payload: any) => {
+  return await axiosInstance.post(`/loans/${id}/verify`, payload);
 };

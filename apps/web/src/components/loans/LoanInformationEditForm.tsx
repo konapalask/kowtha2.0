@@ -17,6 +17,7 @@ import {
   bankOptions,
   loanTypeOptions,
 } from "@/utils/options";
+import { isEmpty } from "@/utils/utility";
 
 interface LoanInfoFormProps {
   form: any;
@@ -44,6 +45,8 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   fetchLoans,
 }) => {
   const { userDetails } = useContext(UserContext);
+  // console.log(selectedLoan);
+  // console.log(form.getFieldsValue());
 
   return (
     <div>
@@ -51,27 +54,26 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         layout="vertical"
         form={form}
         initialValues={
-          selectedLoan
-            ? {
-                applicationNumber: selectedLoan.applicationNumber,
-                applicantName: selectedLoan.applicantName,
-                applicantMobile: selectedLoan.applicantMobile,
-                loanAmount: selectedLoan.loanAmount,
-                applicantAddress: selectedLoan.applicantAddress,
-                loanType:
-                  loanTypeOptions.find(
-                    (option) =>
-                      option.value.toLowerCase() ===
-                      selectedLoan.loanType?.toLowerCase()
-                  )?.value || selectedLoan.loanType,
-                bankName:
-                  bankOptions.find((option) =>
-                    option.value
-                      .toLowerCase()
-                      .includes(selectedLoan.bankName?.toLowerCase() || "")
-                  )?.value || selectedLoan.bankName,
-              }
-            : undefined
+          isEmpty(selectedLoan)
+            ? undefined: {
+              applicationNumber: selectedLoan.applicationNumber,
+              applicantName: selectedLoan.applicantName,
+              applicantMobile: selectedLoan.applicantMobile,
+              loanAmount: selectedLoan.loanAmount,
+              applicantAddress: selectedLoan.applicantAddress,
+              loanType:
+                loanTypeOptions.find(
+                  (option) =>
+                    option.value.toLowerCase() ===
+                    selectedLoan.loanType?.toLowerCase()
+                )?.value || selectedLoan.loanType,
+              bankName:
+                bankOptions.find((option) =>
+                  option.value
+                    .toLowerCase()
+                    .includes(selectedLoan.bankName?.toLowerCase() || "")
+                )?.value || selectedLoan.bankName,
+            }
         }
         onFinish={async (values) => {
           try {

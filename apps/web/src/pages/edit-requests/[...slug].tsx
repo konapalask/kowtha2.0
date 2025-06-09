@@ -12,32 +12,21 @@ const EditRequestDetails = () => {
   const id = router?.query?.slug?.[0];
   const loanid = router?.query?.slug?.[2];
   const [editRequestData, setEditRequestData] = useState<any>({});
-  const [currentData, setCurrentData] = useState<any>({});
+  // const [currentData, setCurrentData] = useState<any>({});
 
   useEffect(() => {
     if (id && loanid) {
       getEditRequestsById(id as string)
         .then((res) => {
-          setEditRequestData({
-            ...res.data?.changes,
-            verificationType: res?.data?.verificationType || "PermanentAddress",
-          });
+          // console.log(res?.data)
+          setEditRequestData(res?.data)
+          // setEditRequestData({
+          //   ...res.data?.changes,
+          //   verificationType: res?.data?.verificationType || "PermanentAddress",
+          // });
         })
         .catch((err) => {
           console.error(err);
-        });
-
-      getVerificationData(loanid as string)
-        .then((res) => {
-          setCurrentData(
-            res.data?.verifications?.find(
-              (v: any) => v.type === "PermanentAddress"
-            )?.verificationData || {}
-          );
-        })
-        .catch((err) => {
-          console.error(err);
-          message.error("Failed to fetch verification data");
         });
     }
   }, [id, loanid]);
@@ -45,8 +34,13 @@ const EditRequestDetails = () => {
   return (
     <div>
       <EditRequestLogs
-        currentData={currentData}
-        editRequestData={editRequestData}
+        verificationType={editRequestData?.verification?.addressType}
+        currentData={editRequestData?.verification?.verificationData}
+        changedData={editRequestData?.changes}
+        fetchEditRequests={()=>{}}
+        disabled={false}
+        admin={true}
+        verificationId={id as string}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   Select,
   Checkbox,
   message,
+  Form,
 } from "antd";
 import {
   CloseOutlined,
@@ -19,6 +20,7 @@ import { bankOptions, loanTypeOptions } from "@/utils/options";
 import { UserContext } from "../layout/UserContextProvider";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
+import { assignExecutivesApi } from "@/services/loans.services";
 
 interface LoanEditProps {
   selectedLoan: any;
@@ -80,10 +82,22 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     return selectedLoan.verifications?.some((v:any) => v.type === type) || false;
   }
   
-  const handleVerifierSelect = (value: string) => {
-    console.log(value);
-    message.success("Verifier Assigned Successfully");
+  const handleVerifierSelect = async (value: string) => {
+    // console.log(value);
+    try {
+      setLoading(true);
+      await assignExecutivesApi(selectedLoan.id, {
+        verifierId: value,
+      });
+      message.success("Verifier assigned successfully");
+      fetchLoans();
+    } catch (error) {
+      message.error("Failed to assign verifier");
+    } finally {
+      setLoading(false);
+    }
   }
+
   return (
     <div>
       <Drawer
@@ -137,6 +151,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
           setIsDrawerVisible(false);
           setSelectedLoan(null);
           setEditLoanInfo(false);
+          setFieldExecutiveEdit({
+            Address1: false,
+            Address2: false,
+            Work: false,
+            Business: false,
+          });
         }}
         open={isDrawerVisible}
         maskClosable={false}
@@ -214,7 +234,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   className="loan-details-descriptions"
                   bordered
                   size="small"
-                  column={{ xxl: 3, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
+                  column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
                 >
                   <Descriptions.Item label="Application Number">
                     {selectedLoan?.applicationNumber}
@@ -228,14 +248,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   <Descriptions.Item label="Loan Amount">
                     {selectedLoan?.loanAmount}
                   </Descriptions.Item>
-                  {/* <Descriptions.Item label="Address">
-                    {selectedLoan?.applicantAddress}
-                  </Descriptions.Item> */}
                   <Descriptions.Item label="Loan Type">
                     {selectedLoan?.loanType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Bank Name">
                     {selectedLoan?.bankName}
+                  </Descriptions.Item>
+                   <Descriptions.Item label="Applicant Type">
+                    {selectedLoan?.applicantType}
                   </Descriptions.Item>
                 </Descriptions>
               )}
@@ -243,7 +263,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 
             {selectedLoan?.id && <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Select placeholder="Select Verifiers" options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
+               <Form.Item layout="vertical" label="Select Verifier">
+               <Select placeholder="Select Verifiers" value={selectedLoan?.verifierId||null} options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
+               </Form.Item>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                   {!hasVerificationType("AddressOne") && 
                     <Checkbox
@@ -292,7 +314,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   return (
                     <Card
                       key={type}
-                      // title={label}
+                      title={label}
                       style={{
                         flex: 1,
                         height: "100%",
@@ -300,7 +322,10 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         flexDirection: "column",
                       }}
                       headStyle={{
-                        display: "none"
+                        // display: "none"
+                        // paddingTop: 10,
+                        // paddingBottom: 10,
+                        minHeight:40
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
@@ -313,7 +338,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               color={
                                 verification.status === "Completed"
                                   ? "green"
-                                  : "blue"
+                                  : "orange"
                               }
                             >
                               {verification.status}
@@ -375,17 +400,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               <Tag color="blue">
                                 Id: {verification.fieldExecutive?.employeeCode}
                               </Tag>
-                            </div>
-                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"row"}}>
-                              <span>Verifier:</span>
-                              <Tag color="blue">
-                                Id: {verification.verifier?.employeeCode}
-                              </Tag>    
-                            </div>                       
+                            </div>                  
                           </div>
                         </div>
                       )}
-                      {verification?.status === "Completed" && (
+                      {/* {verification?.status === "Completed" && (
                         <div
                           style={{
                             textAlign: "center",
@@ -394,9 +413,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           }}
                         >
                           <InfoCircleOutlined style={{ marginRight: 8 }} />
-                          Verification completed - No further updates required
+                          Verification completed
                         </div>
-                      )}
+                      )} */}
                       {(!verification || fieldExecutiveEdit[type]) && (
                         <FieldAssignmentForm
                           verification={verification}

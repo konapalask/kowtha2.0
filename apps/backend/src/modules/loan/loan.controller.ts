@@ -4,7 +4,7 @@ import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { Roles } from '../accounts/decorators/roles.decorator';
-import { VerificationType, LoanStatus, UserRole, VerificationStatus } from '@prisma/client';
+import { VerificationType, LoanStatus, UserRole, VerificationStatus, AddressType } from '@prisma/client';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { CreateLoanDto } from './dto/create-loan.dto';
@@ -194,7 +194,7 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType: VerificationType; fieldExecutiveId: number; address?: string; verifierId?: number },
+    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number },
   ) {
     const parsedLoanId = parseInt(loanId, 10);
     if (isNaN(parsedLoanId)) {
@@ -587,19 +587,20 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() body: { 
       verificationType: VerificationType; 
+      addressType: AddressType; 
       findings: string; 
       verificationData?: any;
-      path?: string;
     },
     @Request() req: AuthenticatedRequest,
   ) {
+    
     const result = await this.loanService.editVerificationReport(
       Number(loanId),
       body.verificationType,
       req.user.sub,
       body.findings,
       body.verificationData,
-      body.path ? [body.path] : undefined,
+      body.addressType,
     );
     return {
       status: 200,

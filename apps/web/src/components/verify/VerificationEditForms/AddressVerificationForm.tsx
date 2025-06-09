@@ -1,8 +1,7 @@
 import React from 'react';
 import { Form, Input, Select, Col } from 'antd';
 
-const AddressVerificationForm: React.FC = () => {
-  const [form] = Form.useForm();
+const AddressVerificationForm: React.FC<{form: any}> = ({form}) => {
   const yearsAtCurrentResidence = Form.useWatch('numberOfYearsAtCurrentResidence', form);
   const yearsAtCurrentCity = Form.useWatch('numberOfYearsAtCurrentCity', form);
 
@@ -15,10 +14,8 @@ const AddressVerificationForm: React.FC = () => {
           rules={[{ required: true, message: "Please select address type" }]}
         >
           <Select>
-            <Select.Option value="Residence">Residence</Select.Option>
-            <Select.Option value="Office">Office</Select.Option>
-            <Select.Option value="Business">Business</Select.Option>
-            <Select.Option value="Other">Other</Select.Option>
+            <Select.Option value="PermanentAddress">Permanent Address</Select.Option>
+            <Select.Option value="CurrentAddress">Current Address</Select.Option>
           </Select>
         </Form.Item>
       </Col>
@@ -35,15 +32,29 @@ const AddressVerificationForm: React.FC = () => {
           </Select>
         </Form.Item>
       </Col>
-      <Col span={16}>
+      <Col span={24}>
         <Form.Item
           name="addressDetails"
           label="Address Details"
           rules={[{ required: true, message: "Please enter address details" }]}
         >
-          <Input.TextArea rows={3} />
+          <Input />
         </Form.Item>
       </Col>
+      <Col span={6}>
+     <Form.Item name="addressMismatch" label="Address Mismatch?" rules={[{ required: true, message: "Please select address mismatch" }]}>
+      <Select style={{maxWidth:100}}>
+        <Select.Option value="Yes">Yes</Select.Option>
+        <Select.Option value="No">No</Select.Option>
+      </Select>
+     </Form.Item>
+      </Col>
+      <Col span={18}>
+        <Form.Item name="correctedAddress" label="Corrected Address" rules={[{ required: true, message: "Please enter corrected address" }]}>
+          <Input />
+        </Form.Item>
+      </Col>
+
       <Col span={8}>
         <Form.Item
           name="numberOfYearsAtCurrentResidence"
@@ -51,14 +62,12 @@ const AddressVerificationForm: React.FC = () => {
           rules={[{ required: true, message: "Please select years at current residence" }]}
         >
           <Select>
-            <Select.Option value="<=1 year">≤1 year</Select.Option>
-            <Select.Option value="1-3 years">1-3 years</Select.Option>
-            <Select.Option value="3-5 years">3-5 years</Select.Option>
-            <Select.Option value=">5 years">&gt;5 years</Select.Option>
+            <Select.Option value="<=2years">≤2 years</Select.Option>
+            <Select.Option value=">2years">&gt;2 years</Select.Option>
           </Select>
         </Form.Item>
       </Col>
-      {yearsAtCurrentResidence && yearsAtCurrentResidence !== '>5 years' && (
+      {yearsAtCurrentResidence && yearsAtCurrentResidence === '<=2years' && (
         <>
           <Col span={12}>
             <Form.Item
@@ -69,7 +78,7 @@ const AddressVerificationForm: React.FC = () => {
               <Input.TextArea rows={2} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <Form.Item
               name="previousAddressYears"
               label="No. of Years at Previous Address"
@@ -129,7 +138,7 @@ const AddressVerificationForm: React.FC = () => {
           label="Geo Tag"
           rules={[{ required: true, message: "Please enter geo tag" }]}
         >
-          <Input />
+          <Input style={{color:"#000"}} disabled />
         </Form.Item>
       </Col>
     </>

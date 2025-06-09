@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
@@ -96,6 +96,8 @@ interface VerificationData {
     type: string;
     timestamp: string;
     s3ImageUrl: string;
+    latitude?: string;
+    longitude?: string;
   }>;
 }
 
@@ -368,8 +370,8 @@ export class LoanService {
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    verificationType: VerificationType,
-    fieldExecutiveId: number,
+    verificationType?: VerificationType,
+    fieldExecutiveId?: number,
     address?: string,
     verifierId?: number
   ) {
@@ -380,22 +382,28 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      // If field executive is provided, address is mandatory
-      if (fieldExecutiveId && !address) {
-        throw new BadRequestException('Address is required when assigning a field executive');
+      if (!fieldExecutiveId && !verifierId) {
+        throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
       }
 
-      // Start a transaction to ensure all operations succeed or fail together
+      if (verifierId) {
+        // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
         // Update loan with verifier if provided
-        if (verifierId) {
-          await prisma.loan.update({
-            where: { id: loanId },
-            data: { verifierId }
-          });
-        }
+        await prisma.loan.update({
+          where: { id: loanId },
+          data: { verifierId }
+        });
+      });
+    }
 
-        const verification = await prisma.verification.upsert({
+    else{
+      // If field executive is provided, address is mandatory
+      if (!fieldExecutiveId || !address || !verificationType) {
+        throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
+      }
+
+        const verification = await this.prisma.verification.upsert({
           where: {
             loanId_type: {
               loanId,
@@ -410,14 +418,13 @@ export class LoanService {
           create: {
             loan: { connect: { id: loan.id } },
             type: verificationType,
-            addressType: verificationType === 'Work' ? 'PermanentAddress' : 'CurrentAddress',
             fieldExecutive: { connect: { id: fieldExecutiveId } },
             status: 'Pending',
             applicantAddress: address || null,
           },
         });
 
-        const loanStatusChange = await prisma.loan.update({
+        const loanStatusChange = await this.prisma.loan.update({
           where: { id: loanId },
           data: { status: 'Assigned' },
         });
@@ -432,7 +439,7 @@ export class LoanService {
         });
 
         return verification;
-      });
+      };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
@@ -907,7 +914,7 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    paths?: string[],
+    addressType?: AddressType,
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -921,6 +928,34 @@ export class LoanService {
       if (!verification) {
         throw new Error('Verification not found or not assigned to this field executive');
       }
+      // Process all images in verificationData if it exists
+      if (verificationData?.uploadedItems) {
+        console.log('sending signal to processs images in verificationData');
+        await Promise.all(
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean;}) => {
+            try {
+              console.log('item', item, item.s3ImageUrl, item.latitude, item.longitude);
+              
+              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
+                const processedUrl = await this.s3Service.processAndUploadImage(
+                  item.s3ImageUrl,
+                  parseFloat(item.latitude),
+                  parseFloat(item.longitude),
+                  item.timestamp,
+                );
+              }
+            } catch (error) {
+              await this.loggingService.error('Failed to process image', {
+                loanId,
+                verificationType,
+                itemId: item.id,
+                error: error.message
+              });
+              // Return original item if processing fails
+            }
+          })
+        );
+      }
 
       // Update verification status
       const updatedVerification = await this.prisma.verification.update({
@@ -929,32 +964,21 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          paths: paths || [],
           verificationData: verificationData || null,
+          addressType: addressType || null,
           updatedAt: new Date(),
         },
       });
 
-      // Create or update verification report
-      const verificationReport = await this.prisma.verificationReport.upsert({
-        where: {
-          loanId,
-        },
-        update: {
-          remarks: findings,
-          updatedAt: new Date(),
-        },
-        create: {
-          loanId,
-          verifierId: fieldExecutiveId,
-          verificationDate: new Date(),
-          remarks: findings,
-        },
+      await this.loggingService.info('Verification report updated successfully with processed images', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        processedImagesCount: verificationData?.uploadedItems?.length || 0
       });
 
       return {
         verification: updatedVerification,
-        report: verificationReport,
       };
     } catch (error) {
       this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
@@ -1612,6 +1636,7 @@ export class LoanService {
           id: verification.id,
           type: verification.type,
           status: verification.status,
+          addressType: verification.addressType,
           verificationData: verification.verificationData,
           paths: verification.paths,
           downloadUrls: downloadUrls.filter(url => url !== null),

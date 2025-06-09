@@ -56,7 +56,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     }
   ) => {
     const finalData = {
-      // verifierId: values.verifierId,
+      // verifierId: 8,
       verificationType: getVerificationType(type),
       fieldExecutiveId: values.fieldExecutiveId,
       address: values.address,
@@ -83,11 +83,11 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 assignmentMethod: verification?.assignmentMethod,
                 office: verification?.office,
                 fieldExecutiveId: verification?.fieldExecutiveId,
-                address: verification?.address || "",
+                address: verification?.applicantAddress || "",
               }
             : {
                 assignmentMethod: "Local",
-                address: "",
+                address:"",
               }
         }
         onFinish={(values) =>

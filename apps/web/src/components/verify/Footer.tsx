@@ -1,11 +1,11 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { generateFinalReport } from "@/services/verifier.services";
+import { generateFinalReport, loanApproveRejectApi } from "@/services/verifier.services";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space } from "antd";
 import { useRouter } from "next/router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
+const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorContent, disabled }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
   const { id } = router.query;
@@ -45,6 +45,7 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
   };
 
   const fetchPdf = async () => {
+   try{
     const reportResponse = await generateFinalReport(id as string, activeTab);
 
     // Check if we have valid data
@@ -56,9 +57,34 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
     const blob = new Blob([reportResponse], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
     setPdfPreviewUrl(url);
+   } catch (error) {
+    console.error("Error generating final report:", error);
+    // message.error(
+    //   "Failed to generate final report: " + (error as Error).message
+    // );
+   }
   };
 
-  const approveLoan = async () => {};
+  const approveLoan = async () => {
+    try{
+      const response = await loanApproveRejectApi(id as string, {
+        status: "Approved",comments:""
+      });
+    } catch (error) {
+      console.error("Error approving loan:", error);
+    }
+  };
+
+  const rejectLoan = async () => {
+    try{
+      const response = await loanApproveRejectApi(id as string, {
+        status: "Rejected",
+        comments:""
+      });
+    } catch (error) {
+      console.error("Error rejecting loan:", error);
+    }
+  };
 
   // Clean up the blob URL when component unmounts
   useEffect(() => {
@@ -94,6 +120,14 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
             onClick={() => {
               setModalAction("reject");
               setModalVisible(true);
+              fetchPdf()
+              rejectLoan();
+            }}
+            disabled={disabled}
+            style={{
+              backgroundColor: disabled ? "#f5f5f5" : undefined,
+              borderColor: disabled ? "#d9d9d9" : undefined,
+              color: disabled ? "rgba(0, 0, 0, 0.25)" : undefined
             }}
           >
             Negative
@@ -105,7 +139,13 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
               setModalAction("approve");
               setModalVisible(true);
               fetchPdf();
-              // console.log(activeTab)
+              approveLoan();
+            }}
+            disabled={disabled}
+            style={{
+              backgroundColor: disabled ? "#f5f5f5" : undefined,
+              borderColor: disabled ? "#d9d9d9" : undefined,
+              color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined
             }}
           >
             Positive
@@ -120,6 +160,11 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
             window.URL.revokeObjectURL(pdfPreviewUrl);
           }
           setPdfPreviewUrl(null);
+        }}
+        cancelButtonProps={{
+          style: {
+            display: "none"
+          }
         }}
         footer={null}
         width={900}
@@ -185,7 +230,7 @@ const Footer: React.FC<{ editorContent: any }> = ({ editorContent }) => {
           >
             Confirm
           </Button>
-          <Button onClick={() => setModalVisible(false)}>Cancel</Button>
+          {/* <Button onClick={() => setModalVisible(false)}>Cancel</Button> */}
         </Space>
       </Modal>
     </>
