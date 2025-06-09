@@ -16,7 +16,11 @@ export class OrgService {
         include: {
           _count: {
             select: {
-              users: true
+              users: {
+                where: {
+                  status: 'Active'
+                }
+              }
             }
           }
         }
