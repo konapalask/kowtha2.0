@@ -40,7 +40,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   initialItems = [],
   loanId,
 }) => {
-  const [uploadedItems, setUploadedItems] = useState<ExtendedUploadedItem[]>(initialItems);
+  const [uploadedItems, setUploadedItems] =
+    useState<ExtendedUploadedItem[]>(initialItems);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeocodingInitialized, setIsGeocodingInitialized] = useState(false);
 
@@ -111,7 +112,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   const uploadImage = async (
     imageUri: string,
     type: string,
-    locationOrOverlay: {latitude: number; longitude: number} | {isOverlayNeeded: boolean},
+    locationOrOverlay: {
+      latitude?: number;
+      longitude?: number;
+      isOverlayNeeded: boolean;
+    },
     isCamera?: boolean,
   ) => {
     try {
@@ -156,10 +161,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         type: 'photo',
         timestamp: new Date().toISOString(),
         isCamera: isCamera || false,
+        isOverlayNeeded: locationOrOverlay.isOverlayNeeded,
       };
 
-      // Add location details if available and overlay is needed
-      if ('latitude' in locationOrOverlay && 'longitude' in locationOrOverlay) {
+      // Add location details if available
+      if (locationOrOverlay.latitude && locationOrOverlay.longitude) {
         try {
           const locationDetails = await getLocationDetails(
             locationOrOverlay.latitude,
@@ -176,8 +182,6 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           newItem.locality = 'Unknown';
           newItem.pincode = 'Unknown';
         }
-      } else if ('isOverlayNeeded' in locationOrOverlay) {
-        newItem.isOverlayNeeded = locationOrOverlay.isOverlayNeeded;
       }
 
       const updatedItems = [...uploadedItems, newItem];
@@ -226,12 +230,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           {
             text: 'No',
             onPress: () => {
-              uploadImage(
-                photoUri,
-                'photo',
-                {isOverlayNeeded: false},
-                true,
-              );
+              uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
             },
           },
           {
@@ -298,6 +297,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   {
                     latitude: location.latitude,
                     longitude: location.longitude,
+                    isOverlayNeeded: true
                   },
                   true,
                 );
@@ -307,12 +307,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   'Location Error',
                   'Failed to get location. Uploading without geotag.',
                 );
-                uploadImage(
-                  photoUri,
-                  'photo',
-                  {isOverlayNeeded: false},
-                  true,
-                );
+                uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
               }
             },
           },
