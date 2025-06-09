@@ -934,9 +934,8 @@ export class LoanService {
         await Promise.all(
           verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean;}) => {
             try {
-              console.log('item', item, item.s3ImageUrl, item.latitude, item.longitude);
               
-              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
+              if (item.s3ImageUrl && item.isCamera) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
