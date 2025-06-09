@@ -422,12 +422,12 @@ export class LoanController {
     description: 'The loan has been successfully verified' 
   })
   async verifyLoan(
-    @Param('id') loanId: number,
+    @Param('id') loanId: string,
     @Body() verifyLoanDto: VerifyLoanDto,
     @Request() req: AuthenticatedRequest,
   ) {
     const result = await this.loanService.verifyLoan(
-      loanId,
+      Number(loanId),
       req.user.sub,
       verifyLoanDto.status,
       verifyLoanDto.comments,

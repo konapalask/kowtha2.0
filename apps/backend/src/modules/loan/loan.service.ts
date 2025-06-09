@@ -733,12 +733,16 @@ export class LoanService {
     }
   }
 
-  async getLoans(filters?: { status?: LoanStatus }) {
+  async getLoans(filters?: { status?: LoanStatus, applicationNumber?: string }) {
     try {
       const where: Prisma.LoanWhereInput = {};
       
       if (filters?.status) {
         where.status = filters.status;
+      }
+
+      if (filters?.applicationNumber) {
+        where.applicationNumber = filters.applicationNumber;
       }
 
       const loans = await this.prisma.loan.findMany({
@@ -1886,7 +1890,12 @@ export class LoanService {
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
         this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri);
       }
-      else if(addressType === 'Work' || addressType === 'Business') {
+      else if(addressType === 'Work') {
+        
+        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
+      }
+      else if(addressType === 'Business') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
         this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
