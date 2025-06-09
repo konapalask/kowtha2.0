@@ -88,7 +88,7 @@ export default function OrganizationSettings() {
     try {
       setLoading(true);
        await axiosInstance.put(
-        `/org/organization/${organization.id}`,
+        `/accounts/organization/${organization.id}`,
         values
       );
         setOrganization({ ...organization, ...values });
@@ -108,7 +108,7 @@ export default function OrganizationSettings() {
       if (editingOffice) {
         // Update existing office
         const result = await axiosInstance.put(
-          `/org/offices/${editingOffice.id}`,
+          `/accounts/offices/${editingOffice.id}`,
           values
         );
           setOffices(
@@ -119,7 +119,7 @@ export default function OrganizationSettings() {
           message.success("Branch updated successfully");
       } else {
         // Create new office
-        const result = await axiosInstance.post("/org/offices", values);
+        const result = await axiosInstance.post("/accounts/offices", values);
           setOffices([...offices, result.data]);
           message.success("Branch added successfully");
       }

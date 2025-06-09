@@ -18,7 +18,7 @@ export interface Office {
 }
 
 export const getOrganizationApi = () => {
-  return axiosInstance.get<Organization>(`/org/organization`);
+  return axiosInstance.get<Organization>(`/accounts/organization`);
 };
 
 // export const updateOrganizationApi = (organization: Organization) => {
@@ -26,7 +26,7 @@ export const getOrganizationApi = () => {
 // };
 
 export const getOfficesApi = () => {
-  return axiosInstance.get<any>(`/org/offices`);
+  return axiosInstance.get<any>(`/accounts/offices`);
 };
 
 
