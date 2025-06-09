@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { Table, Button, Tag, Typography, Form, message, Card } from "antd";
+import { Table, Button, Tag, Typography, Form, message, Card, DatePicker, Input, Select } from "antd";
 import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
+import type { ColumnFilterItem } from 'antd/es/table/interface';
+import type { Key } from 'react';
 import { UserContext } from "@/components/layout/UserContextProvider";
 // import type { UploadFile } from "antd/es/upload/interface";
 // import * as XLSX from "xlsx";
@@ -26,6 +28,9 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 
 dayjs.extend(relativeTime);
+
+const { RangePicker } = DatePicker;
+
 interface FieldExecutive {
   id: number;
   name: string;
@@ -36,6 +41,16 @@ interface FieldExecutive {
 export interface Verifiers {
   [key: string]: any;
 }
+
+// Add status options
+const statusOptions: ColumnFilterItem[] = [
+  { text: 'Unassigned', value: 'Unassigned' },
+  { text: 'Assigned', value: 'Assigned' },
+  // { text: 'UnderFV', value: 'UnderFV' },
+  // { text: 'FVCompleted', value: 'FVCompleted' },
+  { text: 'Approved', value: 'Approved' },
+  { text: 'Rejected', value: 'Rejected' },
+];
 
 export default function Loans() {
   const [loading, setLoading] = useState(false);
@@ -56,6 +71,9 @@ export default function Loans() {
   const [offices, setOffices] = useState<Office[]>([]);
   const [editLoanInfo, setEditLoanInfo] = useState(false);
   const [verifiers, setVerifiers] = useState<Verifiers[]>([]);
+  const [filteredInfo, setFilteredInfo] = useState<Record<string, any>>({});
+  const [searchText, setSearchText] = useState('');
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
 
   // Reset form when selected loan changes
   useEffect(() => {
@@ -180,32 +198,86 @@ export default function Loans() {
     }
   };
 
+  // Add handler for table change
+  const handleTableChange = (pagination: any, filters: any) => {
+    setFilteredInfo(filters);
+  };
+
+  // Get unique assignees for filter options
+  const getUniqueAssignees = (loans: Loan[], verificationType: string): ColumnFilterItem[] => {
+    const uniqueAssignees = new Set<string>();
+    loans.forEach(loan => {
+      const verification = loan?.verifications?.find((v: any) => v.type === verificationType);
+      if (verification?.fieldExecutive?.employeeCode) {
+        uniqueAssignees.add(verification.fieldExecutive.employeeCode);
+      }
+    });
+    return Array.from(uniqueAssignees).map(code => ({
+      text: code,
+      value: code,
+    }));
+  };
+
   const columns: ColumnsType<Loan> = [
     {
       title: "Application Number",
       dataIndex: "applicationNumber",
       key: "applicationNumber",
       width: 200,
+      filteredValue: filteredInfo.applicationNumber || null,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search application number"
+            value={selectedKeys[0]}
+            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            size="small"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Search
+          </Button>
+          <Button onClick={() => clearFilters?.()} size="small" style={{ width: 90 }}>
+            Reset
+          </Button>
+        </div>
+      ),
+      onFilter: (value: boolean | Key, record) =>
+        record.applicationNumber
+          .toString()
+          .toLowerCase()
+          .includes(value.toString().toLowerCase()),
     },
     {
       title: "Applicant Name",
       dataIndex: "applicantName",
       key: "applicantName",
+      width: 150,
     },
     {
       title: "Mobile",
       dataIndex: "applicantMobile",
       key: "applicantMobile",
+      width: 100,
     },
     {
       title: "Loan Type",
       dataIndex: "loanType",
       key: "loanType",
+      width: 100,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filters: statusOptions,
+      filteredValue: filteredInfo.status || null,
+      onFilter: (value, record) => record.status === value,
       render: (status: string) => {
         const color =
           status === "Pending"
@@ -217,12 +289,53 @@ export default function Loans() {
                 : "blue";
         return <Tag color={color}>{status}</Tag>;
       },
+      width: 100,
     },
     {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      render: (date: string) => dayjs(date).fromNow(),
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => {
+              setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null]);
+              const startTime = dates?.[0]?.valueOf();
+              const endTime = dates?.[1]?.valueOf();
+              setSelectedKeys(startTime && endTime ? [startTime, endTime] : []);
+            }}
+            style={{ marginBottom: 8 }}
+          />
+          <div>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ width: 90, marginRight: 8 }}
+            >
+              Filter
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters?.();
+                setDateRange([null, null]);
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      onFilter: (value: boolean | Key, record) => {
+        if (!dateRange[0] || !dateRange[1]) return true;
+        const createdAt = dayjs(record.createdAt);
+        return createdAt.isAfter(dateRange[0]) && createdAt.isBefore(dateRange[1]);
+      },
+      render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
+      width: 120,
     },
 
     {
@@ -231,6 +344,12 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "pavAssignee",
+          filters: getUniqueAssignees(loans, "AddressOne"),
+          filteredValue: filteredInfo.pavAssignee || null,
+          onFilter: (value: boolean | Key, record: Loan) => {
+            const pav = record?.verifications?.find((v: any) => v.type === "AddressOne");
+            return pav?.fieldExecutive?.employeeCode === value.toString();
+          },
           render: (_, record: Loan) => {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
@@ -238,6 +357,7 @@ export default function Loans() {
             return pav ? pav?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
+          width: 100,
         },
         {
           title: "Status",
@@ -254,6 +374,7 @@ export default function Loans() {
               "-"
             );
           },
+          width: 100,
         },
       ],
     },
@@ -263,6 +384,12 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "cavAssignee",
+          filters: getUniqueAssignees(loans, "AddressTwo"),
+          filteredValue: filteredInfo.cavAssignee || null,
+          onFilter: (value: boolean | Key, record: Loan) => {
+            const cav = record?.verifications?.find((v: any) => v.type === "AddressTwo");
+            return cav?.fieldExecutive?.employeeCode === value.toString();
+          },
           render: (_, record: Loan) => {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
@@ -270,6 +397,7 @@ export default function Loans() {
             return cav ? cav?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
+          width: 100,
         },
         {
           title: "Status",
@@ -286,6 +414,7 @@ export default function Loans() {
               "-"
             );
           },
+          width: 100,
         },
       ],
     },
@@ -295,6 +424,12 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "wvAssignee",
+          filters: getUniqueAssignees(loans, "Work"),
+          filteredValue: filteredInfo.wvAssignee || null,
+          onFilter: (value: boolean | Key, record: Loan) => {
+            const wv = record?.verifications?.find((v: any) => v.type === "Work");
+            return wv?.fieldExecutive?.employeeCode === value.toString();
+          },
           render: (_, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
@@ -302,6 +437,7 @@ export default function Loans() {
             return wv ? wv?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
+          width: 100,
         },
         {
           title: "Status",
@@ -318,6 +454,7 @@ export default function Loans() {
               "-"
             );
           },
+          width: 100,
         },
       ],
     },
@@ -326,14 +463,21 @@ export default function Loans() {
       children: [
         {
           title: "Assignee",
-          key: "wvAssignee",
+          key: "businessAssignee",
+          filters: getUniqueAssignees(loans, "Business"),
+          filteredValue: filteredInfo.businessAssignee || null,
+          onFilter: (value: boolean | Key, record: Loan) => {
+            const business = record?.verifications?.find((v: any) => v.type === "Business");
+            return business?.fieldExecutive?.employeeCode === value.toString();
+          },
           render: (_, record: Loan) => {
-            const wv = record?.verifications?.find(
+            const business = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
-            return wv ? wv?.fieldExecutive?.employeeCode : "-";
+            return business ? business?.fieldExecutive?.employeeCode : "-";
           },
           align: "center",
+          width: 100,
         },
         {
           title: "Status",
@@ -350,6 +494,7 @@ export default function Loans() {
               "-"
             );
           },
+          width: 100,
         },
       ],
     },
@@ -371,6 +516,7 @@ export default function Loans() {
           Edit
         </Button>
       ),
+      width: 100,
     },
   ];
   return (
@@ -414,6 +560,7 @@ export default function Loans() {
           dataSource={loans}
           rowKey="id"
           loading={loading}
+          onChange={handleTableChange}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -463,10 +610,10 @@ export default function Loans() {
       />
 
       <style jsx global>{`
-        .ant-form-item {
-          margin-bottom: 12px !important;
-        }
-      `}</style>
+      .ant-form-item {
+        margin-bottom: 12px !important;
+      }
+    `}</style>
     </DashboardLayout>
   );
 }
