@@ -40,7 +40,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   initialItems = [],
   loanId,
 }) => {
-  const [uploadedItems, setUploadedItems] = useState<ExtendedUploadedItem[]>(initialItems);
+  const [uploadedItems, setUploadedItems] =
+    useState<ExtendedUploadedItem[]>(initialItems);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeocodingInitialized, setIsGeocodingInitialized] = useState(false);
 
@@ -111,7 +112,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   const uploadImage = async (
     imageUri: string,
     type: string,
-    locationOrOverlay: {latitude: number; longitude: number} | {isOverlayNeeded: boolean},
+    locationOrOverlay:
+      | {latitude: number; longitude: number}
+      | {isOverlayNeeded: boolean},
     isCamera?: boolean,
   ) => {
     try {
@@ -226,12 +229,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           {
             text: 'No',
             onPress: () => {
-              uploadImage(
-                photoUri,
-                'photo',
-                {isOverlayNeeded: false},
-                true,
-              );
+              uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
             },
           },
           {
@@ -298,6 +296,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   {
                     latitude: location.latitude,
                     longitude: location.longitude,
+                    isOverlayNeeded: true,
                   },
                   true,
                 );
@@ -307,12 +306,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   'Location Error',
                   'Failed to get location. Uploading without geotag.',
                 );
-                uploadImage(
-                  photoUri,
-                  'photo',
-                  {isOverlayNeeded: false},
-                  true,
-                );
+                uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
               }
             },
           },
