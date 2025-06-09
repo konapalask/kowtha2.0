@@ -2450,7 +2450,20 @@ export class LoanService {
                 <th>Reason for Change</th>
                 <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
               </tr>
-          <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
+                    
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
               <tr>
                 <th>Name</th>
                 <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.tpcName || ''}</span></td>
@@ -2470,19 +2483,7 @@ export class LoanService {
               <tr>
                 <th>Comments</th>
                 <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.comments || ''}</span></td>
-              </tr>          
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
+              </tr>
           <tr><td colspan="6" class="section-header">Residence Details</td></tr>
           <tr>
             <th>House Area</th>
