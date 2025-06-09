@@ -98,6 +98,30 @@ export class EditRequestService {
         throw new BadRequestException('Edit request is not in pending status');
       }
 
+      // If status is approved, update the verification data
+      if (updateEditRequestDto.status === EditRequestStatus.Approved) {
+        if (!editRequest.verification) {
+          throw new BadRequestException('No verification associated with this edit request');
+        }
+
+        // Get current verification data and ensure it's an object
+        const currentVerificationData = editRequest.verification.verificationData as Record<string, any>;
+        
+        // Apply the changes to the verification data
+        const updatedVerificationData = {
+          ...currentVerificationData,
+          ...(editRequest.changes as Record<string, any>),
+        };
+
+        // Update the verification record
+        await this.prisma.verification.update({
+          where: { id: editRequest.verification.id },
+          data: {
+            verificationData: updatedVerificationData,
+          },
+        });
+      }
+
       // Update edit request
       const updatedEditRequest = await this.prisma.editRequest.update({
         where: { id: editRequestId },
@@ -113,42 +137,6 @@ export class EditRequestService {
           verification: true,
         },
       });
-
-      // If approved, apply the changes
-      if (updateEditRequestDto.status === EditRequestStatus.Approved) {
-        // Update loan data
-        // await this.prisma.loan.update({
-        //   where: { id: editRequest.loanId },
-        //   data: editRequest.changes as Prisma.LoanUpdateInput,
-        // });
-
-        // If this edit request is for a specific verification, update only that verification
-        if (editRequest.verificationId) {
-          await this.prisma.verification.update({
-            where: { id: editRequest.verificationId },
-            data: {
-              verificationData: editRequest.changes,
-            },
-          });
-        } else {
-          // If no specific verification, update all verifications of this loan
-          const verifications = await this.prisma.verification.findMany({
-            where: { loanId: editRequest.loanId },
-          });
-
-          // Update each verification's data
-          await Promise.all(
-            verifications.map(verification =>
-              this.prisma.verification.update({
-                where: { id: verification.id },
-                data: {
-                  verificationData: editRequest.changes,
-                },
-              })
-            )
-          );
-        }
-      }
 
       await this.loggingService.info('Edit request updated successfully', {
         editRequestId,
