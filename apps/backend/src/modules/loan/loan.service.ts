@@ -177,6 +177,51 @@ interface WorkVerificationData {
       s3ImageUrl: string;
     }>;
 }
+
+interface BusinessVerificationData {
+  basicDetails?: {
+    personMet: string;
+    applicantName: string;
+    isAddressSame: string;
+    businessAddress: string;
+    businessAddress2: string;
+    personMetName: string;
+  };
+  miscellaneous?: {
+    stockSeen: string;
+    rentalAmount: string;
+    employeesSeen: string;
+    businessActivity: string;
+    otherSetupObserved: string;
+    ownershipOfPremises: string;
+    illegalSetupObserved: string;
+    politicallyConnected: string;
+    businessActivityOther: string;
+    privateFinanceOrChits: string;
+    yearsInCurrentPremises: string;
+  };
+  uploadedItems?: Array<{
+    id: string;
+    uri: string;
+    type: string;
+    timestamp: string;
+    s3ImageUrl: string;
+  }>;
+  businessDetails?: {
+    geoTag: string;
+    keyManager: string;
+    constitution: string;
+    nameBoardSeen: string;
+    totalExperience: string;
+    nameBoardMatched: string;
+    businessStartYear: string;
+    constitutionOther: string;
+    isAddressTraceable: string;
+    keyManagerRelation: string;
+    keyManagerRelationOther: string;
+  };
+}
+
 @Injectable()
 export class LoanService {
   constructor(
@@ -528,23 +573,12 @@ export class LoanService {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
-        include: { verificationReport: true },
       });
 
       if (!loan) {
         await this.loggingService.warn('Loan verification failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-
-      if (!loan.verificationReport) {
-        await this.loggingService.warn('Loan verification failed - Verification report not found', { loanId });
-        throw new NotFoundException('Verification report not found');
-      }
-
-      await this.prisma.verificationReport.update({
-        where: { loanId },
-        data: { remarks: comments || '' },
-      });
 
       const updatedLoan = await this.prisma.loan.update({
         where: { id: loanId },

@@ -11,9 +11,26 @@ export class OrgService {
 
   async getOffices() {
     try {
-      const offices = await this.prisma.office.findMany({ where: { archived: false } });
+      const offices = await this.prisma.office.findMany({ 
+        where: { archived: false },
+        include: {
+          _count: {
+            select: {
+              users: true
+            }
+          }
+        }
+      });
+
+      // Transform the data to include employees count
+      const officesWithEmployeeCount = offices.map(office => ({
+        ...office,
+        employees: office._count.users,
+        _count: undefined // Remove the _count field
+      }));
+
       await this.loggingService.debug('Retrieved active offices', { count: offices.length });
-      return offices;
+      return officesWithEmployeeCount;
     } catch (error) {
       await this.loggingService.error('Failed to get offices', { 
         error: error.message,

@@ -530,13 +530,27 @@ export class AccountsService {
         orderBy: {
           name: 'asc',
         },
+        include: {
+          _count: {
+            select: {
+              users: true
+            }
+          }
+        }
       });
+
+      // Transform the data to include employees count
+      const officesWithEmployeeCount = offices.map(office => ({
+        ...office,
+        employees: office._count.users,
+        _count: undefined // Remove the _count field
+      }));
 
       await this.loggingService.debug('Offices listed successfully', {
         count: offices.length,
       });
 
-      return offices;
+      return officesWithEmployeeCount;
     } catch (error) {
       await this.loggingService.error('Failed to list offices', {
         error: error.message,
