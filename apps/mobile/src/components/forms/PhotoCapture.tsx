@@ -296,7 +296,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   {
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    isOverlayNeeded: true,
+                    isOverlayNeeded: true
                   },
                   true,
                 );
@@ -306,7 +306,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   'Location Error',
                   'Failed to get location. Uploading without geotag.',
                 );
-                uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
+                // uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
               }
             },
           },
