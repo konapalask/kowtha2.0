@@ -8,6 +8,11 @@ export class UpdateUserDto {
   @IsOptional()
   name?: string;
 
+  @ApiProperty({ description: 'User\'s mobile number', required: false })
+  @IsString()
+  @IsOptional()
+  mobile?: string;
+
   @ApiProperty({ description: 'User\'s email address', required: false })
   @IsEmail()
   @IsOptional()

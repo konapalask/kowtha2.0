@@ -83,28 +83,46 @@ export class AccountsController {
   @ApiOperation({ summary: 'List all users with optional role filter' })
   @ApiResponse({ 
     status: 200, 
-    description: 'Returns a list of users matching the filter criteria',
+    description: 'Returns a paginated list of users matching the filter criteria',
     schema: {
       type: 'object',
       properties: {
         message: { type: 'string', example: 'Users fetched successfully' },
         data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'number' },
-              name: { type: 'string' },
-              mobile: { type: 'string' },
-              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
-              office: {
+          type: 'object',
+          properties: {
+            items: {
+              type: 'array',
+              items: {
                 type: 'object',
                 properties: {
                   id: { type: 'number' },
-                  name: { type: 'string' }
+                  name: { type: 'string' },
+                  mobile: { type: 'string' },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
+                  office: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' }
+                    }
+                  },
+                  pendingVerifications: { 
+                    type: 'number',
+                    description: 'Number of pending verifications assigned to the field executive'
+                  },
+                  createdAt: { type: 'string', format: 'date-time' }
                 }
-              },
-              createdAt: { type: 'string', format: 'date-time' }
+              }
+            },
+            meta: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
             }
           }
         }
@@ -112,6 +130,8 @@ export class AccountsController {
     }
   })
   async listUsers(@Query() filters: ListUsersDto) {
+    console.log(filters);
+
     const result = await this.accountsService.listUsers(filters);
     return {
       message: 'Users fetched successfully',

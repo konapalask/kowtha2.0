@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { EditRequestStatus, Prisma } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, Prisma } from '@prisma/client';
 import { CreateEditRequestDto } from './dto/create-edit-request.dto';
 import { UpdateEditRequestDto } from './dto/update-edit-request.dto';
 import { LoggingService } from '../common/logging/logging.service';
@@ -16,27 +16,39 @@ export class EditRequestService {
 
   async createEditRequest(userId: number, createEditRequestDto: CreateEditRequestDto) {
     try {
-      // If verificationId is provided, verify it exists and belongs to the loan
+      // If type is LoanData, verify the verification exists
+      if (createEditRequestDto.type === EditRequestType.LoanData) {
+        if (!createEditRequestDto.verificationId) {
+          throw new NotFoundException('Verification Id is required for LoanData edit requests');
+        }
 
-      if (!createEditRequestDto.verificationId) {
-        throw new NotFoundException('Verification Id is required');
+        const verification = await this.prisma.verification.findFirst({
+          where: {
+            id: Number(createEditRequestDto.verificationId),
+          },
+        });
+        
+        if (!verification) {
+          throw new NotFoundException('Verification not found or does not belong to this loan');
+        }
       }
 
-      const verification = await this.prisma.verification.findFirst({
-        where: {
-          id: Number(createEditRequestDto.verificationId),
-        },
-      });
-      
-      if (!verification) {
-        throw new NotFoundException('Verification not found or does not belong to this loan');
+      // If type is Login, verify the user exists
+      if (createEditRequestDto.type === EditRequestType.Login) {
+        const user = await this.prisma.user.findUnique({
+          where: { id: userId }
+        });
+
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
       }
             
       // Create edit request
       const editRequest = await this.prisma.editRequest.create({
         data: {
           loan: {
-            connect: { id: Number(verification.loanId) }
+            connect: { id: Number(createEditRequestDto.loanId) }
           },
           ...(createEditRequestDto.verificationId && {
             verification: {
@@ -49,6 +61,7 @@ export class EditRequestService {
           status: EditRequestStatus.Pending,
           changes: createEditRequestDto.changes,
           remarks: createEditRequestDto.remarks,
+          type: createEditRequestDto.type || EditRequestType.LoanData, // Default to LoanData if not specified
         },
         include: {
           loan: true,
@@ -61,6 +74,7 @@ export class EditRequestService {
         editRequestId: editRequest.id,
         loanId: editRequest.loanId,
         verificationId: editRequest.verificationId,
+        type: editRequest.type,
         requestedBy: userId,
       });
 
@@ -69,6 +83,7 @@ export class EditRequestService {
       await this.loggingService.error('Failed to create edit request', {
         userId,
         verificationId: createEditRequestDto.verificationId,
+        type: createEditRequestDto.type,
         error: error.message,
         stack: error.stack,
       });
@@ -98,28 +113,51 @@ export class EditRequestService {
         throw new BadRequestException('Edit request is not in pending status');
       }
 
-      // If status is approved, update the verification data
+      // If status is approved, update the data based on type
       if (updateEditRequestDto.status === EditRequestStatus.Approved) {
-        if (!editRequest.verification) {
-          throw new BadRequestException('No verification associated with this edit request');
+        if (editRequest.type === EditRequestType.LoanData) {
+          if (!editRequest.verification) {
+            throw new BadRequestException('No verification associated with this edit request');
+          }
+
+          // Get current verification data and ensure it's an object
+          const currentVerificationData = editRequest.verification.verificationData as Record<string, any>;
+          
+          // Apply the changes to the verification data
+          const updatedVerificationData = {
+            ...currentVerificationData,
+            ...(editRequest.changes as Record<string, any>),
+          };
+
+          // Update the verification record
+          await this.prisma.verification.update({
+            where: { id: editRequest.verification.id },
+            data: {
+              verificationData: updatedVerificationData,
+            },
+          });
+        } else if (editRequest.type === EditRequestType.Login) {
+          // Update user data
+          const user = await this.prisma.user.findUnique({
+            where: { id: editRequest.requestedBy }
+          });
+
+          if (!user) {
+            throw new NotFoundException('User not found');
+          }
+
+          // Apply the changes to the user data
+          const updatedUserData = {
+            ...user,
+            ...(editRequest.changes as Record<string, any>),
+          };
+
+          // Update the user record
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: updatedUserData,
+          });
         }
-
-        // Get current verification data and ensure it's an object
-        const currentVerificationData = editRequest.verification.verificationData as Record<string, any>;
-        
-        // Apply the changes to the verification data
-        const updatedVerificationData = {
-          ...currentVerificationData,
-          ...(editRequest.changes as Record<string, any>),
-        };
-
-        // Update the verification record
-        await this.prisma.verification.update({
-          where: { id: editRequest.verification.id },
-          data: {
-            verificationData: updatedVerificationData,
-          },
-        });
       }
 
       // Update edit request
@@ -142,6 +180,7 @@ export class EditRequestService {
         editRequestId,
         loanId: editRequest.loanId,
         verificationId: editRequest.verificationId,
+        type: editRequest.type,
         status: updateEditRequestDto.status,
         approvedBy: userId,
       });
@@ -158,7 +197,7 @@ export class EditRequestService {
     }
   }
 
-  async getEditRequests(filters?: { status?: EditRequestStatus; loanId?: number }) {
+  async getEditRequests(filters?: { status?: EditRequestStatus; loanId?: number; type?: EditRequestType }) {
     try {
       const where: Prisma.EditRequestWhereInput = {};
       
@@ -168,6 +207,10 @@ export class EditRequestService {
 
       if (filters?.loanId) {
         where.loanId = filters.loanId;
+      }
+
+      if (filters?.type) {
+        where.type = filters.type;
       }
 
       const editRequests = await this.prisma.editRequest.findMany({

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
@@ -13,6 +13,11 @@ import * as path from 'path';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { S3Service } from '../common/s3utils/s3.service';
+import { GetLoansDto } from './dto/get-loans.dto';
+import { PaginatedResponse } from '../common/dto/pagination.dto';
+import { VerifyLoanDto } from './dto/verify-loan.dto';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -220,6 +225,11 @@ interface BusinessVerificationData {
     keyManagerRelation: string;
     keyManagerRelationOther: string;
   };
+  finalObservations?: {
+    overallStatus: string;
+    cooperativeness: string;
+    remarks: string;
+  };
 }
 
 @Injectable()
@@ -347,6 +357,7 @@ export class LoanService {
         try {
           const loanData: CreateLoanDto = {
             applicantName: row['NAME OF THE APPLICANT'],
+            applicantType: row['APPLICANT TYPE'] || 'Primary Applicant',
             applicantMobile: row['CONTACT NUMBER'].toString(),
             applicantAddress: row['FULL ADDRESS'],
             applicantAddress1: row['ADDRESS LINE 1'] || null,
@@ -613,174 +624,16 @@ export class LoanService {
 
   async getLoansByOffice(officeId: number) {
     try {
+      const office = await this.prisma.office.findUnique({
+        where: { id: officeId }
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
       const loans = await this.prisma.loan.findMany({
         where: { officeId },
-        include: {
-          operationsExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verificationReport: true,
-          verifications: {
-            include: {
-              fieldExecutive: {
-                select: {
-                  id: true,
-                  name: true,
-                  mobile: true,
-                  employeeCode: true,
-                  role: true
-                }
-              }
-            }
-          }
-        },
-      });
-
-      await this.loggingService.debug('Retrieved loans by office', {
-        officeId,
-        count: loans.length
-      });
-
-      return loans;
-    } catch (error) {
-      await this.loggingService.error('Failed to get loans by office', {
-        officeId,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
-  async getLoansByFieldExecutive(fieldExecutiveId: number) {
-    try {
-      const verifications = await this.prisma.verification.findMany({
-        where: { fieldExecutiveId },
-        select: { loanId: true },
-      });
-
-      const loanIds = verifications.map(v => v.loanId);
-      const loans = await this.prisma.loan.findMany({
-        where: { id: { in: loanIds } },
-        include: {
-          operationsExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verificationReport: true,
-          verifications: {
-            include: {
-              fieldExecutive: {
-                select: {
-                  id: true,
-                  name: true,
-                  mobile: true,
-                  employeeCode: true,
-                  role: true
-                }
-              }
-            }
-          }
-        },
-      });
-
-      await this.loggingService.debug('Retrieved loans by field executive', {
-        fieldExecutiveId,
-        count: loans.length
-      });
-
-      return loans;
-    } catch (error) {
-      await this.loggingService.error('Failed to get loans by field executive', {
-        fieldExecutiveId,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
-  async getLoansByVerifier(verifierId: number) {
-    try {
-      const loans = await this.prisma.loan.findMany({
-        where: { verifierId },
-        include: {
-          operationsExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verificationReport: true,
-          verifications: {
-            include: {
-              fieldExecutive: {
-                select: {
-                  id: true,
-                  name: true,
-                  mobile: true,
-                  employeeCode: true,
-                  role: true
-                }
-              }
-            }
-          }
-        },
-      });
-
-      await this.loggingService.debug('Retrieved loans by verifier', {
-        verifierId,
-        count: loans.length
-      });
-
-      return loans;
-    } catch (error) {
-      await this.loggingService.error('Failed to get loans by verifier', {
-        verifierId,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
-  async getLoans(filters?: { status?: LoanStatus, applicationNumber?: string }) {
-    try {
-      const where: Prisma.LoanWhereInput = {};
-      
-      if (filters?.status) {
-        where.status = filters.status;
-      }
-
-      if (filters?.applicationNumber) {
-        where.applicationNumber = filters.applicationNumber;
-      }
-
-      const loans = await this.prisma.loan.findMany({
-        where,
         include: {
           operationsExecutive: {
             select: {
@@ -820,12 +673,250 @@ export class LoanService {
         }
       });
 
-      await this.loggingService.debug('Retrieved loans with filters', {
-        filters,
+      await this.loggingService.info('Retrieved loans by office', {
+        officeId,
         count: loans.length
       });
 
       return loans;
+    } catch (error) {
+      await this.loggingService.error('Failed to get loans by office', {
+        officeId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getLoansByFieldExecutive(fieldExecutiveId: number) {
+    try {
+      const fieldExecutive = await this.prisma.user.findUnique({
+        where: { id: fieldExecutiveId }
+      });
+
+      if (!fieldExecutive) {
+        throw new NotFoundException('Field executive not found');
+      }
+
+      const verifications = await this.prisma.verification.findMany({
+        where: { fieldExecutiveId },
+        include: {
+          loan: {
+            select: {
+              id: true,
+              applicationNumber: true,
+              applicantName: true,
+              loanAmount: true,
+              status: true
+            }
+          }
+        }
+      });
+
+      const loanIds = verifications.map(v => v.loanId);
+      const loans = await this.prisma.loan.findMany({
+        where: { id: { in: loanIds } },
+        include: {
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verificationReport: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      await this.loggingService.debug('Retrieved loans by field executive', {
+        fieldExecutiveId,
+        count: loans.length
+      });
+
+      return loans;
+    } catch (error) {
+      await this.loggingService.error('Failed to get loans by field executive', {
+        fieldExecutiveId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getLoansByVerifier(verifierId: number) {
+    try {
+      const verifier = await this.prisma.user.findUnique({
+        where: { id: verifierId }
+      });
+
+      if (!verifier) {
+        throw new NotFoundException('Verifier not found');
+      }
+
+      const loans = await this.prisma.loan.findMany({
+        where: { verifierId },
+        include: {
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verificationReport: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      await this.loggingService.info('Retrieved loans by verifier', {
+        verifierId,
+        count: loans.length
+      });
+
+      return loans;
+    } catch (error) {
+      await this.loggingService.error('Failed to get loans by verifier', {
+        verifierId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async getLoans(filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+    try {
+      const where: Prisma.LoanWhereInput = {};
+      
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      if (filters?.applicationNumber) {
+        where.applicationNumber = filters.applicationNumber;
+      }
+
+      // Add field executive search conditions
+      if (filters?.fieldExecutiveEmployeeCode || filters?.fieldExecutiveName) {
+        where.verifications = {
+          some: {
+            fieldExecutive: {
+              ...(filters.fieldExecutiveEmployeeCode && {
+                employeeCode: {
+                  contains: filters.fieldExecutiveEmployeeCode,
+                  mode: 'insensitive'
+                }
+              }),
+              ...(filters.fieldExecutiveName && {
+                name: {
+                  contains: filters.fieldExecutiveName,
+                  mode: 'insensitive'
+                }
+              })
+            }
+          }
+        };
+      }
+
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await this.prisma.loan.count({ where });
+
+      const loans = await this.prisma.loan.findMany({
+        where,
+        include: {
+          operationsExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verifier: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
+          },
+          verificationReport: true,
+          verifications: {
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: Number(limit)
+      });
+
+      await this.loggingService.debug('Retrieved loans with filters', {
+        filters,
+        count: loans.length,
+        page,
+        limit
+      });
+
+      return {
+        items: loans,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
       await this.loggingService.error('Failed to get loans', {
         filters,
@@ -916,33 +1007,42 @@ export class LoanService {
 
   async getAssignedLoansWithVerifications(fieldExecutiveId: number) {
     try {
-      const loans = await this.prisma.loan.findMany({
-        where: {
-          verifications: {
-            some: {
-              fieldExecutiveId: fieldExecutiveId,
-            },
-          },
-        },
-        include: {
-          verifications: {
-            where: {
-              fieldExecutiveId: fieldExecutiveId,
-            },
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
+      const fieldExecutive = await this.prisma.user.findUnique({
+        where: { id: fieldExecutiveId }
       });
 
-      return loans;
+      if (!fieldExecutive) {
+        throw new NotFoundException('Field executive not found');
+      }
+
+      const verifications = await this.prisma.verification.findMany({
+        where: { fieldExecutiveId },
+        include: {
+          loan: {
+            select: {
+              id: true,
+              applicationNumber: true,
+              applicantName: true,
+              loanAmount: true,
+              status: true
+            }
+          }
+        }
+      });
+
+      await this.loggingService.debug('Retrieved assigned loans with verifications', {
+        fieldExecutiveId,
+        count: verifications.length
+      });
+
+      return verifications;
     } catch (error) {
-      this.logger.error(`Error fetching assigned loans with verifications: ${error.message}`, error.stack);
-      throw new Error('Failed to fetch assigned loans with verifications');
+      await this.loggingService.error('Failed to get assigned loans with verifications', {
+        fieldExecutiveId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
     }
   }
 
@@ -1021,527 +1121,6 @@ export class LoanService {
     } catch (error) {
       this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
       throw new Error('Failed to update verification report');
-    }
-  }
-
-  async generateLoanPDF(loanId: number): Promise<Buffer> {
-    try {
-      // Fetch loan details with verification data
-      const loan = await this.prisma.loan.findUnique({
-        where: { id: loanId },
-        select: {
-          applicationNumber: true,
-          applicantName: true,
-          applicantMobile: true,
-          applicantAddress: true,
-          loanType: true,
-          bankName: true,
-          loanAmount: true,
-          status: true,
-          office: { select: { name: true } },
-          operationsExecutive: { select: { name: true } },
-          verifications: {
-            select: {
-              type: true,
-              status: true,
-              updatedAt: true,
-              verificationData: true,
-              paths: true,
-              fieldExecutive: { select: { name: true } }
-            }
-          },
-          verificationReport: { select: { remarks: true, verificationDate: true } }
-        }
-      });
-
-      if (!loan) {
-        throw new NotFoundException('Loan not found');
-      }
-
-      // Get the verification data for each type
-      const permanentAddressVerification = loan.verifications.find(
-        v => v.type === 'AddressOne'
-      )?.verificationData as VerificationData || {};
-
-      const currentAddressVerification = loan.verifications.find(
-        v => v.type === 'AddressTwo'
-      )?.verificationData as VerificationData || {};
-
-      const workVerification = loan.verifications.find(
-        v => v.type === 'Work'
-      )?.verificationData as WorkVerificationData || {};
-
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
-      
-      const imageBase64 = fs.readFileSync(imagePath, 'base64');
-      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
-
-      // Get all uploaded items from all verifications
-      const allUploadedItems = loan.verifications.reduce((acc, verification) => {
-        const verificationData = verification.verificationData as VerificationData;
-        if (verificationData?.uploadedItems) {
-          return [...acc, ...verificationData.uploadedItems];
-        }
-        return acc;
-      }, []);
-
-      // Generate presigned URLs for all images
-      const imageUrls = await Promise.all(
-        allUploadedItems.map(async (item) => {
-          try {
-            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
-          } catch (error) {
-            await this.loggingService.error('Failed to generate presigned URL for image', {
-              s3ImageUrl: item.s3ImageUrl,
-              error: error.message
-            });
-            return null;
-          }
-        })
-      );
-
-      // Filter out any failed URL generations
-      const validImageUrls = imageUrls.filter(url => url !== null);
-
-      const htmlTemplate = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              color: #222;
-              position: relative;
-              min-height: 60vh;
-            }
-            .header {
-              text-align: left;
-              padding: 24px 40px 8px 40px;
-              border-bottom: 2px solid #2c3e50;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-            }
-            .header .firm {
-              font-size: 28px;
-              font-weight: bold;
-              color: #1a237e;
-              letter-spacing: 1px;
-            }
-            .header .subtitle {
-              color: #1976d2;
-              font-style: italic;
-              font-size: 18px;
-              margin-bottom: 8px;
-            }
-            .header .address {
-              font-size: 14px;
-              margin-bottom: 4px;
-            }
-            .header .contact {
-              font-size: 14px;
-              text-align: right;
-            }
-            .logo {
-              display: block;
-              width: 220px;
-              filter: contrast(200%) brightness(80%) saturate(150%);
-              background: white;
-              image-rendering: auto;
-              margin-left: 0; /* aligns to left */
-              margin-bottom: 20px;
-            }
-            .report-title {
-              text-align: center;
-              font-size: 20px;
-              font-weight: bold;
-              margin: 24px 0 0 0;
-              letter-spacing: 1px;
-              text-decoration: underline;
-            }
-            .align-wrapper {
-              width: 90%;
-              margin: 0 auto;
-            }
-            .branch-box {
-              width: 100%;
-              margin: 18px 0 0 0;
-              border: 2px solid #888;
-              border-radius: 4px;
-              background: #f8f9fa;
-            }
-            .branch-table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            .branch-table td {
-              border: none;
-              padding: 10px 16px;
-              font-size: 16px;
-            }
-            .branch-label {
-              font-weight: bold;
-              width: 160px;
-            }
-            .branch-value {
-              font-size: 18px;
-              font-weight: bold;
-              color: #222;
-            }
-            .branch-note {
-              background: #ffe0b2;
-              color: #b26a00;
-              font-size: 13px;
-              text-align: center;
-              border-radius: 3px;
-              font-weight: bold;
-            }
-            .section-table {
-              width: 100%;
-              margin: 24px 0 0 0;
-              border-collapse: collapse;
-              font-size: 15px;
-            }
-            .section-header {
-              background: #f5f5f5;
-              font-weight: bold;
-              font-size: 16px;
-              text-align: center;
-              border: 1px solid #888;
-              padding: 8px;
-              letter-spacing: 1px;
-            }
-            .section-table th, .section-table td {
-              border: 1px solid #888;
-              padding: 8px 10px;
-              vertical-align: top;
-            }
-            .section-table th {
-              background: #f5f5f5;
-              font-weight: bold;
-              text-align: center; 
-              width: 220px;
-            }
-            .highlight {
-              font-weight: bold;
-              color: #1a237e;
-            }
-            .tick {
-              font-weight: bold;
-              color: #388e3c;
-              font-size: 18px;
-            }
-            .footer {
-              position: fixed;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              text-align: center;
-              color: #7f8c8d;
-              font-size: 12px;
-              border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: white; /* Optional, helps avoid overlay */
-            }
-            .logo {
-              margin-top: 24px;
-              text-align: center;
-              opacity: 0.15;
-            }
-            .var-value {
-              font-weight: bold;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div>
-              <div class="firm">KOWTHA & CO.</div>
-              <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-              <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
-            </div>
-            <div class="contact">
-              Mobile no: 9491821359<br>
-              Mail ID: kowthaBOI@gmail.com
-            </div>
-          </div>
-
-          <div class="report-title">DUE DILIGENCE REPORT</div>
-
-          <div class="align-wrapper">
-            <div class="branch-box">
-              <table class="branch-table">
-                <tr>
-                  <td class="branch-label">Application Number</td>
-                  <td class="branch-value">${loan.applicationNumber}</td>
-                </tr>
-              </table>
-            </div>
-            <table class="section-table">
-              <tr><td colspan="6" class="section-header">Basic Details</td></tr>
-              <tr>
-                <th>Name of Applicant</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>PAN Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.pan || 'BQBUU2345R'}</span></td>
-              </tr>
-              <tr>
-                <th>Aadhar Number</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.applicantDetails?.aadhar || '9801 7691 7654'}</span></td>
-              </tr>
-              <tr>
-                <th>Residential Address</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.addressDetails || '1-1-1, Gandhi Nagar, Vijayawada'}</span></td>
-              </tr>
-              <tr>
-                <th>Marital Status</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.applicantMaritalStatus || ''}</span></td>
-                <th>Educational Qualification</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.educationQualification || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Category</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.basicDetails?.category || ''}</span></td>
-                <th>Number of Dependents</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.familyEmploymentDetails?.dependents || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of years in Current Residence</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
-                <th>Current residence house size</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.residenceDetails?.houseArea || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of Years in Current City</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
-                <th>Number of Years stayed in the Current City</th>
-                <td colspan="2"><span class="var-value">${permanentAddressVerification.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>If Less than 1 Year, then Previous Address</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.previousCity || ''}</span></td>
-              </tr> 
-              <tr>
-                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>Reason for Change</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>Parents Staying with?</th>
-                <td colspan="5"><span class="var-value">${permanentAddressVerification.addressVerification?.reasonForChange || ''}</span></td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-
-          <div style="page-break-before: always;"></div>
-
-          <div class="align-wrapper">
-            <table class="section-table">
-            <tr><td colspan="6" class="section-header">Employment Details</td></tr>
-              <tr>
-                <th>Name of the Current Employer</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.currentOfficeName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Curent Office Address</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.officeAddress || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of years in Current Job</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.yearsInCurrentJob || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Total Work Experience</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.totalWorkExperience || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Office Email ID</th>
-                <td colspan="5"><span class="var-value">${''}</span></td>
-              </tr>
-              <tr>
-                <th>Office Phone Number/Landline Number</th>
-                <td colspan="5"><span class="var-value">${''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of Employees in the Company</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.companySize || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Employee ID(Copy/Photograph Mandatory)</th>
-                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.idCardNumber || ''}</span></td>
-                <th>Designation</th>
-                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.designation || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Mode of Salary</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.salaryMode || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Employer</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.employerType || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Industry</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.natureOfService || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Office Locality</th>
-                <td colspan="5"><span class="var-value">${workVerification.employmentDetails?.officeLocality || ''}</span></td>
-              </tr>
-            <tr><td colspan="6" class="section-header">Financial Details</td></tr>
-              <tr>
-                <th>Monthly Gross Salary</th>
-                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.grossSalary || ''}</span></td>
-                <th>Monthly Net Salary</th>
-                <td colspan="2"><span class="var-value">${workVerification.employmentDetails?.netSalary || ''}</span></td>
-              </tr>
-              
-            </table>
-          </div>
-
-          <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-
-          <div style="page-break-before: always;"></div>
-
-          <div class="align-wrapper">
-            <table class="section-table">
-              <tr><td colspan="6" class="section-header">Loan Details</td></tr>
-              <tr>
-                <th>Purpose of Loan</th>
-                <td colspan="5"><span class="var-value">${workVerification.basicDetails?.purposeOfLoan || 'Home Loan'}</span></td>
-              </tr>
-              <tr>
-                <th>Minimum Loan Amount Required</th>
-                <td colspan="5"><span class="var-value">${workVerification.basicDetails?.loanAmount || '700000'}</span></td>
-              </tr>
-              <tr><td colspan="6" class="section-header">Exisiting Loan Details</td></tr>
-              <tr>
-                <th>Bank Name</th>
-                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.bankName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>EMI</th>
-                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.emi || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Tenure</th>
-                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.tenure || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Purpose</th>
-                <td colspan="5"><span class="var-value">${workVerification.existingLoans?.loans[0]?.purpose || ''}</span></td>
-              </tr>
-              
-            </table>
-          </div>
-
-          <canvas id="logoCanvas" width="250" height="140"></canvas>
-
-          <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           <script>
-              const canvas = document.getElementById('logoCanvas');
-              const ctx = canvas.getContext('2d');
-              const img = new Image();
-              img.onload = function () {
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                const offsetX = 20;
-                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
-              };
-              img.src = '${imageDataUri}';
-          </script>
-
-          <div style="page-break-before: always;"></div>
-
-          <div class="align-wrapper">
-            <table class="section-table">
-              <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-              <tr>
-                <td colspan="6">
-                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                    ${validImageUrls.map(url => `
-                      <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                        <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                        <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Launch a new browser instance
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-
-      // Create a new page
-      const page = await browser.newPage();
-
-      // Set content to the HTML template
-      await page.setContent(htmlTemplate, {
-        waitUntil: 'networkidle0'
-      });
-
-      // Generate PDF
-      const pdfArray = await page.pdf({
-        format: 'a4',
-        margin: {
-          top: '20px',
-          right: '20px',
-          bottom: '20px',
-          left: '20px'
-        },
-        printBackground: true,
-        preferCSSPageSize: true
-      });
-      const pdfBuffer: Buffer = Buffer.from(pdfArray);
-      // Close the browser
-      await browser.close();
-
-      await this.loggingService.info('PDF generated successfully', {
-        loanId,
-        applicationNumber: loan.applicationNumber,
-      });
-
-      return pdfBuffer;
-    } catch (error) {
-      await this.loggingService.error('Failed to generate PDF', {
-        loanId,
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
     }
   }
 
@@ -1709,46 +1288,103 @@ export class LoanService {
     }
   }
 
-  async createLoans(data: CreateLoanDto[]) {
+  async createLoans(createLoanDtos: CreateLoanDto[]) {
     try {
       const results = {
         successful: [],
         failed: [],
-        totalProcessed: data.length,
+        totalProcessed: createLoanDtos.length,
         successfulCount: 0,
         failedCount: 0
       };
 
-      // Process each loan creation
-      for (const loanData of data) {
+      for (const dto of createLoanDtos) {
         try {
-          const loan = await this.createLoan(loanData);
-          results.successful.push({
-            loanId: loan.id,
-            applicationNumber: loan.applicationNumber,
-            status: 'success'
+          // Check if application number already exists
+          if (dto.applicationNumber) {
+            const existingLoan = await this.prisma.loan.findUnique({
+              where: { applicationNumber: dto.applicationNumber }
+            });
+
+            if (existingLoan) {
+              throw new ConflictException(`Loan with application number ${dto.applicationNumber} already exists`);
+            }
+          }
+
+          // Check if office exists
+          const office = await this.prisma.office.findUnique({
+            where: { id: dto.officeId }
           });
+
+          if (!office) {
+            throw new NotFoundException(`Office with ID ${dto.officeId} not found`);
+          }
+
+          // Check if operations executive exists
+          const operationsExecutive = await this.prisma.user.findUnique({
+            where: { id: dto.operationsExecutiveId }
+          });
+
+          if (!operationsExecutive) {
+            throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+          }
+
+          // Check if field executive exists (if provided)
+          if (dto.fieldExecutiveId) {
+            const fieldExecutive = await this.prisma.user.findUnique({
+              where: { id: dto.fieldExecutiveId }
+            });
+
+            if (!fieldExecutive) {
+              throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
+            }
+          }
+
+          const { officeId, operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
+
+          // Generate application number if not provided
+          const applicationNumber = dto.applicationNumber || `APP${Date.now()}`;
+
+          const loanData = {
+            ...rest,
+            applicationNumber,
+            status: dto.status || 'Unassigned',
+            office: { connect: { id: officeId } },
+            operationsExecutive: { connect: { id: operationsExecutiveId } },
+            ...(fieldExecutiveId && {
+              fieldExecutive: { connect: { id: fieldExecutiveId } }
+            }),
+            ...(verifierId && {
+              verifier: { connect: { id: Number(verifierId) } }
+            })
+          };
+
+          const loan = await this.prisma.loan.create({
+            data: loanData
+          });
+
+          results.successful.push(loan);
           results.successfulCount++;
         } catch (error) {
           results.failed.push({
-            data: loanData,
+            data: dto,
             error: error.message
           });
           results.failedCount++;
         }
       }
 
-      await this.loggingService.info('Bulk loan creation completed', {
+      await this.loggingService.info('Loans created', {
         totalProcessed: results.totalProcessed,
-        successful: results.successfulCount,
-        failed: results.failedCount
+        successfulCount: results.successfulCount,
+        failedCount: results.failedCount
       });
 
       return results;
     } catch (error) {
-      await this.loggingService.error('Failed to create loans in bulk', {
+      await this.loggingService.error('Failed to create loans', {
         error: error.message,
-        stack: error.stack,
+        stack: error.stack
       });
       throw error;
     }
@@ -1844,7 +1480,7 @@ export class LoanService {
     }
   }
 
-  async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
+  async generateVerificationPDF(loanId: number, addressType: AddressType, status: string): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -1879,17 +1515,26 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
       
+      status = status.toLowerCase();
+
       const verification = loan.verifications[0];
       if (!verification) {
         throw new NotFoundException(`Verification for address type ${addressType} not found`);
       }
 
       // Get the verification data
-      let verificationData: VerificationData | WorkVerificationData = {};
-      if (addressType === 'Work' || addressType === 'Business') {
+      let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
+      if (addressType === 'Work') {
         verificationData = verification.verificationData as WorkVerificationData || {};
-      } else {
+      }
+      else if(addressType === 'Business') {
+        verificationData = verification.verificationData as BusinessVerificationData || {};
+      }
+      else if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         verificationData = verification.verificationData as VerificationData || {};
+      }
+      else {
+        throw new NotFoundException('Invalid address type');
       }
       
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/signature_kowtha.jpeg');
@@ -1922,17 +1567,17 @@ export class LoanService {
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri);
+        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status);
       }
       else if(addressType === 'Work') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status);
       }
       else if(addressType === 'Business') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri);
+        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status);
       }
       else {
         throw new NotFoundException('Invalid address type');
@@ -2162,7 +1807,9 @@ export class LoanService {
             <table class="branch-table">
               <tr>
                 <td class="branch-label">Application Number</td>
-                <td class="branch-value">${loan.applicationNumber}</td>
+                <td class="branch-value" style="border-right: 1px solid #000;">${loan.applicationNumber}</td>
+                <td class="branch-label">Bank Name</td>
+                <td class="branch-value">${loan.bankName}</td>
               </tr>
             </table>
           </div>
@@ -2170,29 +1817,22 @@ export class LoanService {
     `;
   }
 
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string): string {
-    // Use standardized list of remarks
-    const defaultRemarks = [
-      'Applicant is joined as a Project Manager at "M/s. Tekis Hub Consulting Services Pvt. Ltd" since Jan 2024',
-      'Applicant designation is "Project Manager"',
-      'Applicant receives present Net Salary Rs. 75,529/- Per month though Bank',
-      'Applicant submitted the Previous company pay slips and present company pay slip and offer letter',
-      'Applicant having a 07 years of experience in his field',
-      'Co-applicant Mr.Padira srinivasa chary (Father to Applicant) Currtently residing In rented house Rs.2,000/- Per Month with his family in D.no 8-196/2, Chichala Donka, Piduguralla – 522413',
-      'Co-applicant doing wood works and he earns around Rs. 30,000/- per month',
-      'Co-applicant gets the Contracts from out and gets the work',
-      'Co-aplicant gets Income in the Form of cash',
-      'Co-applicant submitted Gas and Current bill For Residential Proof',
-      'Applicant availing this loan for house Constriction',
-      'Neighbor check done. And we got positive feedback about the applicant'
-    ];
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string): string {
 
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
-      : defaultRemarks;
-    
+      : [];
+
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
+    const recommendationStyles: Record<string, string> = {
+      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
+      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+    };
+    
+    const finalRecommendationHtml = recommendationStyles[status] || '';
+
 
     return `
       <div class="align-wrapper">
@@ -2360,6 +2000,189 @@ export class LoanService {
               </ul>
             </td>
           </tr>
+          <tr>
+            <th>Final Recommendation</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${finalRecommendationHtml}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <canvas id="logoCanvas" width="250" height="140"></canvas>
+
+          <div class="footer">
+            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           <script>
+              const canvas = document.getElementById('logoCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.onload = function () {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const offsetX = 20;
+                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
+              };
+              img.src = '${imageDataUri}';
+          </script>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${imageUrls.map(url => `
+                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+    `;
+  }
+  
+  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string ): string {
+    
+    // Use provided remarks or default list
+    const remarks = verificationData.finalObservations?.remarks 
+      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
+      : [];
+    
+    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
+    return `
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Business Details</td></tr>
+          <tr>
+                <th>Total Experience</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Name Board Seen</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Business Start Year</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Is Address Traceable</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Key Person</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.keyManager || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Key Person Relationship</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.keyManagerRelation || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Constitution</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.constitution || ''}</span></td>
+              </tr>
+              <tr>
+                <th>Name Board Matched</th>
+                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
+              </tr>
+        </table>
+      </div>
+      <div class="footer">
+        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+      <div style="page-break-before: always;"></div>
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Miscellaneous Details</td></tr>
+          <tr>
+            <th>Stock Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.stockSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Rental Amount</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Employees Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Activity</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.businessActivity || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Other Setup Observed</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.otherSetupObserved || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Ownership of Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.ownershipOfPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Illegal Setup Observed</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.illegalSetupObserved || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Politically Connected</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.politicallyConnected || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Activity Other</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.businessActivityOther || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Private Finance or Chits</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.privateFinanceOrChits || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Years in Current Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Illegal Setup Observed</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.illegalSetupObserved || ''}</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+          <tr>
+            <th>Overall Status</th>
+            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
+          </tr>
+          <tr>
+            <th>Cooperativeness</th>
+            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Remarks</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${remarksHtml}
+              </ul>
+            </td>
+          </tr>
         </table>
       </div>
 
@@ -2409,27 +2232,11 @@ export class LoanService {
     `;
   }
 
-  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string): string {
-    // Use standardized list of remarks
-    const defaultRemarks = [
-      'Applicant is joined as a Project Manager at "M/s. Tekis Hub Consulting Services Pvt. Ltd" since Jan 2024',
-      'Applicant designation is "Project Manager"',
-      'Applicant receives present Net Salary Rs. 75,529/- Per month though Bank',
-      'Applicant submitted the Previous company pay slips and present company pay slip and offer letter',
-      'Applicant having a 07 years of experience in his field',
-      'Co-applicant Mr.Padira srinivasa chary (Father to Applicant) Currtently residing In rented house Rs.2,000/- Per Month with his family in D.no 8-196/2, Chichala Donka, Piduguralla – 522413',
-      'Co-applicant doing wood works and he earns around Rs. 30,000/- per month',
-      'Co-applicant gets the Contracts from out and gets the work',
-      'Co-aplicant gets Income in the Form of cash',
-      'Co-applicant submitted Gas and Current bill For Residential Proof',
-      'Applicant availing this loan for house Constriction',
-      'Neighbor check done. And we got positive feedback about the applicant'
-    ];
-
+  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string): string {
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
-      : defaultRemarks;
+      : [];
     
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
 

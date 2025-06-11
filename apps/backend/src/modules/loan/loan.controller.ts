@@ -49,9 +49,89 @@ export class LoanController {
   @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
   @ApiResponse({ 
-      status: 200, 
-      description: 'Returns a list of loans matching the filter criteria' 
-    })
+    status: 200, 
+    description: 'Returns a paginated list of loans matching the filter criteria',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Loans fetched successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  applicationNumber: { type: 'string' },
+                  applicantName: { type: 'string' },
+                  applicantMobile: { type: 'string' },
+                  loanType: { type: 'string' },
+                  bankName: { type: 'string' },
+                  loanAmount: { type: 'number' },
+                  status: { type: 'string', enum: Object.values(LoanStatus) },
+                  operationsExecutive: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' },
+                      mobile: { type: 'string' },
+                      employeeCode: { type: 'string' },
+                      role: { type: 'string' }
+                    }
+                  },
+                  verifier: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' },
+                      mobile: { type: 'string' },
+                      employeeCode: { type: 'string' },
+                      role: { type: 'string' }
+                    }
+                  },
+                  verifications: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'number' },
+                        type: { type: 'string' },
+                        status: { type: 'string' },
+                        fieldExecutive: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'number' },
+                            name: { type: 'string' },
+                            mobile: { type: 'string' },
+                            employeeCode: { type: 'string' },
+                            role: { type: 'string' }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            meta: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
   async getLoans(@Query() filters: GetLoansDto) {
     const result = await this.loanService.getLoans(filters);
     return {
@@ -329,12 +409,11 @@ export class LoanController {
   async generatePDF(
     @Param('id') id: string,
     @Query('type') type: AddressType,
+    @Query('status') status: string,
     @Res() res: Response,
   ) {
     try {
-      const pdfBuffer = type 
-        ? await this.loanService.generateVerificationPDF(Number(id), type)
-        : await this.loanService.generateLoanPDF(Number(id));
+      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type, status)
       
       res.set({
         'Content-Type': 'application/pdf',

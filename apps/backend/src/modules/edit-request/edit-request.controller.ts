@@ -15,7 +15,7 @@ import { EditRequestService } from './edit-request.service';
 import { CreateEditRequestDto } from './dto/create-edit-request.dto';
 import { UpdateEditRequestDto } from './dto/update-edit-request.dto';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
-import { EditRequestStatus, UserRole } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole } from '@prisma/client';
 import { Public } from '../accounts/public.decorator';
 import { Roles } from '../accounts/decorators/roles.decorator';
 
@@ -46,9 +46,10 @@ export class EditRequestController {
   findAll(
     @Query('status') status?: EditRequestStatus,
     @Query('loanId') loanId?: string,
+    @Query('type') type?: EditRequestType,
   ) {
-    const loanIdNumber = parseInt(loanId);
-    return this.editRequestService.getEditRequests({ status, loanId: loanIdNumber });
+    const loanIdNumber = loanId ? parseInt(loanId) : undefined;
+    return this.editRequestService.getEditRequests({ status, loanId: loanIdNumber, type });
   }
 
   @Get(':id')

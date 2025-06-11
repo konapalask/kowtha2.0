@@ -73,6 +73,12 @@ enum EditRequestStatus {
   Rejected
 }
 
+enum EditRequestType {
+  Login
+  LoanData
+  Other
+}
+
 model User {
   id                       Int                  @id @default(autoincrement())
   mobile                   String               @unique
@@ -80,6 +86,7 @@ model User {
   name                     String
   email                    String?              @unique
   employeeCode             String?              // Removed @unique constraint temporarily
+  deviceId                 String?              // Removed @unique constraint temporarily
   officeId                 Int
   office                   Office               @relation(fields: [officeId], references: [id])
   status                   UserStatus           @default(Active)
@@ -215,6 +222,7 @@ model EditRequest {
   status         EditRequestStatus
   changes        Json             // Stores the proposed changes
   remarks        String?
+  type           EditRequestType?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }

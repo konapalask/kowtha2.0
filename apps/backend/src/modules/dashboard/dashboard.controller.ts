@@ -1,10 +1,11 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { Roles } from '../accounts/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { GetMetricsDto } from './dto/get-metrics.dto';
 
 @ApiTags('dashboard')
 @Controller('dashboard')
@@ -80,8 +81,8 @@ export class DashboardController {
       }
     }
   })
-  async getLoanMetrics() {
-    const result = await this.dashboardService.getLoanMetrics();
+  async getLoanMetrics(@Query() filters: GetMetricsDto) {
+    const result = await this.dashboardService.getLoanMetrics(filters);
     return {
       status: 200,
       message: 'Dashboard metrics fetched successfully',

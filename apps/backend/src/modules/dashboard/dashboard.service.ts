@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { LoanStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
+import { GetMetricsDto } from './dto/get-metrics.dto';
 
 @Injectable()
 export class DashboardService {
@@ -44,22 +45,48 @@ export class DashboardService {
     }
   }
 
-  async getLoanMetrics() {
+  async getLoanMetrics(filters?: GetMetricsDto) {
     try {
+      const where: any = {};
+      
+      // Add date filters if provided
+      if (filters?.fromDate || filters?.toDate) {
+        where.createdAt = {};
+        if (filters.fromDate) {
+          // Set start of day for fromDate
+          const fromDate = new Date(filters.fromDate);
+          fromDate.setHours(0, 0, 0, 0);
+          where.createdAt.gte = fromDate;
+        }
+        if (filters.toDate) {
+          // Set end of day for toDate
+          const toDate = new Date(filters.toDate);
+          toDate.setHours(23, 59, 59, 999);
+          where.createdAt.lte = toDate;
+        }
+      }
+
       // Get total loans count
-      const totalLoans = await this.prisma.loan.count();
+      const totalLoans = await this.prisma.loan.count({ where });
 
       // Get counts for each status
       const verifiedLoans = await this.prisma.loan.count({
-        where: { status: LoanStatus.Approved },
+        where: { 
+          ...where,
+          status: LoanStatus.Approved 
+        },
       });
 
       const rejectedLoans = await this.prisma.loan.count({
-        where: { status: LoanStatus.Rejected },
+        where: { 
+          ...where,
+          status: LoanStatus.Rejected 
+        },
       });
 
       const pendingLoans = await this.prisma.loan.count({
         where: {
+          ...where,
           status: {
             in: [LoanStatus.Unassigned, LoanStatus.Assigned, LoanStatus.UnderFV, LoanStatus.FVCompleted],
           },
@@ -72,6 +99,7 @@ export class DashboardService {
       const pendingPercentage = totalLoans > 0 ? (pendingLoans / totalLoans) * 100 : 0;
 
       await this.loggingService.info('Dashboard metrics fetched successfully', {
+        filters,
         totalLoans,
         verifiedLoans,
         rejectedLoans,
@@ -91,6 +119,7 @@ export class DashboardService {
       };
     } catch (error) {
       await this.loggingService.error('Failed to fetch dashboard metrics', {
+        filters,
         error: error.message,
         stack: error.stack,
       });

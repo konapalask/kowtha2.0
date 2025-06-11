@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsNumber } from 'class-validator';
+import { IsEnum, IsOptional, IsNumber, IsString } from 'class-validator';
 import { UserRole, UserStatus } from '@prisma/client';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
-export class ListUsersDto {
+export class ListUsersDto extends PaginationDto {
   @ApiProperty({
     description: 'Filter users by role',
     enum: UserRole,
@@ -16,9 +17,9 @@ export class ListUsersDto {
     description: 'Filter users by office ID',
     required: false
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  officeId?: number;
+  officeId?: string;
 
   @ApiProperty({
     description: 'Filter users by status',

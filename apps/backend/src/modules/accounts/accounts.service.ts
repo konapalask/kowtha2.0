@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
@@ -10,6 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
+import { PaginatedResponse } from '../common/dto/pagination.dto';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -87,18 +88,23 @@ export class AccountsService {
 
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
+      const user = await this.prisma.user.findUnique({
+        where: { mobile }
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found with this mobile number');
+      }
+
+      if (user.status !== 'Active') {
+        throw new BadRequestException('Your account is not active. Please contact administrator.');
+      }
+
       // Generate a random 6-digit OTP
       const otp = "123456";
       // const otp = this.generateRandomOTP();
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-      // Find or create user
-      let user = await this.prisma.user.findUnique({ where: { mobile } });
-      if (!user) {
-        await this.loggingService.warn('OTP generation failed - User not found', { mobile });
-        throw new UnauthorizedException('User not found');
-      }
-      
       // Create a new session for this OTP
       await this.prisma.session.create({
         data: {
@@ -130,11 +136,18 @@ export class AccountsService {
 
   async verifyOTP(mobile: string, otp: string, isMobile: boolean): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      const user = await this.prisma.user.findUnique({ where: { mobile } });
+      const user = await this.prisma.user.findUnique({
+        where: { mobile }
+      });
+
       if (!user) {
-        await this.loggingService.warn('OTP verification failed - User not found', { mobile });
-        throw new UnauthorizedException('User not found');
+        throw new NotFoundException('User not found with this mobile number');
       }
+
+      if (user.status !== 'Active') {
+        throw new BadRequestException('Your account is not active. Please contact administrator.');
+      }
+
       if(isMobile){
         if(user.role !== UserRole.FieldExecutive){
           throw new UnauthorizedException('Admin cannot verify OTP');
@@ -200,8 +213,11 @@ export class AccountsService {
       });
 
       if (!user) {
-        await this.loggingService.warn('User validation failed - User not found', { userId: id });
-        throw new UnauthorizedException('User not found');
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.status !== 'Active') {
+        throw new BadRequestException('Your account is not active. Please contact administrator.');
       }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
@@ -219,19 +235,25 @@ export class AccountsService {
     }
   }
 
-  async listUsers(filters?: ListUsersDto) {
+  async listUsers(filters?: ListUsersDto): Promise<PaginatedResponse<any>> {
     try {
       const where: any = {
-        status: filters?.status || 'Active' // Default to Active users if not specified
+        status: filters?.status || 'Active'
       };
       
       if (filters?.role) {
         where.role = filters.role;
       }
-
+      
       if (filters?.officeId) {
         where.officeId = Number(filters.officeId);
       }
+
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await this.prisma.user.count({ where });
 
       const users = await this.prisma.user.findMany({
         where,
@@ -248,19 +270,47 @@ export class AccountsService {
               name: true
             }
           },
-          createdAt: true
+          createdAt: true,
+          _count: {
+            select: {
+              verifications: {
+                where: {
+                  status: 'Pending'
+                }
+              }
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
-        }
+        },
+        skip,
+        take: limit
       });
+
+      // Transform the data to include pending verifications count
+      const transformedUsers = users.map(user => ({
+        ...user,
+        pendingVerifications: user._count.verifications,
+        _count: undefined // Remove the _count field
+      }));
 
       await this.loggingService.info('Users listed successfully', {
         filter: filters,
-        count: users.length
+        count: users.length,
+        page,
+        limit
       });
 
-      return users;
+      return {
+        items: transformedUsers,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
       await this.loggingService.error('Failed to list users', {
         filter: filters,
@@ -314,13 +364,13 @@ export class AccountsService {
 
   async createUser(createUserDto: CreateUserDto) {
     try {
-      // Check if mobile number already exists
+      // Check if user with same mobile already exists
       const existingUser = await this.prisma.user.findUnique({
-        where: { mobile: createUserDto.mobile },
+        where: { mobile: createUserDto.mobile }
       });
 
       if (existingUser) {
-        throw new BadRequestException('Mobile number already registered');
+        throw new ConflictException('User with this mobile number already exists');
       }
 
       // Check if email is provided and already exists
@@ -368,7 +418,7 @@ export class AccountsService {
       return user;
     } catch (error) {
       await this.loggingService.error('Failed to create user', {
-        data: createUserDto,
+        userData: createUserDto,
         error: error.message,
         stack: error.stack,
       });
@@ -378,13 +428,23 @@ export class AccountsService {
 
   async updateUser(userId: number, updateUserDto: UpdateUserDto) {
     try {
-      // Check if user exists
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
       });
 
       if (!user) {
         throw new NotFoundException('User not found');
+      }
+
+      // If mobile is being updated, check if it's already taken
+      if (updateUserDto.mobile && updateUserDto.mobile !== user.mobile) {
+        const existingUser = await this.prisma.user.findUnique({
+          where: { mobile: updateUserDto.mobile }
+        });
+
+        if (existingUser) {
+          throw new ConflictException('User with this mobile number already exists');
+        }
       }
 
       // Check if email is being updated and already exists
