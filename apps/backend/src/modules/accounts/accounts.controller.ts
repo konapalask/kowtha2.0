@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException, Patch, Param, Put } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -385,5 +385,20 @@ export class AccountsController {
       message: 'Office fetched successfully',
       data: office
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('organization')
+  async getOrganization(@Request() req) {
+    return this.accountsService.getOrganizationByUser(req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('organization/:id')
+  async updateOrganization(
+    @Param('id') id: string,
+    @Body() body: { name?: string; description?: string }
+  ) {
+    return this.accountsService.updateOrganization(Number(id), body);
   }
 } 

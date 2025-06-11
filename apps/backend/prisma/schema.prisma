@@ -85,8 +85,8 @@ model User {
   role                     UserRole
   name                     String
   email                    String?              @unique
-  employeeCode             String?              // Removed @unique constraint temporarily
-  deviceId                 String?              // Removed @unique constraint temporarily
+  employeeCode             String?              
+  deviceId                 String?              
   officeId                 Int
   office                   Office               @relation(fields: [officeId], references: [id])
   status                   UserStatus           @default(Active)

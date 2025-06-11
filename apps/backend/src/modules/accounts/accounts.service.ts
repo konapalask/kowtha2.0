@@ -643,4 +643,58 @@ export class AccountsService {
       throw error;
     }
   }
+
+  async getOrganizationByUser(userId: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { office: true },
+      });
+
+      if (!user || !user.office) {
+        await this.loggingService.warn('Organization not found for user', { userId });
+        return null;
+      }
+
+      const org = await this.prisma.organization.findUnique({
+        where: { id: user.office.organizationId },
+      });
+
+      await this.loggingService.debug('Retrieved organization for user', { 
+        userId,
+        organizationId: org?.id 
+      });
+      return org;
+    } catch (error) {
+      await this.loggingService.error('Failed to get organization by user', { 
+        userId,
+        error: error.message,
+        stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  // Update organization name and description
+  async updateOrganization(orgId: number, data: { name?: string; description?: string }) {
+    try {
+      const org = await this.prisma.organization.update({
+        where: { id: orgId },
+        data,
+      });
+      await this.loggingService.info('Organization updated successfully', { 
+        organizationId: orgId,
+        updatedFields: Object.keys(data) 
+      });
+      return org;
+    } catch (error) {
+      await this.loggingService.error('Failed to update organization', { 
+        organizationId: orgId,
+        data,
+        error: error.message,
+        stack: error.stack 
+      });
+      throw error;
+    }
+  }
 } 
