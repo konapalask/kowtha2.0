@@ -8,11 +8,11 @@ import {
   getVerificationData,
   getEditRequestsApi,
 } from "@/services/verifier.services";
-// import { VerificationDetails } from "@/components/verify/VerificationDetails";
-// import { WorkVerificationDetails } from "@/components/verify/WorkVerificationDetails";
-// import { EditFormModal } from "@/components/verify/EditFormModal";
+import { VerificationDetails } from "@/components/verify/VerificationDetails";
+import { WorkVerificationDetails } from "@/components/verify/WorkVerificationDetails";
+import { EditFormModal } from "@/components/verify/EditFormModal";
 import { TabContextType } from "@/utils/verifierInterface";
-// import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
+import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -25,10 +25,10 @@ const TabContext = createContext<TabContextType>({
 export const useTabContext = () => useContext(TabContext);
 
 const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
-const VerificationDetails = dynamic(() => import("@/components/verify/VerificationDetails"), { ssr: false });
-const WorkVerificationDetails = dynamic(() => import("@/components/verify/WorkVerificationDetails"), { ssr: false });
-const EditFormModal = dynamic(() => import("@/components/verify/EditFormModal"), { ssr: false });
-const BusinessVerificationDetails = dynamic(() => import("@/components/verify/BusinessVerificationDetails"), { ssr: false });
+// const VerificationDetails = dynamic(() => import("@/components/verify/VerificationDetails"), { ssr: false });
+// const WorkVerificationDetails = dynamic(() => import("@/components/verify/WorkVerificationDetails"), { ssr: false });
+// const EditFormModal = dynamic(() => import("@/components/verify/EditFormModal"), { ssr: false });
+// const BusinessVerificationDetails = dynamic(() => import("@/components/verify/BusinessVerificationDetails"), { ssr: false });
 
 export default function LoanVerifyDetails() {
   const router = useRouter();
