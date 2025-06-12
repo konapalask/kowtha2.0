@@ -15,7 +15,7 @@ import { generateOtpApi, verifyOtpApi, getUserDetailsApi } from "@/services/auth
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
-import { getUserDetails, setUserDetails } from "@/utils/utility";
+import { getUserDetails, isEmpty, setUserDetails } from "@/utils/utility";
 // import { useUser } from "@/components/layout/UserContextProvider";
 
 const { Title, Text } = Typography;
@@ -30,8 +30,9 @@ export default function Login() {
   const userDetails = getUserDetails();
 
   useEffect(() => {
+
     // Prevent multiple redirects
-    if (userDetails && !isNavigating) {
+    if (Object.keys(userDetails).length > 0 && !isNavigating) {
       setIsNavigating(true);
       router.push("/dashboard").catch((error) => {
         console.error('Navigation error:', error);
