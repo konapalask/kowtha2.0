@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Table, Card, Button, Space, Tag, Typography } from "antd";
 import {
@@ -5,11 +6,10 @@ import {
   CloseCircleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+// import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-// import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { getFieldExecutivesApi, getVerifierLoansApi } from "@/services/loans.services";
 
@@ -29,6 +29,8 @@ type LoanData = {
   updatedAt?: string;
   [key: string]: any; // Allow for additional properties
 };
+
+const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
 
 export default function Verify() {
   const [loading, setLoading] = useState(false);

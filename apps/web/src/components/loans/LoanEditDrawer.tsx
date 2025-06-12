@@ -13,23 +13,35 @@ import {
 import {
   CloseOutlined,
   EditOutlined,
-  InfoCircleOutlined,
 } from "@ant-design/icons";
-import React, { useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
-import { UserContext } from "../layout/UserContextProvider";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
-import { assignExecutivesApi } from "@/services/loans.services";
+import { assignExecutivesApi, getLoansByIdApi } from "@/services/loans.services";
+import { getUserDetails } from "@/utils/utility";
+
+interface LoanDetails {
+  id: number;
+  applicationNumber: string;
+  applicantName: string;
+  applicantMobile: string;
+  loanAmount: string;
+  loanType: string;
+  bankName: string;
+  applicantType: string;
+  status: string;
+  verifierId?: string;
+  verifications?: any[];
+  [key: string]: any;
+}
 
 interface LoanEditProps {
-  selectedLoan: any;
-  setSelectedLoan: (loan: any) => void;
+  selectedApplicationNumber: string | null; // This is now the applicationNumber
   isDrawerVisible: boolean;
   setIsDrawerVisible: (visible: boolean) => void;
   editLoanInfo: boolean;
   setEditLoanInfo: (val: boolean) => void;
-  form: any;
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setLoans: any;
@@ -43,13 +55,11 @@ interface LoanEditProps {
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
-  selectedLoan,
-  setSelectedLoan,
+  selectedApplicationNumber,
   isDrawerVisible,
   setIsDrawerVisible,
   editLoanInfo,
   setEditLoanInfo,
-  form,
   loading,
   setLoading,
   setLoans,
@@ -61,70 +71,112 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   fetchLoans,
   setRefresh,
 }) => {
-  const { userDetails } = useContext(UserContext);
-  const [address1Disabled, setAddress1Disabled] = useState(false);
-  const [address2Disabled, setAddress2Disabled] = useState(false);
-  const [workDisabled, setWorkDisabled] = useState(false);
-  const [businessDisabled, setBusinessDisabled] = useState(false);
-  const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
-    Record<string, boolean>
-  >({
+  // console.log(selectedLoan);
+  const [form] = Form.useForm();
+  const userDetails = getUserDetails();
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(selectedApplicationNumber);
+  const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
+  const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
+  const [workDisabled, setWorkDisabled] = useState<boolean>(false);
+  const [businessDisabled, setBusinessDisabled] = useState<boolean>(false);
+  const [loanDetails, setLoanDetails] = useState<LoanDetails | null>(null);
+  const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<Record<string, boolean>>({
     Address1: false,
     Address2: false,
     Work: false,
     Business: false,
   });
 
-  // useEffect(()=> {
-
-  // })
-  function hasVerificationType( type:string) {
-    return selectedLoan.verifications?.some((v:any) => v.type === type) || false;
-  }
-  
-  const handleVerifierSelect = async (value: string) => {
-    // console.log(value);
+  const fetchLoanDetails = async () => {
+    console.log(selectedLoan)
+    if (!selectedLoan) return;
+    console.log("passed")
     try {
       setLoading(true);
-      await assignExecutivesApi(selectedLoan.id, {
+      const result = await getLoansByIdApi(selectedLoan);
+      const loanData = result?.data?.data?.items?.[0];
+      if (loanData) {
+        setLoanDetails(loanData);
+      }
+    } catch (error) {
+      console.error('Error fetching loan details:', error);
+      message.error("Failed to fetch loan details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedLoan ) {
+      fetchLoanDetails();
+    }
+  }, [selectedLoan]);
+
+  function hasVerificationType(type: string) {
+    return loanDetails?.verifications?.some((v: any) => v.type === type) || false;
+  }
+
+  const handleVerifierSelect = async (value: string) => {
+    if (!loanDetails?.id) return;
+    
+    try {
+      setLoading(true);
+      await assignExecutivesApi(loanDetails.id, {
         verifierId: value,
       });
       message.success("Verifier assigned successfully");
-      fetchLoans();
+      fetchLoanDetails();
+      setRefresh(true);
     } catch (error) {
       message.error("Failed to assign verifier");
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const handleClose = () => {
+    setIsDrawerVisible(false);
+    form.resetFields();
+    setLoanDetails(null);
+    setSelectedLoan(null);
+    setEditLoanInfo(false);
+    setLoanDetails(null);
+    setFieldExecutiveEdit({
+      Address1: false,
+      Address2: false,
+      Work: false,
+      Business: false,
+    });
+    fetchLoans();
+  };
 
   return (
     <div>
       <Drawer
         title={
           <span>
-            {selectedLoan?.id
-              ? `Loan Details - ${selectedLoan?.applicationNumber}`
+            {loanDetails?.id
+              ? `Loan Details - ${loanDetails.applicationNumber}`
               : "New Loan"}{" "}
-            {selectedLoan?.status && (
+            {loanDetails?.status && (
               <Tag
                 color={
-                  selectedLoan.status === "Pending"
+                  loanDetails.status === "Pending"
                     ? "orange"
-                    : selectedLoan.status === "Approved"
+                    : loanDetails.status === "Approved"
                       ? "green"
-                      : selectedLoan.status === "Rejected"
+                      : loanDetails.status === "Rejected"
                         ? "red"
-                        : selectedLoan.status === "FieldVerificationComplete"
+                        : loanDetails.status === "FieldVerificationComplete"
                           ? "green"
-                          : selectedLoan.status === "FieldVerificationStarted"
+                          : loanDetails.status === "FieldVerificationStarted"
                             ? "blue"
                             : "default"
                 }
                 style={{ marginLeft: 8 }}
               >
                 {(() => {
-                  switch (selectedLoan.status) {
+                  switch (loanDetails.status) {
                     case "Pending":
                       return "Unassigned";
                     case "Assigned":
@@ -138,7 +190,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                     case "Rejected":
                       return "Rejected";
                     default:
-                      return selectedLoan.status;
+                      return loanDetails.status;
                   }
                 })()}
               </Tag>
@@ -147,22 +199,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         }
         placement="right"
         width="90%"
-        onClose={() => {
-          setIsDrawerVisible(false);
-          setSelectedLoan(null);
-          setEditLoanInfo(false);
-          setFieldExecutiveEdit({
-            Address1: false,
-            Address2: false,
-            Work: false,
-            Business: false,
-          });
-        }}
+        onClose={handleClose}
         open={isDrawerVisible}
         maskClosable={false}
         destroyOnClose
       >
-        {selectedLoan && (
+        {(selectedLoan || !loanDetails?.id) && (
           <>
             <div style={{ marginBottom: 24 }}>
               <div
@@ -175,38 +217,35 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                 <Typography.Title level={4} style={{ margin: 0 }}>
                   Loan Information
                 </Typography.Title>
-                {!editLoanInfo && selectedLoan.id && (
+                {!editLoanInfo && loanDetails?.id && (
                   <Button
                     type="link"
                     onClick={() => {
                       setEditLoanInfo(true);
-                      if (selectedLoan) {
-                        // Find the matching loan type option
+                      if (loanDetails) {
                         const matchingLoanType = loanTypeOptions.find(
                           (option) =>
                             option.value.toLowerCase() ===
-                            selectedLoan.loanType?.toLowerCase()
+                            loanDetails.loanType?.toLowerCase()
                         );
 
-                        // Find the matching bank option
                         const matchingBank = bankOptions.find((option) =>
                           option.value
                             .toLowerCase()
                             .includes(
-                              selectedLoan.bankName?.toLowerCase() || ""
+                              loanDetails.bankName?.toLowerCase() || ""
                             )
                         );
 
                         form.setFieldsValue({
-                          applicationNumber: selectedLoan.applicationNumber,
-                          applicantName: selectedLoan.applicantName,
-                          applicantMobile: selectedLoan.applicantMobile,
-                          loanAmount: selectedLoan.loanAmount,
-                          applicantAddress: selectedLoan.applicantAddress,
-                          loanType:
-                            matchingLoanType?.value || selectedLoan.loanType,
-                          bankName:
-                            matchingBank?.value || selectedLoan.bankName,
+                          applicationNumber: loanDetails.applicationNumber,
+                          applicantName: loanDetails.applicantName,
+                          applicantMobile: loanDetails.applicantMobile,
+                          loanAmount: loanDetails.loanAmount,
+                          applicantAddress: loanDetails.applicantAddress,
+                          loanType: matchingLoanType?.value || loanDetails.loanType,
+                          bankName: matchingBank?.value || loanDetails.bankName,
+                          applicantType: loanDetails.applicantType,
                         });
                       }
                     }}
@@ -216,18 +255,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   </Button>
                 )}
               </div>
-              {!selectedLoan.id || editLoanInfo ? (
+              {!loanDetails?.id || editLoanInfo ? (
                 <LoanInformationEditForm
                   form={form}
-                  selectedLoan={selectedLoan}
+                  selectedLoan={loanDetails}
                   setSelectedLoan={setSelectedLoan}
-                  setLoans={setLoans}
-                  setIsDrawerVisible={setIsDrawerVisible}
                   setEditLoanInfo={setEditLoanInfo}
                   loading={loading}
-                  loans={loans}
                   setLoading={setLoading}
-                  fetchLoans={fetchLoans}
+                  fetchLoanDetails={fetchLoanDetails}
                 />
               ) : (
                 <Descriptions
@@ -237,35 +273,41 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
                 >
                   <Descriptions.Item label="Application Number">
-                    {selectedLoan?.applicationNumber}
+                    {loanDetails?.applicationNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="Applicant Name">
-                    {selectedLoan?.applicantName}
+                    {loanDetails?.applicantName}
                   </Descriptions.Item>
                   <Descriptions.Item label="Mobile Number">
-                    {selectedLoan?.applicantMobile}
+                    {loanDetails?.applicantMobile}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Loan Amount">
-                    {selectedLoan?.loanAmount}
-                  </Descriptions.Item>
+                 {loanDetails?.loanAmount && <Descriptions.Item label="Loan Amount">
+                    {loanDetails?.loanAmount}
+                  </Descriptions.Item>}
                   <Descriptions.Item label="Loan Type">
-                    {selectedLoan?.loanType}
+                    {loanDetails?.loanType}
                   </Descriptions.Item>
                   <Descriptions.Item label="Bank Name">
-                    {selectedLoan?.bankName}
+                    {loanDetails?.bankName}
                   </Descriptions.Item>
-                   <Descriptions.Item label="Applicant Type">
-                    {selectedLoan?.applicantType}
+                  <Descriptions.Item label="Applicant Type">
+                    {loanDetails?.applicantType}
                   </Descriptions.Item>
                 </Descriptions>
               )}
             </div>
 
-            {selectedLoan?.id && <div style={{ marginTop: 24 }}>
+            {loanDetails?.id && <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-               <Form.Item layout="vertical" label="Select Verifier">
-               <Select placeholder="Select Verifiers" value={selectedLoan?.verifierId||null} options={verifiers} style={{ width: 200 }} onSelect={handleVerifierSelect}/>
-               </Form.Item>
+                <Form.Item layout="vertical" label="Select Verifier">
+                  <Select 
+                    placeholder="Select Verifiers" 
+                    value={loanDetails?.verifierId || null} 
+                    options={verifiers} 
+                    style={{ width: 200 }} 
+                    onSelect={handleVerifierSelect}
+                  />
+                </Form.Item>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                   {!hasVerificationType("AddressOne") && 
                     <Checkbox
@@ -308,7 +350,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   { type: "Work", label: "Work", disabled: workDisabled },
                   { type: "Business", label: "Business", disabled: businessDisabled }
                 ].filter(item => !item.disabled).map(({ type, label }) => {
-                  const verification = selectedLoan?.verifications?.find(
+                  const verification = loanDetails?.verifications?.find(
                     (v: any) => v.type === type
                   );
                   return (
@@ -322,10 +364,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         flexDirection: "column",
                       }}
                       headStyle={{
-                        // display: "none"
-                        // paddingTop: 10,
-                        // paddingBottom: 10,
-                        minHeight:40
+                        minHeight: 40
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
@@ -348,11 +387,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       }
                     >
                       {verification && (
-                        <div
-                          style={{
-                            marginBottom: 0
-                          }}
-                        >
+                        <div style={{ marginBottom: 0 }}>
                           <div className="flex-end">
                             {verification?.status === "Pending" &&
                               (fieldExecutiveEdit[type] ? (
@@ -404,23 +439,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           </div>
                         </div>
                       )}
-                      {/* {verification?.status === "Completed" && (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            color: "#52c41a",
-                            padding: "8px 0",
-                          }}
-                        >
-                          <InfoCircleOutlined style={{ marginRight: 8 }} />
-                          Verification completed
-                        </div>
-                      )} */}
                       {(!verification || fieldExecutiveEdit[type]) && (
                         <FieldAssignmentForm
                           verification={verification}
                           type={type}
-                          selectedLoan={selectedLoan}
+                          selectedLoan={loanDetails}
                           setCurrentOffice={setCurrentOffice}
                           userDetails={userDetails}
                           offices={offices}
@@ -428,7 +451,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           loading={loading}
                           setLoading={setLoading}
                           verifiers={verifiers}
-                          fetchLoans={fetchLoans}
+                          fetchLoans={fetchLoanDetails}
                           setRefresh={setRefresh}
                         />
                       )}

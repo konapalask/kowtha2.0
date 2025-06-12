@@ -39,13 +39,30 @@ export interface VerifierLoan {
   };
 }
 
-export interface GetLoansResponse {
-  data: Loan[];
-  total: number;
+// export interface GetLoansResponse {
+//   data: Loan[];
+//   total: number;
+// }
+
+interface LoanFilters {
+  status?: string;
+  applicationNumber?: string;
+  employeeCode?: string;
+  employeeName?: string;
 }
 
-export const getLoansApi = () => {
-  return axiosInstance.get<GetLoansResponse>("/loans");
+export const getLoansApi = (page?: number, limit?: number, filters?: LoanFilters) => {
+  return axiosInstance.get<any>("/loans", {
+    params: {
+      page,
+      limit,
+      ...filters
+    }
+  });
+};
+
+export const getLoansByIdApi = (applicationNumber: string) => {
+  return axiosInstance.get<Loan>(`/loans?applicationNumber=${applicationNumber}`);
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {

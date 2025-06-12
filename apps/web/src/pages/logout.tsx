@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spin } from "antd";
-import { useUser } from "@/components/layout/UserContextProvider";
 import { clear, clearAllCookies } from "@/helpers/localStorage";
 // import { signOut } from "next-auth/react";
 
 const Logout = () => {
   const [loading, setLoading] = useState(false);
-  const { setUserDetails } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,7 +17,6 @@ const Logout = () => {
         clear();
         
         // Clear user context
-        setUserDetails(null);
         
         // Sign out from next-auth
         // await signOut({ redirect: false });
@@ -34,7 +31,7 @@ const Logout = () => {
     };
 
     handleLogout();
-  }, [router, setUserDetails]);
+  }, []);
 
   return (
     <div>

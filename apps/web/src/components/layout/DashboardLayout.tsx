@@ -9,7 +9,6 @@ import {
   Grid,
 } from "antd";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 import {
   DashboardOutlined,
   FileOutlined,
@@ -27,6 +26,7 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 import { UserContext } from "./UserContextProvider";
 import { getOfficesApi } from "@/services/settings.services";
+import { getUserDetails } from "@/utils/utility";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -62,29 +62,30 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const screens = useBreakpoint();
   const router = useRouter();
-  const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime] = useState(new Date());
   const [office, setOffice] = useState<string>("");
-  const { userDetails } = useContext(UserContext);
+  const userDetails = getUserDetails();
 
   useEffect(() => {
+  if(userDetails?.officeId){
     getOfficesApi()
-      .then((res) => {
-        setOffice(
-          res?.data?.find((office: any) => office?.id === userDetails?.officeId)
-            ?.name
-        );
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    .then((res) => {
+      setOffice(
+        res?.data?.data?.find((office: any) => office?.id === userDetails?.officeId)
+          ?.name
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+  }, [userDetails?.officeId]);
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+  //   return () => clearInterval(timer);
+  // }, []);
 
   // useEffect(() => {
   //   setCollapsed(!!(screens.xs || screens.sm || screens.md));
@@ -147,19 +148,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     },
   ];
 
-  // TODO: Extend NextAuth session user type for id and office
-  const userId = (session?.user as any)?.id ?? 0;
-  const avatarColor = getAvatarColor(userId);
-  const initials = getInitials(session?.user);
-  // const office = (session?.user as any)?.office ?? "Office";
+  const avatarColor = getAvatarColor(userDetails?.id);
+  const initials = getInitials(userDetails);
 
   const menu = (
     <Menu>
       <Menu.Item key="profile">
-        <a href="/profile">My Profile</a>
+        <Link href="/profile">My Profile</Link>
       </Menu.Item>
       <Menu.Item key="logout">
-        <a href="/logout">Logout</a>
+        <Link href="/logout">Logout</Link>
       </Menu.Item>
     </Menu>
   );
@@ -266,7 +264,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           style={{
             margin: 0,
             padding: 16,
-            // background: "var(--background-primary)",
             background: "#f5f5f5",
             fontFamily: "Noto Sans, sans-serif",
           }}

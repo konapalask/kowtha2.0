@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   Form,
   Input,
@@ -10,41 +10,33 @@ import {
   Space,
   message,
 } from "antd";
-import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi, updateLoanApi } from "@/services/loans.services";
 import {
   applicantTypeOptions,
   bankOptions,
   loanTypeOptions,
 } from "@/utils/options";
-import { isEmpty } from "@/utils/utility";
-
+import { getUserDetails, isEmpty } from "@/utils/utility";
 interface LoanInfoFormProps {
   form: any;
   selectedLoan: any;
   setSelectedLoan: (loan: any) => void;
-  setLoans: (updater: any) => void;
-  setIsDrawerVisible: (visible: boolean) => void;
   setEditLoanInfo: (val: boolean) => void;
   loading: boolean;
-  loans: any[];
   setLoading: (loading: boolean) => void;
-  fetchLoans: () => void;
+  fetchLoanDetails: () => void;
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   form,
   selectedLoan,
   setSelectedLoan,
-  setLoans,
-  setIsDrawerVisible,
   setEditLoanInfo,
   loading,
-  loans,
   setLoading,
-  fetchLoans,
+  fetchLoanDetails,
 }) => {
-  const { userDetails } = useContext(UserContext);
+  const userDetails = getUserDetails();
   // console.log(selectedLoan);
   // console.log(form.getFieldsValue());
 
@@ -56,30 +48,31 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         initialValues={
           isEmpty(selectedLoan)
             ? undefined: {
-              applicationNumber: selectedLoan.applicationNumber,
-              applicantName: selectedLoan.applicantName,
-              applicantMobile: selectedLoan.applicantMobile,
-              loanAmount: selectedLoan.loanAmount,
-              applicantAddress: selectedLoan.applicantAddress,
+              applicationNumber: selectedLoan?.applicationNumber,
+              applicantName: selectedLoan?.applicantName,
+              applicantMobile: selectedLoan?.applicantMobile,
+              loanAmount: selectedLoan?.loanAmount,
+              applicantAddress: selectedLoan?.applicantAddress,
               loanType:
                 loanTypeOptions.find(
                   (option) =>
                     option.value.toLowerCase() ===
-                    selectedLoan.loanType?.toLowerCase()
-                )?.value || selectedLoan.loanType,
+                    selectedLoan?.loanType?.toLowerCase()
+                )?.value || selectedLoan?.loanType,
               bankName:
                 bankOptions.find((option) =>
                   option.value
                     .toLowerCase()
-                    .includes(selectedLoan.bankName?.toLowerCase() || "")
-                )?.value || selectedLoan.bankName,
+                    .includes(selectedLoan?.bankName?.toLowerCase() || "")
+                )?.value || selectedLoan?.bankName,
+              applicantType: selectedLoan?.applicantType,
             }
         }
         onFinish={async (values) => {
           try {
             setLoading(true);
             let result: any;
-            if (!selectedLoan.id) {
+            if (!selectedLoan?.id) {
               // Create new loan
               const loanData = {
                 ...values,
@@ -92,40 +85,45 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 loanType: values.loanType,
                 bankName: values.bankName,
                 loanAmount: Number(values.loanAmount),
+                // applicantType: values.applicantType,
               };
-
-              result = await createLoanApi([loanData]);
+// console.log(loanData?.applicationNumber)
+              await createLoanApi([loanData]);
               // Handle the new response format
-              if (
-                result.data.data.successful &&
-                result.data.data.successful.length > 0
-              ) {
-                const createdLoan = result.data.data.successful[0];
-                // Create a new loan object with the loanId as id
-                const newLoan = {
-                  ...loanData,
-                  id: createdLoan.loanId,
-                  applicationNumber: createdLoan.applicationNumber,
-                  status: "Pending",
-                  verifications: [],
-                };
-                setSelectedLoan(newLoan);
+              // if (
+              //   result.data.data.successful &&
+              //   result.data.data.successful.length > 0
+              // ) {
+                // const createdLoan = result.data.data.successful[0];
+                // // Create a new loan object with the loanId as id
+                // const newLoan = {
+                //   ...loanData,
+                //   id: createdLoan.loanId,
+                //   applicationNumber: createdLoan.applicationNumber,
+                //   status: "Pending",
+                //   verifications: [],
+                // };
+                // console.log(result)
+                // console.log(newLoan)
+                console.log(loanData?.applicationNumber)
+                setSelectedLoan(loanData?.applicationNumber);
                 // Add the new loan to the loans list
                 message.success("Loan created successfully");
                 // setIsDrawerVisible(false);
-              } else {
-                message.error("Failed to create loan");
-              }
+              // } else {
+              //   message.error("Failed to create loan");
+              // }
             } else {
               // Update existing loan
-              result = await updateLoanApi(selectedLoan.id, values);
+              result = await updateLoanApi(selectedLoan?.id, values);
               message.success("Loan information updated");
             }
-            fetchLoans();
+            console.log("passed")
+            fetchLoanDetails();
             setEditLoanInfo(false);
           } catch (error) {
             message.error(
-              selectedLoan.id
+              selectedLoan?.id
                 ? "Failed to update loan information"
                 : "Failed to create loan"
             );
@@ -146,7 +144,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 { max: 20, message: "Cannot be more than 20 characters" },
               ]}
             >
-              <Input />
+              <Input readOnly={selectedLoan?.applicationNumber} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>
@@ -184,7 +182,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               label="Loan Amount"
               name="loanAmount"
               rules={[
-                { required: true, message: "Required" },
+                // { required: true, message: "Required" },
                 {
                   type: "number",
                   message: "Please enter a valid amount",
@@ -260,9 +258,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         <Form.Item>
           <Space>
             <Button type="primary" htmlType="submit" loading={loading}>
-              {selectedLoan.id ? "Save" : "Create Loan"}
+              {selectedLoan?.id ? "Save" : "Create Loan"}
             </Button>
-            {selectedLoan.id && (
+            {selectedLoan?.id && (
               <Button onClick={() => setEditLoanInfo(false)}>Cancel</Button>
             )}
           </Space>
