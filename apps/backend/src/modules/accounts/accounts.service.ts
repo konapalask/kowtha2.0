@@ -11,6 +11,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
+import { ListAllUsersDto } from './dto/list-all-users.dto';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -235,7 +236,7 @@ export class AccountsService {
     }
   }
 
-  async listUsers(filters?: ListUsersDto): Promise<PaginatedResponse<any>> {
+  async listUsers(filters?: ListUsersDto): Promise<{ items: any[] }> {
     try {
       const where: any = {
         status: filters?.status || 'Active'
@@ -248,12 +249,6 @@ export class AccountsService {
       if (filters?.officeId) {
         where.officeId = Number(filters.officeId);
       }
-
-      const page = filters?.page || 1;
-      const limit = filters?.limit || 10;
-      const skip = (page - 1) * limit;
-
-      const total = await this.prisma.user.count({ where });
 
       const users = await this.prisma.user.findMany({
         where,
@@ -283,9 +278,7 @@ export class AccountsService {
         },
         orderBy: {
           createdAt: 'desc'
-        },
-        skip,
-        take: limit
+        }
       });
 
       // Transform the data to include pending verifications count
@@ -297,13 +290,84 @@ export class AccountsService {
 
       await this.loggingService.info('Users listed successfully', {
         filter: filters,
+        count: users.length
+      });
+
+      return {
+        items: transformedUsers
+      };
+    } catch (error) {
+      await this.loggingService.error('Failed to list users', {
+        filter: filters,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async listAllUsers(filters?: ListAllUsersDto): Promise<PaginatedResponse<any>> {
+    try {
+      const where: any = {};
+      
+      if (filters?.role) {
+        where.role = filters.role;
+      }
+      
+      if (filters?.employeeCode) {
+        where.employeeCode = {
+          contains: filters.employeeCode,
+          mode: 'insensitive'
+        };
+      }
+
+      if (filters?.name) {
+        where.name = {
+          contains: filters.name,
+          mode: 'insensitive'
+        };
+      }
+
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await this.prisma.user.count({ where });
+
+      const users = await this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          email: true,
+          employeeCode: true,
+          role: true,
+          status: true,
+          office: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          createdAt: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: limit
+      });
+
+      await this.loggingService.info('All users listed successfully', {
+        filter: filters,
         count: users.length,
         page,
         limit
       });
 
       return {
-        items: transformedUsers,
+        items: users,
         meta: {
           total,
           page,
@@ -312,7 +376,7 @@ export class AccountsService {
         }
       };
     } catch (error) {
-      await this.loggingService.error('Failed to list users', {
+      await this.loggingService.error('Failed to list all users', {
         filter: filters,
         error: error.message,
         stack: error.stack

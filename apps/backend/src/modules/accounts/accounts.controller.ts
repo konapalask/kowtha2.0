@@ -5,6 +5,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
+import { ListAllUsersDto } from './dto/list-all-users.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -83,46 +84,32 @@ export class AccountsController {
   @ApiOperation({ summary: 'List all users with optional role filter' })
   @ApiResponse({ 
     status: 200, 
-    description: 'Returns a paginated list of users matching the filter criteria',
+    description: 'Returns a list of users matching the filter criteria',
     schema: {
       type: 'object',
       properties: {
         message: { type: 'string', example: 'Users fetched successfully' },
         data: {
-          type: 'object',
-          properties: {
-            items: {
-              type: 'array',
-              items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              name: { type: 'string' },
+              mobile: { type: 'string' },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
+              office: {
                 type: 'object',
                 properties: {
                   id: { type: 'number' },
-                  name: { type: 'string' },
-                  mobile: { type: 'string' },
-                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
-                  office: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' }
-                    }
-                  },
-                  pendingVerifications: { 
-                    type: 'number',
-                    description: 'Number of pending verifications assigned to the field executive'
-                  },
-                  createdAt: { type: 'string', format: 'date-time' }
+                  name: { type: 'string' }
                 }
-              }
-            },
-            meta: {
-              type: 'object',
-              properties: {
-                total: { type: 'number' },
-                page: { type: 'number' },
-                limit: { type: 'number' },
-                totalPages: { type: 'number' }
-              }
+              },
+              pendingVerifications: { 
+                type: 'number',
+                description: 'Number of pending verifications assigned to the field executive'
+              },
+              createdAt: { type: 'string', format: 'date-time' }
             }
           }
         }
@@ -130,12 +117,10 @@ export class AccountsController {
     }
   })
   async listUsers(@Query() filters: ListUsersDto) {
-    console.log(filters);
-
     const result = await this.accountsService.listUsers(filters);
     return {
       message: 'Users fetched successfully',
-      data: result
+      data: result.items
     };
   }
 
@@ -389,7 +374,7 @@ export class AccountsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('organization')
-  async getOrganization(@Request() req) {
+  async getOrganization(@Request() req: AuthenticatedRequest) {
     return this.accountsService.getOrganizationByUser(req.user.sub);
   }
 
@@ -400,5 +385,67 @@ export class AccountsController {
     @Body() body: { name?: string; description?: string }
   ) {
     return this.accountsService.updateOrganization(Number(id), body);
+  }
+
+  @Get('all-users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
+  @ApiOperation({ summary: 'List all users with pagination and filters' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns a paginated list of users matching the filter criteria',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Users fetched successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            records: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  name: { type: 'string' },
+                  mobile: { type: 'string' },
+                  email: { type: 'string' },
+                  employeeCode: { type: 'string' },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
+                  office: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      name: { type: 'string' }
+                    }
+                  },
+                  status: { type: 'string' },
+                  createdAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            },
+            meta: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async listAllUsers(@Query() filters: ListAllUsersDto) {
+    const result = await this.accountsService.listAllUsers(filters);
+    return {
+      message: 'Users fetched successfully',
+      data: {
+        records: result.items,
+        meta: result.meta
+      }
+    };
   }
 } 
