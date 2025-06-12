@@ -76,7 +76,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               // Create new loan
               const loanData = {
                 ...values,
-                officeId: userDetails?.officeId,
+                // officeId: userDetails?.officeId,
                 operationsExecutiveId: userDetails?.sub,
                 applicationNumber: values.applicationNumber?.trim(),
                 applicantName: values.applicantName?.trim(),
