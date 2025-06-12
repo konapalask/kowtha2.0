@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Form,
   Input,
@@ -10,30 +10,36 @@ import {
   Image,
 } from "antd";
 import { useRouter } from "next/router";
-import { signIn, useSession } from "next-auth/react";
 import { MobileOutlined, LockOutlined } from "@ant-design/icons";
-// import Image from "next/image";
 import { generateOtpApi, verifyOtpApi, getUserDetailsApi } from "@/services/auth.services";
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
-import { useUser } from "@/components/layout/UserContextProvider";
+import { UserContext } from "@/components/layout/UserContextProvider";
+import { getUserDetails, setUserDetails } from "@/utils/utility";
+// import { useUser } from "@/components/layout/UserContextProvider";
 
 const { Title, Text } = Typography;
 
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
-  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const { userDetails, setUserDetails, loading: userLoading } = useUser();
+  // const { userDetails, setUserDetails } = useContext(UserContext);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const userDetails = getUserDetails();
 
   useEffect(() => {
-    // Redirect to dashboard if user is already logged in
-    if (userDetails && !userLoading) {
-      router.push("/dashboard");
+    // Prevent multiple redirects
+    if (userDetails && !isNavigating) {
+      setIsNavigating(true);
+      router.push("/dashboard").catch((error) => {
+        console.error('Navigation error:', error);
+        setIsNavigating(false);
+        message.error('Failed to navigate to dashboard');
+      });
     }
-  }, [userDetails, userLoading, router]);
+  }, [userDetails, router, isNavigating]);
 
   useEffect(() => {
     if (router.query.error) {
@@ -62,45 +68,38 @@ export default function Login() {
         mobile: values.mobile,
         otp: values.otp,
       });
-        // Set tokens
-        setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
-        setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+      
+      // Set tokens
+      setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+      setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
 
-        // Fetch and set user details
-        try {
-          const userDetailsResponse = await getUserDetailsApi();
-          setUserDetails(userDetailsResponse.data);
-          
-          // Wait a bit to ensure context is updated
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 100);
-        } catch (error) {
-          console.error('Error fetching user details:', error);
-          message.error('Failed to fetch user details');
-          // Clear tokens if user details fetch fails
-          setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
-          setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+      // Fetch and set user details
+      try {
+        const userDetailsResponse = await getUserDetailsApi();
+        if (!userDetailsResponse?.data) {
+          throw new Error('No user details received');
         }
+        setUserDetails(userDetailsResponse.data);
+        // Navigation will happen automatically through the useEffect
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        message.error('Failed to fetch user details');
+        // Clear tokens if user details fetch fails
+        // setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        // setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+        // setUserDetails(undefined);
+      }
     } catch (error:any) {
       console.error("OTP verify error:", error);
-      message.error(error?.response?.data?.message);
+      message.error(error?.response?.data?.message || 'Verification failed');
+      // setUserDetails(undefined);
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading state while checking user context
-  if (userLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
-  // Don't show login form if user is already logged in
-  if (userDetails) {
+  // Don't show login form if user is already logged in and navigating
+  if (userDetails && isNavigating) {
     return null;
   }
 

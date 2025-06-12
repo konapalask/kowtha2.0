@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { Table, Card, Typography, Tag, Space, Button, message } from "antd";
 import type { ColumnsType } from "antd/es/table";

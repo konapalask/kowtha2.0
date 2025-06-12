@@ -50,7 +50,6 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const refreshTokenApi = "/accounts/refresh-token";
-    console.log("error", error);
     const originalRequest = error?.config;
 
     const errorMessage =
@@ -59,18 +58,15 @@ axiosInstance.interceptors.response.use(
     const errorStatusCode = error?.response?.status;
     const tokenInvalid = "Unauthorized";
     const accountNotFound = "UNAUTHORIZED_USER";
-    console.log(originalRequest);
 
     // Prevent infinite loops
     if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
-      console.log("refresh logout");
       handleLogout();
       return Promise.reject(error);
     }
 
     // Invalid credentials or user not exist
     if (errorMessage === accountNotFound && errorStatusCode === 401) {
-      console.log("account not found logout");
       handleLogout();
       return Promise.reject(error);
     }
@@ -100,8 +96,6 @@ axiosInstance.interceptors.response.use(
                 { refresh_token: refreshToken }
               );
 
-              console.log(response);
-
               setCookie(
                 ACCESS_TOKEN,
                 response?.data?.accessToken,
@@ -116,7 +110,6 @@ axiosInstance.interceptors.response.use(
               return Promise.reject(refreshError);
             }
           } else {
-            console.log("token expired logout");
             handleLogout();
             customToast({
               type: "error",
@@ -125,12 +118,10 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(error);
           }
         } else {
-          console.log(`regex refresh token failed`);
           handleLogout();
           return Promise.reject(error);
         }
       } else {
-        console.log("refresh token not found logout");
         handleLogout();
         customToast({
           type: "error",

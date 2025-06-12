@@ -19,6 +19,7 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import { useRouter } from "next/router";
 import { useTabContext } from "@/pages/verify/[id]";
+import { getUserDetails } from "@/utils/utility";
 
 const { Text } = Typography;
 
@@ -95,7 +96,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const {activeTab} = useTabContext()
   // console.log("activeTab", activeTab);
-  const { userDetails } = useContext(UserContext);
+  const userDetails = getUserDetails();
   const { currentData, changedData, verificationId, fetchEditRequests, disabled, verificationType, admin } = _props;
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);

@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import { ConfigProvider } from "antd";
-import { SessionProvider } from "next-auth/react";
-import UserContextProvider from "@/components/layout/UserContextProvider";
+// import { SessionProvider } from "next-auth/react";
+// import UserContextProvider from "@/components/layout/UserContextProvider";
 import "../styles/globals.css";
 
 export default function App({
@@ -9,8 +9,8 @@ export default function App({
   pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
-    <SessionProvider session={session}>
-      <UserContextProvider>
+    // <SessionProvider session={session}>
+      // <UserContextProvider>
         <ConfigProvider
           theme={{
             token: {
@@ -21,7 +21,7 @@ export default function App({
         >
           <Component {...pageProps} />
         </ConfigProvider>
-      </UserContextProvider>
-    </SessionProvider>
+      // {/* </UserContextProvider> */}
+    // </SessionProvider>
   );
 }
