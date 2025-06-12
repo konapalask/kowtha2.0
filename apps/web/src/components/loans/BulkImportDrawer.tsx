@@ -18,6 +18,7 @@ import { createLoanApi } from "@/services/loans.services";
 import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
+import { getUserDetails } from "@/utils/utility";
 
 interface BulkImportProps {
   isBulkImportDrawerVisible: boolean;
@@ -38,14 +39,14 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
   setRefresh,
   verifiers = [],
 }) => {
-  const { userDetails } = useContext(UserContext);
+  const userDetails = getUserDetails();
   const [fieldExecutives, setFieldExecutives] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchFieldExecutives = async () => {
     try{
       const response = await getAllFieldExecutivesApi();
-      console.log(response.data.data);
+      // console.log(response.data.data);
       const options = response?.data?.data?.map((user: any) => ({
         label: <Typography.Text>{user.name} <Tag color="blue">{user.employeeCode}</Tag></Typography.Text>,
         value: user.id,

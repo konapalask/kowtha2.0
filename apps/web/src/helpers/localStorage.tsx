@@ -1,9 +1,15 @@
+const isBrowser = typeof window !== 'undefined';
+
+// console.log(isBrowser)
+
 export const setItem = (key: string, value: string | object, isObject = false): void => {
+  if (!isBrowser) return;
   const data = isObject ? JSON.stringify(value) : value;
   localStorage.setItem(key, data as string);
 };
 
 export const getItem = (key: string, isObject = false): string | object | null => {
+  if (!isBrowser) return null;
   const value = localStorage.getItem(key);
   if (value === null) return null;
   const data = isObject ? JSON.parse(value) : value;
@@ -11,14 +17,17 @@ export const getItem = (key: string, isObject = false): string | object | null =
 };
 
 export const clear = (): void => {
+  if (!isBrowser) return;
   localStorage.clear();
 };
 
 export const removeItem = (key: string): void => {
+  if (!isBrowser) return;
   localStorage.removeItem(key);
 };
 
 export function getCookie(cookieName: string): string | null {
+  if (!isBrowser) return null;
   const cookies = document.cookie.split("; ");
   for (const cookie of cookies) {
     const [name, value] = cookie.split("=");
@@ -30,6 +39,7 @@ export function getCookie(cookieName: string): string | null {
 }
 
 export function clearAllCookies(): void {
+  if (!isBrowser) return;
   const cookies = document.cookie.split("; ");
   const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL || '';
   const mainDomain = extractDomainFromUrl(mainDomainUrl);
@@ -54,10 +64,12 @@ export function extractDomainFromUrl(url: string): string | null {
 }
 
 export function setCookie(cookieName: string, cookieValue: string, domain: string, path: string): void {
+  if (!isBrowser) return;
   document.cookie = `${cookieName}=${cookieValue}; domain=${domain}; path=${path}`;
 }
 
 export function deleteCookie(name: string, domain?: string): void {
+  if (!isBrowser) return;
   const currentDomain = domain ? domain : window.location.hostname;
   if (document.cookie.includes(name + "=")) {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;domain=.${currentDomain}; path=/`;

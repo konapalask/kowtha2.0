@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -8,19 +9,15 @@ import {
   Space,
   Modal,
   message,
-  Typography,
   Tabs,
-  Tooltip,
   Popconfirm,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-// import { useSession } from 'next-auth/react';
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
 import { getOfficesApi, getOrganizationApi, Office } from "@/services/settings.services";
 
-const { Title } = Typography;
 const { TabPane } = Tabs;
 
 // interface Office {
@@ -38,7 +35,6 @@ interface Organization {
 }
 
 export default function OrganizationSettings() {
-  // const { data: session } = useSession();
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -55,16 +51,11 @@ export default function OrganizationSettings() {
     const fetchOrganization = async () => {
       try {
         const result = await getOrganizationApi();
-        console.log(result);
-        if (result && result.status >= 200 && result.status < 300) {
           setOrganization(result.data);
           form.setFieldsValue(result.data);
-        } else {
-          message.error("Failed to load organization details");
-        }
       } catch (error) {
         console.error("Fetch organization error:", error);
-        message.error("Failed to load organization details");
+        // message.error("Failed to load organization details");
       }
     };
     fetchOrganization();
@@ -75,10 +66,10 @@ export default function OrganizationSettings() {
     const fetchOffices = async () => {
       try {
         const result = await getOfficesApi();
-          setOffices(result.data);
+          setOffices(result?.data?.data ?? []);
       } catch (error) {
         console.error("Fetch offices error:", error);
-        message.error("Failed to load branches");
+        // message.error("Failed to load branches");
       }
     };
     fetchOffices();

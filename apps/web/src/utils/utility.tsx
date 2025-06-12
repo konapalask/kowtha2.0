@@ -1,4 +1,5 @@
 import axiosInstance from "@/config/axios.config";
+import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getPresignedDownloadUrl } from "@/services/verifier.services";
 
 export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
@@ -39,3 +40,13 @@ export const isEmpty = (obj: any) => {
     })
   );
 };
+
+export const getUserDetails = () => {
+  if (typeof window === 'undefined') return {};
+  return JSON.parse(localStorage.getItem(USER_DETAILS) || "{}");
+}
+
+export const setUserDetails = (userDetails: any) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(USER_DETAILS, JSON.stringify(userDetails));
+}

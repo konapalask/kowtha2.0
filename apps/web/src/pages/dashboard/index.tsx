@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Tag, Space, Typography, Input, Dropdown } from "antd";
+import { Card, Row, Col, Statistic, Table, Tag, Space, Typography, Input, Dropdown, DatePicker } from "antd";
 import {
   FileOutlined,
   CheckCircleOutlined,
@@ -7,7 +7,7 @@ import {
   ClockCircleOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+// import DashboardLayout from "@/components/layout/DashboardLayout";
 // import api from "@/utils/axios";
 import {
   BarChart,
@@ -23,21 +23,22 @@ import {
   Cell
 } from "recharts";
 import { getDashboardMetrics } from "@/services/dashboard.services";
-import DateRangePicker from 'react-date-range';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
+import dayjs from 'dayjs';
+import dynamic from "next/dynamic";
 
 interface DashboardMetrics {
-  totalLoans: number;
-  verifiedLoans: number;
-  rejectedLoans: number;
-  pendingLoans: number;
+  totalLoans: number|null|undefined;
+  verifiedLoans: number|null|undefined;
+  rejectedLoans: number|null|undefined;
+  pendingLoans: number|null|undefined;
   percentages: {
-    verified: number;
-    rejected: number;
-    pending: number;
+    verified: number|null|undefined;
+    rejected: number|null|undefined;
+    pending: number|null|undefined;
   };
 }
+
+const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
 
 // Add this dummy data at the top of the file, after imports
 const DUMMY_EMPLOYEE_STATS = [
@@ -93,46 +94,21 @@ export default function Dashboard() {
   const [pendingLoans, setPendingLoans] = useState<any[]>([]);
   const [processingStats, setProcessingStats] = useState<any[]>([]);
   const [employeeStats, setEmployeeStats] = useState<any[]>([]);
-  const [dateRange, setDateRange] = useState(() => {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - 6);
-    return {
-      startDate,
-      endDate,
-      key: 'selection'
-    };
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(6, 'month');
+    return [startDate, endDate];
   });
 
-  const handleDateRangeChange = (ranges: any) => {
-    setDateRange(ranges.selection);
-    fetchMetrics(ranges.selection.startDate, ranges.selection.endDate);
+  const handleDateRangeChange = (
+    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null,
+    dateStrings: [string, string]
+  ) => {
+    if (dates && dates[0] && dates[1]) {
+      setDateRange([dates[0], dates[1]]);
+      fetchMetrics(dates[0].toDate(), dates[1].toDate());
+    }
   };
-
-  const formatDateRange = () => {
-    const formatDate = (date: Date) => {
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    };
-    return `${formatDate(dateRange.startDate)} - ${formatDate(dateRange.endDate)}`;
-  };
-
-  const dateRangeDropdown = (
-    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-      <DateRangePicker
-        ranges={[dateRange]}
-        onChange={handleDateRangeChange}
-        months={1}
-        direction="horizontal"
-        showDateDisplay={false}
-        rangeColors={['#145886']}
-        minDate={new Date(2024, 0, 1)}
-        maxDate={new Date()}
-      />
-    </div>
-  );
 
   const fetchMetrics = async (startDate?: Date | null, endDate?: Date | null) => {
     try {
@@ -164,7 +140,7 @@ export default function Dashboard() {
       ]);
 
       // Use dummy data for employee stats
-      setEmployeeStats(response.data.employeeStats);
+      setEmployeeStats(response?.employeeStats||[]);
     } catch (error) {
       console.error("Failed to fetch metrics:", error);
       // Fallback to dummy data if API fails
@@ -240,20 +216,20 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="flex-end" style={{ marginBottom: 16 }}>
-        <Dropdown
-          overlay={dateRangeDropdown}
-          trigger={['click']}
-          placement="bottomRight"
-        >
-          <Input
-            placeholder="Select date range"
-            value={formatDateRange()}
-            suffix={<CalendarOutlined />}
-            readOnly
-            style={{ width: '200px' }}
-          />
-        </Dropdown>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <DatePicker.RangePicker
+          value={dateRange}
+          onChange={handleDateRangeChange}
+          format="DD/MM/YYYY"
+          allowClear={false}
+          ranges={{
+            'Last 7 Days': [dayjs().subtract(7, 'day'), dayjs()],
+            'Last 30 Days': [dayjs().subtract(30, 'day'), dayjs()],
+            'Last 6 Months': [dayjs().subtract(6, 'month'), dayjs()],
+            'This Year': [dayjs().startOf('year'), dayjs()]
+          }}
+          style={{ width: '280px' }}
+        />
       </div>
 
       <Row gutter={[16, 16]}>
@@ -296,7 +272,7 @@ export default function Dashboard() {
                       Total Loans
                     </Typography>
                   }
-                  value={metrics.totalLoans}
+                  value={metrics.totalLoans ?? 0}
                   valueStyle={{
                     color: "#145886",
                     fontSize: "28px",
@@ -348,7 +324,7 @@ export default function Dashboard() {
                       Verified Loans
                     </Typography>
                   }
-                  value={metrics.verifiedLoans}
+                  value={metrics.verifiedLoans ?? 0}
                   valueStyle={{
                     color: "#2196F3",
                     fontSize: "28px",
@@ -400,7 +376,7 @@ export default function Dashboard() {
                       Rejected Loans
                     </Typography>
                   }
-                  value={metrics.rejectedLoans}
+                  value={metrics.rejectedLoans ?? 0}
                   valueStyle={{
                     color: "#F44336",
                     fontSize: "28px",
@@ -452,7 +428,7 @@ export default function Dashboard() {
                       Pending Loans
                     </Typography>
                   }
-                  value={metrics.pendingLoans}
+                  value={metrics.pendingLoans ?? 0}
                   valueStyle={{
                     color: "#FFC107",
                     fontSize: "28px",

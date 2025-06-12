@@ -1,15 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { Table, Button, Tag, Typography, Form, message, Card, DatePicker, Input, Select } from "antd";
+import { Table, Button, Tag, Typography, Form, message, Card } from "antd";
 import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
-import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-import type { ColumnFilterItem } from 'antd/es/table/interface';
 import type { Key } from 'react';
 import { UserContext } from "@/components/layout/UserContextProvider";
-// import type { UploadFile } from "antd/es/upload/interface";
-// import * as XLSX from "xlsx";
 import {
   getLoansApi,
   updateLoanApi,
@@ -23,13 +19,15 @@ import {
 } from "@/services/users.services";
 import { colors } from "@/styles/colors";
 import LoanEditDrawer from "@/components/loans/LoanEditDrawer";
-import { bankOptions, loanTypeOptions } from "@/utils/options";
 import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
+import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
+import dynamic from "next/dynamic";
+import { getUserDetails } from "@/utils/utility";
+
+const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
 
 dayjs.extend(relativeTime);
-
-const { RangePicker } = DatePicker;
 
 interface FieldExecutive {
   id: number;
@@ -42,72 +40,46 @@ export interface Verifiers {
   [key: string]: any;
 }
 
-// Add status options
-const statusOptions: ColumnFilterItem[] = [
-  { text: 'Unassigned', value: 'Unassigned' },
-  { text: 'Assigned', value: 'Assigned' },
-  // { text: 'UnderFV', value: 'UnderFV' },
-  // { text: 'FVCompleted', value: 'FVCompleted' },
-  { text: 'Approved', value: 'Approved' },
-  { text: 'Rejected', value: 'Rejected' },
-];
-
 export default function Loans() {
-  const [loading, setLoading] = useState(false);
-  const [isImportModalVisible, setIsImportModalVisible] = useState(false);
-  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
-  const [form] = Form.useForm();
-  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isImportModalVisible, setIsImportModalVisible] = useState<boolean>(false);
+  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(null);
+  const [loans, setLoans] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(false);
-  const { userDetails } = useContext(UserContext);
-  const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] =
-    useState(false);
+  const userDetails = getUserDetails();
+  const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] = useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
-  const [currentOffice, setCurrentOffice] = useState<string>(
-    userDetails?.officeId || ""
-  );
+  const [currentOffice, setCurrentOffice] = useState<string>(userDetails?.officeId || "");
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
   const [offices, setOffices] = useState<Office[]>([]);
-  const [editLoanInfo, setEditLoanInfo] = useState(false);
+  const [editLoanInfo, setEditLoanInfo] = useState<boolean>(false);
   const [verifiers, setVerifiers] = useState<Verifiers[]>([]);
-  const [filteredInfo, setFilteredInfo] = useState<Record<string, any>>({});
-  const [searchText, setSearchText] = useState('');
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0
+  });
+  const [filters, setFilters] = useState<FilterValue>({
+    status: undefined,
+    applicationNumber: undefined,
+    fieldExecutiveEmployeeCode: undefined,
+    fieldExecutiveName: undefined
+  });
 
-  // Reset form when selected loan changes
-  useEffect(() => {
-    if (selectedLoan) {
-      // Find the matching loan type option
-      const matchingLoanType = loanTypeOptions.find(
-        (option) =>
-          option.value.toLowerCase() === selectedLoan.loanType?.toLowerCase()
-      );
-
-      // Find the matching bank option
-      const matchingBank = bankOptions.find((option) =>
-        option.value
-          .toLowerCase()
-          .includes(selectedLoan.bankName?.toLowerCase() || "")
-      );
-
-      form.setFieldsValue({
-        applicationNumber: selectedLoan.applicationNumber,
-        applicantName: selectedLoan.applicantName,
-        applicantMobile: selectedLoan.applicantMobile,
-        loanAmount: selectedLoan.loanAmount,
-        applicantAddress: selectedLoan.applicantAddress,
-        loanType: matchingLoanType?.value || selectedLoan.loanType,
-        bankName: matchingBank?.value || selectedLoan.bankName,
-      });
-    }
-  }, [selectedLoan, form]);
-
-  const fetchLoans = async () => {
+  const fetchLoans = async (page = 1, limit = 10) => {
     try {
       setLoading(true);
-      const result = await getLoansApi();
-      setLoans(result.data.data ?? []);
+      const result = await getLoansApi(page, limit, filters);
+      const data = result.data.data;
+      setLoans(data?.items ?? []);
+      setPagination({
+        current: data.meta.page,
+        pageSize: data.meta.limit,
+        total: data.meta.total,
+        totalPages: data.meta.totalPages
+      });
     } catch (error) {
       message.error("Failed to fetch loans");
     } finally {
@@ -116,15 +88,14 @@ export default function Loans() {
   };
 
   useEffect(() => {
-   
-    fetchLoans();
-  }, [refresh]);
+    fetchLoans(pagination.current, pagination.pageSize);
+  }, [refresh, pagination.current, pagination.pageSize, filters]);
 
   useEffect(() => {
     getOfficesApi()
       .then((res) => {
         const options =
-          res?.data?.map((item: any) => ({
+          res?.data?.data?.map((item: any) => ({
             label: item.name,
             value: item.id,
           })) ?? [];
@@ -180,41 +151,11 @@ export default function Loans() {
     }
   };
 
-  const handleLoanInfoSave = async (values: any) => {
-    try {
-      setLoading(true);
-      if (!selectedLoan) return;
-
-      const result = await updateLoanApi(selectedLoan.id, values);
-      setLoans(
-        loans.map((loan) => (loan.id === selectedLoan.id ? result.data : loan))
-      );
-      setEditLoanInfo(false);
-      message.success("Loan information updated");
-    } catch (error) {
-      message.error("Failed to update loan information");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Add handler for table change
-  const handleTableChange = (pagination: any, filters: any) => {
-    setFilteredInfo(filters);
-  };
-
-  // Get unique assignees for filter options
-  const getUniqueAssignees = (loans: Loan[], verificationType: string): ColumnFilterItem[] => {
-    const uniqueAssignees = new Set<string>();
-    loans.forEach(loan => {
-      const verification = loan?.verifications?.find((v: any) => v.type === verificationType);
-      if (verification?.fieldExecutive?.employeeCode) {
-        uniqueAssignees.add(verification.fieldExecutive.employeeCode);
-      }
-    });
-    return Array.from(uniqueAssignees).map(code => ({
-      text: code,
-      value: code,
+  const handleTableChange = (newPagination: any) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
     }));
   };
 
@@ -224,34 +165,6 @@ export default function Loans() {
       dataIndex: "applicationNumber",
       key: "applicationNumber",
       width: 200,
-      filteredValue: filteredInfo.applicationNumber || null,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search application number"
-            value={selectedKeys[0]}
-            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
-          />
-          <Button
-            type="primary"
-            onClick={() => confirm()}
-            size="small"
-            style={{ width: 90, marginRight: 8 }}
-          >
-            Search
-          </Button>
-          <Button onClick={() => clearFilters?.()} size="small" style={{ width: 90 }}>
-            Reset
-          </Button>
-        </div>
-      ),
-      onFilter: (value: boolean | Key, record) =>
-        record.applicationNumber
-          .toString()
-          .toLowerCase()
-          .includes(value.toString().toLowerCase()),
     },
     {
       title: "Applicant Name",
@@ -275,9 +188,7 @@ export default function Loans() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      filters: statusOptions,
-      filteredValue: filteredInfo.status || null,
-      onFilter: (value, record) => record.status === value,
+      width: 100,
       render: (status: string) => {
         const color =
           status === "Pending"
@@ -289,63 +200,20 @@ export default function Loans() {
                 : "blue";
         return <Tag color={color}>{status}</Tag>;
       },
-      width: 100,
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <RangePicker
-            value={dateRange}
-            onChange={(dates) => {
-              setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null]);
-              const startTime = dates?.[0]?.valueOf();
-              const endTime = dates?.[1]?.valueOf();
-              setSelectedKeys(startTime && endTime ? [startTime, endTime] : []);
-            }}
-            style={{ marginBottom: 8 }}
-          />
-          <div>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              size="small"
-              style={{ width: 90, marginRight: 8 }}
-            >
-              Filter
-            </Button>
-            <Button
-              onClick={() => {
-                clearFilters?.();
-                setDateRange([null, null]);
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      onFilter: (value: boolean | Key, record) => {
-        if (!dateRange[0] || !dateRange[1]) return true;
-        const createdAt = dayjs(record.createdAt);
-        return createdAt.isAfter(dateRange[0]) && createdAt.isBefore(dateRange[1]);
-      },
       render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
       width: 120,
     },
-
     {
       title: <Typography.Text>Address 1</Typography.Text>,
       children: [
         {
           title: "Assignee",
           key: "pavAssignee",
-          filters: getUniqueAssignees(loans, "AddressOne"),
-          filteredValue: filteredInfo.pavAssignee || null,
           onFilter: (value: boolean | Key, record: Loan) => {
             const pav = record?.verifications?.find((v: any) => v.type === "AddressOne");
             return pav?.fieldExecutive?.employeeCode === value.toString();
@@ -384,8 +252,6 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "cavAssignee",
-          filters: getUniqueAssignees(loans, "AddressTwo"),
-          filteredValue: filteredInfo.cavAssignee || null,
           onFilter: (value: boolean | Key, record: Loan) => {
             const cav = record?.verifications?.find((v: any) => v.type === "AddressTwo");
             return cav?.fieldExecutive?.employeeCode === value.toString();
@@ -424,8 +290,6 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "wvAssignee",
-          filters: getUniqueAssignees(loans, "Work"),
-          filteredValue: filteredInfo.wvAssignee || null,
           onFilter: (value: boolean | Key, record: Loan) => {
             const wv = record?.verifications?.find((v: any) => v.type === "Work");
             return wv?.fieldExecutive?.employeeCode === value.toString();
@@ -464,8 +328,6 @@ export default function Loans() {
         {
           title: "Assignee",
           key: "businessAssignee",
-          filters: getUniqueAssignees(loans, "Business"),
-          filteredValue: filteredInfo.businessAssignee || null,
           onFilter: (value: boolean | Key, record: Loan) => {
             const business = record?.verifications?.find((v: any) => v.type === "Business");
             return business?.fieldExecutive?.employeeCode === value.toString();
@@ -498,7 +360,6 @@ export default function Loans() {
         },
       ],
     },
-
     {
       title: "Actions",
       key: "actions",
@@ -509,7 +370,7 @@ export default function Loans() {
           type="link"
           icon={<EditOutlined />}
           onClick={() => {
-            setSelectedLoan(record);
+            setSelectedLoan(record.applicationNumber);
             setIsDrawerVisible(true);
           }}
         >
@@ -519,18 +380,29 @@ export default function Loans() {
       width: 100,
     },
   ];
+
   return (
     <DashboardLayout>
       <Card>
+        <div style={{ marginBottom: 16 }}>
+          <FilterOverlay 
+            filters={filters}
+            onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
+          />
+        </div>
         <div
-          className="flex-end"
-          style={{ marginBottom: 16, display: "flex", gap: "8px" }}
+          style={{ 
+            marginBottom: 16, 
+            display: "flex", 
+            gap: "8px", 
+            justifyContent: "flex-end" 
+          }}
         >
           <Button
             type="primary"
             icon={<PlusOutlined style={{ fontSize: 16 }} />}
             onClick={() => {
-              setSelectedLoan({} as Loan);
+              setSelectedLoan(null);
               setIsDrawerVisible(true);
             }}
           >
@@ -562,8 +434,9 @@ export default function Loans() {
           loading={loading}
           onChange={handleTableChange}
           pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
             showTotal: (total) => `Total ${total} items`,
             position: ["bottomCenter"],
           }}
@@ -580,13 +453,12 @@ export default function Loans() {
       />
 
       <LoanEditDrawer
-        selectedLoan={selectedLoan}
-        setSelectedLoan={setSelectedLoan}
+        selectedApplicationNumber={selectedLoan}
+        // setSelectedLoan={setSelectedLoan}
         isDrawerVisible={isDrawerVisible}
         setIsDrawerVisible={setIsDrawerVisible}
         editLoanInfo={editLoanInfo}
         setEditLoanInfo={setEditLoanInfo}
-        form={form}
         loading={loading}
         setLoading={setLoading}
         setLoans={setLoans}
@@ -608,12 +480,6 @@ export default function Loans() {
         setRefresh={setRefresh}
         verifiers={verifiers}
       />
-
-      <style jsx global>{`
-      .ant-form-item {
-        margin-bottom: 12px !important;
-      }
-    `}</style>
     </DashboardLayout>
   );
 }

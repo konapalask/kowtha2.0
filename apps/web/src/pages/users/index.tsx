@@ -13,8 +13,7 @@ import {
   Tag,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useSession } from "next-auth/react";
+// import DashboardLayout from "@/components/layout/DashboardLayout";
 import { ColumnsType } from "antd/es/table";
 import {
   createUserApi,
@@ -23,6 +22,9 @@ import {
 } from "@/services/users.services";
 import { UserContext } from "@/components/layout/UserContextProvider";
 import { getOfficesApi } from "@/services/settings.services";
+import dynamic from "next/dynamic";
+import { getUserDetails } from "@/utils/utility";
+
 const { Option } = Select;
 
 interface User {
@@ -40,13 +42,15 @@ interface Office {
   name: string;
 }
 
+const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
+
 export default function Users() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  const { userDetails } = useContext(UserContext);
+  const userDetails = getUserDetails();
   const [offices, setOffices] = useState<Office[]>([]);
 
   const fetchUsers = async () => {
@@ -64,11 +68,11 @@ export default function Users() {
     getOfficesApi()
       .then((res) => {
         const options =
-          res?.data?.map((item: any) => ({
+          res?.data?.data?.map((item: any) => ({
             label: `${item.name} - ${item.location}`,
             value: item.id,
           })) ?? [];
-        console.log("Offices:", options);
+        // console.log("Offices:", options);
         setOffices(options);
       })
       .catch((err) => {
