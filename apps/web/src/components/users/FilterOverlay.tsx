@@ -175,6 +175,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
           trigger="click"
           open={isOpen}
           onOpenChange={setIsOpen}
+          placement="bottomLeft"
         >
           <Button icon={<FilterOutlined />}>Filters</Button>
         </Popover>
