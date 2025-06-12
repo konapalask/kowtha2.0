@@ -18,6 +18,7 @@ import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -1016,7 +1017,7 @@ export class LoanService {
     }
   }
 
-  async getAssignedLoansWithVerifications(fieldExecutiveId: number) {
+  async getAssignedLoansWithVerifications(fieldExecutiveId: number, filters?: FieldExecutiveAssignedDto) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
         where: { id: fieldExecutiveId }
@@ -1026,8 +1027,20 @@ export class LoanService {
         throw new NotFoundException('Field executive not found');
       }
 
+      const where: Prisma.VerificationWhereInput = { fieldExecutiveId };
+      
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await this.prisma.verification.count({ where });
+
       const verifications = await this.prisma.verification.findMany({
-        where: { fieldExecutiveId },
+        where,
         include: {
           loan: {
             select: {
@@ -1038,15 +1051,30 @@ export class LoanService {
               status: true
             }
           }
-        }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: Number(limit)
       });
 
       await this.loggingService.debug('Retrieved assigned loans with verifications', {
         fieldExecutiveId,
-        count: verifications.length
+        count: verifications.length,
+        page,
+        limit
       });
 
-      return verifications;
+      return {
+        items: verifications,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
       await this.loggingService.error('Failed to get assigned loans with verifications', {
         fieldExecutiveId,
