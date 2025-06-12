@@ -241,7 +241,7 @@ export class LoanService {
     private s3Service: S3Service,
   ) {}
 
-  async createLoan(data: CreateLoanDto) {
+  async createLoan(data: CreateLoanDto, officeId: number) {
     try {
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
@@ -258,7 +258,7 @@ export class LoanService {
           loanType: data.loanType,
           bankName: data.bankName,
           loanAmount: data.loanAmount,
-          office: { connect: { id: data.officeId } },
+          office: { connect: { id: officeId } },
           operationsExecutive: { connect: { id: data.operationsExecutiveId } },
           status: data.status || LoanStatus.Unassigned,
         };
@@ -367,7 +367,6 @@ export class LoanService {
             loanType: 'Personal', // Default to Personal if not specified
             bankName: 'Default Bank', // Default bank if not specified
             loanAmount: 100,
-            officeId: officeId, // Use the provided officeId
             operationsExecutiveId: operationsExecutiveId,
             status: LoanStatus.Unassigned,
             verifierId: 9,
@@ -382,7 +381,7 @@ export class LoanService {
             throw new Error('Missing required field: APPLICATION ID');
           }
 
-          const loan = await this.createLoan(loanData);
+          const loan = await this.createLoan(loanData, officeId);
           results.push({
             row: row['__rowNum__'] + 1,
             loanId: loan.id,
@@ -1300,7 +1299,7 @@ export class LoanService {
     }
   }
 
-  async createLoans(createLoanDtos: CreateLoanDto[]) {
+  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number) {
     try {
       const results = {
         successful: [],
@@ -1322,16 +1321,6 @@ export class LoanService {
               throw new ConflictException(`Loan with application number ${dto.applicationNumber} already exists`);
             }
           }
-
-          // Check if office exists
-          const office = await this.prisma.office.findUnique({
-            where: { id: dto.officeId }
-          });
-
-          if (!office) {
-            throw new NotFoundException(`Office with ID ${dto.officeId} not found`);
-          }
-
           // Check if operations executive exists
           const operationsExecutive = await this.prisma.user.findUnique({
             where: { id: dto.operationsExecutiveId }
@@ -1352,7 +1341,7 @@ export class LoanService {
             }
           }
 
-          const { officeId, operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
+          const { operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
 
           // Generate application number if not provided
           const applicationNumber = dto.applicationNumber || `APP${Date.now()}`;

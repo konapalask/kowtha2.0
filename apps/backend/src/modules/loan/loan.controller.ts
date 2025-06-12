@@ -165,8 +165,8 @@ export class LoanController {
       }
     }
   })
-  async createLoan(@Body() createLoanDtos: CreateLoanDto[]) {
-    const result = await this.loanService.createLoans(createLoanDtos);
+  async createLoan(@Body() createLoanDtos: CreateLoanDto[], @Request() req: AuthenticatedRequest) {
+    const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId);
     return {
       status: 201,
       message: 'Loans created successfully',

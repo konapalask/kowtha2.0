@@ -52,10 +52,6 @@ export class CreateLoanDto {
   @IsNumber()
   loanAmount: number;
 
-  @ApiProperty({ description: 'Office ID' })
-  @IsNumber()
-  officeId: number;
-
   @ApiProperty({ description: 'Operations executive ID' })
   @IsNumber()
   operationsExecutiveId: number;

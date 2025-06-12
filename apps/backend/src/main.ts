@@ -32,7 +32,7 @@ async function bootstrap() {
   // Set the global prefix for the API
   app.setGlobalPrefix('api');
   
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT);
 }
