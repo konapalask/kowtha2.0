@@ -19,11 +19,12 @@ import {
   createUserApi,
   getUsersApi,
   updateUserApi,
+  UserFilters,
 } from "@/services/users.services";
-import { UserContext } from "@/components/layout/UserContextProvider";
 import { getOfficesApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
 import { getUserDetails } from "@/utils/utility";
+import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
 
@@ -52,19 +53,43 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const userDetails = getUserDetails();
   const [offices, setOffices] = useState<Office[]>([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0
+  });
+  const [filters, setFilters] = useState<UserFilters>({
+    employeeCode: undefined,
+    name: undefined,
+    role: undefined
+  });
 
-  const fetchUsers = async () => {
-    getUsersApi()
-      .then((res) => {
-        setUsers(res?.data?.data);
-      })
-      .catch((err) => {
-        console.log(err);
+  const fetchUsers = async (page = 1, limit = 10) => {
+    try {
+      setLoading(true);
+      const response = await getUsersApi(page, limit, filters);
+      const data = response?.data?.data;
+      setUsers(data?.records ?? []);
+      setPagination({
+        current: data.meta.page,
+        pageSize: data.meta.limit,
+        total: data.meta.total,
+        totalPages: data.meta.totalPages
       });
+    } catch (error) {
+      console.log(error);
+      message.error("Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(pagination.current, pagination.pageSize);
+  }, [pagination.current, pagination.pageSize, filters]);
+
+  useEffect(() => {
     getOfficesApi()
       .then((res) => {
         const options =
@@ -103,8 +128,9 @@ export default function Users() {
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
-    } catch (error) {
-      message.error("Failed to save user");
+    } catch (error:any) {
+      console.log(error?.response?.data?.message);
+      message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -141,6 +167,14 @@ export default function Users() {
       ...form.getFieldsValue(),
       status: "Inactive",
     });
+  };
+
+  const handleTableChange = (newPagination: any) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
   };
 
   const columns: ColumnsType<User> = [
@@ -214,6 +248,12 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
+        <div style={{ marginBottom: 16 }}>
+          <FilterOverlay 
+            filters={filters}
+            onFilterChange={(newFilters: any) => setFilters(newFilters)}
+          />
+        </div>
         {userDetails?.role === "Admin" && (
           <div className="flex-end" style={{ marginBottom: 16 }}>
             <Button
@@ -235,8 +275,12 @@ export default function Users() {
           dataSource={users}
           rowKey="id"
           loading={loading}
+          onChange={handleTableChange}
           sticky
           pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
             showTotal: (total) => `Total ${total} users`,
             position: ["bottomCenter"],
           }}
@@ -265,7 +309,7 @@ export default function Users() {
             rules={[{ required: true, message: "Please enter name" }]}
             style={{ marginBottom: 8 }}
           >
-            <Input />
+            <Input maxLength={40} />
           </Form.Item>
           <Form.Item
             name="mobile"
@@ -295,9 +339,11 @@ export default function Users() {
           <Form.Item
             name="employeeCode"
             label="Employee Code"
+            rules={[{ required: true, message: "Please enter employee code" }]}
             style={{ marginBottom: 8 }}
           >
             <Input
+            maxLength={15}
               onInput={(e: any) => {
                 e.target.value = e.target.value.toUpperCase();
               }}
