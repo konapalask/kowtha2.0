@@ -144,7 +144,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 { max: 20, message: "Cannot be more than 20 characters" },
               ]}
             >
-              <Input />
+              <Input readOnly={selectedLoan?.applicationNumber} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>
