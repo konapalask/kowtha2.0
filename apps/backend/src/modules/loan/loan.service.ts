@@ -830,6 +830,18 @@ export class LoanService {
         where.applicationNumber = filters.applicationNumber;
       }
 
+      // Add date range filter
+      if (filters?.startDate || filters?.endDate) {
+        where.createdAt = {
+          ...(filters.startDate && { 
+            gte: new Date(`${filters.startDate}T00:00:00.000Z`)
+          }),
+          ...(filters.endDate && { 
+            lte: new Date(`${filters.endDate}T23:59:59.999Z`)
+          })
+        };
+      }
+
       // Add field executive search conditions
       if (filters?.fieldExecutiveEmployeeCode || filters?.fieldExecutiveName) {
         where.verifications = {
