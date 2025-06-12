@@ -71,10 +71,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   fetchLoans,
   setRefresh,
 }) => {
-  // console.log(selectedLoan);
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
-  const [selectedLoan, setSelectedLoan] = useState<string | null>(selectedApplicationNumber);
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(null);
   const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
   const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
   const [workDisabled, setWorkDisabled] = useState<boolean>(false);
@@ -87,10 +86,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     Business: false,
   });
 
+  useEffect(() => {
+    if (selectedApplicationNumber) {
+      setSelectedLoan(selectedApplicationNumber);
+    }
+  }, [selectedApplicationNumber]);
+
   const fetchLoanDetails = async () => {
-    console.log(selectedLoan)
     if (!selectedLoan) return;
-    console.log("passed")
     try {
       setLoading(true);
       const result = await getLoansByIdApi(selectedLoan);
@@ -107,7 +110,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   };
 
   useEffect(() => {
-    if (selectedLoan ) {
+    if (selectedLoan) {
       fetchLoanDetails();
     }
   }, [selectedLoan]);
