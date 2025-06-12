@@ -96,7 +96,6 @@ model User {
   operationsExecutiveLoans Loan[]               @relation("OperationsExecutive")
   verifiedLoans            Loan[]               @relation("LoanVerifier")
   verificationReports      VerificationReport[] @relation("ReportVerifier")
-  uploadedDocuments        Document[]           @relation("uploadedBy")
   verifications            Verification[]       @relation("VerificationFieldExecutive")
   sessions                 Session[]
   editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
@@ -133,7 +132,7 @@ model Verification {
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
-  paths            String[]           // Array of S3 paths for verification documents
+  path             String?           // Array of S3 paths for verification documents
   applicantAddress String?           
   verificationData Json?              // JSON field to store address/work data
   pictureSource    PictureSource?     // Source of the uploaded picture
@@ -155,7 +154,7 @@ model Loan {
   isAddressSame         Boolean             @default(false)
   loanType              String
   bankName              String
-  loanAmount            Float
+  loanAmount            Float?
   status                LoanStatus
   officeId              Int
   office                Office              @relation(fields: [officeId], references: [id])
@@ -164,7 +163,6 @@ model Loan {
   verifierId            Int?
   verifier              User?               @relation("LoanVerifier", fields: [verifierId], references: [id])
   verificationReport    VerificationReport?
-  documents             Document[]
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -184,18 +182,6 @@ model VerificationReport {
   remarks          String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-}
-
-model Document {
-  id           Int      @id @default(autoincrement())
-  url          String
-  type         DocumentType
-  loanId       Int
-  loan         Loan     @relation(fields: [loanId], references: [id])
-  uploadedById Int
-  uploadedBy   User     @relation("uploadedBy", fields: [uploadedById], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 }
 
 model Session {

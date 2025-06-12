@@ -548,7 +548,6 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          paths: path ? [path] : [],
           verificationData: verificationData || null,
           pictureSource: pictureSource || null,
         },
@@ -1109,11 +1108,11 @@ export class LoanService {
       if (verificationData?.uploadedItems) {
         console.log('sending signal to processs images in verificationData');
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean;}) => {
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
             try {
               console.log('item', item);
               
-              if (item.s3ImageUrl && item.isCamera) {
+              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
@@ -1128,7 +1127,6 @@ export class LoanService {
                 itemId: item.id,
                 error: error.message
               });
-              // Return original item if processing fails
             }
           })
         );
@@ -1274,19 +1272,6 @@ export class LoanService {
 
       // Format the verification data and generate presigned URLs for paths
       const verificationData = await Promise.all(loan.verifications.map(async verification => {
-        const downloadUrls = await Promise.all(
-          (verification.paths || []).map(async path => {
-            try {
-              return await this.s3Service.generatePresignedDownloadUrl(path);
-            } catch (error) {
-              await this.loggingService.error('Failed to generate presigned URL', {
-                path,
-                error: error.message
-              });
-              return null;
-            }
-          })
-        );
 
         return {
           id: verification.id,
@@ -1294,8 +1279,6 @@ export class LoanService {
           status: verification.status,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
-          paths: verification.paths,
-          downloadUrls: downloadUrls.filter(url => url !== null),
           fieldExecutive: verification.fieldExecutive,
           createdAt: verification.createdAt,
           updatedAt: verification.updatedAt
@@ -1532,7 +1515,6 @@ export class LoanService {
               status: true,
               updatedAt: true,
               verificationData: true,
-              paths: true,
               fieldExecutive: { select: { name: true } }
             }
           },
