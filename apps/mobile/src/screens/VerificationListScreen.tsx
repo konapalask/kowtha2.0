@@ -34,17 +34,13 @@ type NavigationPayload = {
 
 interface VerificationItem {
   id: string;
-  applicantName: string;
-  age?: number;
-  sex?: string;
-  applicationNumber?: string;
-  applicantAddress?: string;
-  verification: {
-    id: string;
-    type: 'AddressOne' | 'AddressTwo' | 'Work' | 'Business';
-    status: 'Pending' | 'In Progress' | 'Completed';
-    loanId: string;
-    applicantAddress: string;
+  type: 'AddressOne' | 'AddressTwo' | 'Work' | 'Business';
+  status: 'Pending' | 'In Progress' | 'Completed';
+  loanId: string;
+  applicantAddress: string;
+  loan: {
+    applicantName: string;
+    applicationNumber: string;
   };
 }
 
@@ -147,6 +143,11 @@ const VerificationListScreen = () => {
       fetchData(1, false);
     }, []),
   );
+
+  // Call fetchData when filter changes
+  useEffect(() => {
+    fetchData(1, false);
+  }, [selectedFilter]);
 
   const onRefresh = async () => {
     setRefreshing(true);
