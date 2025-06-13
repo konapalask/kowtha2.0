@@ -18,6 +18,7 @@ import { Response } from 'express';
 import { NotFoundException } from '@nestjs/common';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -587,36 +588,50 @@ export class LoanController {
   @ApiOperation({ summary: 'Get all loans assigned to field executive with verification details' })
   @ApiResponse({ 
     status: 200, 
-    description: 'Returns a list of loans assigned to the field executive with verification details',
+    description: 'Returns a paginated list of loans assigned to the field executive with verification details',
     schema: {
       type: 'object',
       properties: {
         status: { type: 'number', example: 200 },
         message: { type: 'string', example: 'Assigned loans fetched successfully' },
         data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'number' },
-              loanNumber: { type: 'string' },
-              applicantName: { type: 'string' },
-              amount: { type: 'number' },
-              status: { type: 'string', enum: Object.values(LoanStatus) },
-              verifications: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'number' },
-                    type: { type: 'string', enum: Object.values(VerificationType) },
-                    status: { type: 'string' },
-                    findings: { type: 'string' },
-                    documents: { type: 'array', items: { type: 'string' } },
-                    createdAt: { type: 'string', format: 'date-time' },
-                    updatedAt: { type: 'string', format: 'date-time' }
+          type: 'object',
+          properties: {
+            items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  loanNumber: { type: 'string' },
+                  applicantName: { type: 'string' },
+                  amount: { type: 'number' },
+                  status: { type: 'string', enum: Object.values(LoanStatus) },
+                  verifications: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'number' },
+                        type: { type: 'string', enum: Object.values(VerificationType) },
+                        status: { type: 'string' },
+                        findings: { type: 'string' },
+                        documents: { type: 'array', items: { type: 'string' } },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
+                      }
+                    }
                   }
                 }
+              }
+            },
+            meta: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' }
               }
             }
           }
@@ -624,8 +639,11 @@ export class LoanController {
       }
     }
   })
-  async getAssignedLoansWithVerifications(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub);
+  async getAssignedLoansWithVerifications(
+    @Request() req: AuthenticatedRequest,
+    @Query() filters: FieldExecutiveAssignedDto
+  ) {
+    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub, filters);
     return {
       status: 200,
       message: 'Assigned loans fetched successfully',

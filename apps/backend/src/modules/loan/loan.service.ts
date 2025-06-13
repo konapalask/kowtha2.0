@@ -18,6 +18,7 @@ import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 
 // Workaround: use union type for VerificationType
 // TODO: Replace with import from @prisma/client if/when available
@@ -547,7 +548,6 @@ export class LoanService {
         },
         data: {
           status: 'Completed',
-          paths: path ? [path] : [],
           verificationData: verificationData || null,
           pictureSource: pictureSource || null,
         },
@@ -1016,7 +1016,7 @@ export class LoanService {
     }
   }
 
-  async getAssignedLoansWithVerifications(fieldExecutiveId: number) {
+  async getAssignedLoansWithVerifications(fieldExecutiveId: number, filters?: FieldExecutiveAssignedDto) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
         where: { id: fieldExecutiveId }
@@ -1026,8 +1026,20 @@ export class LoanService {
         throw new NotFoundException('Field executive not found');
       }
 
+      const where: Prisma.VerificationWhereInput = { fieldExecutiveId };
+      
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await this.prisma.verification.count({ where });
+
       const verifications = await this.prisma.verification.findMany({
-        where: { fieldExecutiveId },
+        where,
         include: {
           loan: {
             select: {
@@ -1038,15 +1050,30 @@ export class LoanService {
               status: true
             }
           }
-        }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: Number(limit)
       });
 
       await this.loggingService.debug('Retrieved assigned loans with verifications', {
         fieldExecutiveId,
-        count: verifications.length
+        count: verifications.length,
+        page,
+        limit
       });
 
-      return verifications;
+      return {
+        items: verifications,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
       await this.loggingService.error('Failed to get assigned loans with verifications', {
         fieldExecutiveId,
@@ -1081,11 +1108,11 @@ export class LoanService {
       if (verificationData?.uploadedItems) {
         console.log('sending signal to processs images in verificationData');
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean;}) => {
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
             try {
               console.log('item', item);
               
-              if (item.s3ImageUrl && item.isCamera) {
+              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
@@ -1100,7 +1127,6 @@ export class LoanService {
                 itemId: item.id,
                 error: error.message
               });
-              // Return original item if processing fails
             }
           })
         );
@@ -1246,19 +1272,6 @@ export class LoanService {
 
       // Format the verification data and generate presigned URLs for paths
       const verificationData = await Promise.all(loan.verifications.map(async verification => {
-        const downloadUrls = await Promise.all(
-          (verification.paths || []).map(async path => {
-            try {
-              return await this.s3Service.generatePresignedDownloadUrl(path);
-            } catch (error) {
-              await this.loggingService.error('Failed to generate presigned URL', {
-                path,
-                error: error.message
-              });
-              return null;
-            }
-          })
-        );
 
         return {
           id: verification.id,
@@ -1266,8 +1279,6 @@ export class LoanService {
           status: verification.status,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
-          paths: verification.paths,
-          downloadUrls: downloadUrls.filter(url => url !== null),
           fieldExecutive: verification.fieldExecutive,
           createdAt: verification.createdAt,
           updatedAt: verification.updatedAt
@@ -1504,7 +1515,6 @@ export class LoanService {
               status: true,
               updatedAt: true,
               verificationData: true,
-              paths: true,
               fieldExecutive: { select: { name: true } }
             }
           },
