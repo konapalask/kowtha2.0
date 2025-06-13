@@ -346,10 +346,10 @@ const WorkVerification = () => {
   };
 
   const handleSubmit = async () => {
+    const {colleagueReferences, pastEmployment, existingLoans, ...rest} =
+      validSections;
     // Check if all sections are validated
-    const allSectionsValid = Object.values(validSections).every(
-      isValid => isValid,
-    );
+    const allSectionsValid = Object.values(rest).every(isValid => isValid);
 
     if (!allSectionsValid) {
       Toast.show({

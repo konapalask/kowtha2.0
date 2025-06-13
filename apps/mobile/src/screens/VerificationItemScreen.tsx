@@ -136,7 +136,9 @@ const VerificationItemScreen = () => {
   useEffect(() => {
     const loadSavedData = async () => {
       try {
-        const savedData = await getItem(`${item?.verificationId}_${verificationType}`);
+        const savedData = await getItem(
+          `${item?.verificationId}_${verificationType}`,
+        );
         if (savedData) {
           const completeFormData = {
             ...formData,

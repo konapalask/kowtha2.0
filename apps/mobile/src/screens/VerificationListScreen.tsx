@@ -339,10 +339,10 @@ const VerificationListScreen = () => {
           } else {
             navigation.navigate('VerificationItemScreen' as any, {
               item: baseNavPayload,
-              verificationType:
-                item?.type === 'AddressOne'
-                  ? 'CurrentAddress'
-                  : 'PermanentAddress',
+              verificationType: item?.type,
+              // item?.type === 'AddressOne'
+              //   ? 'CurrentAddress'
+              //   : 'PermanentAddress',
               userData: item,
             });
           }
