@@ -209,8 +209,16 @@ export default function OrganizationSettings() {
                 rules={[
                   { required: true, message: "Please enter organization name" },
                 ]}
+                // normalize={(value) =>
+                //   typeof value === "string"
+                //     ? value.trim().replace(/\s{2,}/g, " ")
+                //     : value
+                // }
               >
-                <Input />
+                <Input  onChange={(e) => {
+      const cleaned = e.target.value.replace(/\s{2,}/g, " ");
+      form.setFieldsValue({ name: cleaned });
+    }} />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
