@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, Input, Popover, Radio, Space, Tag } from 'antd';
+import { Button, Checkbox, Input, Popover, Radio, Space, Tag, DatePicker, Select } from 'antd';
 import { FilterOutlined, CloseOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+
+const { RangePicker } = DatePicker;
 
 interface FilterOption {
   key: string;
   label: string;
-  type: 'status' | 'applicationNumber' | 'assignee';
+  type: 'status' | 'applicationNumber' | 'assignee' | 'dateRange';
 }
 
 const filterOptions: FilterOption[] = [
   { key: 'status', label: 'Status', type: 'status' },
   { key: 'applicationNumber', label: 'Application Number', type: 'applicationNumber' },
   { key: 'assignee', label: 'Assignee', type: 'assignee' },
+  { key: 'dateRange', label: 'Date Range', type: 'dateRange' },
 ];
 
 const statusOptions = [
@@ -28,6 +32,8 @@ export interface FilterValue {
   applicationNumber?: string;
   fieldExecutiveEmployeeCode?: string;
   fieldExecutiveName?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface FilterOverlayProps {
@@ -91,12 +97,38 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
     setIsOpen(false);
   };
 
+  const handleDateRangeChange = (dates: any) => {
+    if (dates) {
+      onFilterChange({
+        ...filters,
+        startDate: dates[0].format('YYYY-MM-DD'),
+        endDate: dates[1].format('YYYY-MM-DD'),
+      });
+    } else {
+      const newFilters = { ...filters };
+      delete newFilters.startDate;
+      delete newFilters.endDate;
+      onFilterChange(newFilters);
+    }
+  };
+
   const renderFilterInput = (option: FilterOption) => {
     switch (option.type) {
+      case 'dateRange':
+        return (
+          <RangePicker
+            value={filters.startDate && filters.endDate ? [
+              dayjs(filters.startDate),
+              dayjs(filters.endDate)
+            ] : null}
+            onChange={handleDateRangeChange}
+            style={{ width: '100%' }}
+          />
+        );
       case 'status':
         return (
           <Space direction="vertical">
-            {statusOptions.map(status => (
+            {/* {statusOptions.map(status => (
               <Radio
                 key={status.value}
                 checked={filters.status === status.value}
@@ -104,7 +136,8 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
               >
                 {status.label}
               </Radio>
-            ))}
+            ))} */}
+            <Select style={{minWidth:200}} options={statusOptions} value={filters.status} onSelect={(value:string) => handleFilterValueChange('status', value)} placeholder="Select Status" />
           </Space>
         );
       case 'applicationNumber':
@@ -160,6 +193,24 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
   const renderActiveFilters = () => {
     const activeFilters = [];
+
+    if (filters.startDate && filters.endDate) {
+      activeFilters.push(
+        <Tag
+          key="dateRange"
+          closable
+          onClose={() => {
+            const newFilters = { ...filters };
+            delete newFilters.startDate;
+            delete newFilters.endDate;
+            onFilterChange(newFilters);
+            setSelectedFilters(prev => prev.filter(k => k !== 'dateRange'));
+          }}
+        >
+          Date: {dayjs(filters.startDate).format('DD/MM/YYYY')} - {dayjs(filters.endDate).format('DD/MM/YYYY')}
+        </Tag>
+      );
+    }
 
     if (filters.status) {
       activeFilters.push(
@@ -221,6 +272,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
           trigger="click"
           open={isOpen}
           onOpenChange={setIsOpen}
+          placement="bottomLeft"
         >
           <Button icon={<FilterOutlined />}>Filters</Button>
         </Popover>

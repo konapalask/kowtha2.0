@@ -1,7 +1,19 @@
 import axiosInstance from "../config/axios.config";
 
-export const getUsersApi = async () => {
-  return axiosInstance.get("/accounts/users");
+export interface UserFilters {
+  employeeCode?: string;
+  name?: string;
+  role?: string;
+}
+
+export const getUsersApi = async (page?: number, limit?: number, filters?: UserFilters) => {
+  return axiosInstance.get("/accounts/all-users", {
+    params: {
+      page,
+      limit,
+      ...filters
+    }
+  });
 };
 
 export const getFieldExecutivesByOfficeIdApi = async (officeId: string) => {
