@@ -449,6 +449,7 @@ const WorkVerification = () => {
           <PhotoCapture
             onUploadedItemsChange={handleUploadedItemsChange}
             initialItems={formData.uploadedItems}
+            loanId={item.verificationId}
           />
         </CollapsibleSection>
 
