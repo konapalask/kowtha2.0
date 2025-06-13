@@ -8,6 +8,7 @@ import {
   RefreshControl,
   TextInput,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -23,6 +24,15 @@ type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   'VerificationList'
 >;
 
+type NavigationPayload = {
+  item: {
+    name: string;
+    applicationNumber: string;
+  };
+  verificationType: 'Work' | 'Business' | 'CurrentAddress' | 'PermanentAddress';
+  userData: VerificationItem;
+};
+
 interface VerificationItem {
   id: string;
   applicantName: string;
@@ -34,6 +44,8 @@ interface VerificationItem {
     id: string;
     type: 'AddressOne' | 'AddressTwo' | 'Work' | 'Business';
     status: 'Pending' | 'In Progress' | 'Completed';
+    loanId: string;
+    applicantAddress: string;
   };
 }
 
@@ -67,6 +79,10 @@ const VerificationListScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showAppNumberFilter, setShowAppNumberFilter] = useState(false);
   const [appNumberFilter, setAppNumberFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 10;
 
   const opacity = useRef(new Animated.Value(1)).current;
   // useEffect(() => {
@@ -90,42 +106,56 @@ const VerificationListScreen = () => {
   //   }
   // }, [status]);
 
-  const fetchData = async () => {
+  const fetchData = async (pageNumber = 1, shouldAppend = false) => {
     try {
+      setLoading(true);
       const response = await getFieldData();
-      const transformedData = response?.data?.data?.reduce(
-        (acc: any[], curr: any) => {
-          const {verifications, ...rest} = curr;
-          const verificationItems = verifications.map((verification: any) => ({
-            ...rest,
-            verification: verification,
-          }));
-          return [...acc, ...verificationItems];
-        },
-        [],
-      );
-      setData(transformedData);
+      const allData = response?.data?.data || [];
+      
+      // Handle pagination on frontend
+      const startIndex = (pageNumber - 1) * PAGE_SIZE;
+      const endIndex = startIndex + PAGE_SIZE;
+      const paginatedData = allData.slice(startIndex, endIndex);
+      const totalPages = Math.ceil(allData.length / PAGE_SIZE);
+      
+      setData(prevData => shouldAppend ? [...prevData, ...paginatedData] : paginatedData);
+      setHasMore(pageNumber < totalPages);
+      setPage(pageNumber);
     } catch (error) {
       console.error('Error fetching data:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to fetch verifications',
+        position: 'bottom',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   // Call fetchData on initial mount
   useEffect(() => {
-    fetchData();
+    fetchData(1, false);
   }, []);
 
   // Call fetchData when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      fetchData();
+      fetchData(1, false);
     }, []),
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchData();
+    await fetchData(1, false);
     setRefreshing(false);
+  };
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      fetchData(page + 1, true);
+    }
   };
 
   const filterOptions = ['All', 'Pending', 'Completed'];
@@ -284,31 +314,31 @@ const VerificationListScreen = () => {
       style={styles.card}
       onPress={() => {
         if (item?.verification?.status === 'Pending') {
-          const baseNavPayload = {
-            name: item.applicantName,
-            id: item.id,
-            applicationNumber: item.applicationNumber, // Main application ID
-            verificationId: item.verification.loanId,
-            address: item.verification.applicantAddress, // Address for CurrentAddress or PermanentAddress
-          };
-
           if (item.verification.type === 'Work') {
-            navigation.navigate('WorkVerification', {
-              item: baseNavPayload,
-              verificationType: 'Work', // Explicitly 'Work'
+            navigation.navigate('WorkVerification' as any, {
+              item: {
+                name: item.applicantName,
+                applicationNumber: item.applicationNumber || '',
+              },
+              verificationType: 'Work',
               userData: item,
             });
           } else if (item.verification.type === 'Business') {
-            navigation.navigate('BusinessVerification', {
-              item: baseNavPayload,
+            navigation.navigate('BusinessVerification' as any, {
+              item: {
+                name: item.applicantName,
+                applicationNumber: item.applicationNumber || '',
+              },
               verificationType: 'Business',
               userData: item,
             });
           } else {
-            // Types for VerificationItemScreen are 'CurrentAddress' or 'PermanentAddress'
-            navigation.navigate('VerificationItemScreen', {
-              item: baseNavPayload,
-              verificationType: item.verification.type, // This will be 'CurrentAddress' or 'PermanentAddress'
+            navigation.navigate('VerificationItemScreen' as any, {
+              item: {
+                name: item.applicantName,
+                applicationNumber: item.applicationNumber || '',
+              },
+              verificationType: item.verification.type === 'AddressOne' ? 'CurrentAddress' : 'PermanentAddress',
               userData: item,
             });
           }
@@ -318,7 +348,7 @@ const VerificationListScreen = () => {
             text1: `${getVerificationTypeLabel(
               item.verification.type,
             )} verification is completed`,
-            text2: `for application ${item.applicationNumber}.`,
+            text2: `for application ${item.applicationNumber || 'N/A'}.`,
             position: 'bottom',
             visibilityTime: 3000,
           });
@@ -395,7 +425,7 @@ const VerificationListScreen = () => {
         </View>
       </View>
       {renderFilterOptions()}
-      {filteredData.length === 0 ? (
+      {filteredData.length === 0 && !loading ? (
         <View style={styles.noResultsContainer}>
           <Icon name="search-off" size={48} color="#999" />
           <Text style={styles.noResultsText}>
@@ -415,6 +445,15 @@ const VerificationListScreen = () => {
               colors={['#007AFF']}
               tintColor="#007AFF"
             />
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading && hasMore ? (
+              <View style={styles.loadingFooter}>
+                <ActivityIndicator size="small" color="#007AFF" />
+              </View>
+            ) : null
           }
         />
       )}
@@ -636,6 +675,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#FFA500',
     zIndex: 1,
+  },
+  loadingFooter: {
+    paddingVertical: 16,
+    alignItems: 'center',
   },
 });
 
