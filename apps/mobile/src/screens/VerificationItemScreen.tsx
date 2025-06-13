@@ -32,7 +32,7 @@ import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
 import {submitVerification} from '../services/field.services';
 import {getItem, setItem, clearItem} from '../helpers/utility';
-import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
+// import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

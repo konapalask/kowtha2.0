@@ -13,8 +13,7 @@ import {
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
-import {getItem} from '../helpers/utility';
-import {getFieldData, getUserDetails} from '../services/field.services';
+import {getFieldData} from '../services/field.services';
 import Settings from '../components/Settings';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -75,7 +74,7 @@ interface VerificationItem {
 const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
   const [data, setData] = useState<VerificationItem[]>([]);
-  const [selectedFilter, setSelectedFilter] = useState<string>('All');
+  const [selectedFilter, setSelectedFilter] = useState<string>('Pending');
   const [refreshing, setRefreshing] = useState(false);
   const [showAppNumberFilter, setShowAppNumberFilter] = useState(false);
   const [appNumberFilter, setAppNumberFilter] = useState('');
@@ -106,21 +105,24 @@ const VerificationListScreen = () => {
   //   }
   // }, [status]);
 
-  const fetchData = async (pageNumber = 1, shouldAppend = false) => {
+  const fetchData = async (page = 1, shouldAppend = false) => {
     try {
       setLoading(true);
-      const response = await getFieldData();
+      const response = await getFieldData(page, selectedFilter);
       const allData = response?.data?.data || [];
-      
+      // console.log(allData);
+
       // Handle pagination on frontend
-      const startIndex = (pageNumber - 1) * PAGE_SIZE;
-      const endIndex = startIndex + PAGE_SIZE;
-      const paginatedData = allData.slice(startIndex, endIndex);
-      const totalPages = Math.ceil(allData.length / PAGE_SIZE);
-      
-      setData(prevData => shouldAppend ? [...prevData, ...paginatedData] : paginatedData);
-      setHasMore(pageNumber < totalPages);
-      setPage(pageNumber);
+      // const startIndex = (page - 1) * PAGE_SIZE;
+      // const endIndex = startIndex + PAGE_SIZE;
+      // const paginatedData = allData.slice(startIndex, endIndex);
+      const totalPages = allData?.meta?.totalPages;
+
+      setData(prevData =>
+        shouldAppend ? [...prevData, ...allData?.items] : allData?.items,
+      );
+      setHasMore(page < totalPages);
+      setPage(page);
     } catch (error) {
       console.error('Error fetching data:', error);
       Toast.show({
@@ -158,21 +160,21 @@ const VerificationListScreen = () => {
     }
   };
 
-  const filterOptions = ['All', 'Pending', 'Completed'];
+  const filterOptions = ['Pending', 'Completed'];
 
-  const filteredData = data
-    .filter(
-      item =>
-        selectedFilter === 'All' || item.verification.status === selectedFilter,
-    )
-    .filter(
-      item =>
-        !appNumberFilter ||
-        (item.applicationNumber &&
-          item.applicationNumber
-            .toLowerCase()
-            .includes(appNumberFilter.toLowerCase())),
-    );
+  // const filteredData = data
+  //   .filter(
+  //     item =>
+  //       selectedFilter === 'All' || item.verification.status === selectedFilter,
+  //   )
+  //   .filter(
+  //     item =>
+  //       !appNumberFilter ||
+  //       (item.applicationNumber &&
+  //         item.applicationNumber
+  //           .toLowerCase()
+  //           .includes(appNumberFilter.toLowerCase())),
+  //   );
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -192,7 +194,7 @@ const VerificationListScreen = () => {
       ]),
     );
 
-    if (filteredData.some(item => item.verification.status === 'Pending')) {
+    if (data.some(item => item?.status === 'Pending')) {
       pulse.start();
     } else {
       scaleAnim.setValue(1);
@@ -200,7 +202,7 @@ const VerificationListScreen = () => {
     }
 
     return () => pulse.stop();
-  }, [filteredData]);
+  }, [data]);
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
@@ -309,36 +311,37 @@ const VerificationListScreen = () => {
     </View>
   );
 
-  const renderItem = ({item}: {item: VerificationItem}) => (
+  const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        if (item?.verification?.status === 'Pending') {
-          if (item.verification.type === 'Work') {
+        if (item?.status === 'Pending') {
+          const baseNavPayload = {
+            name: item?.loan?.applicantName,
+            applicationNumber: item?.loan?.applicationNumber || '',
+            id: item?.id,
+            verificationId: item?.loanId,
+            address: item?.applicantAddress,
+          };
+          if (item?.type === 'Work') {
             navigation.navigate('WorkVerification' as any, {
-              item: {
-                name: item.applicantName,
-                applicationNumber: item.applicationNumber || '',
-              },
+              item: baseNavPayload,
               verificationType: 'Work',
               userData: item,
             });
-          } else if (item.verification.type === 'Business') {
+          } else if (item?.type === 'Business') {
             navigation.navigate('BusinessVerification' as any, {
-              item: {
-                name: item.applicantName,
-                applicationNumber: item.applicationNumber || '',
-              },
+              item: baseNavPayload,
               verificationType: 'Business',
               userData: item,
             });
           } else {
             navigation.navigate('VerificationItemScreen' as any, {
-              item: {
-                name: item.applicantName,
-                applicationNumber: item.applicationNumber || '',
-              },
-              verificationType: item.verification.type === 'AddressOne' ? 'CurrentAddress' : 'PermanentAddress',
+              item: baseNavPayload,
+              verificationType:
+                item?.type === 'AddressOne'
+                  ? 'CurrentAddress'
+                  : 'PermanentAddress',
               userData: item,
             });
           }
@@ -346,19 +349,19 @@ const VerificationListScreen = () => {
           Toast.show({
             type: 'info',
             text1: `${getVerificationTypeLabel(
-              item.verification.type,
+              item?.type,
             )} verification is completed`,
-            text2: `for application ${item.applicationNumber || 'N/A'}.`,
+            text2: `for application ${item?.applicationNumber || 'N/A'}.`,
             position: 'bottom',
             visibilityTime: 3000,
           });
         }
       }}>
       <View style={styles.cardHeader}>
-        <Text style={styles.name}>{item.applicantName}</Text>
+        <Text style={styles.name}>{item?.loan.applicantName}</Text>
 
         <View style={styles.statusDotWrapper}>
-          {item.verification.status === 'Pending' && (
+          {item?.status === 'Pending' && (
             <Animated.View
               style={[
                 styles.dotAura,
@@ -377,9 +380,9 @@ const VerificationListScreen = () => {
               styles.statusDot,
               {
                 backgroundColor:
-                  item.verification.status === 'Pending'
+                  item?.status === 'Pending'
                     ? '#FFA500'
-                    : item.verification.status === 'Completed'
+                    : item?.status === 'Completed'
                     ? '#32CD32'
                     : 'transparent',
               },
@@ -389,22 +392,22 @@ const VerificationListScreen = () => {
         {/* <Animated.View style={[styles.detailsRow,{item.verification.status==="Pending"?"orange":"green",opacity}]} /> */}
       </View>
       <View style={styles.detailsRow}>
-        <Text style={styles.details}>{item.applicationNumber}</Text>
+        <Text style={styles.details}>{item?.loan?.applicationNumber}</Text>
         <View
           style={[
             styles.verificationTypeTag,
             {
-              backgroundColor: getVerificationTypeColor(item.verification.type),
+              backgroundColor: getVerificationTypeColor(item?.type),
             },
           ]}>
           <Text style={styles.verificationTypeText}>
-            {getVerificationTypeLabel(item.verification.type)}
+            {getVerificationTypeLabel(item?.type)}
           </Text>
         </View>
       </View>
-      {item.applicantAddress && (
+      {item?.applicantAddress && (
         <Text style={[styles.details, styles.addressText]}>
-          {item.applicantAddress}
+          {item?.applicantAddress}
         </Text>
       )}
     </TouchableOpacity>
@@ -425,7 +428,7 @@ const VerificationListScreen = () => {
         </View>
       </View>
       {renderFilterOptions()}
-      {filteredData.length === 0 && !loading ? (
+      {data?.length === 0 && !loading ? (
         <View style={styles.noResultsContainer}>
           <Icon name="search-off" size={48} color="#999" />
           <Text style={styles.noResultsText}>
@@ -434,9 +437,9 @@ const VerificationListScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredData}
+          data={data}
           renderItem={renderItem}
-          keyExtractor={item => item.verification.id}
+          keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           refreshControl={
             <RefreshControl

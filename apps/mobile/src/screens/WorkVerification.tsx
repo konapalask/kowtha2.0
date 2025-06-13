@@ -111,11 +111,11 @@ const WorkVerification = () => {
 
   const [formData, setFormData] = useState<WorkVerificationFormData>({
     basicDetails: {
-      applicantName: userData.applicantName,
-      bankName: userData.bankName,
-      prospectNumber: userData.applicationNumber,
-      purposeOfLoan: userData.loanType,
-      loanAmount: userData.loanAmount.toString(),
+      applicantName: userData?.loan?.applicantName,
+      bankName: userData?.loan?.bankName,
+      prospectNumber: userData?.loan?.applicationNumber,
+      purposeOfLoan: userData?.loan?.loanType,
+      loanAmount: userData?.loanAmount?.toString(),
       tenure: '',
       // panNumber: '',
       // aadharNumber: '',

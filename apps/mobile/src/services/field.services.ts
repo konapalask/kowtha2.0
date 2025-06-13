@@ -1,7 +1,9 @@
 import axiosInstance from '../config/axios';
 
-export const getFieldData = async () => {
-  return axiosInstance.get('/loans/field-executive/assigned');
+export const getFieldData = async (page: number, status: string) => {
+  return axiosInstance.get(
+    `/loans/field-executive/assigned?page=${page}&status=${status}`,
+  );
 };
 
 export const getUserDetails = async () => {

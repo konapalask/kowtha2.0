@@ -61,7 +61,6 @@ const BusinessVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params as {item: any};
-  console.log(item);
   const {userData} = route.params as {userData: any};
   const verificationType = 'Business';
 
@@ -85,11 +84,11 @@ const BusinessVerification = () => {
 
   const [formData, setFormData] = useState<BusinessVerificationFormData>({
     basicDetails: {
-      applicantName: userData.applicantName,
+      applicantName: userData?.loan?.applicantName,
       personMet: '',
       personMetName: '',
       personMetRelation: '',
-      businessAddress: item.address,
+      businessAddress: item?.address,
       isAddressSame: '',
       addressCorrection: '',
     },
