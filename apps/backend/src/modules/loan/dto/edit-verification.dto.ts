@@ -20,5 +20,5 @@ export class EditVerificationDto {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  paths?: string[];
+  path?: string;
 } 
