@@ -10,7 +10,7 @@ interface FinalVerdictProps {
   initialRemarks?: string;
   onVerdictChange?: (verdict: string) => void;
   onRemarksChange?: (remarks: string) => void;
-  handleSave?: (verdict: string, remarks: string) => void;
+  handleSave: (verdict: string, remarks: string) => void;
   hasEditRequest?: boolean;
 }
 
