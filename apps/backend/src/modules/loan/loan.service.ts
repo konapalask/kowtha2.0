@@ -1523,6 +1523,7 @@ export class LoanService {
               status: true,
               updatedAt: true,
               verificationData: true,
+              path: true,
               fieldExecutive: { select: { name: true } }
             }
           },
@@ -1586,17 +1587,17 @@ export class LoanService {
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status);
+        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path);
       }
       else if(addressType === 'Work') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status);
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path);
       }
       else if(addressType === 'Business') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status);
+        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path);
       }
       else {
         throw new NotFoundException('Invalid address type');
@@ -1836,7 +1837,7 @@ export class LoanService {
     `;
   }
 
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string): string {
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
 
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
@@ -2076,7 +2077,7 @@ export class LoanService {
     `;
   }
   
-  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string ): string {
+  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
     
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
@@ -2205,7 +2206,7 @@ export class LoanService {
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${remarksHtml}
+                ${path}
               </ul>
             </td>
           </tr>
@@ -2266,14 +2267,16 @@ export class LoanService {
     `;
   }
 
-  private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string): string {
+    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
       : [];
-
+    if (path) {
+      path = path.replace('<ul>', '').replace('</ul>', '')
+    }
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
-
+    
     const recommendationStyles: Record<string, string> = {
       positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
       negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
@@ -2464,7 +2467,7 @@ export class LoanService {
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${remarksHtml}
+                ${path}
               </ul>
             </td>
           </tr>
