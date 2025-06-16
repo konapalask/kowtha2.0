@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, Input, Popover, Radio, Space, Tag, DatePicker } from 'antd';
+import { Button, Checkbox, Input, Popover, Radio, Space, Tag, DatePicker, Select } from 'antd';
 import { FilterOutlined, CloseOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -128,7 +128,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
       case 'status':
         return (
           <Space direction="vertical">
-            {statusOptions.map(status => (
+            {/* {statusOptions.map(status => (
               <Radio
                 key={status.value}
                 checked={filters.status === status.value}
@@ -136,7 +136,8 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
               >
                 {status.label}
               </Radio>
-            ))}
+            ))} */}
+            <Select style={{minWidth:200}} options={statusOptions} value={filters.status} onSelect={(value:string) => handleFilterValueChange('status', value)} placeholder="Select Status" />
           </Space>
         );
       case 'applicationNumber':
@@ -271,6 +272,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
           trigger="click"
           open={isOpen}
           onOpenChange={setIsOpen}
+          placement="bottomLeft"
         >
           <Button icon={<FilterOutlined />}>Filters</Button>
         </Popover>

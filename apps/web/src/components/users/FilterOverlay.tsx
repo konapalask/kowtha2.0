@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, Input, Popover, Radio, Space, Tag } from 'antd';
+import { Button, Checkbox, Input, Popover, Radio, Select, Space, Tag } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
 import { UserFilters } from '@/services/users.services';
 
@@ -89,7 +89,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
       case 'role':
         return (
           <Space direction="vertical">
-            {roleOptions.map(role => (
+            {/* {roleOptions.map(role => (
               <Radio
                 key={role.value}
                 checked={filters.role === role.value}
@@ -97,7 +97,8 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
               >
                 {role.label}
               </Radio>
-            ))}
+            ))} */}
+            <Select style={{minWidth:200}} options={roleOptions} value={filters.role} onSelect={(value:string) => handleFilterValueChange('role', value)} placeholder="Select Role" />
           </Space>
         );
       default:
@@ -174,13 +175,14 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
           trigger="click"
           open={isOpen}
           onOpenChange={setIsOpen}
+          placement="bottomLeft"
         >
           <Button icon={<FilterOutlined />}>Filters</Button>
         </Popover>
         <Space size={[0, 8]} wrap>
           {renderActiveFilters()}
         </Space>
-        {Object.keys(filters).length > 0 && (
+        {Object.keys(selectedFilters).length > 0 && (
           <Button size="small" onClick={handleClearAll}>
             Clear All
           </Button>
