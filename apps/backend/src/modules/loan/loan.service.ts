@@ -1032,6 +1032,12 @@ export class LoanService {
         where.status = filters.status;
       }
 
+      if (filters?.applicationNumber) {
+        where.loan = {
+          applicationNumber: filters.applicationNumber
+        };
+      }
+
       const page = filters?.page || 1;
       const limit = filters?.limit || 10;
       const skip = (page - 1) * limit;
@@ -1047,7 +1053,9 @@ export class LoanService {
               applicationNumber: true,
               applicantName: true,
               loanAmount: true,
-              status: true
+              status: true,
+              bankName: true,
+              loanType: true
             }
           }
         },
@@ -2074,8 +2082,15 @@ export class LoanService {
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
       : [];
-    
+
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
+    const recommendationStyles: Record<string, string> = {
+      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
+      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+    };
+    
+    const finalRecommendationHtml = recommendationStyles[status] || '';
 
     return `
       <div class="align-wrapper">
@@ -2194,6 +2209,14 @@ export class LoanService {
               </ul>
             </td>
           </tr>
+          <tr>
+            <th>Final Recommendation</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${finalRecommendationHtml}
+              </ul>
+            </td>
+          </tr>
         </table>
       </div>
 
@@ -2248,8 +2271,15 @@ export class LoanService {
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
       : [];
-    
+
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+
+    const recommendationStyles: Record<string, string> = {
+      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
+      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+    };
+    
+    const finalRecommendationHtml = recommendationStyles[status] || '';
 
     return `
       <div class="align-wrapper">
@@ -2435,6 +2465,14 @@ export class LoanService {
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
                 ${remarksHtml}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Final Recommendation</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${finalRecommendationHtml}
               </ul>
             </td>
           </tr>

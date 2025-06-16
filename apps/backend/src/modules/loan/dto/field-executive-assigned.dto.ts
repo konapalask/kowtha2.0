@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum } from 'class-validator';
+import { IsOptional, IsEnum, IsString } from 'class-validator';
 import { VerificationStatus } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -12,4 +12,12 @@ export class FieldExecutiveAssignedDto extends PaginationDto {
   @IsEnum(VerificationStatus)
   @IsOptional()
   status?: VerificationStatus;
+
+  @ApiProperty({
+    description: 'Filter by application number',
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  applicationNumber?: string;
 } 

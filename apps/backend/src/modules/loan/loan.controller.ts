@@ -603,25 +603,24 @@ export class LoanController {
                 type: 'object',
                 properties: {
                   id: { type: 'number' },
-                  loanNumber: { type: 'string' },
-                  applicantName: { type: 'string' },
-                  amount: { type: 'number' },
-                  status: { type: 'string', enum: Object.values(LoanStatus) },
-                  verifications: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'number' },
-                        type: { type: 'string', enum: Object.values(VerificationType) },
-                        status: { type: 'string' },
-                        findings: { type: 'string' },
-                        documents: { type: 'array', items: { type: 'string' } },
-                        createdAt: { type: 'string', format: 'date-time' },
-                        updatedAt: { type: 'string', format: 'date-time' }
-                      }
+                  loan: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      applicationNumber: { type: 'string' },
+                      applicantName: { type: 'string' },
+                      loanAmount: { type: 'number' },
+                      status: { type: 'string', enum: Object.values(LoanStatus) },
+                      bankName: { type: 'string' },
+                      loanType: { type: 'string' }
                     }
-                  }
+                  },
+                  type: { type: 'string', enum: Object.values(VerificationType) },
+                  status: { type: 'string' },
+                  findings: { type: 'string' },
+                  documents: { type: 'array', items: { type: 'string' } },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
                 }
               }
             },
