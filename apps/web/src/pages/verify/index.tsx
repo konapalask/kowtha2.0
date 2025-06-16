@@ -60,7 +60,19 @@ export default function Verify() {
   ) ?? [];
 
   const getStatusTags = (record: any) => {
-  //  const 
+    const completedVerifications = record?.verifications?.filter((verification: any) => 
+      verification?.status === "Completed"
+    ) ?? [];
+    
+    return (
+      <Space size={[0, 8]} wrap>
+        {completedVerifications.map((verification: any, index: number) => (
+          <Tag key={index} color="green">
+            {verification?.addressType}
+          </Tag>
+        ))}
+      </Space>
+    );
   };
   const columns: ColumnsType<LoanData> = [
     {
@@ -77,15 +89,13 @@ export default function Verify() {
       width: 150,
       render: (text) => text ?? '-'
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (_,record) => {
-    //    return getStatusTag(record)
-    //   },
-    //   width: 150,
-    // },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (_, record) => getStatusTags(record),
+      width: 200,
+    },
     {
       title: "Updated At",
       dataIndex: "updatedAt",

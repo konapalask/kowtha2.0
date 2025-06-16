@@ -1,12 +1,13 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
-import { CloseCircleOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Card, Descriptions, Image } from "antd";
+import { CloseCircleOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Card, Descriptions, Image, message, Modal } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
+import FinalVerdict from "./FinalVerdict";
 import { useRouter } from "next/router";
 import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
 import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
@@ -14,6 +15,8 @@ import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescript
 import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import Footer from "./Footer";
+import { verifierEditApi } from "@/services/verifier.services";
+import PdfPreview from "./PdfPreview";
 
 interface VerificationDetailsProps {
   verificationData: any;
@@ -22,6 +25,7 @@ interface VerificationDetailsProps {
   verificationId: string;
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
+  verificationType: string;
 }
 
 export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
@@ -30,17 +34,34 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   editLogsUpdated,
   verificationId,
   fetchEditRequests,
-  hasEditRequest
+  hasEditRequest,
+  verificationType
 }) => {
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || ""
+    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
   );
-  console.log("editorContent: ", editorContent);
   const [changedData, setChangedData] = useState<any>({});
+  const [open, setOpen] = useState(false)
+  const [verdict, setVerdict] = useState<string | null>(null)
+
+  const handleSave = async(verdict: string|null, remarks: string) => {
+    verifierEditApi(id as string, verificationType, {path:remarks})
+    .then((response)=>{
+      // console.log("response: ", response)
+      message.success(response.data.message);
+      setOpen(true)
+      setVerdict(verdict)
+
+    }).catch((error)=>{
+      console.log("error: ", error)
+      message.error(error.response.data.message || "Failed to save final observations");
+    });    
+    
+  };
 
   useEffect(() => {
     const fetchImageUrls = async () => {
@@ -100,9 +121,43 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
   const data = verificationData || {};
 
-  const handleEditorChange = (content: string) => {
-    setEditorContent(content);
+  const sanitizeToListOnly = (html: string) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+  
+    // Find all <ul> elements
+    const ul = doc.querySelector("ul");
+    if (!ul) return "<ul><li><br></li></ul>"; // fallback if no list
+  
+    // Only keep <ul><li> structure, remove everything else
+    const cleanUl = document.createElement("ul");
+  
+    ul.querySelectorAll("li").forEach((li: any) => {
+      const cleanLi = document.createElement("li");
+      cleanLi.innerHTML = li.innerHTML;
+      cleanUl.appendChild(cleanLi);
+    });
+  
+    return cleanUl.outerHTML;
   };
+
+  const handleEditorChange = (content: string) => {
+    const sanitized = sanitizeToListOnly(content);
+  
+    if (!sanitized || sanitized.trim() === "") {
+      setEditorContent("<ul><li><br></li></ul>");
+    } else {
+      setEditorContent(sanitized);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Prevent backspace from clearing the initial bullet point
+    if (e.key === 'Backspace' && editorContent === '<ul><li><br></li></ul>') {
+      e.preventDefault();
+    }
+  };
+
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -113,10 +168,11 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   );
 
   const CustomToolbar = () => (
-    <div id="custom-toolbar" style={{ padding: "8px" }}>
+    <div id="custom-toolbar" style={{ padding: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <span style={{ marginLeft: 8, fontWeight: "bold", fontSize: "16px" }}>
         Final Observations
       </span>
+      {/* <Button type="primary" onClick={handleSave} disabled={hasEditRequest} >Save</Button> */}
     </div>
   );
 
@@ -236,34 +292,81 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         />
       </section>
 
+       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
+       {/* <section style={{marginBottom:24, textAlign:"center"}}>
+        <Button icon={<EyeOutlined />} onClick={()=>{
+          setOpen(true)
+        }}>Preview</Button>
+      </section> */}
+      {/* </Card> */}
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
+
+      <FinalVerdict 
+        disabled={hasEditRequest}
+        initialVerdict={verificationData?.finalVerdict}
+        initialRemarks={verificationData?.finalObservations?.remarks}
+        onVerdictChange={(verdict) => {
+          // Handle verdict change
+          console.log("Verdict changed:", verdict);
+        }}
+        onRemarksChange={(remarks) => {
+          // Handle remarks change
+          console.log("Remarks changed:", remarks);
+        }}
+        handleSave={handleSave}
+        hasEditRequest={hasEditRequest}
+      />
+
+      <Modal
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          // if (pdfPreviewUrl) {
+          //   window.URL.revokeObjectURL(pdfPreviewUrl);
+          // }
+          // setPdfPreviewUrl(null);
+        }}
+        cancelButtonProps={{
+          style: {
+            display: "none"
+          }
+        }}
+        footer={null}
+        width={900}
+        title={
+          verdict === "Positive"
+            ? "Positive Loan Verification"
+            : "Negative Loan Verification"
+        }
+        destroyOnClose
+        closeIcon={false}
+      >
+        <PdfPreview id={id as string} status={verdict} />
+        <Button type="primary" onClick={()=>{router.push("/verify")}}>Confirm</Button>
+      </Modal>
       {/* Final Observations Section */}
-      <section style={{ marginBottom: 24 }}>
-        <Card title="Final Observations">
-        <div
-          style={{ height: "400px", marginBottom: "20px", background: "#fff" }}
+      {/* <section style={{ marginBottom: 24 }}>
+        <Card title="Final Observations"> */}
+        {/* <div
+          style={{ minHeight: "300px", marginBottom: "20px", background: "#fff", borderRadius:8 }}
         >
+          <CustomToolbar />
           <ReactQuill
             readOnly={hasEditRequest}
             theme="snow"
             value={editorContent}
             onChange={handleEditorChange}
+            // onKeyDown={handleKeyDown}
             style={{ height: '300px' }}
             modules={{
-              toolbar: [
-                [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                ["bold", "italic", "underline", "strike"],
-                [{ list: "ordered" }, { list: "bullet" }],
-                [{ color: [] }, { background: [] }],
-                ["link"],
-                ["clean"],
-              ],
+              toolbar: false
             }}
-            placeholder=" Enter final observations here..."
+            formats={["list"]}
           />
-        </div>
-        </Card>
-      </section>
-      <Footer editorContent={editorContent} disabled={hasEditRequest} />
+        </div> */}
+        {/* </Card> */}
+      {/* </section> */}
+      {/* <Footer editorContent={editorContent} disabled={hasEditRequest} /> */}
     </>
   );
 };

@@ -5,9 +5,9 @@ export const getVerificationData = async (id: string) => {
   return response.data;
 };
 
-export const generateFinalReport = async (id: string, type: string) => {
+export const generateFinalReport = async (id: string, type: string, status: string|null) => {
   const response = await axiosInstance.get(
-    `/loans/${id}/generate-final-report?type=${type}`,
+    `/loans/${id}/generate-final-report?type=${type}&status=${status}`,
     {
       responseType: "blob",
       headers: {

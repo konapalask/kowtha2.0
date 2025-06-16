@@ -111,11 +111,11 @@ const WorkVerification = () => {
 
   const [formData, setFormData] = useState<WorkVerificationFormData>({
     basicDetails: {
-      applicantName: userData.applicantName,
-      bankName: userData.bankName,
-      prospectNumber: userData.applicationNumber,
-      purposeOfLoan: userData.loanType,
-      loanAmount: userData.loanAmount.toString(),
+      applicantName: userData?.loan?.applicantName,
+      bankName: userData?.loan?.bankName,
+      prospectNumber: userData?.loan?.applicationNumber,
+      purposeOfLoan: userData?.loan?.loanType,
+      loanAmount: userData?.loanAmount?.toString(),
       tenure: '',
       // panNumber: '',
       // aadharNumber: '',
@@ -346,10 +346,10 @@ const WorkVerification = () => {
   };
 
   const handleSubmit = async () => {
+    const {colleagueReferences, pastEmployment, existingLoans, ...rest} =
+      validSections;
     // Check if all sections are validated
-    const allSectionsValid = Object.values(validSections).every(
-      isValid => isValid,
-    );
+    const allSectionsValid = Object.values(rest).every(isValid => isValid);
 
     if (!allSectionsValid) {
       Toast.show({
@@ -449,6 +449,7 @@ const WorkVerification = () => {
           <PhotoCapture
             onUploadedItemsChange={handleUploadedItemsChange}
             initialItems={formData.uploadedItems}
+            loanId={item.verificationId}
           />
         </CollapsibleSection>
 

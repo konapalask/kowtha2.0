@@ -4,6 +4,7 @@ export type VerificationItem = {
   applicationNumber: string;
   description: string;
   address: string;
+  verificationId: string;
 };
 
 export type UploadedItem = {

@@ -32,7 +32,7 @@ import {colors} from '../constants/colors';
 import Toast from 'react-native-toast-message';
 import {submitVerification} from '../services/field.services';
 import {getItem, setItem, clearItem} from '../helpers/utility';
-import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
+// import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 
 type VerificationItemScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -136,7 +136,9 @@ const VerificationItemScreen = () => {
   useEffect(() => {
     const loadSavedData = async () => {
       try {
-        const savedData = await getItem(`${item?.id}_${verificationType}`);
+        const savedData = await getItem(
+          `${item?.verificationId}_${verificationType}`,
+        );
         if (savedData) {
           const completeFormData = {
             ...formData,
@@ -187,17 +189,17 @@ const VerificationItemScreen = () => {
     };
 
     loadSavedData();
-  }, [item?.id, verificationType]);
+  }, [item?.verificationId, verificationType]);
 
   const saveFormData = async (section: string, data: any) => {
     try {
       const savedData =
-        (await getItem(`${item?.id}_${verificationType}`)) || {};
+        (await getItem(`${item?.verificationId}_${verificationType}`)) || {};
       const updatedData = {
         ...savedData,
         [section]: data,
       };
-      await setItem(`${item?.id}_${verificationType}`, updatedData);
+      await setItem(`${item?.verificationId}_${verificationType}`, updatedData);
     } catch (error) {
       console.error('Error saving form data:', error);
     }
@@ -338,10 +340,10 @@ const VerificationItemScreen = () => {
       };
 
       console.log('Submitting form data:', finalData);
-      await submitVerification(finalData, item?.id);
+      await submitVerification(finalData, item?.verificationId);
 
       // Clear the saved data after successful submission
-      await clearItem(`${item?.id}_${verificationType}`);
+      await clearItem(`${item?.verificationId}_${verificationType}`);
 
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();
@@ -444,7 +446,7 @@ const VerificationItemScreen = () => {
           <PhotoCapture
             onUploadedItemsChange={handleUploadedItemsChange}
             initialItems={uploadedItems}
-            loanId={item?.id}
+            loanId={item?.verificationId}
           />
         </CollapsibleSection>
 

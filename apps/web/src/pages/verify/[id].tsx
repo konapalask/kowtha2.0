@@ -153,6 +153,12 @@ export default function LoanVerifyDetails() {
     )?.id;
   };
 
+  const getVerificationType = (type: string) => {
+    return verificationData?.verifications?.find(
+      (v: any) => v.addressType === type
+    )?.type;
+  };
+
   const hasEditRequest = (type: string) => {
     return editRequests?.some((request: any) => request.verificationId === getVerificationId(type));
   };
@@ -167,6 +173,7 @@ export default function LoanVerifyDetails() {
           verificationId={getVerificationId("PermanentAddress")}
           fetchEditRequests={fetchEditRequests}
           hasEditRequest={hasEditRequest("PermanentAddress")}
+          verificationType={getVerificationType("PermanentAddress")}
         />
       case "CurrentAddress":
         return <VerificationDetails
@@ -176,6 +183,7 @@ export default function LoanVerifyDetails() {
           verificationId={getVerificationId("CurrentAddress")}
           fetchEditRequests={fetchEditRequests}
           hasEditRequest={hasEditRequest("CurrentAddress")}
+          verificationType={getVerificationType("CurrentAddress")}
         />
       case "Work":
         return <WorkVerificationDetails 
