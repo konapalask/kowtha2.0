@@ -2016,7 +2016,7 @@ export class LoanService {
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${remarksHtml}
+                ${path}
               </ul>
             </td>
           </tr>
