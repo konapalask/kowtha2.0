@@ -1,9 +1,9 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { generateFinalReport, loanApproveRejectApi } from "@/services/verifier.services";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space } from "antd";
 import { useRouter } from "next/router";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorContent, disabled }) => {
   const { activeTab } = useTabContext();
@@ -17,23 +17,8 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
 
   const handleApprove = async () => {
     try {
-      // Generate final report first
-      // const reportResponse = await generateFinalReport(id as string);
-      // console.log('Report Response:', reportResponse);
-
-      // // Check if we have valid data
-      // if (!reportResponse) {
-      //   throw new Error('No PDF data received');
-      // }
-
-      // // Create a blob URL directly from the response
-      // const blob = new Blob([reportResponse], { type: 'application/pdf' });
-      // const url = window.URL.createObjectURL(blob);
-      // setPdfPreviewUrl(url);
-
-      // Show the modal after setting the PDF URL
-      setModalAction("approve");
-      setModalVisible(true);
+      setModalAction(null);
+      setModalVisible(false);
 
       // Log for debugging
     } catch (error) {
@@ -46,7 +31,7 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
 
   const fetchPdf = async () => {
    try{
-    const reportResponse = await generateFinalReport(id as string, activeTab);
+    const reportResponse = await generateFinalReport(id as string, activeTab,null);
 
     // Check if we have valid data
     if (!reportResponse) {
@@ -107,50 +92,17 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
           padding: "16px 24px",
           borderTop: "1px solid #f0f0f0",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           gap: "16px",
           zIndex: 1000,
           boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
+          marginBottom:24
         }}
       >
-        <Space>
-          <Button
-            danger
-            icon={<CloseCircleOutlined />}
-            onClick={() => {
-              setModalAction("reject");
-              setModalVisible(true);
-              fetchPdf()
-              rejectLoan();
-            }}
-            disabled={disabled}
-            style={{
-              backgroundColor: disabled ? "#f5f5f5" : undefined,
-              borderColor: disabled ? "#d9d9d9" : undefined,
-              color: disabled ? "rgba(0, 0, 0, 0.25)" : undefined
-            }}
-          >
-            Negative
-          </Button>
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            onClick={() => {
-              setModalAction("approve");
-              setModalVisible(true);
-              fetchPdf();
-              approveLoan();
-            }}
-            disabled={disabled}
-            style={{
-              backgroundColor: disabled ? "#f5f5f5" : undefined,
-              borderColor: disabled ? "#d9d9d9" : undefined,
-              color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined
-            }}
-          >
-            Positive
-          </Button>
-        </Space>
+        <Button icon={<EyeOutlined />} onClick={()=>{
+          setModalVisible(true)
+          fetchPdf()
+        }} >Preview</Button>
       </div>
       <Modal
         open={modalVisible}
@@ -169,13 +121,11 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
         footer={null}
         width={900}
         title={
-          modalAction === "approve"
-            ? "Approve Loan Verification"
-            : "Reject Loan Verification"
+         "loan preview"
         }
       >
         <div style={{ marginBottom: 16 }}>
-          <strong>PDF Preview:</strong>
+          {/* <strong>PDF Preview:</strong> */}
           {pdfPreviewUrl ? (
             <object
               data={pdfPreviewUrl}
@@ -208,29 +158,12 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
           verification?
         </div>
         <Space>
-          {/* {modalAction === "approve" && (
-              <Button
-                icon={<CheckCircleOutlined />}
-                type="primary"
-                onClick={handleApprove}
-              >
-                Approve 
-              </Button>
-            )} */}
           <Button
-            // icon={
-            //   modalAction === "approve" ? (
-            //     <CheckCircleOutlined />
-            //   ) : (
-            //     <CloseCircleOutlined />
-            //   )
-            // }
             type={"primary"}
             onClick={handleApprove}
           >
             Confirm
           </Button>
-          {/* <Button onClick={() => setModalVisible(false)}>Cancel</Button> */}
         </Space>
       </Modal>
     </>

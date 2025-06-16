@@ -3,9 +3,10 @@ import { getS3ImageUrl } from "@/utils/utility";
 import {
   CloseCircleOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, Table } from "antd";
+import { Button, Card, Image, message, Modal, Table } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -15,6 +16,9 @@ import Footer from "./Footer";
 import { useRouter } from "next/router";
 import WorkBasicDetailsDescription from "./Descriptions/WorkBasicDetailsDescription";
 import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
+import PdfPreview from "./PdfPreview";
+import FinalVerdict from "./FinalVerdict";
+import { verifierEditApi } from "@/services/verifier.services";
 
 // interface TabContextType {
 //   activeTab: string;
@@ -51,6 +55,23 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
     verificationData?.finalObservations?.remarks || ""
   );
   const [changedData, setChangedData] = useState<any>({});
+  const [open, setOpen] = useState(false)
+  const [verdict, setVerdict] = useState<string | null>(null)
+
+  const handleSave = async(verdict: string|null, remarks: string) => {
+    verifierEditApi(id as string, "Work", {path:remarks})
+    .then((response)=>{
+      // console.log("response: ", response)
+      message.success(response.data.message);
+      setOpen(true)
+      setVerdict(verdict)
+
+    }).catch((error)=>{
+      console.log("error: ", error)
+      message.error(error.response.data.message || "Failed to save final observations");
+    });    
+    
+  };
 
   useEffect(() => {
     const fetchImageUrls = async () => {
@@ -398,8 +419,61 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
         <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} admin={false} verificationType={activeTab} />
       </section>
 
+       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
+       {/* <section style={{marginBottom:24, textAlign:"center"}}>
+        <Button icon={<EyeOutlined />} onClick={()=>{
+          setOpen(true)
+        }}>Preview</Button>
+      </section> */}
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
+      {/* </Card> */}
+
+      <FinalVerdict 
+        disabled={hasEditRequest}
+        initialVerdict={verificationData?.finalVerdict}
+        initialRemarks={verificationData?.finalObservations?.remarks}
+        onVerdictChange={(verdict) => {
+          // Handle verdict change
+          console.log("Verdict changed:", verdict);
+        }}
+        onRemarksChange={(remarks) => {
+          // Handle remarks change
+          console.log("Remarks changed:", remarks);
+        }}
+        handleSave={handleSave}
+        hasEditRequest={hasEditRequest}
+      />
+
+      <Modal
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          // if (pdfPreviewUrl) {
+          //   window.URL.revokeObjectURL(pdfPreviewUrl);
+          // }
+          // setPdfPreviewUrl(null);
+        }}
+        cancelButtonProps={{
+          style: {
+            display: "none"
+          }
+        }}
+        footer={null}
+        width={900}
+        title={
+          verdict === "Positive"
+            ? "Positive Loan Verification"
+            : "Negative Loan Verification"
+        }
+        destroyOnClose
+        closeIcon={false}
+      >
+        <PdfPreview id={id as string} status={verdict} />
+        <Button type="primary" onClick={()=>{router.push("/verify")}}>Confirm</Button>
+      </Modal>
+
       {/* Final Observations Section */}
-      <section style={{ marginBottom: 24 }}>
+      {/* <section style={{ marginBottom: 24 }}>
         <Card title="Final Observations">
           <div style={{ height: "400px", marginBottom: "20px", background: "#fff" }}>
             <ReactQuill
@@ -422,8 +496,8 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             />
           </div>
         </Card>
-      </section>
-      <Footer editorContent={editorContent} disabled={hasEditRequest} />
+      </section> */}
+      {/* <Footer editorContent={editorContent} disabled={hasEditRequest} /> */}
     </>
   );
 };
