@@ -1535,7 +1535,7 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
       
-      status = status.toLowerCase();
+      status = status?.toLowerCase() || '';
 
       const verification = loan.verifications[0];
       if (!verification) {
@@ -1584,20 +1584,21 @@ export class LoanService {
 
 
       let htmlTemplate = '';
+      const bankName = loan.bankName;
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path);
+        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else if(addressType === 'Work') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path);
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else if(addressType === 'Business') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
-        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path);
+        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else {
         throw new NotFoundException('Invalid address type');
@@ -1837,7 +1838,7 @@ export class LoanService {
     `;
   }
 
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
 
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
@@ -1922,7 +1923,7 @@ export class LoanService {
         </table>
       </div>
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -2005,10 +2006,6 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
           <tr>
-            <th>Overall Status</th>
-            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
-          </tr>
-          <tr>
             <th>Cooperativeness</th>
             <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
           </tr>
@@ -2016,7 +2013,7 @@ export class LoanService {
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path}
+                ${path || ''}
               </ul>
             </td>
           </tr>
@@ -2034,7 +2031,7 @@ export class LoanService {
       <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
            <script>
@@ -2071,13 +2068,13 @@ export class LoanService {
       </div>
 
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
   
-  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
+  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
     
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
@@ -2132,7 +2129,7 @@ export class LoanService {
         </table>
       </div>
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -2195,10 +2192,6 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
           <tr>
-            <th>Overall Status</th>
-            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
-          </tr>
-          <tr>
             <th>Cooperativeness</th>
             <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
           </tr>
@@ -2206,7 +2199,7 @@ export class LoanService {
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path}
+                ${path || ''}
               </ul>
             </td>
           </tr>
@@ -2224,7 +2217,7 @@ export class LoanService {
       <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
            <script>
@@ -2261,13 +2254,13 @@ export class LoanService {
       </div>
 
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
 
-    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string): string {
+    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
     // Use provided remarks or default list
     const remarks = verificationData.finalObservations?.remarks 
       ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
@@ -2349,7 +2342,7 @@ export class LoanService {
       </div>
 
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -2451,7 +2444,7 @@ export class LoanService {
         </table>
       </div>
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -2460,14 +2453,10 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
           <tr>
-            <th>Overall Status</th>
-            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.overallStatus || 'POSITIVE'}</span></td>
-          </tr>
-          <tr>
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path}
+                ${path || ''}
               </ul>
             </td>
           </tr>
@@ -2485,7 +2474,7 @@ export class LoanService {
       <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
-            <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
            <script>
@@ -2522,7 +2511,7 @@ export class LoanService {
       </div>
 
       <div class="footer">
-        <span style="color: #138808;">BOI</span><span style="color: #FF9933;">-AP</span><br>
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
     `;
