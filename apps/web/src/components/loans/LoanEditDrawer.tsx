@@ -75,7 +75,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
-  const [selectedLoan, setSelectedLoan] = useState<string | null>(null);
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(selectedApplicationNumber);
   const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
   const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
   const [workDisabled, setWorkDisabled] = useState<boolean>(false);
@@ -92,7 +92,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     if (selectedApplicationNumber) {
       setSelectedLoan(selectedApplicationNumber);
     }
-  }, [selectedApplicationNumber]);
+  }, []);
 
   const fetchLoanDetails = async () => {
     if (!selectedLoan) return;
@@ -444,7 +444,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   Edit
                                 </Button>
                               ))}
-                               {verification&&(
+                               {verification&&verification?.status==="Pending"&&(
                            <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.loanId,verification?.type,verification?.fieldExecutiveId)}>
                              <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f", boxShadow:"none"}} />
                            </Popconfirm>

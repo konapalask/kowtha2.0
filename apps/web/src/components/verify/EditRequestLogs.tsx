@@ -130,6 +130,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const handleRequest = async() => {
     try {
       await postEditRequestApi({
+        loanId:parseInt(loanId),
         verificationId: verificationId,
         changes: changedData,
       });
