@@ -1,11 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Card, Typography, Row, Col, Button, message, Space } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
-import { UserContext } from "../layout/UserContextProvider";
 import { postEditRequestApi, updateEditRequestApi } from "@/services/verifier.services";
 import BasicDetailsDescription from "./Descriptions/BasicDetailsDescription";
 import AddressVerificationDescription from "./Descriptions/AddressVerificationDescription";
@@ -249,7 +248,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                 <SectionDescription
                   data={{ [sectionKey]: editSection }}
                   extra={
-                    userDetails?.role === "Admin" && (
+                    false && (
                       <Space>
                         <Button
                           danger

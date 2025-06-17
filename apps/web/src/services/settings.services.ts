@@ -29,4 +29,10 @@ export const getOfficesApi = () => {
   return axiosInstance.get<any>(`/accounts/offices`);
 };
 
+export const updateOfficeApi = (id:number, values:any) =>{
+  return axiosInstance.patch( `/accounts/offices/${id}`,values)
+}
 
+export const createOfficeApi = (values:any)=>{
+  return axiosInstance.post(`/accounts/offices`,values)
+}

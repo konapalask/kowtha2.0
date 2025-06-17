@@ -4,6 +4,7 @@ import { Form, Input, Select, Col } from 'antd';
 const AddressVerificationForm: React.FC<{form: any}> = ({form}) => {
   const yearsAtCurrentResidence = Form.useWatch('numberOfYearsAtCurrentResidence', form);
   const yearsAtCurrentCity = Form.useWatch('numberOfYearsAtCurrentCity', form);
+  const addressMismatch = Form.useWatch('addressMismatch',form)
 
   return (
     <>
@@ -49,11 +50,11 @@ const AddressVerificationForm: React.FC<{form: any}> = ({form}) => {
       </Select>
      </Form.Item>
       </Col>
-      <Col span={18}>
+      {addressMismatch==="Yes"&&<Col span={18}>
         <Form.Item name="correctedAddress" label="Corrected Address" rules={[{ required: true, message: "Please enter corrected address" }]}>
           <Input />
         </Form.Item>
-      </Col>
+      </Col>}
 
       <Col span={8}>
         <Form.Item

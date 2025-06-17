@@ -16,7 +16,7 @@ import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
-import { getOfficesApi, getOrganizationApi, Office } from "@/services/settings.services";
+import { createOfficeApi, editOfficeApi, getOfficesApi, getOrganizationApi, Office, updateOfficeApi } from "@/services/settings.services";
 
 const { TabPane } = Tabs;
 
@@ -62,16 +62,17 @@ export default function OrganizationSettings() {
   }, [form]);
 
   // Mock data for UI development
+  const fetchOffices = async () => {
+    try {
+      const result = await getOfficesApi();
+        setOffices(result?.data?.data ?? []);
+    } catch (error) {
+      console.error("Fetch offices error:", error);
+      // message.error("Failed to load branches");
+    }
+  };
   useEffect(() => {
-    const fetchOffices = async () => {
-      try {
-        const result = await getOfficesApi();
-          setOffices(result?.data?.data ?? []);
-      } catch (error) {
-        console.error("Fetch offices error:", error);
-        // message.error("Failed to load branches");
-      }
-    };
+    
     fetchOffices();
   }, []);
 
@@ -98,21 +99,14 @@ export default function OrganizationSettings() {
 
       if (editingOffice) {
         // Update existing office
-        const result = await axiosInstance.put(
-          `/accounts/offices/${editingOffice.id}`,
-          values
-        );
-          setOffices(
-            offices.map((office) =>
-              office.id === editingOffice.id ? { ...office, ...values } : office
-            )
-          );
-          message.success("Branch updated successfully");
+        await updateOfficeApi(editingOffice.id,values)
+        fetchOffices()
+        message.success("Branch updated successfully");
       } else {
         // Create new office
-        const result = await axiosInstance.post("/accounts/offices", values);
-          setOffices([...offices, result.data]);
-          message.success("Branch added successfully");
+        await createOfficeApi(values)
+        fetchOffices()
+        message.success("Branch added successfully");
       }
 
       setIsModalVisible(false);
@@ -208,6 +202,12 @@ export default function OrganizationSettings() {
                 label="Organization Name"
                 rules={[
                   { required: true, message: "Please enter organization name" },
+                  {
+                    validator: (_, value) =>
+                      value && /^\s/.test(value)
+                        ? Promise.reject(new Error("Can't start with a space"))
+                        : Promise.resolve(),
+                  },
                 ]}
                 // normalize={(value) =>
                 //   typeof value === "string"
@@ -215,10 +215,9 @@ export default function OrganizationSettings() {
                 //     : value
                 // }
               >
-                <Input  onChange={(e) => {
-      const cleaned = e.target.value.replace(/\s{2,}/g, " ");
-      form.setFieldsValue({ name: cleaned });
-    }} />
+                <Input  onBlur={(e) => {
+                  e.target.value = e.target.value.trim();
+                }} />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
@@ -275,17 +274,31 @@ export default function OrganizationSettings() {
           <Form.Item
             name="name"
             label="Branch Name"
-            rules={[{ required: true, message: "Please enter branch name" }]}
+            rules={[{ required: true, message: "Please enter branch name" },{
+              validator: (_, value) =>
+                value && /^\s/.test(value)
+                  ? Promise.reject(new Error("Can't start with a space"))
+                  : Promise.resolve(),
+            },]}
           >
-            <Input />
+            <Input  onBlur={(e) => {
+               e.target.value = e.target.value.trim();
+            }} />
           </Form.Item>
 
           <Form.Item
             name="location"
             label="Town/City"
-            rules={[{ required: true, message: "Please enter town or city" }]}
+            rules={[{ required: true, message: "Please enter town or city" },{
+              validator: (_, value) =>
+                value && /^\s/.test(value)
+                  ? Promise.reject(new Error("Can't start with a space"))
+                  : Promise.resolve(),
+            },]}
           >
-            <Input />
+            <Input  onBlur={(e) => {
+              e.target.value = e.target.value.trim(); // or just .trim() to remove both ends
+            }} />
           </Form.Item>
 
           <Form.Item

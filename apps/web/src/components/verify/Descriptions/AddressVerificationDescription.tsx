@@ -47,9 +47,9 @@ const AddressVerificationDescription: React.FC<{
             {data?.addressVerification?.addressMismatch==="Yes"&&<>
             <Descriptions.Item 
               label="Corrected Address"
-              contentStyle={getItemStyle('addressCorrectionDetails')}
+              contentStyle={getItemStyle('correctedAddress')}
             >
-              {data?.addressVerification?.addressCorrectionDetails}
+              {data?.addressVerification?.correctedAddress}
             </Descriptions.Item>
             </>}
             <Descriptions.Item 

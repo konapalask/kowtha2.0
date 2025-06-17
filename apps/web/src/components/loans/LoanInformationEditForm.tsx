@@ -115,7 +115,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               // }
             } else {
               // Update existing loan
-              result = await updateLoanApi(selectedLoan?.id, values);
+              // console.log(values)
+              const {applicationNumber,...rest} = values
+              result = await updateLoanApi(selectedLoan?.id, rest);
               message.success("Loan information updated");
             }
             console.log("passed")
