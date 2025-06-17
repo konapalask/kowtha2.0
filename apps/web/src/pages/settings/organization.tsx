@@ -16,7 +16,7 @@ import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
-import { createOfficeApi, editOfficeApi, getOfficesApi, getOrganizationApi, Office, updateOfficeApi } from "@/services/settings.services";
+import { createOfficeApi, getOfficesApi, getOrganizationApi, Office, updateOfficeApi } from "@/services/settings.services";
 
 const { TabPane } = Tabs;
 
