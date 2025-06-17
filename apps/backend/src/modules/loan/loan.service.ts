@@ -1253,6 +1253,88 @@ export class LoanService {
     }
   }
 
+  async deleteVerification(
+    loanId: number,
+    verificationType: VerificationType,
+    fieldExecutiveId: number,
+  ) {
+    try {
+      // Verify that the field executive is assigned to this verification
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+          fieldExecutiveId,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Verification deletion failed - Verification not found or not assigned', {
+          loanId,
+          verificationType,
+          fieldExecutiveId
+        });
+        throw new NotFoundException('Verification not found or not assigned to this field executive');
+      }
+
+      // Check if verification is already completed
+      if (verification.status === VerificationStatus.Completed) {
+        throw new BadRequestException('Cannot delete a completed verification');
+      }
+
+      // Delete the verification
+      const deletedVerification = await this.prisma.verification.delete({
+        where: {
+          id: verification.id,
+        },
+      });
+
+      // Check if there are any remaining verifications for this loan
+      const remainingVerifications = await this.prisma.verification.findMany({
+        where: {
+          loanId,
+        },
+      });
+
+      // If no verifications remain, update loan status to Unassigned
+      if (remainingVerifications.length === 0) {
+        await this.prisma.loan.update({
+          where: { id: loanId },
+          data: { status: LoanStatus.Unassigned },
+        });
+
+        await this.loggingService.info('All verifications deleted, loan status updated to Unassigned', {
+          loanId,
+          newStatus: LoanStatus.Unassigned
+        });
+      }
+
+      await this.loggingService.info('Verification deleted successfully', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        verificationId: verification.id
+      });
+
+      return {
+        message: 'Verification deleted successfully',
+        deletedVerification
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to delete verification', {
+        loanId,
+        verificationType,
+        fieldExecutiveId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
   async getVerificationData(loanId: number) {
     try {
       const loan = await this.prisma.loan.findUnique({
