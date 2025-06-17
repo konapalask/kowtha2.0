@@ -208,6 +208,24 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               Request Approval
             </Button>
           )}
+          {userDetails?.role==="Admin"&&(
+             <Space>
+             <Button
+               danger
+               icon={<CloseCircleOutlined />}
+               onClick={handleApprove}
+             >
+               Reject
+             </Button>
+             <Button
+               type="primary"
+               icon={<CheckCircleOutlined />}
+               onClick={handleApprove}
+             >
+               Approve
+             </Button>
+           </Space>
+          )}
         </>
       }
     >
