@@ -106,11 +106,11 @@ export default function Dashboard() {
   ) => {
     if (dates && dates[0] && dates[1]) {
       setDateRange([dates[0], dates[1]]);
-      fetchMetrics(dates[0].toDate(), dates[1].toDate());
+      fetchMetrics(dates[0], dates[1]);
     }
   };
 
-  const fetchMetrics = async (startDate?: Date | null, endDate?: Date | null) => {
+  const fetchMetrics = async (startDate?: dayjs.Dayjs | null, endDate?: dayjs.Dayjs | null) => {
     try {
       const response = await getDashboardMetrics({
         fromDate: dayjs(startDate).format("YYYY-MM-DD") || null,
@@ -157,7 +157,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchMetrics(null, null);
+    fetchMetrics(dateRange?.[0], dateRange?.[1]);
   }, []);
 
   const pendingLoansColumns = [
