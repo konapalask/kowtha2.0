@@ -17,6 +17,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
 import { createOfficeApi, getOfficesApi, getOrganizationApi, Office, updateOfficeApi } from "@/services/settings.services";
+import { getUserDetails } from "@/utils/utility";
 
 const { TabPane } = Tabs;
 
@@ -35,6 +36,8 @@ interface Organization {
 }
 
 export default function OrganizationSettings() {
+  const userDetails = getUserDetails()
+  const isAdmin = userDetails?.role==="Admin"
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -140,7 +143,7 @@ export default function OrganizationSettings() {
     }
   };
 
-  const officeColumns: ColumnsType<Office> = [
+  const officeColumns:any[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -166,24 +169,26 @@ export default function OrganizationSettings() {
       render: (value: number | undefined) => value ?? 0,
       width: 150,
     },
-    {
-      title: "Actions",
-      key: "actions",
-      align: "center",
-      render: (_: any, record: Office) => (
-        <Space>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEditOffice(record)}
-          >
-            Edit
-          </Button>
-        </Space>
-      ),
-      width: 100,
-      fixed: "right",
-    },
+    ...(isAdmin?[
+      {
+        title: "Actions",
+        key: "actions",
+        align: "center",
+        render: (_: any, record: Office) => (
+          <Space>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEditOffice(record)}
+            >
+              Edit
+            </Button>
+          </Space>
+        ),
+        width: 100,
+        fixed: "right",
+      }
+    ]:[]),
   ];
 
   return (
@@ -217,25 +222,26 @@ export default function OrganizationSettings() {
               >
                 <Input  onBlur={(e) => {
                   e.target.value = e.target.value.trim();
-                }} />
+                }}
+                readOnly={!isAdmin} />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
-                <Input.TextArea rows={4} />
+                <Input.TextArea rows={4} readOnly={!isAdmin} />
               </Form.Item>
 
-              <Form.Item>
+            {isAdmin &&  <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   Save Changes
                 </Button>
-              </Form.Item>
+              </Form.Item>}
             </Form>
           </Card>
         </TabPane>
 
         <TabPane tab="Branches" key="2">
           <Card>
-            <div style={{ marginBottom: 16 }} className="flex-end">
+            {isAdmin&&<div style={{ marginBottom: 16 }} className="flex-end">
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
@@ -247,7 +253,7 @@ export default function OrganizationSettings() {
               >
                 Add Branch
               </Button>
-            </div>
+            </div>}
 
             <Table
               columns={officeColumns}

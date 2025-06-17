@@ -258,7 +258,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           loanAmount: loanDetails.loanAmount,
                           applicantAddress: loanDetails.applicantAddress,
                           loanType: matchingLoanType?.value || loanDetails.loanType,
-                          bankName: matchingBank?.value || loanDetails.bankName,
+                          bankName: loanDetails.bankName,
                           applicantType: loanDetails.applicantType,
                         });
                       }

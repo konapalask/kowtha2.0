@@ -59,12 +59,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                     option.value.toLowerCase() ===
                     selectedLoan?.loanType?.toLowerCase()
                 )?.value || selectedLoan?.loanType,
-              bankName:
-                bankOptions.find((option) =>
-                  option.value
-                    .toLowerCase()
-                    .includes(selectedLoan?.bankName?.toLowerCase() || "")
-                )?.value || selectedLoan?.bankName,
+              bankName: selectedLoan?.bankName,
               applicantType: selectedLoan?.applicantType,
             }
         }

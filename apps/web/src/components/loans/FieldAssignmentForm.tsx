@@ -83,7 +83,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         initialValues={
           verification
             ? {
-                assignmentMethod: verification?.assignmentMethod,
+                assignmentMethod: null,
                 office: verification?.office,
                 fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
