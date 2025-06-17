@@ -115,6 +115,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/users">Users</Link>,
     },
+   ...((userDetails?.role==="Admin"||userDetails?.role==="Verifier")?[
     {
       key: "verify",
       icon: (
@@ -123,7 +124,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       ),
       label: <Link href="/verify">Verify</Link>,
-    },
+    }
+   ]:[]),
     ...(userDetails?.role === "Admin"
       ? [
           {
