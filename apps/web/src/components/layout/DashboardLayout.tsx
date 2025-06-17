@@ -92,15 +92,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // }, [screens]);
 
   const menuItems = [
-    {
-      key: "dashboard",
-      icon: (
-        <DashboardOutlined
-          style={{ fontSize: 20, color: "var(--primary-800)" }}
-        />
-      ),
-      label: <Link href="/dashboard">Dashboard</Link>,
-    },
+    ...(!(userDetails?.role==="Verifier")?[
+      {
+        key: "dashboard",
+        icon: (
+          <DashboardOutlined
+            style={{ fontSize: 20, color: "var(--primary-800)" }}
+          />
+        ),
+        label: <Link href="/dashboard">Dashboard</Link>,
+      }
+    ]:[]),
     {
       key: "loans",
       icon: (

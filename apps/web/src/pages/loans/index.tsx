@@ -159,7 +159,7 @@ export default function Loans() {
     }));
   };
 
-  const columns: ColumnsType<Loan> = [
+  const columns: any = [
     {
       title: "Application Number",
       dataIndex: "applicationNumber",
@@ -218,7 +218,7 @@ export default function Loans() {
             const pav = record?.verifications?.find((v: any) => v.type === "AddressOne");
             return pav?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
@@ -230,7 +230,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "pavStatus",
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
@@ -256,7 +256,7 @@ export default function Loans() {
             const cav = record?.verifications?.find((v: any) => v.type === "AddressTwo");
             return cav?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
@@ -268,7 +268,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "cavStatus",
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
@@ -294,7 +294,7 @@ export default function Loans() {
             const wv = record?.verifications?.find((v: any) => v.type === "Work");
             return wv?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
@@ -306,7 +306,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "wvStatus",
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
@@ -332,7 +332,7 @@ export default function Loans() {
             const business = record?.verifications?.find((v: any) => v.type === "Business");
             return business?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const business = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
@@ -344,7 +344,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "wvStatus",
-          render: (_, record: Loan) => {
+          render: (_:any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
@@ -360,25 +360,27 @@ export default function Loans() {
         },
       ],
     },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      align: "center",
-      render: (_, record) => (
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => {
-            setSelectedLoan(record.applicationNumber);
-            setIsDrawerVisible(true);
-          }}
-        >
-          Edit
-        </Button>
-      ),
-      width: 100,
-    },
+    ...(!(userDetails?.role==="Verifier")?[
+      {
+        title: "Actions",
+        key: "actions",
+        fixed: "right",
+        align: "center",
+        render: (_:any, record:any) => (
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setSelectedLoan(record.applicationNumber);
+              setIsDrawerVisible(true);
+            }}
+          >
+            Edit
+          </Button>
+        ),
+        width: 100,
+      }
+    ]:[]),
   ];
 
   return (
@@ -402,7 +404,7 @@ export default function Loans() {
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
           />
-          <Button
+         {!(userDetails?.role==="Verifier")&& <Button
             type="primary"
             icon={<PlusOutlined style={{ fontSize: 16 }} />}
             onClick={() => {
@@ -411,7 +413,7 @@ export default function Loans() {
             }}
           >
             New Loan
-          </Button>
+          </Button>}
           {/* <Button
             style={{
               color: colors.secondary.main,

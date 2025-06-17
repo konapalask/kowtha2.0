@@ -67,7 +67,7 @@ const WorkBasicDetails: React.FC<{form: any}> = ({form}) => {
         <Form.Item
           name="loanAmount"
           label="Loan Amount"
-          rules={[{ required: true, message: "Loan Amount is required" }]}
+          // rules={[{ required: true, message: "Loan Amount is required" }]}
         >
           <Input disabled />
         </Form.Item>
