@@ -116,3 +116,9 @@ export const getFieldExecutivesApi = () => {
 export const createLoanApi = (payload: any) => {
   return axiosInstance.post<any>(`/loans`, payload);
 };
+
+export const deleteFieldAssignmentApi = (loanId:number, type:string, payload:any) =>{
+  return axiosInstance.delete<any>(`/loans/${loanId}/verification/${type}`, {
+    data: payload
+  })
+}
