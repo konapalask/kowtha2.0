@@ -159,13 +159,13 @@ export default function Users() {
     }
   };
 
-  const handleDeactivateUser = () => {
+  const handleUserStatus = (status:string) => {
     // Implement the logic to deactivate the user
     console.log("Deactivating user");
-    form.setFieldsValue({ status: "Inactive" });
+    form.setFieldsValue({ status });
     handleSubmit({
       ...form.getFieldsValue(),
-      status: "Inactive",
+      status: status,
     });
   };
 
@@ -194,7 +194,7 @@ export default function Users() {
       title: "Mobile",
       dataIndex: "mobile",
       key: "mobile",
-      width: 150,
+      width: 100,
     },
     // {
     //   title: "Email",
@@ -206,20 +206,20 @@ export default function Users() {
       title: "Role",
       dataIndex: "role",
       key: "role",
-      width: 150,
+      width: 100,
     },
     {
       title: "Branch",
       dataIndex: "office",
       key: "office",
-      width: 150,
+      width: 100,
       render: (office: any) => office?.name,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 150,
+      width: 70,
       render: (status: string) => status === "Active" ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
     },
     ...(userDetails?.role === "Admin"
@@ -228,7 +228,7 @@ export default function Users() {
             title: "Actions",
             key: "actions",
             render: (_: any, record: User) => (
-              <Space>
+              // <Space>
                 <Button
                   type="link"
                   icon={<EditOutlined />}
@@ -236,10 +236,10 @@ export default function Users() {
                 >
                   Edit
                 </Button>
-              </Space>
+              // </Space>
             ),
             fixed: "right" as const,
-            width: 100,
+            width: 50,
           },
         ]
       : []),
@@ -248,14 +248,12 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
-        <div style={{ marginBottom: 16 }}>
-          <FilterOverlay 
+        {userDetails?.role === "Admin" && (
+          <div style={{ marginBottom: 16, display:"flex", justifyContent:"space-between" }}>
+             <FilterOverlay 
             filters={filters}
             onFilterChange={(newFilters: any) => setFilters(newFilters)}
           />
-        </div>
-        {userDetails?.role === "Admin" && (
-          <div className="flex-end" style={{ marginBottom: 16 }}>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -284,6 +282,7 @@ export default function Users() {
             showTotal: (total) => `Total ${total} users`,
             position: ["bottomCenter"],
           }}
+          scroll={{ x: 1500 }}
         />
       </Card>
 
@@ -370,16 +369,30 @@ export default function Users() {
           >
             <Select options={offices} placeholder="Select branch" />
           </Form.Item>
-          {editingUser && (
+          {editingUser&&editingUser.status==="Active" && (
             <Form.Item style={{ marginBottom: 8 }}>
               <Popconfirm
                 title="Are you sure you want to deactivate the user?"
-                onConfirm={handleDeactivateUser}
+                onConfirm={()=>handleUserStatus("Inactive")}
                 okText="Yes"
                 cancelText="No"
               >
                 <Button danger style={{ float: "right" }}>
                   Deactivate User
+                </Button>
+              </Popconfirm>
+            </Form.Item>
+          )}
+           {editingUser&&editingUser.status==="Inactive" && (
+            <Form.Item style={{ marginBottom: 8 }}>
+              <Popconfirm
+                title="Are you sure you want to activate the user?"
+                onConfirm={()=>handleUserStatus("Active")}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button style={{ float: "right", color:"green",borderColor:"green" }}>
+                  Activate User
                 </Button>
               </Popconfirm>
             </Form.Item>

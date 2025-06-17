@@ -126,7 +126,7 @@ export default function Loans() {
         const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
         const options =
           result?.data?.data?.map((item: any) => ({
-            label: <Typography.Text>{item.name} <Tag color="blue">{item.employeeCode}</Tag></Typography.Text>,
+            label: <Typography.Text style={{gap:20}}>{item.name} <Tag color="blue">{item.employeeCode}</Tag> <Tag color="blue">Pending:{item.pendingVerifications}</Tag></Typography.Text>,
             value: item.id,
           })) ?? [];
         setFieldExecutives(options);
@@ -384,20 +384,24 @@ export default function Loans() {
   return (
     <DashboardLayout>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        {/* <div style={{ marginBottom: 16 }}>
           <FilterOverlay 
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
           />
-        </div>
+        </div> */}
         <div
           style={{ 
             marginBottom: 16, 
             display: "flex", 
             gap: "8px", 
-            justifyContent: "flex-end" 
+            justifyContent: "space-between" 
           }}
         >
+           <FilterOverlay 
+            filters={filters}
+            onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
+          />
           <Button
             type="primary"
             icon={<PlusOutlined style={{ fontSize: 16 }} />}
@@ -408,7 +412,7 @@ export default function Loans() {
           >
             New Loan
           </Button>
-          <Button
+          {/* <Button
             style={{
               color: colors.secondary.main,
               borderColor: colors.secondary.main,
@@ -423,7 +427,7 @@ export default function Loans() {
             onClick={() => setIsImportModalVisible(true)}
           >
             CSV/Excel Import
-          </Button>
+          </Button> */}
         </div>
 
         <Table

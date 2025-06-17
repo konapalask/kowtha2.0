@@ -113,8 +113,8 @@ export default function Dashboard() {
   const fetchMetrics = async (startDate?: Date | null, endDate?: Date | null) => {
     try {
       const response = await getDashboardMetrics({
-        startDate: startDate?.toISOString() || null,
-        endDate: endDate?.toISOString() || null
+        fromDate: dayjs(startDate).format("YYYY-MM-DD") || null,
+        toDate: dayjs(endDate).format("YYYY-MM-DD") || null
       });
       setMetrics(response);
 

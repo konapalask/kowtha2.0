@@ -279,11 +279,11 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
         <Space size={[0, 8]} wrap>
           {renderActiveFilters()}
         </Space>
-        {Object.keys(selectedFilters).length > 0 && (
+        {/* {Object.keys(selectedFilters).length > 0 && (
           <Button size="small" onClick={handleClearAll}>
             Clear All
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -9,9 +9,11 @@ import {
   Checkbox,
   message,
   Form,
+  Popconfirm,
 } from "antd";
 import {
   CloseOutlined,
+  DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
@@ -153,6 +155,10 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     fetchLoans();
   };
 
+  const handleDelete = async(verificationId:number)=>{
+    message.success(`Deleted ${verificationId} Successfully`)
+  }
+
   return (
     <div>
       <Drawer
@@ -204,7 +210,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         width="90%"
         onClose={handleClose}
         open={isDrawerVisible}
-        maskClosable={false}
+        // maskClosable={false}
         destroyOnClose
       >
         {(selectedLoan || !loanDetails?.id) && (
@@ -367,7 +373,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         flexDirection: "column",
                       }}
                       headStyle={{
-                        minHeight: 40
+                        minHeight: 40,
+                        paddingLeft:10,
+                        paddingRight:0
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
@@ -386,12 +394,20 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               {verification.status}
                             </Tag>
                           )}
+                          {/* {verification&&(
+                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
+                             <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f"}} />
+                           </Popconfirm>
+                          )} */}
                         </>
                       }
                     >
                       {verification && (
                         <div style={{ marginBottom: 0 }}>
-                          <div className="flex-end">
+                          <div 
+                          // className="flex-end"
+                          style={{justifyContent:"space-between", display:"flex"}}
+                          >
                             {verification?.status === "Pending" &&
                               (fieldExecutiveEdit[type] ? (
                                 <Button
@@ -423,6 +439,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   Edit
                                 </Button>
                               ))}
+                               {verification&&(
+                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
+                             <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f", boxShadow:"none"}} />
+                           </Popconfirm>
+                          )}
                           </div>
                           <div
                             style={{
@@ -433,11 +454,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               marginBottom: 8,
                             }}
                           >
-                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"row"}}>
-                              <span>Field Executive:</span>
-                              <Tag color="blue">
+                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"column"}}>
+                              <span>Address: {verification?.applicantAddress}</span>
+                              <span>Field Executive: <Tag color="blue">
                                 Id: {verification.fieldExecutive?.employeeCode}
-                              </Tag>
+                              </Tag></span>
+                              
                             </div>                  
                           </div>
                         </div>

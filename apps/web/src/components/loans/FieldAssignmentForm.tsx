@@ -33,6 +33,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   fetchLoans,
   setRefresh,
 }) => {
+  const [form] = Form.useForm()
   const getVerificationType = (type: string) => {
     switch (type) {
       case "Address1":
@@ -66,6 +67,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       await assignExecutivesApi(loanId, finalData);
       message.success("Field executive assigned successfully");
       fetchLoans();
+      setCurrentOffice(userDetails?.officeId);
     } catch (error) {
       message.error("Failed to assign field executive");
     } finally {
@@ -76,6 +78,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   return (
     <div>
       <Form
+        form={form}
         layout="vertical"
         initialValues={
           verification
@@ -155,6 +158,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                         placeholder="Select branch"
                         onChange={(value) => {
                           setCurrentOffice(value);
+                          form.setFieldValue("fieldExecutiveId",null)
                         }}
                         options={offices}
                       />
@@ -191,23 +195,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             </Form.Item>
           )}
         </Form.Item>
-
-        {/* <Form.Item
-          name="verifierId"
-          label="Verifier"
-          rules={[
-            {
-              required: true,
-              message: "Please select a verifier",
-            },
-          ]}
-        >
-          <Select
-            placeholder="Select verifier"
-            style={{ width: "100%" }}
-            options={verifiers}
-          />
-        </Form.Item> */}
 
         <Form.Item>
           <Button
