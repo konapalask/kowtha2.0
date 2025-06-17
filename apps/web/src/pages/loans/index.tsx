@@ -456,7 +456,7 @@ export default function Loans() {
         handleImport={handleImport}
       />
 
-      <LoanEditDrawer
+     {isDrawerVisible&& <LoanEditDrawer
         selectedApplicationNumber={selectedLoan}
         // setSelectedLoan={setSelectedLoan}
         isDrawerVisible={isDrawerVisible}
@@ -473,7 +473,7 @@ export default function Loans() {
         verifiers={verifiers}
         fetchLoans={fetchLoans}
         setRefresh={setRefresh}
-      />
+      />}
 
       <BulkImportDrawer
         isBulkImportDrawerVisible={isBulkImportDrawerVisible}
