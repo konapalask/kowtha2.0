@@ -39,11 +39,9 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 const handleLogout = () => {
-  console.log("Logging out");
-  // clear();
-  // clearAllCookies();
-  // Use window.location.replace instead of href for more reliable navigation
-  // window.location.replace(`${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/logout`);
+  clear();
+  clearAllCookies();
+  window.location.replace(`${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/logout`);
 };
 
 axiosInstance.interceptors.response.use(
@@ -58,6 +56,8 @@ axiosInstance.interceptors.response.use(
     const errorStatusCode = error?.response?.status;
     const tokenInvalid = "Unauthorized";
     const accountNotFound = "UNAUTHORIZED_USER";
+
+    console.log(error)
 
     // Prevent infinite loops
     if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
@@ -74,6 +74,10 @@ axiosInstance.interceptors.response.use(
     // Triggers when user session is expired
     if (errorMessage === tokenInvalid && errorStatusCode === 401) {
       const refreshToken = getCookie(REFRESH_TOKEN);
+      if(!refreshToken){
+        console.log("whooo")
+        handleLogout()
+      }
       const mainDomainUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE_URL;
       const mainDomain = mainDomainUrl
         ? extractDomainFromUrl(mainDomainUrl)
