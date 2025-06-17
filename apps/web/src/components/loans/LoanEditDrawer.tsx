@@ -20,7 +20,7 @@ import React, { useEffect, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
-import { assignExecutivesApi, getLoansByIdApi } from "@/services/loans.services";
+import { assignExecutivesApi, deleteFieldAssignmentApi, getLoansByIdApi } from "@/services/loans.services";
 import { getUserDetails } from "@/utils/utility";
 
 interface LoanDetails {
@@ -155,8 +155,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     fetchLoans();
   };
 
-  const handleDelete = async(verificationId:number)=>{
-    message.success(`Deleted ${verificationId} Successfully`)
+  const handleDelete = async(loanId:number,type:string,fieldExecutiveId:number)=>{
+   await deleteFieldAssignmentApi(loanId, type,{fieldExecutiveId})
+    .then((response)=>{
+      message.success(response?.data?.message)
+      fetchLoanDetails()
+    })
+    .catch((error)=>console.log(`Error:${error}`))
   }
 
   return (
@@ -440,7 +445,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                 </Button>
                               ))}
                                {verification&&(
-                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
+                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.loanId,verification?.type,verification?.fieldExecutiveId)}>
                              <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f", boxShadow:"none"}} />
                            </Popconfirm>
                           )}
