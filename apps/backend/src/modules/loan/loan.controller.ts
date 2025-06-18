@@ -805,5 +805,4 @@ export class LoanController {
       data: result
     };
   }
-
 } 
