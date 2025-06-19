@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Select, Col } from 'antd';
+import { Form, Input, Select, Col, InputNumber } from 'antd';
 
 const { Option } = Select;
 
@@ -111,6 +111,15 @@ const ResidenceDetailsForm: React.FC<{form: any}> = ({form}) => {
             ))}
           </Select>
         </Form.Item>
+      </Col>
+
+      <Col span={6}>
+      <Form.Item 
+      name="houseArea"
+      label="Area of House (Approx)"
+      rules={[{ required: true, message: "Please enter Area" }]}>
+        <InputNumber style={{minWidth:100}} suffix="sq.ft" />
+      </Form.Item>
       </Col>
 
       <Col span={6}>

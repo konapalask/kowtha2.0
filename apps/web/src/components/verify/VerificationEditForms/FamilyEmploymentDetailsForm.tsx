@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Select, Col } from 'antd';
+import { Form, Input, Select, Col, InputNumber } from 'antd';
 
 const { Option } = Select;
 
@@ -14,10 +14,9 @@ const FamilyEmploymentDetailsForm: React.FC<{form: any, getMaritalStatus: any}> 
           label="Total Family Members"
           rules={[
             { required: true, message: "Please enter total family members" },
-            { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={1} style={{maxWidth: 70}} />
+          <InputNumber min={1} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
       <Col span={8}>
@@ -26,10 +25,9 @@ const FamilyEmploymentDetailsForm: React.FC<{form: any, getMaritalStatus: any}> 
           label="No. of Earning Members"
           rules={[
             { required: true, message: "Please enter number of earning members" },
-            { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={0} style={{maxWidth: 70}} />
+          <InputNumber min={0} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
       <Col span={8}>
@@ -38,10 +36,9 @@ const FamilyEmploymentDetailsForm: React.FC<{form: any, getMaritalStatus: any}> 
           label="No. of Dependents"
           rules={[
             { required: true, message: "Please enter number of dependents" },
-            { type: 'number', message: "Please enter a valid number" }
           ]}
         >
-          <Input type="number" min={0} style={{maxWidth: 70}} />
+          <InputNumber min={0} style={{maxWidth: 70}} />
         </Form.Item>
       </Col>
      { maritalStatus === 'Married' && <Col span={6}>

@@ -246,29 +246,46 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             dataSource={data?.pastEmployment?.employments || []}
             columns={[
               {
-                title: "Employer Name",
+                title: "Organization",
                 dataIndex: "employerName",
                 key: "employerName",
+                width:150
               },
               {
                 title: "Designation",
                 dataIndex: "designation",
                 key: "designation",
+                width:100
               },
               {
                 title: "From Date",
                 dataIndex: "fromDate",
                 key: "fromDate",
+                width:100
               },
               {
                 title: "To Date",
                 dataIndex: "toDate",
                 key: "toDate",
+                width:100
               },
               {
-                title: "Contact Person",
+                title: "Contact Person Name",
                 dataIndex: "contactPersonName",
                 key: "contactPersonName",
+                width:200
+              },
+              {
+                title:"Contact Person Mobile",
+                dataIndex:"contactPersonNumber",
+                key:"contactPersonNumber",
+                width:150
+              },
+              {
+                title:"Reason for Movement",
+                dataIndex:"reasonForMovement",
+                key:"reasonForMovement",
+                width:250
               },
               {
                 title: "Actions",
@@ -281,8 +298,11 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     disabled={hasEditRequest}
                   />
                 ),
+                width:80,
+                fixed:"right"
               },
             ]}
+            scroll={{x:1500}}
             pagination={false}
             locale={{ emptyText: "No past employment records added yet" }}
           />
@@ -391,7 +411,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     const updatedItems = data.uploadedItems.filter(
                       (i: any) => i.id !== item.id
                     );
-                    onEdit("photoCapture");
+                    // onEdit("photoCapture");
                   }}
                 />
                 <div

@@ -34,7 +34,7 @@ export default function Login() {
     // Prevent multiple redirects
     if (Object.keys(userDetails).length > 0 && !isNavigating) {
       setIsNavigating(true);
-      router.push("/dashboard").catch((error) => {
+      router.push(userDetails?.role==="Verifier"?"/loans":"/dashboard").catch((error) => {
         console.error('Navigation error:', error);
         setIsNavigating(false);
         message.error('Failed to navigate to dashboard');
