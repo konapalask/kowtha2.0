@@ -19,6 +19,8 @@ import Settings from '../components/Settings';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AttendanceCard from '../components/AttendanceCard';
+import {getItem} from '../helpers/utility';
+import dayjs from 'dayjs';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -79,42 +81,17 @@ const VerificationListScreen = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 10;
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const disabled = !isLoggedIn;
 
-  const opacity = useRef(new Animated.Value(1)).current;
-  // useEffect(() => {
-  //   if (status === 'pending') {
-  //     Animated.loop(
-  //       Animated.sequence([
-  //         Animated.timing(opacity, {
-  //           toValue: 0,
-  //           duration: 500,
-  //           useNativeDriver: true,
-  //         }),
-  //         Animated.timing(opacity, {
-  //           toValue: 1,
-  //           duration: 500,
-  //           useNativeDriver: true,
-  //         }),
-  //       ]),
-  //     ).start();
-  //   } else {
-  //     opacity.setValue(1);
-  //   }
-  // }, [status]);
+  // const opacity = useRef(new Animated.Value(1)).current;
 
   const fetchData = async (page = 1, shouldAppend = false) => {
     try {
       setLoading(true);
       const response = await getFieldData(page, selectedFilter);
       const allData = response?.data?.data || [];
-      // console.log(allData);
-
-      // Handle pagination on frontend
-      // const startIndex = (page - 1) * PAGE_SIZE;
-      // const endIndex = startIndex + PAGE_SIZE;
-      // const paginatedData = allData.slice(startIndex, endIndex);
       const totalPages = allData?.meta?.totalPages;
 
       setData(prevData =>
@@ -135,19 +112,35 @@ const VerificationListScreen = () => {
     }
   };
 
-  // Call fetchData on initial mount
   useEffect(() => {
     fetchData(1, false);
   }, []);
 
-  // Call fetchData when screen comes into focus
+  const checkAttendance = async () => {
+    try {
+      const details = await getItem('attendance');
+      const currentTime = dayjs();
+      const isToday = details?.date === currentTime.format('YYYY-MM-DD');
+
+      const start = currentTime.clone().hour(7).minute(0).second(0);
+      const end = currentTime.clone().hour(11).minute(0).second(0);
+
+      if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
+        console.log('in bounds');
+        setIsLoggedIn(isToday);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       fetchData(1, false);
+      checkAttendance();
     }, []),
   );
 
-  // Call fetchData when filter changes
   useEffect(() => {
     fetchData(1, false);
   }, [selectedFilter]);
@@ -317,6 +310,7 @@ const VerificationListScreen = () => {
 
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
+      disabled={disabled}
       style={styles.card}
       onPress={() => {
         if (item?.status === 'Pending') {
@@ -417,30 +411,25 @@ const VerificationListScreen = () => {
     </TouchableOpacity>
   );
 
-  const handleCloseAttendanceModal = () => {
-    setShowAttendanceModal(false);
-    // Use the same toast as AttendanceCard's red cross
-    if (typeof Toast !== 'undefined') {
-      Toast.show({
-        type: 'error',
-        text1: 'Login Cancelled',
-        text2: 'You cancelled the login.',
-        position: 'bottom',
-      });
-    }
-  };
+  // const handleCloseAttendanceModal = () => {
+  //   setShowAttendanceModal(false);
+  // };
 
   return (
     <View style={styles.container}>
-      {/* Attendance Modal Overlay */}
-      {showAttendanceModal && (
+      {showAttendanceModal && !isLoggedIn && (
         <View style={styles.attendanceModalOverlay}>
-          <Pressable style={styles.attendanceModalBackground} onPress={handleCloseAttendanceModal} />
+          {/* <Pressable
+            style={styles.attendanceModalBackground}
+            onPress={handleCloseAttendanceModal}
+          /> */}
           <View style={styles.attendanceModalContent}>
-            <AttendanceCard />
-            <TouchableOpacity onPress={handleCloseAttendanceModal} style={styles.closeAttendanceModalBtn}>
+            <AttendanceCard setVisible={setShowAttendanceModal} />
+            {/* <TouchableOpacity
+              onPress={handleCloseAttendanceModal}
+              style={styles.closeAttendanceModalBtn}>
               <Icon name="close" size={28} color="#666" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       )}
@@ -714,14 +703,14 @@ const styles = StyleSheet.create({
   },
   attendanceModalOverlay: {
     position: 'absolute',
-    top: 0,
+    top: 10,
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 9999,
+    zIndex: 10,
   },
   attendanceModalBackground: {
     position: 'absolute',
@@ -731,12 +720,13 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   attendanceModalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e6ecf5',
     borderRadius: 12,
-    padding: 24,
+    // padding: 10,
     alignItems: 'center',
     minWidth: 280,
     elevation: 10,
+    height: 120,
   },
   closeAttendanceModalBtn: {
     position: 'absolute',

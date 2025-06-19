@@ -35,7 +35,7 @@ const validationSchema = yup.object().shape({
   bankName: yup.string().required('Bank Name is required'),
   prospectNumber: yup.string().required('Prospect Number is required'),
   purposeOfLoan: yup.string().required('Purpose of Loan is required'),
-  loanAmount: yup.string().required('Loan Amount is required'),
+  // loanAmount: yup.string().required('Loan Amount is required'),
   tenure: yup.string().required('Tenure is required'),
   // panNumber: yup
   //   .string()
