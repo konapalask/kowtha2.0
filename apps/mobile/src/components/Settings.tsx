@@ -12,6 +12,8 @@ import {clearAll, clearItem} from '../helpers/utility';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
+import AttendanceCard from './AttendanceCard';
 
 type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -21,12 +23,13 @@ type SettingsListScreenNavigationProp = NativeStackNavigationProp<
 const Settings = () => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
   const [visible, setVisible] = useState(false);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
 
   const toggleMenu = () => setVisible(!visible);
 
   const handleProfilePress = () => {
-    // Handle profile navigation here
     setVisible(false);
+    setTimeout(() => setProfileModalVisible(true), 200); // slight delay for smoothness
   };
 
   const handleLogout = () => {
@@ -37,6 +40,24 @@ const Settings = () => {
       routes: [{name: 'Login'}],
     });
     setVisible(false);
+  };
+
+  const handleLoginTick = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Login Successful',
+      text2: 'You have logged in for the day!',
+      position: 'bottom',
+    });
+  };
+
+  const handleLoginCross = () => {
+    Toast.show({
+      type: 'error',
+      text1: 'Login Cancelled',
+      text2: 'You cancelled the login.',
+      position: 'bottom',
+    });
   };
 
   return (
@@ -67,6 +88,27 @@ const Settings = () => {
           </Pressable>
         </Modal>
       </View>
+
+      <Modal
+        visible={profileModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setProfileModalVisible(false)}
+      >
+        <Pressable style={styles.profileModalOverlay} onPress={() => setProfileModalVisible(false)}>
+          <Pressable style={styles.profileModalContent} onPress={e => e.stopPropagation()}>
+            {/* Top Card: Profile Info */}
+            <View style={styles.profileCard}>
+              <Text style={styles.profileTitle}>Profile</Text>
+              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Name:</Text><Text style={styles.profileFieldValue}>John Doe</Text></View>
+              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Employee Code:</Text><Text style={styles.profileFieldValue}>EMP12345</Text></View>
+              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Role:</Text><Text style={styles.profileFieldValue}>Field Executive</Text></View>
+            </View>
+            {/* Bottom Card: Login for the day */}
+            <AttendanceCard />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
@@ -110,6 +152,50 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 16,
     color: '#000',
+  },
+  profileModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  profileCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+  },
+  profileTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  profileFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  profileFieldLabel: {
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  profileFieldValue: {
+    flex: 1,
   },
 });
 

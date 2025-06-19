@@ -9,6 +9,7 @@ import {
   TextInput,
   Animated,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -17,6 +18,7 @@ import {getFieldData} from '../services/field.services';
 import Settings from '../components/Settings';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AttendanceCard from '../components/AttendanceCard';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -78,6 +80,7 @@ const VerificationListScreen = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const PAGE_SIZE = 10;
+  const [showAttendanceModal, setShowAttendanceModal] = useState(true);
 
   const opacity = useRef(new Animated.Value(1)).current;
   // useEffect(() => {
@@ -414,8 +417,33 @@ const VerificationListScreen = () => {
     </TouchableOpacity>
   );
 
+  const handleCloseAttendanceModal = () => {
+    setShowAttendanceModal(false);
+    // Use the same toast as AttendanceCard's red cross
+    if (typeof Toast !== 'undefined') {
+      Toast.show({
+        type: 'error',
+        text1: 'Login Cancelled',
+        text2: 'You cancelled the login.',
+        position: 'bottom',
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Attendance Modal Overlay */}
+      {showAttendanceModal && (
+        <View style={styles.attendanceModalOverlay}>
+          <Pressable style={styles.attendanceModalBackground} onPress={handleCloseAttendanceModal} />
+          <View style={styles.attendanceModalContent}>
+            <AttendanceCard />
+            <TouchableOpacity onPress={handleCloseAttendanceModal} style={styles.closeAttendanceModalBtn}>
+              <Icon name="close" size={28} color="#666" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Verification List</Text>
         <View
@@ -683,6 +711,39 @@ const styles = StyleSheet.create({
   loadingFooter: {
     paddingVertical: 16,
     alignItems: 'center',
+  },
+  attendanceModalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  attendanceModalBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  attendanceModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    minWidth: 280,
+    elevation: 10,
+  },
+  closeAttendanceModalBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    padding: 8,
+    zIndex: 10,
   },
 });
 
