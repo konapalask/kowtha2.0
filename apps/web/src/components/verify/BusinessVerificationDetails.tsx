@@ -206,7 +206,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
                     const updatedItems = data.uploadedItems.filter(
                       (i: any) => i.id !== item.id
                     );
-                    onEdit("photoCapture");
+                    // onEdit("photoCapture");
                   }}
                 />
                 <div

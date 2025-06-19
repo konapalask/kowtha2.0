@@ -6,6 +6,7 @@ const { Title } = Typography;
 const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
   const employerType = Form.useWatch('employerType', form);
   const salaryMode = Form.useWatch('salaryMode', form);
+  // const 
 
   return (
     <>
@@ -32,16 +33,12 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={8}>
-        <Form.Item
-          name="officeLocality"
-          label="Locality of Office Premises"
-          rules={[{ required: true, message: "Please select office locality" }]}
+      <Form.Item
+          name="yearsInCurrentJob"
+          label="Years in Current Job"
+          rules={[{ required: true, message: "Please enter years in current job" }]}
         >
-          <Select>
-            <Select.Option value="Residential">Residential</Select.Option>
-            <Select.Option value="Commercial">Commercial</Select.Option>
-            <Select.Option value="Industry">Industry</Select.Option>
-          </Select>
+          <Input type="number" min={0} />
         </Form.Item>
       </Col>
 
@@ -50,46 +47,7 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         <Title level={5} style={{ marginTop: 16 }}>Employment Details</Title>
       </Col> */}
       <Col span={8}>
-        <Form.Item
-          name="employerType"
-          label="Type of Employer"
-          rules={[{ required: true, message: "Please select employer type" }]}
-        >
-          <Select>
-            <Select.Option value="Government">Government</Select.Option>
-            <Select.Option value="Private">Private</Select.Option>
-          </Select>
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
-          name="designation"
-          label="Designation"
-          rules={[{ required: true, message: "Please enter designation" }]}
-        >
-          <Input />
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
-          name="idCardNumber"
-          label="ID Card Number"
-          rules={[{ required: true, message: "Please enter ID card number" }]}
-        >
-          <Input />
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
-          name="yearsInCurrentJob"
-          label="Years in Current Job"
-          rules={[{ required: true, message: "Please enter years in current job" }]}
-        >
-          <Input type="number" min={0} />
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
+      <Form.Item
           name="totalWorkExperience"
           label="Total Work Experience"
           rules={[{ required: true, message: "Please enter total work experience" }]}
@@ -98,7 +56,7 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={8}>
-        <Form.Item
+      <Form.Item
           name="companySize"
           label="Company Size"
           rules={[{ required: true, message: "Please enter company size" }]}
@@ -112,14 +70,51 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
           label="Nature of Service/Business"
           rules={[{ required: true, message: "Please enter nature of service" }]}
         >
+           <Select>
+            <Select.Option value="Agricultural">Agricultural</Select.Option>
+            <Select.Option value="Construction">Construction</Select.Option>
+            <Select.Option value="Education">Education</Select.Option>
+            <Select.Option value="FMCG">FMCG</Select.Option>
+            <Select.Option value="Health Care">Health Care</Select.Option>
+            <Select.Option value="Manufacturing">Manufacturing</Select.Option>
+            <Select.Option value="Services">Services</Select.Option>
+            <Select.Option value="Travel & Tourism & Hotel">Travel & Tourism & Hotel</Select.Option>
+            <Select.Option value="Travel & Tourism & Hotel">Travel & Tourism & Hotel</Select.Option>
+            <Select.Option value="Others">Others</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+      <Form.Item
+          name="officeLocality"
+          label="Locality of Office Premises"
+          rules={[{ required: true, message: "Please select office locality" }]}
+        >
+          <Select>
+            <Select.Option value="Residential">Residential</Select.Option>
+            <Select.Option value="Commercial">Commercial</Select.Option>
+            <Select.Option value="Industry">Industry</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="idCardNumber"
+          label="ID Card Number"
+          rules={[{ required: true, message: "Please enter ID card number" }]}
+        >
           <Input />
         </Form.Item>
       </Col>
-
-      {/* Salary Details */}
-      {/* <Col span={24}>
-        <Title level={5} style={{ marginTop: 16 }}>Salary Details</Title>
-      </Col> */}
+      <Col span={8}>
+      <Form.Item
+          name="designation"
+          label="Designation"
+          rules={[{ required: true, message: "Please enter designation" }]}
+        >
+          <Input />
+        </Form.Item>
+      </Col>
       <Col span={8}>
         <Form.Item
           name="salaryMode"
@@ -132,6 +127,29 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
           </Select>
         </Form.Item>
       </Col>
+      <Col span={8}>
+      <Form.Item
+          name="employerType"
+          label="Type of Employer"
+          rules={[{ required: true, message: "Please select employer type" }]}
+        >
+          <Select>
+            <Select.Option value="Government/PSU">Government/PSU</Select.Option>
+            <Select.Option value="Unlisted Pvt. Ltd">Unlisted Pvt. Ltd</Select.Option>
+            <Select.Option value="MNC/Listed Pvt. Ltd">MNC/Listed Pvt. Ltd</Select.Option>
+            <Select.Option value="Proprietorship/Partnership/NGO/Trust">Proprietorship/Partnership/NGO/Trust</Select.Option>
+            <Select.Option value="Others">Others</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+     
+    
+
+      {/* Salary Details */}
+      {/* <Col span={24}>
+        <Title level={5} style={{ marginTop: 16 }}>Salary Details</Title>
+      </Col> */}
+      
       <Col span={8}>
         <Form.Item
           name="grossSalary"

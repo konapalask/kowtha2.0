@@ -61,7 +61,6 @@ export default function LoanVerifyDetails() {
       });
   };
 
-
   const fetchEditRequests = async () => {
     getEditRequestsApi("Pending", id as string)
       .then((res) => {

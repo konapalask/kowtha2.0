@@ -28,7 +28,6 @@ export const FormSelector: React.FC<FormSelectorProps> = ({form, formKey, curren
       return <ResidenceDetailsForm form={form} />;
     case 'familyEmploymentDetails':
       return <FamilyEmploymentDetailsForm form={form} getMaritalStatus={getMaritalStatus} />;
-   
     case 'thirdPartyCheck':
       return <ThirdPartyCheckForm form={form} />;
     // case 'finalObservations':

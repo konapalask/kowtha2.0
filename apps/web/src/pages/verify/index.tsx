@@ -74,6 +74,7 @@ export default function Verify() {
       </Space>
     );
   };
+  
   const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",

@@ -237,7 +237,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                     }}
                     preview={false}
                   />
-                  <Button
+                  {/* <Button
                     type="text"
                     danger
                     icon={<CloseCircleOutlined />}
@@ -255,9 +255,9 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       const updatedItems = data.uploadedItems.filter(
                         (i: any) => i.id !== item.id
                       );
-                      onEdit("photoCapture");
+                      // onEdit("photoCapture");
                     }}
-                  />
+                  /> */}
                   <div
                     style={{
                       position: "absolute",
@@ -270,8 +270,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       fontSize: "12px",
                     }}
                   >
-                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)}{" "}
-                    Photo {idx + 1}
+                    Photo {idx + 1} {item?.isCamera?null:"(Gallery)"}
                   </div>
                 </div>
               );

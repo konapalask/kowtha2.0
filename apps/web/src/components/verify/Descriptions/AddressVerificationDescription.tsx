@@ -59,7 +59,7 @@ const AddressVerificationDescription: React.FC<{
               {data?.addressVerification?.numberOfYearsAtCurrentResidence}
             </Descriptions.Item>
             {data?.addressVerification?.numberOfYearsAtCurrentResidence ===
-              "<=1year" && (
+              "<=2years" && (
               <>
                 <Descriptions.Item 
                   label="Previous Address"
