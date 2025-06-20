@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
@@ -19,6 +19,7 @@ import { NotFoundException } from '@nestjs/common';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { DeleteVerificationDto } from './dto/delete-verification.dto';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -746,5 +747,62 @@ export class LoanController {
     };
   }
 
-
+  @Delete(':id/verification/:type')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Delete verification assigned to a field executive' })
+  @ApiBody({
+    type: DeleteVerificationDto,
+    description: 'Field executive ID to identify the verification to delete'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'The verification has been successfully deleted',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification deleted successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' },
+            deletedVerification: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                loanId: { type: 'number' },
+                type: { type: 'string', enum: Object.values(VerificationType) },
+                fieldExecutiveId: { type: 'number' },
+                status: { type: 'string', enum: Object.values(VerificationStatus) }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Cannot delete a completed verification' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Verification not found or not assigned to this field executive' 
+  })
+  async deleteVerification(
+    @Param('id') loanId: string,
+    @Param('type') verificationType: VerificationType,
+    @Body() deleteVerificationDto: DeleteVerificationDto,
+  ) {
+    const result = await this.loanService.deleteVerification(
+      Number(loanId),
+      verificationType,
+      deleteVerificationDto.fieldExecutiveId,
+    );
+    return {
+      status: 200,
+      message: 'Verification deleted successfully',
+      data: result
+    };
+  }
 } 
