@@ -24,7 +24,8 @@ import KowthaDarkIcon from '../assets/Images/KowthaDarkIcon.png';
 import Toast from 'react-native-toast-message';
 import loginBackground from '../assets/Images/loginBackground.jpg';
 import DeviceInfo from 'react-native-device-info';
-import {get} from 'http';
+import {getUserDetailsApi} from '../services/user.services';
+// import {get} from 'http';
 // import {REACT_APP_BASE_URL} from '@env';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -96,6 +97,13 @@ const LoginScreen = () => {
           routes: [{name: 'VerificationList'}],
         }),
       );
+      try {
+        const userDetails = await getUserDetailsApi();
+        // console.log(userDetails);
+        await setItem('userDetails', userDetails?.data);
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error: any) {
       Alert.alert(
         'Error',

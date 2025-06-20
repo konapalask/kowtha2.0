@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,56 +8,72 @@ import {
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {clearAll, clearItem} from '../helpers/utility';
+import {clearAll, clearItem, getItem} from '../helpers/utility';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import AttendanceCard from './AttendanceCard';
+import dayjs from 'dayjs';
 
 type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'VerificationList'
 >;
 
+const fetchUserDetails = async () => {
+  return await getItem('userDetails');
+};
+
 const Settings = () => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
   const [visible, setVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  // const userDetails: any = fetchUserDetails();
+  // console.log(userDetails);
+  const [userDetails, setUserDetails] = useState<any>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const details = await getItem('userDetails');
+        setUserDetails(details);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    // const checkAttendance = async () => {
+    //   try {
+    //     const details = await getItem('attendance');
+    //     const isLoggedIn = details?.date === dayjs().format('YYYY-MM-DD');
+    //     setIsLoggedIn(isLoggedIn);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+
+    fetchUserDetails();
+    // checkAttendance();
+  }, []);
 
   const toggleMenu = () => setVisible(!visible);
 
   const handleProfilePress = () => {
     setVisible(false);
-    setTimeout(() => setProfileModalVisible(true), 200); // slight delay for smoothness
+    setTimeout(() => setProfileModalVisible(true), 200);
   };
 
   const handleLogout = () => {
     clearItem('accessToken');
     clearItem('refreshToken');
+    clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],
     });
     setVisible(false);
-  };
-
-  const handleLoginTick = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Login Successful',
-      text2: 'You have logged in for the day!',
-      position: 'bottom',
-    });
-  };
-
-  const handleLoginCross = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Login Cancelled',
-      text2: 'You cancelled the login.',
-      position: 'bottom',
-    });
   };
 
   return (
@@ -93,19 +109,37 @@ const Settings = () => {
         visible={profileModalVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setProfileModalVisible(false)}
-      >
-        <Pressable style={styles.profileModalOverlay} onPress={() => setProfileModalVisible(false)}>
-          <Pressable style={styles.profileModalContent} onPress={e => e.stopPropagation()}>
+        onRequestClose={() => setProfileModalVisible(false)}>
+        <Pressable
+          style={styles.profileModalOverlay}
+          onPress={() => setProfileModalVisible(false)}>
+          <Pressable
+            style={styles.profileModalContent}
+            onPress={e => e.stopPropagation()}>
             {/* Top Card: Profile Info */}
             <View style={styles.profileCard}>
               <Text style={styles.profileTitle}>Profile</Text>
-              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Name:</Text><Text style={styles.profileFieldValue}>John Doe</Text></View>
-              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Employee Code:</Text><Text style={styles.profileFieldValue}>EMP12345</Text></View>
-              <View style={styles.profileFieldRow}><Text style={styles.profileFieldLabel}>Role:</Text><Text style={styles.profileFieldValue}>Field Executive</Text></View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Name:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.name}
+                </Text>
+              </View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Employee Code:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.employeeCode}
+                </Text>
+              </View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Role:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.role}
+                </Text>
+              </View>
             </View>
-            {/* Bottom Card: Login for the day */}
-            <AttendanceCard />
+            <AttendanceCard setVisible={setVisible} />
+            {/* {!isLoggedIn && <AttendanceCard setVisible={setVisible} />} */}
           </Pressable>
         </Pressable>
       </Modal>
@@ -175,9 +209,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   profileCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e6ecf5',
+    // backgroundColor: '#e6ecf5',
     borderRadius: 10,
-    padding: 20,
+    padding: 10,
     marginBottom: 20,
   },
   profileTitle: {
