@@ -1,30 +1,31 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Tag, Space, Typography, Input, Dropdown, DatePicker } from "antd";
+import { Card, Row, Col, Statistic, Typography, DatePicker } from "antd";
 import {
   FileOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
-  CalendarOutlined,
+  // CalendarOutlined,
 } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
 // import api from "@/utils/axios";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  CartesianGrid,
-  PieChart,
-  Pie,
-  Cell
-} from "recharts";
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   Legend,
+//   CartesianGrid,
+//   PieChart,
+//   Pie,
+//   Cell
+// } from "recharts";
 import { getDashboardMetrics } from "@/services/dashboard.services";
 import dayjs from 'dayjs';
 import dynamic from "next/dynamic";
+import Attendance from "@/components/attendance/Attendance";
 
 interface DashboardMetrics {
   totalLoans: number|null|undefined;
@@ -40,44 +41,6 @@ interface DashboardMetrics {
 
 const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
 
-// Add this dummy data at the top of the file, after imports
-const DUMMY_EMPLOYEE_STATS = [
-  { name: "John Doe", completed: 12 },
-  { name: "Jane Smith", completed: 8 },
-  { name: "Amit Singh", completed: 5 },
-  { name: "Rajesh Kumar", completed: 10 },
-];
-
-const DUMMY_RECENT_LOANS = [
-  {
-    id: 1,
-    applicationNumber: "LVS-2024-001",
-    applicantName: "Rajesh Kumar",
-    status: "Pending",
-    createdAt: "2024-03-15T10:30:00",
-    amount: 500000,
-    type: "Home Loan",
-  },
-  {
-    id: 2,
-    applicationNumber: "LVS-2024-002",
-    applicantName: "Priya Sharma",
-    status: "Verified",
-    createdAt: "2024-03-14T15:45:00",
-    amount: 300000,
-    type: "Personal Loan",
-  },
-  {
-    id: 3,
-    applicationNumber: "LVS-2024-003",
-    applicantName: "Mohammed Ali",
-    status: "Rejected",
-    createdAt: "2024-03-13T09:15:00",
-    amount: 750000,
-    type: "Business Loan",
-  },
-];
-
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalLoans: 0,
@@ -91,12 +54,12 @@ export default function Dashboard() {
     },
   });
 
-  const [pendingLoans, setPendingLoans] = useState<any[]>([]);
-  const [processingStats, setProcessingStats] = useState<any[]>([]);
-  const [employeeStats, setEmployeeStats] = useState<any[]>([]);
+  // const [pendingLoans, setPendingLoans] = useState<any[]>([]);
+  // const [processingStats, setProcessingStats] = useState<any[]>([]);
+  // const [employeeStats, setEmployeeStats] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
     const endDate = dayjs();
-    const startDate = dayjs().subtract(6, 'month');
+    const startDate = dayjs().startOf('month');
     return [startDate, endDate];
   });
 
@@ -133,26 +96,16 @@ export default function Dashboard() {
 
       // Use dummy data for processing stats
       // console.log(response)
-      setProcessingStats([
-        { status: "Pending", count: response.percentages.pending },
-        { status: "Verified", count: response.percentages.verified },
-        { status: "Rejected", count: response.percentages.rejected },
-      ]);
+      // setProcessingStats([
+      //   { status: "Pending", count: response.percentages.pending },
+      //   { status: "Verified", count: response.percentages.verified },
+      //   { status: "Rejected", count: response.percentages.rejected },
+      // ]);
 
       // Use dummy data for employee stats
-      setEmployeeStats(response?.employeeStats||[]);
+      // setEmployeeStats(response?.employeeStats||[]);
     } catch (error) {
       console.error("Failed to fetch metrics:", error);
-      // Fallback to dummy data if API fails
-      setPendingLoans(
-        DUMMY_RECENT_LOANS.filter((l) => l.status === "Pending")
-      );
-      // setProcessingStats([
-      //   { status: "Pending", count: 6 },
-      //   { status: "Verified", count: 16 },
-      //   { status: "Rejected", count: 3 },
-      // ]);
-      setEmployeeStats(DUMMY_EMPLOYEE_STATS);
     }
   };
 
@@ -160,59 +113,59 @@ export default function Dashboard() {
     fetchMetrics(dateRange?.[0], dateRange?.[1]);
   }, []);
 
-  const pendingLoansColumns = [
-    {
-      title: "Application Number",
-      dataIndex: "applicationNumber",
-      key: "applicationNumber",
-      width: 150,
-    },
-    {
-      title: "Applicant Name",
-      dataIndex: "applicantName",
-      key: "applicantName",
-      width: 150,
-    },
-    {
-      title: "Loan Type",
-      dataIndex: "type",
-      key: "type",
-      width: 150,
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount: number) => `₹${amount.toLocaleString()}`,
-      width: 150,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <Tag
-          color={
-            status === "Pending"
-              ? "orange"
-              : status === "Verified"
-              ? "green"
-              : "red"
-          }
-        >
-          {status}
-        </Tag>
-      ),
-      width: 150,
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-      width: 150,
-    },
-  ];
+  // const pendingLoansColumns = [
+  //   {
+  //     title: "Application Number",
+  //     dataIndex: "applicationNumber",
+  //     key: "applicationNumber",
+  //     width: 150,
+  //   },
+  //   {
+  //     title: "Applicant Name",
+  //     dataIndex: "applicantName",
+  //     key: "applicantName",
+  //     width: 150,
+  //   },
+  //   {
+  //     title: "Loan Type",
+  //     dataIndex: "type",
+  //     key: "type",
+  //     width: 150,
+  //   },
+  //   {
+  //     title: "Amount",
+  //     dataIndex: "amount",
+  //     key: "amount",
+  //     render: (amount: number) => `₹${amount.toLocaleString()}`,
+  //     width: 150,
+  //   },
+  //   {
+  //     title: "Status",
+  //     dataIndex: "status",
+  //     key: "status",
+  //     render: (status: string) => (
+  //       <Tag
+  //         color={
+  //           status === "Pending"
+  //             ? "orange"
+  //             : status === "Verified"
+  //             ? "green"
+  //             : "red"
+  //         }
+  //       >
+  //         {status}
+  //       </Tag>
+  //     ),
+  //     width: 150,
+  //   },
+  //   {
+  //     title: "Created At",
+  //     dataIndex: "createdAt",
+  //     key: "createdAt",
+  //     render: (date: string) => new Date(date).toLocaleDateString(),
+  //     width: 150,
+  //   },
+  // ];
 
   return (
     <DashboardLayout>
@@ -440,19 +393,8 @@ export default function Dashboard() {
           </Card>
         </Col>
       </Row>
-{/* 
-      <Card title="Loans Pending Since Longest" style={{ marginTop: 16 }}>
-        <Table
-          columns={pendingLoansColumns}
-          dataSource={pendingLoans}
-          rowKey="id"
-          pagination={false}
-          size="small"
-          scroll={{ y: 200 }}
-        />
-      </Card> */}
 
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+      {/* <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col md={24} lg={12}>
           <Card title="Loan Applications Being Processed">
             <ResponsiveContainer width="100%" height={300}>
@@ -490,14 +432,15 @@ export default function Dashboard() {
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="completed" name="Completed" fill="#4CAF50" />
-                {/* <Bar dataKey="pending" name="Pending" fill="#FFC107" />
+                 <Bar dataKey="pending" name="Pending" fill="#FFC107" />
                 <Bar dataKey="verified" name="Verified" fill="#2196F3" />
-                <Bar dataKey="rejected" name="Rejected" fill="#F44336" /> */}
+                <Bar dataKey="rejected" name="Rejected" fill="#F44336" /> 
               </BarChart>
             </ResponsiveContainer>
           </Card>
         </Col>
-      </Row>
+      </Row> */}
+      <Attendance dateRange={dateRange} />
     </DashboardLayout>
   );
 }
