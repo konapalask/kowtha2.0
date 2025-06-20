@@ -328,3 +328,19 @@ body {
   /* animation: badge-pulse 1.6s infinite; */
   box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4); 
 }
+
+/* .striped-row {
+  background-color: #ee3434; 
+} */
+
+.striped-table .ant-table-tbody > tr:nth-child(odd) > td {
+  background-color: #f6fafc;
+}
+
+/* .striped-table thead {
+  background-color: #f1f1f1;
+} */
+
+/* .striped-table .ant-table-tbody > tr:hover {
+  background-color: #e6f7ff;
+} */

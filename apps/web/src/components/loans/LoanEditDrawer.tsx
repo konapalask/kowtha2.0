@@ -483,6 +483,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           verifiers={verifiers}
                           fetchLoans={fetchLoanDetails}
                           setRefresh={setRefresh}
+                          setFieldExecutiveEdit={setFieldExecutiveEdit}
                         />
                       )}
                     </Card>

@@ -254,7 +254,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Dropdown
               overlay={menu}
               placement="bottomRight"
-              trigger={["click", "hover"]}
+              trigger={["click"]}
             >
               <Avatar
                 style={{

@@ -182,6 +182,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.colleagueReferences?.references || []}
             columns={[
               {
@@ -224,6 +225,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
+            bordered
           />
         </Card>
       </section>
@@ -243,6 +245,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.pastEmployment?.employments || []}
             columns={[
               {
@@ -305,6 +308,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             scroll={{x:1500}}
             pagination={false}
             locale={{ emptyText: "No past employment records added yet" }}
+            bordered
           />
         </Card>
       </section>
@@ -324,6 +328,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.existingLoans?.loans || []}
             columns={[
               {
@@ -366,6 +371,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             ]}
             pagination={false}
             locale={{ emptyText: "No existing loans added yet" }}
+            bordered
           />
         </Card>
       </section>

@@ -219,8 +219,9 @@ export default function Users() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 70,
+      width: 50,
       render: (status: string) => status === "Active" ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+      ...(userDetails?.role!=="Admin"&&{fixed:"right"})
     },
     ...(userDetails?.role === "Admin"
       ? [
@@ -269,6 +270,7 @@ export default function Users() {
         )}
 
         <Table
+          className="striped-table"
           columns={columns}
           dataSource={users}
           rowKey="id"
@@ -283,6 +285,7 @@ export default function Users() {
             position: ["bottomCenter"],
           }}
           scroll={{ x: 1500 }}
+          bordered
         />
       </Card>
 
