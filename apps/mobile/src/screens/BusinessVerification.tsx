@@ -13,11 +13,15 @@ import BusinessBasicDetails from '../components/forms/BusinessBasicDetails';
 import BusinessDetails from '../components/forms/BusinessDetails';
 import BusinessMiscellaneous from '../components/forms/BusinessMiscellaneous';
 import PhotoCapture from '../components/forms/PhotoCapture';
+import ThirdPartyCheck, {
+  ThirdPartyCheckFormData,
+} from '../components/forms/ThirdPartyCheck';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {getItem, setItem, clearItem} from '../helpers/utility';
+import {BusinessDetailsFormData} from '../components/forms/BusinessDetails';
 
 interface BusinessVerificationFormData {
   basicDetails: {
@@ -29,18 +33,7 @@ interface BusinessVerificationFormData {
     isAddressSame: string;
     addressCorrection?: string;
   };
-  businessDetails: {
-    nameBoardSeen: string;
-    nameBoardMatched: string;
-    constitution: string;
-    constitutionOther?: string;
-    keyManager: string;
-    keyManagerRelation: string;
-    businessStartYear: string;
-    totalExperience: string;
-    isAddressTraceable: string;
-    geoTag: string;
-  };
+  businessDetails: BusinessDetailsFormData;
   miscellaneous: {
     ownershipOfPremises: string;
     rentalAmount?: string;
@@ -54,6 +47,7 @@ interface BusinessVerificationFormData {
     businessActivity: string;
     businessActivityOther?: string;
   };
+  // thirdPartyCheck: ThirdPartyCheckFormData;
   uploadedItems: UploadedItem[];
 }
 
@@ -70,6 +64,7 @@ const BusinessVerification = () => {
     basicDetails: true,
     businessDetails: false,
     miscellaneous: false,
+    // thirdPartyCheck: false,
     photoCapture: false,
   });
 
@@ -79,6 +74,7 @@ const BusinessVerification = () => {
     basicDetails: false,
     businessDetails: false,
     miscellaneous: false,
+    // thirdPartyCheck: false,
     photoCapture: false,
   });
 
@@ -117,6 +113,9 @@ const BusinessVerification = () => {
       businessActivity: '',
       businessActivityOther: '',
     },
+    // thirdPartyCheck: {
+    //   checks: [{tpcName: '', mobileNumber: '', relationship: '', comments: ''}],
+    // },
     uploadedItems: [],
   });
 
@@ -142,6 +141,11 @@ const BusinessVerification = () => {
               ...formData.miscellaneous,
               ...savedData.miscellaneous,
             },
+            // thirdPartyCheck: savedData.thirdPartyCheck || {
+            //   checks: [
+            //     {tpcName: '', mobileNumber: '', relationship: '', comments: ''},
+            //   ],
+            // },
             uploadedItems: savedData.uploadedItems || [],
           };
           setFormData(completeFormData);
@@ -149,6 +153,7 @@ const BusinessVerification = () => {
             basicDetails: !!savedData.basicDetails,
             businessDetails: !!savedData.businessDetails,
             miscellaneous: !!savedData.miscellaneous,
+            thirdPartyCheck: !!savedData.thirdPartyCheck,
             photoCapture: savedData.uploadedItems?.length > 0,
           });
         }
@@ -197,9 +202,7 @@ const BusinessVerification = () => {
     await saveFormData('basicDetails', data);
   };
 
-  const handleBusinessDetailsSubmit = async (
-    data: BusinessVerificationFormData['businessDetails'],
-  ) => {
+  const handleBusinessDetailsSubmit = (data: BusinessDetailsFormData) => {
     const updatedData = {
       ...formData,
       businessDetails: data,
@@ -210,7 +213,7 @@ const BusinessVerification = () => {
       businessDetails: true,
     }));
     setExpandedSections(prev => ({...prev, businessDetails: false}));
-    await saveFormData('businessDetails', data);
+    saveFormData('businessDetails', data);
   };
 
   const handleMiscellaneousSubmit = async (
@@ -227,6 +230,20 @@ const BusinessVerification = () => {
     }));
     setExpandedSections(prev => ({...prev, miscellaneous: false}));
     await saveFormData('miscellaneous', data);
+  };
+
+  const handleThirdPartyCheckSubmit = async (data: ThirdPartyCheckFormData) => {
+    const updatedData = {
+      ...formData,
+      thirdPartyCheck: data,
+    };
+    setFormData(updatedData);
+    setValidSections(prev => ({
+      ...prev,
+      thirdPartyCheck: true,
+    }));
+    setExpandedSections(prev => ({...prev, thirdPartyCheck: false}));
+    await saveFormData('thirdPartyCheck', data);
   };
 
   const handleUploadedItemsChange = async (items: UploadedItem[]) => {
@@ -312,6 +329,17 @@ const BusinessVerification = () => {
             onSubmit={handleMiscellaneousSubmit}
           />
         </CollapsibleSection>
+
+        {/* <CollapsibleSection
+          title="Third-Party Check"
+          isExpanded={expandedSections.thirdPartyCheck}
+          onToggle={() => toggleSection('thirdPartyCheck')}
+          isValid={validSections.thirdPartyCheck}>
+          <ThirdPartyCheck
+            onSubmit={handleThirdPartyCheckSubmit}
+            initialData={formData.thirdPartyCheck}
+          />
+        </CollapsibleSection> */}
 
         <CollapsibleSection
           title="Photo Capture"

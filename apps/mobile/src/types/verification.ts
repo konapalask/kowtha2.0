@@ -66,11 +66,11 @@ export type ResidenceDetailsFormData = {
   residenceType: string;
   specifyResidenceType: string;
   standardOfLiving: string;
-  localityType: string;
+  // localityType: string;
   accessibility: string;
   houseArea: string;
   yearsAtCurrentAddress: string;
-  nameBoardVisible: string;
+  // nameBoardVisible: string;
   politicalSymbolVisible: string;
 };
 
@@ -123,6 +123,6 @@ export interface VerificationFormData {
   residenceDetails: ResidenceDetailsFormData;
   familyEmploymentDetails: FamilyEmploymentDetailsFormData;
   familyMemberDetails: FamilyMember[];
-  thirdPartyCheck: ThirdPartyCheckFormData;
+  thirdPartyCheck: any;
   uploadedItems: UploadedItem[];
 }

@@ -41,9 +41,9 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       residenceType: '',
       specifyResidenceType: '',
       standardOfLiving: '',
-      localityType: '',
+      // localityType: '',
       accessibility: '',
-      nameBoardVisible: '',
+      // nameBoardVisible: '',
       rentDetails: '',
       yearsAtCurrentAddress: '',
       politicalSymbolVisible: '',
@@ -104,18 +104,32 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       {residenceStatus === 'Rented' && (
         <Controller
           control={control}
-          rules={{required: 'Rent details are required'}}
+          rules={{
+            required: 'Rent is required',
+            validate: value => {
+              if (isNaN(Number(value))) {
+                return 'Please enter a valid number';
+              }
+              return true;
+            },
+          }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Rent Details*</Text>
+              <Text style={styles.label}>Rent per month*</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
-                onChangeText={onChange}
+                style={[styles.input]}
+                onChangeText={text => {
+                  // Only update if the entire string is digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
+                  // Otherwise ignore the input
+                }}
                 value={value}
-                placeholder="Enter rent details"
-                multiline
-                numberOfLines={4}
+                placeholder="Enter rent"
                 placeholderTextColor={colors.text.disabled}
+                keyboardType="numeric" // Show numeric keyboard on mobile
+                inputMode="decimal" // Modern alternative to keyboardType
               />
               {errors.rentDetails && (
                 <Text style={styles.errorText}>
@@ -203,7 +217,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="standardOfLiving"
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         rules={{required: 'Locality type is required'}}
         render={({field: {value}}) => (
@@ -225,7 +239,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           </View>
         )}
         name="localityType"
-      />
+      /> */}
 
       <Controller
         control={control}
@@ -251,7 +265,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="accessibility"
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         rules={{required: 'House area is required'}}
         render={({field: {onChange, value}}) => (
@@ -274,7 +288,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           </View>
         )}
         name="houseArea"
-      />
+      /> */}
 
       <Controller
         control={control}
@@ -303,7 +317,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="yearsAtCurrentAddress"
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         rules={{required: 'Nameplate visibility is required'}}
         render={({field: {value}}) => (
@@ -325,7 +339,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           </View>
         )}
         name="nameBoardVisible"
-      />
+      /> */}
 
       <Controller
         control={control}
