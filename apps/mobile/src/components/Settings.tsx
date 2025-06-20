@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,30 +8,67 @@ import {
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {clearAll, clearItem} from '../helpers/utility';
+import {clearAll, clearItem, getItem} from '../helpers/utility';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
+import AttendanceCard from './AttendanceCard';
+import dayjs from 'dayjs';
 
 type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'VerificationList'
 >;
 
+const fetchUserDetails = async () => {
+  return await getItem('userDetails');
+};
+
 const Settings = () => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
   const [visible, setVisible] = useState(false);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  // const userDetails: any = fetchUserDetails();
+  // console.log(userDetails);
+  const [userDetails, setUserDetails] = useState<any>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const details = await getItem('userDetails');
+        setUserDetails(details);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    // const checkAttendance = async () => {
+    //   try {
+    //     const details = await getItem('attendance');
+    //     const isLoggedIn = details?.date === dayjs().format('YYYY-MM-DD');
+    //     setIsLoggedIn(isLoggedIn);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+
+    fetchUserDetails();
+    // checkAttendance();
+  }, []);
 
   const toggleMenu = () => setVisible(!visible);
 
   const handleProfilePress = () => {
-    // Handle profile navigation here
     setVisible(false);
+    setTimeout(() => setProfileModalVisible(true), 200);
   };
 
   const handleLogout = () => {
     clearItem('accessToken');
     clearItem('refreshToken');
+    clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],
@@ -67,6 +104,45 @@ const Settings = () => {
           </Pressable>
         </Modal>
       </View>
+
+      <Modal
+        visible={profileModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setProfileModalVisible(false)}>
+        <Pressable
+          style={styles.profileModalOverlay}
+          onPress={() => setProfileModalVisible(false)}>
+          <Pressable
+            style={styles.profileModalContent}
+            onPress={e => e.stopPropagation()}>
+            {/* Top Card: Profile Info */}
+            <View style={styles.profileCard}>
+              <Text style={styles.profileTitle}>Profile</Text>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Name:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.name}
+                </Text>
+              </View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Employee Code:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.employeeCode}
+                </Text>
+              </View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>Role:</Text>
+                <Text style={styles.profileFieldValue}>
+                  {userDetails?.role}
+                </Text>
+              </View>
+            </View>
+            <AttendanceCard setVisible={setVisible} />
+            {/* {!isLoggedIn && <AttendanceCard setVisible={setVisible} />} */}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
@@ -110,6 +186,51 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 16,
     color: '#000',
+  },
+  profileModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  profileCard: {
+    backgroundColor: '#e6ecf5',
+    // backgroundColor: '#e6ecf5',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
+  },
+  profileTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  profileFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  profileFieldLabel: {
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  profileFieldValue: {
+    flex: 1,
   },
 });
 

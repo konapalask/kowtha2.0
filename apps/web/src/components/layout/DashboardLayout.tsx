@@ -20,11 +20,11 @@ import {
   AuditOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
-import { UserContext } from "./UserContextProvider";
+import attendanceIcon from "../../../public/images/svgIcons/attendance.svg"
 import { getOfficesApi } from "@/services/settings.services";
 import { getUserDetails } from "@/utils/utility";
 
@@ -141,6 +141,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           },
         ]
       : []),
+      // ...(userDetails?.role === "Admin"
+      //   ? [
+      //       {
+      //         key: "attendance",
+      //         icon: <Image src={attendanceIcon} alt="Attendance icon" width={20}height={20} style={{filter:"var(--primary-filter)"}} />,
+      //         label: <Link href="/attendance">Attendance</Link>,
+      //       },
+      //     ]
+      //   : []),
     {
       key: "settings",
       icon: (
