@@ -182,7 +182,7 @@ export default function Loans() {
       title: "Loan Type",
       dataIndex: "loanType",
       key: "loanType",
-      width: 100,
+      width: 130,
     },
     {
       title: "Status",
@@ -433,7 +433,7 @@ export default function Loans() {
         </div>
 
         <Table
-          className="loans-table"
+          className="loans-table striped-table"
           columns={columns}
           dataSource={loans}
           rowKey="id"
@@ -449,6 +449,7 @@ export default function Loans() {
           size="small"
           scroll={{ x: 1500 }}
           sticky
+          bordered
         />
       </Card>
 

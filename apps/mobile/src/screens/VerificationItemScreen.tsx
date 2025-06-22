@@ -107,11 +107,11 @@ const VerificationItemScreen = () => {
       residenceType: '',
       specifyResidenceType: '',
       standardOfLiving: '',
-      localityType: '',
+      // localityType: '',
       accessibility: '',
       houseArea: '',
       yearsAtCurrentAddress: '',
-      nameBoardVisible: '',
+      // nameBoardVisible: '',
       politicalSymbolVisible: '',
     },
     familyEmploymentDetails: {
@@ -124,11 +124,15 @@ const VerificationItemScreen = () => {
     },
     familyMemberDetails: [],
     thirdPartyCheck: {
-      tpcName: '',
-      mobileNumber: '',
-      relationship: '',
-      // feedbackStatus: '',
-      comments: '',
+      checks: [
+        {
+          tpcName: '',
+          mobileNumber: '',
+          relationship: '',
+          // feedbackStatus: '',
+          comments: '',
+        },
+      ],
     },
     uploadedItems: [],
   });

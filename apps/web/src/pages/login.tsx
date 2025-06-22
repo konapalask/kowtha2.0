@@ -104,6 +104,14 @@ export default function Login() {
     return null;
   }
 
+  const handleBack = () =>{
+    setOtpSent(false)
+  }
+
+  const handleResend = () =>{
+
+  }
+
   return (
     <div
       style={{
@@ -204,6 +212,7 @@ export default function Login() {
                 ]}
               >
                 <Input
+                  maxLength={6}
                   prefix={
                     <LockOutlined style={{ color: "var(--primary-600)" }} />
                   }
@@ -241,6 +250,10 @@ export default function Login() {
                 {otpSent ? "Verify OTP" : "Send OTP"}
               </Button>
             </Form.Item>
+            {otpSent&&<div style={{display:"flex",justifyContent:"space-between"}}>
+            <Button type="link" style={{color:"#fff"}} onClick={handleBack}>Back to Login</Button>
+            {/* <Button type="link" style={{color:"#fff"}} onClick={handleResend}>Resend OTP</Button> */}
+            </div>}
           </Form>
         </Space>
       </Card>

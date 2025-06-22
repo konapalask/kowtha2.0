@@ -17,6 +17,7 @@ interface FieldAssignmentFormProps {
   verifiers?: any[];
   fetchLoans: () => void;
   setRefresh: any;
+  setFieldExecutiveEdit:any
 }
 
 const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
@@ -32,6 +33,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   verifiers = [],
   fetchLoans,
   setRefresh,
+  setFieldExecutiveEdit
 }) => {
   const [form] = Form.useForm()
   const getVerificationType = (type: string) => {
@@ -68,6 +70,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       message.success("Field executive assigned successfully");
       fetchLoans();
       setCurrentOffice(userDetails?.officeId);
+      setFieldExecutiveEdit((prev:any)=>({...prev,[type]:false}))
     } catch (error) {
       message.error("Failed to assign field executive");
     } finally {
@@ -136,6 +139,8 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                       onChange={(e) => {
                         if (e.target.value === "Local") {
                           setCurrentOffice(userDetails?.officeId || "");
+                          form.setFieldValue("fieldExecutiveId",null)
+                          form.setFieldValue("office",null)
                         }
                       }}
                     >

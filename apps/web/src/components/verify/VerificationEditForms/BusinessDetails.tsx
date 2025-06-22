@@ -1,22 +1,22 @@
-import React from 'react';
-import { Form, Input, Select, Col } from 'antd';
+import React from "react";
+import { Form, Input, Select, Col } from "antd";
 
-const yesNoOptions = ['Yes', 'No'];
+const yesNoOptions = ["Yes", "No"];
 const constitutionOptions = [
-  'Proprietorship',
-  'Partnership',
-  'PVT Ltd',
-  'Ltd',
-  'Society',
-  'Trust',
-  'Others',
+  "Proprietorship",
+  "Partnership",
+  "PVT Ltd",
+  "Ltd",
+  "Society",
+  "Trust",
+  "Others",
 ];
 const relationshipOptions = [
-  'Applicant',
-  'Co-Applicant',
-  'Guarantor',
-  'Family',
-  'Others',
+  "Applicant",
+  "Co-Applicant",
+  "Guarantor",
+  "Family",
+  "Others",
 ];
 
 export type BusinessDetailsFormData = {
@@ -32,10 +32,10 @@ export type BusinessDetailsFormData = {
   isAddressTraceable: string;
 };
 
-const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
+const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
   // Watch values for conditional rendering
-  const constitution = Form.useWatch('constitution', form);
-  const keyManagerRelation = Form.useWatch('keyManagerRelation', form);
+  const constitution = Form.useWatch("constitution", form);
+  const keyManagerRelation = Form.useWatch("keyManagerRelation", form);
 
   return (
     <>
@@ -87,7 +87,7 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      {constitution === 'Others' && (
+      {constitution === "Others" && (
         <Col span={8}>
           <Form.Item
             name="constitutionOther"
@@ -115,7 +115,7 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      {keyManagerRelation === 'Others' && (
+      {keyManagerRelation === "Others" && (
         <Col span={8}>
           <Form.Item
             name="keyManagerRelationOther"
@@ -127,7 +127,7 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
         </Col>
       )}
 
-      {keyManagerRelation && keyManagerRelation !== 'Applicant' && (
+      {keyManagerRelation && keyManagerRelation !== "Applicant" && (
         <Col span={8}>
           <Form.Item
             name="keyManager"
@@ -147,14 +147,11 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
             { required: true, message: "Required" },
             {
               pattern: /^\d{4}$/,
-              message: "Please enter a valid year (YYYY)"
-            }
+              message: "Please enter a valid year (YYYY)",
+            },
           ]}
         >
-          <Input
-            placeholder="YYYY"
-            maxLength={4}
-          />
+          <Input placeholder="YYYY" maxLength={4} />
         </Form.Item>
       </Col>
 
@@ -166,14 +163,11 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
             { required: true, message: "Required" },
             {
               pattern: /^\d+$/,
-              message: "Please enter a valid number"
-            }
+              message: "Please enter a valid number",
+            },
           ]}
         >
-          <Input
-            type="number"
-            placeholder="Enter total experience"
-          />
+          <Input type="number" placeholder="Enter total experience" />
         </Form.Item>
       </Col>
 
@@ -190,6 +184,16 @@ const BusinessDetails: React.FC<{form: any}> = ({ form }) => {
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="geoTag"
+          label="Geotag"
+          rules={[{ required: true, message: "Required" }]}
+          hidden
+        >
+          <Input disabled />
         </Form.Item>
       </Col>
     </>

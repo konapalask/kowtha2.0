@@ -203,6 +203,7 @@ const EditRequests: React.FC = () => {
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
             {/* <Title level={4}>Edit Requests</Title> */}
             <Table
+              className="striped-table"
               columns={columns}
               dataSource={editRequests}
               loading={loading}
@@ -213,6 +214,7 @@ const EditRequests: React.FC = () => {
               //   showSizeChanger: true,
               //   showTotal: (total) => `Total ${total} items`,
               // }}
+              bordered
             />
           </Space>
         </Card>
@@ -221,6 +223,7 @@ const EditRequests: React.FC = () => {
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
             {/* <Title level={4}>Login Requests</Title> */}
             <Table
+              className="striped-table"
               columns={loginRequestColumns}
               dataSource={loginRequests}
               rowKey="id"
@@ -230,6 +233,7 @@ const EditRequests: React.FC = () => {
               //   showSizeChanger: true,
               //   showTotal: (total) => `Total ${total} items`,
               // }}
+              bordered
             />
           </Space>
         </Card>

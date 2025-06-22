@@ -1,6 +1,10 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
-import { CloseCircleOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  EditOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 import { Button, Card, Descriptions, Image, message, Modal } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -35,7 +39,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   verificationId,
   fetchEditRequests,
   hasEditRequest,
-  verificationType
+  verificationType,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -45,22 +49,25 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
     verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
-  const [open, setOpen] = useState(false)
-  const [verdict, setVerdict] = useState<string | null>(null)
+  const [open, setOpen] = useState<boolean>(false);
+  const [verdict, setVerdict] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async(verdict: string|null, remarks: string) => {
-    verifierEditApi(id as string, verificationType, {path:remarks})
-    .then((response)=>{
-      // console.log("response: ", response)
-      message.success(response.data.message);
-      setOpen(true)
-      setVerdict(verdict)
-
-    }).catch((error)=>{
-      console.log("error: ", error)
-      message.error(error.response.data.message || "Failed to save final observations");
-    });    
-    
+  const handleSave = async (verdict: string | null, remarks: string) => {
+    verifierEditApi(id as string, verificationType, { path: remarks })
+      .then((response) => {
+        // console.log("response: ", response)
+        message.success(response.data.message);
+        setOpen(true);
+        setVerdict(verdict);
+        setLoading(true);
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+        message.error(
+          error.response.data.message || "Failed to save final observations"
+        );
+      });
   };
 
   useEffect(() => {
@@ -91,7 +98,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-      
+
       try {
         const transaction = db.transaction("logs", "readonly");
         const store = transaction.objectStore("logs");
@@ -124,26 +131,26 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   const sanitizeToListOnly = (html: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-  
+
     // Find all <ul> elements
     const ul = doc.querySelector("ul");
     if (!ul) return "<ul><li><br></li></ul>"; // fallback if no list
-  
+
     // Only keep <ul><li> structure, remove everything else
     const cleanUl = document.createElement("ul");
-  
+
     ul.querySelectorAll("li").forEach((li: any) => {
       const cleanLi = document.createElement("li");
       cleanLi.innerHTML = li.innerHTML;
       cleanUl.appendChild(cleanLi);
     });
-  
+
     return cleanUl.outerHTML;
   };
 
   const handleEditorChange = (content: string) => {
     const sanitized = sanitizeToListOnly(content);
-  
+
     if (!sanitized || sanitized.trim() === "") {
       setEditorContent("<ul><li><br></li></ul>");
     } else {
@@ -153,7 +160,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Prevent backspace from clearing the initial bullet point
-    if (e.key === 'Backspace' && editorContent === '<ul><li><br></li></ul>') {
+    if (e.key === "Backspace" && editorContent === "<ul><li><br></li></ul>") {
       e.preventDefault();
     }
   };
@@ -168,7 +175,15 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   );
 
   const CustomToolbar = () => (
-    <div id="custom-toolbar" style={{ padding: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div
+      id="custom-toolbar"
+      style={{
+        padding: "8px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <span style={{ marginLeft: 8, fontWeight: "bold", fontSize: "16px" }}>
         Final Observations
       </span>
@@ -270,7 +285,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       fontSize: "12px",
                     }}
                   >
-                    Photo {idx + 1} {item?.isCamera?null:"(Gallery)"}
+                    Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
                   </div>
                 </div>
               );
@@ -291,8 +306,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         />
       </section>
 
-       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
-       {/* <section style={{marginBottom:24, textAlign:"center"}}>
+      {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
+      {/* <section style={{marginBottom:24, textAlign:"center"}}>
         <Button icon={<EyeOutlined />} onClick={()=>{
           setOpen(true)
         }}>Preview</Button>
@@ -300,7 +315,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       {/* </Card> */}
       <Footer editorContent={editorContent} disabled={hasEditRequest} />
 
-      <FinalVerdict 
+      <FinalVerdict
         disabled={hasEditRequest}
         initialVerdict={verificationData?.finalVerdict}
         initialRemarks={verificationData?.finalObservations?.remarks}
@@ -327,8 +342,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         }}
         cancelButtonProps={{
           style: {
-            display: "none"
-          }
+            display: "none",
+          },
         }}
         footer={null}
         width={900}
@@ -339,14 +354,27 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         }
         destroyOnClose
         closeIcon={false}
+        maskClosable={false}
       >
-        <PdfPreview id={id as string} status={verdict} />
-        <Button type="primary" onClick={()=>{router.push("/verify")}}>Confirm</Button>
+        <PdfPreview
+          id={id as string}
+          status={verdict}
+          setLoading={setLoading}
+        />
+        <Button
+          type="primary"
+          onClick={() => {
+            router.push("/verify");
+          }}
+          loading={loading}
+        >
+          Confirm
+        </Button>
       </Modal>
       {/* Final Observations Section */}
       {/* <section style={{ marginBottom: 24 }}>
         <Card title="Final Observations"> */}
-        {/* <div
+      {/* <div
           style={{ minHeight: "300px", marginBottom: "20px", background: "#fff", borderRadius:8 }}
         >
           <CustomToolbar />
@@ -363,10 +391,9 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
             formats={["list"]}
           />
         </div> */}
-        {/* </Card> */}
+      {/* </Card> */}
       {/* </section> */}
       {/* <Footer editorContent={editorContent} disabled={hasEditRequest} /> */}
     </>
   );
 };
-

@@ -126,11 +126,12 @@ export default function Verify() {
     <DashboardLayout>
       <Card>
         <Table
+          className="striped-table"
+          // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
           columns={columns}
           dataSource={filteredLoans}
           rowKey={(record) => record?.id?.toString() ?? Math.random().toString()}
           loading={loading}
-          
           pagination={{
             pageSize: 10,
             // showSizeChanger: true,
@@ -140,6 +141,7 @@ export default function Verify() {
           // size="small"
           // scroll={{ y: 400 }}
           sticky
+          bordered
         />
       </Card>
     </DashboardLayout>

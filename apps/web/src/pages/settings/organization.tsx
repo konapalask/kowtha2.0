@@ -256,11 +256,13 @@ export default function OrganizationSettings() {
             </div>}
 
             <Table
+              className="striped-table"
               columns={officeColumns}
               dataSource={offices}
               rowKey="id"
               loading={loading}
               scroll={{ y: 400 }}
+              bordered
             />
           </Card>
         </TabPane>

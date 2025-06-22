@@ -187,6 +187,7 @@ export default function ManageLoans() {
     <DashboardLayout>
       <Card>
         <Table
+          className="striped-table"
           columns={columns}
           dataSource={loans}
           rowKey="id"

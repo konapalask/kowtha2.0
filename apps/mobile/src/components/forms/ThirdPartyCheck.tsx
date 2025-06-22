@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,21 @@ import {
   ScrollView,
 } from 'react-native';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
-import {useForm, Controller} from 'react-hook-form';
-import {ThirdPartyCheckFormData} from '../../types/verification';
+import {useForm, Controller, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// Types
+export interface ThirdPartyCheckItem {
+  tpcName: string;
+  mobileNumber: string;
+  relationship: string;
+  comments: string;
+}
+
+export interface ThirdPartyCheckFormData {
+  checks: ThirdPartyCheckItem[];
+}
 
 type ThirdPartyCheckProps = {
   onSubmit: (data: ThirdPartyCheckFormData) => void;
@@ -24,14 +36,14 @@ const RELATIONSHIP_OPTIONS = [
   'Other',
 ];
 
-const FEEDBACK_STATUS_OPTIONS = ['Positive', 'Negative', 'Could Not Confirm'];
-
 const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   onSubmit,
   initialData,
 }) => {
   const relationshipRef = React.useRef<ActionSheetRef>(null);
-  // const feedbackStatusRef = React.useRef<ActionSheetRef>(null);
+  const [activeRelationshipIndex, setActiveRelationshipIndex] = React.useState<
+    number | null
+  >(null);
 
   const {
     control,
@@ -39,150 +51,159 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
     setValue,
     formState: {errors},
   } = useForm<ThirdPartyCheckFormData>({
-    defaultValues: initialData || {
-      tpcName: '',
-      mobileNumber: '',
-      relationship: '',
-      // feedbackStatus: '',
-      comments: '',
+    defaultValues: {
+      checks: initialData?.checks || [
+        {tpcName: '', mobileNumber: '', relationship: '', comments: ''},
+      ],
     },
+  });
+
+  const {fields, append, remove} = useFieldArray({
+    control,
+    name: 'checks',
   });
 
   const handleSelect = (
     value: string,
-    field: keyof ThirdPartyCheckFormData,
+    index: number,
     ref: React.RefObject<ActionSheetRef | null>,
   ) => {
-    setValue(field, value);
+    setValue(`checks.${index}.relationship`, value);
     if (ref.current) {
       ref.current.hide();
     }
   };
 
+  const renderCheckFields = (index: number) => (
+    <View key={fields[index].id} style={styles.checkContainer}>
+      <View style={styles.checkHeader}>
+        <Text style={styles.checkTitle}>Third Party Check {index + 1}</Text>
+        {index > 0 && (
+          <TouchableOpacity
+            onPress={() => remove(index)}
+            style={styles.removeButton}>
+            <Icon name="delete" size={24} color={colors.error} />
+          </TouchableOpacity>
+        )}
+      </View>
+      <Controller
+        control={control}
+        rules={{required: 'TPC/Neighbor name is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Name of TPC/Neighbor*</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={onChange}
+              value={value}
+              placeholder="Enter name"
+            />
+            {errors.checks?.[index]?.tpcName && (
+              <Text style={styles.errorText}>
+                {errors.checks[index]?.tpcName?.message}
+              </Text>
+            )}
+          </View>
+        )}
+        name={`checks.${index}.tpcName`}
+      />
+      <Controller
+        control={control}
+        rules={{required: 'Mobile number is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Mobile Number*</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={text => {
+                if (/^\d*$/.test(text)) {
+                  onChange(text.slice(0, 10));
+                }
+              }}
+              value={value}
+              placeholder="Enter mobile number"
+              keyboardType="numeric"
+              maxLength={10}
+            />
+            {errors.checks?.[index]?.mobileNumber && (
+              <Text style={styles.errorText}>
+                {errors.checks[index]?.mobileNumber?.message}
+              </Text>
+            )}
+          </View>
+        )}
+        name={`checks.${index}.mobileNumber`}
+      />
+      <Controller
+        control={control}
+        rules={{required: 'Relationship is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Relationship to Applicant*</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => {
+                setActiveRelationshipIndex(index);
+                relationshipRef.current?.show();
+              }}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select relationship'}
+              </Text>
+            </TouchableOpacity>
+            {errors.checks?.[index]?.relationship && (
+              <Text style={styles.errorText}>
+                {errors.checks[index]?.relationship?.message}
+              </Text>
+            )}
+          </View>
+        )}
+        name={`checks.${index}.relationship`}
+      />
+      <Controller
+        control={control}
+        rules={{required: 'Comments/Remarks is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Comments/Remarks*</Text>
+            <TextInput
+              style={[styles.textArea, styles.input]}
+              onChangeText={onChange}
+              value={value}
+              placeholder="Enter comments or remarks"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+            {errors.checks?.[index]?.comments && (
+              <Text style={styles.errorText}>
+                {errors.checks[index]?.comments?.message}
+              </Text>
+            )}
+          </View>
+        )}
+        name={`checks.${index}.comments`}
+      />
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView>
-        <Controller
-          control={control}
-          rules={{required: 'TPC/Neighbor name is required'}}
-          render={({field: {onChange, value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Name of TPC/Neighbor*</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter name"
-              />
-              {errors.tpcName && (
-                <Text style={styles.errorText}>{errors.tpcName.message}</Text>
-              )}
-            </View>
-          )}
-          name="tpcName"
-        />
-
-        <Controller
-          control={control}
-          rules={{required: 'Mobile number is required'}}
-          render={({field: {onChange, value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Mobile Number*</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={text => {
-                  // Only allow numbers
-                  if (/^\d*$/.test(text)) {
-                    onChange(text.slice(0, 10));
-                  }
-                }}
-                value={value}
-                placeholder="Enter mobile number"
-                keyboardType="numeric"
-                maxLength={10}
-              />
-              {errors.mobileNumber && (
-                <Text style={styles.errorText}>
-                  {errors.mobileNumber.message}
-                </Text>
-              )}
-            </View>
-          )}
-          name="mobileNumber"
-        />
-
-        <Controller
-          control={control}
-          rules={{required: 'Relationship is required'}}
-          render={({field: {value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Relationship to Applicant*</Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => relationshipRef.current?.show()}>
-                <Text
-                  style={value ? styles.selectButtonText : styles.placeholder}>
-                  {value || 'Select relationship'}
-                </Text>
-              </TouchableOpacity>
-              {errors.relationship && (
-                <Text style={styles.errorText}>
-                  {errors.relationship.message}
-                </Text>
-              )}
-            </View>
-          )}
-          name="relationship"
-        />
-
-        {/* <Controller
-          control={control}
-          rules={{required: 'Feedback status is required'}}
-          render={({field: {value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Feedback Status*</Text>
-              <TouchableOpacity
-                style={styles.selectButton}
-                onPress={() => feedbackStatusRef.current?.show()}>
-                <Text
-                  style={value ? styles.selectButtonText : styles.placeholder}>
-                  {value || 'Select feedback status'}
-                </Text>
-              </TouchableOpacity>
-              {errors.feedbackStatus && (
-                <Text style={styles.errorText}>
-                  {errors.feedbackStatus.message}
-                </Text>
-              )}
-            </View>
-          )}
-          name="feedbackStatus"
-        /> */}
-
-        <Controller
-          control={control}
-          rules={{required: 'Comments/Remarks is required'}}
-          render={({field: {onChange, value}}) => (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Comments/Remarks*</Text>
-              <TextInput
-                style={[styles.textArea, styles.input]}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter comments or remarks"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-              />
-              {errors.comments && (
-                <Text style={styles.errorText}>{errors.comments.message}</Text>
-              )}
-            </View>
-          )}
-          name="comments"
-        />
+        {fields.map((_, index) => renderCheckFields(index))}
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() =>
+            append({
+              tpcName: '',
+              mobileNumber: '',
+              relationship: '',
+              comments: '',
+            })
+          }>
+          <Text style={styles.addButtonText}>Add Another Check</Text>
+        </TouchableOpacity>
       </ScrollView>
-
       <ActionSheet ref={relationshipRef}>
         <View style={styles.actionSheet}>
           <Text style={styles.actionSheetTitle}>Select Relationship</Text>
@@ -190,31 +211,21 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPressIn={() =>
-                handleSelect(option, 'relationship', relationshipRef)
-              }>
+              onPressIn={() => {
+                if (activeRelationshipIndex !== null) {
+                  handleSelect(
+                    option,
+                    activeRelationshipIndex,
+                    relationshipRef,
+                  );
+                  setActiveRelationshipIndex(null);
+                }
+              }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </ActionSheet>
-
-      {/* <ActionSheet ref={feedbackStatusRef}>
-        <View style={styles.actionSheet}>
-          <Text style={styles.actionSheetTitle}>Select Feedback Status</Text>
-          {FEEDBACK_STATUS_OPTIONS.map(option => (
-            <TouchableOpacity
-              key={option}
-              style={styles.actionSheetItem}
-              onPressIn={() =>
-                handleSelect(option, 'feedbackStatus', feedbackStatusRef)
-              }>
-              <Text style={styles.actionSheetItemText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ActionSheet> */}
-
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onSubmit)}>
@@ -229,6 +240,26 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: colors.background,
+  },
+  checkContainer: {
+    marginBottom: 24,
+    padding: 16,
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  checkHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  checkTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: colors.text.primary,
   },
   inputContainer: {
     marginBottom: 16,
@@ -272,13 +303,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
+  addButton: {
+    backgroundColor: colors.button.secondary.background,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+    marginHorizontal: 16,
+  },
+  addButtonText: {
+    color: colors.button.secondary.text,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   submitButton: {
     borderColor: colors.button.primary.background,
     borderWidth: 1,
     padding: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
     height: 40,
   },
   submitButtonText: {
@@ -286,13 +332,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  removeButton: {
+    padding: 4,
+  },
   actionSheet: {
     backgroundColor: colors.background,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    padding: 16,
-  },
-  actionSheetContent: {
     padding: 16,
   },
   actionSheetTitle: {

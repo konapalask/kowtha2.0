@@ -39,13 +39,15 @@ interface WorkVerificationDetailsProps {
   hasEditRequest: boolean;
 }
 
-export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = ({
+export const WorkVerificationDetails: React.FC<
+  WorkVerificationDetailsProps
+> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
   verificationId,
   fetchEditRequests,
-  hasEditRequest
+  hasEditRequest,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -55,22 +57,25 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
     verificationData?.finalObservations?.remarks || ""
   );
   const [changedData, setChangedData] = useState<any>({});
-  const [open, setOpen] = useState(false)
-  const [verdict, setVerdict] = useState<string | null>(null)
+  const [open, setOpen] = useState(false);
+  const [verdict, setVerdict] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async(verdict: string|null, remarks: string) => {
-    verifierEditApi(id as string, "Work", {path:remarks})
-    .then((response)=>{
-      // console.log("response: ", response)
-      message.success(response.data.message);
-      setOpen(true)
-      setVerdict(verdict)
-
-    }).catch((error)=>{
-      console.log("error: ", error)
-      message.error(error.response.data.message || "Failed to save final observations");
-    });    
-    
+  const handleSave = async (verdict: string | null, remarks: string) => {
+    verifierEditApi(id as string, "Work", { path: remarks })
+      .then((response) => {
+        // console.log("response: ", response)
+        message.success(response.data.message);
+        setOpen(true);
+        setVerdict(verdict);
+        setLoading(true);
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+        message.error(
+          error.response.data.message || "Failed to save final observations"
+        );
+      });
   };
 
   useEffect(() => {
@@ -101,7 +106,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
 
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-      
+
       try {
         const transaction = db.transaction("logs", "readonly");
         const store = transaction.objectStore("logs");
@@ -139,7 +144,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
     //   // force at least one <li>
     //   setEditorContent("<ul><li></li></ul>");
     // } else {
-      setEditorContent(content);
+    setEditorContent(content);
     // }
   };
   const getButton = (formKey: string) => (
@@ -182,6 +187,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.colleagueReferences?.references || []}
             columns={[
               {
@@ -224,6 +230,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
+            bordered
           />
         </Card>
       </section>
@@ -243,49 +250,50 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.pastEmployment?.employments || []}
             columns={[
               {
                 title: "Organization",
                 dataIndex: "employerName",
                 key: "employerName",
-                width:150
+                width: 150,
               },
               {
                 title: "Designation",
                 dataIndex: "designation",
                 key: "designation",
-                width:100
+                width: 100,
               },
               {
                 title: "From Date",
                 dataIndex: "fromDate",
                 key: "fromDate",
-                width:100
+                width: 100,
               },
               {
                 title: "To Date",
                 dataIndex: "toDate",
                 key: "toDate",
-                width:100
+                width: 100,
               },
               {
                 title: "Contact Person Name",
                 dataIndex: "contactPersonName",
                 key: "contactPersonName",
-                width:200
+                width: 200,
               },
               {
-                title:"Contact Person Mobile",
-                dataIndex:"contactPersonNumber",
-                key:"contactPersonNumber",
-                width:150
+                title: "Contact Person Mobile",
+                dataIndex: "contactPersonNumber",
+                key: "contactPersonNumber",
+                width: 150,
               },
               {
-                title:"Reason for Movement",
-                dataIndex:"reasonForMovement",
-                key:"reasonForMovement",
-                width:250
+                title: "Reason for Movement",
+                dataIndex: "reasonForMovement",
+                key: "reasonForMovement",
+                width: 250,
               },
               {
                 title: "Actions",
@@ -298,13 +306,14 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
                     disabled={hasEditRequest}
                   />
                 ),
-                width:80,
-                fixed:"right"
+                width: 80,
+                fixed: "right",
               },
             ]}
-            scroll={{x:1500}}
+            scroll={{ x: 1500 }}
             pagination={false}
             locale={{ emptyText: "No past employment records added yet" }}
+            bordered
           />
         </Card>
       </section>
@@ -324,6 +333,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
           // }
         >
           <Table
+            className="striped-table"
             dataSource={data?.existingLoans?.loans || []}
             columns={[
               {
@@ -366,6 +376,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
             ]}
             pagination={false}
             locale={{ emptyText: "No existing loans added yet" }}
+            bordered
           />
         </Card>
       </section>
@@ -436,11 +447,19 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} admin={false} verificationType={activeTab} />
+        <EditRequestLogs
+          currentData={data}
+          changedData={changedData}
+          verificationId={verificationId}
+          fetchEditRequests={fetchEditRequests}
+          disabled={hasEditRequest}
+          admin={false}
+          verificationType={activeTab}
+        />
       </section>
 
-       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
-       {/* <section style={{marginBottom:24, textAlign:"center"}}>
+      {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
+      {/* <section style={{marginBottom:24, textAlign:"center"}}>
         <Button icon={<EyeOutlined />} onClick={()=>{
           setOpen(true)
         }}>Preview</Button>
@@ -448,7 +467,7 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
       <Footer editorContent={editorContent} disabled={hasEditRequest} />
       {/* </Card> */}
 
-      <FinalVerdict 
+      <FinalVerdict
         disabled={hasEditRequest}
         initialVerdict={verificationData?.finalVerdict}
         initialRemarks={verificationData?.finalObservations?.remarks}
@@ -475,8 +494,8 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
         }}
         cancelButtonProps={{
           style: {
-            display: "none"
-          }
+            display: "none",
+          },
         }}
         footer={null}
         width={900}
@@ -487,9 +506,22 @@ export const WorkVerificationDetails: React.FC<WorkVerificationDetailsProps> = (
         }
         destroyOnClose
         closeIcon={false}
+        maskClosable
       >
-        <PdfPreview id={id as string} status={verdict} />
-        <Button type="primary" onClick={()=>{router.push("/verify")}}>Confirm</Button>
+        <PdfPreview
+          id={id as string}
+          status={verdict}
+          setLoading={setLoading}
+        />
+        <Button
+          type="primary"
+          onClick={() => {
+            router.push("/verify");
+          }}
+          loading={loading}
+        >
+          Confirm
+        </Button>
       </Modal>
 
       {/* Final Observations Section */}

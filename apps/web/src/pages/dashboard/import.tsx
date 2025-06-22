@@ -132,6 +132,7 @@ export default function ImportLoans() {
             <>
               <Title level={4}>Preview</Title>
               <Table
+                className="striped-table"
                 columns={columns}
                 dataSource={previewData}
                 rowKey="applicationNumber"

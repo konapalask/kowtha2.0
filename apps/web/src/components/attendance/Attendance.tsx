@@ -242,6 +242,7 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   return (
     <div style={{ marginTop: 24 }}>
       <Table
+        className="striped-table"
         title={()=><Typography.Text style={{fontSize:16, fontWeight:600}}>Employee Details</Typography.Text>}
         columns={columns}
         dataSource={filteredData}
