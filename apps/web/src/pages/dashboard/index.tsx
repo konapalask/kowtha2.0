@@ -23,23 +23,26 @@ import {
 //   Cell
 // } from "recharts";
 import { getDashboardMetrics } from "@/services/dashboard.services";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import Attendance from "@/components/attendance/Attendance";
 
 interface DashboardMetrics {
-  totalLoans: number|null|undefined;
-  verifiedLoans: number|null|undefined;
-  rejectedLoans: number|null|undefined;
-  pendingLoans: number|null|undefined;
+  totalLoans: number | null | undefined;
+  verifiedLoans: number | null | undefined;
+  rejectedLoans: number | null | undefined;
+  pendingLoans: number | null | undefined;
   percentages: {
-    verified: number|null|undefined;
-    rejected: number|null|undefined;
-    pending: number|null|undefined;
+    verified: number | null | undefined;
+    rejected: number | null | undefined;
+    pending: number | null | undefined;
   };
 }
 
-const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
+const DashboardLayout = dynamic(
+  () => import("@/components/layout/DashboardLayout"),
+  { ssr: false }
+);
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
@@ -59,7 +62,7 @@ export default function Dashboard() {
   // const [employeeStats, setEmployeeStats] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
     const endDate = dayjs();
-    const startDate = dayjs().startOf('month');
+    const startDate = dayjs().startOf("month");
     return [startDate, endDate];
   });
 
@@ -73,11 +76,14 @@ export default function Dashboard() {
     }
   };
 
-  const fetchMetrics = async (startDate?: dayjs.Dayjs | null, endDate?: dayjs.Dayjs | null) => {
+  const fetchMetrics = async (
+    startDate?: dayjs.Dayjs | null,
+    endDate?: dayjs.Dayjs | null
+  ) => {
     try {
       const response = await getDashboardMetrics({
         fromDate: dayjs(startDate).format("YYYY-MM-DD") || null,
-        toDate: dayjs(endDate).format("YYYY-MM-DD") || null
+        toDate: dayjs(endDate).format("YYYY-MM-DD") || null,
       });
       setMetrics(response);
 
@@ -169,19 +175,25 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
         <DatePicker.RangePicker
           value={dateRange}
           onChange={handleDateRangeChange}
           format="DD/MM/YYYY"
           allowClear={false}
           ranges={{
-            'Last 7 Days': [dayjs().subtract(7, 'day'), dayjs()],
-            'Last 30 Days': [dayjs().subtract(30, 'day'), dayjs()],
-            'Last 6 Months': [dayjs().subtract(6, 'month'), dayjs()],
-            'This Year': [dayjs().startOf('year'), dayjs()]
+            "Last 7 Days": [dayjs().subtract(7, "day"), dayjs()],
+            "Last 30 Days": [dayjs().subtract(30, "day"), dayjs()],
+            "Last 6 Months": [dayjs().subtract(6, "month"), dayjs()],
+            "This Year": [dayjs().startOf("year"), dayjs()],
           }}
-          style={{ width: '280px' }}
+          style={{ width: "280px" }}
         />
       </div>
 
@@ -193,8 +205,8 @@ export default function Dashboard() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              borderColor: "#145886",
-              // backgroundColor: "rgba(20, 88, 134, 0.05)",
+              borderColor: "none",
+              background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -207,16 +219,17 @@ export default function Dashboard() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  color: "#fff",
                 }}
               >
-                <FileOutlined style={{ fontSize: "24px", color: "#145886" }} />
+                <FileOutlined style={{ fontSize: "24px", color: "#fff" }} />
               </div>
               <div>
                 <Statistic
                   title={
                     <Typography
                       style={{
-                        color: "#145886",
+                        color: "#fff",
                         fontSize: "16px",
                         marginBottom: "8px",
                         fontWeight: "600",
@@ -227,7 +240,7 @@ export default function Dashboard() {
                   }
                   value={metrics.totalLoans ?? 0}
                   valueStyle={{
-                    color: "#145886",
+                    color: "#fff",
                     fontSize: "28px",
                     fontWeight: "500",
                   }}
@@ -243,112 +256,8 @@ export default function Dashboard() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              borderColor: "#2196F3",
-              // backgroundColor: "rgba(33, 150, 243, 0.05)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: "rgba(33, 150, 243, 0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <CheckCircleOutlined
-                  style={{ fontSize: "24px", color: "#2196F3" }}
-                />
-              </div>
-              <div>
-                <Statistic
-                  title={
-                    <Typography
-                      style={{
-                        color: "#2196F3",
-                        fontSize: "16px",
-                        marginBottom: "8px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Verified Loans
-                    </Typography>
-                  }
-                  value={metrics.verifiedLoans ?? 0}
-                  valueStyle={{
-                    color: "#2196F3",
-                    fontSize: "28px",
-                    fontWeight: "500",
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col sm={12} md={12} lg={6}>
-          <Card
-            style={{
-              height: "140px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              borderColor: "#F44336",
-              // backgroundColor: "rgba(244, 67, 54, 0.05)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: "rgba(244, 67, 54, 0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <CloseCircleOutlined
-                  style={{ fontSize: "24px", color: "#F44336" }}
-                />
-              </div>
-              <div>
-                <Statistic
-                  title={
-                    <Typography
-                      style={{
-                        color: "#F44336",
-                        fontSize: "16px",
-                        marginBottom: "8px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Rejected Loans
-                    </Typography>
-                  }
-                  value={metrics.rejectedLoans ?? 0}
-                  valueStyle={{
-                    color: "#F44336",
-                    fontSize: "28px",
-                    fontWeight: "500",
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col sm={12} md={12} lg={6}>
-          <Card
-            style={{
-              height: "140px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              borderColor: "#FFC107",
-              // backgroundColor: "rgba(255, 193, 7, 0.05)",
+              // borderColor: "#FFC107",
+              background: "linear-gradient(90deg, #f7971e 0%, #ffd200 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -364,7 +273,7 @@ export default function Dashboard() {
                 }}
               >
                 <ClockCircleOutlined
-                  style={{ fontSize: "24px", color: "#FFC107" }}
+                  style={{ fontSize: "24px", color: "#fff" }}
                 />
               </div>
               <div>
@@ -372,7 +281,7 @@ export default function Dashboard() {
                   title={
                     <Typography
                       style={{
-                        color: "#FFC107",
+                        color: "#fff",
                         fontSize: "16px",
                         marginBottom: "8px",
                         fontWeight: "600",
@@ -383,7 +292,111 @@ export default function Dashboard() {
                   }
                   value={metrics.pendingLoans ?? 0}
                   valueStyle={{
-                    color: "#FFC107",
+                    color: "#fff",
+                    fontSize: "28px",
+                    fontWeight: "500",
+                  }}
+                />
+              </div>
+            </div>
+          </Card>
+        </Col>
+        <Col sm={12} md={12} lg={6}>
+          <Card
+            style={{
+              height: "140px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              // borderColor: "#2196F3",
+              background: "linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(33, 150, 243, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CheckCircleOutlined
+                  style={{ fontSize: "24px", color: "#fff" }}
+                />
+              </div>
+              <div>
+                <Statistic
+                  title={
+                    <Typography
+                      style={{
+                        color: "#fff",
+                        fontSize: "16px",
+                        marginBottom: "8px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Verified Loans
+                    </Typography>
+                  }
+                  value={metrics.verifiedLoans ?? 0}
+                  valueStyle={{
+                    color: "#fff",
+                    fontSize: "28px",
+                    fontWeight: "500",
+                  }}
+                />
+              </div>
+            </div>
+          </Card>
+        </Col>
+        <Col sm={12} md={12} lg={6}>
+          <Card
+            style={{
+              height: "140px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              // borderColor: "#F44336",
+              background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(244, 67, 54, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CloseCircleOutlined
+                  style={{ fontSize: "24px", color: "#fff" }}
+                />
+              </div>
+              <div>
+                <Statistic
+                  title={
+                    <Typography
+                      style={{
+                        color: "#fff",
+                        fontSize: "16px",
+                        marginBottom: "8px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Rejected Loans
+                    </Typography>
+                  }
+                  value={metrics.rejectedLoans ?? 0}
+                  valueStyle={{
+                    color: "#fff",
                     fontSize: "28px",
                     fontWeight: "500",
                   }}

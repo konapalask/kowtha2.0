@@ -190,7 +190,7 @@ const Footer: React.FC<{
               title="Are you sure you want to submit this final verdict?"
               onConfirm={handleSave}
             >
-              <Button type="primary">Submit</Button>
+              <Button type="primary">Generate Final Report</Button>
             </Popconfirm>
             {/* </Space> */}
           </div>

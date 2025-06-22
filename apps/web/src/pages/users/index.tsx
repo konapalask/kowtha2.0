@@ -43,7 +43,10 @@ interface Office {
   name: string;
 }
 
-const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
+const DashboardLayout = dynamic(
+  () => import("@/components/layout/DashboardLayout"),
+  { ssr: false }
+);
 
 export default function Users() {
   const [form] = Form.useForm();
@@ -57,12 +60,12 @@ export default function Users() {
     current: 1,
     pageSize: 10,
     total: 0,
-    totalPages: 0
+    totalPages: 0,
   });
   const [filters, setFilters] = useState<UserFilters>({
     employeeCode: undefined,
     name: undefined,
-    role: undefined
+    role: undefined,
   });
 
   const fetchUsers = async (page = 1, limit = 10) => {
@@ -75,7 +78,7 @@ export default function Users() {
         current: data.meta.page,
         pageSize: data.meta.limit,
         total: data.meta.total,
-        totalPages: data.meta.totalPages
+        totalPages: data.meta.totalPages,
       });
     } catch (error) {
       console.log(error);
@@ -128,7 +131,7 @@ export default function Users() {
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
-    } catch (error:any) {
+    } catch (error: any) {
       console.log(error?.response?.data?.message);
       message.error(error?.response?.data?.message);
     } finally {
@@ -159,7 +162,7 @@ export default function Users() {
     }
   };
 
-  const handleUserStatus = (status:string) => {
+  const handleUserStatus = (status: string) => {
     // Implement the logic to deactivate the user
     console.log("Deactivating user");
     form.setFieldsValue({ status });
@@ -170,10 +173,10 @@ export default function Users() {
   };
 
   const handleTableChange = (newPagination: any) => {
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       current: newPagination.current,
-      pageSize: newPagination.pageSize
+      pageSize: newPagination.pageSize,
     }));
   };
 
@@ -182,7 +185,7 @@ export default function Users() {
       title: "Employee Code",
       dataIndex: "employeeCode",
       key: "employeeCode",
-      width: 150,
+      width: 70,
     },
     {
       title: "Name",
@@ -207,6 +210,21 @@ export default function Users() {
       dataIndex: "role",
       key: "role",
       width: 100,
+      render: (role: string) => (
+        <Tag
+          color={
+            role === "Admin"
+              ? "geekblue"
+              : role === "OperationsExecutive"
+                ? "gold"
+                : role === "FieldExecutive"
+                  ? "green"
+                  : "volcano"
+          }
+        >
+          {role}
+        </Tag>
+      ),
     },
     {
       title: "Branch",
@@ -220,8 +238,13 @@ export default function Users() {
       dataIndex: "status",
       key: "status",
       width: 50,
-      render: (status: string) => status === "Active" ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
-      ...(userDetails?.role!=="Admin"&&{fixed:"right"})
+      render: (status: string) =>
+        status === "Active" ? (
+          <Tag color="green">Active</Tag>
+        ) : (
+          <Tag color="red">Inactive</Tag>
+        ),
+      ...(userDetails?.role !== "Admin" && { fixed: "right" }),
     },
     ...(userDetails?.role === "Admin"
       ? [
@@ -230,13 +253,13 @@ export default function Users() {
             key: "actions",
             render: (_: any, record: User) => (
               // <Space>
-                <Button
-                  type="link"
-                  icon={<EditOutlined />}
-                  onClick={() => handleEdit(record)}
-                >
-                  Edit
-                </Button>
+              <Button
+                type="link"
+                icon={<EditOutlined />}
+                onClick={() => handleEdit(record)}
+              >
+                Edit
+              </Button>
               // </Space>
             ),
             fixed: "right" as const,
@@ -250,11 +273,17 @@ export default function Users() {
     <DashboardLayout>
       <Card>
         {userDetails?.role === "Admin" && (
-          <div style={{ marginBottom: 16, display:"flex", justifyContent:"space-between" }}>
-             <FilterOverlay 
-            filters={filters}
-            onFilterChange={(newFilters: any) => setFilters(newFilters)}
-          />
+          <div
+            style={{
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <FilterOverlay
+              filters={filters}
+              onFilterChange={(newFilters: any) => setFilters(newFilters)}
+            />
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -316,7 +345,14 @@ export default function Users() {
           <Form.Item
             name="mobile"
             label="Mobile Number"
-            rules={[{ required: true, message: "Please enter mobile number" }, { max: 10, message: "Cannot be more than 10 characters" }, { pattern: /^[0-9]+$/, message: "Please enter a valid mobile number" }]}
+            rules={[
+              { required: true, message: "Please enter mobile number" },
+              { max: 10, message: "Cannot be more than 10 characters" },
+              {
+                pattern: /^[0-9]+$/,
+                message: "Please enter a valid mobile number",
+              },
+            ]}
             style={{ marginBottom: 8 }}
           >
             <Input maxLength={10} prefix="+91" />
@@ -345,7 +381,7 @@ export default function Users() {
             style={{ marginBottom: 8 }}
           >
             <Input
-            maxLength={15}
+              maxLength={15}
               onInput={(e: any) => {
                 e.target.value = e.target.value.toUpperCase();
               }}
@@ -372,11 +408,11 @@ export default function Users() {
           >
             <Select options={offices} placeholder="Select branch" />
           </Form.Item>
-          {editingUser&&editingUser.status==="Active" && (
+          {editingUser && editingUser.status === "Active" && (
             <Form.Item style={{ marginBottom: 8 }}>
               <Popconfirm
                 title="Are you sure you want to deactivate the user?"
-                onConfirm={()=>handleUserStatus("Inactive")}
+                onConfirm={() => handleUserStatus("Inactive")}
                 okText="Yes"
                 cancelText="No"
               >
@@ -386,15 +422,21 @@ export default function Users() {
               </Popconfirm>
             </Form.Item>
           )}
-           {editingUser&&editingUser.status==="Inactive" && (
+          {editingUser && editingUser.status === "Inactive" && (
             <Form.Item style={{ marginBottom: 8 }}>
               <Popconfirm
                 title="Are you sure you want to activate the user?"
-                onConfirm={()=>handleUserStatus("Active")}
+                onConfirm={() => handleUserStatus("Active")}
                 okText="Yes"
                 cancelText="No"
               >
-                <Button style={{ float: "right", color:"green",borderColor:"green" }}>
+                <Button
+                  style={{
+                    float: "right",
+                    color: "green",
+                    borderColor: "green",
+                  }}
+                >
                   Activate User
                 </Button>
               </Popconfirm>

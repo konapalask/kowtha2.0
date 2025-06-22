@@ -1,5 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { Table, Button, Tag, Typography, Form, message, Card } from "antd";
+import {
+  Table,
+  Button,
+  Tag,
+  Typography,
+  Form,
+  message,
+  Card,
+  Badge,
+} from "antd";
 import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -137,6 +146,7 @@ export default function Loans() {
               <Typography.Text
                 style={{ display: "flex", justifyContent: "space-between" }}
               >
+                <Badge dot status="error" />
                 {item.name} <Tag color="blue">{item.employeeCode}</Tag>{" "}
                 <Tag color="blue">Pending:{item.pendingVerifications}</Tag>
               </Typography.Text>
