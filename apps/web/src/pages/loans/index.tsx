@@ -4,7 +4,7 @@ import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
-import type { Key } from 'react';
+import type { Key } from "react";
 import { UserContext } from "@/components/layout/UserContextProvider";
 import {
   getLoansApi,
@@ -25,7 +25,10 @@ import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
 import { getUserDetails } from "@/utils/utility";
 
-const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
+const DashboardLayout = dynamic(
+  () => import("@/components/layout/DashboardLayout"),
+  { ssr: false }
+);
 
 dayjs.extend(relativeTime);
 
@@ -42,15 +45,19 @@ export interface Verifiers {
 
 export default function Loans() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [isImportModalVisible, setIsImportModalVisible] = useState<boolean>(false);
+  const [isImportModalVisible, setIsImportModalVisible] =
+    useState<boolean>(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
   const [selectedLoan, setSelectedLoan] = useState<string | null>(null);
   const [loans, setLoans] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(false);
   const userDetails = getUserDetails();
-  const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] = useState<boolean>(false);
+  const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] =
+    useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
-  const [currentOffice, setCurrentOffice] = useState<string>(userDetails?.officeId || "");
+  const [currentOffice, setCurrentOffice] = useState<string>(
+    userDetails?.officeId || ""
+  );
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
   const [offices, setOffices] = useState<Office[]>([]);
   const [editLoanInfo, setEditLoanInfo] = useState<boolean>(false);
@@ -59,16 +66,16 @@ export default function Loans() {
     current: 1,
     pageSize: 20,
     total: 0,
-    totalPages: 0
+    totalPages: 0,
   });
   const [filters, setFilters] = useState<FilterValue>({
     status: undefined,
     applicationNumber: undefined,
     fieldExecutiveEmployeeCode: undefined,
-    fieldExecutiveName: undefined
+    fieldExecutiveName: undefined,
   });
 
-  const fetchLoans = async (page = 1, limit = 10) => {
+  const fetchLoans = async (page = 1, limit = 20) => {
     try {
       setLoading(true);
       const result = await getLoansApi(page, limit, filters);
@@ -78,7 +85,7 @@ export default function Loans() {
         current: data.meta.page,
         pageSize: data.meta.limit,
         total: data.meta.total,
-        totalPages: data.meta.totalPages
+        totalPages: data.meta.totalPages,
       });
     } catch (error) {
       message.error("Failed to fetch loans");
@@ -126,7 +133,14 @@ export default function Loans() {
         const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
         const options =
           result?.data?.data?.map((item: any) => ({
-            label: <Typography.Text style={{gap:20}}>{item.name} <Tag color="blue">{item.employeeCode}</Tag> <Tag color="blue">Pending:{item.pendingVerifications}</Tag></Typography.Text>,
+            label: (
+              <Typography.Text
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                {item.name} <Tag color="blue">{item.employeeCode}</Tag>{" "}
+                <Tag color="blue">Pending:{item.pendingVerifications}</Tag>
+              </Typography.Text>
+            ),
             value: item.id,
           })) ?? [];
         setFieldExecutives(options);
@@ -152,10 +166,10 @@ export default function Loans() {
   };
 
   const handleTableChange = (newPagination: any) => {
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       current: newPagination.current,
-      pageSize: newPagination.pageSize
+      pageSize: newPagination.pageSize,
     }));
   };
 
@@ -187,17 +201,17 @@ export default function Loans() {
       width: 100,
       render: (status: string) => {
         const color =
-        status === "Unassigned"
+          status === "Unassigned"
             ? "magenta"
-        :status === "Assigned"
-            ? "geekblue"
-          :status === "Pending"
-            ? "orange"
-            : status === "Approved"
-              ? "green"
-              : status === "Rejected"
-                ? "red"
-                : "blue";
+            : status === "Assigned"
+              ? "geekblue"
+              : status === "Pending"
+                ? "orange"
+                : status === "Approved"
+                  ? "green"
+                  : status === "Rejected"
+                    ? "red"
+                    : "blue";
         return <Tag color={color}>{status}</Tag>;
       },
     },
@@ -215,10 +229,12 @@ export default function Loans() {
           title: "Assignee",
           key: "pavAssignee",
           onFilter: (value: boolean | Key, record: Loan) => {
-            const pav = record?.verifications?.find((v: any) => v.type === "AddressOne");
+            const pav = record?.verifications?.find(
+              (v: any) => v.type === "AddressOne"
+            );
             return pav?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
@@ -230,7 +246,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "pavStatus",
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
@@ -253,10 +269,12 @@ export default function Loans() {
           title: "Assignee",
           key: "cavAssignee",
           onFilter: (value: boolean | Key, record: Loan) => {
-            const cav = record?.verifications?.find((v: any) => v.type === "AddressTwo");
+            const cav = record?.verifications?.find(
+              (v: any) => v.type === "AddressTwo"
+            );
             return cav?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
@@ -268,7 +286,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "cavStatus",
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
@@ -291,10 +309,12 @@ export default function Loans() {
           title: "Assignee",
           key: "wvAssignee",
           onFilter: (value: boolean | Key, record: Loan) => {
-            const wv = record?.verifications?.find((v: any) => v.type === "Work");
+            const wv = record?.verifications?.find(
+              (v: any) => v.type === "Work"
+            );
             return wv?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
@@ -306,7 +326,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "wvStatus",
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
@@ -329,10 +349,12 @@ export default function Loans() {
           title: "Assignee",
           key: "businessAssignee",
           onFilter: (value: boolean | Key, record: Loan) => {
-            const business = record?.verifications?.find((v: any) => v.type === "Business");
+            const business = record?.verifications?.find(
+              (v: any) => v.type === "Business"
+            );
             return business?.fieldExecutive?.employeeCode === value.toString();
           },
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const business = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
@@ -344,7 +366,7 @@ export default function Loans() {
         {
           title: "Status",
           key: "wvStatus",
-          render: (_:any, record: Loan) => {
+          render: (_: any, record: Loan) => {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
@@ -360,27 +382,29 @@ export default function Loans() {
         },
       ],
     },
-    ...(!(userDetails?.role==="Verifier")?[
-      {
-        title: "Actions",
-        key: "actions",
-        fixed: "right",
-        align: "center",
-        render: (_:any, record:any) => (
-          <Button
-            type="link"
-            // icon={<EditOutlined />}
-            onClick={() => {
-              setSelectedLoan(record.applicationNumber);
-              setIsDrawerVisible(true);
-            }}
-          >
-            Edit
-          </Button>
-        ),
-        width: 100,
-      }
-    ]:[]),
+    ...(!(userDetails?.role === "Verifier")
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            fixed: "right",
+            align: "center",
+            render: (_: any, record: any) => (
+              <Button
+                type="link"
+                // icon={<EditOutlined />}
+                onClick={() => {
+                  setSelectedLoan(record.applicationNumber);
+                  setIsDrawerVisible(true);
+                }}
+              >
+                Edit
+              </Button>
+            ),
+            width: 100,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -393,27 +417,29 @@ export default function Loans() {
           />
         </div> */}
         <div
-          style={{ 
-            marginBottom: 16, 
-            display: "flex", 
-            gap: "8px", 
-            justifyContent: "space-between" 
+          style={{
+            marginBottom: 16,
+            display: "flex",
+            gap: "8px",
+            justifyContent: "space-between",
           }}
         >
-           <FilterOverlay 
+          <FilterOverlay
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
           />
-         {!(userDetails?.role==="Verifier")&& <Button
-            type="primary"
-            icon={<PlusOutlined style={{ fontSize: 16 }} />}
-            onClick={() => {
-              setSelectedLoan(null);
-              setIsDrawerVisible(true);
-            }}
-          >
-            New Loan
-          </Button>}
+          {!(userDetails?.role === "Verifier") && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined style={{ fontSize: 16 }} />}
+              onClick={() => {
+                setSelectedLoan(null);
+                setIsDrawerVisible(true);
+              }}
+            >
+              New Loan
+            </Button>
+          )}
           {/* <Button
             style={{
               color: colors.secondary.main,
@@ -459,24 +485,26 @@ export default function Loans() {
         handleImport={handleImport}
       />
 
-     {isDrawerVisible&& <LoanEditDrawer
-        selectedApplicationNumber={selectedLoan}
-        // setSelectedLoan={setSelectedLoan}
-        isDrawerVisible={isDrawerVisible}
-        setIsDrawerVisible={setIsDrawerVisible}
-        editLoanInfo={editLoanInfo}
-        setEditLoanInfo={setEditLoanInfo}
-        loading={loading}
-        setLoading={setLoading}
-        setLoans={setLoans}
-        loans={loans}
-        fieldExecutives={fieldExecutives}
-        setCurrentOffice={setCurrentOffice}
-        offices={offices}
-        verifiers={verifiers}
-        fetchLoans={fetchLoans}
-        setRefresh={setRefresh}
-      />}
+      {isDrawerVisible && (
+        <LoanEditDrawer
+          selectedApplicationNumber={selectedLoan}
+          // setSelectedLoan={setSelectedLoan}
+          isDrawerVisible={isDrawerVisible}
+          setIsDrawerVisible={setIsDrawerVisible}
+          editLoanInfo={editLoanInfo}
+          setEditLoanInfo={setEditLoanInfo}
+          loading={loading}
+          setLoading={setLoading}
+          setLoans={setLoans}
+          loans={loans}
+          fieldExecutives={fieldExecutives}
+          setCurrentOffice={setCurrentOffice}
+          offices={offices}
+          verifiers={verifiers}
+          fetchLoans={fetchLoans}
+          setRefresh={setRefresh}
+        />
+      )}
 
       <BulkImportDrawer
         isBulkImportDrawerVisible={isBulkImportDrawerVisible}

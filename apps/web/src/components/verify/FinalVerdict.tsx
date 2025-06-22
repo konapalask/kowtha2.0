@@ -1,31 +1,23 @@
-import { Radio, Card, Button, Popconfirm } from "antd";
+import { Radio, Card } from "antd";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 
 interface FinalVerdictProps {
   disabled?: boolean;
-  initialVerdict?: string;
-  initialRemarks?: string;
-  onVerdictChange?: (verdict: string) => void;
-  onRemarksChange?: (remarks: string) => void;
-  handleSave: (verdict: string, remarks: string) => void;
-  hasEditRequest?: boolean;
+  verdict: boolean;
+  setVerdict: any;
+  editorContent: any;
+  setEditorContent: any;
 }
 
 const FinalVerdict: React.FC<FinalVerdictProps> = ({
   disabled = false,
-  initialVerdict = "",
-  initialRemarks = "<ul><li><br></li></ul>",
-  onVerdictChange,
-  onRemarksChange,
-  handleSave,
-  hasEditRequest,
+  verdict,
+  setVerdict,
+  editorContent,
+  setEditorContent,
 }) => {
-  const [verdict, setVerdict] = useState(initialVerdict);
-  const [editorContent, setEditorContent] = useState(initialRemarks);
-
   const sanitizeToListOnly = (html: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -51,16 +43,13 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
 
     if (!sanitized || sanitized.trim() === "") {
       setEditorContent("<ul><li><br></li></ul>");
-      onRemarksChange?.("<ul><li><br></li></ul>");
     } else {
       setEditorContent(sanitized);
-      onRemarksChange?.(sanitized);
     }
   };
 
   const handleVerdictChange = (e: any) => {
     setVerdict(e.target.value);
-    onVerdictChange?.(e.target.value);
   };
 
   return (
@@ -68,15 +57,15 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
       <Card
         title="Final Verdict"
         bodyStyle={{ padding: 0 }}
-        extra={
-          <Popconfirm
-            title="Are you sure you want to submit this final verdict?"
-            onConfirm={() => handleSave(verdict, editorContent)}
-            disabled={hasEditRequest}
-          >
-            <Button type="primary">Submit</Button>
-          </Popconfirm>
-        }
+        // extra={
+        //   <Popconfirm
+        //     title="Are you sure you want to submit this final verdict?"
+        //     onConfirm={() => handleSave(verdict, editorContent)}
+        //     disabled={hasEditRequest}
+        //   >
+        //     <Button type="primary">Submit</Button>
+        //   </Popconfirm>
+        // }
       >
         <div
           style={{ minHeight: "300px", background: "#fff", borderRadius: 8 }}

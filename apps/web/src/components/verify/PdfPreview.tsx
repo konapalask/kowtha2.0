@@ -7,7 +7,7 @@ const PdfPreview: React.FC<{
   status: string | null;
   setLoading: (val: boolean) => void;
 }> = ({ id, status, setLoading }) => {
-  // console.log(id, status)
+  // console.log(id, status);
   const { activeTab } = useTabContext();
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
 
@@ -44,14 +44,14 @@ const PdfPreview: React.FC<{
   }, []);
   return (
     <>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, height: "80dvh" }}>
         <strong>PDF Preview:</strong>
         {pdfPreviewUrl ? (
           <object
             data={pdfPreviewUrl}
             type="application/pdf"
             width="100%"
-            height={600}
+            height={"100%"}
             style={{ border: "1px solid #eee", marginTop: 8 }}
           >
             <div style={{ padding: "20px", textAlign: "center" }}>

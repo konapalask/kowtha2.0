@@ -4,7 +4,11 @@ import { Table, Card, Typography, Tag, Space, Button, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { EyeOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
 
 const { Title } = Typography;
@@ -32,7 +36,7 @@ const EditRequests: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [editRequests, setEditRequests] = useState<EditRequest[]>([]);
-  
+
   // Add dummy login requests data
   const [loginRequests] = useState<LoginRequest[]>([
     {
@@ -182,12 +186,20 @@ const EditRequests: React.FC = () => {
         <Space>
           <Button
             type="text"
-            icon={<CheckCircleOutlined style={{ color: '#52c41a', fontSize: '20px' }} />}
+            icon={
+              <CheckCircleOutlined
+                style={{ color: "#52c41a", fontSize: "20px" }}
+              />
+            }
             onClick={() => handleApprove(record)}
           />
           <Button
             type="text"
-            icon={<CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '20px' }} />}
+            icon={
+              <CloseCircleOutlined
+                style={{ color: "#ff4d4f", fontSize: "20px" }}
+              />
+            }
             onClick={() => handleReject(record)}
           />
         </Space>
@@ -219,24 +231,18 @@ const EditRequests: React.FC = () => {
           </Space>
         </Card>
 
-        <Card title="Login Requests">
+        {/* <Card title="Login Requests">
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
-            {/* <Title level={4}>Login Requests</Title> */}
             <Table
               className="striped-table"
               columns={loginRequestColumns}
               dataSource={loginRequests}
               rowKey="id"
               pagination={false}
-              // pagination={{
-              //   pageSize: 10,
-              //   showSizeChanger: true,
-              //   showTotal: (total) => `Total ${total} items`,
-              // }}
               bordered
             />
           </Space>
-        </Card>
+        </Card> */}
       </Space>
     </DashboardLayout>
   );

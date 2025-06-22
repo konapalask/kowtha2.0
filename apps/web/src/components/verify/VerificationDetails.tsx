@@ -1,14 +1,14 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
 import {
-  CloseCircleOutlined,
+  // CloseCircleOutlined,
   EditOutlined,
-  EyeOutlined,
+  // EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Descriptions, Image, message, Modal } from "antd";
-import dynamic from "next/dynamic";
+import { Button, Card, Image, message } from "antd";
+// import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import FinalVerdict from "./FinalVerdict";
@@ -20,7 +20,7 @@ import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescript
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import Footer from "./Footer";
 import { verifierEditApi } from "@/services/verifier.services";
-import PdfPreview from "./PdfPreview";
+// import PdfPreview from "./PdfPreview";
 
 interface VerificationDetailsProps {
   verificationData: any;
@@ -50,17 +50,20 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState<boolean>(false);
-  const [verdict, setVerdict] = useState<string | null>(null);
+  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  // const [editorContent, setEditorContent] = useState(initialRemarks);
+  // const [verdict, setVerdict] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async (verdict: string | null, remarks: string) => {
-    verifierEditApi(id as string, verificationType, { path: remarks })
+  const handleSave = async () => {
+    verifierEditApi(id as string, verificationType, { path: editorContent })
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        setOpen(true);
-        setVerdict(verdict);
+        // setOpen(true);
+        // setVerdict(verdict);
         setLoading(true);
+        setOpen(false);
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -128,42 +131,42 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
   const data = verificationData || {};
 
-  const sanitizeToListOnly = (html: string) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+  // const sanitizeToListOnly = (html: string) => {
+  //   const parser = new DOMParser();
+  //   const doc = parser.parseFromString(html, "text/html");
 
-    // Find all <ul> elements
-    const ul = doc.querySelector("ul");
-    if (!ul) return "<ul><li><br></li></ul>"; // fallback if no list
+  //   // Find all <ul> elements
+  //   const ul = doc.querySelector("ul");
+  //   if (!ul) return "<ul><li><br></li></ul>"; // fallback if no list
 
-    // Only keep <ul><li> structure, remove everything else
-    const cleanUl = document.createElement("ul");
+  //   // Only keep <ul><li> structure, remove everything else
+  //   const cleanUl = document.createElement("ul");
 
-    ul.querySelectorAll("li").forEach((li: any) => {
-      const cleanLi = document.createElement("li");
-      cleanLi.innerHTML = li.innerHTML;
-      cleanUl.appendChild(cleanLi);
-    });
+  //   ul.querySelectorAll("li").forEach((li: any) => {
+  //     const cleanLi = document.createElement("li");
+  //     cleanLi.innerHTML = li.innerHTML;
+  //     cleanUl.appendChild(cleanLi);
+  //   });
 
-    return cleanUl.outerHTML;
-  };
+  //   return cleanUl.outerHTML;
+  // };
 
-  const handleEditorChange = (content: string) => {
-    const sanitized = sanitizeToListOnly(content);
+  // const handleEditorChange = (content: string) => {
+  //   const sanitized = sanitizeToListOnly(content);
 
-    if (!sanitized || sanitized.trim() === "") {
-      setEditorContent("<ul><li><br></li></ul>");
-    } else {
-      setEditorContent(sanitized);
-    }
-  };
+  //   if (!sanitized || sanitized.trim() === "") {
+  //     setEditorContent("<ul><li><br></li></ul>");
+  //   } else {
+  //     setEditorContent(sanitized);
+  //   }
+  // };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Prevent backspace from clearing the initial bullet point
-    if (e.key === "Backspace" && editorContent === "<ul><li><br></li></ul>") {
-      e.preventDefault();
-    }
-  };
+  // const handleKeyDown = (e: React.KeyboardEvent) => {
+  //   // Prevent backspace from clearing the initial bullet point
+  //   if (e.key === "Backspace" && editorContent === "<ul><li><br></li></ul>") {
+  //     e.preventDefault();
+  //   }
+  // };
 
   const getButton = (formKey: string) => (
     <Button
@@ -174,22 +177,22 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
     />
   );
 
-  const CustomToolbar = () => (
-    <div
-      id="custom-toolbar"
-      style={{
-        padding: "8px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <span style={{ marginLeft: 8, fontWeight: "bold", fontSize: "16px" }}>
-        Final Observations
-      </span>
-      {/* <Button type="primary" onClick={handleSave} disabled={hasEditRequest} >Save</Button> */}
-    </div>
-  );
+  // const CustomToolbar = () => (
+  //   <div
+  //     id="custom-toolbar"
+  //     style={{
+  //       padding: "8px",
+  //       display: "flex",
+  //       justifyContent: "space-between",
+  //       alignItems: "center",
+  //     }}
+  //   >
+  //     <span style={{ marginLeft: 8, fontWeight: "bold", fontSize: "16px" }}>
+  //       Final Observations
+  //     </span>
+  //     {/* <Button type="primary" onClick={handleSave} disabled={hasEditRequest} >Save</Button> */}
+  //   </div>
+  // );
 
   return (
     <>
@@ -313,25 +316,24 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         }}>Preview</Button>
       </section> */}
       {/* </Card> */}
-      <Footer editorContent={editorContent} disabled={hasEditRequest} />
-
       <FinalVerdict
         disabled={hasEditRequest}
-        initialVerdict={verificationData?.finalVerdict}
-        initialRemarks={verificationData?.finalObservations?.remarks}
-        onVerdictChange={(verdict) => {
-          // Handle verdict change
-          console.log("Verdict changed:", verdict);
-        }}
-        onRemarksChange={(remarks) => {
-          // Handle remarks change
-          console.log("Remarks changed:", remarks);
-        }}
-        handleSave={handleSave}
-        hasEditRequest={hasEditRequest}
+        verdict={verdict}
+        setVerdict={setVerdict}
+        editorContent={editorContent}
+        setEditorContent={setEditorContent}
       />
 
-      <Modal
+      <Footer
+        editorContent={editorContent}
+        disabled={hasEditRequest}
+        handleSave={handleSave}
+        verdict={verdict}
+        open={open}
+        setOpen={setOpen}
+      />
+
+      {/* <Modal
         open={open}
         onCancel={() => {
           setOpen(false);
@@ -370,7 +372,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         >
           Confirm
         </Button>
-      </Modal>
+      </Modal> */}
       {/* Final Observations Section */}
       {/* <section style={{ marginBottom: 24 }}>
         <Card title="Final Observations"> */}
