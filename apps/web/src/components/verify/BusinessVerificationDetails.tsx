@@ -30,13 +30,15 @@ interface BusinessVerificationDetailsProps {
   hasEditRequest: boolean;
 }
 
-export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsProps> = ({
+export const BusinessVerificationDetails: React.FC<
+  BusinessVerificationDetailsProps
+> = ({
   verificationData,
   onEdit,
   editLogsUpdated,
   verificationId,
   fetchEditRequests,
-  hasEditRequest
+  hasEditRequest,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -46,24 +48,26 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
     verificationData?.finalObservations?.remarks || ""
   );
   const [changedData, setChangedData] = useState<any>({});
-  const [open, setOpen] = useState(false)
-  const [verdict, setVerdict] = useState<string | null>(null)
+  const [open, setOpen] = useState(false);
+  const [verdict, setVerdict] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async(verdict: string|null, remarks: string) => {
-    verifierEditApi(id as string, "Work", {path:remarks})
-    .then((response)=>{
-      // console.log("response: ", response)
-      message.success(response.data.message);
-      setOpen(true)
-      setVerdict(verdict)
-
-    }).catch((error)=>{
-      console.log("error: ", error)
-      message.error(error.response.data.message || "Failed to save final observations");
-    });    
-    
+  const handleSave = async (verdict: string | null, remarks: string) => {
+    verifierEditApi(id as string, "Work", { path: remarks })
+      .then((response) => {
+        // console.log("response: ", response)
+        message.success(response.data.message);
+        setOpen(true);
+        setVerdict(verdict);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+        message.error(
+          error.response.data.message || "Failed to save final observations"
+        );
+      });
   };
-
 
   useEffect(() => {
     const fetchImageUrls = async () => {
@@ -93,7 +97,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
 
     request.onsuccess = (event: any) => {
       const db = event.target.result;
-      
+
       try {
         const transaction = db.transaction("logs", "readonly");
         const store = transaction.objectStore("logs");
@@ -130,7 +134,7 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
     // if (liCount === 0) {
     //   setEditorContent("<ul><li></li></ul>");
     // } else {
-      setEditorContent(content);
+    setEditorContent(content);
     // }
   };
 
@@ -231,19 +235,27 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
       </section>
 
       <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs currentData={data} changedData={changedData} verificationId={verificationId} fetchEditRequests={fetchEditRequests} disabled={hasEditRequest} admin={false} verificationType={activeTab} />
+        <EditRequestLogs
+          currentData={data}
+          changedData={changedData}
+          verificationId={verificationId}
+          fetchEditRequests={fetchEditRequests}
+          disabled={hasEditRequest}
+          admin={false}
+          verificationType={activeTab}
+        />
       </section>
 
       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
       {/* <section style={{marginBottom:24, textAlign:"center", padding:8}}> */}
-        {/* <Button icon={<EyeOutlined />} onClick={()=>{
+      {/* <Button icon={<EyeOutlined />} onClick={()=>{
           setOpen(true)
         }}>Preview</Button> */}
-        <Footer editorContent={editorContent} disabled={hasEditRequest} />
+      <Footer editorContent={editorContent} disabled={hasEditRequest} />
       {/* </section> */}
       {/* </Card> */}
 
-      <FinalVerdict 
+      <FinalVerdict
         disabled={hasEditRequest}
         initialVerdict={verificationData?.finalVerdict}
         initialRemarks={verificationData?.finalObservations?.remarks}
@@ -270,8 +282,8 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
         }}
         cancelButtonProps={{
           style: {
-            display: "none"
-          }
+            display: "none",
+          },
         }}
         footer={null}
         width={900}
@@ -282,9 +294,24 @@ export const BusinessVerificationDetails: React.FC<BusinessVerificationDetailsPr
         }
         destroyOnClose
         closeIcon={!verdict}
+        maskClosable={false}
       >
-        <PdfPreview id={id as string} status={verdict} />
-       {verdict&& <Button type="primary" onClick={()=>{router.push("/verify")}}>Confirm</Button>}
+        <PdfPreview
+          id={id as string}
+          status={verdict}
+          setLoading={setLoading}
+        />
+        {verdict && (
+          <Button
+            type="primary"
+            onClick={() => {
+              router.push("/verify");
+            }}
+            loading={loading}
+          >
+            Confirm
+          </Button>
+        )}
       </Modal>
 
       {/* Final Observations Section */}

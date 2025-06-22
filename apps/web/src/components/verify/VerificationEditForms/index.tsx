@@ -1,15 +1,15 @@
-import React from 'react';
-import BasicDetailsForm from './BasicDetailsForm';
-import ResidenceDetailsForm from './ResidenceDetailsForm';
-import FamilyEmploymentDetailsForm from './FamilyEmploymentDetailsForm';
-import AddressVerificationForm from './AddressVerificationForm';
-import ThirdPartyCheckForm from './ThirdPartyCheckForm';
-import FinalObservationsForm from './FinalObservationsForm';
-import OfficeVerificationForm from './OfficeVerificationForm';
-import WorkBasicDetails from './WorkBasicDetails';
-import BusinessBasicDetails from './BusinessBasicDetails';
-import BusinessDetails from './BusinessDetails';
-import BusinessMiscellaneous from './BusinessMiscellaneous';
+import React from "react";
+import BasicDetailsForm from "./BasicDetailsForm";
+import ResidenceDetailsForm from "./ResidenceDetailsForm";
+import FamilyEmploymentDetailsForm from "./FamilyEmploymentDetailsForm";
+import AddressVerificationForm from "./AddressVerificationForm";
+import ThirdPartyCheckForm from "./ThirdPartyCheckForm";
+// import FinalObservationsForm from './FinalObservationsForm';
+import OfficeVerificationForm from "./OfficeVerificationForm";
+import WorkBasicDetails from "./WorkBasicDetails";
+import BusinessBasicDetails from "./BusinessBasicDetails";
+import BusinessDetails from "./BusinessDetails";
+import BusinessMiscellaneous from "./BusinessMiscellaneous";
 
 interface FormSelectorProps {
   form: any;
@@ -18,39 +18,49 @@ interface FormSelectorProps {
   getMaritalStatus: any;
 }
 
-export const FormSelector: React.FC<FormSelectorProps> = ({form, formKey, currentTab, getMaritalStatus }) => {
+export const FormSelector: React.FC<FormSelectorProps> = ({
+  form,
+  formKey,
+  currentTab,
+  getMaritalStatus,
+}) => {
   switch (formKey) {
-    case 'basicDetails':
+    case "basicDetails":
       return <BasicDetailsForm form={form} />;
-      case 'addressVerification':
-        return <AddressVerificationForm form={form} />;
-    case 'residenceDetails':
+    case "addressVerification":
+      return <AddressVerificationForm form={form} />;
+    case "residenceDetails":
       return <ResidenceDetailsForm form={form} />;
-    case 'familyEmploymentDetails':
-      return <FamilyEmploymentDetailsForm form={form} getMaritalStatus={getMaritalStatus} />;
-    case 'thirdPartyCheck':
+    case "familyEmploymentDetails":
+      return (
+        <FamilyEmploymentDetailsForm
+          form={form}
+          getMaritalStatus={getMaritalStatus}
+        />
+      );
+    case "thirdPartyCheck":
       return <ThirdPartyCheckForm form={form} />;
     // case 'finalObservations':
     //   return <FinalObservationsForm form={form} />;
-    case 'employmentDetails':
+    case "employmentDetails":
       return <OfficeVerificationForm form={form} />;
-    case 'workBasicDetails':
+    case "workBasicDetails":
       return <WorkBasicDetails form={form} />;
-    case 'businessBasicDetails':
+    case "businessBasicDetails":
       return <BusinessBasicDetails form={form} />;
-    case 'businessDetails':
+    case "businessDetails":
       return <BusinessDetails form={form} />;
-    case 'miscellaneous':
+    case "miscellaneous":
       return <BusinessMiscellaneous form={form} />;
     default:
       return null;
   }
 };
 
-export { default as BasicDetailsForm } from './BasicDetailsForm';
-export { default as ResidenceDetailsForm } from './ResidenceDetailsForm';
-export { default as FamilyEmploymentDetailsForm } from './FamilyEmploymentDetailsForm';
-export { default as AddressVerificationForm } from './AddressVerificationForm';
-export { default as ThirdPartyCheckForm } from './ThirdPartyCheckForm';
-export { default as FinalObservationsForm } from './FinalObservationsForm';
-export { default as OfficeVerificationForm } from './OfficeVerificationForm'; 
+export { default as BasicDetailsForm } from "./BasicDetailsForm";
+export { default as ResidenceDetailsForm } from "./ResidenceDetailsForm";
+export { default as FamilyEmploymentDetailsForm } from "./FamilyEmploymentDetailsForm";
+export { default as AddressVerificationForm } from "./AddressVerificationForm";
+export { default as ThirdPartyCheckForm } from "./ThirdPartyCheckForm";
+export { default as FinalObservationsForm } from "./FinalObservationsForm";
+export { default as OfficeVerificationForm } from "./OfficeVerificationForm";
