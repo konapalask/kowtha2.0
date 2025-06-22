@@ -10,18 +10,19 @@ import {
   message,
   Form,
   Popconfirm,
-  Row, Col
+  Row,
+  Col,
 } from "antd";
-import {
-  CloseOutlined,
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
-import { assignExecutivesApi, deleteFieldAssignmentApi, getLoansByIdApi } from "@/services/loans.services";
+import {
+  assignExecutivesApi,
+  deleteFieldAssignmentApi,
+  getLoansByIdApi,
+} from "@/services/loans.services";
 import { getUserDetails } from "@/utils/utility";
 
 interface LoanDetails {
@@ -76,13 +77,17 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
-  const [selectedLoan, setSelectedLoan] = useState<string | null>(selectedApplicationNumber);
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(
+    selectedApplicationNumber
+  );
   const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
   const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
   const [workDisabled, setWorkDisabled] = useState<boolean>(false);
   const [businessDisabled, setBusinessDisabled] = useState<boolean>(false);
   const [loanDetails, setLoanDetails] = useState<LoanDetails | null>(null);
-  const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<Record<string, boolean>>({
+  const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
+    Record<string, boolean>
+  >({
     Address1: false,
     Address2: false,
     Work: false,
@@ -105,7 +110,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         setLoanDetails(loanData);
       }
     } catch (error) {
-      console.error('Error fetching loan details:', error);
+      console.error("Error fetching loan details:", error);
       message.error("Failed to fetch loan details");
     } finally {
       setLoading(false);
@@ -119,12 +124,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   }, [selectedLoan]);
 
   function hasVerificationType(type: string) {
-    return loanDetails?.verifications?.some((v: any) => v.type === type) || false;
+    return (
+      loanDetails?.verifications?.some((v: any) => v.type === type) || false
+    );
   }
 
   const handleVerifierSelect = async (value: string) => {
     if (!loanDetails?.id) return;
-    
+
     try {
       setLoading(true);
       await assignExecutivesApi(loanDetails.id, {
@@ -156,14 +163,25 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     fetchLoans();
   };
 
-  const handleDelete = async(loanId:number,type:string,fieldExecutiveId:number)=>{
-   await deleteFieldAssignmentApi(loanId, type,{fieldExecutiveId})
-    .then((response)=>{
-      message.success(response?.data?.message)
-      fetchLoanDetails()
-    })
-    .catch((error)=>console.log(`Error:${error}`))
-  }
+  const handleDelete = async (
+    loanId: number,
+    type: string,
+    fieldExecutiveId: number
+  ) => {
+    await deleteFieldAssignmentApi(loanId, type, { fieldExecutiveId })
+      .then((response) => {
+        message.success(response?.data?.message);
+        fetchLoanDetails();
+      })
+      .catch((error) => console.log(`Error:${error}`));
+  };
+
+  const handleSaveAndClose = () => {
+    if (editLoanInfo) {
+      form.submit();
+    }
+    handleClose();
+  };
 
   return (
     <div>
@@ -218,6 +236,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         open={isDrawerVisible}
         // maskClosable={false}
         destroyOnClose
+        footer={
+          <div className="flex-end">
+            <Button onClick={handleSaveAndClose} type="primary">
+              Save & Close
+            </Button>
+          </div>
+        }
       >
         {(selectedLoan || !loanDetails?.id) && (
           <>
@@ -244,9 +269,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         const matchingBank = bankOptions.find((option) =>
                           option.value
                             .toLowerCase()
-                            .includes(
-                              loanDetails.bankName?.toLowerCase() || ""
-                            )
+                            .includes(loanDetails.bankName?.toLowerCase() || "")
                         );
 
                         form.setFieldsValue({
@@ -255,7 +278,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                           applicantMobile: loanDetails.applicantMobile,
                           loanAmount: loanDetails.loanAmount,
                           applicantAddress: loanDetails.applicantAddress,
-                          loanType: matchingLoanType?.value || loanDetails.loanType,
+                          loanType:
+                            matchingLoanType?.value || loanDetails.loanType,
                           bankName: loanDetails.bankName,
                           applicantType: loanDetails.applicantType,
                         });
@@ -282,7 +306,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   className="loan-details-descriptions"
                   bordered
                   size="small"
-                  column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
+                  column={{ xxl: 4, xl: 4, lg: 4, md: 2, sm: 1, xs: 1 }}
                 >
                   <Descriptions.Item label="Application Number">
                     {loanDetails?.applicationNumber}
@@ -293,9 +317,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   <Descriptions.Item label="Mobile Number">
                     {loanDetails?.applicantMobile}
                   </Descriptions.Item>
-                 {loanDetails?.loanAmount && <Descriptions.Item label="Loan Amount">
-                    {loanDetails?.loanAmount}
-                  </Descriptions.Item>}
+                  {loanDetails?.loanAmount && (
+                    <Descriptions.Item label="Loan Amount">
+                      {loanDetails?.loanAmount}
+                    </Descriptions.Item>
+                  )}
                   <Descriptions.Item label="Loan Type">
                     {loanDetails?.loanType}
                   </Descriptions.Item>
@@ -309,159 +335,206 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
               )}
             </div>
 
-            {loanDetails?.id && <>
-             
-              <Row style={{ display: "flex"}} gutter={[8,8]}>
-                {[
-                  { type: "AddressOne", label: "Address 1" },
-                  { type: "AddressTwo", label: "Address 2" },
-                  { type: "Work", label: "Work" },
-                  { type: "Business", label: "Business" }
-                ].map(({ type, label }) => {
-                  const verification = loanDetails?.verifications?.find(
-                    (v: any) => v.type === type
-                  );
-                  return (
-                    <Col span={6}>
-                    <Card
-                      key={type}
-                      size={"small"}
-                      title={label}
-                      style={{
-                        flex: 1,
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                      headStyle={{
-                        minHeight: 40,
-                        paddingLeft:10,
-                        paddingRight:0,
-                        border:"none",
-                        fontWeight:400
-                      }}
-                      bodyStyle={{
-                        flex: verification?.status === "Completed" ? "none" : 1,
-                        padding: 12
-                      }}
-                      extra={
-                        <>
-                          {verification && (
-                            <Tag
-                              color={
-                                verification.status === "Completed"
-                                  ? "green"
-                                  : "orange"
-                              }
-                            >
-                              {verification.status}
-                            </Tag>
-                          )}
-                          {/* {verification&&(
+            {loanDetails?.id && (
+              <>
+                <Row style={{ display: "flex" }} gutter={[8, 8]}>
+                  {[
+                    { type: "AddressOne", label: "Address 1" },
+                    { type: "AddressTwo", label: "Address 2" },
+                    { type: "Work", label: "Work" },
+                    { type: "Business", label: "Business" },
+                  ].map(({ type, label }) => {
+                    const verification = loanDetails?.verifications?.find(
+                      (v: any) => v.type === type
+                    );
+                    return (
+                      <Col span={6}>
+                        <Card
+                          key={type}
+                          size={"small"}
+                          title={label}
+                          style={{
+                            flex: 1,
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                          headStyle={{
+                            minHeight: 40,
+                            paddingLeft: 10,
+                            paddingRight: 0,
+                            border: "none",
+                            fontWeight: 400,
+                          }}
+                          bodyStyle={{
+                            flex:
+                              verification?.status === "Completed" ? "none" : 1,
+                            padding: 12,
+                          }}
+                          extra={
+                            <>
+                              {verification && (
+                                <Tag
+                                  color={
+                                    verification.status === "Completed"
+                                      ? "green"
+                                      : "orange"
+                                  }
+                                >
+                                  {verification.status}
+                                </Tag>
+                              )}
+                              {/* {verification&&(
                            <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
                              <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f"}} />
                            </Popconfirm>
                           )} */}
-                        </>
-                      }
-                    >
-                      {verification && (
-                        <div style={{ marginBottom: 0 }}>
-                          <div 
-                          // className="flex-end"
-                          style={{justifyContent:"space-between", display:"flex"}}
-                          >
-                            {verification?.status === "Pending" &&
-                              (fieldExecutiveEdit[type] ? (
-                                <Button
-                                  danger
-                                  type="link"
-                                  size="small"
-                                  icon={<CloseOutlined />}
-                                  onClick={() =>
-                                    setFieldExecutiveEdit((prev) => ({
-                                      ...prev,
-                                      [type]: false,
-                                    }))
-                                  }
-                                >
-                                  Cancel
-                                </Button>
-                              ) : (
-                                <Button
-                                  type="link"
-                                  size="small"
-                                  icon={<EditOutlined />}
-                                  onClick={() => {
-                                    setFieldExecutiveEdit((prev) => ({
-                                      ...prev,
-                                      [type]: true,
-                                    }));
+                            </>
+                          }
+                        >
+                          {verification && (
+                            <div style={{ marginBottom: 0 }}>
+                              <div
+                                // className="flex-end"
+                                style={{
+                                  justifyContent: "space-between",
+                                  display: "flex",
+                                }}
+                              >
+                                {verification?.status === "Pending" &&
+                                  (fieldExecutiveEdit[type] ? (
+                                    <Button
+                                      danger
+                                      type="link"
+                                      size="small"
+                                      icon={<CloseOutlined />}
+                                      onClick={() =>
+                                        setFieldExecutiveEdit((prev) => ({
+                                          ...prev,
+                                          [type]: false,
+                                        }))
+                                      }
+                                    >
+                                      Cancel
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      type="link"
+                                      size="small"
+                                      icon={<EditOutlined />}
+                                      onClick={() => {
+                                        setFieldExecutiveEdit((prev) => ({
+                                          ...prev,
+                                          [type]: true,
+                                        }));
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                  ))}
+                                {verification &&
+                                  verification?.status === "Pending" && (
+                                    <Popconfirm
+                                      title="Are you sure you want to delete"
+                                      onConfirm={() =>
+                                        handleDelete(
+                                          verification?.loanId,
+                                          verification?.type,
+                                          verification?.fieldExecutiveId
+                                        )
+                                      }
+                                    >
+                                      <Button
+                                        icon={<DeleteOutlined />}
+                                        style={{
+                                          border: "none",
+                                          color: "#ff4d4f",
+                                          boxShadow: "none",
+                                        }}
+                                      />
+                                    </Popconfirm>
+                                  )}
+                              </div>
+                              {!fieldExecutiveEdit[type] && (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "left",
+                                    gap: "8px",
+                                    marginBottom: 8,
                                   }}
                                 >
-                                  Edit
-                                </Button>
-                              ))}
-                               {verification&&verification?.status==="Pending"&&(
-                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.loanId,verification?.type,verification?.fieldExecutiveId)}>
-                             <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f", boxShadow:"none"}} />
-                           </Popconfirm>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "left",
+                                      gap: "8px",
+                                      flexDirection: "column",
+                                    }}
+                                  >
+                                    <span>
+                                      Address: {verification?.applicantAddress}
+                                    </span>
+                                    <span>
+                                      Field Executive:{" "}
+                                      <Tag color="blue">
+                                        Id:{" "}
+                                        {
+                                          verification.fieldExecutive
+                                            ?.employeeCode
+                                        }
+                                      </Tag>
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           )}
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "left",
-                              gap: "8px",
-                              marginBottom: 8,
-                            }}
-                          >
-                            <div style={{display:"flex",alignItems:"left",gap:"8px", flexDirection:"column"}}>
-                              <span>Address: {verification?.applicantAddress}</span>
-                              <span>Field Executive: <Tag color="blue">
-                                Id: {verification.fieldExecutive?.employeeCode}
-                              </Tag></span>
-                              
-                            </div>                  
-                          </div>
-                        </div>
-                      )}
-                      {(!verification || fieldExecutiveEdit[type]) && (
-                        <FieldAssignmentForm
-                          verification={verification}
-                          type={type}
-                          selectedLoan={loanDetails}
-                          setCurrentOffice={setCurrentOffice}
-                          userDetails={userDetails}
-                          offices={offices}
-                          fieldExecutives={fieldExecutives}
-                          loading={loading}
-                          setLoading={setLoading}
-                          verifiers={verifiers}
-                          fetchLoans={fetchLoanDetails}
-                          setRefresh={setRefresh}
-                          setFieldExecutiveEdit={setFieldExecutiveEdit}
-                        />
-                      )}
-                    </Card>
-                    </Col>
-                  );
-                })}
-              </Row>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Form.Item layout="vertical" label="Select Verifier">
-                  <Select 
-                    placeholder="Select Verifier" 
-                    value={loanDetails?.verifierId || null} 
-                    options={verifiers} 
-                    style={{ width: 200 }} 
-                    onSelect={handleVerifierSelect}
-                  />
-                </Form.Item>
-              </div>
+                          {(!verification || fieldExecutiveEdit[type]) && (
+                            <FieldAssignmentForm
+                              verification={verification}
+                              type={type}
+                              selectedLoan={loanDetails}
+                              setCurrentOffice={setCurrentOffice}
+                              userDetails={userDetails}
+                              offices={offices}
+                              fieldExecutives={fieldExecutives}
+                              loading={loading}
+                              setLoading={setLoading}
+                              verifiers={verifiers}
+                              fetchLoans={fetchLoanDetails}
+                              setRefresh={setRefresh}
+                              setFieldExecutiveEdit={setFieldExecutiveEdit}
+                            />
+                          )}
+                        </Card>
+                      </Col>
+                    );
+                  })}
+                </Row>
+                {/* <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 16,
+                  }}
+                > */}
+                <Card size="small" style={{ marginTop: 16, width: 300 }}>
+                  <Form.Item layout="vertical" label="Select Verifier">
+                    <Select
+                      placeholder="Select Verifier"
+                      value={loanDetails?.verifierId || null}
+                      options={verifiers}
+                      style={{ width: 200 }}
+                      onSelect={handleVerifierSelect}
+                    />
+                  </Form.Item>
+                </Card>
+                {/* </div> */}
               </>
-            }
+            )}
           </>
         )}
       </Drawer>

@@ -11,7 +11,10 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/router";
-import { getFieldExecutivesApi, getVerifierLoansApi } from "@/services/loans.services";
+import {
+  getFieldExecutivesApi,
+  getVerifierLoansApi,
+} from "@/services/loans.services";
 
 dayjs.extend(relativeTime);
 
@@ -30,7 +33,10 @@ type LoanData = {
   [key: string]: any; // Allow for additional properties
 };
 
-const DashboardLayout = dynamic(() => import("@/components/layout/DashboardLayout"), { ssr: false });
+const DashboardLayout = dynamic(
+  () => import("@/components/layout/DashboardLayout"),
+  { ssr: false }
+);
 
 export default function Verify() {
   const [loading, setLoading] = useState(false);
@@ -46,49 +52,69 @@ export default function Verify() {
   // }, []);
 
   useEffect(() => {
-    getVerifierLoansApi()?.then((res: any) => {
-      setLoans(res?.data?.data ?? []);
-    })?.catch((err) => {
-      console.log(err)
-    });
+    getVerifierLoansApi()
+      ?.then((res: any) => {
+        setLoans(res?.data?.data ?? []);
+      })
+      ?.catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   const router = useRouter();
 
-  const filteredLoans = loans?.filter((loan) =>
-    ["Unassigned","Assigned", "FVCompleted", "Approved", "Rejected", "Pending"].includes(loan?.status ?? '')
-  ) ?? [];
+  const filteredLoans =
+    loans?.filter((loan) =>
+      [
+        "Unassigned",
+        "Assigned",
+        "FVCompleted",
+        "Approved",
+        "Rejected",
+        "Pending",
+      ].includes(loan?.status ?? "")
+    ) ?? [];
 
   const getStatusTags = (record: any) => {
-    const completedVerifications = record?.verifications?.filter((verification: any) => 
-      verification?.status === "Completed"
-    ) ?? [];
-    
+    const types = [
+      { key: "PermanentAddress", label: "Permanent Address" },
+      { key: "CurrentAddress", label: "Current Address" },
+      { key: "Work", label: "Work" },
+      { key: "Business", label: "Business" },
+    ];
+    const verifications = record?.verifications ?? [];
     return (
       <Space size={[0, 8]} wrap>
-        {completedVerifications.map((verification: any, index: number) => (
-          <Tag key={index} color="green">
-            {verification?.addressType}
-          </Tag>
-        ))}
+        {types.map((type) => {
+          const verification = verifications.find(
+            (v: any) => v.addressType === type.key
+          );
+          if (!verification) return null;
+          const isCompleted = verification?.status === "Completed";
+          return (
+            <Tag key={type.key} color={isCompleted ? "green" : "red"}>
+              {type.label}
+            </Tag>
+          );
+        })}
       </Space>
     );
   };
-  
+
   const columns: ColumnsType<LoanData> = [
     {
       title: "Application Number",
       dataIndex: "applicationNumber",
       key: "applicationNumber",
       width: 150,
-      render: (text) => text ?? '-'
+      render: (text) => text ?? "-",
     },
     {
       title: "Applicant Name",
       dataIndex: "applicantName",
       key: "applicantName",
       width: 150,
-      render: (text) => text ?? '-'
+      render: (text) => text ?? "-",
     },
     {
       title: "Investigations",
@@ -101,7 +127,7 @@ export default function Verify() {
       title: "Updated At",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date?: string) => date ? dayjs(date).fromNow() : '-',
+      render: (date?: string) => (date ? dayjs(date).fromNow() : "-"),
       width: 150,
     },
     {
@@ -130,7 +156,9 @@ export default function Verify() {
           // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
           columns={columns}
           dataSource={filteredLoans}
-          rowKey={(record) => record?.id?.toString() ?? Math.random().toString()}
+          rowKey={(record) =>
+            record?.id?.toString() ?? Math.random().toString()
+          }
           loading={loading}
           pagination={{
             pageSize: 10,

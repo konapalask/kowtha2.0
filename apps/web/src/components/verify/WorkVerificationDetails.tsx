@@ -1,22 +1,22 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
 import {
-  CloseCircleOutlined,
+  // CloseCircleOutlined,
   EditOutlined,
-  EyeOutlined,
-  PlusOutlined,
+  // EyeOutlined,
+  // PlusOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Image, message, Modal, Table } from "antd";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import { useRouter } from "next/router";
 import WorkBasicDetailsDescription from "./Descriptions/WorkBasicDetailsDescription";
 import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
-import PdfPreview from "./PdfPreview";
+// import PdfPreview from "./PdfPreview";
 import FinalVerdict from "./FinalVerdict";
 import { verifierEditApi } from "@/services/verifier.services";
 
@@ -54,11 +54,11 @@ export const WorkVerificationDetails: React.FC<
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || ""
+    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
-  const [verdict, setVerdict] = useState<string | null>(null);
+  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async (verdict: string | null, remarks: string) => {
@@ -404,7 +404,7 @@ export const WorkVerificationDetails: React.FC<
                   }}
                   preview={false}
                 />
-                <Button
+                {/* <Button
                   type="text"
                   danger
                   icon={<CloseCircleOutlined />}
@@ -424,7 +424,7 @@ export const WorkVerificationDetails: React.FC<
                     );
                     // onEdit("photoCapture");
                   }}
-                />
+                /> */}
                 <div
                   style={{
                     position: "absolute",
@@ -464,25 +464,24 @@ export const WorkVerificationDetails: React.FC<
           setOpen(true)
         }}>Preview</Button>
       </section> */}
-      <Footer editorContent={editorContent} disabled={hasEditRequest} />
-      {/* </Card> */}
-
       <FinalVerdict
         disabled={hasEditRequest}
-        initialVerdict={verificationData?.finalVerdict}
-        initialRemarks={verificationData?.finalObservations?.remarks}
-        onVerdictChange={(verdict) => {
-          // Handle verdict change
-          console.log("Verdict changed:", verdict);
-        }}
-        onRemarksChange={(remarks) => {
-          // Handle remarks change
-          console.log("Remarks changed:", remarks);
-        }}
-        handleSave={handleSave}
-        hasEditRequest={hasEditRequest}
+        verdict={verdict}
+        setVerdict={setVerdict}
+        editorContent={editorContent}
+        setEditorContent={setEditorContent}
       />
 
+      <Footer
+        editorContent={editorContent}
+        disabled={hasEditRequest}
+        handleSave={handleSave}
+        verdict={verdict}
+        open={open}
+        setOpen={setOpen}
+      />
+      {/* </Card> */}
+      {/* 
       <Modal
         open={open}
         onCancel={() => {
@@ -522,7 +521,7 @@ export const WorkVerificationDetails: React.FC<
         >
           Confirm
         </Button>
-      </Modal>
+      </Modal> */}
 
       {/* Final Observations Section */}
       {/* <section style={{ marginBottom: 24 }}>

@@ -1,75 +1,93 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { generateFinalReport, loanApproveRejectApi } from "@/services/verifier.services";
-import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Space } from "antd";
+import {
+  generateFinalReport,
+  loanApproveRejectApi,
+} from "@/services/verifier.services";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+import { Button, message, Modal, Popconfirm, Space } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorContent, disabled }) => {
+const Footer: React.FC<{
+  editorContent: any;
+  disabled?: boolean;
+  handleSave: any;
+  verdict: any;
+  open: boolean;
+  setOpen: any;
+}> = ({ editorContent, disabled, handleSave, verdict, open, setOpen }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
   const { id } = router.query;
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(
-    null
-  );
+  // const [modalVisible, setModalVisible] = useState(false);
+  // const [modalAction, setModalAction] = useState<"approve" | "reject" | null>(
+  //   null
+  // );
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
 
-  const handleApprove = async () => {
-    try {
-      setModalAction(null);
-      setModalVisible(false);
+  // const handleApprove = async () => {
+  //   try {
+  //     setModalVisible(false);
 
-      // Log for debugging
-    } catch (error) {
-      console.error("Error generating final report:", error);
-      message.error(
-        "Failed to generate final report: " + (error as Error).message
-      );
-    }
-  };
+  //     // Log for debugging
+  //   } catch (error) {
+  //     console.error("Error generating final report:", error);
+  //     message.error(
+  //       "Failed to generate final report: " + (error as Error).message
+  //     );
+  //   }
+  // };
 
   const fetchPdf = async () => {
-   try{
-    const reportResponse = await generateFinalReport(id as string, activeTab,null);
+    try {
+      const reportResponse = await generateFinalReport(
+        id as string,
+        activeTab,
+        null
+      );
 
-    // Check if we have valid data
-    if (!reportResponse) {
-      throw new Error("No PDF data received");
-    }
+      // Check if we have valid data
+      if (!reportResponse) {
+        throw new Error("No PDF data received");
+      }
 
-    // Create a blob URL directly from the response
-    const blob = new Blob([reportResponse], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
-    setPdfPreviewUrl(url);
-   } catch (error) {
-    console.error("Error generating final report:", error);
-    // message.error(
-    //   "Failed to generate final report: " + (error as Error).message
-    // );
-   }
-  };
-
-  const approveLoan = async () => {
-    try{
-      const response = await loanApproveRejectApi(id as string, {
-        status: "Approved",comments:""
-      });
+      // Create a blob URL directly from the response
+      const blob = new Blob([reportResponse], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      setPdfPreviewUrl(url);
     } catch (error) {
-      console.error("Error approving loan:", error);
+      console.error("Error generating final report:", error);
+      // message.error(
+      //   "Failed to generate final report: " + (error as Error).message
+      // );
     }
   };
 
-  const rejectLoan = async () => {
-    try{
-      const response = await loanApproveRejectApi(id as string, {
-        status: "Rejected",
-        comments:""
-      });
-    } catch (error) {
-      console.error("Error rejecting loan:", error);
-    }
-  };
+  // const approveLoan = async () => {
+  //   try {
+  //     const response = await loanApproveRejectApi(id as string, {
+  //       status: "Approved",
+  //       comments: "",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error approving loan:", error);
+  //   }
+  // };
+
+  // const rejectLoan = async () => {
+  //   try {
+  //     const response = await loanApproveRejectApi(id as string, {
+  //       status: "Rejected",
+  //       comments: "",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error rejecting loan:", error);
+  //   }
+  // };
 
   // Clean up the blob URL when component unmounts
   useEffect(() => {
@@ -96,18 +114,23 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
           gap: "16px",
           zIndex: 1000,
           boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-          marginBottom:24
+          // marginBottom: 24,
         }}
       >
-        <Button icon={<EyeOutlined />} onClick={()=>{
-          setModalVisible(true)
-          fetchPdf()
-        }} >Preview</Button>
+        <Button
+          icon={<EyeOutlined />}
+          onClick={() => {
+            setOpen(true);
+            fetchPdf();
+          }}
+        >
+          Generate Preview
+        </Button>
       </div>
       <Modal
-        open={modalVisible}
+        open={open}
         onCancel={() => {
-          setModalVisible(false);
+          setOpen(false);
           if (pdfPreviewUrl) {
             window.URL.revokeObjectURL(pdfPreviewUrl);
           }
@@ -115,24 +138,24 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
         }}
         cancelButtonProps={{
           style: {
-            display: "none"
-          }
+            display: "none",
+          },
         }}
+        style={{ top: 10 }}
         footer={null}
-        width={900}
-        title={
-         "loan preview"
-        }
+        width={"100%"}
+        title={"Loan preview"}
+        maskClosable={false}
       >
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ height: "85vh", overflow: "hidden" }}>
           {/* <strong>PDF Preview:</strong> */}
           {pdfPreviewUrl ? (
             <object
               data={pdfPreviewUrl}
               type="application/pdf"
               width="100%"
-              height={600}
-              style={{ border: "1px solid #eee", marginTop: 8 }}
+              height={"100%"}
+              style={{ border: "1px solid #eee" }}
             >
               <div style={{ padding: "20px", textAlign: "center" }}>
                 Unable to display PDF file.{" "}
@@ -152,19 +175,26 @@ const Footer: React.FC<{ editorContent: any; disabled?: boolean }> = ({ editorCo
             </div>
           )}
         </div>
-        <div style={{ marginBottom: 16 }}>
-          Are you sure you want to{" "}
-          {modalAction === "approve" ? "approve" : "reject"} this loan
-          verification?
-        </div>
-        <Space>
-          <Button
-            type={"primary"}
-            onClick={handleApprove}
-          >
-            Confirm
-          </Button>
-        </Space>
+        {verdict && (
+          <div className="flex-end" style={{ marginTop: 8 }}>
+            {/* <div style={{ marginBottom: 16 }}>
+              Are you sure you want to{" "}
+              {verdict === "positive" ? "recommend" : "reject"} this loan
+              verification?
+            </div> */}
+            {/* <Space sty> */}
+            {/* <Button type={"primary"} onClick={handleSave}>
+              Submit
+            </Button> */}
+            <Popconfirm
+              title="Are you sure you want to submit this final verdict?"
+              onConfirm={handleSave}
+            >
+              <Button type="primary">Submit</Button>
+            </Popconfirm>
+            {/* </Space> */}
+          </div>
+        )}
       </Modal>
     </>
   );
