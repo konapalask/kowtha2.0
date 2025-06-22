@@ -57,7 +57,7 @@ export default function Loans() {
   const [verifiers, setVerifiers] = useState<Verifiers[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 20,
     total: 0,
     totalPages: 0
   });
@@ -164,6 +164,7 @@ export default function Loans() {
       title: "Application Number",
       dataIndex: "applicationNumber",
       key: "applicationNumber",
+      fixed: "left",
       width: 200,
     },
     {
@@ -178,12 +179,7 @@ export default function Loans() {
       key: "applicantMobile",
       width: 100,
     },
-    {
-      title: "Loan Type",
-      dataIndex: "loanType",
-      key: "loanType",
-      width: 130,
-    },
+
     {
       title: "Status",
       dataIndex: "status",
@@ -191,7 +187,11 @@ export default function Loans() {
       width: 100,
       render: (status: string) => {
         const color =
-          status === "Pending"
+        status === "Unassigned"
+            ? "magenta"
+        :status === "Assigned"
+            ? "geekblue"
+          :status === "Pending"
             ? "orange"
             : status === "Approved"
               ? "green"
@@ -369,7 +369,7 @@ export default function Loans() {
         render: (_:any, record:any) => (
           <Button
             type="link"
-            icon={<EditOutlined />}
+            // icon={<EditOutlined />}
             onClick={() => {
               setSelectedLoan(record.applicationNumber);
               setIsDrawerVisible(true);

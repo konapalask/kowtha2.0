@@ -102,7 +102,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       >
         <Form.Item
           name="address"
-          label={type === "AddressOne" ? "Address 1" :type === "AddressTwo" ? "Address 2" : type === "Work" ? "Work Address" : type === "Business" ? "Business Address" : "Address"}
+          // label={type === "AddressOne" ? "Address 1" :type === "AddressTwo" ? "Address 2" : type === "Work" ? "Work Address" : type === "Business" ? "Business Address" : "Address"}
           rules={[
             {
               required: true,
@@ -110,7 +110,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             },
           ]}
         >
-          <Input.TextArea rows={3} placeholder="Enter address for verification" />
+          <Input.TextArea rows={2} placeholder="Enter address for verification" />
         </Form.Item>
 
         <Form.Item
@@ -125,7 +125,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
               <>
                   <Form.Item
                     name="assignmentMethod"
-                    label="Assignment Method"
                     rules={[
                       {
                         required: true,
@@ -151,7 +150,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 {assignmentMethod === "Remote" && (
                     <Form.Item
                       name="office"
-                      label="Select Branch"
+                      // label="Select Branch"
                       rules={[
                         {
                           required: true,
@@ -184,7 +183,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           {() => (
             <Form.Item
               name="fieldExecutiveId"
-              label="Field Executive"
+              // label="Field Executive"
               rules={[
                 {
                   required: true,
@@ -203,7 +202,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
 
         <Form.Item>
           <Button
-            type="primary"
+            // type="primary"
             htmlType="submit"
             loading={loading}
             icon={<UserOutlined />}

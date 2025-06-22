@@ -343,3 +343,11 @@ body {
 /* .striped-table .ant-table-tbody > tr:hover {
   background-color: #e6f7ff;
 } */
+
+.ant-form-item {
+  margin-bottom: 8px !important;
+}
+
+.ant-form-item-label {
+  padding-bottom: 6px !important;
+}

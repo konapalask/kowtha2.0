@@ -91,7 +91,7 @@ export default function Verify() {
       render: (text) => text ?? '-'
     },
     {
-      title: "Status",
+      title: "Investigations",
       dataIndex: "status",
       key: "status",
       render: (_, record) => getStatusTags(record),

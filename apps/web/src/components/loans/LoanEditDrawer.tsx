@@ -10,6 +10,7 @@ import {
   message,
   Form,
   Popconfirm,
+  Row, Col
 } from "antd";
 import {
   CloseOutlined,
@@ -212,7 +213,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
           </span>
         }
         placement="right"
-        width="90%"
+        width="99%"
         onClose={handleClose}
         open={isDrawerVisible}
         // maskClosable={false}
@@ -228,9 +229,6 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   alignItems: "center",
                 }}
               >
-                <Typography.Title level={4} style={{ margin: 0 }}>
-                  Loan Information
-                </Typography.Title>
                 {!editLoanInfo && loanDetails?.id && (
                   <Button
                     type="link"
@@ -311,65 +309,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
               )}
             </div>
 
-            {loanDetails?.id && <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Form.Item layout="vertical" label="Select Verifier">
-                  <Select 
-                    placeholder="Select Verifiers" 
-                    value={loanDetails?.verifierId || null} 
-                    options={verifiers} 
-                    style={{ width: 200 }} 
-                    onSelect={handleVerifierSelect}
-                  />
-                </Form.Item>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                  {!hasVerificationType("AddressOne") && 
-                    <Checkbox
-                      checked={!address1Disabled}
-                      onChange={(e) => setAddress1Disabled(!e.target.checked)}
-                    >
-                      Address 1
-                    </Checkbox>
-                  }
-                  {!hasVerificationType("AddressTwo") && 
-                    <Checkbox
-                      checked={!address2Disabled}
-                      onChange={(e) => setAddress2Disabled(!e.target.checked)}
-                    >
-                      Address 2
-                    </Checkbox>
-                  }
-                  {!hasVerificationType("Work") && 
-                    <Checkbox
-                      checked={!workDisabled}
-                      onChange={(e) => setWorkDisabled(!e.target.checked)}
-                    >
-                      Work
-                    </Checkbox>
-                  }
-                  {!hasVerificationType("Business") && 
-                    <Checkbox
-                      checked={!businessDisabled}
-                      onChange={(e) => setBusinessDisabled(!e.target.checked)}
-                    >
-                      Business
-                    </Checkbox>
-                  }
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 16 }}>
+            {loanDetails?.id && <>
+             
+              <Row style={{ display: "flex"}} gutter={[8,8]}>
                 {[
-                  { type: "AddressOne", label: "Address 1", disabled: address1Disabled },
-                  { type: "AddressTwo", label: "Address 2", disabled: address2Disabled },
-                  { type: "Work", label: "Work", disabled: workDisabled },
-                  { type: "Business", label: "Business", disabled: businessDisabled }
-                ].filter(item => !item.disabled).map(({ type, label }) => {
+                  { type: "AddressOne", label: "Address 1" },
+                  { type: "AddressTwo", label: "Address 2" },
+                  { type: "Work", label: "Work" },
+                  { type: "Business", label: "Business" }
+                ].map(({ type, label }) => {
                   const verification = loanDetails?.verifications?.find(
                     (v: any) => v.type === type
                   );
                   return (
+                    <Col span={6}>
                     <Card
                       key={type}
+                      size={"small"}
                       title={label}
                       style={{
                         flex: 1,
@@ -380,7 +336,9 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       headStyle={{
                         minHeight: 40,
                         paddingLeft:10,
-                        paddingRight:0
+                        paddingRight:0,
+                        border:"none",
+                        fontWeight:400
                       }}
                       bodyStyle={{
                         flex: verification?.status === "Completed" ? "none" : 1,
@@ -487,10 +445,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                         />
                       )}
                     </Card>
+                    </Col>
                   );
                 })}
+              </Row>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <Form.Item layout="vertical" label="Select Verifier">
+                  <Select 
+                    placeholder="Select Verifier" 
+                    value={loanDetails?.verifierId || null} 
+                    options={verifiers} 
+                    style={{ width: 200 }} 
+                    onSelect={handleVerifierSelect}
+                  />
+                </Form.Item>
               </div>
-            </div>}
+              </>
+            }
           </>
         )}
       </Drawer>

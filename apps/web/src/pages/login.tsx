@@ -199,6 +199,7 @@ export default function Login() {
                 // minLength={10}
               />
             </Form.Item>
+            <br />
 
             {otpSent && (
               <Form.Item
@@ -245,6 +246,7 @@ export default function Login() {
                   fontWeight: "bold",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   cursor: "pointer",
+                  marginTop:"40px"
                 }}
               >
                 {otpSent ? "Verify OTP" : "Send OTP"}

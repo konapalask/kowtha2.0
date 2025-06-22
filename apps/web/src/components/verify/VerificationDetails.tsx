@@ -346,7 +346,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           },
         }}
         footer={null}
-        width={900}
+        width="100%"
         title={
           verdict === "Positive"
             ? "Positive Loan Verification"

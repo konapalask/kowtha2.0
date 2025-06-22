@@ -189,19 +189,6 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <InputNumber min={0} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          {/* <Col xs={24} sm={6} style={{ padding: 4 }}>
-            <Form.Item
-              labelCol={{ span: 24, style: { marginBottom: 0 } }}
-              label="Address"
-              name="applicantAddress"
-              rules={[
-                { required: true, message: "Required" },
-                { whitespace: true, message: "Cannot be empty" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          </Col> */}
           <Col xs={24} sm={6} style={{ padding: 4 }}>
             <Form.Item
               labelCol={{ span: 24, style: { marginBottom: 0 } }}
