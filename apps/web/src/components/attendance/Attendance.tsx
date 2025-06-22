@@ -1,7 +1,16 @@
-import { getAttendanceRecodsApi } from "@/services/attendance.services"
-import { Table, Input, Select, Tag, Space, Badge, message, Typography } from "antd"
-import { useEffect, useState, useMemo } from "react"
-import dayjs from "dayjs"
+import { getAttendanceRecodsApi } from "@/services/attendance.services";
+import {
+  Table,
+  Input,
+  Select,
+  Tag,
+  Space,
+  Badge,
+  message,
+  Typography,
+} from "antd";
+import { useEffect, useState, useMemo } from "react";
+import dayjs from "dayjs";
 
 interface AttendanceProps {
   dateRange: [any, any]; // dayjs.Dayjs[]
@@ -36,8 +45,8 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   const [data, setData] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    name: '',
-    employeeCode: '',
+    name: "",
+    employeeCode: "",
     status: undefined as boolean | undefined,
   });
 
@@ -46,8 +55,8 @@ export default function Attendance({ dateRange }: AttendanceProps) {
     try {
       const [start, end] = dateRange || [];
       const params: any = {
-        startDate: start ? dayjs(start).format('YYYY-MM-DD') : undefined,
-        endDate: end ? dayjs(end).format('YYYY-MM-DD') : undefined,
+        startDate: start ? dayjs(start).format("YYYY-MM-DD") : undefined,
+        endDate: end ? dayjs(end).format("YYYY-MM-DD") : undefined,
       };
       if (filters.status !== undefined) params.status = filters.status;
       if (filters.employeeCode) params.employeeCode = filters.employeeCode;
@@ -55,7 +64,7 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       const response = await getAttendanceRecodsApi(params);
       setData(response?.data?.data?.userStatistics || []);
     } catch (error: any) {
-      message.error('Failed to fetch attendance records');
+      message.error("Failed to fetch attendance records");
     } finally {
       setLoading(false);
     }
@@ -74,36 +83,43 @@ export default function Attendance({ dateRange }: AttendanceProps) {
     );
   }, [data, filters.name]);
 
-  const columns:any[] = [
+  const columns: any[] = [
     {
-      title: 'Name',
-      dataIndex: ['user', 'name'],
-      key: 'name',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
+      title: "Name",
+      dataIndex: ["user", "name"],
+      key: "name",
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }: any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Search name"
             value={selectedKeys[0]}
-            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             onPressEnter={() => {
-              setFilters(f => ({ ...f, name: selectedKeys[0] || '' }));
+              setFilters((f) => ({ ...f, name: selectedKeys[0] || "" }));
               confirm();
             }}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
+            style={{ width: 188, marginBottom: 8, display: "block" }}
           />
           <Space>
             <a
               onClick={() => {
-                setFilters(f => ({ ...f, name: selectedKeys[0] || '' }));
+                setFilters((f) => ({ ...f, name: selectedKeys[0] || "" }));
                 confirm();
               }}
-              style={{ color: '#1890ff' }}
+              style={{ color: "#1890ff" }}
             >
               Search
             </a>
             <a
               onClick={() => {
-                setFilters(f => ({ ...f, name: '' }));
+                setFilters((f) => ({ ...f, name: "" }));
                 clearFilters();
                 confirm();
               }}
@@ -114,49 +130,73 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         </div>
       ),
       onFilterDropdownVisibleChange: (visible: boolean) => {
-        if (!visible) setFilters(f => ({ ...f, name: '' }));
+        if (!visible) setFilters((f) => ({ ...f, name: "" }));
       },
       filteredValue: filters.name ? [filters.name] : null,
-      render: (_: any, record: AttendanceRecord) =><>{ record.user?.name}
-      {/* <Tag color="blue" style={{marginLeft:10}}>{record.user?.employeeCode}</Tag> */}
-      <Badge
-      status={record.availableToday ? 'success' : 'error'}
-      dot
-      style={{marginLeft:10}}
-    //   style={{ boxShadow: `0 0 8px 2px ${record.availableToday ? '#52c41a' : '#ff4d4f'}` }}
-      title={record.availableToday ? 'Available Today' : 'Not Available Today'}
-      className={record.availableToday ? "badge-pulse-success" : "badge-pulse-error"}
-    /></>,
+      render: (_: any, record: AttendanceRecord) => (
+        <>
+          {" "}
+          <Badge
+            status={record.availableToday ? "success" : "error"}
+            dot
+            style={{ marginRight: 10 }}
+            //   style={{ boxShadow: `0 0 8px 2px ${record.availableToday ? '#52c41a' : '#ff4d4f'}` }}
+            title={
+              record.availableToday ? "Available Today" : "Not Available Today"
+            }
+            className={
+              record.availableToday
+                ? "badge-pulse-success"
+                : "badge-pulse-error"
+            }
+          />
+          {record.user?.name}
+          {/* <Tag color="blue" style={{marginLeft:10}}>{record.user?.employeeCode}</Tag> */}
+        </>
+      ),
     },
     {
-      title: 'Employee Code',
-      dataIndex: ['user', 'employeeCode'],
-      key: 'employeeCode',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
+      title: "Employee Code",
+      dataIndex: ["user", "employeeCode"],
+      key: "employeeCode",
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }: any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Search code"
             value={selectedKeys[0]}
-            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             onPressEnter={() => {
-              setFilters(f => ({ ...f, employeeCode: selectedKeys[0] || '' }));
+              setFilters((f) => ({
+                ...f,
+                employeeCode: selectedKeys[0] || "",
+              }));
               confirm();
             }}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
+            style={{ width: 188, marginBottom: 8, display: "block" }}
           />
           <Space>
             <a
               onClick={() => {
-                setFilters(f => ({ ...f, employeeCode: selectedKeys[0] || '' }));
+                setFilters((f) => ({
+                  ...f,
+                  employeeCode: selectedKeys[0] || "",
+                }));
                 confirm();
               }}
-              style={{ color: '#1890ff' }}
+              style={{ color: "#1890ff" }}
             >
               Search
             </a>
             <a
               onClick={() => {
-                setFilters(f => ({ ...f, employeeCode: '' }));
+                setFilters((f) => ({ ...f, employeeCode: "" }));
                 clearFilters();
                 confirm();
               }}
@@ -167,26 +207,27 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         </div>
       ),
       filteredValue: filters.employeeCode ? [filters.employeeCode] : null,
-      render: (_: any, record: AttendanceRecord) => record.user?.employeeCode || '-',
+      render: (_: any, record: AttendanceRecord) =>
+        record.user?.employeeCode || "-",
     },
     {
-      title: 'Total Assigned',
-      dataIndex: 'totalAssigned',
-      key: 'totalAssigned',
+      title: "Total Assigned",
+      dataIndex: "totalAssigned",
+      key: "totalAssigned",
     },
     {
-      title: 'Pending',
-      dataIndex: 'pendingVerifications',
-      key: 'pendingVerifications',
+      title: "Pending",
+      dataIndex: "pendingVerifications",
+      key: "pendingVerifications",
     },
     {
-      title: 'Completed',
-      dataIndex: 'completedVerifications',
-      key: 'completedVerifications',
+      title: "Completed",
+      dataIndex: "completedVerifications",
+      key: "completedVerifications",
     },
     {
-      title: 'Absent',
-      key: 'absentDays',
+      title: "Absent",
+      key: "absentDays",
       render: (_: any, record: AttendanceRecord) => `${record.absentDays}`,
     },
     // {
@@ -243,14 +284,18 @@ export default function Attendance({ dateRange }: AttendanceProps) {
     <div style={{ marginTop: 24 }}>
       <Table
         className="striped-table"
-        title={()=><Typography.Text style={{fontSize:16, fontWeight:600}}>Employee Details</Typography.Text>}
+        title={() => (
+          <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+            Employee Details
+          </Typography.Text>
+        )}
         columns={columns}
         dataSource={filteredData}
-        rowKey={record => record.userId}
+        rowKey={(record) => record.userId}
         loading={loading}
         bordered
         pagination={{ pageSize: 10 }}
-        scroll={{ x: 'max-content' }}
+        scroll={{ x: "max-content" }}
       />
     </div>
   );
