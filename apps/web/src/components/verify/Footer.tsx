@@ -2,6 +2,7 @@ import { useTabContext } from "@/pages/verify/[id]";
 import {
   generateFinalReport,
   loanApproveRejectApi,
+  patchFinalVerdict,
 } from "@/services/verifier.services";
 import {
   CheckCircleOutlined,
@@ -19,7 +20,16 @@ const Footer: React.FC<{
   verdict: any;
   open: boolean;
   setOpen: any;
-}> = ({ editorContent, disabled, handleSave, verdict, open, setOpen }) => {
+  verificationType: string;
+}> = ({
+  editorContent,
+  disabled,
+  handleSave,
+  verdict,
+  open,
+  setOpen,
+  verificationType,
+}) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
   const { id } = router.query;
@@ -64,6 +74,19 @@ const Footer: React.FC<{
       // message.error(
       //   "Failed to generate final report: " + (error as Error).message
       // );
+    }
+  };
+
+  const submitFinalVerdict = async () => {
+    try {
+      const payload = {
+        status: verdict,
+        path: editorContent,
+      };
+      await patchFinalVerdict(id as string, verificationType, payload);
+    } catch (error: any) {
+      console.log("Error:", error);
+      message.error(error?.response?.data?.message);
     }
   };
 
@@ -120,6 +143,7 @@ const Footer: React.FC<{
         <Button
           icon={<EyeOutlined />}
           onClick={() => {
+            submitFinalVerdict();
             setOpen(true);
             fetchPdf();
           }}
