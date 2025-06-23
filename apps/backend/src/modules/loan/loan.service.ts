@@ -1954,8 +1954,8 @@ export class LoanService {
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
 
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
-      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
@@ -2190,8 +2190,8 @@ export class LoanService {
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
 
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
-      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
@@ -2377,8 +2377,8 @@ export class LoanService {
     const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
     
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">RECOMMENDED</li>',
-      negative: '<li style="color: red; font-weight: bold;">NOT RECOMMENDED</li>',
+      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
@@ -2397,15 +2397,15 @@ export class LoanService {
               </tr>
               <tr>
                 <th>PAN Number</th>
-                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || 'BQBUU2345R'}</span></td>
+                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || ''}</span></td>
               </tr>
               <tr>
                 <th>Aadhar Number</th>
-                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || '9801 7691 7654'}</span></td>
+                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || ''}</span></td>
               </tr>
               <tr>
                 <th>Residential Address</th>
-                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || '1-1-1, Gandhi Nagar, Vijayawada'}</span></td>
+                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
               </tr>
               <tr>
                 <th>Marital Status</th>

@@ -102,7 +102,8 @@ export class AttendanceService {
         id: true,
         name: true,
         mobile: true,
-        role: true
+        role: true,
+        employeeCode: true
       }
     });
 
