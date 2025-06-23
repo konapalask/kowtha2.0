@@ -80,7 +80,7 @@ const Footer: React.FC<{
   const submitFinalVerdict = async () => {
     try {
       const payload = {
-        status: verdict,
+        status: verdict === "positive" ? "Positive" : "Negative",
         path: editorContent,
       };
       await patchFinalVerdict(id as string, verificationType, payload);
@@ -143,7 +143,7 @@ const Footer: React.FC<{
         <Button
           icon={<EyeOutlined />}
           onClick={() => {
-            submitFinalVerdict();
+            // submitFinalVerdict();
             setOpen(true);
             fetchPdf();
           }}

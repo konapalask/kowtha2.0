@@ -19,7 +19,10 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 // import PdfPreview from "./PdfPreview";
 import FinalVerdict from "./FinalVerdict";
-import { verifierEditApi } from "@/services/verifier.services";
+import {
+  patchFinalVerdict,
+  verifierEditApi,
+} from "@/services/verifier.services";
 
 interface BusinessVerificationDetailsProps {
   verificationData: any;
@@ -53,7 +56,10 @@ export const BusinessVerificationDetails: React.FC<
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async (verdict: string | null, remarks: string) => {
-    verifierEditApi(id as string, "Work", { path: remarks })
+    patchFinalVerdict(id as string, "Work", {
+      status: verdict === "positive" ? "Positve" : "Negative",
+      path: remarks,
+    })
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
@@ -257,6 +263,7 @@ export const BusinessVerificationDetails: React.FC<
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}
+        handleSave={handleSave}
       />
       <Footer
         editorContent={editorContent}
