@@ -55,16 +55,16 @@ export const BusinessVerificationDetails: React.FC<
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async (verdict: string | null, remarks: string) => {
+  const handleSave = async () => {
     patchFinalVerdict(id as string, "Work", {
-      status: verdict === "positive" ? "Positve" : "Negative",
-      path: remarks,
+      status: verdict === "positive" ? "Positive" : "Negative",
+      path: editorContent,
     })
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        setOpen(true);
-        setVerdict(verdict);
+        // setOpen(true);
+        // setVerdict(verdict);
         setLoading(false);
       })
       .catch((error) => {

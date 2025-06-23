@@ -64,16 +64,17 @@ export const WorkVerificationDetails: React.FC<
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSave = async (verdict: string | null, remarks: string) => {
-    patchFinalVerdict(id as string, "Work", {
-      status: verdict === "positive" ? "Positve" : "Negative",
-      path: remarks,
-    })
+  const handleSave = async () => {
+    const payload = {
+      status: verdict === "positive" ? "Positive" : "Negative",
+      path: editorContent,
+    };
+    patchFinalVerdict(id as string, "Work", payload)
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        setOpen(true);
-        setVerdict(verdict);
+        // setOpen(true);
+        // setVerdict(verdict);
         setLoading(true);
       })
       .catch((error) => {
