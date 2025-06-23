@@ -72,13 +72,15 @@ interface VerificationData {
     spouseEmploymentDetails: string;
     assetsObserved: string;
   };
-  thirdPartyCheck?: Array<{
-    tpcName: string;
-    relationship: string;
-    comments: string;
-    feedbackStatus: string;
-    mobileNumber: string;
-  }>;
+  thirdPartyCheck?: {
+    checks: Array<{
+      tpcName: string;
+      relationship: string;
+      comments: string;
+      feedbackStatus: string;
+      mobileNumber: string;
+    }>;
+  };
   addressVerification?: {
     address: string;
     addressType: string;
@@ -2464,8 +2466,8 @@ export class LoanService {
           <th>Feedback Status</th>
           <th>Comments</th>
         </tr>
-        ${Array.isArray(verificationData.thirdPartyCheck) && verificationData.thirdPartyCheck.length > 0
-          ? verificationData.thirdPartyCheck.map(tpc => `
+        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
+          ? verificationData.thirdPartyCheck.checks.map(tpc => `
             <tr>
               <td><span class="var-value">${tpc.tpcName || ''}</span></td>
               <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
