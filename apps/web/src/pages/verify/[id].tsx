@@ -186,6 +186,16 @@ export default function LoanVerifyDetails() {
     };
   };
 
+  const getCompleteVerificationData = (type: string) => {
+    const verification = verificationData?.verifications?.find(
+      (v: any) => v.addressType === type
+    );
+    console.log(verification);
+    return verification;
+  };
+
+  getCompleteVerificationData("PermanentAddress");
+
   const getComponentByType = (type: string) => {
     const { verification, status, id, approvedStatus } =
       getVerificationAndStatusForTab(type);
@@ -203,6 +213,9 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("PermanentAddress")}
             verificationType={getVerificationType("PermanentAddress")}
+            // completeVerificationData={getCompleteVerificationData(
+            //   "PermanentAddress"
+            // )}
           />
         );
       case "CurrentAddress":
@@ -215,6 +228,9 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("CurrentAddress")}
             verificationType={getVerificationType("CurrentAddress")}
+            // completeVerificationData={getCompleteVerificationData(
+            //   "CurrentAddress"
+            // )}
           />
         );
       case "Work":
@@ -226,6 +242,7 @@ export default function LoanVerifyDetails() {
             verificationId={getVerificationId("Work")}
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Work")}
+            // completeVerificationData={getCompleteVerificationData("Work")}
           />
         );
       case "Business":
@@ -237,6 +254,7 @@ export default function LoanVerifyDetails() {
             verificationId={getVerificationId("Business")}
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Business")}
+            // completeVerificationData={getCompleteVerificationData("Business")}
           />
         );
     }
@@ -308,15 +326,17 @@ export default function LoanVerifyDetails() {
           </Tabs>
         </div>
 
-        <EditFormModal
-          visible={editModalVisible}
-          onCancel={() => setEditModalVisible(false)}
-          formKey={currentFormKey}
-          initialValues={verificationData}
-          currentTab={activeTab}
-          fetchVerificationData={fetchVerificationData}
-          onEditSuccess={() => setEditLogsUpdated((prev) => prev + 1)}
-        />
+        {editModalVisible && (
+          <EditFormModal
+            visible={editModalVisible}
+            onCancel={() => setEditModalVisible(false)}
+            formKey={currentFormKey}
+            initialValues={verificationData}
+            currentTab={activeTab}
+            fetchVerificationData={fetchVerificationData}
+            onEditSuccess={() => setEditLogsUpdated((prev) => prev + 1)}
+          />
+        )}
       </Drawer>
     </TabContext.Provider>
   );
