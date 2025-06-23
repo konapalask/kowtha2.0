@@ -265,6 +265,7 @@ export const BusinessVerificationDetails: React.FC<
         verdict={verdict}
         open={open}
         setOpen={setOpen}
+        verificationType="Business"
       />
       {/* </section> */}
       {/* </Card> */}

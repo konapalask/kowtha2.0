@@ -479,6 +479,7 @@ export const WorkVerificationDetails: React.FC<
         verdict={verdict}
         open={open}
         setOpen={setOpen}
+        verificationType="Work"
       />
       {/* </Card> */}
       {/* 
