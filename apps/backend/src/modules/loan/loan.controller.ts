@@ -415,7 +415,7 @@ export class LoanController {
     @Res() res: Response,
   ) {
     try {
-      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type, status)
+      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
       
       res.set({
         'Content-Type': 'application/pdf',
@@ -511,6 +511,7 @@ export class LoanController {
       Number(loanId),
       req.user.sub,
       verifyLoanDto.status,
+      verifyLoanDto.approvedStatus,
       verifyLoanDto.comments,
     );
     return {

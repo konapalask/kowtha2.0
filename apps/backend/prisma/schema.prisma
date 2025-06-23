@@ -52,6 +52,11 @@ enum VerificationStatus {
   Completed
 }
 
+enum ApprovedStatus {
+  Positive
+  Negative
+}
+
 enum LoanStatus {
   Unassigned
   Assigned
@@ -135,6 +140,7 @@ model Verification {
   loan             Loan               @relation(fields: [loanId], references: [id])
   type             VerificationType
   addressType      AddressType?
+  approvedStatus   ApprovedStatus?
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole, ApprovedStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
@@ -582,7 +582,7 @@ export class LoanService {
     }
   }
 
-  async verifyLoan(loanId: number, verifierId: number, status: LoanStatus, comments?: string) {
+  async verifyLoan(loanId: number, verifierId: number, status: LoanStatus, approvedStatus: ApprovedStatus, comments?: string) {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
@@ -1393,6 +1393,7 @@ export class LoanService {
           id: verification.id,
           type: verification.type,
           status: verification.status,
+          approvedStatus: verification.approvedStatus,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
           fieldExecutive: verification.fieldExecutive,
@@ -1608,7 +1609,7 @@ export class LoanService {
     }
   }
 
-  async generateVerificationPDF(loanId: number, addressType: AddressType, status: string): Promise<Buffer> {
+  async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -1629,6 +1630,7 @@ export class LoanService {
             select: {
               type: true,
               status: true,
+              approvedStatus: true,
               updatedAt: true,
               verificationData: true,
               path: true,
@@ -1643,9 +1645,8 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
       
-      status = status?.toLowerCase() || '';
-
       const verification = loan.verifications[0];
+      const status = verification.approvedStatus;
       if (!verification) {
         throw new NotFoundException(`Verification for address type ${addressType} not found`);
       }
@@ -1948,12 +1949,9 @@ export class LoanService {
 
   private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
 
-    // Use provided remarks or default list
-    const remarks = verificationData.finalObservations?.remarks 
-      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
-      : [];
-
-    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+    if (path) {
+      path = path.replace('<ul>', '').replace('</ul>', '')
+    }
 
     const recommendationStyles: Record<string, string> = {
       positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -2184,12 +2182,9 @@ export class LoanService {
   
   private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
     
-    // Use provided remarks or default list
-    const remarks = verificationData.finalObservations?.remarks 
-      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
-      : [];
-
-    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
+    if (path) {
+      path = path.replace('<ul>', '').replace('</ul>', '')
+    }
 
     const recommendationStyles: Record<string, string> = {
       positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -2370,13 +2365,10 @@ export class LoanService {
 
     private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
     // Use provided remarks or default list
-    const remarks = verificationData.finalObservations?.remarks 
-      ? verificationData.finalObservations.remarks.split('.').filter(point => point.trim()).map(point => point.trim())
-      : [];
+    
     if (path) {
       path = path.replace('<ul>', '').replace('</ul>', '')
     }
-    const remarksHtml = remarks.map(point => `<li>${point}</li>`).join('');
     
     const recommendationStyles: Record<string, string> = {
       positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',

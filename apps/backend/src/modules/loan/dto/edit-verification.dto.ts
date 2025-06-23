@@ -1,5 +1,6 @@
-import { IsString, IsObject, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsObject, IsOptional, IsArray, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ApprovedStatus } from '@prisma/client';
 
 export class EditVerificationDto {
   @ApiProperty({ description: 'Verification findings', required: false })
@@ -20,4 +21,8 @@ export class EditVerificationDto {
   @IsString()
   @IsOptional()
   path?: string;
+
+  @ApiProperty({ description: 'Approved status', enum: ApprovedStatus })
+  @IsEnum(ApprovedStatus)
+  approvedStatus: ApprovedStatus;
 } 
