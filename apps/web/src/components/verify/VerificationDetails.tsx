@@ -19,7 +19,10 @@ import ResidenceDetailsDescription from "./Descriptions/ResidenceDetailsDescript
 import FamilyEmploymentDescription from "./Descriptions/FamilyEmploymentDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import Footer from "./Footer";
-import { verifierEditApi } from "@/services/verifier.services";
+import {
+  patchFinalVerdict,
+  verifierEditApi,
+} from "@/services/verifier.services";
 // import PdfPreview from "./PdfPreview";
 
 interface VerificationDetailsProps {
@@ -51,12 +54,16 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState<boolean>(false);
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  console.log(verdict);
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
-    verifierEditApi(id as string, verificationType, { path: editorContent })
+    patchFinalVerdict(id as string, verificationType, {
+      status: verdict === "positive" ? "Positive" : "Negative",
+      path: editorContent,
+    })
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
@@ -322,6 +329,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}
+        handleSave={handleSave}
       />
 
       <Footer

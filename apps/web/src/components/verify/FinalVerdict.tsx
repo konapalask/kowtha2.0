@@ -1,4 +1,4 @@
-import { Radio, Card } from "antd";
+import { Radio, Card, Button } from "antd";
 import dynamic from "next/dynamic";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
@@ -9,6 +9,7 @@ interface FinalVerdictProps {
   setVerdict: any;
   editorContent: any;
   setEditorContent: any;
+  handleSave: any;
 }
 
 const FinalVerdict: React.FC<FinalVerdictProps> = ({
@@ -17,6 +18,7 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
   setVerdict,
   editorContent,
   setEditorContent,
+  handleSave,
 }) => {
   const sanitizeToListOnly = (html: string) => {
     const parser = new DOMParser();
@@ -92,6 +94,11 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
             }}
             formats={["list"]}
           />
+          <div className="flex-end" style={{ margin: 8 }}>
+            <Button type="primary" onClick={handleSave}>
+              Save
+            </Button>
+          </div>
         </div>
       </Card>
     </section>
