@@ -2112,10 +2112,6 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
           <tr>
-            <th>Cooperativeness</th>
-            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
-          </tr>
-          <tr>
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
@@ -2294,10 +2290,6 @@ export class LoanService {
       <div class="align-wrapper">
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Cooperativeness</th>
-            <td colspan="5"><span class="var-value">${verificationData.finalObservations?.cooperativeness || ''}</span></td>
-          </tr>
           <tr>
             <th>Remarks</th>
             <td colspan="5">
