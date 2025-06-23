@@ -1101,6 +1101,20 @@ export class LoanService {
     addressType?: AddressType,
   ) {
     try {
+      // First, check if a verification with the same loanId and addressType exists and is completed
+      if (addressType) {
+        const completedVerification = await this.prisma.verification.findFirst({
+          where: {
+            loanId,
+            addressType,
+            status: 'Completed',
+          },
+        });
+        if (completedVerification) {
+          throw new BadRequestException(`Verification type - ${addressType} verification is already completed`);
+        }
+      }
+
       const verification = await this.prisma.verification.findFirst({
         where: {
           loanId,
@@ -1114,11 +1128,9 @@ export class LoanService {
       }
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
-        console.log('sending signal to processs images in verificationData');
         await Promise.all(
           verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
             try {
-              console.log('item', item);
               
               if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(

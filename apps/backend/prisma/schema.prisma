@@ -203,8 +203,8 @@ model Session {
 
 model EditRequest {
   id             Int               @id @default(autoincrement())
-  loanId         Int
-  loan           Loan              @relation(fields: [loanId], references: [id])
+  loanId         Int?
+  loan           Loan?              @relation(fields: [loanId], references: [id])
   verificationId Int?
   verification   Verification?     @relation(fields: [verificationId], references: [id])
   requestedBy    Int

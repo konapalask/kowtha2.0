@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
 import { LoggingService } from '../common/logging/logging.service';
-import { UserRole } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole } from '@prisma/client';
 import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -135,7 +135,7 @@ export class AccountsService {
     }
   }
 
-  async verifyOTP(mobile: string, otp: string, isMobile: boolean): Promise<{ accessToken: string; refreshToken: string }> {
+  async verifyOTP(mobile: string, otp: string, deviceId?: string): Promise<{ accessToken: string; refreshToken: string; message: string }> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { mobile }
@@ -148,12 +148,63 @@ export class AccountsService {
       if (user.status !== 'Active') {
         throw new BadRequestException('Your account is not active. Please contact administrator.');
       }
+      let returnMessage = 'Device has been changed. Please contact administrator.';
 
-      if(isMobile){
+      if(deviceId){
         if(user.role !== UserRole.FieldExecutive){
           throw new UnauthorizedException('Admin cannot verify OTP');
         }
+
+        if(deviceId !== user.deviceId){
+
+          const checkEditRequest = await this.prisma.editRequest.findFirst({
+            where: {
+              requester: {
+                id: user.id
+              },
+              type: EditRequestType.Login,
+              status: EditRequestStatus.Pending
+            }
+          });
+          if(checkEditRequest){
+            returnMessage = 'Device change request already pending. Please wait for approval.';
+          }
+          else{
+            const editRequest = await this.prisma.editRequest.create({
+              data: {
+                requester: {
+                  connect: { id: user.id }
+                },
+                changes: {
+                  oldDeviceId: user.deviceId,
+                  newDeviceId: deviceId,
+                  userName: user.name,
+                  mobile: user.mobile,
+                  employeeCode: user.employeeCode,
+                  role: user.role,
+                  officeId: user.officeId,
+                },
+                type: EditRequestType.Login,
+                status: EditRequestStatus.Pending
+              }
+            });
+            await this.loggingService.info('Device change request created', {
+              userId: user.id,
+              deviceId,
+              oldDeviceId: user.deviceId,
+              status: 'Pending',
+            });
+          }
+          
+          return {
+            accessToken: '',
+            refreshToken: '',
+            message: returnMessage,
+          };
+        }
       }
+      
+
       // Find the latest active session for this user
       const session = await this.prisma.session.findFirst({
         where: {
@@ -187,13 +238,7 @@ export class AccountsService {
       // Generate both tokens
       const tokens = this.generateTokens(user.id, user.mobile, user.role);
       
-      await this.loggingService.info('OTP verified successfully', { 
-        mobile, 
-        userId: user.id,
-        role: user.role 
-      });
-      
-      return tokens;
+      return { ...tokens, message: returnMessage };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;

@@ -65,7 +65,7 @@ export class AttendanceController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Get attendance statistics for all field executives' })
   @ApiResponse({ 
     status: 200, 

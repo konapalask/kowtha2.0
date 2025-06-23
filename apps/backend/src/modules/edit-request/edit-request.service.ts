@@ -6,6 +6,19 @@ import { UpdateEditRequestDto } from './dto/update-edit-request.dto';
 import { LoggingService } from '../common/logging/logging.service';
 import { S3Service } from '../common/s3utils/s3.service';
 
+interface changeData {
+  oldDeviceId: string;
+  newDeviceId: string;
+  userName: string;
+  mobile: string;
+  employeeCode: string;
+  role: string;
+  officeId: number;
+}
+
+interface LoginRequestData {
+  changes?: changeData;
+}
 @Injectable()
 export class EditRequestService {
   constructor(
@@ -145,18 +158,23 @@ export class EditRequestService {
           if (!user) {
             throw new NotFoundException('User not found');
           }
-
-          // Apply the changes to the user data
-          const updatedUserData = {
-            ...user,
-            ...(editRequest.changes as Record<string, any>),
-          };
+          const requestedData = await this.prisma.editRequest.findUnique({
+            where: { id: editRequestId },
+            select: {
+              changes: true
+            }
+          });
+          console.log(requestedData);
+          
+          // const editRequestData = requestedData as LoginRequestData;
 
           // Update the user record
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: updatedUserData,
-          });
+          // await this.prisma.user.update({ 
+          //   where: { id: user.id },
+          //   data: {
+          //     deviceId: changes.newDeviceId
+          //   },
+          // });
         }
       }
 
