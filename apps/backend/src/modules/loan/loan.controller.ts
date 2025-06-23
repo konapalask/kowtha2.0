@@ -582,12 +582,13 @@ export class LoanController {
   async updateVerificationApproval(
     @Param('id') loanId: string,
     @Param('type') verificationType: VerificationType,
-    @Body() body: { approvedStatus: ApprovedStatus; path?: string }
+    @Body() body: { status: ApprovedStatus; path?: string }
   ) {
+    const approvedStatus = body.status;
     const result = await this.loanService.updateVerificationApproval(
       Number(loanId),
       verificationType,
-      body.approvedStatus,
+      approvedStatus,
       body.path
     );
     return {
