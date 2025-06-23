@@ -5,7 +5,7 @@ import {
   EditOutlined,
   // EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, message } from "antd";
+import { Button, Card, Image, message, Table } from "antd";
 // import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 // const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -232,11 +232,67 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       />
 
       {/* Third Party Check Section */}
-      <ThirdPartyCheckDescription
+      {/* <ThirdPartyCheckDescription
         data={data}
         extra={getButton("thirdPartyCheck")}
         logs={false}
-      />
+      /> */}
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Third Party Check"
+          // extra={
+          //   <Button
+          //     type="primary"
+          //     icon={<PlusOutlined />}
+          //     onClick={() => onEdit("colleagueReferences")}
+          //   >
+          //     Add Reference
+          //   </Button>
+          // }
+        >
+          <Table
+            className="striped-table"
+            dataSource={data?.thirdPartyCheck?.checks || []}
+            columns={[
+              {
+                title: "TPC Name",
+                dataIndex: "tpcName",
+                key: "tpcName",
+              },
+              {
+                title: "Mobile",
+                dataIndex: "mobileNumber",
+                key: "mobileNumber",
+              },
+              {
+                title: "Relationship",
+                dataIndex: "relationship",
+                key: "relationship",
+              },
+              {
+                title: "Comments",
+                dataIndex: "comments",
+                key: "comments",
+              },
+              {
+                title: "Actions",
+                key: "actions",
+                render: (_, record) => (
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit("colleagueReferences")}
+                    disabled={hasEditRequest}
+                  />
+                ),
+              },
+            ]}
+            pagination={false}
+            locale={{ emptyText: "No references added yet" }}
+            bordered
+          />
+        </Card>
+      </section>
 
       {/* Photo Capture Section */}
       <section style={{ marginBottom: 24 }}>
