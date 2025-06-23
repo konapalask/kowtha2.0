@@ -56,7 +56,7 @@ export const BusinessVerificationDetails: React.FC<
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
-    patchFinalVerdict(id as string, "Work", {
+    patchFinalVerdict(id as string, "Business", {
       status: verdict === "positive" ? "Positive" : "Negative",
       path: editorContent,
     })
