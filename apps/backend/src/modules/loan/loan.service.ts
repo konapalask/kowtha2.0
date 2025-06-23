@@ -72,13 +72,13 @@ interface VerificationData {
     spouseEmploymentDetails: string;
     assetsObserved: string;
   };
-  thirdPartyCheck?: {
+  thirdPartyCheck?: Array<{
     tpcName: string;
     relationship: string;
     comments: string;
     feedbackStatus: string;
     mobileNumber: string;
-  };
+  }>;
   addressVerification?: {
     address: string;
     addressType: string;
@@ -2457,168 +2457,25 @@ export class LoanService {
       <div class="align-wrapper">
         <table class="section-table">
         <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
-              <tr>
-                <th>Name</th>
-                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.tpcName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Mobile Number</th>
-                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.mobileNumber || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Relationship</th>
-                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.relationship || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Feedback Status</th>
-                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.feedbackStatus || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Comments</th>
-                <td colspan="5"><span class="var-value">${verificationData.thirdPartyCheck?.comments || ''}</span></td>
-              </tr>
-          <tr><td colspan="6" class="section-header">Residence Details</td></tr>
-          <tr>
-            <th>House Area</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.houseArea || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Rent Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Locality Type</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.localityType || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Accessibility</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Residence Type</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceType || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Residence Status</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceStatus || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Location Category</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.localityType || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name Plate Visible</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.nameplateVisible || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Standard of Living</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.standardOfLiving || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Construction Quality</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.constructionQuality || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Years at Current Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
-          </tr>
-          <tr><td colspan="6" class="section-header">Family Employment Details</td></tr>
-          <tr>
-            <th>Dependents</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Assets Observed</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.assetsObserved || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Earning Members</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.earningMembers || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Is Spouse Working</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.isSpouseWorking || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Spouse Employment Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.spouseEmploymentDetails || 'NA'}</span></td>
-          </tr>
-          <tr>
-            <th>Total Family Members</th>
-            <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.totalFamilyMembers || 'NA'}</span></td>
-          </tr>      
+        <tr>
+          <th>Name</th>
+          <th>Mobile Number</th>
+          <th>Relationship</th>
+          <th>Feedback Status</th>
+          <th>Comments</th>
+        </tr>
+        ${Array.isArray(verificationData.thirdPartyCheck) && verificationData.thirdPartyCheck.length > 0
+          ? verificationData.thirdPartyCheck.map(tpc => `
+            <tr>
+              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
+              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
+              <td><span class="var-value">${tpc.relationship || ''}</span></td>
+              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
+              <td><span class="var-value">${tpc.comments || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
         </table>
-      </div>
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Remarks</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Final Recommendation</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${finalRecommendationHtml}
-              </ul>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <canvas id="logoCanvas" width="250" height="140"></canvas>
-
-          <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           <script>
-              const canvas = document.getElementById('logoCanvas');
-              const ctx = canvas.getContext('2d');
-              const img = new Image();
-              img.onload = function () {
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                const offsetX = 20;
-                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
-              };
-              img.src = '${imageDataUri}';
-          </script>
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
