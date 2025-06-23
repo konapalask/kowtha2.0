@@ -1954,8 +1954,8 @@ export class LoanService {
     }
 
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
@@ -2187,8 +2187,8 @@ export class LoanService {
     }
 
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
@@ -2371,8 +2371,8 @@ export class LoanService {
     }
     
     const recommendationStyles: Record<string, string> = {
-      positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     };
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
