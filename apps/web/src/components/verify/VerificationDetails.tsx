@@ -71,6 +71,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         // setVerdict(verdict);
         setLoading(true);
         setOpen(false);
+        router?.push("/verify");
       })
       .catch((error) => {
         console.log("error: ", error);

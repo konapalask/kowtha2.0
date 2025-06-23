@@ -73,7 +73,8 @@ export const WorkVerificationDetails: React.FC<
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        // setOpen(true);
+        setOpen(false);
+        router?.push("/verify");
         // setVerdict(verdict);
         setLoading(true);
       })
