@@ -65,6 +65,8 @@ export const BusinessVerificationDetails: React.FC<
         message.success(response.data.message);
         // setOpen(true);
         // setVerdict(verdict);
+        setOpen(false);
+        router?.push("/verify");
         setLoading(false);
       })
       .catch((error) => {
