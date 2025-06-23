@@ -5,7 +5,11 @@ export const getVerificationData = async (id: string) => {
   return response.data;
 };
 
-export const generateFinalReport = async (id: string, type: string, status: string|null) => {
+export const generateFinalReport = async (
+  id: string,
+  type: string,
+  status: string | null
+) => {
   const response = await axiosInstance.get(
     `/loans/${id}/generate-final-report?type=${type}&status=${status}`,
     {
@@ -62,4 +66,15 @@ export const getAllEditRequestsApi = async () => {
 
 export const loanApproveRejectApi = async (id: string, payload: any) => {
   return await axiosInstance.post(`/loans/${id}/verify`, payload);
+};
+
+export const patchFinalVerdict = async (
+  id: string,
+  type: string,
+  payload: any
+) => {
+  return await axiosInstance.patch(
+    `/loans/${id}/verification/${type}/approve`,
+    payload
+  );
 };
