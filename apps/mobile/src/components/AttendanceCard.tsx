@@ -22,6 +22,16 @@ const handleLoginTick = async (setVisible: (val: boolean) => void) => {
     await setItem('attendance', payload);
   } catch (error: any) {
     console.log(error?.response?.data?.message);
+    if (
+      error?.response?.data?.message ===
+      'Attendance record already exists for this date'
+    ) {
+      const payload = {
+        status: 'Available',
+        date: dayjs().format('YYYY-MM-DD'),
+      };
+      await setItem('attendance', payload);
+    }
     Toast.show({
       type: 'error',
       text1: error?.response?.data?.message || 'Login unsuccessful',
@@ -64,7 +74,6 @@ const AttendanceCard: React.FC<{
         console.log(error);
       }
     };
-
     checkAttendance();
   }, []);
   return (
