@@ -1125,7 +1125,7 @@ export class LoanService {
           },
         });
         if (completedVerification) {
-          throw new BadRequestException(`Verification type - ${addressType} verification is already completed`);
+          throw new Error(`Verification type - ${addressType} verification is already completed`);
         }
       }
 
@@ -2538,5 +2538,48 @@ export class LoanService {
         Generated on ${new Date().toLocaleString()}
       </div>
     `;
+  }
+
+  async updateVerificationApproval(
+    loanId: number,
+    verificationType: VerificationType,
+    approvedStatus: ApprovedStatus,
+    path?: string
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+        },
+      });
+      if (!verification) {
+        throw new NotFoundException('Verification not found');
+      }
+      const updatedVerification = await this.prisma.verification.update({
+        where: { id: verification.id },
+        data: {
+          approvedStatus,
+          ...(path !== undefined && { path }),
+        },
+      });
+      await this.loggingService.info('Verification approval updated', {
+        loanId,
+        verificationType,
+        approvedStatus,
+        path,
+      });
+      return updatedVerification;
+    } catch (error) {
+      await this.loggingService.error('Failed to update verification approval', {
+        loanId,
+        verificationType,
+        approvedStatus,
+        path,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
   }
 } 

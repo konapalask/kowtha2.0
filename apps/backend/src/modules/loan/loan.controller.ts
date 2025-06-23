@@ -4,7 +4,7 @@ import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { Roles } from '../accounts/decorators/roles.decorator';
-import { VerificationType, LoanStatus, UserRole, VerificationStatus, AddressType } from '@prisma/client';
+import { VerificationType, LoanStatus, UserRole, VerificationStatus, AddressType, ApprovedStatus } from '@prisma/client';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { CreateLoanDto } from './dto/create-loan.dto';
@@ -560,6 +560,39 @@ export class LoanController {
     return {
       status: 200,
       message: 'Verification data updated successfully',
+      data: result
+    };
+  }
+
+  @Patch(':id/verification/:type/approve')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Approve or change status and path for a verification (Admin/Verifier only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'The verification approval status and path have been updated',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Verification approval updated successfully' },
+        data: { type: 'object' }
+      }
+    }
+  })
+  async updateVerificationApproval(
+    @Param('id') loanId: string,
+    @Param('type') verificationType: VerificationType,
+    @Body() body: { approvedStatus: ApprovedStatus; path?: string }
+  ) {
+    const result = await this.loanService.updateVerificationApproval(
+      Number(loanId),
+      verificationType,
+      body.approvedStatus,
+      body.path
+    );
+    return {
+      status: 200,
+      message: 'Verification approval updated successfully',
       data: result
     };
   }
