@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
-import attendanceIcon from "../../../public/images/svgIcons/attendance.svg"
+import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
 import { getUserDetails } from "@/utils/utility";
 
@@ -68,18 +68,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const userDetails = getUserDetails();
 
   useEffect(() => {
-  if(userDetails?.officeId){
-    getOfficesApi()
-    .then((res) => {
-      setOffice(
-        res?.data?.data?.find((office: any) => office?.id === userDetails?.officeId)
-          ?.name
-      );
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  }
+    if (userDetails?.officeId) {
+      getOfficesApi()
+        .then((res) => {
+          setOffice(
+            res?.data?.data?.find(
+              (office: any) => office?.id === userDetails?.officeId
+            )?.name
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   }, [userDetails?.officeId]);
 
   // useEffect(() => {
@@ -92,17 +93,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // }, [screens]);
 
   const menuItems = [
-    ...(!(userDetails?.role==="Verifier")?[
-      {
-        key: "dashboard",
-        icon: (
-          <DashboardOutlined
-            style={{ fontSize: 20, color: "var(--primary-800)" }}
-          />
-        ),
-        label: <Link href="/dashboard">Dashboard</Link>,
-      }
-    ]:[]),
+    ...(!(userDetails?.role === "Verifier")
+      ? [
+          {
+            key: "dashboard",
+            icon: (
+              <DashboardOutlined
+                style={{ fontSize: 20, color: "var(--primary-800)" }}
+              />
+            ),
+            label: <Link href="/dashboard">Dashboard</Link>,
+          },
+        ]
+      : []),
     {
       key: "loans",
       icon: (
@@ -117,17 +120,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/users">Users</Link>,
     },
-   ...((userDetails?.role==="Admin"||userDetails?.role==="Verifier")?[
-    {
-      key: "verify",
-      icon: (
-        <CheckCircleOutlined
-          style={{ fontSize: 20, color: "var(--primary-800)" }}
-        />
-      ),
-      label: <Link href="/verify">Verify</Link>,
-    }
-   ]:[]),
+    ...(userDetails?.role === "Admin" || userDetails?.role === "Verifier"
+      ? [
+          {
+            key: "verify",
+            icon: (
+              <CheckCircleOutlined
+                style={{ fontSize: 20, color: "var(--primary-800)" }}
+              />
+            ),
+            label: <Link href="/verify">Verify</Link>,
+          },
+        ]
+      : []),
     ...(userDetails?.role === "Admin"
       ? [
           {
@@ -141,15 +146,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           },
         ]
       : []),
-      // ...(userDetails?.role === "Admin"
-      //   ? [
-      //       {
-      //         key: "attendance",
-      //         icon: <Image src={attendanceIcon} alt="Attendance icon" width={20}height={20} style={{filter:"var(--primary-filter)"}} />,
-      //         label: <Link href="/attendance">Attendance</Link>,
-      //       },
-      //     ]
-      //   : []),
+    // ...(userDetails?.role === "Admin"
+    //   ? [
+    //       {
+    //         key: "attendance",
+    //         icon: <Image src={attendanceIcon} alt="Attendance icon" width={20}height={20} style={{filter:"var(--primary-filter)"}} />,
+    //         label: <Link href="/attendance">Attendance</Link>,
+    //       },
+    //     ]
+    //   : []),
     {
       key: "settings",
       icon: (
@@ -166,9 +171,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const menu = (
     <Menu>
-      <Menu.Item key="profile">
+      {/* <Menu.Item key="profile">
         <Link href="/profile">My Profile</Link>
-      </Menu.Item>
+      </Menu.Item> */}
       <Menu.Item key="logout">
         <Link href="/logout">Logout</Link>
       </Menu.Item>

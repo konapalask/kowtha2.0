@@ -182,12 +182,14 @@ export default function LoanVerifyDetails() {
       verification,
       status: verification?.status,
       id: verificationData?.loanId,
+      approvedStatus: verification?.approvedStatus,
     };
   };
 
   const getComponentByType = (type: string) => {
-    const { verification, status, id } = getVerificationAndStatusForTab(type);
-    if (status === "Completed") {
+    const { verification, status, id, approvedStatus } =
+      getVerificationAndStatusForTab(type);
+    if (status === "Completed" && approvedStatus) {
       return <PdfPreview id={id} status={status} setLoading={setLoading} />;
     }
     switch (type) {

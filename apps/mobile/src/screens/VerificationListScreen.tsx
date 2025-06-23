@@ -9,7 +9,7 @@ import {
   TextInput,
   Animated,
   ActivityIndicator,
-  Pressable,
+  // Pressable,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -27,14 +27,14 @@ type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   'VerificationList'
 >;
 
-type NavigationPayload = {
-  item: {
-    name: string;
-    applicationNumber: string;
-  };
-  verificationType: 'Work' | 'Business' | 'CurrentAddress' | 'PermanentAddress';
-  userData: VerificationItem;
-};
+// type NavigationPayload = {
+//   item: {
+//     name: string;
+//     applicationNumber: string;
+//   };
+//   verificationType: 'Work' | 'Business' | 'CurrentAddress' | 'PermanentAddress';
+//   userData: VerificationItem;
+// };
 
 interface VerificationItem {
   id: string;
