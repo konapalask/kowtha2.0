@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
 import { Logger } from '@nestjs/common';
+import { Roles } from '../accounts/decorators/roles.decorator';
 import * as puppeteer from 'puppeteer';
 import PDFDocument = require('pdfkit');
 import { Buffer } from 'buffer'; // Import the Buffer type
@@ -759,7 +760,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByVerifier(verifierId: number) {
+  async getLoansByVerifier(verifierId: number, role: UserRole) {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId }
@@ -769,8 +770,18 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
+      let whereCondition: Prisma.LoanWhereInput = {};
+      
+      if (role === UserRole.Admin) {
+        // For Admin, get all loans
+        whereCondition = {};
+      } else if (role === UserRole.Verifier) {
+        // For Verifier, get only loans assigned to them
+        whereCondition = { verifierId };
+      }
+
       const loans = await this.prisma.loan.findMany({
-        where: { verifierId },
+        where: whereCondition,
         include: {
           operationsExecutive: {
             select: {
@@ -803,6 +814,7 @@ export class LoanService {
 
       await this.loggingService.info('Retrieved loans by verifier', {
         verifierId,
+        role,
         count: loans.length
       });
 

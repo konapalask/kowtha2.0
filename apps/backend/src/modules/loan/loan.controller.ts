@@ -394,7 +394,7 @@ export class LoanController {
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
   async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByVerifier(req.user.sub);
+    const result = await this.loanService.getLoansByVerifier(req.user.sub, req.user.role as UserRole);
     return {
       status: 200,
       message: 'Verifier loans fetched successfully',
@@ -521,7 +521,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/:type')
-  @Roles(UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Edit verification data' })
   @ApiResponse({
     status: 200,
