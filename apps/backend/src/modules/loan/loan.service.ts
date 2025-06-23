@@ -2479,6 +2479,72 @@ export class LoanService {
           : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
         </table>
       </div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+          <tr>
+            <th>Remarks</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${path || ''}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Final Recommendation</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${finalRecommendationHtml}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <canvas id="logoCanvas" width="250" height="140"></canvas>
+
+          <div class="footer">
+            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           <script>
+              const canvas = document.getElementById('logoCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.onload = function () {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const offsetX = 20;
+                ctx.drawImage(img, offsetX, 0, canvas.width, canvas.height);
+              };
+              img.src = '${imageDataUri}';
+          </script>
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${imageUrls.map(url => `
+                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
     `;
   }
 } 
