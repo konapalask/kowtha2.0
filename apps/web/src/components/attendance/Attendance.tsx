@@ -11,6 +11,7 @@ import {
 } from "antd";
 import { useEffect, useState, useMemo } from "react";
 import dayjs from "dayjs";
+import { SearchOutlined } from "@ant-design/icons";
 
 interface AttendanceProps {
   dateRange: [any, any]; // dayjs.Dayjs[]
@@ -88,6 +89,9 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       title: "Name",
       dataIndex: ["user", "name"],
       key: "name",
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
       filterDropdown: ({
         setSelectedKeys,
         selectedKeys,
@@ -159,6 +163,9 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       title: "Employee Code",
       dataIndex: ["user", "employeeCode"],
       key: "employeeCode",
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
       filterDropdown: ({
         setSelectedKeys,
         selectedKeys,
@@ -214,21 +221,29 @@ export default function Attendance({ dateRange }: AttendanceProps) {
       title: "Total Assigned",
       dataIndex: "totalAssigned",
       key: "totalAssigned",
+      sorter: (a: AttendanceRecord, b: AttendanceRecord) =>
+        a.totalAssigned - b.totalAssigned,
     },
     {
       title: "Pending",
       dataIndex: "pendingVerifications",
       key: "pendingVerifications",
+      sorter: (a: AttendanceRecord, b: AttendanceRecord) =>
+        a.pendingVerifications - b.pendingVerifications,
     },
     {
       title: "Completed",
       dataIndex: "completedVerifications",
       key: "completedVerifications",
+      sorter: (a: AttendanceRecord, b: AttendanceRecord) =>
+        a.completedVerifications - b.completedVerifications,
     },
     {
       title: "Absent",
       key: "absentDays",
       render: (_: any, record: AttendanceRecord) => `${record.absentDays}`,
+      sorter: (a: AttendanceRecord, b: AttendanceRecord) =>
+        a.absentDays - b.absentDays,
     },
     // {
     //   title: "Today's Status",

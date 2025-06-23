@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Table, Card, Button, Space, Tag, Typography } from "antd";
+import { Table, Card, Button, Space, Tag, Typography, Badge } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -89,10 +89,28 @@ export default function Verify() {
           const verification = verifications.find(
             (v: any) => v.addressType === type.key
           );
-          if (!verification) return null;
+          if (!verification) {
+            return (
+              <Tag key={type.key} color="default">
+                {verifications?.type}
+              </Tag>
+            );
+          }
           const isCompleted = verification?.status === "Completed";
+          const approvedStatus = verification?.approvedStatus;
           return (
-            <Tag key={type.key} color={isCompleted ? "green" : "red"}>
+            <Tag
+              key={type.key}
+              color={
+                isCompleted
+                  ? approvedStatus === "Positive"
+                    ? "green"
+                    : approvedStatus === "Negative"
+                      ? "red"
+                      : "blue"
+                  : "orange"
+              }
+            >
               {type.label}
             </Tag>
           );
@@ -171,6 +189,20 @@ export default function Verify() {
           sticky
           bordered
         />
+        <div
+          style={{
+            marginTop: 16,
+            display: "flex",
+            gap: 16,
+            alignItems: "center",
+          }}
+        >
+          <Badge color="green" text="Completed - Positive" />
+          <Badge color="red" text="Completed - Negative" />
+          <Badge color="blue" text="Completed - Other" />
+          <Badge color="orange" text="In Progress" />
+          <Badge color="default" text="Pending" />
+        </div>
       </Card>
     </DashboardLayout>
   );
