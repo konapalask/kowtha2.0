@@ -166,15 +166,15 @@ export class EditRequestService {
           });
           console.log(requestedData);
           
-          // const editRequestData = requestedData as LoginRequestData;
+          const changes = requestedData?.changes as unknown as changeData;
 
           // Update the user record
-          // await this.prisma.user.update({ 
-          //   where: { id: user.id },
-          //   data: {
-          //     deviceId: changes.newDeviceId
-          //   },
-          // });
+          await this.prisma.user.update({ 
+            where: { id: user.id },
+            data: {
+              deviceId: changes.newDeviceId
+            },
+          });
         }
       }
 

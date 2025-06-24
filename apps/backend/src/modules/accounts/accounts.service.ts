@@ -151,12 +151,14 @@ export class AccountsService {
       let returnMessage = 'Device has been changed. Please contact administrator.';
 
       if(deviceId){
+        console.log("deviceId", deviceId);
         
         if(user.role !== UserRole.FieldExecutive){
           throw new UnauthorizedException('Admin cannot verify OTP');
         }
 
         if(!user.deviceId){
+          console.log("user.deviceId", user.deviceId);
           const updateUser  = await this.prisma.user.update({
             where: { id: user.id },
             data: { deviceId }
@@ -167,7 +169,7 @@ export class AccountsService {
         }
 
         if(deviceId !== user.deviceId){
-
+          console.log("deviceId !== user.deviceId");
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
               requester: {
@@ -177,11 +179,13 @@ export class AccountsService {
               status: EditRequestStatus.Pending
             }
           });
-          
+
           if(checkEditRequest){
+            console.log("checkEditRequest already pending");
             returnMessage = 'Device change request already pending. Please wait for approval.';
           }
           else{
+            console.log("checkEditRequest not pending");
             const editRequest = await this.prisma.editRequest.create({
               data: {
                 requester: {
@@ -206,16 +210,14 @@ export class AccountsService {
               oldDeviceId: user.deviceId,
               status: 'Pending',
             });
-          }
-          
-          return {
-            accessToken: '',
-            refreshToken: '',
-            message: returnMessage,
-          };
+            return {
+              accessToken: '',
+              refreshToken: '',
+              message: "returnMessage",
+            };
+          }          
         }
       }
-      
 
       // Find the latest active session for this user
       const session = await this.prisma.session.findFirst({
