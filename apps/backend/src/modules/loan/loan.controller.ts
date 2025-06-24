@@ -20,12 +20,13 @@ import { EditLoanDto } from './dto/edit-loan.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { DeleteVerificationDto } from './dto/delete-verification.dto';
+import { S3Service } from '../common/s3utils/s3.service';
 
 @ApiTags('loans')
 @Controller('loans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LoanController {
-  constructor(private loanService: LoanService) {}
+  constructor(private loanService: LoanService, private s3Service: S3Service) { }
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -34,8 +35,8 @@ export class LoanController {
   @Get('office/:officeId')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Get loans by office' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a list of loans for the specified office'
   })
   async getLoansByOffice(@Param('officeId') officeId: number) {
@@ -46,12 +47,12 @@ export class LoanController {
       data: result
     };
   }
-    
+
   @Get()
   @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a paginated list of loans matching the filter criteria',
     schema: {
       type: 'object',
@@ -146,8 +147,8 @@ export class LoanController {
   @Post()
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Create one or multiple loans' })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'The loans have been successfully created',
     schema: {
       type: 'object',
@@ -193,8 +194,8 @@ export class LoanController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Loans have been successfully imported from Excel file',
     schema: {
       type: 'object',
@@ -208,7 +209,7 @@ export class LoanController {
             totalProcessed: { type: 'number' },
             successful: { type: 'number' },
             failed: { type: 'number' },
-            results: { 
+            results: {
               type: 'array',
               items: {
                 type: 'object',
@@ -253,8 +254,8 @@ export class LoanController {
   @Post(':id/assign-loan-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Assign a field executive to a loan verification' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The verification has been successfully assigned',
     schema: {
       type: 'object',
@@ -300,8 +301,8 @@ export class LoanController {
   @Patch(':id/update-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The loan verification assignment has been successfully updated',
     schema: {
       type: 'object',
@@ -389,8 +390,8 @@ export class LoanController {
   @Get('get-verifier-loans')
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to verifier' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
   async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
@@ -403,12 +404,12 @@ export class LoanController {
   }
 
 
-  @Get(':id/generate-final-report')
+  @Get(':id/preview-final-report')
   @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({ summary: 'Generate PDF for loan details' })
+  @ApiOperation({ summary: 'Generate PDF Preview for loan details' })
   @ApiResponse({ status: 200, description: 'PDF generated successfully' })
   @ApiResponse({ status: 404, description: 'Loan not found' })
-  async generatePDF(
+  async generatePDFPreview(
     @Param('id') id: string,
     @Query('type') type: AddressType,
     @Query('status') status: string,
@@ -416,7 +417,7 @@ export class LoanController {
   ) {
     try {
       const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
-      
+
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename=loan-${id}-${type || 'all'}.pdf`,
@@ -433,11 +434,37 @@ export class LoanController {
     }
   }
 
+
+  @Get(':id/generate-final-report')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Generate Final Report PDF for loan details without further improvements' })
+  @ApiResponse({ status: 200, description: 'PDF generated successfully' })
+  @ApiResponse({ status: 404, description: 'Loan not found' })
+  async generateFinalReportPDF(
+    @Param('id') id: string,
+    @Query('type') type: AddressType,
+    @Res() res: Response,
+  ) {
+    try {
+      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
+      const pdfUrl = await this.s3Service.uploadPdfToS3(pdfBuffer, `final_pdf/${id}/${type}.pdf`)
+      res.status(404).json({ downloadUrl: pdfUrl });
+
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Failed to generate PDF', error: error.message });
+      }
+    }
+  }
+
+
   @Get(':id/verification-data')
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Get verification data for a loan' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns verification data for the specified loan',
     schema: {
       type: 'object',
@@ -498,9 +525,9 @@ export class LoanController {
   @Post(':id/verify')
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Verifier will approve or reject a loan and add comments' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'The loan has been successfully verified' 
+  @ApiResponse({
+    status: 200,
+    description: 'The loan has been successfully verified'
   })
   async verifyLoan(
     @Param('id') loanId: string,
@@ -606,8 +633,8 @@ export class LoanController {
   @Get('get-field-executive-loans')
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to field executive' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a list of loans assigned to the same field executive calling this API'
   })
   async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
@@ -622,8 +649,8 @@ export class LoanController {
   @Get('field-executive/assigned')
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get all loans assigned to field executive with verification details' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a paginated list of loans assigned to the field executive with verification details',
     schema: {
       type: 'object',
@@ -689,8 +716,8 @@ export class LoanController {
   @Patch(':id/submit-verification-report')
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Edit verification report' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The verification report has been successfully updated',
     schema: {
       type: 'object',
@@ -716,15 +743,15 @@ export class LoanController {
   })
   async editVerificationReport(
     @Param('id') loanId: string,
-    @Body() body: { 
-      verificationType: VerificationType; 
-      addressType: AddressType; 
-      findings: string; 
+    @Body() body: {
+      verificationType: VerificationType;
+      addressType: AddressType;
+      findings: string;
       verificationData?: any;
     },
     @Request() req: AuthenticatedRequest,
   ) {
-    
+
     const result = await this.loanService.editVerificationReport(
       Number(loanId),
       body.verificationType,
@@ -743,8 +770,8 @@ export class LoanController {
   @Patch(':id/verification/status')
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Update verification status' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The verification status has been successfully updated',
     schema: {
       type: 'object',
@@ -789,8 +816,8 @@ export class LoanController {
     type: DeleteVerificationDto,
     description: 'Field executive ID to identify the verification to delete'
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The verification has been successfully deleted',
     schema: {
       type: 'object',
@@ -816,13 +843,13 @@ export class LoanController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Cannot delete a completed verification' 
+  @ApiResponse({
+    status: 400,
+    description: 'Cannot delete a completed verification'
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Verification not found or not assigned to this field executive' 
+  @ApiResponse({
+    status: 404,
+    description: 'Verification not found or not assigned to this field executive'
   })
   async deleteVerification(
     @Param('id') loanId: string,

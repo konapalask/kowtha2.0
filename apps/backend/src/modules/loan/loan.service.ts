@@ -1646,10 +1646,12 @@ export class LoanService {
       }
       
       const verification = loan.verifications[0];
-      const status = verification.approvedStatus;
+      
       if (!verification) {
         throw new NotFoundException(`Verification for address type ${addressType} not found`);
       }
+
+      const status = verification?.approvedStatus || '';
 
       // Get the verification data
       let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
@@ -1690,7 +1692,6 @@ export class LoanService {
 
       // Filter out any failed URL generations
       const validImageUrls = imageUrls.filter(url => url !== null);
-
 
       let htmlTemplate = '';
       const bankName = loan.bankName;

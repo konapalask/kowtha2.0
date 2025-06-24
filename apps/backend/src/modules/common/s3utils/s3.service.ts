@@ -48,6 +48,38 @@ export class S3Service {
     }
   }
 
+  async uploadPdfToS3(pdfBuffer: Buffer, fileName: string): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileName,
+      Body: pdfBuffer,
+      ContentType: "application/pdf",
+    });
+  
+    try {
+      await this.s3Client.send(command);
+  
+      const getCommand = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: fileName,
+      });
+
+      const signedUrl = await getSignedUrl(this.s3Client, getCommand, { expiresIn: 3600 }); // URL expires in 1 hour
+
+      await this.loggingService.info('Generated presigned download URL', {
+        fileName,
+      });
+
+      return signedUrl;
+    } catch (error) {
+      await this.loggingService.error('Failed to upload PDF to S3', {
+        fileName,
+        error: error.message,
+      });
+      throw error;
+    }
+  };
+
   async generatePresignedDownloadUrl(path: string): Promise<string> {
     try {
       const command = new GetObjectCommand({
