@@ -150,59 +150,71 @@ export class AccountsService {
       }
       let returnMessage = 'Device has been changed. Please contact administrator.';
 
-      // if(deviceId){
-      //   if(user.role !== UserRole.FieldExecutive){
-      //     throw new UnauthorizedException('Admin cannot verify OTP');
-      //   }
+      if(deviceId){
+        
+        if(user.role !== UserRole.FieldExecutive){
+          throw new UnauthorizedException('Admin cannot verify OTP');
+        }
 
-      //   if(deviceId !== user.deviceId){
+        if(!user.deviceId){
+          const updateUser  = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { deviceId }
+          });
+          await this.loggingService.info('Device ID updated successfully', {
+            userId: user.id,
+          });
+        }
 
-      //     const checkEditRequest = await this.prisma.editRequest.findFirst({
-      //       where: {
-      //         requester: {
-      //           id: user.id
-      //         },
-      //         type: EditRequestType.Login,
-      //         status: EditRequestStatus.Pending
-      //       }
-      //     });
-      //     if(checkEditRequest){
-      //       returnMessage = 'Device change request already pending. Please wait for approval.';
-      //     }
-      //     else{
-      //       const editRequest = await this.prisma.editRequest.create({
-      //         data: {
-      //           requester: {
-      //             connect: { id: user.id }
-      //           },
-      //           changes: {
-      //             oldDeviceId: user.deviceId,
-      //             newDeviceId: deviceId,
-      //             userName: user.name,
-      //             mobile: user.mobile,
-      //             employeeCode: user.employeeCode,
-      //             role: user.role,
-      //             officeId: user.officeId,
-      //           },
-      //           type: EditRequestType.Login,
-      //           status: EditRequestStatus.Pending
-      //         }
-      //       });
-      //       await this.loggingService.info('Device change request created', {
-      //         userId: user.id,
-      //         deviceId,
-      //         oldDeviceId: user.deviceId,
-      //         status: 'Pending',
-      //       });
-      //     }
+        if(deviceId !== user.deviceId){
+
+          const checkEditRequest = await this.prisma.editRequest.findFirst({
+            where: {
+              requester: {
+                id: user.id
+              },
+              type: EditRequestType.Login,
+              status: EditRequestStatus.Pending
+            }
+          });
           
-      //     return {
-      //       accessToken: '',
-      //       refreshToken: '',
-      //       message: returnMessage,
-      //     };
-      //   }
-      // }
+          if(checkEditRequest){
+            returnMessage = 'Device change request already pending. Please wait for approval.';
+          }
+          else{
+            const editRequest = await this.prisma.editRequest.create({
+              data: {
+                requester: {
+                  connect: { id: user.id }
+                },
+                changes: {
+                  oldDeviceId: user.deviceId,
+                  newDeviceId: deviceId,
+                  userName: user.name,
+                  mobile: user.mobile,
+                  employeeCode: user.employeeCode,
+                  role: user.role,
+                  officeId: user.officeId,
+                },
+                type: EditRequestType.Login,
+                status: EditRequestStatus.Pending
+              }
+            });
+            await this.loggingService.info('Device change request created', {
+              userId: user.id,
+              deviceId,
+              oldDeviceId: user.deviceId,
+              status: 'Pending',
+            });
+          }
+          
+          return {
+            accessToken: '',
+            refreshToken: '',
+            message: returnMessage,
+          };
+        }
+      }
       
 
       // Find the latest active session for this user
