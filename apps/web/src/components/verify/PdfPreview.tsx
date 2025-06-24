@@ -1,5 +1,5 @@
 import { useTabContext } from "@/pages/verify/[id]";
-import { generateFinalReport } from "@/services/verifier.services";
+import { generatePreviewReport } from "@/services/verifier.services";
 import React, { useEffect, useState } from "react";
 
 const PdfPreview: React.FC<{
@@ -13,7 +13,7 @@ const PdfPreview: React.FC<{
 
   const fetchPdf = async () => {
     try {
-      const reportResponse = await generateFinalReport(
+      const reportResponse = await generatePreviewReport(
         id as string,
         activeTab,
         status

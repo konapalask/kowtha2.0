@@ -1,6 +1,6 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import {
-  generateFinalReport,
+  generatePreviewReport,
   loanApproveRejectApi,
   patchFinalVerdict,
 } from "@/services/verifier.services";
@@ -54,7 +54,7 @@ const Footer: React.FC<{
 
   const fetchPdf = async () => {
     try {
-      const reportResponse = await generateFinalReport(
+      const reportResponse = await generatePreviewReport(
         id as string,
         activeTab,
         null
