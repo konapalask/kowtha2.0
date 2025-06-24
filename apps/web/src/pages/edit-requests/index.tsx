@@ -231,7 +231,7 @@ const EditRequests: React.FC = () => {
           </Space>
         </Card>
 
-        {/* <Card title="Login Requests">
+        <Card title="Login Requests">
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
             <Table
               className="striped-table"
@@ -242,7 +242,7 @@ const EditRequests: React.FC = () => {
               bordered
             />
           </Space>
-        </Card> */}
+        </Card>
       </Space>
     </DashboardLayout>
   );

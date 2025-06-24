@@ -54,7 +54,6 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState<boolean>(false);
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
-  console.log(verdict);
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -241,15 +240,14 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Third Party Check"
-          // extra={
-          //   <Button
-          //     type="primary"
-          //     icon={<PlusOutlined />}
-          //     onClick={() => onEdit("colleagueReferences")}
-          //   >
-          //     Add Reference
-          //   </Button>
-          // }
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("thirdPartyCheck")}
+            />
+          }
         >
           <Table
             className="striped-table"
@@ -275,18 +273,18 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 dataIndex: "comments",
                 key: "comments",
               },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("colleagueReferences")}
-                    disabled={hasEditRequest}
-                  />
-                ),
-              },
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: (_, record) => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("colleagueReferences")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              // },
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}

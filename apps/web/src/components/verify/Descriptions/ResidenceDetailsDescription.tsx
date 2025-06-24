@@ -7,12 +7,18 @@ const ResidenceDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
-}> = ({ data, extra, logs = false, changedFields = [], isCurrentVersion = false }) => {
+}> = ({
+  data,
+  extra,
+  logs = false,
+  changedFields = [],
+  isCurrentVersion = false,
+}) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
-    
+
     return {
-      backgroundColor: isCurrentVersion ? '#fff1f0' : '#f6ffed'  // Red for current version, green for new version
+      backgroundColor: isCurrentVersion ? "#fff1f0" : "#f6ffed", // Red for current version, green for new version
     };
   };
 
@@ -26,65 +32,65 @@ const ResidenceDetailsDescription: React.FC<{
             column={logs ? 1 : 3}
             extra={extra || null}
           >
-            <Descriptions.Item 
+            <Descriptions.Item
               label="Residence Status"
-              contentStyle={getItemStyle('residenceStatus')}
+              contentStyle={getItemStyle("residenceStatus")}
             >
               {data?.residenceDetails?.residenceStatus}
             </Descriptions.Item>
             {data?.residenceDetails?.residenceStatus === "Rented" && (
-              <Descriptions.Item 
+              <Descriptions.Item
                 label="Rent Details"
-                contentStyle={getItemStyle('rentDetails')}
+                contentStyle={getItemStyle("rentDetails")}
               >
                 {data?.residenceDetails?.rentDetails}
               </Descriptions.Item>
             )}
-            <Descriptions.Item 
+            <Descriptions.Item
               label="Type of Residence"
-              contentStyle={getItemStyle('residenceType')}
+              contentStyle={getItemStyle("residenceType")}
             >
               {data?.residenceDetails?.residenceType}
             </Descriptions.Item>
-            <Descriptions.Item 
+            <Descriptions.Item
               label="Standard of Living"
-              contentStyle={getItemStyle('standardOfLiving')}
+              contentStyle={getItemStyle("standardOfLiving")}
             >
               {data?.residenceDetails?.standardOfLiving}
             </Descriptions.Item>
-            <Descriptions.Item 
+            {/* <Descriptions.Item 
               label="Locality Type"
               contentStyle={getItemStyle('localityType')}
             >
               {data?.residenceDetails?.localityType}
-            </Descriptions.Item>
-            <Descriptions.Item 
+            </Descriptions.Item> */}
+            <Descriptions.Item
               label="Accessibility"
-              contentStyle={getItemStyle('accessibility')}
+              contentStyle={getItemStyle("accessibility")}
             >
               {data?.residenceDetails?.accessibility}
             </Descriptions.Item>
-            <Descriptions.Item 
+            {/* <Descriptions.Item 
               label="House Area (sq.ft)"
               contentStyle={getItemStyle('houseArea')}
             >
               {data?.residenceDetails?.houseArea}
-            </Descriptions.Item>
-            <Descriptions.Item 
+            </Descriptions.Item> */}
+            <Descriptions.Item
               label="Years at Current Address"
-              contentStyle={getItemStyle('yearsAtCurrentAddress')}
+              contentStyle={getItemStyle("yearsAtCurrentAddress")}
             >
               {data?.residenceDetails?.yearsAtCurrentAddress}
             </Descriptions.Item>
-            <Descriptions.Item 
+            {/* <Descriptions.Item 
               label="Nameboard Visible"
               contentStyle={getItemStyle('nameBoardVisible')}
             >
               {data?.residenceDetails?.nameBoardVisible}
-            </Descriptions.Item>
-            <Descriptions.Item 
+            </Descriptions.Item> */}
+            <Descriptions.Item
               label="Political Symbol Visible"
-              contentStyle={getItemStyle('politicalSymbolVisible')}
+              contentStyle={getItemStyle("politicalSymbolVisible")}
             >
               {data?.residenceDetails?.politicalSymbolVisible}
             </Descriptions.Item>

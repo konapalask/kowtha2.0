@@ -10,6 +10,9 @@ import WorkBasicDetails from "./WorkBasicDetails";
 import BusinessBasicDetails from "./BusinessBasicDetails";
 import BusinessDetails from "./BusinessDetails";
 import BusinessMiscellaneous from "./BusinessMiscellaneous";
+import ColleagueReferencesDetails from "./ColleagueReferencesDetails";
+import PastEmploymentDetails from "./PastEmploymentDetails";
+import ExistingLoansDetails from "./ExistingLoansDetails";
 
 interface FormSelectorProps {
   form: any;
@@ -46,6 +49,12 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       return <OfficeVerificationForm form={form} />;
     case "workBasicDetails":
       return <WorkBasicDetails form={form} />;
+    case "colleagueReferences":
+      return <ColleagueReferencesDetails form={form} />;
+    case "pastEmployment":
+      return <PastEmploymentDetails form={form} />;
+    case "existingLoans":
+      return <ExistingLoansDetails form={form} />;
     case "businessBasicDetails":
       return <BusinessBasicDetails form={form} />;
     case "businessDetails":

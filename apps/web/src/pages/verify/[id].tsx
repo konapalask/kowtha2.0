@@ -190,7 +190,7 @@ export default function LoanVerifyDetails() {
     const verification = verificationData?.verifications?.find(
       (v: any) => v.addressType === type
     );
-    console.log(verification);
+    // console.log(verification);
     return verification;
   };
 
@@ -294,7 +294,7 @@ export default function LoanVerifyDetails() {
         style={{ top: 0 }}
       >
         <div style={{ paddingBottom: "20px", marginTop: 8 }}>
-          <div style={{ paddingTop: 8, paddingLeft: 8, position: "absolute" }}>
+          <div style={{ paddingTop: 8, paddingLeft: 8 }}>
             <LeftOutlined
               style={{ fontSize: 24 }}
               onClick={() => router?.push("/verify")}
