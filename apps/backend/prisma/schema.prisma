@@ -105,7 +105,6 @@ model User {
   // Relations
   operationsExecutiveLoans Loan[]               @relation("OperationsExecutive")
   verifiedLoans            Loan[]               @relation("LoanVerifier")
-  verificationReports      VerificationReport[] @relation("ReportVerifier")
   verifications            Verification[]       @relation("VerificationFieldExecutive")
   sessions                 Session[]
   editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
@@ -145,6 +144,7 @@ model Verification {
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
   path             String? // Array of S3 paths for verification documents
+  finalReportPath  String? // S3 path for final report
   applicantAddress String?
   verificationData Json? // JSON field to store address/work data
   pictureSource    PictureSource? // Source of the uploaded picture
@@ -174,7 +174,6 @@ model Loan {
   operationsExecutive   User                @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
   verifierId            Int?
   verifier              User?               @relation("LoanVerifier", fields: [verifierId], references: [id])
-  verificationReport    VerificationReport?
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -182,18 +181,6 @@ model Loan {
   applicantType         String?
 
   @@unique([applicationNumber, applicantType]) // New optional field
-}
-
-model VerificationReport {
-  id               Int      @id @default(autoincrement())
-  loanId           Int      @unique
-  loan             Loan     @relation(fields: [loanId], references: [id])
-  verifierId       Int
-  verifier         User     @relation("ReportVerifier", fields: [verifierId], references: [id])
-  verificationDate DateTime
-  remarks          String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
 }
 
 model Session {

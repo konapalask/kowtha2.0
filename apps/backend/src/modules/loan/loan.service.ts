@@ -655,7 +655,6 @@ export class LoanService {
               role: true
             }
           },
-          verificationReport: true,
           verifications: {
             include: {
               fieldExecutive: {
@@ -729,7 +728,6 @@ export class LoanService {
               role: true
             }
           },
-          verificationReport: true,
           verifications: {
             include: {
               fieldExecutive: {
@@ -794,7 +792,6 @@ export class LoanService {
               role: true
             }
           },
-          verificationReport: true,
           verifications: {
             include: {
               fieldExecutive: {
@@ -904,7 +901,6 @@ export class LoanService {
               role: true
             }
           },
-          verificationReport: true,
           verifications: {
             include: {
               fieldExecutive: {
@@ -1377,7 +1373,6 @@ export class LoanService {
               }
             }
           },
-          verificationReport: true
         }
       });
 
@@ -1412,7 +1407,6 @@ export class LoanService {
         applicationNumber: loan.applicationNumber,
         applicantName: loan.applicantName,
         verifications: verificationData,
-        verificationReport: loan.verificationReport
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -1637,7 +1631,6 @@ export class LoanService {
               fieldExecutive: { select: { name: true } }
             }
           },
-          verificationReport: { select: { remarks: true, verificationDate: true } }
         }
       });
 
