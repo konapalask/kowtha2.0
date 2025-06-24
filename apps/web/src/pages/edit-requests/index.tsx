@@ -9,7 +9,10 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
-import { getAllEditRequestsApi } from "@/services/verifier.services";
+import {
+  getAllEditRequestsApi,
+  updateEditRequestApi,
+} from "@/services/verifier.services";
 
 const { Title } = Typography;
 
@@ -36,35 +39,42 @@ const EditRequests: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [editRequests, setEditRequests] = useState<EditRequest[]>([]);
-
+  const [loginRequests, setLoginRequests] = useState<any>([]);
   // Add dummy login requests data
-  const [loginRequests] = useState<LoginRequest[]>([
-    {
-      id: "1",
-      employeeCode: "EMP001",
-      name: "John Doe",
-      phoneNumber: "+91 9876543210",
-    },
-    {
-      id: "2",
-      employeeCode: "EMP002",
-      name: "Jane Smith",
-      phoneNumber: "+91 9876543211",
-    },
-    {
-      id: "3",
-      employeeCode: "EMP003",
-      name: "Mike Johnson",
-      phoneNumber: "+91 9876543212",
-    },
-  ]);
+  // const [loginRequests] = useState<LoginRequest[]>([
+  //   {
+  //     id: "1",
+  //     employeeCode: "EMP001",
+  //     name: "John Doe",
+  //     phoneNumber: "+91 9876543210",
+  //   },
+  //   {
+  //     id: "2",
+  //     employeeCode: "EMP002",
+  //     name: "Jane Smith",
+  //     phoneNumber: "+91 9876543211",
+  //   },
+  //   {
+  //     id: "3",
+  //     employeeCode: "EMP003",
+  //     name: "Mike Johnson",
+  //     phoneNumber: "+91 9876543212",
+  //   },
+  // ]);
 
   const fetchEditRequests = async () => {
     setLoading(true);
     try {
       const response = await getAllEditRequestsApi();
-      console.log(response.data);
-      setEditRequests(response.data);
+      const data = response?.data ?? [];
+
+      const loanRequests = data.filter((req: any) => req?.type !== "Login");
+      const loginRequests = data.filter((req: any) => req?.type === "Login");
+
+      // console.log({ loanRequests, loginRequests });
+
+      setEditRequests(loanRequests);
+      setLoginRequests(loginRequests);
     } catch (error) {
       console.error("Error fetching edit requests:", error);
     } finally {
@@ -155,28 +165,53 @@ const EditRequests: React.FC = () => {
     },
   ];
 
-  const handleApprove = (record: LoginRequest) => {
-    message.success(`Login request for ${record.name} approved`);
+  const handleApprove = async (record: LoginRequest) => {
+    console.log(record);
+    try {
+      const response = await updateEditRequestApi(record?.id, {
+        status: "Approved",
+      });
+      // console.log(response);
+      message.success("Approved Successfully");
+      fetchEditRequests();
+    } catch (error: any) {
+      console.log(`Error:${error}`);
+      message.error(
+        error?.response?.data?.message || "Failed to approve this request"
+      );
+    }
   };
 
-  const handleReject = (record: LoginRequest) => {
-    message.success(`Login request for ${record.name} rejected`);
+  const handleReject = async (record: LoginRequest) => {
+    try {
+      const response = await updateEditRequestApi(record?.id, {
+        status: "Rejected",
+      });
+      // console.log(response);
+      message.success("Rejected Successfully");
+      fetchEditRequests();
+    } catch (error: any) {
+      console.log(`Error:${error}`);
+      message.error(
+        error?.response?.data?.message || "Failed to reject this request"
+      );
+    }
   };
 
   const loginRequestColumns: ColumnsType<LoginRequest> = [
     {
       title: "Employee Code",
-      dataIndex: "employeeCode",
+      dataIndex: ["requester", "employeeCode"],
       key: "employeeCode",
     },
     {
       title: "Name",
-      dataIndex: "name",
+      dataIndex: ["requester", "name"],
       key: "name",
     },
     {
       title: "Phone Number",
-      dataIndex: "phoneNumber",
+      dataIndex: ["requester", "mobile"],
       key: "phoneNumber",
     },
     {
