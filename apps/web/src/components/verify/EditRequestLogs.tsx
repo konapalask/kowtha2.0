@@ -21,7 +21,10 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import { useRouter } from "next/router";
 import { useTabContext } from "@/pages/verify/[id]";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, isEmpty } from "@/utils/utility";
+import ColleagueReferencesDescription from "./Descriptions/ColleagueReferencesDescription";
+import PastEmploymentsDescription from "./Descriptions/PastEmploymentsDescription";
+import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 
 const { Text } = Typography;
 
@@ -34,6 +37,9 @@ const getLabels = {
   residenceDetails: "Residence Details",
   thirdPartyCheck: "Third Party Check",
   employmentDetails: "Employment Details",
+  colleagueReferences: "Colleague References",
+  pastEmployment: "Past Employments",
+  existingLoans: "Existing Loans",
   businessDetails: "Business Details",
   miscellaneous: "Business Miscellaneous Details",
 };
@@ -52,6 +58,9 @@ const getDescriptions = (activeTab: string) => ({
   residenceDetails: ResidenceDetailsDescription,
   thirdPartyCheck: ThirdPartyCheckDescription,
   employmentDetails: WorkEmploymentDetailsDescription,
+  colleagueReferences: ColleagueReferencesDescription,
+  pastEmployment: PastEmploymentsDescription,
+  existingLoans: ExistingLoansDescription,
   businessDetails: BusinessDetailsDescription,
   miscellaneous: BusinessMiscellaneousDescription,
 });
@@ -118,6 +127,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   } = _props;
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);
+  // console.log(isEmpty(changedData));
 
   if (!changedData) {
     return (
@@ -309,24 +319,25 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                 <SectionDescription
                   data={{ [sectionKey]: editSection }}
                   extra={
-                    false && (
-                      <Space>
-                        <Button
-                          danger
-                          icon={<CloseCircleOutlined />}
-                          onClick={handleApprove}
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          type="primary"
-                          icon={<CheckCircleOutlined />}
-                          onClick={handleApprove}
-                        >
-                          Approve
-                        </Button>
-                      </Space>
-                    )
+                    null
+                    // false && (
+                    //   <Space>
+                    //     <Button
+                    //       danger
+                    //       icon={<CloseCircleOutlined />}
+                    //       onClick={handleApprove}
+                    //     >
+                    //       Reject
+                    //     </Button>
+                    //     <Button
+                    //       type="primary"
+                    //       icon={<CheckCircleOutlined />}
+                    //       onClick={handleApprove}
+                    //     >
+                    //       Approve
+                    //     </Button>
+                    //   </Space>
+                    // )
                   }
                   logs={true}
                   changedFields={changedKeys}

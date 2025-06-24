@@ -94,7 +94,7 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      <Col span={8}>
+      {/* <Col span={8}>
         <Form.Item
           name="localityType"
           label="Locality Type"
@@ -108,7 +108,7 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
             ))}
           </Select>
         </Form.Item>
-      </Col>
+      </Col> */}
 
       <Col span={8}>
         <Form.Item

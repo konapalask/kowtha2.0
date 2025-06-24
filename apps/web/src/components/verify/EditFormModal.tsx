@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { FormSelector } from "./VerificationEditForms";
 
 const formKeyMapping: Record<string, string> = {
-  businessBasicDetails: 'basicDetails',
-  workBasicDetails: 'basicDetails'
+  businessBasicDetails: "basicDetails",
+  workBasicDetails: "basicDetails",
 };
 
 interface ExtendedEditFormModalProps extends EditFormModalProps {
@@ -56,7 +56,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
       request.onsuccess = (event: any) => {
         const db = request.result;
-        
+
         try {
           const transaction = db.transaction("logs", "readwrite");
           const store = transaction.objectStore("logs");
@@ -132,8 +132,23 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
   };
 
   const getMaritalStatus = () => {
-    return initialValues?.verifications?.find((v: any) => v.addressType === currentTab)?.verificationData?.basicDetails?.maritalStatus;
+    return initialValues?.verifications?.find(
+      (v: any) => v.addressType === currentTab
+    )?.verificationData?.basicDetails?.maritalStatus;
   };
+
+  // console.log(initialValues);
+
+  const getInitialValues = async () => {
+    return await initialValues?.verifications?.find(
+      (v: any) => v.addressType === currentTab
+    )?.verificationData?.[formKeyMapping[formKey] || formKey];
+  };
+
+  console.log(
+    initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
+      ?.verificationData?.[formKeyMapping[formKey] || formKey]
+  );
 
   return (
     <Modal
@@ -144,20 +159,26 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         onCancel();
       }}
       onOk={handleSubmit}
-      width={1000}
+      width={"100%"}
       confirmLoading={loading}
     >
       <Form
         form={form}
         layout="vertical"
         initialValues={
-          initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
-            ?.verificationData?.[formKeyMapping[formKey] || formKey]
+          initialValues?.verifications?.find(
+            (v: any) => v.addressType === currentTab
+          )?.verificationData?.[formKeyMapping[formKey] || formKey]
         }
-        preserve={false}
+        // preserve={false}
       >
-        <Row gutter={[16, 16]}>
-          <FormSelector form={form} formKey={formKey} currentTab={currentTab} getMaritalStatus={getMaritalStatus} />
+        <Row gutter={[0, 0]}>
+          <FormSelector
+            form={form}
+            formKey={formKey}
+            currentTab={currentTab}
+            getMaritalStatus={getMaritalStatus}
+          />
         </Row>
       </Form>
     </Modal>

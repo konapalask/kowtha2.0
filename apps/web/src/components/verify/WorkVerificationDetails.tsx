@@ -184,15 +184,14 @@ export const WorkVerificationDetails: React.FC<
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Colleague References"
-          // extra={
-          //   <Button
-          //     type="primary"
-          //     icon={<PlusOutlined />}
-          //     onClick={() => onEdit("colleagueReferences")}
-          //   >
-          //     Add Reference
-          //   </Button>
-          // }
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("colleagueReferences")}
+            />
+          }
         >
           <Table
             className="striped-table"
@@ -223,18 +222,18 @@ export const WorkVerificationDetails: React.FC<
                 dataIndex: "emailAddress",
                 key: "emailAddress",
               },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("colleagueReferences")}
-                    disabled={hasEditRequest}
-                  />
-                ),
-              },
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: (_, record) => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("colleagueReferences")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              // },
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
@@ -247,15 +246,14 @@ export const WorkVerificationDetails: React.FC<
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Past Employment"
-          // extra={
-          //   <Button
-          //     type="primary"
-          //     icon={<PlusOutlined />}
-          //     onClick={() => onEdit("pastEmployment")}
-          //   >
-          //     Add Employment
-          //   </Button>
-          // }
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("pastEmployment")}
+            />
+          }
         >
           <Table
             className="striped-table"
@@ -303,20 +301,20 @@ export const WorkVerificationDetails: React.FC<
                 key: "reasonForMovement",
                 width: 250,
               },
-              {
-                title: "Actions",
-                key: "actions",
-                render: (_, record) => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("pastEmployment")}
-                    disabled={hasEditRequest}
-                  />
-                ),
-                width: 80,
-                fixed: "right",
-              },
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: (_, record) => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("pastEmployment")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              //   width: 80,
+              //   fixed: "right",
+              // },
             ]}
             scroll={{ x: 1500 }}
             pagination={false}
@@ -330,15 +328,14 @@ export const WorkVerificationDetails: React.FC<
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Existing Loans"
-          // extra={
-          //   <Button
-          //     type="primary"
-          //     icon={<PlusOutlined />}
-          //     onClick={() => onEdit("existingLoans")}
-          //   >
-          //     Add Loan
-          //   </Button>
-          // }
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("existingLoans")}
+            />
+          }
         >
           <Table
             className="striped-table"

@@ -23,6 +23,7 @@ export const isEmpty = (obj: any) => {
   if (!obj || typeof obj !== "object") return false;
 
   const keys = Object.keys(obj);
+  // if (keys?.length === 0) return true;
   return (
     keys.length > 0 &&
     keys.some((key) => {
@@ -42,11 +43,11 @@ export const isEmpty = (obj: any) => {
 };
 
 export const getUserDetails = () => {
-  if (typeof window === 'undefined') return {};
+  if (typeof window === "undefined") return {};
   return JSON.parse(localStorage.getItem(USER_DETAILS) || "{}");
-}
+};
 
 export const setUserDetails = (userDetails: any) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   localStorage.setItem(USER_DETAILS, JSON.stringify(userDetails));
-}
+};
