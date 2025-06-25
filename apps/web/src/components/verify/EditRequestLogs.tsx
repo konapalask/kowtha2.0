@@ -129,7 +129,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   // console.log("changedData", changedData);
   // console.log(isEmpty(changedData));
 
-  if (!changedData) {
+  if (isEmpty(changedData) && !disabled) {
     return (
       <Card
         title={
@@ -242,7 +242,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
       }
       extra={
         <>
-          {userDetails?.role !== "Admin" && (
+          {userDetails?.role !== "Admin" && !isEmpty(changedData) && (
             <Button
               type="primary"
               onClick={handleRequest}
@@ -252,7 +252,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                 borderColor: disabled ? "#d9d9d9" : undefined,
                 color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined,
               }}
-              disabled={disabled}
+              // disabled={disabled}
             >
               Request Approval
             </Button>

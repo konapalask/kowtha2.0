@@ -177,10 +177,10 @@ export default function LoanVerifyDetails() {
     const verification = verificationData?.verifications?.find(
       (v: any) => v.addressType === type
     );
-    // console.log(verificationData);
+    console.log(verification);
     return {
       verification,
-      status: verification?.status,
+      status: verification?.finalReportPath,
       id: verificationData?.loanId,
       approvedStatus: verification?.approvedStatus,
     };
@@ -199,7 +199,7 @@ export default function LoanVerifyDetails() {
   const getComponentByType = (type: string) => {
     const { verification, status, id, approvedStatus } =
       getVerificationAndStatusForTab(type);
-    if (status === "Completed" && approvedStatus) {
+    if (status) {
       return <PdfPreview id={id} status={status} setLoading={setLoading} />;
     }
     switch (type) {

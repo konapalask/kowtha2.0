@@ -17,7 +17,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           label="Address Type"
           rules={[{ required: true, message: "Please select address type" }]}
         >
-          <Select>
+          <Select style={{ color: "#000" }} disabled>
             <Select.Option value="PermanentAddress">
               Permanent Address
             </Select.Option>

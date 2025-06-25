@@ -1,5 +1,6 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import {
+  generateFinalReport,
   generatePreviewReport,
   loanApproveRejectApi,
   patchFinalVerdict,
@@ -121,6 +122,15 @@ const Footer: React.FC<{
     };
   }, [pdfPreviewUrl]);
 
+  const handleFinalReport = async () => {
+    try {
+      const response = await generateFinalReport(id as string, activeTab);
+      console.log(response);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
   return (
     <>
       <div
@@ -212,7 +222,7 @@ const Footer: React.FC<{
             </Button> */}
             <Popconfirm
               title="Are you sure you want to submit this final verdict?"
-              onConfirm={handleSave}
+              onConfirm={handleFinalReport}
             >
               <Button type="primary">Generate Final Report</Button>
             </Popconfirm>

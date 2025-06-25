@@ -53,7 +53,7 @@ export const BusinessVerificationDetails: React.FC<
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
     patchFinalVerdict(id as string, "Business", {
@@ -65,9 +65,9 @@ export const BusinessVerificationDetails: React.FC<
         message.success(response.data.message);
         // setOpen(true);
         // setVerdict(verdict);
-        setOpen(false);
-        router?.push("/verify");
-        setLoading(false);
+        // setOpen(false);
+        // router?.push("/verify");
+        // setLoading(false);
       })
       .catch((error) => {
         console.log("error: ", error);

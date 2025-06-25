@@ -22,6 +22,10 @@ export const generatePreviewReport = async (
   return response.data;
 };
 
+export const generateFinalReport = (id: string, type: string) => {
+  return axiosInstance.get(`/loans/${id}/generate-final-report?type=${type}`);
+};
+
 export const verifierEditApi = async (
   id: string,
   verificationType: string,
