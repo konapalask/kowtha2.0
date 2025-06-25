@@ -446,9 +446,14 @@ export class LoanController {
     @Res() res: Response,
   ) {
     try {
-      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
-      const pdfUrl = await this.s3Service.uploadPdfToS3(pdfBuffer, `final_pdf/${id}/${type}.pdf`)
-      res.status(404).json({ downloadUrl: pdfUrl });
+      let pdfUrl = await this.loanService.generateFinalReportPDF(Number(id), type)
+
+      if(pdfUrl) {
+        res.status(200).json({ downloadUrl: pdfUrl });
+      }
+      else {
+        res.status(404).json({ message: 'Error while generating Final report' });
+      }
 
     } catch (error) {
       if (error instanceof NotFoundException) {

@@ -1603,6 +1603,74 @@ export class LoanService {
     }
   }
 
+
+  async generateFinalReportPDF(loanId: number, addressType: AddressType): Promise<string> {
+    
+    const loan = await this.prisma.loan.findUnique({
+      where: { id: loanId },
+      select: {
+        applicationNumber: true,
+        applicantName: true,
+        applicantMobile: true,
+        applicantAddress: true,
+        loanType: true,
+        bankName: true,
+        loanAmount: true,
+        status: true,
+        office: { select: { name: true } },
+        operationsExecutive: { select: { name: true } },
+        verifications: {
+          where: { addressType: addressType },
+          select: {
+            id: true,
+            type: true,
+            status: true,
+            approvedStatus: true,
+            updatedAt: true,
+            verificationData: true,
+            path: true,
+            finalReportPath: true,
+            fieldExecutive: { select: { name: true } }
+          }
+        },
+      }
+    });
+
+    if (!loan) {
+      throw new NotFoundException('Loan not found');
+    }
+    
+    const verification = loan.verifications[0];
+    
+    if (!verification) {
+      throw new NotFoundException(`Verification for address type ${addressType} not found`);
+    }
+
+    const finalReportPath = verification.finalReportPath;
+
+    let finalReportPdfUrl = '';
+
+    const s3_path = `final_pdf/${loanId}/${addressType}.pdf`;
+
+    if(finalReportPath) {
+      finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+      return finalReportPdfUrl;
+    }
+    else {
+      const pdfBuffer = await this.generateVerificationPDF(loanId, addressType);
+
+      const pdfUrl = await this.s3Service.uploadPdfToS3(pdfBuffer, s3_path);
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: { id: verification.id },
+        data: { finalReportPath: s3_path }
+      });
+
+      return pdfUrl;
+    }
+  }
+
+
   async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
@@ -1617,7 +1685,7 @@ export class LoanService {
           bankName: true,
           loanAmount: true,
           status: true,
-          office: { select: { name: true } },
+          office: { select: { name: true, address: true } },
           operationsExecutive: { select: { name: true } },
           verifications: {
             where: { addressType: addressType },
@@ -1628,6 +1696,7 @@ export class LoanService {
               updatedAt: true,
               verificationData: true,
               path: true,
+              finalReportPath: true,
               fieldExecutive: { select: { name: true } }
             }
           },
@@ -1637,7 +1706,9 @@ export class LoanService {
       if (!loan) {
         throw new NotFoundException('Loan not found');
       }
-      
+
+      const address = loan.office.address;
+
       const verification = loan.verifications[0];
       
       if (!verification) {
@@ -1690,20 +1761,22 @@ export class LoanService {
       const bankName = loan.bankName;
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
         this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else if(addressType === 'Work') {
         
-        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
         this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else if(addressType === 'Business') {
         
-        htmlTemplate = this.generateBaseHTMLTemplate(loan) + 
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
         this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
       }
       else {
+
         throw new NotFoundException('Invalid address type');
       }
 
@@ -1756,7 +1829,7 @@ export class LoanService {
     }
   }
 
-  private generateBaseHTMLTemplate(loan: any): string {
+  private generateBaseHTMLTemplate(loan: any, address: string): string {
     return `
       <!DOCTYPE html>
       <html>
@@ -1916,11 +1989,11 @@ export class LoanService {
           <div>
             <div class="firm">KOWTHA & CO.</div>
             <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address">26-22-21, Mudunurivari Street,<br>Gandhi Nagar, VIJAYAWADA – 520003.</div>
+            <div class="address">${address}</div>
           </div>
           <div class="contact">
             Mobile no: 9491821359<br>
-            Mail ID: kowthaboi@gmail.com
+            Mail ID: opsfi@cakowtha.co.in
           </div>
         </div>
 
