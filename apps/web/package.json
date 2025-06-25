@@ -24,6 +24,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.18",
     "@types/node": "^18.11.0",
     "@types/react": "^18.0.0",
     "@types/react-date-range": "^1.4.10",

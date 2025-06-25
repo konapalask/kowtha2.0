@@ -56,7 +56,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
     patchFinalVerdict(id as string, verificationType, {
@@ -66,11 +66,9 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        // setOpen(true);
-        // setVerdict(verdict);
-        setLoading(true);
-        setOpen(false);
-        router?.push("/verify");
+        // setLoading(true);
+        // setOpen(false);
+        // router?.push("/verify");
       })
       .catch((error) => {
         console.log("error: ", error);

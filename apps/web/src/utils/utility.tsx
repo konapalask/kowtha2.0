@@ -19,27 +19,22 @@ export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
   }
 };
 
-export const isEmpty = (obj: any) => {
-  if (!obj || typeof obj !== "object") return false;
+export const isEmpty = (obj: any): boolean => {
+  if (obj === null || obj === undefined) return true;
+
+  if (typeof obj !== "object") {
+    if (typeof obj === "string") return obj.trim().length === 0;
+    return false;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.every(isEmpty);
+  }
 
   const keys = Object.keys(obj);
-  // if (keys?.length === 0) return true;
-  return (
-    keys.length > 0 &&
-    keys.some((key) => {
-      const value = obj[key];
+  if (keys.length === 0) return true;
 
-      if (value === null || value === undefined) return false;
-
-      if (Array.isArray(value)) return value.length > 0;
-
-      if (typeof value === "object") return Object.keys(value).length > 0;
-
-      // if (typeof value === "string") return value.trim().length > 0;
-
-      return true;
-    })
-  );
+  return keys.every((key) => isEmpty(obj[key]));
 };
 
 export const getUserDetails = () => {

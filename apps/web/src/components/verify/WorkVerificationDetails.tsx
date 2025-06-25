@@ -62,7 +62,7 @@ export const WorkVerificationDetails: React.FC<
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
     const payload = {
@@ -73,10 +73,10 @@ export const WorkVerificationDetails: React.FC<
       .then((response) => {
         // console.log("response: ", response)
         message.success(response.data.message);
-        setOpen(false);
-        router?.push("/verify");
-        // setVerdict(verdict);
-        setLoading(true);
+        // setOpen(false);
+        // router?.push("/verify");
+        // // setVerdict(verdict);
+        // setLoading(true);
       })
       .catch((error) => {
         console.log("error: ", error);

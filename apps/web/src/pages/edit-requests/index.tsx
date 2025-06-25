@@ -166,7 +166,6 @@ const EditRequests: React.FC = () => {
   ];
 
   const handleApprove = async (record: LoginRequest) => {
-    console.log(record);
     try {
       const response = await updateEditRequestApi(record?.id, {
         status: "Approved",
