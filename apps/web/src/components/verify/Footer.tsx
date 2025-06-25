@@ -125,6 +125,8 @@ const Footer: React.FC<{
   const handleFinalReport = async () => {
     try {
       const response = await generateFinalReport(id as string, activeTab);
+      // setOpen(false);
+      router?.push("/verify");
       console.log(response);
     } catch (error) {
       console.log("Error:", error);
