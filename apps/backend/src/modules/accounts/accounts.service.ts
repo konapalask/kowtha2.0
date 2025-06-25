@@ -339,11 +339,28 @@ export class AccountsService {
         }
       });
 
-      // Transform the data to include pending verifications count
-      const transformedUsers = users.map(user => ({
-        ...user,
-        pendingVerifications: user._count.verifications,
-        _count: undefined // Remove the _count field
+      // Transform the data to include pending verifications count and availabletoday flag
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      const transformedUsers = await Promise.all(users.map(async user => {
+        const attendance = await this.prisma.attendance.findFirst({
+          where: {
+            userId: user.id,
+            date: {
+              gte: today,
+              lt: tomorrow
+            }
+          }
+        });
+        return {
+          ...user,
+          pendingVerifications: user._count.verifications,
+          availabletoday: !!attendance,
+          _count: undefined // Remove the _count field
+        };
       }));
 
       await this.loggingService.info('Users listed successfully', {

@@ -1389,6 +1389,7 @@ export class LoanService {
           type: verification.type,
           status: verification.status,
           approvedStatus: verification.approvedStatus,
+          finalReportPath: verification.finalReportPath,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
           fieldExecutive: verification.fieldExecutive,
