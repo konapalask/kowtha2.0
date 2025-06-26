@@ -2285,8 +2285,12 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
           </tr>
           <tr>
-            <th>Business Profile</th>
+            <th>Business Name</th>
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Profile</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
           </tr>
           <tr>
             <th>Business Address</th>
@@ -2536,7 +2540,7 @@ export class LoanService {
             <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
           </tr>
           <tr>
-            <th>If Less than 1 Year, then Previous Address</th>
+            <th>If Less than 2 Year, then Previous Address</th>
             <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
           </tr> 
           <tr>

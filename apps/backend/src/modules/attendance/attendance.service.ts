@@ -15,9 +15,9 @@ export class AttendanceService {
     // Use current date if not provided
     const attendanceDate = new Date(date);
     
-    if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
-      throw new BadRequestException('You can only record attendance for today');
-    }
+    // if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
+    //   throw new BadRequestException('You can only record attendance for today');
+    // }
 
     const user = await this.prisma.user.findUnique({
       where: {
