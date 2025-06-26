@@ -2072,6 +2072,10 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
           <tr>
+            <th>Name of the the Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+          </tr>
+          <tr>
             <th>Name of the Current Employer</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
           </tr>
