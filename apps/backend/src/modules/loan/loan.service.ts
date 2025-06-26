@@ -2197,7 +2197,7 @@ export class LoanService {
           </tr>
         </table>
       </div>
-
+      <br>
       <canvas id="logoCanvas" width="250" height="140"></canvas>
 
           <div class="footer">
