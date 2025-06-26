@@ -2046,62 +2046,58 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
           </tr>
           <tr>
-                <th>Name of the Current Employer</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Curent Office Address</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of years in Current Job</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Total Work Experience</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Office Email ID</th>
-                <td colspan="5"><span class="var-value">${''}</span></td>
-              </tr>
-              <tr>
-                <th>Office Phone Number/Landline Number</th>
-                <td colspan="5"><span class="var-value">${''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of Employees in the Company</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Employee ID(Copy/Photograph Mandatory)</th>
-                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
-                <th>Designation</th>
-                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Mode of Salary</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Employer</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.employerType || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Industry</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.natureOfService || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Type of Office Locality</th>
-                <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeLocality || ''}</span></td>
-              </tr>
+            <th>Curent Office Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Number of years in Current Job</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Total Work Experience</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Office Email ID</th>
+            <td colspan="5"><span class="var-value">${''}</span></td>
+          </tr>
+          <tr>
+            <th>Office Phone Number/Landline Number</th>
+            <td colspan="5"><span class="var-value">${''}</span></td>
+          </tr>
+          <tr>
+            <th>Number of Employees in the Company</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Employee ID(Copy/Photograph Mandatory)</th>
+            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
+            <th>Designation</th>
+            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Mode of Salary</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Type of Employer</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.employerType || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Type of Industry</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.natureOfService || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Type of Office Locality</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeLocality || ''}</span></td>
+          </tr>
             <tr><td colspan="6" class="section-header">Financial Details</td></tr>
-              <tr>
-                <th>Monthly Gross Salary</th>
-                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.grossSalary || ''}</span></td>
-                <th>Monthly Net Salary</th>
-                <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
-              </tr>
+          <tr>
+            <th>Monthly Gross Salary</th>
+            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.grossSalary || ''}</span></td>
+            <th>Monthly Net Salary</th>
+            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
+          </tr>
         </table>
       </div>
       <div class="footer">

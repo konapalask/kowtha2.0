@@ -102,8 +102,8 @@ export class AccountsService {
       }
 
       // Generate a random 6-digit OTP
-      const otp = "123456";
-      // const otp = this.generateRandomOTP();
+      // const otp = "123456";
+      const otp = this.generateRandomOTP();
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       // Create a new session for this OTP
