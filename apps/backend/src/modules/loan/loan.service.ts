@@ -2070,13 +2070,13 @@ export class LoanService {
     return `
       <div class="align-wrapper">
         <table class="section-table">
-          <tr><td colspan="6" class="section-header">Employment Details</td></tr>
+          <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
           <tr>
             <th>Name of the Current Employer</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
           </tr>
           <tr>
-            <th>Current Office Address</th>
+            <th>Office Address</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
           </tr>
           <tr>
@@ -2086,10 +2086,6 @@ export class LoanService {
           <tr>
             <th>Total Work Experience</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Office Email ID</th>
-            <td colspan="5"><span class="var-value">${''}</span></td>
           </tr>
           <tr>
             <th>Number of Employees in the Company</th>
@@ -2279,13 +2275,13 @@ export class LoanService {
     return `
       <div class="align-wrapper">
         <table class="section-table">
-          <tr><td colspan="6" class="section-header">Business Details</td></tr>
+          <tr><td colspan="6" class="section-header">Business Verification</td></tr>
           <tr>
             <th>Name of the Applicant</th>
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
           </tr>
           <tr>
-            <th>Business Name</th>
+            <th>Business Profile</th>
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
           </tr>
           <tr>
@@ -2352,7 +2348,11 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.stockSeen || ''}</span></td>
           </tr>
           <tr>
-            <th>Rental Amount</th>
+            <th>Ownership of Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.ownershipOfPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Rent Paid</th>
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
           </tr>
           <tr>
@@ -2368,24 +2368,8 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.otherSetupObserved || ''}</span></td>
           </tr>
           <tr>
-            <th>Ownership of Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.ownershipOfPremises || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Illegal Setup Observed</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.illegalSetupObserved || ''}</span></td>
-          </tr>
-          <tr>
             <th>Politically Connected</th>
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.politicallyConnected || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Activity Other</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.businessActivityOther || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Private Finance or Chits</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.privateFinanceOrChits || ''}</span></td>
           </tr>
           <tr>
             <th>Years in Current Premises</th>
@@ -2503,64 +2487,57 @@ export class LoanService {
     return `
       <div class="align-wrapper">
         <table class="section-table">
-          <tr><td colspan="6" class="section-header">Address Verification Details</td></tr>
+          <tr><td colspan="6" class="section-header">Residence Verification</td></tr>
           <tr>
-            <th>Address</th>
+            <th>Initiated Address</th>
             <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
           </tr>
           <tr>
-                <th>Name of Applicant</th>
-                <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
-              </tr>
-              <tr>
-                <th>PAN Number</th>
-                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Aadhar Number</th>
-                <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Residential Address</th>
-                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Marital Status</th>
-                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.applicantMaritalStatus || ''}</span></td>
-                <th>Educational Qualification</th>
-                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.educationQualification || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Category</th>
-                <td colspan="2"><span class="var-value">${verificationData.basicDetails?.category || ''}</span></td>
-                <th>Number of Dependents</th>
-                <td colspan="2"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of years in Current Residence</th>
-                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
-                <th>Current residence house size</th>
-                <td colspan="2"><span class="var-value">${verificationData.residenceDetails?.houseArea || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Number of Years in Current City</th>
-                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
-                <th>Number of Years stayed in the Current City</th>
-                <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>If Less than 1 Year, then Previous Address</th>
-                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
-              </tr> 
-              <tr>
-                <th>If Less than 3 Years in current city, then mention Reason for Change</th>
-                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-              <tr>
-                <th>Reason for Change</th>
-                <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
-              </tr>
-                    
+            <th>Name of the Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>PAN Number</th>
+            <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Aadhar Number</th>
+            <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Residential Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Marital Status</th>
+            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.applicantMaritalStatus || ''}</span></td>
+            <th>Educational Qualification</th>
+            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.educationQualification || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Category</th>
+            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.category || ''}</span></td>
+            <th>Number of Dependents</th>
+            <td colspan="2"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Number of Years stayed in the Current City</th>
+            <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
+            <th>Number of years in Current Residence</th>
+            <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
+          </tr>
+          <tr>
+            <th>If Less than 1 Year, then Previous Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
+          </tr> 
+          <tr>
+            <th>If Less than 3 Years in current city, then mention Reason for Change</th>
+            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
+          </tr>
+          <tr>
+            <th>Reason for Change</th>
+            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
+          </tr>
         </table>
       </div>
 
