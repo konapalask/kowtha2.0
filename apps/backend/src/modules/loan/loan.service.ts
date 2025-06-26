@@ -845,7 +845,7 @@ export class LoanService {
       }
 
       if (filters?.applicationNumber) {
-        where.applicationNumber = filters.applicationNumber;
+        where.applicationNumber = {contains: filters.applicationNumber, mode: 'insensitive'};
       }
 
       // Add date range filter
@@ -1445,7 +1445,7 @@ export class LoanService {
           // Check if application number already exists
           if (dto.applicationNumber) {
             const existingLoan = await this.prisma.loan.findUnique({
-              where: { applicationNumber: dto.applicationNumber }
+              where: { applicationNumber: dto.applicationNumber, applicantType: dto.applicantType }
             });
 
             if (existingLoan) {

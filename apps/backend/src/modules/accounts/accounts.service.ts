@@ -90,11 +90,15 @@ export class AccountsService {
   async generateOTP(mobile: string): Promise<{ message: string }> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { mobile }
+        where: { mobile: mobile, status: 'Active' }
       });
 
       if (!user) {
         throw new NotFoundException('User not found with this mobile number');
+      }
+
+      if (user.role === UserRole.FieldExecutive) {
+        throw new UnauthorizedException('Field Executive do not have access to generate OTP');
       }
 
       if (user.status !== 'Active') {
@@ -151,7 +155,7 @@ export class AccountsService {
       let returnMessage = 'Device has been changed. Please contact administrator.';
 
       if(user.role === UserRole.FieldExecutive && !deviceId){
-        throw new UnauthorizedException('Only Admin and Operations Executive can verify OTP');
+        throw new UnauthorizedException('You do not have access to verify OTP');
       }
       
       if(deviceId){

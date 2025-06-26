@@ -18,6 +18,5 @@ export class CreateAttendanceDto {
     example: '2024-01-15'
   })
   @IsDateString()
-  @IsOptional()
   date?: string;
 } 
