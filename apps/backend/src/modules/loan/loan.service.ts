@@ -1741,7 +1741,7 @@ export class LoanService {
         throw new NotFoundException('Invalid address type');
       }
       
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpeg');
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
