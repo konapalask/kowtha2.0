@@ -2062,10 +2062,6 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${''}</span></td>
           </tr>
           <tr>
-            <th>Office Phone Number/Landline Number</th>
-            <td colspan="5"><span class="var-value">${''}</span></td>
-          </tr>
-          <tr>
             <th>Number of Employees in the Company</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
           </tr>
@@ -2140,7 +2136,7 @@ export class LoanService {
           <tr>
             <th>Name</th>
             <th>Designation</th>
-            <th>Contact Number</th>
+            <th>Mobile</th>
             <th>Email Address</th>
             <th>Address</th>
             <th>Years Known</th>
