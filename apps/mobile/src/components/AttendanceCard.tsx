@@ -23,6 +23,7 @@ const handleLoginTick = async (
       position: 'top',
     });
     await setItem('attendance', payload);
+    setIsLoggedIn(true);
   } catch (error: any) {
     console.log(error?.response?.data?.message);
     if (
@@ -90,36 +91,35 @@ const AttendanceCard: React.FC<{
   return (
     <View style={styles.loginCard}>
       {/* {!isLoggedIn && isValidTime() ? ( */}
-      {!isLoggedIn ? (
-        <>
-          <Text style={styles.loginText}>Login for the day</Text>
-          <View style={styles.loginActions}>
-            <Pressable
-              onPress={() => {
-                handleLoginTick(setVisible, setIsLoggedIn);
-              }}
-              style={styles.iconButton}>
-              <Icon name="checkmark-circle" size={28} color="green" />
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                handleLoginCross(setVisible);
-              }}
-              style={styles.iconButton}>
-              <Icon name="close-circle" size={28} color="red" />
-            </Pressable>
-          </View>
-        </>
+      {/* {!isLoggedIn ? (
+        <> */}
+      <Text style={styles.loginText}>Login for the day</Text>
+      <View style={styles.loginActions}>
+        <Pressable
+          onPress={() => {
+            handleLoginTick(setVisible, setIsLoggedIn);
+          }}
+          style={styles.iconButton}>
+          <Icon name="checkmark-circle" size={28} color="green" />
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleLoginCross(setVisible);
+          }}
+          style={styles.iconButton}>
+          <Icon name="close-circle" size={28} color="red" />
+        </Pressable>
+      </View>
+      {/* </>
       ) : (
         <View style={{}}>
           <Icon name="information-circle-outline" size={28} color={'green'} />
           <Text
             style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
-            {/* Login available from 9AM to 12PM */}
             Already logged in for the day
           </Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 };

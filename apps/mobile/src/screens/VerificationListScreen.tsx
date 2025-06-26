@@ -422,7 +422,8 @@ const VerificationListScreen = () => {
 
   return (
     <View style={styles.container}>
-      {showAttendanceModal && !isLoggedIn && validTime() && (
+      {/* {showAttendanceModal && !isLoggedIn && validTime() && ( */}
+      {showAttendanceModal && !isLoggedIn && (
         <View style={styles.attendanceModalOverlay}>
           {/* <Pressable
             style={styles.attendanceModalBackground}

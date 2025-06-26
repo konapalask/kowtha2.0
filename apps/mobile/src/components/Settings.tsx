@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -37,7 +37,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   const [userDetails, setUserDetails] = useState<any>({});
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const details = await getItem('userDetails');
@@ -142,7 +142,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
               </View>
             </View>
             <AttendanceCard
-              setVisible={setVisible}
+              setVisible={setProfileModalVisible}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
             />

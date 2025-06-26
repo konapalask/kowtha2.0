@@ -40,6 +40,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       availablePersonMobile: '',
       availablePersonRelation: '',
       availablePersonRelationOther: '',
+      aadhar: '',
     },
   });
 
@@ -157,6 +158,29 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
               <Text style={styles.errorText}>
                 {errors.applicantName.message}
               </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="aadhar"
+        rules={{required: 'Aadhar is required'}}
+        render={({field: {onChange, onBlur, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Aadhar Number</Text>
+            <TextInput
+              style={[styles.input, styles.readOnlyInput]}
+              placeholder="Enter Aadhar Number"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              // editable={false}
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.aadhar && (
+              <Text style={styles.errorText}>{errors.aadhar.message}</Text>
             )}
           </View>
         )}

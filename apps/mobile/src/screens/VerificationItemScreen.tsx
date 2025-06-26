@@ -76,6 +76,7 @@ const VerificationItemScreen = () => {
       verificationType: verificationType,
       applicationNumber: item?.applicationNumber,
       applicantName: item.name,
+      aadhar: '',
       applicantMaritalStatus: '',
       applicantMaritalStatusOther: '',
       educationQualification: '',

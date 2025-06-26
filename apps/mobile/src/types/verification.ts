@@ -34,6 +34,7 @@ export interface BasicDetailsFormData {
   availablePersonMobile: string;
   availablePersonRelation: string;
   availablePersonRelationOther: string;
+  aadhar: string;
 }
 
 export type ApplicantInformationFormData = {
