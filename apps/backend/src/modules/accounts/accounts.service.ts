@@ -97,10 +97,6 @@ export class AccountsService {
         throw new NotFoundException('User not found with this mobile number');
       }
 
-      if (user.role === UserRole.FieldExecutive) {
-        throw new UnauthorizedException('Field Executive do not have access to generate OTP');
-      }
-
       if (user.status !== 'Active') {
         throw new BadRequestException('Your account is not active. Please contact administrator.');
       }
