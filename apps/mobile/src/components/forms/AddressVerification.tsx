@@ -36,6 +36,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       previousAddress: '',
       addressMismatch: '',
       addressCorrectionDetails: '',
+      addressProof: '',
       previousAddressYears: '',
       numberOfYearsAtCurrentCity: '',
       previousCity: '',
@@ -50,6 +51,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
   const yearsAtResidenceSheetRef = useRef<ActionSheetRef>(null);
   const yearsInCitySheetRef = useRef<ActionSheetRef>(null);
   const addressMismatchSheetRef = useRef<ActionSheetRef>(null);
+  const addressProofSheetRef = useRef<ActionSheetRef>(null);
 
   const addressTypes = [
     {label: 'Permanent Address', value: 'PermanentAddress'},
@@ -63,6 +65,17 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
     AddressVerificationFormData['numberOfYearsAtCurrentCity']
   > = ['<=3 years', '>3 years'];
   const addressMismatchOptions = ['Yes', 'No'];
+  const addressProofOptions = [
+    'Gas Bill',
+    'Rental Agreement',
+    'Voter ID',
+    'Aadhar Card',
+    'Bank Passbook',
+    'Passport Address',
+    'Property Tax Report',
+    'Electric',
+    'None',
+  ];
 
   const watchedAddressMismatch = useWatch({
     control,
@@ -111,6 +124,10 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
 
   const showAddressMismatchSheet = () => {
     addressMismatchSheetRef.current?.show();
+  };
+
+  const showAddressProofSheet = () => {
+    addressProofSheetRef.current?.show();
   };
 
   return (
@@ -237,6 +254,30 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           )}
         />
       )}
+
+      <Controller
+        control={control}
+        name="addressProof"
+        // rules={{required: 'Address Mismatch? is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Address Proof</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showAddressProofSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Address Proof'}
+              </Text>
+            </TouchableOpacity>
+            {errors.addressProof && (
+              <Text style={styles.errorText}>
+                {errors.addressProof.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
 
       <Controller
         control={control}
@@ -556,6 +597,24 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
                 addressMismatchSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      <ActionSheet
+        ref={addressProofSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Select Address Proof</Text>
+          {addressCategories.map((category, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('addressProof', category);
+                addressProofSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{category}</Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -42,7 +42,6 @@ export type BusinessDetailsFormData = {
   totalExperience: string;
   isAddressTraceable: string;
   isBusinessSeasonal: string;
-  businessProfile: string;
   geoTag: string;
 };
 
@@ -74,7 +73,6 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       businessStartYear: '',
       totalExperience: '',
       isBusinessSeasonal: '',
-      businessProfile: '',
       isAddressTraceable: '',
       geoTag: '',
     },
@@ -305,30 +303,6 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
               onChangeText={onChange}
               value={value}
               keyboardType="numeric"
-              placeholderTextColor={colors.text.disabled}
-            />
-            {errors.totalExperience && (
-              <Text style={styles.errorText}>
-                {errors.totalExperience.message}
-              </Text>
-            )}
-          </View>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="businessProfile"
-        rules={{required: 'Required'}}
-        render={({field: {onChange, onBlur, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Business Profile</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter business profile"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
               placeholderTextColor={colors.text.disabled}
             />
             {errors.totalExperience && (

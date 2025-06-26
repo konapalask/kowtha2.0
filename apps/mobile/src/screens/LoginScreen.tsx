@@ -76,10 +76,10 @@ const LoginScreen = () => {
   };
 
   const handleVerifyOtp = async () => {
-    // if (otp.length !== 6) {
-    //   Alert.alert('Error', 'Please enter a valid 6-digit OTP');
-    //   return;
-    // }
+    if (otp.length !== 6) {
+      Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+      return;
+    }
 
     try {
       const deviceId = await getDeviceId();
@@ -182,7 +182,7 @@ const LoginScreen = () => {
                   }
                 }}
                 keyboardType="numeric"
-                maxLength={12}
+                maxLength={6}
                 placeholderTextColor={'#c8c8c8'}
                 editable={!loading}
               />

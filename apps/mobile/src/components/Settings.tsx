@@ -71,7 +71,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   const handleLogout = () => {
     clearItem('accessToken');
     clearItem('refreshToken');
-    clearItem('attendance');
+    // clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],
@@ -146,7 +146,6 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
             />
-            {/* {!isLoggedIn && <AttendanceCard setVisible={setVisible} />} */}
           </Pressable>
         </Pressable>
       </Modal>

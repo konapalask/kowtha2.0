@@ -18,11 +18,11 @@ export type BusinessMiscellaneousFormData = {
   stockSeen: string;
   employeesSeen: string;
   otherSetupObserved: string;
-  illegalSetupObserved: string;
+  // illegalSetupObserved: string;
   politicallyConnected: string;
-  privateFinanceOrChits: string;
+  // privateFinanceOrChits: string;
   businessActivity: string;
-  businessActivityOther?: string;
+  // businessActivityOther?: string;
   areaOfPremises: string;
   localityOfBusiness: string;
   employeesUnderApplicant: string;
@@ -67,11 +67,11 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       stockSeen: '',
       employeesSeen: '',
       otherSetupObserved: '',
-      illegalSetupObserved: '',
+      // illegalSetupObserved: '',
       politicallyConnected: '',
-      privateFinanceOrChits: '',
+      // privateFinanceOrChits: '',
       businessActivity: '',
-      businessActivityOther: '',
+      // businessActivityOther: '',
       areaOfPremises: '',
       localityOfBusiness: '',
       employeesUnderApplicant: '',
@@ -111,6 +111,29 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
 
   return (
     <ScrollView style={styles.container}>
+      {/* 19. Stock seen (select) */}
+      <Controller
+        control={control}
+        name="stockSeen"
+        rules={{required: 'Stock seen is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Stock Seen</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showStockSeenSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select option'}
+              </Text>
+            </TouchableOpacity>
+            {errors.stockSeen && (
+              <Text style={styles.errorText}>{errors.stockSeen.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
       {/* 16. Ownership of the Business Premises (select) */}
       <Controller
         control={control}
@@ -146,7 +169,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
               <Text style={styles.label}>Rental Amount</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter rental amount"
+                placeholder="Enter rental paid"
                 keyboardType="numeric"
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -236,28 +259,6 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
           </View>
         )}
       />
-      {/* 19. Stock seen (select) */}
-      <Controller
-        control={control}
-        name="stockSeen"
-        rules={{required: 'Stock seen is required'}}
-        render={({field: {value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Stock Seen</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={showStockSeenSheet}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select option'}
-              </Text>
-            </TouchableOpacity>
-            {errors.stockSeen && (
-              <Text style={styles.errorText}>{errors.stockSeen.message}</Text>
-            )}
-          </View>
-        )}
-      />
 
       <Controller
         control={control}
@@ -332,7 +333,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       />
       {/* 22. Any ILLEGAL setup was observed (select) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="illegalSetupObserved"
         rules={{required: 'This field is required'}}
@@ -354,7 +355,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* 23. Is applicant or any family member politically connected (select) */}
       <Controller
         control={control}
@@ -382,7 +383,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       />
       {/* 24. As per neighbor check, any collections or private finance or private chits are being operated from the premises or by the applicant (select) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="privateFinanceOrChits"
         rules={{required: 'This field is required'}}
@@ -407,7 +408,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* 25. Business activity (Trading/Services/Manufacturing/Others, with 'others' input) */}
       <Controller
         control={control}
@@ -432,7 +433,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
           </View>
         )}
       />
-      {businessActivity === 'Others' && (
+      {/* {businessActivity === 'Others' && (
         <Controller
           control={control}
           name="businessActivityOther"
@@ -456,7 +457,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onSubmit)}>

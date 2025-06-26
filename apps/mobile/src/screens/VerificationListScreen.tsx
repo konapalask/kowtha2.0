@@ -122,18 +122,21 @@ const VerificationListScreen = () => {
       const details = await getItem('attendance');
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-
-      // const start = currentTime.clone().hour(9).minute(0).second(0);
-      // const end = currentTime.clone().hour(12).minute(0).second(0);
-
-      // if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
-      //   console.log('in bounds');
-      //   setIsLoggedIn(isToday);
-      // }
       setIsLoggedIn(isToday);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const validTime = () => {
+    const currentTime = dayjs();
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
+
+    if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
+      return true;
+    }
+    return false;
   };
 
   useFocusEffect(
@@ -419,7 +422,7 @@ const VerificationListScreen = () => {
 
   return (
     <View style={styles.container}>
-      {showAttendanceModal && !isLoggedIn && (
+      {showAttendanceModal && !isLoggedIn && validTime() && (
         <View style={styles.attendanceModalOverlay}>
           {/* <Pressable
             style={styles.attendanceModalBackground}

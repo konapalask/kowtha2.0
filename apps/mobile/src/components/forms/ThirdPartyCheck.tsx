@@ -17,6 +17,7 @@ export interface ThirdPartyCheckItem {
   tpcName: string;
   mobileNumber: string;
   relationship: string;
+  feedbackStatus: string;
   comments: string;
 }
 
@@ -35,6 +36,7 @@ const RELATIONSHIP_OPTIONS = [
   'Local Shop Owner',
   'Other',
 ];
+const FEEDBACK_OPTIONS = ['Positive', 'Negative', 'Neutral'];
 
 const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   onSubmit,
@@ -44,6 +46,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   const [activeRelationshipIndex, setActiveRelationshipIndex] = React.useState<
     number | null
   >(null);
+  const feedbackStatusRef = React.useRef<ActionSheetRef>(null);
 
   const {
     control,
@@ -53,7 +56,13 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   } = useForm<ThirdPartyCheckFormData>({
     defaultValues: {
       checks: initialData?.checks || [
-        {tpcName: '', mobileNumber: '', relationship: '', comments: ''},
+        {
+          tpcName: '',
+          mobileNumber: '',
+          relationship: '',
+          feedbackStatus: '',
+          comments: '',
+        },
       ],
     },
   });
@@ -162,6 +171,32 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
       />
       <Controller
         control={control}
+        rules={{required: 'Feedback status is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Feedback Status*</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => {
+                setActiveRelationshipIndex(index);
+                feedbackStatusRef.current?.show();
+              }}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Feedback Status'}
+              </Text>
+            </TouchableOpacity>
+            {errors.checks?.[index]?.feedbackStatus && (
+              <Text style={styles.errorText}>
+                {errors.checks[index]?.feedbackStatus?.message}
+              </Text>
+            )}
+          </View>
+        )}
+        name={`checks.${index}.feedbackStatus`}
+      />
+      <Controller
+        control={control}
         rules={{required: 'Comments/Remarks is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
@@ -199,6 +234,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
                 tpcName: '',
                 mobileNumber: '',
                 relationship: '',
+                feedbackStatus: '',
                 comments: '',
               })
             }>
@@ -220,6 +256,28 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
                     activeRelationshipIndex,
                     relationshipRef,
                   );
+                  setActiveRelationshipIndex(null);
+                }
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      <ActionSheet ref={feedbackStatusRef}>
+        <View style={styles.actionSheet}>
+          <Text style={styles.actionSheetTitle}>Select Feedback Status</Text>
+          {FEEDBACK_OPTIONS.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                if (activeRelationshipIndex !== null) {
+                  setValue(
+                    `checks.${activeRelationshipIndex}.feedbackStatus`,
+                    option,
+                  );
+                  feedbackStatusRef.current?.hide();
                   setActiveRelationshipIndex(null);
                 }
               }}>

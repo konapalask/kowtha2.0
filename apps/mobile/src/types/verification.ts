@@ -50,6 +50,7 @@ export type AddressVerificationFormData = {
   addressDetails: string;
   addressMismatch: string;
   addressCorrectionDetails?: string;
+  addressProof: string;
   numberOfYearsAtCurrentResidence: string;
   previousAddress?: string;
   previousAddressYears?: string;

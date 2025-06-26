@@ -89,7 +89,8 @@ const AttendanceCard: React.FC<{
   };
   return (
     <View style={styles.loginCard}>
-      {!isLoggedIn && isValidTime() ? (
+      {/* {!isLoggedIn && isValidTime() ? ( */}
+      {!isLoggedIn ? (
         <>
           <Text style={styles.loginText}>Login for the day</Text>
           <View style={styles.loginActions}>
@@ -114,7 +115,8 @@ const AttendanceCard: React.FC<{
           <Icon name="information-circle-outline" size={28} color={'green'} />
           <Text
             style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
-            Login available from 9AM to 12AM
+            {/* Login available from 9AM to 12PM */}
+            Already logged in for the day
           </Text>
         </View>
       )}
