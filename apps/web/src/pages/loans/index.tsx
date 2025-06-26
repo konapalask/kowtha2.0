@@ -8,6 +8,8 @@ import {
   message,
   Card,
   Badge,
+  Row,
+  Col,
 } from "antd";
 import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -143,13 +145,32 @@ export default function Loans() {
         const options =
           result?.data?.data?.map((item: any) => ({
             label: (
-              <Typography.Text
-                style={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <Badge dot status="error" />
-                {item.name} <Tag color="blue">{item.employeeCode}</Tag>{" "}
-                <Tag color="blue">Pending:{item.pendingVerifications}</Tag>
-              </Typography.Text>
+              <Row gutter={[0, 0]} style={{ width: "100%" }}>
+                <Col xs={24} sm={24} md={1} xl={1}>
+                  <Badge
+                    dot
+                    status={item?.isAvailbleToday ? "success" : "error"}
+                  />
+                </Col>
+
+                <Col
+                  xs={24}
+                  sm={12}
+                  md={8}
+                  xl={15}
+                  style={{ wordWrap: "break-word" }}
+                >
+                  <Typography.Text>{item.name}</Typography.Text>
+                </Col>
+
+                <Col xs={24} sm={6} md={6} xl={4}>
+                  <Tag color="blue">{item.employeeCode}</Tag>
+                </Col>
+
+                <Col xs={24} sm={6} md={9} xl={4}>
+                  <Tag color="blue">P: {item.pendingVerifications}</Tag>
+                </Col>
+              </Row>
             ),
             value: item.id,
           })) ?? [];

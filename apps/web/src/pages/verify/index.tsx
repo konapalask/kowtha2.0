@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Table, Card, Button, Space, Tag, Typography, Badge } from "antd";
 import {
   CheckCircleOutlined,
+  CheckOutlined,
   CloseCircleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
@@ -82,7 +83,11 @@ export default function Verify() {
       { key: "Work", label: "Work" },
       { key: "Business", label: "Business" },
     ];
-    const verifications = record?.verifications ?? [];
+    const verifications =
+      record?.verifications?.filter(
+        (option: any) => option?.status !== "Pending"
+      ) ?? [];
+    console.log(record?.verifications);
     return (
       <Space size={[0, 8]} wrap>
         {types.map((type) => {
@@ -90,11 +95,7 @@ export default function Verify() {
             (v: any) => v.addressType === type.key
           );
           if (!verification) {
-            return (
-              <Tag key={type.key} color="default">
-                {verifications?.type}
-              </Tag>
-            );
+            return null;
           }
           const isCompleted = verification?.status === "Completed";
           const approvedStatus = verification?.approvedStatus;
@@ -104,14 +105,22 @@ export default function Verify() {
               color={
                 isCompleted
                   ? approvedStatus === "Positive"
-                    ? "green"
+                    ? "geekblue"
                     : approvedStatus === "Negative"
-                      ? "red"
-                      : "blue"
+                      ? "geekblue"
+                      : "green"
                   : "orange"
               }
             >
-              {type.label}
+              {type.label}{" "}
+              {approvedStatus ? (
+                <CheckOutlined
+                  style={{
+                    color: approvedStatus === "Positive" ? "green" : "red",
+                  }}
+                  // color={approvedStatus === "Positive" ? "green" : "red"}
+                />
+              ) : null}
             </Tag>
           );
         })}
@@ -169,6 +178,28 @@ export default function Verify() {
   return (
     <DashboardLayout>
       <Card>
+        <div
+          style={{
+            marginTop: 16,
+            display: "flex",
+            gap: 16,
+            alignItems: "center",
+          }}
+        >
+          {/* <Badge color="green" text="Completed - Positive" /> */}
+          <div style={{ gap: 2 }}>
+            <CheckOutlined style={{ color: "green" }} /> Completed - Positive
+          </div>
+          {/* <Badge color="red" text="Completed - Negative" /> */}
+          <div style={{ gap: 2 }}>
+            <CheckOutlined style={{ color: "red" }} /> Completed - Negative
+          </div>
+
+          <Badge color="green" text="Investigations completed" />
+          {/* <Tag color="green">Investigations Completed</Tag> */}
+          {/* <Badge color="orange" text="In Progress" />
+          <Badge color="default" text="Pending" /> */}
+        </div>
         <Table
           className="striped-table"
           // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
@@ -189,20 +220,6 @@ export default function Verify() {
           sticky
           bordered
         />
-        <div
-          style={{
-            marginTop: 16,
-            display: "flex",
-            gap: 16,
-            alignItems: "center",
-          }}
-        >
-          <Badge color="green" text="Completed - Positive" />
-          <Badge color="red" text="Completed - Negative" />
-          <Badge color="blue" text="Completed - Other" />
-          <Badge color="orange" text="In Progress" />
-          <Badge color="default" text="Pending" />
-        </div>
       </Card>
     </DashboardLayout>
   );

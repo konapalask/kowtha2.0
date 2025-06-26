@@ -78,6 +78,10 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     }
   };
 
+  const remoteOffices = offices?.filter(
+    (option: any) => option?.value !== userDetails?.officeId
+  );
+
   return (
     <div>
       <Form
@@ -170,7 +174,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                         setCurrentOffice(value);
                         form.setFieldValue("fieldExecutiveId", null);
                       }}
-                      options={offices}
+                      options={remoteOffices}
                     />
                   </Form.Item>
                 )}

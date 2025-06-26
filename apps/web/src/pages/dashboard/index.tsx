@@ -206,7 +206,8 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               borderColor: "none",
-              background: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
+              background:
+                "linear-gradient(90deg, #4facfe 0%,rgba(7, 220, 231, 0.69) 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -309,7 +310,8 @@ export default function Dashboard() {
               flexDirection: "column",
               justifyContent: "center",
               // borderColor: "#2196F3",
-              background: "linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)",
+              background:
+                "linear-gradient(90deg, #43e97b 0%,rgb(66, 238, 206) 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>

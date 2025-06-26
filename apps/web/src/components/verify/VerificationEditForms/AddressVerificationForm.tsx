@@ -68,7 +68,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
       {addressMismatch === "Yes" && (
         <Col span={18}>
           <Form.Item
-            name="correctedAddress"
+            name="addressCorrectionDetails"
             label="Corrected Address"
             rules={[
               { required: true, message: "Please enter corrected address" },

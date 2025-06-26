@@ -7,6 +7,8 @@ import {
   Avatar,
   Dropdown,
   Grid,
+  Badge,
+  notification,
 } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -18,6 +20,7 @@ import {
   MenuUnfoldOutlined,
   CheckCircleOutlined,
   AuditOutlined,
+  NotificationOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -66,6 +69,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentTime] = useState(new Date());
   const [office, setOffice] = useState<string>("");
   const userDetails = getUserDetails();
+  const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     if (userDetails?.officeId) {
@@ -180,6 +184,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </Menu>
   );
 
+  const openNotification = () => {
+    api.open({
+      message: "Title",
+      description: "description",
+      // duration: 0,
+      placement: "top",
+    });
+  };
+
   return (
     <Layout style={{ minHeight: "100vh", fontFamily: "Noto Sans, sans-serif" }}>
       <Sider
@@ -246,6 +259,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           />
           <Space>
+            <Badge dot style={{ marginRight: 20 }}>
+              {contextHolder}
+              <span
+                onClick={openNotification}
+                style={{ cursor: "pointer", marginRight: 15 }}
+              >
+                <NotificationOutlined style={{ fontSize: 12 }} />
+              </span>
+            </Badge>
             <Text type="secondary" style={{ fontWeight: 500 }}>
               {office}
             </Text>

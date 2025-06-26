@@ -236,7 +236,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
           }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Enter Address Correction Details</Text>
+              <Text style={styles.label}>Corrected Address</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Enter Details"
