@@ -2480,7 +2480,12 @@ export class LoanService {
     if (path) {
       path = path.replace('<ul>', '').replace('</ul>', '')
     }
-    
+    let aadhar = verificationData.applicantDetails?.aadhar || '';
+
+    if(aadhar.length > 4) {
+      aadhar = aadhar.slice(0, 4) + 'XXXX';
+    }
+
     const recommendationStyles: Record<string, string> = {
       Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
       Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
@@ -2506,7 +2511,7 @@ export class LoanService {
           </tr>
           <tr>
             <th>Aadhar Number</th>
-            <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.aadhar || ''}</span></td>
+            <td colspan="5"><span class="var-value">${aadhar}</span></td>
           </tr>
           <tr>
             <th>Residential Address</th>
