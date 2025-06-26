@@ -2046,7 +2046,7 @@ export class LoanService {
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
           </tr>
           <tr>
-            <th>Curent Office Address</th>
+            <th>Current Office Address</th>
             <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
           </tr>
           <tr>
