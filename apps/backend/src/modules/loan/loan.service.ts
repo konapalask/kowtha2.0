@@ -2383,10 +2383,6 @@ export class LoanService {
             <th>Years in Current Premises</th>
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
           </tr>
-          <tr>
-            <th>Illegal Setup Observed</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.illegalSetupObserved || ''}</span></td>
-          </tr>
         </table>
       </div>
       <div class="align-wrapper">
