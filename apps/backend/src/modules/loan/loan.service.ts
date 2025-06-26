@@ -1741,7 +1741,7 @@ export class LoanService {
         throw new NotFoundException('Invalid address type');
       }
       
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpeg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
@@ -2198,12 +2198,11 @@ export class LoanService {
         </table>
       </div>
       <br>
-      <img src="${imageDataUri}"/>
-
+      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
 
           <div class="footer">
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+            Generated on ${new Date().toLocaleString()}
           </div>
            
 
@@ -2229,7 +2228,7 @@ export class LoanService {
 
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
@@ -2311,7 +2310,7 @@ export class LoanService {
       </div>
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
 
       <div style="page-break-before: always;"></div>
@@ -2395,7 +2394,7 @@ export class LoanService {
 
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
 
 
@@ -2424,10 +2423,9 @@ export class LoanService {
       <br>
       <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
 
-
           <div class="footer">
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+            Generated on ${new Date().toLocaleString()}
           </div>
            
 
@@ -2442,7 +2440,7 @@ export class LoanService {
                 ${imageUrls.map(url => `
                   <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
                     <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}</div>
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
                   </div>
                 `).join('')}
               </div>
@@ -2453,7 +2451,7 @@ export class LoanService {
 
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
@@ -2521,7 +2519,7 @@ export class LoanService {
                 <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtPreviousCity || 'NA'}</span></td>
               </tr>
               <tr>
-                <th>If Less than 2 Year, then Previous Address</th>
+                <th>If Less than 1 Year, then Previous Address</th>
                 <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
               </tr> 
               <tr>
@@ -2538,7 +2536,7 @@ export class LoanService {
 
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
 
       <div style="page-break-before: always;"></div>
@@ -2590,26 +2588,13 @@ export class LoanService {
       </div>
 
       <br>
-      <canvas id="logoCanvas"></canvas>
+      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
 
           <div class="footer">
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+            Generated on ${new Date().toLocaleString()}
           </div>
-           <script>
-             const canvas = document.getElementById('logoCanvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.onload = function () {
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
- 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-  };
-  img.src = '${imageDataUri}';
-          </script>
+           
 
       <div style="page-break-before: always;"></div>
 
@@ -2622,7 +2607,7 @@ export class LoanService {
                 ${imageUrls.map(url => `
                   <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
                     <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}</div>
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
                   </div>
                 `).join('')}
               </div>
@@ -2633,7 +2618,7 @@ export class LoanService {
 
       <div class="footer">
         <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
+        Generated on ${new Date().toLocaleString()}
       </div>
     `;
   }
