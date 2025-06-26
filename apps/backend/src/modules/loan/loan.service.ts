@@ -1709,6 +1709,54 @@ export class LoanService {
     }
   }
 
+  async returnHTMLImageData(data: string[], bankName: string): Promise<string> {
+    return `
+    <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${data.join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+    `
+  }
+
+  async formatImages(images: string[], bankName: string): Promise<string> {
+    let result = [];
+    let finalResult = [];
+    let count = 0;
+    for(let i = 0; i < images.length; i++) {
+      result.push(`<div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${images[i]}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>`);
+      
+      count++;
+      if(count % 4 === 0) {
+        finalResult.push(await this.returnHTMLImageData(result, bankName));
+        result = [];
+        count = 0;
+      }
+    }
+
+    if(count > 0 && count < 4) {
+      finalResult.push(await this.returnHTMLImageData(result, bankName));
+    }
+    
+    return finalResult.join('');
+  }
 
   async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
     try {
@@ -1799,6 +1847,9 @@ export class LoanService {
       let htmlTemplate = '';
       const bankName = loan.bankName;
 
+      const imagesData = await this.formatImages(validImageUrls, bankName);
+      console.log(validImageUrls, 'validImageUrls');
+      
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
 
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
@@ -1807,7 +1858,7 @@ export class LoanService {
       else if(addressType === 'Work') {
         
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName, imagesData);
       }
       else if(addressType === 'Business') {
         
@@ -2053,12 +2104,12 @@ export class LoanService {
     `;
   }
 
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
+  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string, imagesData: string): string {
 
     if (path) {
       path = path.replace('<ul>', '').replace('</ul>', '')
     }
-
+    
     const recommendationStyles: Record<string, string> = {
       Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
       Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
@@ -2234,32 +2285,7 @@ export class LoanService {
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
-           
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
+          ${imagesData}
     `;
   }
   
