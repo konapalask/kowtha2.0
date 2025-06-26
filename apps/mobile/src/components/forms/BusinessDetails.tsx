@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,9 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import ActionSheet, { ActionSheetRef } from 'react-native-actions-sheet';
-import { colors } from '../../constants/colors';
+import {useForm, Controller} from 'react-hook-form';
+import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
+import {colors} from '../../constants/colors';
 import GetLocation from 'react-native-get-location';
 
 const yesNoOptions = ['Yes', 'No'];
@@ -22,25 +22,27 @@ const constitutionOptions = [
   'Trust',
   'Others',
 ];
-const relationshipOptions = [
-  'Applicant',
-  'Co-Applicant',
-  'Guarantor',
-  'Family',
-  'Others',
-];
+// const relationshipOptions = [
+//   'Applicant',
+//   'Co-Applicant',
+//   'Guarantor',
+//   'Family',
+//   'Others',
+// ];
 
 export type BusinessDetailsFormData = {
   nameBoardSeen: string;
   nameBoardMatched: string;
   constitution: string;
   constitutionOther?: string;
-  keyManagerRelation: string;
-  keyManagerRelationOther?: string;
-  keyManager?: string;
+  // keyManagerRelation: string;
+  // keyManagerRelationOther?: string;
+  // keyManager?: string;
   businessStartYear: string;
   totalExperience: string;
   isAddressTraceable: string;
+  isBusinessSeasonal: string;
+  businessProfile: string;
   geoTag: string;
 };
 
@@ -49,20 +51,30 @@ type BusinessDetailsProps = {
   initialData?: BusinessDetailsFormData;
 };
 
-const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData }) => {
+const BusinessDetails: React.FC<BusinessDetailsProps> = ({
+  onSubmit,
+  initialData,
+}) => {
   const {
-    control, handleSubmit, setValue, watch, reset, formState: { errors },
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: {errors},
   } = useForm<BusinessDetailsFormData>({
     defaultValues: initialData || {
       nameBoardSeen: '',
       nameBoardMatched: '',
       constitution: '',
       constitutionOther: '',
-      keyManagerRelation: '',
-      keyManagerRelationOther: '',
-      keyManager: '',
+      // keyManagerRelation: '',
+      // keyManagerRelationOther: '',
+      // keyManager: '',
       businessStartYear: '',
       totalExperience: '',
+      isBusinessSeasonal: '',
+      businessProfile: '',
       isAddressTraceable: '',
       geoTag: '',
     },
@@ -73,8 +85,10 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
   }, [initialData, reset]);
 
   useEffect(() => {
-    GetLocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 })
-      .then(location => setValue('geoTag', `${location.latitude},${location.longitude}`))
+    GetLocation.getCurrentPosition({enableHighAccuracy: true, timeout: 15000})
+      .then(location =>
+        setValue('geoTag', `${location.latitude},${location.longitude}`),
+      )
       .catch(() => setValue('geoTag', 'Location not available'));
   }, [setValue]);
 
@@ -82,10 +96,10 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
   const nameBoardMatchedSheetRef = useRef<ActionSheetRef>(null);
   const constitutionSheetRef = useRef<ActionSheetRef>(null);
   const isAddressTraceableSheetRef = useRef<ActionSheetRef>(null);
-  const keyManagerRelationSheetRef = useRef<ActionSheetRef>(null);
-
+  // const keyManagerRelationSheetRef = useRef<ActionSheetRef>(null);
+  const isBusinessSeasonalRef = useRef<ActionSheetRef>(null);
   const watchedConstitution = watch('constitution');
-  const watchedKeyManagerRelation = watch('keyManagerRelation');
+  // const watchedKeyManagerRelation = watch('keyManagerRelation');
 
   return (
     <ScrollView style={styles.container}>
@@ -93,14 +107,23 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       <Controller
         control={control}
         name="nameBoardSeen"
-        rules={{ required: 'Required' }}
-        render={({ field: { value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Name Board was seen</Text>
-            <TouchableOpacity style={styles.selectButton} onPress={() => nameBoardSeenSheetRef.current?.show()}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>{value || 'Select Yes/No'}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => nameBoardSeenSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
             </TouchableOpacity>
-            {errors.nameBoardSeen && <Text style={styles.errorText}>{errors.nameBoardSeen.message}</Text>}
+            {errors.nameBoardSeen && (
+              <Text style={styles.errorText}>
+                {errors.nameBoardSeen.message}
+              </Text>
+            )}
           </View>
         )}
       />
@@ -108,14 +131,23 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       <Controller
         control={control}
         name="nameBoardMatched"
-        rules={{ required: 'Required' }}
-        render={({ field: { value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Is it matched with the Initiation?</Text>
-            <TouchableOpacity style={styles.selectButton} onPress={() => nameBoardMatchedSheetRef.current?.show()}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>{value || 'Select Yes/No'}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => nameBoardMatchedSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
             </TouchableOpacity>
-            {errors.nameBoardMatched && <Text style={styles.errorText}>{errors.nameBoardMatched.message}</Text>}
+            {errors.nameBoardMatched && (
+              <Text style={styles.errorText}>
+                {errors.nameBoardMatched.message}
+              </Text>
+            )}
           </View>
         )}
       />
@@ -123,14 +155,23 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       <Controller
         control={control}
         name="constitution"
-        rules={{ required: 'Required' }}
-        render={({ field: { value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Constitution of The Business</Text>
-            <TouchableOpacity style={styles.selectButton} onPress={() => constitutionSheetRef.current?.show()}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>{value || 'Select Constitution'}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => constitutionSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Constitution'}
+              </Text>
             </TouchableOpacity>
-            {errors.constitution && <Text style={styles.errorText}>{errors.constitution.message}</Text>}
+            {errors.constitution && (
+              <Text style={styles.errorText}>
+                {errors.constitution.message}
+              </Text>
+            )}
           </View>
         )}
       />
@@ -139,8 +180,8 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
         <Controller
           control={control}
           name="constitutionOther"
-          rules={{ required: 'Please specify constitution' }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          rules={{required: 'Please specify constitution'}}
+          render={({field: {onChange, onBlur, value}}) => (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Specify Constitution</Text>
               <TextInput
@@ -151,13 +192,17 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
                 value={value}
                 placeholderTextColor={colors.text.disabled}
               />
-              {errors.constitutionOther && <Text style={styles.errorText}>{errors.constitutionOther.message}</Text>}
+              {errors.constitutionOther && (
+                <Text style={styles.errorText}>
+                  {errors.constitutionOther.message}
+                </Text>
+              )}
             </View>
           )}
         />
       )}
       {/* Key manager relationship to the applicant */}
-      <Controller
+      {/* <Controller
         control={control}
         name="keyManagerRelation"
         rules={{ required: 'Required' }}
@@ -173,7 +218,6 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           </View>
         )}
       />
-      {/* If Others, specify relationship */}
       {watchedKeyManagerRelation === 'Others' && (
         <Controller
           control={control}
@@ -197,7 +241,6 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           )}
         />
       )}
-      {/* Key manager person of the Business (conditional) */}
       {watchedKeyManagerRelation !== '' && watchedKeyManagerRelation !== 'Applicant' && (
         <Controller
           control={control}
@@ -218,13 +261,13 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
             </View>
           )}
         />
-      )}
+      )} */}
       {/* Business started in the year */}
       <Controller
         control={control}
         name="businessStartYear"
-        rules={{ required: 'Required' }}
-        render={({ field: { onChange, onBlur, value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {onChange, onBlur, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Business started in the year</Text>
             <TextInput
@@ -237,7 +280,11 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
               maxLength={4}
               placeholderTextColor={colors.text.disabled}
             />
-            {errors.businessStartYear && <Text style={styles.errorText}>{errors.businessStartYear.message}</Text>}
+            {errors.businessStartYear && (
+              <Text style={styles.errorText}>
+                {errors.businessStartYear.message}
+              </Text>
+            )}
           </View>
         )}
       />
@@ -245,10 +292,12 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       <Controller
         control={control}
         name="totalExperience"
-        rules={{ required: 'Required' }}
-        render={({ field: { onChange, onBlur, value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {onChange, onBlur, value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Total experience in the field (years)</Text>
+            <Text style={styles.label}>
+              Total experience in the field (years)
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Enter total experience"
@@ -258,22 +307,84 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
               keyboardType="numeric"
               placeholderTextColor={colors.text.disabled}
             />
-            {errors.totalExperience && <Text style={styles.errorText}>{errors.totalExperience.message}</Text>}
+            {errors.totalExperience && (
+              <Text style={styles.errorText}>
+                {errors.totalExperience.message}
+              </Text>
+            )}
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="businessProfile"
+        rules={{required: 'Required'}}
+        render={({field: {onChange, onBlur, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Business Profile</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter business profile"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.totalExperience && (
+              <Text style={styles.errorText}>
+                {errors.totalExperience.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="isBusinessSeasonal"
+        rules={{required: 'Required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Is Business seasonal?</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isBusinessSeasonalRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isAddressTraceable && (
+              <Text style={styles.errorText}>
+                {errors.isAddressTraceable.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
       {/* Is Business address traceable */}
       <Controller
         control={control}
         name="isAddressTraceable"
-        rules={{ required: 'Required' }}
-        render={({ field: { value } }) => (
+        rules={{required: 'Required'}}
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Is Business address traceable?</Text>
-            <TouchableOpacity style={styles.selectButton} onPress={() => isAddressTraceableSheetRef.current?.show()}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>{value || 'Select Yes/No'}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isAddressTraceableSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
             </TouchableOpacity>
-            {errors.isAddressTraceable && <Text style={styles.errorText}>{errors.isAddressTraceable.message}</Text>}
+            {errors.isAddressTraceable && (
+              <Text style={styles.errorText}>
+                {errors.isAddressTraceable.message}
+              </Text>
+            )}
           </View>
         )}
       />
@@ -281,8 +392,8 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
       <Controller
         control={control}
         name="geoTag"
-        rules={{ required: 'Geo tag is required' }}
-        render={({ field: { value } }) => (
+        rules={{required: 'Geo tag is required'}}
+        render={({field: {value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Geo Tag</Text>
             <TextInput
@@ -292,15 +403,21 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
               placeholder="Capturing location..."
               placeholderTextColor={colors.text.disabled}
             />
-            {errors.geoTag && <Text style={styles.errorText}>{errors.geoTag.message}</Text>}
+            {errors.geoTag && (
+              <Text style={styles.errorText}>{errors.geoTag.message}</Text>
+            )}
           </View>
         )}
       />
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit(onSubmit)}>
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
       {/* ActionSheets */}
-      <ActionSheet ref={nameBoardSeenSheetRef} containerStyle={styles.actionSheet}>
+      <ActionSheet
+        ref={nameBoardSeenSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Name Board was seen</Text>
           {yesNoOptions.map(option => (
@@ -316,9 +433,13 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           ))}
         </View>
       </ActionSheet>
-      <ActionSheet ref={nameBoardMatchedSheetRef} containerStyle={styles.actionSheet}>
+      <ActionSheet
+        ref={nameBoardMatchedSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
-          <Text style={styles.actionSheetTitle}>Is it matched with the Initiation?</Text>
+          <Text style={styles.actionSheetTitle}>
+            Is it matched with the Initiation?
+          </Text>
           {yesNoOptions.map(option => (
             <TouchableOpacity
               key={option}
@@ -332,9 +453,13 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           ))}
         </View>
       </ActionSheet>
-      <ActionSheet ref={constitutionSheetRef} containerStyle={styles.actionSheet}>
+      <ActionSheet
+        ref={constitutionSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
-          <Text style={styles.actionSheetTitle}>Constitution of The Business</Text>
+          <Text style={styles.actionSheetTitle}>
+            Constitution of The Business
+          </Text>
           {constitutionOptions.map(option => (
             <TouchableOpacity
               key={option}
@@ -349,9 +474,14 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
           ))}
         </View>
       </ActionSheet>
-      <ActionSheet ref={isAddressTraceableSheetRef} containerStyle={styles.actionSheet}>
+
+      <ActionSheet
+        ref={isAddressTraceableSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
-          <Text style={styles.actionSheetTitle}>Is Business address traceable?</Text>
+          <Text style={styles.actionSheetTitle}>
+            Is Business address traceable?
+          </Text>
           {yesNoOptions.map(option => (
             <TouchableOpacity
               key={option}
@@ -366,7 +496,9 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
         </View>
       </ActionSheet>
       {/* Key Manager Relationship ActionSheet */}
-      <ActionSheet ref={keyManagerRelationSheetRef} containerStyle={styles.actionSheet}>
+      {/* <ActionSheet
+        ref={keyManagerRelationSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Select Relationship</Text>
           {relationshipOptions.map(option => (
@@ -375,9 +507,28 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ onSubmit, initialData
               style={styles.actionSheetItem}
               onPress={() => {
                 setValue('keyManagerRelation', option);
-                if (option !== 'Others') setValue('keyManagerRelationOther', '');
+                if (option !== 'Others')
+                  setValue('keyManagerRelationOther', '');
                 if (option === 'Applicant') setValue('keyManager', '');
                 keyManagerRelationSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet> */}
+      <ActionSheet
+        ref={isBusinessSeasonalRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Is Business seasonal?</Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPress={() => {
+                setValue('isBusinessSeasonal', option);
+                isBusinessSeasonalRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

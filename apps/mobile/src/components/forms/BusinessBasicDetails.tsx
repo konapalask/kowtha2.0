@@ -17,6 +17,7 @@ export type BusinessBasicDetailsFormData = {
   personMet: string;
   personMetName?: string;
   personMetRelation?: string;
+  businessName: string;
   businessAddress: string;
   isAddressSame: string;
   addressCorrection?: string;
@@ -50,6 +51,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
   } = useForm<BusinessBasicDetailsFormData>({
     defaultValues: initialData || {
       applicantName: '',
+      businessName: '',
       personMet: '',
       personMetName: '',
       personMetRelation: '',
@@ -175,6 +177,32 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
           )}
         />
       )}
+
+      <Controller
+        control={control}
+        name="businessName"
+        rules={{required: 'Business name is required'}}
+        render={({field: {onChange, onBlur, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Business Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter business name"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor={colors.text.disabled}
+              multiline
+              numberOfLines={3}
+            />
+            {errors.businessAddress && (
+              <Text style={styles.errorText}>
+                {errors.businessAddress.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
 
       {/* Business Address */}
       <Controller

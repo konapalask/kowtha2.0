@@ -191,18 +191,20 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
     <View style={styles.container}>
       <ScrollView>
         {fields.map((_, index) => renderCheckFields(index))}
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() =>
-            append({
-              tpcName: '',
-              mobileNumber: '',
-              relationship: '',
-              comments: '',
-            })
-          }>
-          <Text style={styles.addButtonText}>Add Another Check</Text>
-        </TouchableOpacity>
+        {fields.length < 2 && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() =>
+              append({
+                tpcName: '',
+                mobileNumber: '',
+                relationship: '',
+                comments: '',
+              })
+            }>
+            <Text style={styles.addButtonText}>Add Another Check</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
       <ActionSheet ref={relationshipRef}>
         <View style={styles.actionSheet}>

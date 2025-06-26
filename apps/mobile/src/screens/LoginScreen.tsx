@@ -76,10 +76,10 @@ const LoginScreen = () => {
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
-      Alert.alert('Error', 'Please enter a valid 6-digit OTP');
-      return;
-    }
+    // if (otp.length !== 6) {
+    //   Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+    //   return;
+    // }
 
     try {
       const deviceId = await getDeviceId();
@@ -110,6 +110,7 @@ const LoginScreen = () => {
         error?.response?.data?.message ||
           'Invalid OTP. Please check and try again.',
       );
+      // console.log('invalid');
     } finally {
       setLoading(false);
     }
@@ -181,7 +182,7 @@ const LoginScreen = () => {
                   }
                 }}
                 keyboardType="numeric"
-                maxLength={6}
+                maxLength={12}
                 placeholderTextColor={'#c8c8c8'}
                 editable={!loading}
               />

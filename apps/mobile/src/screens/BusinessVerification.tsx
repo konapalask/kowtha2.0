@@ -32,6 +32,7 @@ interface BusinessVerificationFormData {
     businessAddress: string;
     isAddressSame: string;
     addressCorrection?: string;
+    businessName: string;
   };
   businessDetails: BusinessDetailsFormData;
   miscellaneous: {
@@ -46,8 +47,11 @@ interface BusinessVerificationFormData {
     privateFinanceOrChits: string;
     businessActivity: string;
     businessActivityOther?: string;
+    areaOfPremises: string;
+    localityOfBusiness: string;
+    employeesUnderApplicant: string;
   };
-  // thirdPartyCheck: ThirdPartyCheckFormData;
+  thirdPartyCheck: ThirdPartyCheckFormData;
   uploadedItems: UploadedItem[];
 }
 
@@ -64,7 +68,7 @@ const BusinessVerification = () => {
     basicDetails: true,
     businessDetails: false,
     miscellaneous: false,
-    // thirdPartyCheck: false,
+    thirdPartyCheck: false,
     photoCapture: false,
   });
 
@@ -74,7 +78,7 @@ const BusinessVerification = () => {
     basicDetails: false,
     businessDetails: false,
     miscellaneous: false,
-    // thirdPartyCheck: false,
+    thirdPartyCheck: false,
     photoCapture: false,
   });
 
@@ -87,14 +91,17 @@ const BusinessVerification = () => {
       businessAddress: item?.address,
       isAddressSame: '',
       addressCorrection: '',
+      businessName: '',
     },
     businessDetails: {
       nameBoardSeen: '',
       nameBoardMatched: '',
       constitution: '',
       constitutionOther: '',
-      keyManager: '',
-      keyManagerRelation: '',
+      // keyManager: '',
+      // keyManagerRelation: '',
+      businessProfile: '',
+      isBusinessSeasonal: '',
       businessStartYear: '',
       totalExperience: '',
       isAddressTraceable: '',
@@ -112,10 +119,13 @@ const BusinessVerification = () => {
       privateFinanceOrChits: '',
       businessActivity: '',
       businessActivityOther: '',
+      areaOfPremises: '',
+      localityOfBusiness: '',
+      employeesUnderApplicant: '',
     },
-    // thirdPartyCheck: {
-    //   checks: [{tpcName: '', mobileNumber: '', relationship: '', comments: ''}],
-    // },
+    thirdPartyCheck: {
+      checks: [{tpcName: '', mobileNumber: '', relationship: '', comments: ''}],
+    },
     uploadedItems: [],
   });
 
@@ -141,11 +151,11 @@ const BusinessVerification = () => {
               ...formData.miscellaneous,
               ...savedData.miscellaneous,
             },
-            // thirdPartyCheck: savedData.thirdPartyCheck || {
-            //   checks: [
-            //     {tpcName: '', mobileNumber: '', relationship: '', comments: ''},
-            //   ],
-            // },
+            thirdPartyCheck: savedData.thirdPartyCheck || {
+              checks: [
+                {tpcName: '', mobileNumber: '', relationship: '', comments: ''},
+              ],
+            },
             uploadedItems: savedData.uploadedItems || [],
           };
           setFormData(completeFormData);
@@ -330,7 +340,7 @@ const BusinessVerification = () => {
           />
         </CollapsibleSection>
 
-        {/* <CollapsibleSection
+        <CollapsibleSection
           title="Third-Party Check"
           isExpanded={expandedSections.thirdPartyCheck}
           onToggle={() => toggleSection('thirdPartyCheck')}
@@ -339,7 +349,7 @@ const BusinessVerification = () => {
             onSubmit={handleThirdPartyCheckSubmit}
             initialData={formData.thirdPartyCheck}
           />
-        </CollapsibleSection> */}
+        </CollapsibleSection>
 
         <CollapsibleSection
           title="Photo Capture"

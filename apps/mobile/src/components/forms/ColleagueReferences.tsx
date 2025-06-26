@@ -273,20 +273,22 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
     <ScrollView style={styles.container}>
       {fields.map((field, index) => renderReferenceFields(index))}
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() =>
-          append({
-            name: '',
-            address: '',
-            designation: '',
-            yearsKnown: '',
-            contactNumber: '',
-            emailAddress: '',
-          })
-        }>
-        <Text style={styles.addButtonText}>Add Another Reference</Text>
-      </TouchableOpacity>
+      {fields?.length < 2 && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() =>
+            append({
+              name: '',
+              address: '',
+              designation: '',
+              yearsKnown: '',
+              contactNumber: '',
+              emailAddress: '',
+            })
+          }>
+          <Text style={styles.addButtonText}>Add Another Reference</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.submitButton}

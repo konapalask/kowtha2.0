@@ -25,14 +25,17 @@ const fetchUserDetails = async () => {
   return await getItem('userDetails');
 };
 
-const Settings = () => {
+const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
+  isLoggedIn,
+  setIsLoggedIn,
+}) => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
   const [visible, setVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   // const userDetails: any = fetchUserDetails();
   // console.log(userDetails);
   const [userDetails, setUserDetails] = useState<any>({});
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -138,7 +141,11 @@ const Settings = () => {
                 </Text>
               </View>
             </View>
-            <AttendanceCard setVisible={setVisible} />
+            <AttendanceCard
+              setVisible={setVisible}
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+            />
             {/* {!isLoggedIn && <AttendanceCard setVisible={setVisible} />} */}
           </Pressable>
         </Pressable>

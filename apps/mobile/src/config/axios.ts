@@ -36,14 +36,20 @@ axiosInstance.interceptors.response.use(
   response => response,
   async error => {
     const refreshTokenApi = 'accounts/refresh-token/';
+    const verifyOtpApi = 'accounts/otp/verify';
     const originalRequest = error.config;
     const errorMessage =
       error?.response?.data?.detail?.code || error?.response?.data?.code;
     const errorStatusCode = error?.response?.status;
     const tokenInvalid = 'TOKEN_EXPIRED';
     const accountNotFound = 'UNAUTHORIZED_USER';
+    console.log(originalRequest.url);
 
-    if ('auth/'.includes(originalRequest.url)) {
+    if (
+      ['/accounts/otp/verify', '/accounts/otp/generate'].includes(
+        originalRequest.url,
+      )
+    ) {
       // clearAll();
       return Promise.reject(error);
     }
