@@ -190,6 +190,8 @@ interface WorkVerificationData {
 interface BusinessVerificationData {
   basicDetails?: {
     personMet: string;
+    personMetRelation: string;
+    businessName: string;
     applicantName: string;
     isAddressSame: string;
     businessAddress: string;
@@ -208,6 +210,9 @@ interface BusinessVerificationData {
     businessActivityOther: string;
     privateFinanceOrChits: string;
     yearsInCurrentPremises: string;
+    areaOfPremises: string;
+    localityOfBusiness: string;
+    employeesUnderApplicant: string;
   };
   uploadedItems?: Array<{
     id: string;
@@ -216,23 +221,26 @@ interface BusinessVerificationData {
     timestamp: string;
     s3ImageUrl: string;
   }>;
+  thirdPartyCheck?: {
+    checks: Array<{
+      tpcName: string;
+      relationship: string;
+      comments: string;
+      feedbackStatus: string;
+      mobileNumber: string;
+    }>;
+  };
   businessDetails?: {
     geoTag: string;
-    keyManager: string;
     constitution: string;
     nameBoardSeen: string;
     totalExperience: string;
+    businessProfile: string;
     nameBoardMatched: string;
+    isBusinessSeasonal: string;
     businessStartYear: string;
     constitutionOther: string;
     isAddressTraceable: string;
-    keyManagerRelation: string;
-    keyManagerRelationOther: string;
-  };
-  finalObservations?: {
-    overallStatus: string;
-    cooperativeness: string;
-    remarks: string;
   };
 }
 
@@ -2262,37 +2270,61 @@ export class LoanService {
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Business Details</td></tr>
           <tr>
-                <th>Total Experience</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Name Board Seen</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Business Start Year</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Is Address Traceable</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Key Person</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.keyManager || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Key Person Relationship</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.keyManagerRelation || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Constitution</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.constitution || ''}</span></td>
-              </tr>
-              <tr>
-                <th>Name Board Matched</th>
-                <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
-              </tr>
+            <th>Name of the Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Name</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessAddress || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Total Work Experience</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Name Board Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Name Board Matched</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Date of Commencement of Business</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Is Address Traceable</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Type of Business</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Seasonal</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isBusinessSeasonal || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Constitution</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.constitution || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Area of Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.areaOfPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Locality of Business</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.localityOfBusiness || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Number of Employees Working Under Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesUnderApplicant || ''}</span></td>
+          </tr>
         </table>
       </div>
       <div class="footer">
@@ -2354,7 +2386,38 @@ export class LoanService {
           </tr>
         </table>
       </div>
+      <div class="align-wrapper">
+        <table class="section-table">
+        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
+        <tr>
+          <th>Name</th>
+          <th>Mobile Number</th>
+          <th>Relationship</th>
+          <th>Feedback Status</th>
+          <th>Comments</th>
+        </tr>
+        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
+          ? verificationData.thirdPartyCheck.checks.map(tpc => `
+            <tr>
+              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
+              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
+              <td><span class="var-value">${tpc.relationship || ''}</span></td>
+              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
+              <td><span class="var-value">${tpc.comments || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
+        </table>
+      </div>
 
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+
+      <div style="page-break-before: always;"></div>
       <div class="align-wrapper">
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
