@@ -836,10 +836,14 @@ export class LoanService {
     }
   }
 
-  async getLoans(filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+  async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
       const where: Prisma.LoanWhereInput = {};
       
+      if (role === UserRole.OperationsExecutive) {
+        where.officeId = officeId;
+      }
+
       if (filters?.status) {
         where.status = filters.status;
       }
@@ -1182,6 +1186,32 @@ export class LoanService {
           updatedAt: new Date(),
         },
       });
+
+      // If status is Completed, check if all verifications are complete
+      if (updatedVerification.status === VerificationStatus.Completed) {
+        const allVerifications = await this.prisma.verification.findMany({
+          where: {
+            loanId,
+          },
+        });
+
+        const allCompleted = allVerifications.every(
+          v => v.status === VerificationStatus.Completed
+        );
+
+        // If all verifications are complete, update loan status to FVCompleted
+        if (allCompleted) {
+          await this.prisma.loan.update({
+            where: { id: loanId },
+            data: { status: LoanStatus.FVCompleted },
+          });
+
+          await this.loggingService.info('All verifications completed, loan status updated', {
+            loanId,
+            newStatus: LoanStatus.FVCompleted
+          });
+        }
+      }
 
       await this.loggingService.info('Verification report updated successfully with processed images', {
         loanId,
@@ -2595,7 +2625,6 @@ export class LoanService {
             Generated on ${new Date().toLocaleString()}
           </div>
            
-
       <div style="page-break-before: always;"></div>
 
       <div class="align-wrapper">
@@ -2636,16 +2665,20 @@ export class LoanService {
           type: verificationType,
         },
       });
+
       if (!verification) {
         throw new NotFoundException('Verification not found');
       }
+
       const updatedVerification = await this.prisma.verification.update({
         where: { id: verification.id },
         data: {
           approvedStatus,
+          status: VerificationStatus.Completed,
           ...(path !== undefined && { path }),
         },
       });
+
       await this.loggingService.info('Verification approval updated', {
         loanId,
         verificationType,

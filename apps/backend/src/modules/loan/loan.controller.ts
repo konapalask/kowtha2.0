@@ -135,8 +135,8 @@ export class LoanController {
       }
     }
   })
-  async getLoans(@Query() filters: GetLoansDto) {
-    const result = await this.loanService.getLoans(filters);
+  async getLoans(@Query() filters: GetLoansDto, @Request() req: AuthenticatedRequest) {
+    const result = await this.loanService.getLoans(req.user.officeId, req.user.role as UserRole,filters);
     return {
       status: 200,
       message: 'Loans fetched successfully',

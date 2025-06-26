@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { LoanStatus } from '@prisma/client';
+import { ApprovedStatus, LoanStatus, VerificationStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { GetMetricsDto } from './dto/get-metrics.dto';
 
@@ -70,52 +70,42 @@ export class DashboardService {
       const totalLoans = await this.prisma.loan.count({ where });
 
       // Get counts for each status
-      const verifiedLoans = await this.prisma.loan.count({
+      const totalVerifications = await this.prisma.verification.count({
         where: { 
           ...where,
-          status: LoanStatus.Approved 
+          status: VerificationStatus.Completed 
         },
       });
 
-      const rejectedLoans = await this.prisma.loan.count({
+      const rejectedVerifications = await this.prisma.verification.count({
         where: { 
           ...where,
-          status: LoanStatus.Rejected 
+          status: ApprovedStatus.Negative 
         },
       });
 
-      const pendingLoans = await this.prisma.loan.count({
+      const completedVerifications = await this.prisma.verification.count({
         where: {
           ...where,
           status: {
-            in: [LoanStatus.Unassigned, LoanStatus.Assigned, LoanStatus.UnderFV, LoanStatus.FVCompleted],
-          },
+            in: [ApprovedStatus.Positive, ApprovedStatus.Negative]
+          }
         },
       });
-
-      // Calculate percentages
-      const verifiedPercentage = totalLoans > 0 ? (verifiedLoans / totalLoans) * 100 : 0;
-      const rejectedPercentage = totalLoans > 0 ? (rejectedLoans / totalLoans) * 100 : 0;
-      const pendingPercentage = totalLoans > 0 ? (pendingLoans / totalLoans) * 100 : 0;
 
       await this.loggingService.info('Dashboard metrics fetched successfully', {
         filters,
         totalLoans,
-        verifiedLoans,
-        rejectedLoans,
-        pendingLoans,
+        totalVerifications,
+        completedVerifications,
+        rejectedVerifications,
       });
 
       return {
         totalLoans,
-        verifiedLoans,
-        rejectedLoans,
-        pendingLoans,
-        percentages: {
-          verified: Number(verifiedPercentage.toFixed(2)),
-          rejected: Number(rejectedPercentage.toFixed(2)),
-          pending: Number(pendingPercentage.toFixed(2)),
-        },
+        totalVerifications,
+        completedVerifications,
+        rejectedVerifications,
       };
     } catch (error) {
       await this.loggingService.error('Failed to fetch dashboard metrics', {
