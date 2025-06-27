@@ -29,7 +29,6 @@ interface VerificationData {
   applicantDetails?: {
     applicantName: string;
     pan: string;
-    aadhar: string;
     coApplicantName: string;
     coApplicantPan: string;
     coApplicantAadhar: string;
@@ -44,6 +43,7 @@ interface VerificationData {
     applicantMaritalStatus: string;
     educationQualification: string;
     applicantMaritalStatusOther: string;
+    aadhar: string;
   };
   applicantInformation?: {
     applicantAge: string;
@@ -72,6 +72,15 @@ interface VerificationData {
     spouseEmploymentDetails: string;
     assetsObserved: string;
   };
+  familyMemberDetails?:Array<{
+    name:string;
+    relation:string;
+    age:string;
+    employmentType:string;
+    educationalQualification:string;
+    mobileNumber:string;
+    stayingWithApplicant:string;
+  }>;
   thirdPartyCheck?: {
     checks: Array<{
       tpcName: string;
@@ -117,7 +126,7 @@ interface WorkVerificationData {
       bankName: string;
       panNumber: string;
       loanAmount: string;
-      aadharNumber: string;
+      aadhar: string;
       applicantName: string;
       purposeOfLoan: string;
       qualification: string;
@@ -2480,7 +2489,7 @@ export class LoanService {
     if (path) {
       path = path.replace('<ul>', '').replace('</ul>', '')
     }
-    let aadhar = verificationData.applicantDetails?.aadhar || '';
+    let aadhar = verificationData.basicDetails?.aadhar || '';
 
     if(aadhar.length > 4) {
       aadhar = aadhar.slice(0, 4) + 'XXXX';
@@ -2556,6 +2565,30 @@ export class LoanService {
       </div>
 
       <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+        <tr><td colspan="6" class="section-header">Family Member Details</td></tr>
+        <tr>
+          <th>Name</th>
+          <th>Relation</th>
+          <th>Age</th>
+          <th>Employment Type</th>
+          <th>Staying With Applicant</th>
+        </tr>
+        ${Array.isArray(verificationData.familyMemberDetails) && verificationData.familyMemberDetails.length > 0
+          ? verificationData.familyMemberDetails.map(fmd => `
+            <tr>
+              <td><span class="var-value">${fmd.name || ''}</span></td>
+              <td><span class="var-value">${fmd.relation || ''}</span></td>
+              <td><span class="var-value">${fmd.age || ''}</span></td>
+              <td><span class="var-value">${fmd.employmentType || ''}</span></td>
+              <td><span class="var-value">${fmd.stayingWithApplicant || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="5" style="text-align: center;">No Family Member Details found</td></tr>'}
+        </table>
+      </div>
 
       <div class="align-wrapper">
         <table class="section-table">
