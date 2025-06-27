@@ -229,6 +229,78 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         logs={false}
       />
 
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Family Member Details"
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("familyMemberDetails")}
+            />
+          }
+        >
+          <Table
+            className="striped-table"
+            dataSource={data?.familyMemberDetails || []}
+            columns={[
+              {
+                title: " Name",
+                dataIndex: "name",
+                key: "name",
+              },
+              {
+                title: "Relation",
+                dataIndex: "relation",
+                key: "relation",
+              },
+              {
+                title: "Age",
+                dataIndex: "age",
+                key: "age",
+              },
+              {
+                title: "Employment Type",
+                dataIndex: "employmentType",
+                key: "employmentType",
+              },
+              {
+                title: "Educational Qualification",
+                dataIndex: "educationalQualification",
+                key: "educationalQualification",
+              },
+              {
+                title: "Mobile Number",
+                dataIndex: "mobileNumber",
+                key: "mobileNumber",
+              },
+              {
+                title: "Staying with Applicant",
+                dataIndex: "stayingWithApplicant",
+                key: "stayingWithApplicant",
+              },
+
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: (_, record) => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("colleagueReferences")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              // },
+            ]}
+            pagination={false}
+            locale={{ emptyText: "No references added yet" }}
+            bordered
+          />
+        </Card>
+      </section>
+
       {/* Third Party Check Section */}
       {/* <ThirdPartyCheckDescription
         data={data}
@@ -267,10 +339,16 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 key: "relationship",
               },
               {
+                title: "Feedback Status",
+                dataIndex: "feedbackStatus",
+                key: "feedbackStatus",
+              },
+              {
                 title: "Comments",
                 dataIndex: "comments",
                 key: "comments",
               },
+
               // {
               //   title: "Actions",
               //   key: "actions",

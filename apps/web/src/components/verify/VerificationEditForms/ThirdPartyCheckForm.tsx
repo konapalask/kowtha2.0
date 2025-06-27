@@ -24,7 +24,7 @@ const ThirdPartyCheckRow: React.FC<{
   );
   return (
     <Row
-      gutter={18}
+      gutter={8}
       key={String(field.key)}
       // align="middle"
       style={{ marginBottom: 0, backgroundColor: "#efefef", padding: 8 }}
@@ -92,6 +92,26 @@ const ThirdPartyCheckRow: React.FC<{
           </Form.Item>
         </Col>
       )}
+      <Col span={4}>
+        <Form.Item
+          {...field}
+          name={[field.name, "feedbackStatus"]}
+          fieldKey={[String(field.fieldKey), "feedbackStatus"]}
+          label={idx === 0 ? "Feedback Status" : ""}
+          rules={[
+            {
+              required: true,
+              message: "Please enter comments/remarks",
+            },
+          ]}
+        >
+          <Select>
+            <Select.Option value="Positive">Positive</Select.Option>
+            <Select.Option value="Negative">Negative</Select.Option>
+            <Select.Option value="Neutral">Neutral</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
       <Col span={6}>
         <Form.Item
           {...field}
