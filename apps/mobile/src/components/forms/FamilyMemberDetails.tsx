@@ -47,7 +47,7 @@ const validationSchema = yup.object().shape({
           .required('Educational qualification is required'),
         mobileNumber: yup
           .string()
-          .required('Mobile number is required')
+          // .required('Mobile number is required')
           .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
         stayingWithApplicant: yup
           .string()

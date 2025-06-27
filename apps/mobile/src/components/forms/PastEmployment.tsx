@@ -328,22 +328,23 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
     <ScrollView style={styles.container}>
       {fields.map((field, index) => renderEmploymentFields(index))}
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() =>
-          append({
-            employerName: '',
-            designation: '',
-            fromDate: '',
-            toDate: '',
-            contactPersonName: '',
-            contactPersonNumber: '',
-            reasonForMovement: '',
-          })
-        }>
-        <Text style={styles.addButtonText}>Add Another Employment</Text>
-      </TouchableOpacity>
-
+      {fields?.length < 2 && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() =>
+            append({
+              employerName: '',
+              designation: '',
+              fromDate: '',
+              toDate: '',
+              contactPersonName: '',
+              contactPersonNumber: '',
+              reasonForMovement: '',
+            })
+          }>
+          <Text style={styles.addButtonText}>Add Another Employment</Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onFormSubmit)}>

@@ -18,11 +18,14 @@ export type BusinessMiscellaneousFormData = {
   stockSeen: string;
   employeesSeen: string;
   otherSetupObserved: string;
-  illegalSetupObserved: string;
+  // illegalSetupObserved: string;
   politicallyConnected: string;
-  privateFinanceOrChits: string;
+  // privateFinanceOrChits: string;
   businessActivity: string;
-  businessActivityOther?: string;
+  // businessActivityOther?: string;
+  areaOfPremises: string;
+  localityOfBusiness: string;
+  employeesUnderApplicant: string;
 };
 
 type BusinessMiscellaneousProps = {
@@ -32,7 +35,7 @@ type BusinessMiscellaneousProps = {
 
 const OWNERSHIP_OPTIONS = ['Owned', 'Rented', 'Leased', 'Others'];
 const STOCK_SEEN_OPTIONS = ['Yes', 'No'];
-const EMPLOYEES_SEEN_OPTIONS = ['None', '1-2', '3-5', '6+'];
+// const EMPLOYEES_SEEN_OPTIONS = ['None', '1-2', '3-5', '6+'];
 const ILLEGAL_SETUP_OPTIONS = ['Yes', 'No'];
 const POLITICALLY_CONNECTED_OPTIONS = ['Yes', 'No'];
 const PRIVATE_FINANCE_OPTIONS = ['Yes', 'No'];
@@ -42,6 +45,8 @@ const BUSINESS_ACTIVITY_OPTIONS = [
   'Manufacturing',
   'Others',
 ];
+const areaOfPremisesOptions = ['<250 Sq.ft', '250 to 400 Sq.ft', '>400 Sq.ft'];
+const localityOptions = ['Residential', 'Commercial', 'Industry', 'Corporate'];
 
 const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
   onSubmit,
@@ -62,11 +67,14 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       stockSeen: '',
       employeesSeen: '',
       otherSetupObserved: '',
-      illegalSetupObserved: '',
+      // illegalSetupObserved: '',
       politicallyConnected: '',
-      privateFinanceOrChits: '',
+      // privateFinanceOrChits: '',
       businessActivity: '',
-      businessActivityOther: '',
+      // businessActivityOther: '',
+      areaOfPremises: '',
+      localityOfBusiness: '',
+      employeesUnderApplicant: '',
     },
   });
 
@@ -80,23 +88,52 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
   // ActionSheet refs
   const ownershipSheetRef = useRef<ActionSheetRef>(null);
   const stockSeenSheetRef = useRef<ActionSheetRef>(null);
-  const employeesSeenSheetRef = useRef<ActionSheetRef>(null);
+  // const employeesSeenSheetRef = useRef<ActionSheetRef>(null);
   const illegalSetupSheetRef = useRef<ActionSheetRef>(null);
   const politicallyConnectedSheetRef = useRef<ActionSheetRef>(null);
   const privateFinanceSheetRef = useRef<ActionSheetRef>(null);
   const businessActivitySheetRef = useRef<ActionSheetRef>(null);
+  const areaOfPremisesSheetRef = useRef<ActionSheetRef>(null);
+  const locationTypeSheetRef = useRef<ActionSheetRef>(null);
 
   // Show ActionSheet functions
   const showOwnershipSheet = () => ownershipSheetRef.current?.show();
   const showStockSeenSheet = () => stockSeenSheetRef.current?.show();
-  const showEmployeesSeenSheet = () => employeesSeenSheetRef.current?.show();
+  // const showEmployeesSeenSheet = () => employeesSeenSheetRef.current?.show();
   const showIllegalSetupSheet = () => illegalSetupSheetRef.current?.show();
-  const showPoliticallyConnectedSheet = () => politicallyConnectedSheetRef.current?.show();
+  const showPoliticallyConnectedSheet = () =>
+    politicallyConnectedSheetRef.current?.show();
   const showPrivateFinanceSheet = () => privateFinanceSheetRef.current?.show();
-  const showBusinessActivitySheet = () => businessActivitySheetRef.current?.show();
+  const showBusinessActivitySheet = () =>
+    businessActivitySheetRef.current?.show();
+  const showAreaOfPremises = () => areaOfPremisesSheetRef.current?.show();
+  const showLocationType = () => locationTypeSheetRef.current?.show();
 
   return (
     <ScrollView style={styles.container}>
+      {/* 19. Stock seen (select) */}
+      <Controller
+        control={control}
+        name="stockSeen"
+        rules={{required: 'Stock seen is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Stock Seen</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showStockSeenSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select option'}
+              </Text>
+            </TouchableOpacity>
+            {errors.stockSeen && (
+              <Text style={styles.errorText}>{errors.stockSeen.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
       {/* 16. Ownership of the Business Premises (select) */}
       <Controller
         control={control}
@@ -108,7 +145,8 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={showOwnershipSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select ownership'}
               </Text>
             </TouchableOpacity>
@@ -131,7 +169,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
               <Text style={styles.label}>Rental Amount</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter rental amount"
+                placeholder="Enter rental paid"
                 keyboardType="numeric"
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -147,6 +185,55 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
           )}
         />
       )}
+
+      <Controller
+        control={control}
+        name="areaOfPremises"
+        rules={{required: 'This field is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Area of Premises</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showAreaOfPremises}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select option'}
+              </Text>
+            </TouchableOpacity>
+            {errors.areaOfPremises && (
+              <Text style={styles.errorText}>
+                {errors.areaOfPremises.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="localityOfBusiness"
+        rules={{required: 'This field is required'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Locality of business</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showLocationType}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select option'}
+              </Text>
+            </TouchableOpacity>
+            {errors.localityOfBusiness && (
+              <Text style={styles.errorText}>
+                {errors.localityOfBusiness.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
       {/* 18. No: of Years in the current Business premises (input) */}
       <Controller
         control={control}
@@ -154,9 +241,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         rules={{required: 'No. of years is required'}}
         render={({field: {value, onChange, onBlur}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>
-              No. of Years in Current Business Premises
-            </Text>
+            <Text style={styles.label}>No. of Years in Business Premises</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter number of years"
@@ -174,42 +259,49 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
           </View>
         )}
       />
-      {/* 19. Stock seen (select) */}
+
       <Controller
         control={control}
-        name="stockSeen"
-        rules={{required: 'Stock seen is required'}}
-        render={({field: {value}}) => (
+        name="employeesUnderApplicant"
+        rules={{required: 'Employees under applicant is required'}}
+        render={({field: {value, onBlur, onChange}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Stock Seen</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={showStockSeenSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select option'}
+            <Text style={styles.label}>Employees working under applicant</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter number of employees"
+              keyboardType="numeric"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.employeesUnderApplicant && (
+              <Text style={styles.errorText}>
+                {errors.employeesUnderApplicant.message}
               </Text>
-            </TouchableOpacity>
-            {errors.stockSeen && (
-              <Text style={styles.errorText}>{errors.stockSeen.message}</Text>
             )}
           </View>
         )}
       />
+
       {/* 20. Employees seen (select) */}
       <Controller
         control={control}
         name="employeesSeen"
         rules={{required: 'Employees seen is required'}}
-        render={({field: {value}}) => (
+        render={({field: {value, onBlur, onChange}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Employees Seen</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={showEmployeesSeenSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select option'}
-              </Text>
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter number of employees"
+              keyboardType="numeric"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor={colors.text.disabled}
+            />
             {errors.employeesSeen && (
               <Text style={styles.errorText}>
                 {errors.employeesSeen.message}
@@ -241,7 +333,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       />
       {/* 22. Any ILLEGAL setup was observed (select) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="illegalSetupObserved"
         rules={{required: 'This field is required'}}
@@ -251,7 +343,8 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={showIllegalSetupSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select option'}
               </Text>
             </TouchableOpacity>
@@ -262,7 +355,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* 23. Is applicant or any family member politically connected (select) */}
       <Controller
         control={control}
@@ -276,7 +369,8 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={showPoliticallyConnectedSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select option'}
               </Text>
             </TouchableOpacity>
@@ -289,7 +383,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       />
       {/* 24. As per neighbor check, any collections or private finance or private chits are being operated from the premises or by the applicant (select) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="privateFinanceOrChits"
         rules={{required: 'This field is required'}}
@@ -302,7 +396,8 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={showPrivateFinanceSheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select option'}
               </Text>
             </TouchableOpacity>
@@ -313,7 +408,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* 25. Business activity (Trading/Services/Manufacturing/Others, with 'others' input) */}
       <Controller
         control={control}
@@ -325,7 +420,8 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             <TouchableOpacity
               style={styles.selectButton}
               onPress={showBusinessActivitySheet}>
-              <Text style={value ? styles.selectButtonText : styles.placeholder}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
                 {value || 'Select activity'}
               </Text>
             </TouchableOpacity>
@@ -337,7 +433,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
           </View>
         )}
       />
-      {businessActivity === 'Others' && (
+      {/* {businessActivity === 'Others' && (
         <Controller
           control={control}
           name="businessActivityOther"
@@ -361,7 +457,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onSubmit)}>
@@ -403,7 +499,9 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet ref={employeesSeenSheetRef} containerStyle={styles.actionSheet}>
+      {/* <ActionSheet
+        ref={employeesSeenSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Number of Employees Seen</Text>
           {EMPLOYEES_SEEN_OPTIONS.map((option, index) => (
@@ -418,9 +516,11 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
-      <ActionSheet ref={illegalSetupSheetRef} containerStyle={styles.actionSheet}>
+      <ActionSheet
+        ref={illegalSetupSheetRef}
+        containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Illegal Setup Observed?</Text>
           {ILLEGAL_SETUP_OPTIONS.map((option, index) => (
@@ -430,6 +530,44 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
               onPressIn={() => {
                 setValue('illegalSetupObserved', option);
                 illegalSetupSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={areaOfPremisesSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Area of premises</Text>
+          {areaOfPremisesOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('areaOfPremises', option);
+                areaOfPremisesSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={locationTypeSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={styles.actionSheetContent}>
+          <Text style={styles.actionSheetTitle}>Locality of Business</Text>
+          {localityOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('localityOfBusiness', option);
+                locationTypeSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

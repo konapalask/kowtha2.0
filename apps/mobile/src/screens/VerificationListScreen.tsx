@@ -84,6 +84,7 @@ const VerificationListScreen = () => {
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const disabled = !isLoggedIn;
+  console.log(isLoggedIn);
 
   // const opacity = useRef(new Animated.Value(1)).current;
 
@@ -121,17 +122,21 @@ const VerificationListScreen = () => {
       const details = await getItem('attendance');
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-
-      const start = currentTime.clone().hour(7).minute(0).second(0);
-      const end = currentTime.clone().hour(11).minute(0).second(0);
-
-      if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
-        console.log('in bounds');
-        setIsLoggedIn(isToday);
-      }
+      setIsLoggedIn(isToday);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const validTime = () => {
+    const currentTime = dayjs();
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
+
+    if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
+      return true;
+    }
+    return false;
   };
 
   useFocusEffect(
@@ -417,6 +422,7 @@ const VerificationListScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* {showAttendanceModal && !isLoggedIn && validTime() && ( */}
       {showAttendanceModal && !isLoggedIn && (
         <View style={styles.attendanceModalOverlay}>
           {/* <Pressable
@@ -424,7 +430,11 @@ const VerificationListScreen = () => {
             onPress={handleCloseAttendanceModal}
           /> */}
           <View style={styles.attendanceModalContent}>
-            <AttendanceCard setVisible={setShowAttendanceModal} />
+            <AttendanceCard
+              setVisible={setShowAttendanceModal}
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+            />
             {/* <TouchableOpacity
               onPress={handleCloseAttendanceModal}
               style={styles.closeAttendanceModalBtn}>
@@ -442,7 +452,7 @@ const VerificationListScreen = () => {
             elevation: 1000,
             zIndex: 1000,
           }}>
-          <Settings />
+          <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         </View>
       </View>
       {renderFilterOptions()}

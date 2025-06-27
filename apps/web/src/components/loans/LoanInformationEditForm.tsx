@@ -47,21 +47,22 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         form={form}
         initialValues={
           isEmpty(selectedLoan)
-            ? undefined: {
-              applicationNumber: selectedLoan?.applicationNumber,
-              applicantName: selectedLoan?.applicantName,
-              applicantMobile: selectedLoan?.applicantMobile,
-              loanAmount: selectedLoan?.loanAmount,
-              applicantAddress: selectedLoan?.applicantAddress,
-              loanType:
-                loanTypeOptions.find(
-                  (option) =>
-                    option.value.toLowerCase() ===
-                    selectedLoan?.loanType?.toLowerCase()
-                )?.value || selectedLoan?.loanType,
-              bankName: selectedLoan?.bankName,
-              applicantType: selectedLoan?.applicantType,
-            }
+            ? undefined
+            : {
+                applicationNumber: selectedLoan?.applicationNumber,
+                applicantName: selectedLoan?.applicantName,
+                applicantMobile: selectedLoan?.applicantMobile,
+                loanAmount: selectedLoan?.loanAmount,
+                applicantAddress: selectedLoan?.applicantAddress,
+                loanType:
+                  loanTypeOptions.find(
+                    (option) =>
+                      option.value.toLowerCase() ===
+                      selectedLoan?.loanType?.toLowerCase()
+                  )?.value || selectedLoan?.loanType,
+                bankName: selectedLoan?.bankName,
+                applicantType: selectedLoan?.applicantType,
+              }
         }
         onFinish={async (values) => {
           try {
@@ -82,40 +83,52 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 loanAmount: Number(values.loanAmount),
                 // applicantType: values.applicantType,
               };
-// console.log(loanData?.applicationNumber)
-              await createLoanApi([loanData]);
+              // console.log(loanData?.applicationNumber)
+              const response = await createLoanApi([loanData]);
+              const data = response?.data;
+              // console.log(response);
               // Handle the new response format
               // if (
               //   result.data.data.successful &&
               //   result.data.data.successful.length > 0
               // ) {
-                // const createdLoan = result.data.data.successful[0];
-                // // Create a new loan object with the loanId as id
-                // const newLoan = {
-                //   ...loanData,
-                //   id: createdLoan.loanId,
-                //   applicationNumber: createdLoan.applicationNumber,
-                //   status: "Pending",
-                //   verifications: [],
-                // };
-                // console.log(result)
-                // console.log(newLoan)
-                console.log(loanData?.applicationNumber)
+              // const createdLoan = result.data.data.successful[0];
+              // // Create a new loan object with the loanId as id
+              // const newLoan = {
+              //   ...loanData,
+              //   id: createdLoan.loanId,
+              //   applicationNumber: createdLoan.applicationNumber,
+              //   status: "Pending",
+              //   verifications: [],
+              // };
+              // console.log(result)
+              // console.log(newLoan)
+              // if()
+              // console.log(loanData?.applicationNumber)
+              if (data?.status === 201 && data?.data?.failedCount > 0) {
+                // message.error(data?.data?.failed?.[0]?.error);
+                message.error(
+                  "Duplicate Application number and applicant type"
+                );
+                // setEditLoanInfo(false);
+              } else {
                 setSelectedLoan(loanData?.applicationNumber);
                 // Add the new loan to the loans list
                 message.success("Loan created successfully");
-                // setIsDrawerVisible(false);
+              }
+
+              // setIsDrawerVisible(false);
               // } else {
               //   message.error("Failed to create loan");
               // }
             } else {
               // Update existing loan
               // console.log(values)
-              const {applicationNumber,...rest} = values
+              const { applicationNumber, ...rest } = values;
               result = await updateLoanApi(selectedLoan?.id, rest);
               message.success("Loan information updated");
             }
-            console.log("passed")
+            // console.log("passed")
             fetchLoanDetails();
             setEditLoanInfo(false);
           } catch (error) {

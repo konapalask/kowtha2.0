@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -25,16 +25,19 @@ const fetchUserDetails = async () => {
   return await getItem('userDetails');
 };
 
-const Settings = () => {
+const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
+  isLoggedIn,
+  setIsLoggedIn,
+}) => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
   const [visible, setVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   // const userDetails: any = fetchUserDetails();
   // console.log(userDetails);
   const [userDetails, setUserDetails] = useState<any>({});
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const details = await getItem('userDetails');
@@ -68,7 +71,7 @@ const Settings = () => {
   const handleLogout = () => {
     clearItem('accessToken');
     clearItem('refreshToken');
-    clearItem('attendance');
+    // clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],
@@ -138,8 +141,11 @@ const Settings = () => {
                 </Text>
               </View>
             </View>
-            <AttendanceCard setVisible={setVisible} />
-            {/* {!isLoggedIn && <AttendanceCard setVisible={setVisible} />} */}
+            <AttendanceCard
+              setVisible={setProfileModalVisible}
+              isLoggedIn={isLoggedIn}
+              setIsLoggedIn={setIsLoggedIn}
+            />
           </Pressable>
         </Pressable>
       </Modal>

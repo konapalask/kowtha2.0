@@ -6,7 +6,10 @@ import {postAttendanceApi} from '../services/user.services';
 import dayjs from 'dayjs';
 import {getItem, setItem} from '../helpers/utility';
 
-const handleLoginTick = async (setVisible: (val: boolean) => void) => {
+const handleLoginTick = async (
+  setVisible: (val: boolean) => void,
+  setIsLoggedIn: any,
+) => {
   try {
     const payload = {
       status: 'Available',
@@ -20,6 +23,7 @@ const handleLoginTick = async (setVisible: (val: boolean) => void) => {
       position: 'top',
     });
     await setItem('attendance', payload);
+    setIsLoggedIn(true);
   } catch (error: any) {
     console.log(error?.response?.data?.message);
     if (
@@ -31,6 +35,7 @@ const handleLoginTick = async (setVisible: (val: boolean) => void) => {
         date: dayjs().format('YYYY-MM-DD'),
       };
       await setItem('attendance', payload);
+      setIsLoggedIn(true);
     }
     Toast.show({
       type: 'error',
@@ -53,8 +58,10 @@ const handleLoginCross = (setVisible: (val: boolean) => void) => {
 
 const AttendanceCard: React.FC<{
   setVisible: (val: boolean) => void;
-}> = ({setVisible}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  isLoggedIn: any;
+  setIsLoggedIn: any;
+}> = ({setVisible, isLoggedIn, setIsLoggedIn}) => {
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   useEffect(() => {
     const checkAttendance = async () => {
@@ -62,52 +69,57 @@ const AttendanceCard: React.FC<{
         const details = await getItem('attendance');
         const currentTime = dayjs();
         const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-
-        const start = currentTime.clone().hour(7).minute(0).second(0);
-        const end = currentTime.clone().hour(11).minute(0).second(0);
-
-        if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
-          console.log('in bounds');
-          setIsLoggedIn(isToday);
-        }
+        setIsLoggedIn(isToday);
       } catch (error) {
         console.log(error);
       }
     };
     checkAttendance();
   }, []);
+
+  const isValidTime = () => {
+    const currentTime = dayjs();
+
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
+    if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
+      // console.log('in bounds');
+      return true;
+    }
+    return false;
+  };
   return (
     <View style={styles.loginCard}>
-      {!isLoggedIn && (
-        <>
-          <Text style={styles.loginText}>Login for the day</Text>
-          <View style={styles.loginActions}>
-            <Pressable
-              onPress={() => {
-                handleLoginTick(setVisible);
-              }}
-              style={styles.iconButton}>
-              <Icon name="checkmark-circle" size={28} color="green" />
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                handleLoginCross(setVisible);
-              }}
-              style={styles.iconButton}>
-              <Icon name="close-circle" size={28} color="red" />
-            </Pressable>
-          </View>
-        </>
-      )}
-      {isLoggedIn && (
+      {/* {!isLoggedIn && isValidTime() ? ( */}
+      {/* {!isLoggedIn ? (
+        <> */}
+      <Text style={styles.loginText}>Login for the day</Text>
+      <View style={styles.loginActions}>
+        <Pressable
+          onPress={() => {
+            handleLoginTick(setVisible, setIsLoggedIn);
+          }}
+          style={styles.iconButton}>
+          <Icon name="checkmark-circle" size={28} color="green" />
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleLoginCross(setVisible);
+          }}
+          style={styles.iconButton}>
+          <Icon name="close-circle" size={28} color="red" />
+        </Pressable>
+      </View>
+      {/* </>
+      ) : (
         <View style={{}}>
           <Icon name="information-circle-outline" size={28} color={'green'} />
           <Text
             style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
-            Login available from 7AM to 11AM
+            Already logged in for the day
           </Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 };

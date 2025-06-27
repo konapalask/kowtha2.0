@@ -242,7 +242,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         // onValuesChange={() => setDirty(true)}
         // preserve={false}
       >
-        <Row gutter={[0, 0]}>
+        <Row gutter={[12, 0]}>
           <FormSelector
             form={form}
             formKey={formKey}

@@ -110,6 +110,7 @@ const LoginScreen = () => {
         error?.response?.data?.message ||
           'Invalid OTP. Please check and try again.',
       );
+      // console.log('invalid');
     } finally {
       setLoading(false);
     }

@@ -1,30 +1,44 @@
-import React, { useState } from 'react';
-import { Button, Checkbox, Input, Popover, Radio, Space, Tag, DatePicker, Select } from 'antd';
-import { FilterOutlined, CloseOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
+import React, { useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Popover,
+  Radio,
+  Space,
+  Tag,
+  DatePicker,
+  Select,
+} from "antd";
+import { FilterOutlined, CloseOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
 
 interface FilterOption {
   key: string;
   label: string;
-  type: 'status' | 'applicationNumber' | 'assignee' | 'dateRange';
+  type: "status" | "applicationNumber" | "assignee" | "dateRange";
 }
 
 const filterOptions: FilterOption[] = [
-  { key: 'status', label: 'Status', type: 'status' },
-  { key: 'applicationNumber', label: 'Application Number', type: 'applicationNumber' },
-  { key: 'assignee', label: 'Assignee', type: 'assignee' },
-  { key: 'dateRange', label: 'Date Range', type: 'dateRange' },
+  { key: "status", label: "Status", type: "status" },
+  {
+    key: "applicationNumber",
+    label: "Application Number",
+    type: "applicationNumber",
+  },
+  { key: "assignee", label: "Assignee", type: "assignee" },
+  { key: "dateRange", label: "Date Range", type: "dateRange" },
 ];
 
 const statusOptions = [
-  { label: 'Unassigned', value: 'Unassigned' },
-  { label: 'Assigned', value: 'Assigned' },
-  { label: 'UnderFV', value: 'UnderFV' },
-  { label: 'FVCompleted', value: 'FVCompleted' },
-  { label: 'Approved', value: 'Approved' },
-  { label: 'Rejected', value: 'Rejected' },
+  { label: "Unassigned", value: "Unassigned" },
+  { label: "Assigned", value: "Assigned" },
+  // { label: 'UnderFV', value: 'UnderFV' },
+  { label: "FVCompleted", value: "FVCompleted" },
+  // { label: 'Approved', value: 'Approved' },
+  // { label: 'Rejected', value: 'Rejected' },
 ];
 
 export interface FilterValue {
@@ -41,46 +55,54 @@ interface FilterOverlayProps {
   onFilterChange: (newFilters: FilterValue) => void;
 }
 
-const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }) => {
+const FilterOverlay: React.FC<FilterOverlayProps> = ({
+  filters,
+  onFilterChange,
+}) => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
-    Object.keys(filters).filter(key => filters[key as keyof FilterValue] !== undefined)
+    Object.keys(filters).filter(
+      (key) => filters[key as keyof FilterValue] !== undefined
+    )
   );
   const [isOpen, setIsOpen] = useState(false);
 
   const handleFilterSelect = (filterKey: string, checked: boolean) => {
     if (checked) {
-      setSelectedFilters(prev => [...prev, filterKey]);
+      setSelectedFilters((prev) => [...prev, filterKey]);
     } else {
-      setSelectedFilters(prev => prev.filter(key => key !== filterKey));
+      setSelectedFilters((prev) => prev.filter((key) => key !== filterKey));
       // Clear the filter values when unchecking
       switch (filterKey) {
-        case 'status':
+        case "status":
           onFilterChange({
             ...filters,
-            status: undefined
+            status: undefined,
           });
           break;
-        case 'applicationNumber':
+        case "applicationNumber":
           onFilterChange({
             ...filters,
-            applicationNumber: undefined
+            applicationNumber: undefined,
           });
           break;
-        case 'assignee':
+        case "assignee":
           onFilterChange({
             ...filters,
             fieldExecutiveEmployeeCode: undefined,
-            fieldExecutiveName: undefined
+            fieldExecutiveName: undefined,
           });
           break;
       }
     }
   };
 
-  const handleFilterValueChange = (key: keyof FilterValue, value: string | undefined) => {
+  const handleFilterValueChange = (
+    key: keyof FilterValue,
+    value: string | undefined
+  ) => {
     onFilterChange({
       ...filters,
-      [key]: value
+      [key]: value,
     });
   };
 
@@ -88,7 +110,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
     const newFilters = { ...filters };
     delete newFilters[key];
     onFilterChange(newFilters);
-    setSelectedFilters(prev => prev.filter(k => k !== key));
+    setSelectedFilters((prev) => prev.filter((k) => k !== key));
   };
 
   const handleClearAll = () => {
@@ -101,8 +123,8 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
     if (dates) {
       onFilterChange({
         ...filters,
-        startDate: dates[0].format('YYYY-MM-DD'),
-        endDate: dates[1].format('YYYY-MM-DD'),
+        startDate: dates[0].format("YYYY-MM-DD"),
+        endDate: dates[1].format("YYYY-MM-DD"),
       });
     } else {
       const newFilters = { ...filters };
@@ -114,18 +136,19 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
   const renderFilterInput = (option: FilterOption) => {
     switch (option.type) {
-      case 'dateRange':
+      case "dateRange":
         return (
           <RangePicker
-            value={filters.startDate && filters.endDate ? [
-              dayjs(filters.startDate),
-              dayjs(filters.endDate)
-            ] : null}
+            value={
+              filters.startDate && filters.endDate
+                ? [dayjs(filters.startDate), dayjs(filters.endDate)]
+                : null
+            }
             onChange={handleDateRangeChange}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           />
         );
-      case 'status':
+      case "status":
         return (
           <Space direction="vertical">
             {/* {statusOptions.map(status => (
@@ -137,32 +160,49 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
                 {status.label}
               </Radio>
             ))} */}
-            <Select style={{minWidth:200}} options={statusOptions} value={filters.status} onSelect={(value:string) => handleFilterValueChange('status', value)} placeholder="Select Status" />
+            <Select
+              style={{ minWidth: 200 }}
+              options={statusOptions}
+              value={filters.status}
+              onSelect={(value: string) =>
+                handleFilterValueChange("status", value)
+              }
+              placeholder="Select Status"
+            />
           </Space>
         );
-      case 'applicationNumber':
+      case "applicationNumber":
         return (
           <Input
             placeholder="Search application number"
             value={filters.applicationNumber}
-            onChange={(e) => handleFilterValueChange('applicationNumber', e.target.value)}
+            onChange={(e) =>
+              handleFilterValueChange("applicationNumber", e.target.value)
+            }
             style={{ width: 200 }}
           />
         );
-      case 'assignee':
+      case "assignee":
         return (
           <Space direction="vertical">
             <Input
               placeholder="Search by Employee Code"
               value={filters.fieldExecutiveEmployeeCode}
-              onChange={(e) => handleFilterValueChange('fieldExecutiveEmployeeCode', e.target.value)}
+              onChange={(e) =>
+                handleFilterValueChange(
+                  "fieldExecutiveEmployeeCode",
+                  e.target.value
+                )
+              }
               style={{ width: 200 }}
               disabled={!!filters.fieldExecutiveName}
             />
             <Input
               placeholder="Search by Employee Name"
               value={filters.fieldExecutiveName}
-              onChange={(e) => handleFilterValueChange('fieldExecutiveName', e.target.value)}
+              onChange={(e) =>
+                handleFilterValueChange("fieldExecutiveName", e.target.value)
+              }
               style={{ width: 200 }}
               disabled={!!filters.fieldExecutiveEmployeeCode}
             />
@@ -175,16 +215,21 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
   const content = (
     <div style={{ width: 300 }}>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        {filterOptions.map(option => (
-          <div key={option.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <Space direction="vertical" style={{ width: "100%" }}>
+        {filterOptions.map((option) => (
+          <div
+            key={option.key}
+            style={{ display: "flex", flexDirection: "column", gap: 8 }}
+          >
             <Checkbox
               checked={selectedFilters.includes(option.key)}
               onChange={(e) => handleFilterSelect(option.key, e.target.checked)}
             >
               {option.label}
             </Checkbox>
-            {selectedFilters.includes(option.key) && <div style={{marginLeft: 20}}>{renderFilterInput(option)}</div>}
+            {selectedFilters.includes(option.key) && (
+              <div style={{ marginLeft: 20 }}>{renderFilterInput(option)}</div>
+            )}
           </div>
         ))}
       </Space>
@@ -204,21 +249,18 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
             delete newFilters.startDate;
             delete newFilters.endDate;
             onFilterChange(newFilters);
-            setSelectedFilters(prev => prev.filter(k => k !== 'dateRange'));
+            setSelectedFilters((prev) => prev.filter((k) => k !== "dateRange"));
           }}
         >
-          Date: {dayjs(filters.startDate).format('DD/MM/YYYY')} - {dayjs(filters.endDate).format('DD/MM/YYYY')}
+          Date: {dayjs(filters.startDate).format("DD/MM/YYYY")} -{" "}
+          {dayjs(filters.endDate).format("DD/MM/YYYY")}
         </Tag>
       );
     }
 
     if (filters.status) {
       activeFilters.push(
-        <Tag 
-          key="status" 
-          closable 
-          onClose={() => handleClearFilter('status')}
-        >
+        <Tag key="status" closable onClose={() => handleClearFilter("status")}>
           Status: {filters.status}
         </Tag>
       );
@@ -226,10 +268,10 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
     if (filters.applicationNumber) {
       activeFilters.push(
-        <Tag 
-          key="applicationNumber" 
-          closable 
-          onClose={() => handleClearFilter('applicationNumber')}
+        <Tag
+          key="applicationNumber"
+          closable
+          onClose={() => handleClearFilter("applicationNumber")}
         >
           Application: {filters.applicationNumber}
         </Tag>
@@ -238,10 +280,10 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
     if (filters.fieldExecutiveEmployeeCode) {
       activeFilters.push(
-        <Tag 
-          key="employeeCode" 
-          closable 
-          onClose={() => handleClearFilter('fieldExecutiveEmployeeCode')}
+        <Tag
+          key="employeeCode"
+          closable
+          onClose={() => handleClearFilter("fieldExecutiveEmployeeCode")}
         >
           Employee Code: {filters.fieldExecutiveEmployeeCode}
         </Tag>
@@ -250,10 +292,10 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
     if (filters.fieldExecutiveName) {
       activeFilters.push(
-        <Tag 
-          key="employeeName" 
-          closable 
-          onClose={() => handleClearFilter('fieldExecutiveName')}
+        <Tag
+          key="employeeName"
+          closable
+          onClose={() => handleClearFilter("fieldExecutiveName")}
         >
           Employee Name: {filters.fieldExecutiveName}
         </Tag>
@@ -265,7 +307,14 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+        }}
+      >
         <Popover
           content={content}
           title="Select Filters"
@@ -289,4 +338,4 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({ filters, onFilterChange }
   );
 };
 
-export default FilterOverlay; 
+export default FilterOverlay;
