@@ -45,6 +45,12 @@ const BasicDetailsDescription: React.FC<{
               {data?.basicDetails?.applicantName}
             </Descriptions.Item>
             <Descriptions.Item
+              label="Aadhar Nubmer"
+              contentStyle={getItemStyle("aadhar")}
+            >
+              {data?.basicDetails?.aadhar}
+            </Descriptions.Item>
+            <Descriptions.Item
               label="Marital Status"
               contentStyle={getItemStyle("applicantMaritalStatus")}
             >

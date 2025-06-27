@@ -45,6 +45,16 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
 
       <Col span={8}>
         <Form.Item
+          name="aadhar"
+          label="Aadhar Number"
+          rules={[{ required: true, message: "Please enter aadhar name" }]}
+        >
+          <Input />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
           name="applicantMaritalStatus"
           label="Marital Status"
           rules={[{ required: true, message: "Please select marital status" }]}
