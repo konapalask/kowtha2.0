@@ -2491,9 +2491,9 @@ export class LoanService {
     }
     let aadhar = verificationData.basicDetails?.aadhar || '';
 
-    if(aadhar.length > 4) {
-      aadhar = aadhar.slice(0, 4) + 'XXXX';
-    }
+    // if(aadhar.length > 4) {
+    //   aadhar = aadhar.slice(0, 4) + 'XXXX';
+    // }
 
     const recommendationStyles: Record<string, string> = {
       Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
