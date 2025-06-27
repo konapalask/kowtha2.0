@@ -100,18 +100,7 @@ export default function Verify() {
           const isCompleted = verification?.status === "Completed";
           const approvedStatus = verification?.approvedStatus;
           return (
-            <Tag
-              key={type.key}
-              color={
-                isCompleted
-                  ? approvedStatus === "Positive"
-                    ? "geekblue"
-                    : approvedStatus === "Negative"
-                      ? "geekblue"
-                      : "green"
-                  : "orange"
-              }
-            >
+            <Tag key={type.key} color={isCompleted ? "geekblue" : "orange"}>
               {type.label}{" "}
               {approvedStatus ? (
                 <CheckOutlined
@@ -195,7 +184,7 @@ export default function Verify() {
             <CheckOutlined style={{ color: "red" }} /> Completed - Negative
           </div>
 
-          <Badge color="green" text="Investigations completed" />
+          {/* <Badge color="green" text="Investigations completed" /> */}
           {/* <Tag color="green">Investigations Completed</Tag> */}
           {/* <Badge color="orange" text="In Progress" />
           <Badge color="default" text="Pending" /> */}
