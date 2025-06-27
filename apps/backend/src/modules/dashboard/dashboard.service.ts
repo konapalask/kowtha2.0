@@ -80,14 +80,14 @@ export class DashboardService {
       const rejectedVerifications = await this.prisma.verification.count({
         where: { 
           ...where,
-          status: ApprovedStatus.Negative 
+          approvedStatus: ApprovedStatus.Negative 
         },
       });
 
       const completedVerifications = await this.prisma.verification.count({
         where: {
           ...where,
-          status: {
+          approvedStatus: {
             in: [ApprovedStatus.Positive, ApprovedStatus.Negative]
           }
         },
