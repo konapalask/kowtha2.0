@@ -2492,7 +2492,7 @@ export class LoanService {
     let aadhar = verificationData.basicDetails?.aadhar || '';
 
     if(aadhar.length > 4) {
-      aadhar = aadhar.slice(0, 4) + 'XXXX';
+      aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
     }
 
     const recommendationStyles: Record<string, string> = {
