@@ -47,24 +47,23 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    const formValues = form.getFieldsValue();
-    const initialValues = await getInitialValues();
-    const cleanedInitialValues = Object.fromEntries(
-      Object.entries(initialValues).filter(
-        ([_, value]) => value !== undefined && value !== null && value !== ""
-      )
-    );
-    // console.log(formValues, cleanedInitialValues);
-    const isChanged =
-      JSON.stringify(_.sortBy(Object.entries(formValues))) !==
-      JSON.stringify(_.sortBy(Object.entries(cleanedInitialValues)));
+    try {
+      setLoading(true);
+      // Validate form first. If invalid, this will throw and skip the rest.
+      const values = await form.validateFields();
+      // Only proceed if validation passes
+      const formValues = values;
+      const initialValues = await getInitialValues();
+      const cleanedInitialValues = Object.fromEntries(
+        Object.entries(initialValues).filter(
+          ([_, value]) => value !== undefined && value !== null && value !== ""
+        )
+      );
+      const isChanged =
+        JSON.stringify(_.sortBy(Object.entries(formValues))) !==
+        JSON.stringify(_.sortBy(Object.entries(cleanedInitialValues)));
 
-    // const isChanged = isEqual(formValues, cleanedInitialValues);
-    // console.log(isChanged);
-    if (isChanged) {
-      try {
-        setLoading(true);
-        const values = await form.validateFields();
+      if (isChanged) {
         const mappedKey = formKeyMapping[formKey] || formKey;
         const finalData = {
           [mappedKey]: values,
@@ -146,64 +145,65 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             db.close();
           }
         };
-      } catch (error) {
-        console.error("Error saving form:", error);
-        message.error("Failed to save changes");
-      } finally {
-        setLoading(false);
+      } else {
+        // If not changed, check if a log exists and update it by removing the data related to formKey
+        const request = indexedDB.open("editLogs", 1);
+        request.onerror = (event) => {
+          console.error("Database error:", request.error);
+        };
+        request.onsuccess = (event: any) => {
+          const db = request.result;
+          try {
+            const transaction = db.transaction("logs", "readwrite");
+            const store = transaction.objectStore("logs");
+            const key = `${id}_${activeTab}`;
+            const getRequest = store.get(key);
+            getRequest.onsuccess = () => {
+              const existingData = getRequest.result;
+              if (existingData) {
+                const mappedKey = formKeyMapping[formKey] || formKey;
+                // Remove the data related to formKey
+                const updatedData = { ...existingData };
+                delete updatedData[mappedKey];
+                // Optionally, check if only id and timestamp remain
+                // If so, you could delete the log, but per instruction, just update it
+                const putRequest = store.put(updatedData);
+                putRequest.onsuccess = () => {
+                  message.success("Removed stale form data from edit log");
+                  // console.log("Removed stale form data from edit log");
+                  onEditSuccess?.();
+                };
+                putRequest.onerror = () => {
+                  console.error("Error updating log:", putRequest.error);
+                };
+              }
+            };
+            getRequest.onerror = () => {
+              console.error(
+                "Error checking for existing log:",
+                getRequest.error
+              );
+            };
+            transaction.oncomplete = () => {
+              db.close();
+            };
+            transaction.onerror = () => {
+              console.error("Transaction error:", transaction.error);
+              db.close();
+            };
+          } catch (error) {
+            console.error("Error in database operation:", error);
+            db.close();
+          }
+        };
       }
+      onCancel();
+    } catch (error) {
+      // If validation fails, AntD will show errors on the form fields automatically
+      // Only show a message if you want a global error
+      // message.error("Please fill all required fields correctly.");
+      setLoading(false);
     }
-    // setDirty(false);
-    else {
-      // If not changed, check if a log exists and update it by removing the data related to formKey
-      const request = indexedDB.open("editLogs", 1);
-      request.onerror = (event) => {
-        console.error("Database error:", request.error);
-      };
-      request.onsuccess = (event: any) => {
-        const db = request.result;
-        try {
-          const transaction = db.transaction("logs", "readwrite");
-          const store = transaction.objectStore("logs");
-          const key = `${id}_${activeTab}`;
-          const getRequest = store.get(key);
-          getRequest.onsuccess = () => {
-            const existingData = getRequest.result;
-            if (existingData) {
-              const mappedKey = formKeyMapping[formKey] || formKey;
-              // Remove the data related to formKey
-              const updatedData = { ...existingData };
-              delete updatedData[mappedKey];
-              // Optionally, check if only id and timestamp remain
-              // If so, you could delete the log, but per instruction, just update it
-              const putRequest = store.put(updatedData);
-              putRequest.onsuccess = () => {
-                message.success("Removed stale form data from edit log");
-                // console.log("Removed stale form data from edit log");
-                onEditSuccess?.();
-              };
-              putRequest.onerror = () => {
-                console.error("Error updating log:", putRequest.error);
-              };
-            }
-          };
-          getRequest.onerror = () => {
-            console.error("Error checking for existing log:", getRequest.error);
-          };
-          transaction.oncomplete = () => {
-            db.close();
-          };
-          transaction.onerror = () => {
-            console.error("Transaction error:", transaction.error);
-            db.close();
-          };
-        } catch (error) {
-          console.error("Error in database operation:", error);
-          db.close();
-        }
-      };
-    }
-    onCancel();
   };
 
   const getMaritalStatus = () => {
