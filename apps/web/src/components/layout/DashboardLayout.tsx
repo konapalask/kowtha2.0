@@ -9,6 +9,7 @@ import {
   Grid,
   Badge,
   notification,
+  Popover,
 } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -27,9 +28,10 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
-import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
+// import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
 import { getUserDetails } from "@/utils/utility";
+import { getAllEditRequestsApi } from "@/services/verifier.services";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -69,7 +71,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentTime] = useState(new Date());
   const [office, setOffice] = useState<string>("");
   const userDetails = getUserDetails();
-  const [api, contextHolder] = notification.useNotification();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [requestData, setRequestData] = useState<any>([]);
+  // Add dummy login requests data
 
   useEffect(() => {
     if (userDetails?.officeId) {
@@ -87,10 +91,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [userDetails?.officeId]);
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-  //   return () => clearInterval(timer);
-  // }, []);
+  const fetchEditRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllEditRequestsApi();
+      const data = response?.data ?? [];
+      setRequestData(data);
+
+      // const loanRequests = data.filter((req: any) => req?.type !== "Login");
+      // const loginRequests = data.filter((req: any) => req?.type === "Login");
+
+      // // console.log({ loanRequests, loginRequests });
+
+      // setEditRequests(loanRequests);
+      // setLoginRequests(loginRequests);
+    } catch (error) {
+      console.error("Error fetching edit requests:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEditRequests();
+    const interval = setInterval(fetchEditRequests, 120000); // poll every 2 min
+    return () => clearInterval(interval);
+  }, []);
 
   // useEffect(() => {
   //   setCollapsed(!!(screens.xs || screens.sm || screens.md));
@@ -184,15 +210,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </Menu>
   );
 
-  const openNotification = () => {
-    api.open({
-      message: "Title",
-      description: "description",
-      // duration: 0,
-      placement: "top",
-    });
-  };
-
   return (
     <Layout style={{ minHeight: "100vh", fontFamily: "Noto Sans, sans-serif" }}>
       <Sider
@@ -217,6 +234,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           {collapsed ? (
             <Image
+              loading="lazy"
               src={smallLogo}
               alt="Kowtha Logo"
               width={120}
@@ -225,6 +243,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
           ) : (
             <Image
+              loading="lazy"
               src={logo}
               alt="Kowtha Logo"
               width={120}
@@ -259,15 +278,95 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           />
           <Space>
-            <Badge dot style={{ marginRight: 20 }}>
-              {contextHolder}
-              <span
-                onClick={openNotification}
-                style={{ cursor: "pointer", marginRight: 15 }}
+            {userDetails?.role === "Admin" && (
+              <Popover
+                placement="bottomRight"
+                trigger="hover"
+                content={
+                  <div style={{ minWidth: 320, maxWidth: 400 }}>
+                    {requestData && requestData.length > 0 ? (
+                      <div style={{ maxHeight: 350, overflowY: "auto" }}>
+                        {requestData.slice(0, 5).map((req: any) => (
+                          <div
+                            key={req.id}
+                            style={{
+                              border: "1px solid #eee",
+                              borderRadius: 8,
+                              marginBottom: 10,
+                              padding: 10,
+                              background: "#fff",
+                              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                            }}
+                          >
+                            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                              {req.type || "Edit Request"} -{" "}
+                              <span
+                                style={{
+                                  color:
+                                    req.status === "Pending"
+                                      ? "#faad14"
+                                      : req.status === "Approved"
+                                        ? "#52c41a"
+                                        : "#ff4d4f",
+                                }}
+                              >
+                                {req.status}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 13, color: "#555" }}>
+                              {req.applicantName ||
+                                req.requester?.name ||
+                                req.requester?.employeeCode ||
+                                "-"}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#888" }}>
+                              {new Date(
+                                req.createdAt || req.requestedAt
+                              ).toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          color: "#888",
+                          textAlign: "center",
+                          padding: 16,
+                        }}
+                      >
+                        No requests
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        borderTop: "1px solid #eee",
+                        marginTop: 8,
+                        paddingTop: 8,
+                        textAlign: "center",
+                      }}
+                    >
+                      <a
+                        href="/edit-requests"
+                        style={{ color: "#1677ff", fontWeight: 500 }}
+                      >
+                        View all requests
+                      </a>
+                    </div>
+                  </div>
+                }
               >
-                <NotificationOutlined style={{ fontSize: 12 }} />
-              </span>
-            </Badge>
+                <Badge
+                  count={requestData?.length || 0}
+                  style={{ marginRight: 20, fontSize: 10 }}
+                  size="small"
+                >
+                  <span style={{ cursor: "pointer", marginRight: 20 }}>
+                    <NotificationOutlined style={{ fontSize: 18 }} />
+                  </span>
+                </Badge>
+              </Popover>
+            )}
             <Text type="secondary" style={{ fontWeight: 500 }}>
               {office}
             </Text>

@@ -87,7 +87,6 @@ export default function Verify() {
       record?.verifications?.filter(
         (option: any) => option?.status !== "Pending"
       ) ?? [];
-    console.log(record?.verifications);
     return (
       <Space size={[0, 8]} wrap>
         {types.map((type) => {
