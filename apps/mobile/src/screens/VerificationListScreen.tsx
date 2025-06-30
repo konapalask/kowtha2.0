@@ -83,7 +83,8 @@ const VerificationListScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const disabled = !isLoggedIn;
+  // const disabled = !isLoggedIn;
+  const disabled = false;
   console.log(isLoggedIn);
 
   // const opacity = useRef(new Animated.Value(1)).current;

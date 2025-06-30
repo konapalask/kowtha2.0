@@ -606,7 +606,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
         containerStyle={styles.actionSheet}>
         <View style={styles.actionSheetContent}>
           <Text style={styles.actionSheetTitle}>Select Address Proof</Text>
-          {addressCategories.map((category, index) => (
+          {addressProofOptions.map((category, index) => (
             <TouchableOpacity
               key={index}
               style={styles.actionSheetItem}
