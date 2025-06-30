@@ -29,14 +29,14 @@ import Attendance from "@/components/attendance/Attendance";
 
 interface DashboardMetrics {
   totalLoans: number | null | undefined;
-  verifiedLoans: number | null | undefined;
-  rejectedLoans: number | null | undefined;
-  pendingLoans: number | null | undefined;
-  percentages: {
-    verified: number | null | undefined;
-    rejected: number | null | undefined;
-    pending: number | null | undefined;
-  };
+  totalVerifications: number | null | undefined;
+  pendingVerifications: number | null | undefined;
+  completedVerifications: number | null | undefined;
+  // percentages: {
+  //   verified: number | null | undefined;
+  //   rejected: number | null | undefined;
+  //   pending: number | null | undefined;
+  // };
 }
 
 const DashboardLayout = dynamic(
@@ -47,14 +47,14 @@ const DashboardLayout = dynamic(
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalLoans: 0,
-    verifiedLoans: 0,
-    rejectedLoans: 0,
-    pendingLoans: 0,
-    percentages: {
-      verified: 0,
-      rejected: 0,
-      pending: 0,
-    },
+    totalVerifications: 0,
+    pendingVerifications: 0,
+    completedVerifications: 0,
+    // percentages: {
+    //   verified: 0,
+    //   rejected: 0,
+    //   pending: 0,
+    // },
   });
 
   // const [pendingLoans, setPendingLoans] = useState<any[]>([]);
@@ -239,59 +239,7 @@ export default function Dashboard() {
                       Total Loans
                     </Typography>
                   }
-                  value={metrics.totalLoans ?? 0}
-                  valueStyle={{
-                    color: "#fff",
-                    fontSize: "28px",
-                    fontWeight: "500",
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col sm={12} md={12} lg={6}>
-          <Card
-            style={{
-              height: "140px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              // borderColor: "#FFC107",
-              background: "linear-gradient(90deg, #f7971e 0%, #ffd200 100%)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: "rgba(255, 193, 7, 0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ClockCircleOutlined
-                  style={{ fontSize: "24px", color: "#fff" }}
-                />
-              </div>
-              <div>
-                <Statistic
-                  title={
-                    <Typography
-                      style={{
-                        color: "#fff",
-                        fontSize: "16px",
-                        marginBottom: "8px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Pending Loans
-                    </Typography>
-                  }
-                  value={metrics.pendingLoans ?? 0}
+                  value={metrics?.totalLoans ?? 0}
                   valueStyle={{
                     color: "#fff",
                     fontSize: "28px",
@@ -341,10 +289,10 @@ export default function Dashboard() {
                         fontWeight: "600",
                       }}
                     >
-                      Verified Loans
+                      Total Verifications
                     </Typography>
                   }
-                  value={metrics.verifiedLoans ?? 0}
+                  value={metrics?.totalVerifications ?? 0}
                   valueStyle={{
                     color: "#fff",
                     fontSize: "28px",
@@ -355,6 +303,59 @@ export default function Dashboard() {
             </div>
           </Card>
         </Col>
+        <Col sm={12} md={12} lg={6}>
+          <Card
+            style={{
+              height: "140px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              // borderColor: "#FFC107",
+              background: "linear-gradient(90deg, #f7971e 0%, #ffd200 100%)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(255, 193, 7, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ClockCircleOutlined
+                  style={{ fontSize: "24px", color: "#fff" }}
+                />
+              </div>
+              <div>
+                <Statistic
+                  title={
+                    <Typography
+                      style={{
+                        color: "#fff",
+                        fontSize: "16px",
+                        marginBottom: "8px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Pending Verifications
+                    </Typography>
+                  }
+                  value={metrics?.pendingVerifications ?? 0}
+                  valueStyle={{
+                    color: "#fff",
+                    fontSize: "28px",
+                    fontWeight: "500",
+                  }}
+                />
+              </div>
+            </div>
+          </Card>
+        </Col>
+
         <Col sm={12} md={12} lg={6}>
           <Card
             style={{
@@ -393,10 +394,10 @@ export default function Dashboard() {
                         fontWeight: "600",
                       }}
                     >
-                      Rejected Loans
+                      Completed Verifications
                     </Typography>
                   }
-                  value={metrics.rejectedLoans ?? 0}
+                  value={metrics?.completedVerifications ?? 0}
                   valueStyle={{
                     color: "#fff",
                     fontSize: "28px",
