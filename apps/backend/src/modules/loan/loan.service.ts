@@ -21,9 +21,6 @@ import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 
-// Workaround: use union type for VerificationType
-// TODO: Replace with import from @prisma/client if/when available
-// type VerificationType = 'PermanentAddress' | 'CurrentAddress' | 'Work';
 
 interface VerificationData {
   applicantDetails?: {

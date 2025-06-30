@@ -93,12 +93,22 @@ export class DashboardService {
         },
       });
 
+      const pendingVerifications = await this.prisma.verification.count({
+        where: {
+          ...where,
+          status: {
+            in: [VerificationStatus.Pending, VerificationStatus.InProgress]
+          }
+        },
+      });
+
       await this.loggingService.info('Dashboard metrics fetched successfully', {
         filters,
         totalLoans,
         totalVerifications,
         completedVerifications,
         rejectedVerifications,
+        pendingVerifications,
       });
 
       return {
@@ -106,6 +116,7 @@ export class DashboardService {
         totalVerifications,
         completedVerifications,
         rejectedVerifications,
+        pendingVerifications,
       };
     } catch (error) {
       await this.loggingService.error('Failed to fetch dashboard metrics', {
