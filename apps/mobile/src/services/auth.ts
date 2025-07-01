@@ -62,3 +62,13 @@ export const verifyOTP = async (
     throw error;
   }
 };
+
+export const getPlaystoreVersion = async () => {
+  try {
+    const response = await axiosInstance.get('/accounts/playstore/version');
+    return response?.data;
+  } catch (error) {
+    console.error('Error getting playstore version:', error);
+    return null;
+  }
+};

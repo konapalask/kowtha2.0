@@ -20,6 +20,7 @@ import {submitVerification} from '../services/field.services';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {getItem, setItem, clearItem} from '../helpers/utility';
+import Investigable from '../components/forms/Investigable';
 
 interface WorkVerificationFormData {
   basicDetails: {
@@ -87,6 +88,7 @@ const WorkVerification = () => {
   const {item} = route.params as {item: any};
   const {userData} = route.params as {userData: any};
   const verificationType = 'Work';
+  const [investigable, setInvestigable] = useState<boolean | null>(null);
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -96,8 +98,8 @@ const WorkVerification = () => {
     pastEmployment: false,
     existingLoans: false,
     photoCapture: false,
+    investigable: investigable ?? true,
   });
-
   const [validSections, setValidSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -387,71 +389,85 @@ const WorkVerification = () => {
     <View style={styles.container}>
       <ScrollView>
         <CollapsibleSection
-          title="Basic Details"
-          isExpanded={expandedSections.basicDetails}
-          onToggle={() => toggleSection('basicDetails')}
-          isValid={validSections.basicDetails}>
-          <WorkBasicDetails
-            initialData={formData.basicDetails}
-            onSubmit={handleBasicDetailsSubmit}
+          title="Applicant asked to postpone?"
+          onToggle={() => toggleSection('investigable')}
+          isExpanded={expandedSections.investigable}
+          isValid={investigable ?? false}>
+          <Investigable
+            isInvestigable={investigable}
+            setIsInvestigable={setInvestigable}
+            onYes={() =>
+              setExpandedSections(prev => ({...prev, investigable: false}))
+            }
           />
         </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Employment Details"
-          isExpanded={expandedSections.employmentDetails}
-          onToggle={() => toggleSection('employmentDetails')}
-          isValid={validSections.employmentDetails}>
-          <WorkEmploymentDetails
-            initialData={formData.employmentDetails}
-            onSubmit={handleEmploymentDetailsSubmit}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Colleague References"
-          isExpanded={expandedSections.colleagueReferences}
-          onToggle={() => toggleSection('colleagueReferences')}
-          isValid={validSections.colleagueReferences}>
-          <ColleagueReferences
-            initialData={formData.colleagueReferences}
-            onSubmit={handleColleagueReferencesSubmit}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Past Employment"
-          isExpanded={expandedSections.pastEmployment}
-          onToggle={() => toggleSection('pastEmployment')}
-          isValid={validSections.pastEmployment}>
-          <PastEmployment
-            initialData={formData.pastEmployment}
-            onSubmit={handlePastEmploymentSubmit}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Existing Loans"
-          isExpanded={expandedSections.existingLoans}
-          onToggle={() => toggleSection('existingLoans')}
-          isValid={validSections.existingLoans}>
-          <ExistingLoans
-            initialData={formData.existingLoans}
-            onSubmit={handleExistingLoansSubmit}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Photo Capture"
-          isExpanded={expandedSections.photoCapture}
-          onToggle={() => toggleSection('photoCapture')}
-          isValid={validSections.photoCapture}>
-          <PhotoCapture
-            onUploadedItemsChange={handleUploadedItemsChange}
-            initialItems={formData.uploadedItems}
-            loanId={item.verificationId}
-          />
-        </CollapsibleSection>
+        {investigable && (
+          <>
+            {' '}
+            <CollapsibleSection
+              title="Basic Details"
+              isExpanded={expandedSections.basicDetails}
+              onToggle={() => toggleSection('basicDetails')}
+              isValid={validSections.basicDetails}>
+              <WorkBasicDetails
+                initialData={formData.basicDetails}
+                onSubmit={handleBasicDetailsSubmit}
+              />
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Employment Details"
+              isExpanded={expandedSections.employmentDetails}
+              onToggle={() => toggleSection('employmentDetails')}
+              isValid={validSections.employmentDetails}>
+              <WorkEmploymentDetails
+                initialData={formData.employmentDetails}
+                onSubmit={handleEmploymentDetailsSubmit}
+              />
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Colleague References"
+              isExpanded={expandedSections.colleagueReferences}
+              onToggle={() => toggleSection('colleagueReferences')}
+              isValid={validSections.colleagueReferences}>
+              <ColleagueReferences
+                initialData={formData.colleagueReferences}
+                onSubmit={handleColleagueReferencesSubmit}
+              />
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Past Employment"
+              isExpanded={expandedSections.pastEmployment}
+              onToggle={() => toggleSection('pastEmployment')}
+              isValid={validSections.pastEmployment}>
+              <PastEmployment
+                initialData={formData.pastEmployment}
+                onSubmit={handlePastEmploymentSubmit}
+              />
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Existing Loans"
+              isExpanded={expandedSections.existingLoans}
+              onToggle={() => toggleSection('existingLoans')}
+              isValid={validSections.existingLoans}>
+              <ExistingLoans
+                initialData={formData.existingLoans}
+                onSubmit={handleExistingLoansSubmit}
+              />
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Photo Capture"
+              isExpanded={expandedSections.photoCapture}
+              onToggle={() => toggleSection('photoCapture')}
+              isValid={validSections.photoCapture}>
+              <PhotoCapture
+                onUploadedItemsChange={handleUploadedItemsChange}
+                initialItems={formData.uploadedItems}
+                loanId={item.verificationId}
+              />
+            </CollapsibleSection>
+          </>
+        )}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit Verification</Text>

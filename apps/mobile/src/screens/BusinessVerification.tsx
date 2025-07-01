@@ -22,6 +22,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {getItem, setItem, clearItem} from '../helpers/utility';
 import {BusinessDetailsFormData} from '../components/forms/BusinessDetails';
+import Investigable from '../components/forms/Investigable';
 
 interface BusinessVerificationFormData {
   basicDetails: {
@@ -61,17 +62,6 @@ const BusinessVerification = () => {
   const {item} = route.params as {item: any};
   const {userData} = route.params as {userData: any};
   const verificationType = 'Business';
-
-  const [expandedSections, setExpandedSections] = useState<{
-    [key: string]: boolean;
-  }>({
-    basicDetails: true,
-    businessDetails: false,
-    miscellaneous: false,
-    thirdPartyCheck: false,
-    photoCapture: false,
-  });
-
   const [validSections, setValidSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -80,6 +70,17 @@ const BusinessVerification = () => {
     miscellaneous: false,
     thirdPartyCheck: false,
     photoCapture: false,
+  });
+  const [investigable, setInvestigable] = useState<boolean | null>(null);
+  const [expandedSections, setExpandedSections] = useState<{
+    [key: string]: boolean;
+  }>({
+    basicDetails: true,
+    businessDetails: false,
+    miscellaneous: false,
+    thirdPartyCheck: false,
+    photoCapture: false,
+    investigable: investigable ?? true,
   });
 
   const [formData, setFormData] = useState<BusinessVerificationFormData>({
@@ -159,13 +160,21 @@ const BusinessVerification = () => {
             uploadedItems: savedData.uploadedItems || [],
           };
           setFormData(completeFormData);
-          setValidSections({
+          const updatedSections = {
             basicDetails: !!savedData.basicDetails,
             businessDetails: !!savedData.businessDetails,
             miscellaneous: !!savedData.miscellaneous,
             thirdPartyCheck: !!savedData.thirdPartyCheck,
             photoCapture: savedData.uploadedItems?.length > 0,
-          });
+          };
+
+          setValidSections(updatedSections);
+
+          // check if at least one is true
+          const isAnySectionValid = Object.values(updatedSections).some(
+            val => val,
+          );
+          setInvestigable(isAnySectionValid);
         }
       } catch (error) {
         console.error('Error loading saved data:', error);
@@ -308,60 +317,77 @@ const BusinessVerification = () => {
     <View style={styles.container}>
       <ScrollView>
         <CollapsibleSection
-          title="Basic Details"
-          isExpanded={expandedSections.basicDetails}
-          onToggle={() => toggleSection('basicDetails')}
-          isValid={validSections.basicDetails}>
-          <BusinessBasicDetails
-            initialData={formData.basicDetails}
-            onSubmit={handleBasicDetailsSubmit}
+          title="Applicant asked to postpone?"
+          onToggle={() => toggleSection('investigable')}
+          isExpanded={expandedSections.investigable}
+          isValid={investigable ?? false}>
+          <Investigable
+            isInvestigable={investigable}
+            setIsInvestigable={setInvestigable}
+            onYes={() =>
+              setExpandedSections(prev => ({...prev, investigable: false}))
+            }
           />
         </CollapsibleSection>
+        {investigable && (
+          <>
+            <CollapsibleSection
+              title="Basic Details"
+              isExpanded={expandedSections.basicDetails}
+              onToggle={() => toggleSection('basicDetails')}
+              isValid={validSections.basicDetails}>
+              <BusinessBasicDetails
+                initialData={formData.basicDetails}
+                onSubmit={handleBasicDetailsSubmit}
+              />
+            </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Business Details"
-          isExpanded={expandedSections.businessDetails}
-          onToggle={() => toggleSection('businessDetails')}
-          isValid={validSections.businessDetails}>
-          <BusinessDetails
-            initialData={formData.businessDetails}
-            onSubmit={handleBusinessDetailsSubmit}
-          />
-        </CollapsibleSection>
+            <CollapsibleSection
+              title="Business Details"
+              isExpanded={expandedSections.businessDetails}
+              onToggle={() => toggleSection('businessDetails')}
+              isValid={validSections.businessDetails}>
+              <BusinessDetails
+                initialData={formData.businessDetails}
+                onSubmit={handleBusinessDetailsSubmit}
+              />
+            </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Miscellaneous Details"
-          isExpanded={expandedSections.miscellaneous}
-          onToggle={() => toggleSection('miscellaneous')}
-          isValid={validSections.miscellaneous}>
-          <BusinessMiscellaneous
-            initialData={formData.miscellaneous}
-            onSubmit={handleMiscellaneousSubmit}
-          />
-        </CollapsibleSection>
+            <CollapsibleSection
+              title="Miscellaneous Details"
+              isExpanded={expandedSections.miscellaneous}
+              onToggle={() => toggleSection('miscellaneous')}
+              isValid={validSections.miscellaneous}>
+              <BusinessMiscellaneous
+                initialData={formData.miscellaneous}
+                onSubmit={handleMiscellaneousSubmit}
+              />
+            </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Third-Party Check"
-          isExpanded={expandedSections.thirdPartyCheck}
-          onToggle={() => toggleSection('thirdPartyCheck')}
-          isValid={validSections.thirdPartyCheck}>
-          <ThirdPartyCheck
-            onSubmit={handleThirdPartyCheckSubmit}
-            initialData={formData.thirdPartyCheck}
-          />
-        </CollapsibleSection>
+            <CollapsibleSection
+              title="Third-Party Check"
+              isExpanded={expandedSections.thirdPartyCheck}
+              onToggle={() => toggleSection('thirdPartyCheck')}
+              isValid={validSections.thirdPartyCheck}>
+              <ThirdPartyCheck
+                onSubmit={handleThirdPartyCheckSubmit}
+                initialData={formData.thirdPartyCheck}
+              />
+            </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Photo Capture"
-          isExpanded={expandedSections.photoCapture}
-          onToggle={() => toggleSection('photoCapture')}
-          isValid={validSections.photoCapture}>
-          <PhotoCapture
-            onUploadedItemsChange={handleUploadedItemsChange}
-            initialItems={formData.uploadedItems}
-            loanId={item.verificationId}
-          />
-        </CollapsibleSection>
+            <CollapsibleSection
+              title="Photo Capture"
+              isExpanded={expandedSections.photoCapture}
+              onToggle={() => toggleSection('photoCapture')}
+              isValid={validSections.photoCapture}>
+              <PhotoCapture
+                onUploadedItemsChange={handleUploadedItemsChange}
+                initialItems={formData.uploadedItems}
+                loanId={item.verificationId}
+              />
+            </CollapsibleSection>
+          </>
+        )}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit Verification</Text>
