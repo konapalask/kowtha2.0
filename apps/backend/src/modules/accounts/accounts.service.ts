@@ -87,18 +87,22 @@ export class AccountsService {
     }
   }
 
-  async generateOTP(mobile: string): Promise<{ message: string }> {
+  async generateOTP(mobile: string, isMobile: Boolean): Promise<{ message: string }> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { mobile: mobile, status: 'Active' }
       });
 
+      if (isMobile && user.role !== UserRole.FieldExecutive) {
+        throw new BadRequestException('Access denied: The mobile number you entered is not authorized');
+      }
+
       if (!user) {
-        throw new NotFoundException('User not found with this mobile number');
+        throw new NotFoundException('Access denied: Please use a registered mobile number');
       }
 
       if (user.status !== 'Active') {
-        throw new BadRequestException('Your account is not active. Please contact administrator.');
+        throw new BadRequestException('Access denied: Your account is not active. Please contact administrator');
       }
 
       // Generate a random 6-digit OTP
@@ -142,81 +146,81 @@ export class AccountsService {
       });
 
       if (!user) {
-        throw new NotFoundException('User not found with this mobile number');
+        throw new NotFoundException('Access denied: User not found with this mobile number');
       }
 
       if (user.status !== 'Active') {
-        throw new BadRequestException('Your account is not active. Please contact administrator.');
+        throw new BadRequestException('Access denied: Your account is not active. Please contact administrator.');
       }
       let returnMessage = 'Device has been changed. Please contact administrator.';
 
       if(user.role === UserRole.FieldExecutive && !deviceId){
-        throw new UnauthorizedException('You do not have access to verify OTP');
+        throw new UnauthorizedException('Access denied: You are not Authorized to login');
       }
       
-      // if(deviceId){
+      if(deviceId){
         
-      //   if(user.role !== UserRole.FieldExecutive){
-      //     throw new UnauthorizedException('Admin cannot verify OTP');
-      //   }
+        if(user.role !== UserRole.FieldExecutive){
+          throw new UnauthorizedException('Access denied: You are not Authorized to login');
+        }
 
-      //   if(!user.deviceId){
-      //     const updateUser  = await this.prisma.user.update({
-      //       where: { id: user.id },
-      //       data: { deviceId }
-      //     });
-      //     await this.loggingService.info('Device ID updated successfully', {
-      //       userId: user.id,
-      //     });
-      //   }
+        if(!user.deviceId){
+          const updateUser  = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { deviceId }
+          });
+          await this.loggingService.info('Device ID updated successfully', {
+            userId: user.id,
+          });
+        }
 
-      //   if(deviceId !== user.deviceId){
-      //     const checkEditRequest = await this.prisma.editRequest.findFirst({
-      //       where: {
-      //         requester: {
-      //           id: user.id
-      //         },
-      //         type: EditRequestType.Login,
-      //         status: EditRequestStatus.Pending
-      //       }
-      //     });
+        if(deviceId !== user.deviceId){
+          const checkEditRequest = await this.prisma.editRequest.findFirst({
+            where: {
+              requester: {
+                id: user.id
+              },
+              type: EditRequestType.Login,
+              status: EditRequestStatus.Pending
+            }
+          });
 
-      //     if(checkEditRequest){
-      //       returnMessage = 'Device change request already pending. Please wait for approval.';
-      //     }
-      //     else{
-      //       const editRequest = await this.prisma.editRequest.create({
-      //         data: {
-      //           requester: {
-      //             connect: { id: user.id }
-      //           },
-      //           changes: {
-      //             oldDeviceId: user.deviceId,
-      //             newDeviceId: deviceId,
-      //             userName: user.name,
-      //             mobile: user.mobile,
-      //             employeeCode: user.employeeCode,
-      //             role: user.role,
-      //             officeId: user.officeId,
-      //           },
-      //           type: EditRequestType.Login,
-      //           status: EditRequestStatus.Pending
-      //         }
-      //       });
-      //       await this.loggingService.info('Device change request created', {
-      //         userId: user.id,
-      //         deviceId,
-      //         oldDeviceId: user.deviceId,
-      //         status: 'Pending',
-      //       });
-      //       return {
-      //         accessToken: '',
-      //         refreshToken: '',
-      //         message: "returnMessage",
-      //       };
-      //     }          
-      //   }
-      // }
+          if(checkEditRequest){
+            returnMessage = 'Device change request already pending. Please wait for approval.';
+          }
+          else{
+            const editRequest = await this.prisma.editRequest.create({
+              data: {
+                requester: {
+                  connect: { id: user.id }
+                },
+                changes: {
+                  oldDeviceId: user.deviceId,
+                  newDeviceId: deviceId,
+                  userName: user.name,
+                  mobile: user.mobile,
+                  employeeCode: user.employeeCode,
+                  role: user.role,
+                  officeId: user.officeId,
+                },
+                type: EditRequestType.Login,
+                status: EditRequestStatus.Pending
+              }
+            });
+            await this.loggingService.info('Device change request created', {
+              userId: user.id,
+              deviceId,
+              oldDeviceId: user.deviceId,
+              status: 'Pending',
+            });
+            return {
+              accessToken: '',
+              refreshToken: '',
+              message: "returnMessage",
+            };
+          }          
+        }
+      }
 
       // Find the latest active session for this user
       const session = await this.prisma.session.findFirst({

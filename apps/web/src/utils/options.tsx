@@ -127,5 +127,5 @@ export const applicantTypeOptions = [
   { label: "Co-applicant 4 ", value: "Co-applicant 4" },
   { label: "Co-applicant 5 ", value: "Co-applicant 5" },
   { label: "Co-applicant 6 ", value: "Co-applicant 6" },
-  { label: "Guarteer", value: "Guarnteer" },
+  { label: "Guarantor", value: "Guarantor" },
 ];

@@ -25,8 +25,8 @@ export class AccountsController {
     status: 200, 
     description: 'OTP has been successfully generated' 
   })
-  async generateOTP(@Body() body: { mobile: string }) {
-    const result = await this.accountsService.generateOTP(body.mobile);
+  async generateOTP(@Body() body: { mobile: string, isMobile: Boolean }) {
+    const result = await this.accountsService.generateOTP(body.mobile, body.isMobile);
     return {
       message: 'OTP generated successfully'
     };
