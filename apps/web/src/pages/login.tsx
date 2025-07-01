@@ -11,7 +11,11 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { MobileOutlined, LockOutlined } from "@ant-design/icons";
-import { generateOtpApi, verifyOtpApi, getUserDetailsApi } from "@/services/auth.services";
+import {
+  generateOtpApi,
+  verifyOtpApi,
+  getUserDetailsApi,
+} from "@/services/auth.services";
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
@@ -30,15 +34,16 @@ export default function Login() {
   const userDetails = getUserDetails();
 
   useEffect(() => {
-
     // Prevent multiple redirects
     if (Object.keys(userDetails).length > 0 && !isNavigating) {
       setIsNavigating(true);
-      router.push(userDetails?.role==="Verifier"?"/loans":"/dashboard").catch((error) => {
-        console.error('Navigation error:', error);
-        setIsNavigating(false);
-        message.error('Failed to navigate to dashboard');
-      });
+      router
+        .push(userDetails?.role === "Verifier" ? "/loans" : "/dashboard")
+        .catch((error) => {
+          console.error("Navigation error:", error);
+          setIsNavigating(false);
+          message.error("Failed to navigate to dashboard");
+        });
     }
   }, [userDetails, router, isNavigating]);
 
@@ -69,30 +74,40 @@ export default function Login() {
         mobile: values.mobile,
         otp: values.otp,
       });
-      
+
       // Set tokens
-      setCookie(ACCESS_TOKEN, result.data?.accessToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
-      setCookie(REFRESH_TOKEN, result.data?.refreshToken, `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+      setCookie(
+        ACCESS_TOKEN,
+        result.data?.accessToken,
+        `.${process.env.NEXT_PUBLIC_DOMAIN}`,
+        "/"
+      );
+      setCookie(
+        REFRESH_TOKEN,
+        result.data?.refreshToken,
+        `.${process.env.NEXT_PUBLIC_DOMAIN}`,
+        "/"
+      );
 
       // Fetch and set user details
       try {
         const userDetailsResponse = await getUserDetailsApi();
         if (!userDetailsResponse?.data) {
-          throw new Error('No user details received');
+          throw new Error("No user details received");
         }
         setUserDetails(userDetailsResponse.data);
         // Navigation will happen automatically through the useEffect
       } catch (error) {
-        console.error('Error fetching user details:', error);
-        message.error('Failed to fetch user details');
+        console.error("Error fetching user details:", error);
+        message.error("Failed to fetch user details");
         // Clear tokens if user details fetch fails
         // setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         // setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
         // setUserDetails(undefined);
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("OTP verify error:", error);
-      message.error(error?.response?.data?.message || 'Verification failed');
+      message.error(error?.response?.data?.message || "Verification failed");
       // setUserDetails(undefined);
     } finally {
       setLoading(false);
@@ -104,13 +119,14 @@ export default function Login() {
     return null;
   }
 
-  const handleBack = () =>{
-    setOtpSent(false)
-  }
+  const handleBack = () => {
+    form.resetFields();
+    setOtpSent(false);
+  };
 
-  const handleResend = () =>{
+  // const handleResend = () =>{
 
-  }
+  // }
 
   return (
     <div
@@ -132,14 +148,14 @@ export default function Login() {
           maxWidth: "400px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.65)",
           borderRadius: "8px",
-          borderColor:"transparent",
+          borderColor: "transparent",
           // background: "var(--background-primary)",
           opacity: 0.7,
-          background:"#00396e"
+          background: "#00396e",
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div style={{ textAlign: "center",transform:"translateX(-10px)" }}>
+          <div style={{ textAlign: "center", transform: "translateX(-10px)" }}>
             <div style={{ marginBottom: 0 }}>
               <Image
                 src="/images/appLogos/KowthaLightIcon.png"
@@ -187,7 +203,9 @@ export default function Login() {
             >
               <Input
                 prefix={
-                  <MobileOutlined style={{ color: "var(--primary-600)", fontSize: "16px" }} />
+                  <MobileOutlined
+                    style={{ color: "var(--primary-600)", fontSize: "16px" }}
+                  />
                 }
                 placeholder="Enter mobile number"
                 disabled={otpSent}
@@ -246,16 +264,24 @@ export default function Login() {
                   fontWeight: "bold",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   cursor: "pointer",
-                  marginTop:"40px"
+                  marginTop: "40px",
                 }}
               >
                 {otpSent ? "Verify OTP" : "Send OTP"}
               </Button>
             </Form.Item>
-            {otpSent&&<div style={{display:"flex",justifyContent:"space-between"}}>
-            <Button type="link" style={{color:"#fff"}} onClick={handleBack}>Back to Login</Button>
-            {/* <Button type="link" style={{color:"#fff"}} onClick={handleResend}>Resend OTP</Button> */}
-            </div>}
+            {otpSent && (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Button
+                  type="link"
+                  style={{ color: "#fff" }}
+                  onClick={handleBack}
+                >
+                  Back to Login
+                </Button>
+                {/* <Button type="link" style={{color:"#fff"}} onClick={handleResend}>Resend OTP</Button> */}
+              </div>
+            )}
           </Form>
         </Space>
       </Card>
