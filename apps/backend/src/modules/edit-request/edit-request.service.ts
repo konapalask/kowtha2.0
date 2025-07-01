@@ -287,18 +287,12 @@ export class EditRequestService {
     }
   }
 
-  async getImageCoordinates(s3ImageUrl: string, applicationNumber: string) {
+  async getImageCoordinates(s3ImageUrl: string, id: string) {
     try {
       // Find the loan by application number
       const loan = await this.prisma.loan.findUnique({
-        where: { applicationNumber },
-        include: {
-          verifications: {
-            select: {
-              verificationData: true,
-            },
-          },
-        },
+        where: { id: Number(id) },
+        include: { verifications: { select: { verificationData: true } } },
       });
 
       if (!loan) {
@@ -326,7 +320,7 @@ export class EditRequestService {
     } catch (error) {
       await this.loggingService.error('Failed to get image coordinates', {
         s3ImageUrl,
-        applicationNumber,
+        id,
         error: error.message,
         stack: error.stack,
       });

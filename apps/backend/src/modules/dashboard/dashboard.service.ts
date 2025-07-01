@@ -127,4 +127,21 @@ export class DashboardService {
       throw error;
     }
   }
+
+  async getAppDeployments() {
+    try {
+      const deployments = await this.prisma.appDeployment.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' }
+      });
+      await this.loggingService.info('Fetched app deployments', { deployments });
+      return deployments;
+    } catch (error) {
+      await this.loggingService.error('Failed to fetch app deployments', {
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
 } 

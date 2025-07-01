@@ -1054,7 +1054,26 @@ export class LoanService {
         throw new NotFoundException('Field executive not found');
       }
 
-      const where: Prisma.VerificationWhereInput = { fieldExecutiveId };
+      // Calculate today's date range
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      const where: Prisma.VerificationWhereInput = { 
+        fieldExecutiveId,
+        // Exclude verifications that have retries for today
+        NOT: {
+          verificationRetries: {
+            some: {
+              date: {
+                gte: today,
+                lt: tomorrow
+              }
+            }
+          }
+        }
+      };
       
       if (filters?.status) {
         where.status = filters.status;
@@ -1093,22 +1112,32 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
+      
+      const isAvailableToday = await this.prisma.attendance.findFirst({
+        where: {
+          userId: fieldExecutiveId,
+          date: new Date()
+        }
+      }) ? true : false;
 
       await this.loggingService.debug('Retrieved assigned loans with verifications', {
         fieldExecutiveId,
         count: verifications.length,
         page,
-        limit
+        limit,
+        excludedRetriesForToday: true
       });
 
       return {
-        items: verifications,
+        isAvailableToday,
+        data:
+        {items: verifications,
         meta: {
           total,
           page,
           limit,
           totalPages: Math.ceil(total / limit)
-        }
+        }}
       };
     } catch (error) {
       await this.loggingService.error('Failed to get assigned loans with verifications', {
@@ -1478,16 +1507,6 @@ export class LoanService {
 
       for (const dto of createLoanDtos) {
         try {
-          // Check if application number already exists
-          if (dto.applicationNumber) {
-            const existingLoan = await this.prisma.loan.findUnique({
-              where: { applicationNumber: dto.applicationNumber, applicantType: dto.applicantType }
-            });
-
-            if (existingLoan) {
-              throw new ConflictException(`Loan with application number ${dto.applicationNumber} already exists`);
-            }
-          }
           // Check if operations executive exists
           const operationsExecutive = await this.prisma.user.findUnique({
             where: { id: dto.operationsExecutiveId }
@@ -1512,7 +1531,7 @@ export class LoanService {
 
           // Generate application number if not provided
           const applicationNumber = dto.applicationNumber || `APP${Date.now()}`;
-
+          
           const loanData = {
             ...rest,
             applicationNumber,
@@ -2710,6 +2729,90 @@ export class LoanService {
         path,
         error: error.message,
         stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createVerificationRetry(createVerificationRetryDto: any) {
+    try {
+      // Validate that the verification exists
+      const verification = await this.prisma.verification.findUnique({
+        where: { id: createVerificationRetryDto.verificationId },
+        include: {
+          loan: {
+            select: {
+              id: true,
+              applicationNumber: true,
+              applicantName: true
+            }
+          }
+        }
+      });
+
+      if (!verification) {
+        throw new NotFoundException('Verification not found');
+      }
+
+      // Validate that the field executive exists
+      const fieldExecutive = await this.prisma.user.findUnique({
+        where: { id: createVerificationRetryDto.fieldExecutiveId }
+      });
+
+      if (!fieldExecutive) {
+        throw new NotFoundException('Field executive not found');
+      }
+
+      // Create the verification retry
+      const verificationRetry = await this.prisma.verificationRetries.create({
+        data: {
+          verificationId: createVerificationRetryDto.verificationId,
+          date: new Date(createVerificationRetryDto.date),
+          geotag: createVerificationRetryDto.geotag,
+          address: createVerificationRetryDto.address,
+          reason: createVerificationRetryDto.reason,
+          fieldExecutiveId: createVerificationRetryDto.fieldExecutiveId,
+        },
+        include: {
+          verification: {
+            include: {
+              loan: {
+                select: {
+                  id: true,
+                  applicationNumber: true,
+                  applicantName: true
+                }
+              }
+            }
+          },
+          fieldExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true
+            }
+          }
+        }
+      });
+
+      await this.loggingService.info('Verification retry created successfully', {
+        verificationRetryId: verificationRetry.id,
+        verificationId: createVerificationRetryDto.verificationId,
+        fieldExecutiveId: createVerificationRetryDto.fieldExecutiveId,
+        loanId: verification.loan.id,
+        applicationNumber: verification.loan.applicationNumber
+      });
+
+      return verificationRetry;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create verification retry', {
+        data: createVerificationRetryDto,
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }

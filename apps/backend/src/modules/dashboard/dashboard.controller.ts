@@ -89,4 +89,44 @@ export class DashboardController {
       data: result
     };
   }
+
+  @Get('app-deployments')
+  @ApiOperation({ summary: 'Get all app deployment records' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns a list of app deployments',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'App deployments fetched successfully' },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              version: { type: 'string' },
+              isActive: { type: 'boolean' },
+              source: { type: 'string' },
+              forceUpdate: { type: 'boolean' },
+              appStoreUrl: { type: 'string', nullable: true },
+              playStoreUrl: { type: 'string', nullable: true },
+              description: { type: 'string', nullable: true },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        }
+      }
+    }
+  })
+  async getAppDeployments() {
+    const deployments = await this.dashboardService.getAppDeployments();
+    return {
+      status: 200,
+      message: 'App deployments fetched successfully',
+      data: deployments
+    };
+  }
 } 

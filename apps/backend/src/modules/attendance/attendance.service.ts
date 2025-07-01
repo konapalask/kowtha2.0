@@ -15,9 +15,9 @@ export class AttendanceService {
     // Use current date if not provided
     const attendanceDate = new Date(date);
     
-    // if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
-    //   throw new BadRequestException('You can only record attendance for today');
-    // }
+    if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {
+      throw new BadRequestException('You can only record attendance for today');
+    }
 
     const user = await this.prisma.user.findUnique({
       where: {
@@ -81,7 +81,7 @@ export class AttendanceService {
     const defaultEndDate = new Date(istToday.getFullYear(), istToday.getMonth(), istToday.getDate());
     
     const start = startDate ? new Date(startDate) : defaultStartDate;
-    const end = endDate ? new Date(endDate) : defaultEndDate;
+    const end = endDate ? new Date(endDate) : new Date(defaultEndDate.getFullYear(), defaultEndDate.getMonth(), defaultEndDate.getDate() + 1);
 
     // Build where clause for attendance records
     const attendanceWhereClause: any = {
@@ -129,7 +129,7 @@ export class AttendanceService {
       where: {
         date: {
           gte: todayStart,
-          lt: todayEnd
+          lte: todayEnd
         }
       },
       select: {
@@ -170,21 +170,21 @@ export class AttendanceService {
       const absentDays = totalDays - presentDays;
       
       const totalAssigned = userVerifications.reduce((sum, stat) => sum + stat._count.status, 0);
-      const completedVerifications = userVerifications.find(stat => stat.status === 'Completed')?._count.status || 0;
       const pendingVerifications = userVerifications.find(stat => stat.status === 'Pending')?._count.status || 0;
+      const completedVerifications = userVerifications.find(stat => stat.status === 'Completed')?._count.status || 0;
       const inProgressVerifications = userVerifications.find(stat => stat.status === 'InProgress')?._count.status || 0;
 
       return {
-        userId: fieldExecutive.id,
         user: fieldExecutive,
         totalDays,
-        presentDays,
         absentDays,
+        presentDays,
         totalAssigned,
-        completedVerifications,
+        availableToday,
         pendingVerifications,
+        completedVerifications,
         inProgressVerifications,
-        availableToday
+        userId: fieldExecutive.id
       };
     });
 

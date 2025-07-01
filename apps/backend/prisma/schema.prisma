@@ -110,6 +110,7 @@ model User {
   editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
   editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
   attendances              Attendance[]         @relation("UserAttendance")
+  verificationRetries      VerificationRetries[]
 }
 
 model Organization {
@@ -151,13 +152,13 @@ model Verification {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   editRequests     EditRequest[] // Add this relation
-
+  verificationRetries VerificationRetries[]
   @@unique([loanId, type])
 }
 
 model Loan {
   id                    Int                 @id @default(autoincrement())
-  applicationNumber     String              @unique
+  applicationNumber     String              
   applicantName         String
   applicantMobile       String
   applicantAddress      String?
@@ -181,6 +182,20 @@ model Loan {
   applicantType         String?
 
   @@unique([applicationNumber, applicantType]) // New optional field
+}
+
+model VerificationRetries {
+  id                  Int @id @default(autoincrement())
+  verificationId      Int
+  verification        Verification @relation(fields: [verificationId], references: [id])
+  date                DateTime
+  geotag              String?
+  address             String?
+  reason              String?
+  fieldExecutiveId    Int
+  fieldExecutive      User         @relation(fields: [fieldExecutiveId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model Session {
@@ -220,4 +235,17 @@ model Attendance {
   status         AttendanceStatus
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+}
+
+model AppDeployment {
+  id            Int @id @default(autoincrement())
+  version       String
+  isActive      Boolean @default(true)
+  source        String
+  forceUpdate   Boolean @default(false)
+  appStoreUrl   String?
+  playStoreUrl  String?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -21,6 +21,7 @@ import { EditVerificationDto } from './dto/edit-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { DeleteVerificationDto } from './dto/delete-verification.dto';
 import { S3Service } from '../common/s3utils/s3.service';
+import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -661,6 +662,7 @@ export class LoanController {
       type: 'object',
       properties: {
         status: { type: 'number', example: 200 },
+        isAvailableToday: { type: 'boolean', example: false },
         message: { type: 'string', example: 'Assigned loans fetched successfully' },
         data: {
           type: 'object',
@@ -713,8 +715,9 @@ export class LoanController {
     const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub, filters);
     return {
       status: 200,
+      isAvailableToday: result.isAvailableToday,
       message: 'Assigned loans fetched successfully',
-      data: result
+      data: result.data
     };
   }
 
@@ -869,6 +872,84 @@ export class LoanController {
     return {
       status: 200,
       message: 'Verification deleted successfully',
+      data: result
+    };
+  }
+
+  @Post('verification-retry')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Create a verification retry record' })
+  @ApiResponse({
+    status: 201,
+    description: 'Verification retry created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Verification retry created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            verificationId: { type: 'number' },
+            date: { type: 'string', format: 'date-time' },
+            geotag: { type: 'string', nullable: true },
+            address: { type: 'string', nullable: true },
+            reason: { type: 'string', nullable: true },
+            fieldExecutiveId: { type: 'number' },
+            verification: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                type: { type: 'string' },
+                status: { type: 'string' },
+                loan: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'number' },
+                    applicationNumber: { type: 'string' },
+                    applicantName: { type: 'string' }
+                  }
+                }
+              }
+            },
+            fieldExecutive: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                mobile: { type: 'string' },
+                employeeCode: { type: 'string' }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification or field executive not found'
+  })
+  async createVerificationRetry(
+    @Body() createVerificationRetryDto: CreateVerificationRetryDto,
+    @Request() req: AuthenticatedRequest
+  ) {
+    // If the user is a field executive, ensure they can only create retries for themselves
+    if (req.user.role === UserRole.FieldExecutive) {
+      createVerificationRetryDto.fieldExecutiveId = req.user.sub;
+    }
+
+    const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
+    return {
+      status: 201,
+      message: 'Verification retry created successfully',
       data: result
     };
   }
