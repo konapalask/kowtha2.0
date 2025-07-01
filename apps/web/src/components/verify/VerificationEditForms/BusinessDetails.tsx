@@ -99,7 +99,7 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
         </Col>
       )}
 
-      <Col span={8}>
+      {/* <Col span={8}>
         <Form.Item
           name="keyManagerRelation"
           label="Key manager relationship to the applicant"
@@ -137,7 +137,7 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
             <Input placeholder="Enter key manager name" />
           </Form.Item>
         </Col>
-      )}
+      )} */}
 
       <Col span={8}>
         <Form.Item
@@ -173,6 +173,22 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
 
       <Col span={8}>
         <Form.Item
+          name="isBusinessSeasonal"
+          label="Is Business Seasonal?"
+          rules={[{ required: true, message: "Required" }]}
+        >
+          <Select placeholder="Select Yes/No">
+            {yesNoOptions.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
           name="isAddressTraceable"
           label="Is Business address traceable?"
           rules={[{ required: true, message: "Required" }]}
@@ -191,7 +207,7 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
           name="geoTag"
           label="Geotag"
           rules={[{ required: true, message: "Required" }]}
-          hidden
+          // hidden
         >
           <Input disabled />
         </Form.Item>

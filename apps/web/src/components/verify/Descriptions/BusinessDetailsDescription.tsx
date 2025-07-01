@@ -7,12 +7,18 @@ const BusinessDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
-}> = ({ data, extra, logs = false, changedFields = [], isCurrentVersion = false }) => {
+}> = ({
+  data,
+  extra,
+  logs = false,
+  changedFields = [],
+  isCurrentVersion = false,
+}) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
-    
+
     return {
-      backgroundColor: isCurrentVersion ? '#fff1f0' : '#f6ffed'  // Red for current version, green for new version
+      backgroundColor: isCurrentVersion ? "#fff1f0" : "#f6ffed", // Red for current version, green for new version
     };
   };
 
@@ -25,33 +31,33 @@ const BusinessDetailsDescription: React.FC<{
           column={logs ? 1 : 2}
           extra={extra}
         >
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Name Board Seen"
-            contentStyle={getItemStyle('nameBoardSeen')}
+            contentStyle={getItemStyle("nameBoardSeen")}
           >
             {data?.businessDetails?.nameBoardSeen}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Name Board Matched with Initiation"
-            contentStyle={getItemStyle('nameBoardMatched')}
+            contentStyle={getItemStyle("nameBoardMatched")}
           >
             {data?.businessDetails?.nameBoardMatched}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Constitution"
-            contentStyle={getItemStyle('constitution')}
+            contentStyle={getItemStyle("constitution")}
           >
             {data?.businessDetails?.constitution}
           </Descriptions.Item>
           {data?.businessDetails?.constitution === "Others" && (
-            <Descriptions.Item 
+            <Descriptions.Item
               label="Other Constitution"
-              contentStyle={getItemStyle('constitutionOther')}
+              contentStyle={getItemStyle("constitutionOther")}
             >
               {data?.businessDetails?.constitutionOther}
             </Descriptions.Item>
           )}
-          <Descriptions.Item 
+          {/* <Descriptions.Item 
             label="Key Manager Relationship"
             contentStyle={getItemStyle('keyManagerRelation')}
           >
@@ -72,28 +78,34 @@ const BusinessDetailsDescription: React.FC<{
             >
               {data?.businessDetails?.keyManager}
             </Descriptions.Item>
-          )}
-          <Descriptions.Item 
+          )} */}
+          <Descriptions.Item
             label="Business Start Year"
-            contentStyle={getItemStyle('businessStartYear')}
+            contentStyle={getItemStyle("businessStartYear")}
           >
             {data?.businessDetails?.businessStartYear}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Total Experience (Years)"
-            contentStyle={getItemStyle('totalExperience')}
+            contentStyle={getItemStyle("totalExperience")}
           >
             {data?.businessDetails?.totalExperience}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
+            label="Is Business Seasonal?"
+            contentStyle={getItemStyle("isBusinessSeasonal")}
+          >
+            {data?.businessDetails?.isBusinessSeasonal}
+          </Descriptions.Item>
+          <Descriptions.Item
             label="Is Address Traceable"
-            contentStyle={getItemStyle('isAddressTraceable')}
+            contentStyle={getItemStyle("isAddressTraceable")}
           >
             {data?.businessDetails?.isAddressTraceable}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Geo Tag"
-            contentStyle={getItemStyle('geoTag')}
+            contentStyle={getItemStyle("geoTag")}
           >
             {data?.businessDetails?.geoTag}
           </Descriptions.Item>
@@ -103,4 +115,4 @@ const BusinessDetailsDescription: React.FC<{
   );
 };
 
-export default BusinessDetailsDescription; 
+export default BusinessDetailsDescription;

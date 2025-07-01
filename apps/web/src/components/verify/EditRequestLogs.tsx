@@ -111,6 +111,8 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
+  // console.log(router);
+  const pathname: any = router?.pathname;
   const loanId = router?.query?.id || null;
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const { activeTab } = useTabContext();
@@ -128,6 +130,8 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);
   // console.log(isEmpty(changedData));
+  // console.log(pathname);
+  // console.log(["edit-requests"].includes(pathname));
 
   if (isEmpty(changedData) && !disabled) {
     return (
@@ -242,7 +246,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
       }
       extra={
         <>
-          {userDetails?.role !== "Admin" && !isEmpty(changedData) && (
+          {["verify"]?.includes(pathname) && !isEmpty(changedData) && (
             <Button
               type="primary"
               onClick={handleRequest}
@@ -257,24 +261,25 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               Request Approval
             </Button>
           )}
-          {userDetails?.role === "Admin" && (
-            <Space>
-              <Button
-                danger
-                icon={<CloseCircleOutlined />}
-                onClick={handleReject}
-              >
-                Reject
-              </Button>
-              <Button
-                type="primary"
-                icon={<CheckCircleOutlined />}
-                onClick={handleApprove}
-              >
-                Approve
-              </Button>
-            </Space>
-          )}
+          {userDetails?.role === "Admin" &&
+            pathname.startsWith("/edit-requests") && (
+              <Space>
+                <Button
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  onClick={handleReject}
+                >
+                  Reject
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  onClick={handleApprove}
+                >
+                  Approve
+                </Button>
+              </Space>
+            )}
         </>
       }
     >

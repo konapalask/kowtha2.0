@@ -7,12 +7,18 @@ const BusinessBasicDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
-}> = ({ data, extra, logs = false, changedFields = [], isCurrentVersion = false }) => {
+}> = ({
+  data,
+  extra,
+  logs = false,
+  changedFields = [],
+  isCurrentVersion = false,
+}) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
-    
+
     return {
-      backgroundColor: isCurrentVersion ? '#fff1f0' : '#f6ffed'  // Red for current version, green for new version
+      backgroundColor: isCurrentVersion ? "#fff1f0" : "#f6ffed", // Red for current version, green for new version
     };
   };
 
@@ -25,52 +31,64 @@ const BusinessBasicDetailsDescription: React.FC<{
           column={logs ? 1 : 2}
           extra={extra}
         >
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Name of the Applicant"
-            contentStyle={getItemStyle('applicantName')}
+            contentStyle={getItemStyle("applicantName")}
           >
             {data?.basicDetails?.applicantName}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Person Met"
-            contentStyle={getItemStyle('personMet')}
+            contentStyle={getItemStyle("personMet")}
           >
             {data?.basicDetails?.personMet}
           </Descriptions.Item>
           {data?.basicDetails?.personMet !== "Applicant" && (
             <>
-              <Descriptions.Item 
+              <Descriptions.Item
                 label="Person Met Name"
-                contentStyle={getItemStyle('personMetName')}
+                contentStyle={getItemStyle("personMetName")}
               >
                 {data?.basicDetails?.personMetName}
               </Descriptions.Item>
               {data?.basicDetails?.personMet === "Others" && (
-                <Descriptions.Item 
+                <Descriptions.Item
                   label="Relationship to Applicant"
-                  contentStyle={getItemStyle('personMetRelation')}
+                  contentStyle={getItemStyle("personMetRelation")}
                 >
                   {data?.basicDetails?.personMetRelation}
                 </Descriptions.Item>
               )}
             </>
           )}
-          <Descriptions.Item 
+          <Descriptions.Item
+            label="Business Name"
+            contentStyle={getItemStyle("businessName")}
+          >
+            {data?.basicDetails?.businessName}
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="Business Profile"
+            contentStyle={getItemStyle("businessProfile")}
+          >
+            {data?.basicDetails?.businessProfile}
+          </Descriptions.Item>
+          <Descriptions.Item
             label="Business Address"
-            contentStyle={getItemStyle('businessAddress')}
+            contentStyle={getItemStyle("businessAddress")}
           >
             {data?.basicDetails?.businessAddress}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Is Address Same as Initiated"
-            contentStyle={getItemStyle('isAddressSame')}
+            contentStyle={getItemStyle("isAddressSame")}
           >
             {data?.basicDetails?.isAddressSame}
           </Descriptions.Item>
           {data?.basicDetails?.isAddressSame === "No" && (
-            <Descriptions.Item 
+            <Descriptions.Item
               label="Address Correction"
-              contentStyle={getItemStyle('addressCorrection')}
+              contentStyle={getItemStyle("addressCorrection")}
             >
               {data?.basicDetails?.addressCorrection}
             </Descriptions.Item>
@@ -81,4 +99,4 @@ const BusinessBasicDetailsDescription: React.FC<{
   );
 };
 
-export default BusinessBasicDetailsDescription; 
+export default BusinessBasicDetailsDescription;

@@ -177,7 +177,7 @@ export default function LoanVerifyDetails() {
     const verification = verificationData?.verifications?.find(
       (v: any) => v.addressType === type
     );
-    console.log(verification);
+    // console.log(verification);
     return {
       verification,
       status: verification?.finalReportPath,

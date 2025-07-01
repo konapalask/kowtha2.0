@@ -1,15 +1,15 @@
-import React from 'react';
-import { Form, Input, Select, Col } from 'antd';
+import React from "react";
+import { Form, Input, Select, Col } from "antd";
 
 const personMetOptions = [
-  'Applicant',
-  'Co-Applicant',
-  'Family',
-  'Guaranteer',
-  'Others',
+  "Applicant",
+  "Co-Applicant",
+  "Family",
+  "Guaranteer",
+  "Others",
 ];
 
-const yesNoOptions = ['Yes', 'No'];
+const yesNoOptions = ["Yes", "No"];
 
 export type BusinessBasicDetailsFormData = {
   applicantName: string;
@@ -21,10 +21,10 @@ export type BusinessBasicDetailsFormData = {
   addressCorrection?: string;
 };
 
-const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
+const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   // Watch values for conditional rendering
-  const personMet = Form.useWatch('personMet', form);
-  const isAddressSame = Form.useWatch('isAddressSame', form);
+  const personMet = Form.useWatch("personMet", form);
+  const isAddressSame = Form.useWatch("isAddressSame", form);
 
   return (
     <>
@@ -32,7 +32,9 @@ const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
         <Form.Item
           name="applicantName"
           label="Name of the Applicant"
-          rules={[{ required: true, message: "Name of the applicant is required" }]}
+          rules={[
+            { required: true, message: "Name of the applicant is required" },
+          ]}
         >
           <Input disabled />
         </Form.Item>
@@ -54,29 +56,59 @@ const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
         </Form.Item>
       </Col>
 
-      {personMet && personMet !== 'Applicant' && (
+      {personMet && personMet !== "Applicant" && (
         <Col span={8}>
           <Form.Item
             name="personMetName"
             label="Name of Person Met"
-            rules={[{ required: true, message: "Please enter the name of the person met" }]}
+            rules={[
+              {
+                required: true,
+                message: "Please enter the name of the person met",
+              },
+            ]}
           >
             <Input placeholder="Enter name of person met" />
           </Form.Item>
         </Col>
       )}
 
-      {personMet === 'Others' && (
+      {personMet === "Others" && (
         <Col span={8}>
           <Form.Item
             name="personMetRelation"
             label="Specify Relationship to Applicant"
-            rules={[{ required: true, message: "Please specify the relationship to the applicant" }]}
+            rules={[
+              {
+                required: true,
+                message: "Please specify the relationship to the applicant",
+              },
+            ]}
           >
             <Input placeholder="Specify relationship" />
           </Form.Item>
         </Col>
       )}
+
+      <Col span={8}>
+        <Form.Item
+          name="businessName"
+          label="Business Name"
+          rules={[{ required: true, message: "Please enter business name" }]}
+        >
+          <Input placeholder="Enter Business Name" />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="businessProfile"
+          label="Business Profile"
+          rules={[{ required: true, message: "Please enter business profile" }]}
+        >
+          <Input placeholder="Enter Business Profile" />
+        </Form.Item>
+      </Col>
 
       <Col span={24}>
         <Form.Item
@@ -84,9 +116,9 @@ const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
           label="Business Address"
           rules={[{ required: true, message: "Business address is required" }]}
         >
-          <Input.TextArea 
-            rows={3} 
-            disabled 
+          <Input.TextArea
+            rows={3}
+            disabled
             placeholder="Enter business address"
           />
         </Form.Item>
@@ -96,7 +128,12 @@ const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
         <Form.Item
           name="isAddressSame"
           label="Is the address same as initiated?"
-          rules={[{ required: true, message: "Please specify if the address is same as initiated" }]}
+          rules={[
+            {
+              required: true,
+              message: "Please specify if the address is same as initiated",
+            },
+          ]}
         >
           <Select placeholder="Select Yes/No">
             {yesNoOptions.map((option) => (
@@ -108,17 +145,19 @@ const BusinessBasicDetails: React.FC<{form: any}> = ({form}) => {
         </Form.Item>
       </Col>
 
-      {isAddressSame === 'No' && (
+      {isAddressSame === "No" && (
         <Col span={24}>
           <Form.Item
             name="addressCorrection"
             label="Address Correction"
-            rules={[{ required: true, message: "Please provide the corrected address" }]}
+            rules={[
+              {
+                required: true,
+                message: "Please provide the corrected address",
+              },
+            ]}
           >
-            <Input.TextArea 
-              rows={3} 
-              placeholder="Enter corrected address"
-            />
+            <Input.TextArea rows={3} placeholder="Enter corrected address" />
           </Form.Item>
         </Col>
       )}
