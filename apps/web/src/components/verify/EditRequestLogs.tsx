@@ -246,7 +246,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
       }
       extra={
         <>
-          {["verify"]?.includes(pathname) && !isEmpty(changedData) && (
+          {pathname?.startsWith("/verify") && !isEmpty(changedData) && (
             <Button
               type="primary"
               onClick={handleRequest}
