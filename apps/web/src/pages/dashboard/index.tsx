@@ -250,6 +250,7 @@ export default function Dashboard() {
             </div>
           </Card>
         </Col>
+
         <Col sm={12} md={12} lg={6}>
           <Card
             style={{
@@ -257,9 +258,8 @@ export default function Dashboard() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              // borderColor: "#2196F3",
-              background:
-                "linear-gradient(90deg, #43e97b 0%,rgb(66, 238, 206) 100%)",
+              // borderColor: "#F44336",
+              background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -268,13 +268,13 @@ export default function Dashboard() {
                   width: "48px",
                   height: "48px",
                   borderRadius: "50%",
-                  backgroundColor: "rgba(33, 150, 243, 0.1)",
+                  backgroundColor: "rgba(244, 67, 54, 0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <CheckCircleOutlined
+                <CloseCircleOutlined
                   style={{ fontSize: "24px", color: "#fff" }}
                 />
               </div>
@@ -303,6 +303,7 @@ export default function Dashboard() {
             </div>
           </Card>
         </Col>
+
         <Col sm={12} md={12} lg={6}>
           <Card
             style={{
@@ -363,8 +364,9 @@ export default function Dashboard() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              // borderColor: "#F44336",
-              background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+              // borderColor: "#2196F3",
+              background:
+                "linear-gradient(90deg, #43e97b 0%,rgb(66, 238, 206) 100%)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -373,13 +375,13 @@ export default function Dashboard() {
                   width: "48px",
                   height: "48px",
                   borderRadius: "50%",
-                  backgroundColor: "rgba(244, 67, 54, 0.1)",
+                  backgroundColor: "rgba(33, 150, 243, 0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <CloseCircleOutlined
+                <CheckCircleOutlined
                   style={{ fontSize: "24px", color: "#fff" }}
                 />
               </div>
