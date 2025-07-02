@@ -56,7 +56,7 @@ export default function Login() {
   const handleSendOTP = async (values: { mobile: string }) => {
     try {
       setLoading(true);
-      await generateOtpApi({ mobile: values.mobile });
+      await generateOtpApi({ mobile: values.mobile, isMobile: true });
       setOtpSent(true);
       message.success("OTP sent successfully");
     } catch (error) {

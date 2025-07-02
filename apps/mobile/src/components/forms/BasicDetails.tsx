@@ -171,7 +171,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Aadhar Number</Text>
             <TextInput
-              style={[styles.input, styles.readOnlyInput]}
+              style={[styles.input]}
               placeholder="Enter Aadhar Number"
               onBlur={onBlur}
               onChangeText={onChange}

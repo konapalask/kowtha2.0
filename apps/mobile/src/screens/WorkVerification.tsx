@@ -394,6 +394,7 @@ const WorkVerification = () => {
           isExpanded={expandedSections.investigable}
           isValid={investigable ?? false}>
           <Investigable
+            item={item}
             isInvestigable={investigable}
             setIsInvestigable={setInvestigable}
             onYes={() =>
@@ -466,12 +467,13 @@ const WorkVerification = () => {
                 loanId={item.verificationId}
               />
             </CollapsibleSection>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Submit Verification</Text>
+            </TouchableOpacity>
           </>
         )}
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Verification</Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );

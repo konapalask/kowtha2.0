@@ -43,3 +43,7 @@ export const uploadImageToS3 = async (
     },
   });
 };
+
+export const verificationRetryApi = async (payload: any) => {
+  return axiosInstance.post(`/loans/verification-retry`, payload);
+};

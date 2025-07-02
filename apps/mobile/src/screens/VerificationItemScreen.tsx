@@ -353,11 +353,20 @@ const VerificationItemScreen = () => {
       // Clear the saved data after successful submission
       await clearItem(`${item?.verificationId}_${verificationType}`);
 
-      Alert.alert('Success', 'Verification submitted successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Successfully submitted',
+        position: 'top',
+      });
       navigation.goBack();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting verification:', error);
-      Alert.alert('Error', 'Failed to submit verification');
+      Toast.show({
+        type: 'error',
+        text1:
+          error?.response?.data?.message || 'Error submitting verification',
+        position: 'top',
+      });
     }
   };
 
@@ -370,6 +379,7 @@ const VerificationItemScreen = () => {
           isExpanded={expandedSections.investigable}
           isValid={investigable ?? false}>
           <Investigable
+            item={item}
             isInvestigable={investigable}
             setIsInvestigable={setInvestigable}
             onYes={() =>
@@ -475,6 +485,11 @@ const VerificationItemScreen = () => {
                 loanId={item?.verificationId}
               />
             </CollapsibleSection>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Submit Verification</Text>
+            </TouchableOpacity>
           </>
         )}
 
@@ -488,10 +503,6 @@ const VerificationItemScreen = () => {
             initialData={formData.finalObservations}
           />
         </CollapsibleSection> */}
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Verification</Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
