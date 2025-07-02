@@ -74,7 +74,8 @@ export class AccountsController {
       employeeCode: user.employeeCode,
       name: user.name,
       email: user.email,
-      status: user.status
+      status: user.status,
+      locality: user.locality
     };
   }
 
@@ -109,6 +110,7 @@ export class AccountsController {
                 type: 'number',
                 description: 'Number of pending verifications assigned to the field executive'
               },
+              locality: { type: 'string' },
               createdAt: { type: 'string', format: 'date-time' }
             }
           }
@@ -173,6 +175,7 @@ export class AccountsController {
             employeeCode: { type: 'string' },
             role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
             officeId: { type: 'number' },
+            locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -209,6 +212,7 @@ export class AccountsController {
             employeeCode: { type: 'string' },
             role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
             officeId: { type: 'number' },
+            locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -419,6 +423,7 @@ export class AccountsController {
                       name: { type: 'string' }
                     }
                   },
+                  locality: { type: 'string' },
                   status: { type: 'string' },
                   createdAt: { type: 'string', format: 'date-time' }
                 }

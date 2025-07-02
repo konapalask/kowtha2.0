@@ -41,4 +41,9 @@ export class UpdateUserDto {
   @IsEnum(UserStatus)
   @IsOptional()
   status?: UserStatus;
+
+  @ApiProperty({ description: "User's locality", required: false })
+  @IsString()
+  @IsOptional()
+  locality?: string;
 } 

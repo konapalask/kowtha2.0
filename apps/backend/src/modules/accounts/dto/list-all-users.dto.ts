@@ -28,4 +28,12 @@ export class ListAllUsersDto extends PaginationDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiProperty({
+    description: 'Filter users by locality',
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  locality?: string;
 } 

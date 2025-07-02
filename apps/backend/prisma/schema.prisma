@@ -96,6 +96,7 @@ model User {
   name                     String
   email                    String?              @unique
   employeeCode             String?
+  locality                 String?
   deviceId                 String?
   officeId                 Int
   office                   Office               @relation(fields: [officeId], references: [id])

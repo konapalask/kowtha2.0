@@ -29,4 +29,12 @@ export class ListUsersDto {
   @IsEnum(UserStatus)
   @IsOptional()
   status?: UserStatus;
+
+  @ApiProperty({
+    description: 'Filter users by locality',
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  locality?: string;
 } 

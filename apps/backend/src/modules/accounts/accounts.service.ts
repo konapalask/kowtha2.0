@@ -98,7 +98,7 @@ export class AccountsService {
       }
 
       if (!user) {
-        throw new NotFoundException('Access denied: Please use a registered mobile number');
+        throw new NotFoundException('Access denied: Please use a valid number');
       }
 
       if (user.status !== 'Active') {
@@ -319,6 +319,13 @@ export class AccountsService {
         where.officeId = Number(filters.officeId);
       }
 
+      if (filters?.locality) {
+        where.locality = {
+          contains: filters.locality,
+          mode: 'insensitive'
+        };
+      }
+
       const users = await this.prisma.user.findMany({
         where,
         select: {
@@ -343,7 +350,8 @@ export class AccountsService {
                 }
               }
             }
-          }
+          },
+          locality: true,
         },
         orderBy: {
           createdAt: 'desc'
@@ -414,6 +422,13 @@ export class AccountsService {
         };
       }
 
+      if (filters?.locality) {
+        where.locality = {
+          contains: filters.locality,
+          mode: 'insensitive'
+        };
+      }
+
       const page = filters?.page || 1;
       const limit = filters?.limit || 10;
       const skip = (page - 1) * limit;
@@ -436,7 +451,8 @@ export class AccountsService {
               name: true
             }
           },
-          createdAt: true
+          createdAt: true,
+          locality: true,
         },
         orderBy: {
           createdAt: 'desc'
