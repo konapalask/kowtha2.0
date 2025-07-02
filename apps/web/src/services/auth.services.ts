@@ -2,7 +2,6 @@ import axiosInstance from "../config/axios.config";
 
 interface GenerateOtpPayload {
   mobile: string;
-  isMobile: boolean;
 }
 
 interface GenerateOtpResponse {

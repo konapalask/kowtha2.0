@@ -21,6 +21,7 @@ export const generateOTP = async (mobileNumber: string): Promise<void> => {
   try {
     const response = await axiosInstance.post('/accounts/otp/generate', {
       mobile: mobileNumber,
+      isMobile: true,
     });
     return response?.data;
 
