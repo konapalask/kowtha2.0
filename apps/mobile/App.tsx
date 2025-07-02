@@ -20,12 +20,17 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
+  Modal,
+  Pressable,
+  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import WorkVerification from './src/screens/WorkVerification';
 import {getItem} from './src/helpers/utility';
 import BusinessVerification from './src/screens/BusinessVerification';
+import {getPlaystoreVersion} from './src/services/auth';
+import DeviceInfo from 'react-native-device-info';
 
 // Configure XMLHttpRequest
 
@@ -48,10 +53,28 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+function isVersionLess(current: string, latest: string) {
+  const cur = current.split('.').map(Number);
+  const lat = latest.split('.').map(Number);
+  for (let i = 0; i < Math.max(cur.length, lat.length); i++) {
+    const c = cur[i] || 0;
+    const l = lat[i] || 0;
+    if (c < l) return true;
+    if (c > l) return false;
+  }
+  return false;
+}
+
+const APP_VERSION = DeviceInfo.getVersion();
+
 const App = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState<{
+    show: boolean;
+    playStoreUrl?: string;
+  }>({show: false});
 
   useEffect(() => {
     // Subscribe to network state updates
@@ -81,11 +104,52 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const checkForceUpdate = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const res = await getPlaystoreVersion();
+        const {version, playStoreUrl} = res.data;
+        if (version && isVersionLess(APP_VERSION, version)) {
+          setForceUpdate({show: true, playStoreUrl});
+        }
+      } catch (e) {
+        // Optionally handle error
+        console.log('Error checking latest deployment', e);
+      }
+    };
+    checkForceUpdate();
+  }, [isAuthenticated]);
+
   if (isLoading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color="#145886" />
       </View>
+    );
+  }
+
+  if (forceUpdate.show) {
+    return (
+      <Modal visible transparent animationType="fade">
+        <View style={styles.forceUpdateContainer}>
+          <View style={styles.forceUpdateBox}>
+            <Text style={styles.forceUpdateTitle}>Update Required</Text>
+            <Text style={styles.forceUpdateText}>
+              A new version of the app is available. Please update to continue.
+            </Text>
+            <Pressable
+              style={styles.forceUpdateButton}
+              onPress={() => {
+                if (forceUpdate.playStoreUrl) {
+                  Linking.openURL(forceUpdate.playStoreUrl);
+                }
+              }}>
+              <Text style={styles.forceUpdateButtonText}>Update Now</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     );
   }
 
@@ -143,7 +207,6 @@ const App = () => {
                 : 'Business Verification',
             })}
           />
-
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />
@@ -172,6 +235,42 @@ const styles = StyleSheet.create({
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  forceUpdateContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  forceUpdateBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 24,
+    alignItems: 'center',
+    width: 300,
+  },
+  forceUpdateTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#145886',
+  },
+  forceUpdateText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  forceUpdateButton: {
+    backgroundColor: '#145886',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  forceUpdateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

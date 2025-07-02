@@ -34,13 +34,16 @@ interface VerifyOtpResponse {
 }
 
 export const generateOtpApi = (payload: GenerateOtpPayload) => {
-  return axiosInstance.post<GenerateOtpResponse>("/accounts/otp/generate", payload);
+  return axiosInstance.post<GenerateOtpResponse>(
+    "/accounts/otp/generate",
+    payload
+  );
 };
 
 export const verifyOtpApi = (payload: VerifyOtpPayload) => {
   return axiosInstance.post<VerifyOtpResponse>("/accounts/otp/verify", payload);
-}; 
+};
 
 export const getUserDetailsApi = () => {
   return axiosInstance.get<any>("/accounts/profile");
-}; 
+};

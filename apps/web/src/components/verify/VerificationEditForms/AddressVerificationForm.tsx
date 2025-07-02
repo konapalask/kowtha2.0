@@ -1,6 +1,18 @@
 import React from "react";
 import { Form, Input, Select, Col } from "antd";
 
+const addressProofOptions = [
+  "Gas Bill",
+  "Rental Agreement",
+  "Voter ID",
+  "Aadhar Card",
+  "Bank Passbook",
+  "Passport Address",
+  "Property Tax Report",
+  "Electric",
+  "None",
+];
+
 const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
   const yearsAtCurrentResidence = Form.useWatch(
     "numberOfYearsAtCurrentResidence",
@@ -78,6 +90,21 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
+      <Col span={8}>
+        <Form.Item
+          name="addressProof"
+          label="Address Proof"
+          rules={[{ required: true, message: "Please select address proof" }]}
+        >
+          <Select>
+            {addressProofOptions.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
 
       <Col span={8}>
         <Form.Item

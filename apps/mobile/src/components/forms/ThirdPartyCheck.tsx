@@ -118,7 +118,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
       />
       <Controller
         control={control}
-        rules={{required: 'Mobile number is required'}}
+        // rules={{required: 'Mobile number is required'}}
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Mobile Number*</Text>

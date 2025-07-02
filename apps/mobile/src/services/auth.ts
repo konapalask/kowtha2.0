@@ -21,6 +21,7 @@ export const generateOTP = async (mobileNumber: string): Promise<void> => {
   try {
     const response = await axiosInstance.post('/accounts/otp/generate', {
       mobile: mobileNumber,
+      isMobile: true,
     });
     return response?.data;
 
@@ -60,5 +61,15 @@ export const verifyOTP = async (
   } catch (error) {
     console.error('Error verifying OTP:', error);
     throw error;
+  }
+};
+
+export const getPlaystoreVersion = async () => {
+  try {
+    const response = await axiosInstance.get('/dashboard/app-deployments');
+    return response?.data;
+  } catch (error) {
+    console.error('Error getting playstore version:', error);
+    return null;
   }
 };

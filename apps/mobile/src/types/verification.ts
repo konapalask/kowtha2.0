@@ -115,7 +115,7 @@ export interface FamilyMember {
   age: string;
   employmentType: string;
   educationalQualification: string;
-  mobileNumber: string;
+  mobileNumber?: string;
   stayingWithApplicant: string;
 }
 

@@ -19,7 +19,7 @@ import {requestAllPermissions} from '../utils/permissions';
 import {setItem} from '../helpers/utility';
 import {generateOTP, verifyOTP} from '../services/auth';
 import {colors} from '../constants/colors';
-import KowthaLightIcon from '../assets/Images/KowthaLightIcon.png';
+// import KowthaLightIcon from '../assets/Images/KowthaLightIcon.png';
 import KowthaDarkIcon from '../assets/Images/KowthaDarkIcon.png';
 import Toast from 'react-native-toast-message';
 import loginBackground from '../assets/Images/loginBackground.jpg';
@@ -56,18 +56,18 @@ const LoginScreen = () => {
     try {
       setLoading(true);
       await generateOTP(mobileNumber);
-      // Alert.alert('Success', 'OTP has been sent to your mobile number');
       Toast.show({
         text1: 'OTP has been sent to your mobile number',
         type: 'success',
       });
       setShowOtpInput(true);
     } catch (error: any) {
-      // Alert.alert(
-      //   'Error',
-      //   error?.response?.data?.message ||
-      //     'Failed to send OTP. Please try again.',
-      // );
+      Toast.show({
+        text1:
+          error?.response?.data?.message ||
+          'Failed to send OTP. Please try again.',
+        type: 'error',
+      });
       console.log('AXIOS ERROR', error);
       console.log('FULL ERROR', JSON.stringify(error, null, 2));
     } finally {

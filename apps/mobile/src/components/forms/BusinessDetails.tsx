@@ -398,7 +398,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('nameBoardSeen', option);
                 nameBoardSeenSheetRef.current?.hide();
               }}>
@@ -418,7 +418,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('nameBoardMatched', option);
                 nameBoardMatchedSheetRef.current?.hide();
               }}>
@@ -438,7 +438,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('constitution', option);
                 if (option !== 'Others') setValue('constitutionOther', '');
                 constitutionSheetRef.current?.hide();
@@ -460,7 +460,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('isAddressTraceable', option);
                 isAddressTraceableSheetRef.current?.hide();
               }}>
@@ -500,7 +500,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('isBusinessSeasonal', option);
                 isBusinessSeasonalRef.current?.hide();
               }}>

@@ -61,6 +61,12 @@ const AddressVerificationDescription: React.FC<{
               </>
             )}
             <Descriptions.Item
+              label="Address Proof"
+              contentStyle={getItemStyle("addressProof")}
+            >
+              {data?.addressVerification?.addressProof}
+            </Descriptions.Item>
+            <Descriptions.Item
               label="Years at Current Residence"
               contentStyle={getItemStyle("numberOfYearsAtCurrentResidence")}
             >
