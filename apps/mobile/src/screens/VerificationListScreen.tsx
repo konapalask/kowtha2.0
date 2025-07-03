@@ -48,29 +48,6 @@ interface VerificationItem {
   };
 }
 
-// Dummy data
-// const dummyData: VerificationItem[] = [
-//   {
-//     id: '1',
-//     name: 'B. Yedukondalu',
-//     age: 25,
-//     sex: 'Male',
-//     address: 'H.no: 123, Street: 1, City: Amalapuram',
-//     status: 'In Progress',
-//     verificationType: 'Current Address',
-//   },
-//   {
-//     id: '2',
-//     name: 'B. Mudukondalu',
-//     age: 30,
-//     sex: 'Male',
-//     address: 'H.no: 456, Street: 2, City: Amalapuram',
-//     status: 'Completed',
-//     verificationType: 'Work Address',
-//   },
-//   // Add more dummy data as needed
-// ];
-
 const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
   const [data, setData] = useState<VerificationItem[]>([]);
@@ -84,9 +61,10 @@ const VerificationListScreen = () => {
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const disabled = !isLoggedIn;
+  const [testUser, setTestUser] = useState(false);
   // const disabled = false;
   // console.log(isLoggedIn);
-
+  // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
 
   const fetchData = async (page = 1, shouldAppend = false) => {
@@ -108,20 +86,70 @@ const VerificationListScreen = () => {
       setHasMore(page < totalPages);
       setPage(page);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to fetch verifications',
-        position: 'bottom',
-      });
+      // if (testUser) {
+      // }
+      if (!testUser) {
+        console.error('Error fetching data:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to fetch verifications',
+          position: 'top',
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(1, false);
+    const checkTestUserAndSetData = async () => {
+      const testUser = await getItem('testUser');
+      setTestUser(testUser);
+      if (testUser) {
+        // Use the provided dummy data structure
+        const dummyItems: VerificationItem[] = [
+          {
+            id: '206',
+            loanId: '99',
+            type: 'Business',
+            status: 'Pending',
+            applicantAddress: 'Sree krishna sai residency, Kondapur',
+            loan: {
+              applicationNumber: 'ABHF-00020',
+              applicantName: 'Prem',
+            },
+          },
+          {
+            id: '166',
+            loanId: '78',
+            type: 'AddressOne',
+            status: 'Pending',
+            applicantAddress: 'Kondapur',
+            loan: {
+              applicationNumber: 'ABHF-00002',
+              applicantName: 'Conduit',
+            },
+          },
+          {
+            id: '300',
+            loanId: '120',
+            type: 'Work',
+            status: 'Completed',
+            applicantAddress: 'Madhapur',
+            loan: {
+              applicationNumber: 'ABHF-00099',
+              applicantName: 'Test Completed',
+            },
+          },
+        ];
+        setData(dummyItems);
+        setHasMore(false);
+      } else {
+        fetchData(1, false);
+      }
+    };
+    checkTestUserAndSetData();
   }, []);
 
   const checkAttendance = async () => {

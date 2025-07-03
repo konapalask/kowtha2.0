@@ -36,6 +36,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   // console.log(userDetails);
   const [userDetails, setUserDetails] = useState<any>({});
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [testUser, setTestUser] = useState(false);
 
   useLayoutEffect(() => {
     const fetchUserDetails = async () => {
@@ -43,8 +44,20 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
         const details = await getItem('userDetails');
         setUserDetails(details);
       } catch (error) {
+        if (testUser) {
+          setUserDetails({
+            name: 'Test',
+            employeeCode: 'Test123',
+            role: 'Field Executive',
+          });
+        }
         console.log(error);
       }
+    };
+
+    const checkTestUser = async () => {
+      const testUser = await getItem('testUser');
+      setTestUser(testUser);
     };
 
     // const checkAttendance = async () => {
@@ -56,7 +69,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
     //     console.log(error);
     //   }
     // };
-
+    checkTestUser();
     fetchUserDetails();
     // checkAttendance();
   }, []);
