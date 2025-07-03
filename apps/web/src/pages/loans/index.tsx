@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -11,15 +11,15 @@ import {
   Row,
   Col,
 } from "antd";
-import { EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import type { ColumnsType } from "antd/es/table";
+// import type { ColumnsType } from "antd/es/table";
 import type { Key } from "react";
-import { UserContext } from "@/components/layout/UserContextProvider";
+// import { UserContext } from "@/components/layout/UserContextProvider";
 import {
   getLoansApi,
-  updateLoanApi,
+  // updateLoanApi,
   importLoansApi,
   type Loan,
 } from "@/services/loans.services";
@@ -28,7 +28,7 @@ import {
   getFieldExecutivesByOfficeIdApi,
   getVerifiersApi,
 } from "@/services/users.services";
-import { colors } from "@/styles/colors";
+// import { colors } from "@/styles/colors";
 import LoanEditDrawer from "@/components/loans/LoanEditDrawer";
 import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
@@ -138,47 +138,48 @@ export default function Loans() {
       });
   }, []);
 
+  const fetchExecutives = async () => {
+    try {
+      const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
+      const options =
+        result?.data?.data?.map((item: any) => ({
+          label: (
+            <Row gutter={[0, 0]} style={{ width: "100%" }}>
+              <Col xs={24} sm={24} md={1} xl={1}>
+                <Badge
+                  dot
+                  status={item?.isAvailbleToday ? "success" : "error"}
+                />
+              </Col>
+
+              <Col
+                xs={24}
+                sm={12}
+                md={8}
+                xl={15}
+                style={{ wordWrap: "break-word" }}
+              >
+                <Typography.Text>{item?.name}</Typography.Text>
+              </Col>
+
+              <Col xs={24} sm={6} md={6} xl={4}>
+                <Tag color="blue">{item?.employeeCode}</Tag>
+              </Col>
+
+              <Col xs={24} sm={6} md={9} xl={4}>
+                <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+              </Col>
+            </Row>
+          ),
+          value: item?.id,
+        })) ?? [];
+      setFieldExecutives(options);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
-    const fetchExecutives = async () => {
-      try {
-        const result = await getFieldExecutivesByOfficeIdApi(currentOffice);
-        const options =
-          result?.data?.data?.map((item: any) => ({
-            label: (
-              <Row gutter={[0, 0]} style={{ width: "100%" }}>
-                <Col xs={24} sm={24} md={1} xl={1}>
-                  <Badge
-                    dot
-                    status={item?.isAvailbleToday ? "success" : "error"}
-                  />
-                </Col>
-
-                <Col
-                  xs={24}
-                  sm={12}
-                  md={8}
-                  xl={15}
-                  style={{ wordWrap: "break-word" }}
-                >
-                  <Typography.Text>{item.name}</Typography.Text>
-                </Col>
-
-                <Col xs={24} sm={6} md={6} xl={4}>
-                  <Tag color="blue">{item.employeeCode}</Tag>
-                </Col>
-
-                <Col xs={24} sm={6} md={9} xl={4}>
-                  <Tag color="blue">P: {item.pendingVerifications}</Tag>
-                </Col>
-              </Row>
-            ),
-            value: item.id,
-          })) ?? [];
-        setFieldExecutives(options);
-      } catch (err) {
-        console.log(err);
-      }
-    };
     fetchExecutives();
   }, [currentOffice]);
 
@@ -425,7 +426,7 @@ export default function Loans() {
                 type="link"
                 // icon={<EditOutlined />}
                 onClick={() => {
-                  setSelectedLoan(record.applicationNumber);
+                  setSelectedLoan(record?.applicationNumber);
                   setIsDrawerVisible(true);
                 }}
               >
@@ -518,7 +519,7 @@ export default function Loans() {
 
       {isDrawerVisible && (
         <LoanEditDrawer
-          selectedApplicationNumber={selectedLoan}
+          loanId={selectedLoan}
           // setSelectedLoan={setSelectedLoan}
           isDrawerVisible={isDrawerVisible}
           setIsDrawerVisible={setIsDrawerVisible}
@@ -534,6 +535,7 @@ export default function Loans() {
           verifiers={verifiers}
           fetchLoans={fetchLoans}
           setRefresh={setRefresh}
+          fetchExecutives={fetchExecutives}
         />
       )}
 
