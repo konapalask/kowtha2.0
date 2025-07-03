@@ -41,7 +41,7 @@ interface LoanDetails {
 }
 
 interface LoanEditProps {
-  selectedApplicationNumber: string | null; // This is now the applicationNumber
+  loanId: string | null; // This is now the applicationNumber
   isDrawerVisible: boolean;
   setIsDrawerVisible: (visible: boolean) => void;
   editLoanInfo: boolean;
@@ -56,10 +56,11 @@ interface LoanEditProps {
   verifiers?: any[];
   fetchLoans: () => void;
   setRefresh: (refresh: boolean) => void;
+  fetchExecutives: any;
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
-  selectedApplicationNumber,
+  loanId,
   isDrawerVisible,
   setIsDrawerVisible,
   editLoanInfo,
@@ -74,16 +75,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   verifiers = [],
   fetchLoans,
   setRefresh,
+  fetchExecutives,
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
-  const [selectedLoan, setSelectedLoan] = useState<string | null>(
-    selectedApplicationNumber
-  );
-  const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
-  const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
-  const [workDisabled, setWorkDisabled] = useState<boolean>(false);
-  const [businessDisabled, setBusinessDisabled] = useState<boolean>(false);
+  const [selectedLoan, setSelectedLoan] = useState<string | null>(loanId);
+  // const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
+  // const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
+  // const [workDisabled, setWorkDisabled] = useState<boolean>(false);
+  // const [businessDisabled, setBusinessDisabled] = useState<boolean>(false);
   const [loanDetails, setLoanDetails] = useState<LoanDetails | null>(null);
   const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
     Record<string, boolean>
@@ -95,8 +95,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   });
 
   useEffect(() => {
-    if (selectedApplicationNumber) {
-      setSelectedLoan(selectedApplicationNumber);
+    if (loanId) {
+      setSelectedLoan(loanId);
     }
   }, []);
 
@@ -123,11 +123,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     }
   }, [selectedLoan]);
 
-  function hasVerificationType(type: string) {
-    return (
-      loanDetails?.verifications?.some((v: any) => v.type === type) || false
-    );
-  }
+  // function hasVerificationType(type: string) {
+  //   return (
+  //     loanDetails?.verifications?.some((v: any) => v.type === type) || false
+  //   );
+  // }
 
   const handleVerifierSelect = async (value: string) => {
     if (!loanDetails?.id) return;
@@ -266,11 +266,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                             loanDetails.loanType?.toLowerCase()
                         );
 
-                        const matchingBank = bankOptions.find((option) =>
-                          option.value
-                            .toLowerCase()
-                            .includes(loanDetails.bankName?.toLowerCase() || "")
-                        );
+                        // const matchingBank = bankOptions.find((option) =>
+                        //   option.value
+                        //     .toLowerCase()
+                        //     .includes(loanDetails.bankName?.toLowerCase() || "")
+                        // );
 
                         form.setFieldsValue({
                           applicationNumber: loanDetails.applicationNumber,
@@ -506,6 +506,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               fetchLoans={fetchLoanDetails}
                               setRefresh={setRefresh}
                               setFieldExecutiveEdit={setFieldExecutiveEdit}
+                              fetchExecutives={fetchExecutives}
                             />
                           )}
                         </Card>
