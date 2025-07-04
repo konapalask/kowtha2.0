@@ -477,14 +477,22 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                       Address: {verification?.applicantAddress}
                                     </span>
                                     <span>
-                                      Field Executive:{" "}
+                                      FE:{" "}
+                                      <Typography.Text
+                                        style={{ marginRight: 5 }}
+                                      >
+                                        {verification?.fieldExecutive?.name}
+                                      </Typography.Text>
                                       <Tag color="blue">
-                                        Id:{" "}
                                         {
                                           verification.fieldExecutive
                                             ?.employeeCode
                                         }
                                       </Tag>
+                                    </span>
+                                    <span>
+                                      FE mobile:{" "}
+                                      {verification?.fieldExecutive?.mobile}
                                     </span>
                                   </div>
                                 </div>

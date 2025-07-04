@@ -66,15 +66,16 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     values: {
       assignmentMethod: "Local" | "Remote";
       office?: string;
-      fieldExecutiveId: string;
+      fieldExecutiveId: any;
       address: string;
       // verifierId: string;
     }
   ) => {
+    // console.log(values?.fieldExecutiveId?.value);
     const finalData = {
       // verifierId: 8,
       verificationType: getVerificationType(type),
-      fieldExecutiveId: values.fieldExecutiveId,
+      fieldExecutiveId: values.fieldExecutiveId?.value,
       address: values.address,
     };
     try {
@@ -154,6 +155,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                       message: "Please select assignment method",
                     },
                   ]}
+                  hidden={!address}
                 >
                   <Radio.Group
                     disabled={!address}
@@ -237,8 +239,10 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   ),
                   value: verification?.fieldExecutive?.employeeCode,
                 }}
+                hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
+                  placeholder="Select an Executive"
                   labelInValue
                   disabled={
                     !address || (assignmentMethod === "Remote" && !office)
