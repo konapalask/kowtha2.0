@@ -185,19 +185,19 @@ export default function Users() {
       title: "Employee Code",
       dataIndex: "employeeCode",
       key: "employeeCode",
-      width: 70,
+      width: 60,
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      width: 150,
+      width: 80,
     },
     {
       title: "Mobile",
       dataIndex: "mobile",
       key: "mobile",
-      width: 100,
+      width: 60,
     },
     // {
     //   title: "Email",
@@ -209,7 +209,7 @@ export default function Users() {
       title: "Role",
       dataIndex: "role",
       key: "role",
-      width: 100,
+      width: 80,
       render: (role: string) => (
         <Tag
           color={
@@ -230,7 +230,7 @@ export default function Users() {
       title: "Branch",
       dataIndex: "office",
       key: "office",
-      width: 100,
+      width: 50,
       render: (office: any) => office?.name,
     },
     {
