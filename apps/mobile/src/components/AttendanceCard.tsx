@@ -49,11 +49,11 @@ const handleLoginTick = async (
 
 const handleLoginCross = (setVisible: (val: boolean) => void) => {
   setVisible(false);
-  Toast.show({
-    type: 'error',
-    text1: 'Login Cancelled',
-    position: 'top',
-  });
+  // Toast.show({
+  //   type: 'error',
+  //   text1: 'Login Cancelled',
+  //   position: 'top',
+  // });
 };
 
 const AttendanceCard: React.FC<{
@@ -80,8 +80,8 @@ const AttendanceCard: React.FC<{
   const isValidTime = () => {
     const currentTime = dayjs();
 
-    const start = currentTime.clone().hour(9).minute(0).second(0);
-    const end = currentTime.clone().hour(12).minute(0).second(0);
+    const start = currentTime.clone().hour(8).minute(0).second(0);
+    const end = currentTime.clone().hour(11).minute(0).second(0);
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       // console.log('in bounds');
       return true;
@@ -90,27 +90,28 @@ const AttendanceCard: React.FC<{
   };
   return (
     <View style={styles.loginCard}>
-      {/* {!isLoggedIn && isValidTime() ? ( */}
-      {/* {!isLoggedIn ? (
-        <> */}
-      <Text style={styles.loginText}>Login for the day</Text>
-      <View style={styles.loginActions}>
-        <Pressable
-          onPress={() => {
-            handleLoginTick(setVisible, setIsLoggedIn);
-          }}
-          style={styles.iconButton}>
-          <Icon name="checkmark-circle" size={28} color="green" />
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            handleLoginCross(setVisible);
-          }}
-          style={styles.iconButton}>
-          <Icon name="close-circle" size={28} color="red" />
-        </Pressable>
-      </View>
-      {/* </>
+      {/* {!isLoggedIn ? ( */}
+
+      {!isLoggedIn && isValidTime() ? (
+        <>
+          <Text style={styles.loginText}>Login for the day</Text>
+          <View style={styles.loginActions}>
+            <Pressable
+              onPress={() => {
+                handleLoginTick(setVisible, setIsLoggedIn);
+              }}
+              style={styles.iconButton}>
+              <Icon name="checkmark-circle" size={28} color="green" />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                handleLoginCross(setVisible);
+              }}
+              style={styles.iconButton}>
+              <Icon name="close-circle" size={28} color="red" />
+            </Pressable>
+          </View>
+        </>
       ) : (
         <View style={{}}>
           <Icon name="information-circle-outline" size={28} color={'green'} />
@@ -119,7 +120,7 @@ const AttendanceCard: React.FC<{
             Already logged in for the day
           </Text>
         </View>
-      )} */}
+      )}
     </View>
   );
 };

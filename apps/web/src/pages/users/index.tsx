@@ -362,10 +362,10 @@ export default function Users() {
             label="Email"
             style={{ marginBottom: 8 }}
             rules={[
-              {
-                required: true,
-                message: "Please input your email!",
-              },
+              // {
+              //   required: true,
+              //   message: "Please input your email!",
+              // },
               {
                 type: "email",
                 message: "Please enter a valid email address!",
@@ -399,6 +399,14 @@ export default function Users() {
               <Option value="FieldExecutive">Field Executive</Option>
               <Option value="Verifier">Verifier</Option>
             </Select>
+          </Form.Item>
+          <Form.Item
+            name="locality"
+            label="Location"
+            rules={[{ required: true, message: "Please enter location" }]}
+            style={{ marginBottom: 8 }}
+          >
+            <Input maxLength={30} />
           </Form.Item>
           <Form.Item
             name="officeId"

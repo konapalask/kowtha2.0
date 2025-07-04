@@ -325,7 +325,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('personMet', option);
                 if (option === 'Applicant') {
                   setValue('personMetName', '');
@@ -350,7 +350,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             <TouchableOpacity
               key={option}
               style={styles.actionSheetItem}
-              onPress={() => {
+              onPressIn={() => {
                 setValue('isAddressSame', option);
                 if (option === 'Yes') {
                   setValue('addressCorrection', '');

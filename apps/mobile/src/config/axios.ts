@@ -1,11 +1,11 @@
 import axios from 'axios';
-// import {REACT_APP_BASE_URL} from '@env';
+import {REACT_APP_BASE_URL} from '@env';
 import RNRestart from 'react-native-restart';
 import {clearAll, clearItem, getItem, setItem} from '../helpers/utility';
 
 const axiosConfig = {
   // baseURL: REACT_APP_BASE_URL,
-  baseURL: process.env.REACT_APP_BASE_URL,
+  baseURL: REACT_APP_BASE_URL,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

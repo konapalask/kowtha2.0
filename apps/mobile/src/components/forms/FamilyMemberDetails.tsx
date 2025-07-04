@@ -7,7 +7,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import {useForm, Controller, useFieldArray} from 'react-hook-form';
+import {useForm, Controller, useFieldArray, useWatch} from 'react-hook-form';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {FamilyMember} from '../../types/verification';
 import {colors} from '../../constants/colors';
@@ -67,6 +67,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
     handleSubmit,
     setValue,
     formState: {errors},
+    watch,
   } = useForm<FamilyMemberDetailsFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -94,7 +95,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
       age: '',
       employmentType: '',
       educationalQualification: '',
-      mobileNumber: '',
+      mobileNumber: undefined,
       stayingWithApplicant: '',
     };
   }
@@ -156,6 +157,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
   };
 
   const renderFamilyMemberFields = (index: number) => {
+    const relationValue = watch(`familyMembers.${index}.relation`);
     return (
       <View key={index} style={styles.memberContainer}>
         <View style={styles.memberHeader}>
@@ -219,13 +221,11 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
           )}
         />
 
-        <Controller
-          control={control}
-          name={`familyMembers.${index}.otherRelation`}
-          render={({field: {onChange, value}}) => {
-            const relationValue =
-              control._formValues.familyMembers[index]?.relation;
-            return relationValue === 'Other' ? (
+        {relationValue === 'Other' && (
+          <Controller
+            control={control}
+            name={`familyMembers.${index}.otherRelation`}
+            render={({field: {onChange, value}}) => (
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Specify Relation</Text>
                 <TextInput
@@ -244,11 +244,9 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
                   </Text>
                 )}
               </View>
-            ) : (
-              <View />
-            );
-          }}
-        />
+            )}
+          />
+        )}
 
         <Controller
           control={control}

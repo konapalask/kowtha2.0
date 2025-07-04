@@ -51,18 +51,24 @@ interface LoanFilters {
   employeeName?: string;
 }
 
-export const getLoansApi = (page?: number, limit?: number, filters?: LoanFilters) => {
+export const getLoansApi = (
+  page?: number,
+  limit?: number,
+  filters?: LoanFilters
+) => {
   return axiosInstance.get<any>("/loans", {
     params: {
       page,
       limit,
-      ...filters
-    }
+      ...filters,
+    },
   });
 };
 
 export const getLoansByIdApi = (applicationNumber: string) => {
-  return axiosInstance.get<Loan>(`/loans?applicationNumber=${applicationNumber}`);
+  return axiosInstance.get<Loan>(
+    `/loans?applicationNumber=${applicationNumber}`
+  );
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {
@@ -117,8 +123,12 @@ export const createLoanApi = (payload: any) => {
   return axiosInstance.post<any>(`/loans`, payload);
 };
 
-export const deleteFieldAssignmentApi = (loanId:number, type:string, payload:any) =>{
+export const deleteFieldAssignmentApi = (
+  loanId: number,
+  type: string,
+  payload: any
+) => {
   return axiosInstance.delete<any>(`/loans/${loanId}/verification/${type}`, {
-    data: payload
-  })
-}
+    data: payload,
+  });
+};

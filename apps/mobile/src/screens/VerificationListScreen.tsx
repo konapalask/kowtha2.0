@@ -19,7 +19,7 @@ import Settings from '../components/Settings';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AttendanceCard from '../components/AttendanceCard';
-import {getItem} from '../helpers/utility';
+import {getItem, setItem} from '../helpers/utility';
 import dayjs from 'dayjs';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
@@ -83,9 +83,9 @@ const VerificationListScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  // const disabled = !isLoggedIn;
-  const disabled = false;
-  console.log(isLoggedIn);
+  const disabled = !isLoggedIn;
+  // const disabled = false;
+  // console.log(isLoggedIn);
 
   // const opacity = useRef(new Animated.Value(1)).current;
 
@@ -93,6 +93,12 @@ const VerificationListScreen = () => {
     try {
       setLoading(true);
       const response = await getFieldData(page, selectedFilter);
+      // console.log(response);
+      await setItem('attendance', {
+        status: response?.data?.isAvailableToday ? 'Available' : null,
+        date: dayjs().format('YYYY-MM-DD'),
+      });
+      checkAttendance();
       const allData = response?.data?.data || [];
       const totalPages = allData?.meta?.totalPages;
 
@@ -131,8 +137,8 @@ const VerificationListScreen = () => {
 
   const validTime = () => {
     const currentTime = dayjs();
-    const start = currentTime.clone().hour(9).minute(0).second(0);
-    const end = currentTime.clone().hour(12).minute(0).second(0);
+    const start = currentTime.clone().hour(8).minute(0).second(0);
+    const end = currentTime.clone().hour(11).minute(0).second(0);
 
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       return true;
@@ -316,47 +322,57 @@ const VerificationListScreen = () => {
 
   const renderItem = ({item}: {item: any}) => (
     <TouchableOpacity
-      disabled={disabled}
+      // disabled={disabled}
       style={styles.card}
       onPress={() => {
-        if (item?.status === 'Pending') {
-          const baseNavPayload = {
-            name: item?.loan?.applicantName,
-            applicationNumber: item?.loan?.applicationNumber || '',
-            id: item?.id,
-            verificationId: item?.loanId,
-            address: item?.applicantAddress,
-          };
-          if (item?.type === 'Work') {
-            navigation.navigate('WorkVerification' as any, {
-              item: baseNavPayload,
-              verificationType: 'Work',
-              userData: item,
-            });
-          } else if (item?.type === 'Business') {
-            navigation.navigate('BusinessVerification' as any, {
-              item: baseNavPayload,
-              verificationType: 'Business',
-              userData: item,
-            });
+        if (!disabled) {
+          if (item?.status === 'Pending') {
+            const baseNavPayload = {
+              name: item?.loan?.applicantName,
+              applicationNumber: item?.loan?.applicationNumber || '',
+              id: item?.id,
+              verificationId: item?.loanId,
+              address: item?.applicantAddress,
+            };
+            if (item?.type === 'Work') {
+              navigation.navigate('WorkVerification' as any, {
+                item: baseNavPayload,
+                verificationType: 'Work',
+                userData: item,
+              });
+            } else if (item?.type === 'Business') {
+              navigation.navigate('BusinessVerification' as any, {
+                item: baseNavPayload,
+                verificationType: 'Business',
+                userData: item,
+              });
+            } else {
+              navigation.navigate('VerificationItemScreen' as any, {
+                item: baseNavPayload,
+                verificationType: item?.type,
+                // item?.type === 'AddressOne'
+                //   ? 'CurrentAddress'
+                //   : 'PermanentAddress',
+                userData: item,
+              });
+            }
           } else {
-            navigation.navigate('VerificationItemScreen' as any, {
-              item: baseNavPayload,
-              verificationType: item?.type,
-              // item?.type === 'AddressOne'
-              //   ? 'CurrentAddress'
-              //   : 'PermanentAddress',
-              userData: item,
+            Toast.show({
+              type: 'info',
+              text1: `${getVerificationTypeLabel(
+                item?.type,
+              )} verification is completed`,
+              text2: `for application ${item?.applicationNumber || 'N/A'}.`,
+              position: 'top',
+              visibilityTime: 3000,
             });
           }
         } else {
           Toast.show({
             type: 'info',
-            text1: `${getVerificationTypeLabel(
-              item?.type,
-            )} verification is completed`,
-            text2: `for application ${item?.applicationNumber || 'N/A'}.`,
-            position: 'bottom',
+            text1: 'Please sign in your attendance',
+            // text2: `for application ${item?.applicationNumber || 'N/A'}.`,
+            position: 'top',
             visibilityTime: 3000,
           });
         }
@@ -423,8 +439,8 @@ const VerificationListScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* {showAttendanceModal && !isLoggedIn && validTime() && ( */}
-      {showAttendanceModal && !isLoggedIn && (
+      {/* {showAttendanceModal && !isLoggedIn && ( */}
+      {showAttendanceModal && !isLoggedIn && validTime() && (
         <View style={styles.attendanceModalOverlay}>
           {/* <Pressable
             style={styles.attendanceModalBackground}

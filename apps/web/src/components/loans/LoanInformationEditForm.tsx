@@ -106,9 +106,10 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               // if()
               // console.log(loanData?.applicationNumber)
               if (data?.status === 201 && data?.data?.failedCount > 0) {
+                console.log(response?.data);
                 // message.error(data?.data?.failed?.[0]?.error);
                 message.error(
-                  "Duplicate Application number and applicant type"
+                  "Applicantion with the same number and type already exists"
                 );
                 // setEditLoanInfo(false);
               } else {

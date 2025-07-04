@@ -60,7 +60,7 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         endDate: end ? dayjs(end).format("YYYY-MM-DD") : undefined,
       };
       if (filters.status !== undefined) params.status = filters.status;
-      if (filters.employeeCode) params.employeeCode = filters.employeeCode;
+      // if (filters.employeeCode) params.employeeCode = filters.employeeCode;
       // Name filter is client-side (API doesn't support it directly)
       const response = await getAttendanceRecodsApi(params);
       setData(response?.data?.data?.userStatistics || []);
@@ -78,11 +78,21 @@ export default function Attendance({ dateRange }: AttendanceProps) {
 
   // Client-side filter for name
   const filteredData = useMemo(() => {
-    if (!filters.name) return data;
-    return data.filter((rec) =>
-      rec.user?.name?.toLowerCase().includes(filters.name.toLowerCase())
-    );
-  }, [data, filters.name]);
+    let result = data;
+    if (filters.name) {
+      result = result.filter((rec) =>
+        rec.user?.name?.toLowerCase().includes(filters.name.toLowerCase())
+      );
+    }
+    if (filters.employeeCode) {
+      result = result.filter((rec) =>
+        (rec.user?.employeeCode || "")
+          .toLowerCase()
+          .includes(filters.employeeCode.toLowerCase())
+      );
+    }
+    return result;
+  }, [data, filters.name, filters.employeeCode]);
 
   const columns: any[] = [
     {
@@ -133,10 +143,6 @@ export default function Attendance({ dateRange }: AttendanceProps) {
           </Space>
         </div>
       ),
-      onFilterDropdownVisibleChange: (visible: boolean) => {
-        if (!visible) setFilters((f) => ({ ...f, name: "" }));
-      },
-      filteredValue: filters.name ? [filters.name] : null,
       render: (_: any, record: AttendanceRecord) => (
         <>
           {" "}
@@ -213,7 +219,6 @@ export default function Attendance({ dateRange }: AttendanceProps) {
           </Space>
         </div>
       ),
-      filteredValue: filters.employeeCode ? [filters.employeeCode] : null,
       render: (_: any, record: AttendanceRecord) =>
         record.user?.employeeCode || "-",
     },
@@ -309,7 +314,12 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         rowKey={(record) => record.userId}
         loading={loading}
         bordered
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: false,
+          position: ["bottomCenter"],
+          showTotal: (total) => `Total ${total ?? 0} items`,
+        }}
         scroll={{ x: "max-content" }}
       />
     </div>
