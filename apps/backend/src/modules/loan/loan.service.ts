@@ -1070,8 +1070,8 @@ export class LoanService {
         NOT: {
           verificationRetries: {
             some: {
-              date: {
-                gte: today,
+              createdAt: {
+                gt: today,
                 lt: tomorrow
               }
             }
