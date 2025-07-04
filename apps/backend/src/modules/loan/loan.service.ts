@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole, ApprovedStatus } from '@prisma/client';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import * as XLSX from 'xlsx';
@@ -446,7 +446,8 @@ export class LoanService {
     verificationType?: VerificationType,
     fieldExecutiveId?: number,
     address?: string,
-    verifierId?: number
+    verifierId?: number,
+    locationType?: LocationType
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -487,6 +488,7 @@ export class LoanService {
             fieldExecutiveId,
             status: 'Pending',
             applicantAddress: address || null,
+            locationType: locationType || null,
           },
           create: {
             loan: { connect: { id: loan.id } },
@@ -494,6 +496,7 @@ export class LoanService {
             fieldExecutive: { connect: { id: fieldExecutiveId } },
             status: 'Pending',
             applicantAddress: address || null,
+            locationType: locationType || null,
           },
         });
 

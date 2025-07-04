@@ -19,7 +19,7 @@ import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto'
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
-            AddressType, ApprovedStatus } from '@prisma/client';
+            AddressType, ApprovedStatus, LocationType } from '@prisma/client';
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 
@@ -278,7 +278,7 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number },
+    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number; locationType?: LocationType },
   ) {
     const parsedLoanId = parseInt(loanId, 10);
     if (isNaN(parsedLoanId)) {
@@ -290,7 +290,8 @@ export class LoanController {
       body.verificationType,
       body.fieldExecutiveId,
       body.address,
-      body.verifierId
+      body.verifierId,
+      body.locationType
     );
     return {
       status: 200,

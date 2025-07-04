@@ -89,6 +89,11 @@ enum AttendanceStatus {
   Unavailable
 }
 
+enum LocationType {
+  Local
+  Remote
+}
+
 model User {
   id                       Int                  @id @default(autoincrement())
   mobile                   String               @unique
@@ -145,6 +150,7 @@ model Verification {
   fieldExecutiveId Int
   fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status           VerificationStatus
+  locationType     LocationType?
   path             String? // Array of S3 paths for verification documents
   finalReportPath  String? // S3 path for final report
   applicantAddress String?
