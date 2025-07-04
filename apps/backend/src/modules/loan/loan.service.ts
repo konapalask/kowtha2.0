@@ -934,7 +934,13 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  role: true,
+                  office: {
+                    select: {
+                      id: true,
+                      name: true
+                    }
+                  }
                 }
               }
             }
