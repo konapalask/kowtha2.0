@@ -1,5 +1,16 @@
-import { Form, Radio, Select, Button, message, Input, Row, Col } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  Form,
+  Radio,
+  Select,
+  Button,
+  message,
+  Input,
+  Row,
+  Col,
+  Typography,
+  Tag,
+} from "antd";
+// import { UserOutlined } from "@ant-design/icons";
 import React from "react";
 import { assignExecutivesApi } from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
@@ -95,7 +106,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             ? {
                 assignmentMethod: null,
                 office: verification?.office,
-                fieldExecutiveId: verification?.fieldExecutiveId,
+                fieldExecutiveId: verification?.fieldExecutiveId?.value,
                 address: verification?.applicantAddress || "",
               }
             : {
@@ -151,9 +162,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     onChange={(e) => {
                       if (e.target.value === "Local") {
                         setCurrentOffice(userDetails?.officeId || "");
-                        form.setFieldValue("fieldExecutiveId", null);
-                        form.setFieldValue("office", null);
                       }
+                      form.setFieldValue("fieldExecutiveId", null);
+                      form.setFieldValue("office", null);
                     }}
                   >
                     <Radio.Button value="Local">Local</Radio.Button>
@@ -208,12 +219,30 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a field executive",
                   },
                 ]}
+                initialValue={{
+                  label: (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography.Text>
+                        {verification?.fieldExecutive?.name}
+                      </Typography.Text>
+                      <Tag color="blue">
+                        {verification?.fieldExecutive?.employeeCode}
+                      </Tag>
+                    </div>
+                  ),
+                  value: verification?.fieldExecutive?.employeeCode,
+                }}
               >
                 <Select
+                  labelInValue
                   disabled={
                     !address || (assignmentMethod === "Remote" && !office)
                   }
-                  placeholder="Select field executive"
                   style={{ width: "100%" }}
                   options={fieldExecutives}
                   onSelect={() => form.submit()}
