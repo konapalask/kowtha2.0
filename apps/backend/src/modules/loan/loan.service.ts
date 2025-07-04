@@ -1381,6 +1381,17 @@ export class LoanService {
         throw new BadRequestException('Cannot delete a completed verification');
       }
 
+      const verificationRetries = await this.prisma.verificationRetries.findMany({
+        where: {
+          verificationId: verification.id,
+        },
+      });
+
+      if (verificationRetries.length > 0) {
+        throw new BadRequestException('Cannot delete the verification as it has been rescheduled');
+      }
+      
+
       // Delete the verification
       const deletedVerification = await this.prisma.verification.delete({
         where: {
