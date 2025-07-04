@@ -86,11 +86,13 @@ const EditRequests: React.FC = () => {
     fetchEditRequests();
   }, []);
 
+  console.log(editRequests);
+
   const columns: ColumnsType<EditRequest> = [
     {
-      title: "Loan ID",
-      dataIndex: "loanId",
-      key: "loanId",
+      title: "Application Number",
+      dataIndex: ["loan", "applicationNumber"],
+      key: "applicationNumber",
       // render: (text) => (
       //   <Button type="link" onClick={() => router.push(`/loans/${text}`)}>
       //     {text}
@@ -134,7 +136,7 @@ const EditRequests: React.FC = () => {
     },
     {
       title: "Requested By",
-      dataIndex: "requestedBy",
+      dataIndex: ["requester", "employeeCode"],
       key: "requestedBy",
     },
     {

@@ -109,11 +109,11 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 console.log(response?.data);
                 // message.error(data?.data?.failed?.[0]?.error);
                 message.error(
-                  "Applicantion with the same number and type already exists"
+                  "Loan with this Application nubmer and Applicant type exists"
                 );
                 // setEditLoanInfo(false);
               } else {
-                setSelectedLoan(loanData?.applicationNumber);
+                setSelectedLoan(loanData?.id);
                 // Add the new loan to the loans list
                 message.success("Loan created successfully");
               }
