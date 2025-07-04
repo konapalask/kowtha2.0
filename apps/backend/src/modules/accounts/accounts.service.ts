@@ -93,6 +93,10 @@ export class AccountsService {
         where: { mobile: mobile, status: 'Active' }
       });
 
+      if (!user.role) {
+        throw new BadRequestException('Access denied: Please use a valid number');
+      }
+
       if (isMobile && user.role !== UserRole.FieldExecutive) {
         throw new BadRequestException('Access denied: The mobile number you entered is not authorized');
       }
