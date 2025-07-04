@@ -65,10 +65,8 @@ export const getLoansApi = (
   });
 };
 
-export const getLoansByIdApi = (applicationNumber: string) => {
-  return axiosInstance.get<Loan>(
-    `/loans?applicationNumber=${applicationNumber}`
-  );
+export const getLoansByIdApi = (id: string) => {
+  return axiosInstance.get<Loan>(`/loans?id=${id}`);
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {

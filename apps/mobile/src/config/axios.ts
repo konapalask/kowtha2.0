@@ -54,6 +54,10 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (await getItem('testUser')) {
+      return Promise.reject(error);
+    }
+
     if (errorStatusCode === 401) {
       // clearAll();
       clearItem('accessToken');

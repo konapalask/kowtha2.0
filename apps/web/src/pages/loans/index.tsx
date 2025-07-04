@@ -426,7 +426,7 @@ export default function Loans() {
                 type="link"
                 // icon={<EditOutlined />}
                 onClick={() => {
-                  setSelectedLoan(record?.applicationNumber);
+                  setSelectedLoan(record?.id);
                   setIsDrawerVisible(true);
                 }}
               >
