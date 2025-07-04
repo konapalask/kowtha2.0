@@ -86,6 +86,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               // console.log(loanData?.applicationNumber)
               const response = await createLoanApi([loanData]);
               const data = response?.data;
+              // console.log(response?.data);
               // console.log(response);
               // Handle the new response format
               // if (
@@ -113,7 +114,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 );
                 // setEditLoanInfo(false);
               } else {
-                setSelectedLoan(loanData?.id);
+                setSelectedLoan(data?.data?.successful?.[0]?.id);
                 // Add the new loan to the loans list
                 message.success("Loan created successfully");
               }
