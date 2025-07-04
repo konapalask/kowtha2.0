@@ -854,6 +854,10 @@ export class LoanService {
         where.status = filters.status;
       }
 
+      if (filters?.id) {
+        where.id = Number(filters.id);
+      }
+
       if (filters?.applicationNumber) {
         where.applicationNumber = {contains: filters.applicationNumber, mode: 'insensitive'};
       }
