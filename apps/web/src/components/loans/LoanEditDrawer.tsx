@@ -236,13 +236,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         open={isDrawerVisible}
         // maskClosable={false}
         destroyOnClose
-        footer={
-          <div className="flex-end">
-            <Button onClick={handleSaveAndClose} type="primary">
-              Save & Close
-            </Button>
-          </div>
-        }
+        // footer={
+        //   <div className="flex-end">
+        //     <Button onClick={handleSaveAndClose} type="primary">
+        //       Save & Close
+        //     </Button>
+        //   </div>
+        // }
       >
         {(selectedLoan || !loanDetails?.id) && (
           <>
