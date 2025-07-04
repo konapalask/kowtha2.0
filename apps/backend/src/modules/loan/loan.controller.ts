@@ -1,27 +1,27 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { LoanService } from './loan.service';
-import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
-import { RolesGuard } from '../accounts/guards/roles.guard';
-import { Roles } from '../accounts/decorators/roles.decorator';
-import { VerificationType, LoanStatus, UserRole, VerificationStatus, AddressType, ApprovedStatus } from '@prisma/client';
-import { AuthenticatedRequest } from '../common/types/request.types';
+import { EditLoanDto } from './dto/edit-loan.dto';
 import { GetLoansDto } from './dto/get-loans.dto';
+import { NotFoundException } from '@nestjs/common';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
+import { S3Service } from '../common/s3utils/s3.service';
+import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RolesGuard } from '../accounts/guards/roles.guard';
+import { Roles } from '../accounts/decorators/roles.decorator';
+import { EditVerificationDto } from './dto/edit-verification.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { AuthenticatedRequest } from '../common/types/request.types';
+import { DeleteVerificationDto } from './dto/delete-verification.dto';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { log } from 'console';
-import * as XLSX from 'xlsx';
-import { Response } from 'express';
-import { NotFoundException } from '@nestjs/common';
-import { EditLoanDto } from './dto/edit-loan.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
-import { DeleteVerificationDto } from './dto/delete-verification.dto';
-import { S3Service } from '../common/s3utils/s3.service';
-import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
+import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
+            AddressType, ApprovedStatus } from '@prisma/client';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
+          UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 
 @ApiTags('loans')
 @Controller('loans')

@@ -98,11 +98,9 @@ export class AccountsService {
       }
 
       if (isMobile && user.role !== UserRole.FieldExecutive) {
-        throw new BadRequestException('Access denied: The mobile number you entered is not authorized');
+        throw new BadRequestException('Access denied: You are not authorized to login');
       }
 
-      // Generate a random 6-digit OTP
-      // const otp = "123456";
       const otp = this.generateRandomOTP();
       const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -138,24 +136,20 @@ export class AccountsService {
   async verifyOTP(mobile: string, otp: string, deviceId?: string): Promise<{ accessToken: string; refreshToken: string; message: string }> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { mobile }
+        where: { mobile, status: 'Active' }
       });
 
       if (!user) {
         throw new NotFoundException('Access denied: User not found with this mobile number');
       }
 
-      if (user.status !== 'Active') {
-        throw new BadRequestException('Access denied: Your account is not active. Please contact administrator.');
-      }
-      let returnMessage = 'Device has been changed. Please contact administrator.';
 
       if(user.role === UserRole.FieldExecutive && !deviceId){
-        throw new UnauthorizedException('Access denied: You are not Authorized to login');
+        throw new UnauthorizedException('Access denied: Please contact administrator');
       }
       
       if(deviceId){
-        
+
         if(user.role !== UserRole.FieldExecutive){
           throw new UnauthorizedException('Access denied: You are not Authorized to login');
         }
@@ -182,7 +176,7 @@ export class AccountsService {
           });
 
           if(checkEditRequest){
-            returnMessage = 'Device change request already pending. Please wait for approval.';
+            throw new BadRequestException('Device change request already pending. Please wait for approval');
           }
           else{
             const editRequest = await this.prisma.editRequest.create({
@@ -209,11 +203,7 @@ export class AccountsService {
               oldDeviceId: user.deviceId,
               status: 'Pending',
             });
-            return {
-              accessToken: '',
-              refreshToken: '',
-              message: "returnMessage",
-            };
+            throw new BadRequestException('Device has been changed. Please contact administrator');
           }          
         }
       }

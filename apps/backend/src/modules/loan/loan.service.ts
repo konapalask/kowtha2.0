@@ -1390,7 +1390,6 @@ export class LoanService {
       if (verificationRetries.length > 0) {
         throw new BadRequestException('Cannot delete the verification as it has been rescheduled');
       }
-      
 
       // Delete the verification
       const deletedVerification = await this.prisma.verification.delete({
