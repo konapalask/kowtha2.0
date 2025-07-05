@@ -94,7 +94,7 @@ export class AccountsService {
       });
 
       if (!user || !user.role) {
-        throw new NotFoundException('Access denied: Please use a valid number');
+        throw new NotFoundException('Please use a valid number');
       }
 
       if (isMobile && user.role !== UserRole.FieldExecutive) {
