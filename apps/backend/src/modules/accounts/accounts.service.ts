@@ -58,7 +58,7 @@ export class AccountsService {
           sender_id: 'BYNSCL',
           message: '166906',
           language: 'english',
-          variables_values: 'Kowtha',
+          variables_values: otp,
           flash: 0,
           numbers: mobile,
         },
