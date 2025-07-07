@@ -59,10 +59,11 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   const [verdict, setVerdict] = useState(
     completeVerificationData?.approvedStatus === "Positive"
       ? "positive"
-      : completeVerificationData?.appprovedStatus === "Negative"
+      : completeVerificationData?.approvedStatus === "Negative"
         ? "negative"
         : null
   );
+  console.log(verdict);
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   // const [loading, setLoading] = useState<boolean>(false);
