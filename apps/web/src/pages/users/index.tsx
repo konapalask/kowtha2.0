@@ -48,6 +48,20 @@ const DashboardLayout = dynamic(
   { ssr: false }
 );
 
+const FiRoleOptions = [
+  { label: "Admin", value: "Admin" },
+  { label: "Operations Executive", value: "OperationsExecutive" },
+  { label: "Verifier", value: "Verifer" },
+  { label: "Field Executive", value: "FieldExecutive" },
+];
+
+const PdRoleOptions = [
+  { label: "PD-Admin", value: "PD-Admin" },
+  { label: "PD-Operations Executive", value: "PD-OperationsExecutive" },
+  { label: "PD-Verifier", value: "PD-Verifer" },
+  { label: "PD-Field Executive", value: "PD-FieldExecutive" },
+];
+
 export default function Users() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -393,12 +407,7 @@ export default function Users() {
             rules={[{ required: true, message: "Please select role" }]}
             style={{ marginBottom: 8 }}
           >
-            <Select>
-              <Option value="Admin">Admin</Option>
-              <Option value="OperationsExecutive">Operations Executive</Option>
-              <Option value="FieldExecutive">Field Executive</Option>
-              <Option value="Verifier">Verifier</Option>
-            </Select>
+            <Select options={FiRoleOptions} />
           </Form.Item>
           <Form.Item
             name="locality"
