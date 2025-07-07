@@ -15,9 +15,9 @@ async function bootstrap() {
   }));
 
   app.enableCors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: ['http://localhost:3000', 'https://app.cakowtha.co.in'],
+    methods: '*',
+    allowedHeaders: '*',
     credentials: true,
   });
 
