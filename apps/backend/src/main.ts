@@ -14,10 +14,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
-  app.enableCors({
-    origin: ['http://localhost:3000'], 
-    credentials: true, 
-  });
+  app.enableCors();
 
   // Use global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
