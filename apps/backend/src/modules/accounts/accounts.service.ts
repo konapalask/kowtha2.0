@@ -154,8 +154,10 @@ export class AccountsService {
           throw new UnauthorizedException('Access denied: You are not Authorized to login');
         }
 
+        let updateUser = null;
+
         if(!user.deviceId){
-          const updateUser  = await this.prisma.user.update({
+          updateUser  = await this.prisma.user.update({
             where: { id: user.id },
             data: { deviceId }
           });
@@ -164,7 +166,11 @@ export class AccountsService {
           });
         }
 
-        if(deviceId !== user.deviceId){
+        const newUser = await this.prisma.user.findUnique({
+          where: { mobile, status: 'Active' }
+        });
+
+        if(deviceId !== newUser.deviceId){
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
               requester: {
