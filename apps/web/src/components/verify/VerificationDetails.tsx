@@ -33,6 +33,7 @@ interface VerificationDetailsProps {
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
   verificationType: string;
+  completeVerificationData: any;
 }
 
 export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
@@ -43,17 +44,25 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   fetchEditRequests,
   hasEditRequest,
   verificationType,
+  completeVerificationData,
 }) => {
+  // console.log(completeVerificationData?.approvedStatus);
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
+    completeVerificationData?.path || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState<boolean>(false);
-  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  const [verdict, setVerdict] = useState(
+    completeVerificationData?.approvedStatus === "Positive"
+      ? "positive"
+      : completeVerificationData?.appprovedStatus === "Negative"
+        ? "negative"
+        : null
+  );
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   // const [loading, setLoading] = useState<boolean>(false);
@@ -391,7 +400,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       objectFit: "cover",
                       borderRadius: "4px",
                     }}
-                    preview={false}
+                    // preview={false}
                   />
                   {/* <Button
                     type="text"

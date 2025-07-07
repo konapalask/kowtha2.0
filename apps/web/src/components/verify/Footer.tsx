@@ -2,15 +2,9 @@ import { useTabContext } from "@/pages/verify/[id]";
 import {
   generateFinalReport,
   generatePreviewReport,
-  loanApproveRejectApi,
-  patchFinalVerdict,
 } from "@/services/verifier.services";
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { Button, message, Modal, Popconfirm, Space } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Popconfirm } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
@@ -70,26 +64,26 @@ const Footer: React.FC<{
       const blob = new Blob([reportResponse], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       setPdfPreviewUrl(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating final report:", error);
-      // message.error(
-      //   "Failed to generate final report: " + (error as Error).message
-      // );
+      message.error(
+        error?.response?.data?.message ?? "Failed to generate final report"
+      );
     }
   };
 
-  const submitFinalVerdict = async () => {
-    try {
-      const payload = {
-        status: verdict === "positive" ? "Positive" : "Negative",
-        path: editorContent,
-      };
-      await patchFinalVerdict(id as string, verificationType, payload);
-    } catch (error: any) {
-      console.log("Error:", error);
-      message.error(error?.response?.data?.message);
-    }
-  };
+  // const submitFinalVerdict = async () => {
+  //   try {
+  //     const payload = {
+  //       status: verdict === "positive" ? "Positive" : "Negative",
+  //       path: editorContent,
+  //     };
+  //     await patchFinalVerdict(id as string, verificationType, payload);
+  //   } catch (error: any) {
+  //     console.log("Error:", error);
+  //     message.error(error?.response?.data?.message);
+  //   }
+  // };
 
   // const approveLoan = async () => {
   //   try {

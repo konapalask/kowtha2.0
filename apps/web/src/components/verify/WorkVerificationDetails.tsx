@@ -144,17 +144,17 @@ export const WorkVerificationDetails: React.FC<
 
   const data = verificationData || {};
 
-  const handleEditorChange = (content: string) => {
-    // const liMatch = content.match(/<li>/g);
-    // const liCount = liMatch ? liMatch.length : 0;
+  // const handleEditorChange = (content: string) => {
+  //   // const liMatch = content.match(/<li>/g);
+  //   // const liCount = liMatch ? liMatch.length : 0;
 
-    // if (liCount === 0) {
-    //   // force at least one <li>
-    //   setEditorContent("<ul><li></li></ul>");
-    // } else {
-    setEditorContent(content);
-    // }
-  };
+  //   // if (liCount === 0) {
+  //   //   // force at least one <li>
+  //   //   setEditorContent("<ul><li></li></ul>");
+  //   // } else {
+  //   setEditorContent(content);
+  //   // }
+  // };
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -369,7 +369,7 @@ export const WorkVerificationDetails: React.FC<
               {
                 title: "Actions",
                 key: "actions",
-                render: (_, record) => (
+                render: () => (
                   <Button
                     type="text"
                     icon={<EditOutlined />}
@@ -407,7 +407,7 @@ export const WorkVerificationDetails: React.FC<
                     objectFit: "cover",
                     borderRadius: "4px",
                   }}
-                  preview={false}
+                  // preview={false}
                 />
                 {/* <Button
                   type="text"
