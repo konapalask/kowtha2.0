@@ -348,7 +348,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       (v: any) => v.type === type
                     );
                     return (
-                      <Col span={6}>
+                      <Col md={12} lg={12} xl={12} xxl={6}>
                         <Card
                           key={type}
                           size={"small"}
