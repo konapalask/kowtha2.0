@@ -46,10 +46,11 @@ export class AccountsService {
   private async sendOTPViaSMS(mobile: string, otp: string): Promise<void> {
     try {
       const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
+
       if (!fast2smsApiKey) {
         throw new Error('FAST2SMS_API_KEY is not configured');
       }
-      const org_name = 'Kowtha';
+
       const response = await axios.post(
         'https://www.fast2sms.com/dev/bulkV2',
         {
@@ -57,7 +58,7 @@ export class AccountsService {
           sender_id: 'BYNSCL',
           message: '166906',
           language: 'english',
-          variables_values: `${org_name}|${otp}`,
+          variables_values: 'Kowtha',
           flash: 0,
           numbers: mobile,
         },
@@ -97,7 +98,7 @@ export class AccountsService {
         throw new NotFoundException('Please use a valid number');
       }
 
-      if (isMobile && user.role !== UserRole.FieldExecutive) {
+      if (isMobile && !([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)) {
         throw new BadRequestException('Access denied: You are not authorized to login');
       }
 
@@ -151,13 +152,13 @@ export class AccountsService {
       }
 
 
-      if(user.role === UserRole.FieldExecutive && !deviceId){
+      if((user.role === UserRole.FieldExecutive || user.role === UserRole.PDFieldExecutive) && !deviceId){
         throw new UnauthorizedException('Access denied: Please contact administrator');
       }
       
       if(deviceId){
 
-        if(user.role !== UserRole.FieldExecutive){
+        if(!([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)){
           throw new UnauthorizedException('Access denied: You are not Authorized to login');
         }
 
