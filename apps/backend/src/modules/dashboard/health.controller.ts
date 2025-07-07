@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('')
+@ApiTags('health')
 @Controller('')
 export class HealthController {
   constructor() {}

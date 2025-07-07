@@ -13,42 +13,6 @@ import { GetMetricsDto } from './dto/get-metrics.dto';
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
-  @Get('health-check')
-  @UseGuards()
-  @ApiOperation({ summary: 'Check server health status' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns server health status including database connectivity',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Health check completed successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            status: { type: 'string', enum: ['healthy', 'unhealthy'] },
-            timestamp: { type: 'string', format: 'date-time' },
-            services: {
-              type: 'object',
-              properties: {
-                database: { type: 'string', enum: ['connected', 'disconnected'] },
-                server: { type: 'string', enum: ['running'] }
-              }
-            },
-            error: { type: 'string', nullable: true }
-          }
-        }
-      }
-    }
-  })
-  async getHealthStatus() {
-    return {
-      status: 200,
-      message: 'Health check completed successfully',
-    };
-  }
-
   @Get('metrics')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Get loan metrics for dashboard' })
