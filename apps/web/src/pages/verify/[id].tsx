@@ -216,6 +216,7 @@ export default function LoanVerifyDetails() {
             completeVerificationData={getCompleteVerificationData(
               "PermanentAddress"
             )}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "CurrentAddress":
@@ -231,6 +232,7 @@ export default function LoanVerifyDetails() {
             completeVerificationData={getCompleteVerificationData(
               "CurrentAddress"
             )}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "Work":
@@ -243,6 +245,7 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Work")}
             completeVerificationData={getCompleteVerificationData("Work")}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "Business":
@@ -255,6 +258,7 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Business")}
             completeVerificationData={getCompleteVerificationData("Business")}
+            fetchVerificationData={fetchVerificationData}
           />
         );
     }

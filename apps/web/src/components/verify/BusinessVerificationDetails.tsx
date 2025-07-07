@@ -32,6 +32,7 @@ interface BusinessVerificationDetailsProps {
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
   completeVerificationData: any;
+  fetchVerificationData: any;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -44,6 +45,7 @@ export const BusinessVerificationDetails: React.FC<
   fetchEditRequests,
   hasEditRequest,
   completeVerificationData,
+  fetchVerificationData,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -76,6 +78,7 @@ export const BusinessVerificationDetails: React.FC<
         // setOpen(false);
         // router?.push("/verify");
         // setLoading(false);
+        fetchVerificationData();
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -341,7 +344,7 @@ export const BusinessVerificationDetails: React.FC<
         editorContent={editorContent}
         disabled={hasEditRequest}
         handleSave={handleSave}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         open={open}
         setOpen={setOpen}
         verificationType="Business"
