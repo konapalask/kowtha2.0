@@ -5,7 +5,7 @@ import "react-quill/dist/quill.snow.css";
 
 interface FinalVerdictProps {
   disabled?: boolean;
-  verdict: boolean;
+  verdict: boolean | null | string;
   setVerdict: any;
   editorContent: any;
   setEditorContent: any;
