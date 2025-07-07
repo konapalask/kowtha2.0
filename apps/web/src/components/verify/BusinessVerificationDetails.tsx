@@ -57,7 +57,7 @@ export const BusinessVerificationDetails: React.FC<
   const [verdict, setVerdict] = useState(
     completeVerificationData?.approvedStatus === "Positive"
       ? "positive"
-      : completeVerificationData?.appprovedStatus === "Negative"
+      : completeVerificationData?.approvedStatus === "Negative"
         ? "negative"
         : null
   );
