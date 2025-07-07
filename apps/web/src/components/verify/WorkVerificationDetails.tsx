@@ -65,7 +65,7 @@ export const WorkVerificationDetails: React.FC<
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
-  const [verdict, setVerdict] = useState(
+  const [verdict, setVerdict] = useState<string | null>(
     completeVerificationData?.approvedStatus === "Positive"
       ? "positive"
       : completeVerificationData?.approvedStatus === "Negative"
@@ -482,7 +482,7 @@ export const WorkVerificationDetails: React.FC<
       </section> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={completeVerificationData?.approvedStatus}
+        verdict={completeVerificationData?.approvedStatus ?? verdict}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}

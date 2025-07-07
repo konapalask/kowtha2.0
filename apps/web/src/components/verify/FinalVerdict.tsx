@@ -95,7 +95,11 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
             formats={["list"]}
           />
           <div className="flex-end" style={{ margin: 8 }}>
-            <Button disabled={!verdict} type="primary" onClick={handleSave}>
+            <Button
+              disabled={!verdict || disabled}
+              type="primary"
+              onClick={handleSave}
+            >
               Save
             </Button>
           </div>

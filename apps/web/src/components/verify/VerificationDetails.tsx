@@ -247,7 +247,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           extra={
             <Button
               // type="primary"
-              style={{ border: "none" }}
+              disabled={hasEditRequest}
+              style={{ border: "none", background: "transparent" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("familyMemberDetails")}
             />
@@ -325,7 +326,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           extra={
             <Button
               // type="primary"
-              style={{ border: "none" }}
+              disabled={hasEditRequest}
+              style={{ border: "none", background: "transparent" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("thirdPartyCheck")}
             />
@@ -468,7 +470,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       {/* </Card> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus ?? verdict}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}

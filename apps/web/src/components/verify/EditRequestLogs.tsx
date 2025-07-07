@@ -256,7 +256,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                 borderColor: disabled ? "#d9d9d9" : undefined,
                 color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined,
               }}
-              // disabled={disabled}
+              disabled={disabled}
             >
               Request Approval
             </Button>
