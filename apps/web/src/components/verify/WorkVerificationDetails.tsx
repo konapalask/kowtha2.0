@@ -482,7 +482,7 @@ export const WorkVerificationDetails: React.FC<
       </section> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={completeVerificationData?.approvedStatus ?? verdict}
+        verdict={verdict}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}
@@ -493,7 +493,7 @@ export const WorkVerificationDetails: React.FC<
         editorContent={editorContent}
         disabled={hasEditRequest}
         handleSave={handleSave}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         open={open}
         setOpen={setOpen}
         verificationType="Work"
