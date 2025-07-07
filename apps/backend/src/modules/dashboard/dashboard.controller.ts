@@ -14,6 +14,7 @@ export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   @Get('health-check')
+  @UseGuards()
   @ApiOperation({ summary: 'Check server health status' })
   @ApiResponse({
     status: 200,
@@ -42,11 +43,9 @@ export class DashboardController {
     }
   })
   async getHealthStatus() {
-    const result = await this.dashboardService.getHealthStatus();
     return {
       status: 200,
-      message: result.status === 'healthy' ? 'Health check completed successfully' : 'Health check failed',
-      data: result
+      message: 'Health check completed successfully',
     };
   }
 

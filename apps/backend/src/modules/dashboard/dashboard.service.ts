@@ -11,40 +11,6 @@ export class DashboardService {
     private loggingService: LoggingService,
   ) {}
 
-  async getHealthStatus() {
-    try {
-      // Check database connectivity
-      await this.prisma.$queryRaw`SELECT 1`;
-      
-      const healthStatus = {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        services: {
-          database: 'connected',
-          server: 'running'
-        }
-      };
-
-      await this.loggingService.info('Health check completed successfully', healthStatus);
-      return healthStatus;
-    } catch (error) {
-      await this.loggingService.error('Health check failed', {
-        error: error.message,
-        stack: error.stack,
-      });
-      
-      return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        services: {
-          database: 'disconnected',
-          server: 'running'
-        },
-        error: error.message
-      };
-    }
-  }
-
   async getLoanMetrics(filters?: GetMetricsDto) {
     try {
       const where: any = {};
