@@ -334,7 +334,7 @@ export const BusinessVerificationDetails: React.FC<
         }}>Preview</Button> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={completeVerificationData?.approvedStatus ?? verdict}
+        verdict={verdict}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}

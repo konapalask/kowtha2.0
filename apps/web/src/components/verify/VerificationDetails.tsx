@@ -470,7 +470,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       {/* </Card> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={completeVerificationData?.approvedStatus ?? verdict}
+        verdict={verdict}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}
