@@ -34,6 +34,7 @@ interface VerificationDetailsProps {
   hasEditRequest: boolean;
   verificationType: string;
   completeVerificationData: any;
+  fetchVerificationData: any;
 }
 
 export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
@@ -45,6 +46,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   hasEditRequest,
   verificationType,
   completeVerificationData,
+  fetchVerificationData,
 }) => {
   // console.log(completeVerificationData?.approvedStatus);
   const router = useRouter();
@@ -63,7 +65,6 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         ? "negative"
         : null
   );
-  console.log(verdict);
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   // const [loading, setLoading] = useState<boolean>(false);
@@ -79,6 +80,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         // setLoading(true);
         // setOpen(false);
         // router?.push("/verify");
+        fetchVerificationData();
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -477,7 +479,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         editorContent={editorContent}
         disabled={hasEditRequest}
         handleSave={handleSave}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         open={open}
         setOpen={setOpen}
         verificationType={verificationType}

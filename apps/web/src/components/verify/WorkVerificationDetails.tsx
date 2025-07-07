@@ -41,6 +41,7 @@ interface WorkVerificationDetailsProps {
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
   completeVerificationData: any;
+  fetchVerificationData: any;
 }
 
 export const WorkVerificationDetails: React.FC<
@@ -53,6 +54,7 @@ export const WorkVerificationDetails: React.FC<
   fetchEditRequests,
   hasEditRequest,
   completeVerificationData,
+  fetchVerificationData,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -85,6 +87,7 @@ export const WorkVerificationDetails: React.FC<
         // router?.push("/verify");
         // // setVerdict(verdict);
         // setLoading(true);
+        fetchVerificationData();
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -479,7 +482,7 @@ export const WorkVerificationDetails: React.FC<
       </section> */}
       <FinalVerdict
         disabled={hasEditRequest}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         setVerdict={setVerdict}
         editorContent={editorContent}
         setEditorContent={setEditorContent}
