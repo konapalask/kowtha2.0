@@ -1483,6 +1483,7 @@ export class LoanService {
         return {
           id: verification.id,
           type: verification.type,
+          path: verification.path,
           status: verification.status,
           approvedStatus: verification.approvedStatus,
           finalReportPath: verification.finalReportPath,
