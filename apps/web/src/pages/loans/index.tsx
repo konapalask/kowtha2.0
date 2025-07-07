@@ -144,7 +144,7 @@ export default function Loans() {
       const options =
         result?.data?.data?.map((item: any) => ({
           label: (
-            <Row gutter={[0, 0]} style={{ width: "100%" }}>
+            <Row gutter={[0, 5]} style={{ width: "100%" }}>
               <Col xs={24} sm={24} md={1} xl={1}>
                 <Badge
                   dot
@@ -156,13 +156,18 @@ export default function Loans() {
                 xs={24}
                 sm={12}
                 md={8}
-                xl={15}
+                xl={10}
                 style={{ wordWrap: "break-word" }}
               >
-                <Typography.Text>{item?.name}</Typography.Text>
+                <Typography.Text>
+                  {" "}
+                  {item?.name?.length > 15
+                    ? item.name.slice(0, 15) + "..."
+                    : item?.name}
+                </Typography.Text>
               </Col>
 
-              <Col xs={24} sm={6} md={6} xl={4}>
+              <Col xs={24} sm={6} md={6} xl={9}>
                 <Tag color="blue">{item?.employeeCode}</Tag>
               </Col>
 
