@@ -14,7 +14,12 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
-  app.enableCors();
+  app.enableCors({
+    origin: ['http://localhost:3000', 'https://app.cakowtha.co.in'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
 
   // Use global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
