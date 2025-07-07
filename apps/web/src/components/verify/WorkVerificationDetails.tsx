@@ -40,6 +40,7 @@ interface WorkVerificationDetailsProps {
   verificationId: string;
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
+  completeVerificationData: any;
 }
 
 export const WorkVerificationDetails: React.FC<
@@ -51,17 +52,24 @@ export const WorkVerificationDetails: React.FC<
   verificationId,
   fetchEditRequests,
   hasEditRequest,
+  completeVerificationData,
 }) => {
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
+    completeVerificationData?.path || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
-  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  const [verdict, setVerdict] = useState(
+    completeVerificationData?.approvedStatus === "Positive"
+      ? "positive"
+      : completeVerificationData?.appprovedStatus === "Negative"
+        ? "negative"
+        : null
+  );
   // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
