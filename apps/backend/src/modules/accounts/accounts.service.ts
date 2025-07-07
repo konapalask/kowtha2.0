@@ -139,6 +139,13 @@ export class AccountsService {
         where: { mobile, status: 'Active' }
       });
 
+      await this.loggingService.info('User found', {
+        user: user,
+        mobile: mobile,
+        otp: otp,
+        deviceId: deviceId
+      });
+
       if (!user) {
         throw new NotFoundException('Access denied: User not found with this mobile number');
       }
