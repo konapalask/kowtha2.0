@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Select, Col, FormInstance } from "antd";
+import { Form, Input, Select, Col, FormInstance, InputNumber } from "antd";
 
 const { Option } = Select;
 
@@ -49,7 +49,7 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
           label="Aadhar Number"
           rules={[{ required: true, message: "Please enter aadhar name" }]}
         >
-          <Input />
+          <InputNumber minLength={12} maxLength={12} />
         </Form.Item>
       </Col>
 

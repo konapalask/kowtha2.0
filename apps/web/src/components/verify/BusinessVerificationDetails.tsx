@@ -261,7 +261,7 @@ export const BusinessVerificationDetails: React.FC<
                     objectFit: "cover",
                     borderRadius: "4px",
                   }}
-                  preview={false}
+                  // preview={false}
                 />
                 {/* <Button
                   type="text"
