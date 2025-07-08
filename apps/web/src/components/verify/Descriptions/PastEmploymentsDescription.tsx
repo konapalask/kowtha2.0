@@ -53,9 +53,9 @@ const PastEmploymentsDescription: React.FC<{
   changedFields?: string[];
   changedData?: any;
 }> = ({ data, extra, logs = false, changedFields = [], changedData = {} }) => {
-  const employments = data?.pastEmployments?.employments || [];
-  const prevEmployments = changedData?.pastEmployments?.employments || [];
-
+  const employments = data?.pastEmployment?.employments || [];
+  const prevEmployments = changedData?.pastEmployment?.employments || [];
+  // console.log(employments);
   function renderCell(field: string, idx: number, value: any) {
     if (
       prevEmployments[idx] &&
