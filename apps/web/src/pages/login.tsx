@@ -68,46 +68,48 @@ export default function Login() {
   // };
 
   const handleSendOTP = async (values: { mobile: string }) => {
-  try {
-    setLoading(true);
-    await generateOtpApi({ mobile: values.mobile });
-    setOtpSent(true);
-    message.success("OTP sent successfully");
-  } catch (error: any) {
-    console.error("OTP send error:", error);
+    try {
+      setLoading(true);
+      await generateOtpApi({ mobile: values.mobile });
+      setOtpSent(true);
+      message.success("OTP sent successfully");
+    } catch (error: any) {
+      console.error("OTP send error:", error);
 
-    if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
 
-      // Message can be string or array — handle both
-      const messageText = Array.isArray(data?.message)
-        ? data.message.join(", ")
-        : data?.message;
+        // Message can be string or array — handle both
+        const messageText = Array.isArray(data?.message)
+          ? data.message.join(", ")
+          : data?.message;
 
-      switch (status) {
-        case 400:
-          message.error(messageText || "Bad request. Please check the input.");
-          break;
-        case 403:
-          message.error(messageText || "Access denied.");
-          break;
-        case 404:
-          message.error(messageText || "Mobile number not found.");
-          break;
-        default:
-          message.error(messageText || "Something went wrong. Please try again.");
+        switch (status) {
+          case 400:
+            message.error(
+              messageText || "Bad request. Please check the input."
+            );
+            break;
+          case 403:
+            message.error(messageText || "Access denied.");
+            break;
+          case 404:
+            message.error(messageText || "Mobile number not found.");
+            break;
+          default:
+            message.error(
+              messageText || "Something went wrong. Please try again."
+            );
+        }
+      } else {
+        // For network errors or no response
+        message.error("Network error. Please check your connection.");
       }
-    } else {
-      // For network errors or no response
-      message.error("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   const handleVerifyOTP = async (values: { mobile: string; otp: string }) => {
     try {

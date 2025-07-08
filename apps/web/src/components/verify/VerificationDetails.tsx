@@ -213,28 +213,24 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
   return (
     <>
-      {/* Basic Details Section */}
       <BasicDetailsDescription
         data={data}
         extra={getButton("basicDetails")}
         logs={false}
       />
 
-      {/* Address Verification Section */}
       <AddressVerificationDescription
         data={data}
         extra={getButton("addressVerification")}
         logs={false}
       />
 
-      {/* Residence Details Section */}
       <ResidenceDetailsDescription
         data={data}
         extra={getButton("residenceDetails")}
         logs={false}
       />
 
-      {/* Family & Employment Details Section */}
       <FamilyEmploymentDescription
         data={data}
         extra={getButton("familyEmploymentDetails")}
@@ -293,19 +289,6 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 dataIndex: "stayingWithApplicant",
                 key: "stayingWithApplicant",
               },
-
-              // {
-              //   title: "Actions",
-              //   key: "actions",
-              //   render: (_, record) => (
-              //     <Button
-              //       type="text"
-              //       icon={<EditOutlined />}
-              //       onClick={() => onEdit("colleagueReferences")}
-              //       disabled={hasEditRequest}
-              //     />
-              //   ),
-              // },
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
