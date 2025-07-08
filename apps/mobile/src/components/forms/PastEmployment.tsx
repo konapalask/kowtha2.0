@@ -15,6 +15,8 @@ import {yupResolver} from '@hookform/resolvers/yup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 interface Employment {
   employerName: string;
@@ -71,6 +73,7 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
     handleSubmit,
     formState: {errors},
     setValue,
+    watch,
   } = useForm<PastEmploymentFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -87,7 +90,14 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
       ],
     },
   });
+  const fromDate = watch(`employments.${currentDateIndex}.fromDate`);
+  // console.log(dayjs(fromDate, 'DD/MM/YYYY').toDate());
+  // console.log(fromDate);
 
+  const parsed = dayjs(fromDate, 'DD/MM/YYYY', true);
+
+  // console.log(parsed.isValid()); // true
+  // console.log(parsed.toDate());
   const {fields, append, remove} = useFieldArray({
     control,
     name: 'employments',
@@ -103,7 +113,9 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
         `employments.${currentDateIndex}.fromDate`,
         dayjs(date).format('DD/MM/YYYY'),
       );
+      setValue(`employments.${currentDateIndex}.toDate`, '');
     }
+
     setFromDatePickerVisible(false);
   };
 
@@ -351,27 +363,31 @@ const PastEmployment: React.FC<Props> = ({initialData, onSubmit}) => {
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
 
-      <DateTimePickerModal
-        isVisible={isFromDatePickerVisible}
-        mode="date"
-        onConfirm={handleFromDateConfirm}
-        onCancel={() => setFromDatePickerVisible(false)}
-        date={new Date()}
-        minimumDate={new Date(1900, 0, 1)}
-        maximumDate={new Date()}
-        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-      />
+      {isFromDatePickerVisible && (
+        <DateTimePickerModal
+          isVisible={isFromDatePickerVisible}
+          mode="date"
+          onConfirm={handleFromDateConfirm}
+          onCancel={() => setFromDatePickerVisible(false)}
+          date={new Date()}
+          minimumDate={new Date(1900, 0, 1)}
+          maximumDate={new Date()}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+        />
+      )}
 
-      <DateTimePickerModal
-        isVisible={isToDatePickerVisible}
-        mode="date"
-        onConfirm={handleToDateConfirm}
-        onCancel={() => setToDatePickerVisible(false)}
-        date={new Date()}
-        minimumDate={new Date(1900, 0, 1)}
-        maximumDate={new Date()}
-        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-      />
+      {isToDatePickerVisible && (
+        <DateTimePickerModal
+          isVisible={isToDatePickerVisible}
+          mode="date"
+          onConfirm={handleToDateConfirm}
+          onCancel={() => setToDatePickerVisible(false)}
+          date={new Date()}
+          minimumDate={parsed.toDate() ?? new Date()}
+          maximumDate={new Date()}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+        />
+      )}
     </ScrollView>
   );
 };

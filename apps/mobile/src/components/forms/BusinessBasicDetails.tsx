@@ -319,7 +319,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
 
       {/* ActionSheets */}
       <ActionSheet ref={personMetSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Person Met</Text>
           {personMetOptions.map(option => (
             <TouchableOpacity
@@ -342,7 +342,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       <ActionSheet
         ref={isAddressSameSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Is the address same as initiated?
           </Text>

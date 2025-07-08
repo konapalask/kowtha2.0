@@ -70,7 +70,11 @@ const VerificationListScreen = () => {
   const fetchData = async (page = 1, shouldAppend = false) => {
     try {
       setLoading(true);
-      const response = await getFieldData(page, selectedFilter);
+      const response = await getFieldData(
+        page,
+        selectedFilter,
+        appNumberFilter,
+      );
       // console.log(response);
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
@@ -183,7 +187,7 @@ const VerificationListScreen = () => {
 
   useEffect(() => {
     fetchData(1, false);
-  }, [selectedFilter]);
+  }, [selectedFilter, appNumberFilter]);
 
   const onRefresh = async () => {
     setRefreshing(true);

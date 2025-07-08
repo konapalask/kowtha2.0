@@ -540,7 +540,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={officeLocalitySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Office Locality</Text>
           {officeLocalityOptions.map((option, index) => (
             <TouchableOpacity
@@ -557,7 +557,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       </ActionSheet>
 
       <ActionSheet ref={salaryModeSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Salary Mode</Text>
           {salaryModeOptions.map((option, index) => (
             <TouchableOpacity
@@ -576,7 +576,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={employerTypeSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Employer Type</Text>
           {employerTypeOptions.map((option, index) => (
             <TouchableOpacity
@@ -595,7 +595,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={natureOfServiceSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Nature of Service</Text>
           {natureOfServiceOptions.map((option, index) => (
             <TouchableOpacity

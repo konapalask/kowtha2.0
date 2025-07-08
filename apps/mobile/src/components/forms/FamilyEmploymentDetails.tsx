@@ -13,6 +13,7 @@ import {useForm, Controller} from 'react-hook-form';
 import {FamilyEmploymentDetailsFormData} from '../../types/verification';
 import {colors} from '../../constants/colors';
 import Toast from 'react-native-toast-message';
+import {stringify} from 'querystring';
 
 interface FamilyEmploymentDetailsProps {
   onSubmit: (data: FamilyEmploymentDetailsFormData) => void;
@@ -69,6 +70,17 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
   React.useEffect(() => {
     if (earningMembers) {
       trigger('earningMembers');
+    }
+
+    if (
+      totalFamilyMembers !== undefined &&
+      earningMembers !== undefined &&
+      parseInt(totalFamilyMembers) - parseInt(earningMembers) >= 0
+    ) {
+      setValue(
+        'dependents',
+        (parseInt(totalFamilyMembers) - parseInt(earningMembers)).toString(),
+      );
     }
   }, [earningMembers, totalFamilyMembers]);
 
@@ -164,6 +176,8 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
                   if (/^\d*$/.test(text)) {
                     onChange(text);
                     trigger('earningMembers');
+                    if (totalFamilyMembers - earningMembers >= 0) {
+                    }
                   }
                 }}
                 value={value}
@@ -305,7 +319,7 @@ const FamilyEmploymentDetails: React.FC<FamilyEmploymentDetailsProps> = ({
       <ActionSheet ref={isSpouseWorkingRef}>
         <View style={styles.actionSheet}>
           <Text style={styles.actionSheetTitle}>Is Spouse Working?</Text>
-          <View style={styles.actionSheetContent}>
+          <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
             {YES_NO_OPTIONS.map(option => (
               <TouchableOpacity
                 key={option}

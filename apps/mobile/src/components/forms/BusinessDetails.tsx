@@ -392,7 +392,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       <ActionSheet
         ref={nameBoardSeenSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Name Board was seen</Text>
           {yesNoOptions.map(option => (
             <TouchableOpacity
@@ -410,7 +410,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       <ActionSheet
         ref={nameBoardMatchedSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Is it matched with the Initiation?
           </Text>
@@ -430,7 +430,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       <ActionSheet
         ref={constitutionSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Constitution of The Business
           </Text>
@@ -452,7 +452,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       <ActionSheet
         ref={isAddressTraceableSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Is Business address traceable?
           </Text>
@@ -473,7 +473,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       {/* <ActionSheet
         ref={keyManagerRelationSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Relationship</Text>
           {relationshipOptions.map(option => (
             <TouchableOpacity
@@ -494,7 +494,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
       <ActionSheet
         ref={isBusinessSeasonalRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Is Business seasonal?</Text>
           {yesNoOptions.map(option => (
             <TouchableOpacity

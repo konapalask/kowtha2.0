@@ -375,7 +375,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={residenceStatusRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Residence Status</Text>
           {RESIDENCE_STATUS_OPTIONS.map(option => (
             <TouchableOpacity
@@ -394,7 +394,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={residenceTypeRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Residence Type</Text>
           {RESIDENCE_TYPE_OPTIONS.map(option => (
             <TouchableOpacity
@@ -413,7 +413,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={standardOfLivingRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Standard of Living</Text>
           {QUALITY_OPTIONS.map(option => (
             <TouchableOpacity
@@ -432,7 +432,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={localityTypeRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Locality Type</Text>
           {LOCALITY_TYPE_OPTIONS.map(option => (
             <TouchableOpacity
@@ -451,7 +451,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={accessibilityRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Accessibility</Text>
           {ACCESSIBILITY_OPTIONS.map(option => (
             <TouchableOpacity
@@ -470,7 +470,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={nameBoardVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Visibility</Text>
           {YES_NO_OPTIONS.map(option => (
             <TouchableOpacity
@@ -489,7 +489,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={politicalSymbolVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Visibility</Text>
           {YES_NO_OPTIONS.map(option => (
             <TouchableOpacity

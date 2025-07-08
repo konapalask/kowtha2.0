@@ -21,9 +21,9 @@ type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   'VerificationList'
 >;
 
-const fetchUserDetails = async () => {
-  return await getItem('userDetails');
-};
+// const fetchUserDetails = async () => {
+//   return await getItem('userDetails');
+// };
 
 const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   isLoggedIn,
@@ -43,6 +43,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
       try {
         const details = await getItem('userDetails');
         setUserDetails(details);
+        console.log(details);
       } catch (error) {
         if (testUser) {
           setUserDetails({
@@ -69,10 +70,12 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
     //     console.log(error);
     //   }
     // };
-    checkTestUser();
-    fetchUserDetails();
+    if (profileModalVisible) {
+      checkTestUser();
+      fetchUserDetails();
+    }
     // checkAttendance();
-  }, []);
+  }, [profileModalVisible]);
 
   const toggleMenu = () => setVisible(!visible);
 

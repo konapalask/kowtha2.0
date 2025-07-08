@@ -243,7 +243,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
         )}
       </ScrollView>
       <ActionSheet ref={relationshipRef}>
-        <View style={styles.actionSheet}>
+        <View style={[styles.actionSheet, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Relationship</Text>
           {RELATIONSHIP_OPTIONS.map(option => (
             <TouchableOpacity
@@ -265,7 +265,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
         </View>
       </ActionSheet>
       <ActionSheet ref={feedbackStatusRef}>
-        <View style={styles.actionSheet}>
+        <View style={[styles.actionSheet, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Feedback Status</Text>
           {FEEDBACK_OPTIONS.map(option => (
             <TouchableOpacity

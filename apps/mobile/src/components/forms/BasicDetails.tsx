@@ -166,17 +166,24 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <Controller
         control={control}
         name="aadhar"
-        rules={{required: 'Aadhar is required'}}
+        rules={{
+          required: 'Aadhar is required',
+          pattern: {
+            value: /^[1-9]{1}[0-9]{11}$/, // starts with non-zero, total 12 digits
+            message: 'Aadhar must be a valid 12-digit number',
+          },
+        }}
         render={({field: {onChange, onBlur, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Aadhar Number</Text>
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Enter Aadhar Number"
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
-              // editable={false}
+              keyboardType="numeric"
+              maxLength={12}
               placeholderTextColor={colors.text.disabled}
             />
             {errors.aadhar && (
@@ -447,7 +454,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <ActionSheet
         ref={maritalStatusSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Marital Status</Text>
           {maritalStatusOptions.map(status => (
             <TouchableOpacity
@@ -469,7 +476,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <ActionSheet
         ref={educationQualificationSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Select Education Qualification
           </Text>
@@ -488,7 +495,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       </ActionSheet>
 
       <ActionSheet ref={categorySheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Category</Text>
           {categoryOptions.map(cat => (
             <TouchableOpacity
@@ -510,7 +517,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       <ActionSheet
         ref={isApplicantAvailableSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Is Applicant Available?</Text>
           {yesNoOptions.map(option => (
             <TouchableOpacity
@@ -530,7 +537,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       </ActionSheet>
 
       <ActionSheet ref={relationSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Relation</Text>
           {relationOptions.map(option => (
             <TouchableOpacity
