@@ -51,6 +51,8 @@ export class AccountsService {
         throw new Error('FAST2SMS_API_KEY is not configured');
       }
 
+      const org_name = 'Kowtha';
+
       const response = await axios.post(
         'https://www.fast2sms.com/dev/bulkV2',
         {
@@ -58,7 +60,7 @@ export class AccountsService {
           sender_id: 'BYNSCL',
           message: '166906',
           language: 'english',
-          variables_values: otp,
+          variables_values: `${org_name}|${otp}`,
           flash: 0,
           numbers: mobile,
         },
