@@ -954,4 +954,28 @@ export class LoanController {
       data: result
     };
   }
+
+  @Delete(':id')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Delete a loan and all related entities (cascade)' })
+  @ApiResponse({
+    status: 200,
+    description: 'The loan and all related entities have been successfully deleted',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Loan and all related entities deleted' },
+        data: { type: 'object' }
+      }
+    }
+  })
+  async deleteLoan(@Param('id') loanId: string) {
+    const result = await this.loanService.deleteLoan(Number(loanId));
+    return {
+      status: 200,
+      message: 'Loan and all related entities deleted',
+      data: result
+    };
+  }
 } 

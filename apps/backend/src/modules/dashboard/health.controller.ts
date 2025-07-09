@@ -3,7 +3,6 @@ import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { RolesGuard } from '../accounts/guards/roles.guard';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
 @ApiTags('health')
 @Controller('')
 export class HealthController {

@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { ApprovedStatus, LoanStatus, VerificationStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { GetMetricsDto } from './dto/get-metrics.dto';
+import gplay from 'google-play-scraper';
 
 @Injectable()
 export class DashboardService {
@@ -96,6 +97,8 @@ export class DashboardService {
 
   async getAppDeployments() {
     try {
+      const appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
+      
       const deployments = await this.prisma.appDeployment.findFirst({
         where: { isActive: true },
         orderBy: { createdAt: 'desc' }

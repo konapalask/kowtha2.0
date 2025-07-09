@@ -2592,10 +2592,6 @@ export class LoanService {
             <th>If Less than 3 Years in current city, then mention Reason for Change</th>
             <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
           </tr>
-          <tr>
-            <th>Reason for Change</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
-          </tr>
         </table>
       </div>
 
@@ -2837,6 +2833,58 @@ export class LoanService {
         data: createVerificationRetryDto,
         error: error.message,
         stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async deleteLoan(loanId: number) {
+    try {
+      // Start a transaction to delete all related entities
+      return await this.prisma.$transaction(async (prisma) => {
+        // Delete VerificationRetries for all verifications of this loan
+        const verifications = await prisma.verification.findMany({
+          where: { loanId },
+          select: { id: true },
+        });
+        const verificationIds = verifications.map(v => v.id);
+        if (verificationIds.length > 0) {
+          await prisma.verificationRetries.deleteMany({
+            where: { verificationId: { in: verificationIds } },
+          });
+        }
+
+        // Delete EditRequests for this loan
+        await prisma.editRequest.deleteMany({
+          where: { loanId },
+        });
+        // Delete EditRequests for verifications of this loan
+        if (verificationIds.length > 0) {
+          await prisma.editRequest.deleteMany({
+            where: { verificationId: { in: verificationIds } },
+          });
+        }
+
+        // Delete Verifications for this loan
+        await prisma.verification.deleteMany({
+          where: { loanId },
+        });
+
+        // Finally, delete the loan
+        const deletedLoan = await prisma.loan.delete({
+          where: { id: loanId },
+        });
+
+        await this.loggingService.info('Loan and all related entities deleted', {
+          loanId,
+        });
+        return { message: 'Loan and all related entities deleted', deletedLoan };
+      });
+    } catch (error) {
+      await this.loggingService.error('Failed to delete loan and related entities', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }
