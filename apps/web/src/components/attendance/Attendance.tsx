@@ -314,12 +314,16 @@ export default function Attendance({ dateRange }: AttendanceProps) {
         rowKey={(record) => record.userId}
         loading={loading}
         bordered
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: false,
-          position: ["bottomCenter"],
-          showTotal: (total) => `Total ${total ?? 0} items`,
-        }}
+        pagination={
+          filteredData.length >= 10
+            ? {
+                pageSize: 10,
+                showSizeChanger: false,
+                position: ["bottomCenter"],
+                showTotal: (total) => `Total ${total ?? 0} items`,
+              }
+            : false
+        }
         scroll={{ x: "max-content" }}
       />
     </div>

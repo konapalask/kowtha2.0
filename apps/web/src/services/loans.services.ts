@@ -130,3 +130,7 @@ export const deleteFieldAssignmentApi = (
     data: payload,
   });
 };
+
+export const deleteLoanApi = (id: number) => {
+  return axiosInstance.delete<any>(`/loans/${id}`);
+};
