@@ -117,7 +117,7 @@ const WorkVerification = () => {
       bankName: userData?.loan?.bankName,
       prospectNumber: userData?.loan?.applicationNumber,
       purposeOfLoan: userData?.loan?.loanType,
-      loanAmount: userData?.loanAmount?.toString(),
+      loanAmount: userData?.loan?.loanAmount?.toString() ?? '',
       tenure: '',
       // panNumber: '',
       // aadharNumber: '',
@@ -125,7 +125,7 @@ const WorkVerification = () => {
     },
     employmentDetails: {
       currentOfficeName: '',
-      officeAddress: '',
+      officeAddress: userData?.applicantAddress ?? '',
       yearsInCurrentJob: '',
       totalWorkExperience: '',
       companySize: '',
@@ -405,7 +405,6 @@ const WorkVerification = () => {
 
         {investigable && (
           <>
-            {' '}
             <CollapsibleSection
               title="Basic Details"
               isExpanded={expandedSections.basicDetails}

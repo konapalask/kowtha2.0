@@ -21,7 +21,7 @@ export type BusinessMiscellaneousFormData = {
   // illegalSetupObserved: string;
   politicallyConnected: string;
   // privateFinanceOrChits: string;
-  businessActivity: string;
+  // businessActivity: string;
   // businessActivityOther?: string;
   areaOfPremises: string;
   localityOfBusiness: string;
@@ -70,7 +70,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       // illegalSetupObserved: '',
       politicallyConnected: '',
       // privateFinanceOrChits: '',
-      businessActivity: '',
+      // businessActivity: '',
       // businessActivityOther: '',
       areaOfPremises: '',
       localityOfBusiness: '',
@@ -83,7 +83,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
   }, [initialData, reset]);
 
   const ownershipOfPremises = watch('ownershipOfPremises');
-  const businessActivity = watch('businessActivity');
+  // const businessActivity = watch('businessActivity');
 
   // ActionSheet refs
   const ownershipSheetRef = useRef<ActionSheetRef>(null);
@@ -410,7 +410,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       /> */}
       {/* 25. Business activity (Trading/Services/Manufacturing/Others, with 'others' input) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="businessActivity"
         rules={{required: 'Business activity is required'}}
@@ -432,7 +432,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* {businessActivity === 'Others' && (
         <Controller
           control={control}
@@ -518,7 +518,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         </View>
       </ActionSheet> */}
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={illegalSetupSheetRef}
         containerStyle={styles.actionSheet}>
         <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
@@ -535,7 +535,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={areaOfPremisesSheetRef}
@@ -594,7 +594,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={privateFinanceSheetRef}
         containerStyle={styles.actionSheet}>
         <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
@@ -613,9 +613,9 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={businessActivitySheetRef}
         containerStyle={styles.actionSheet}>
         <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
@@ -632,7 +632,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
     </ScrollView>
   );
 };

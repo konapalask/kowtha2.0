@@ -51,10 +51,8 @@ const validationSchema = yup.object().shape({
               return /^[0-9]+$/.test(value);
             },
           ),
-        emailAddress: yup
-          .string()
-          .email('Invalid email address')
-          .required('Email Address is required'),
+        emailAddress: yup.string().email('Invalid email address'),
+        // .required('Email Address is required'),
       }),
     )
     .required('At least one reference is required'),
