@@ -12,6 +12,8 @@ import {colors} from '../../constants/colors';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import ExtraDimensions from 'react-native-extra-dimensions-android';
 
 interface WorkBasicDetailsFormData {
   applicantName: string;
@@ -61,7 +63,8 @@ const QUALIFICATION_OPTIONS = [
 
 const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const qualificationSheetRef = useRef<ActionSheetRef>(null);
-
+  const insets = useSafeAreaInsets();
+  // console.log(insets);
   const {
     control,
     handleSubmit,
@@ -346,7 +349,11 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={qualificationSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View
+          style={[
+            styles.actionSheetContent,
+            {paddingBottom: insets.bottom || 50},
+          ]}>
           <Text style={styles.actionSheetTitle}>Select Qualification</Text>
           {QUALIFICATION_OPTIONS.map((option, index) => (
             <TouchableOpacity

@@ -288,7 +288,7 @@ const BusinessVerification = () => {
         type: 'error',
         text1: 'Validation Error',
         text2: 'Please fill all mandatory fields before submitting',
-        position: 'bottom',
+        position: 'top',
       });
       return;
     }

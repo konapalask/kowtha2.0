@@ -504,7 +504,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       </TouchableOpacity>
 
       <ActionSheet ref={addressSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Address Type</Text>
           {addressTypes.map((option, index) => (
             <TouchableOpacity
@@ -523,7 +523,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet
         ref={addressCategorySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Address Category</Text>
           {addressCategories.map((category, index) => (
             <TouchableOpacity
@@ -542,7 +542,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet
         ref={yearsAtResidenceSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Select Years at Current Residence
           </Text>
@@ -563,7 +563,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet
         ref={yearsInCitySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Select Years in Current City
           </Text>
@@ -584,7 +584,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet
         ref={addressMismatchSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Is there an Address Mismatch?
           </Text>
@@ -604,7 +604,7 @@ const AddressVerification: React.FC<AddressVerificationProps> = ({
       <ActionSheet
         ref={addressProofSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Address Proof</Text>
           {addressProofOptions.map((category, index) => (
             <TouchableOpacity

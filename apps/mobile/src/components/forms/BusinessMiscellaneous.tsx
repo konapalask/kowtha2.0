@@ -466,7 +466,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
 
       {/* ActionSheets */}
       <ActionSheet ref={ownershipSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Ownership Type</Text>
           {OWNERSHIP_OPTIONS.map((type, index) => (
             <TouchableOpacity
@@ -483,7 +483,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       </ActionSheet>
 
       <ActionSheet ref={stockSeenSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Stock Seen?</Text>
           {STOCK_SEEN_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -502,7 +502,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       {/* <ActionSheet
         ref={employeesSeenSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Number of Employees Seen</Text>
           {EMPLOYEES_SEEN_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -521,7 +521,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={illegalSetupSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Illegal Setup Observed?</Text>
           {ILLEGAL_SETUP_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -540,7 +540,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={areaOfPremisesSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Area of premises</Text>
           {areaOfPremisesOptions.map((option, index) => (
             <TouchableOpacity
@@ -559,7 +559,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={locationTypeSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Locality of Business</Text>
           {localityOptions.map((option, index) => (
             <TouchableOpacity
@@ -578,7 +578,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={politicallyConnectedSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Politically Connected?</Text>
           {POLITICALLY_CONNECTED_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -597,7 +597,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={privateFinanceSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Private Finance/Chits Operated?
           </Text>
@@ -618,7 +618,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={businessActivitySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Business Activity</Text>
           {BUSINESS_ACTIVITY_OPTIONS.map((option, index) => (
             <TouchableOpacity

@@ -441,7 +441,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
       </TouchableOpacity>
 
       <ActionSheet ref={relationSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Relation</Text>
           {relationOptions.map((option, index) => (
             <TouchableOpacity
@@ -466,7 +466,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
       <ActionSheet
         ref={employmentTypeSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Employment Type</Text>
           {employmentTypeOptions.map((option, index) => (
             <TouchableOpacity
@@ -488,7 +488,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
       <ActionSheet
         ref={educationalQualificationSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Select Educational Qualification
           </Text>
@@ -512,7 +512,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
       <ActionSheet
         ref={stayingWithSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Staying with Applicant?</Text>
           {stayingWithOptions.map((option, index) => (
             <TouchableOpacity
