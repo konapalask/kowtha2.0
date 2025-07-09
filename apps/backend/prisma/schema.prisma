@@ -145,24 +145,24 @@ model Office {
 }
 
 model Verification {
-  id               Int                @id @default(autoincrement())
-  loanId           Int
-  loan             Loan               @relation(fields: [loanId], references: [id])
-  type             VerificationType
-  addressType      AddressType?
-  approvedStatus   ApprovedStatus?
-  fieldExecutiveId Int
-  fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
-  status           VerificationStatus
-  locationType     LocationType?
-  path             String? // Array of S3 paths for verification documents
-  finalReportPath  String? // S3 path for final report
-  applicantAddress String?
-  verificationData Json? // JSON field to store address/work data
-  pictureSource    PictureSource? // Source of the uploaded picture
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  editRequests     EditRequest[] // Add this relation
+  id                  Int                @id @default(autoincrement())
+  loanId              Int
+  loan                Loan               @relation(fields: [loanId], references: [id])
+  type                VerificationType
+  addressType         AddressType?
+  approvedStatus      ApprovedStatus?
+  fieldExecutiveId    Int
+  fieldExecutive      User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
+  status              VerificationStatus
+  locationType        LocationType?
+  path                String? // Array of S3 paths for verification documents
+  finalReportPath     String? // S3 path for final report
+  applicantAddress    String?
+  verificationData    Json? // JSON field to store address/work data
+  pictureSource       PictureSource? // Source of the uploaded picture
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  editRequests        EditRequest[] // Add this relation
   verificationRetries VerificationRetries[]
   @@unique([loanId, type])
 }
