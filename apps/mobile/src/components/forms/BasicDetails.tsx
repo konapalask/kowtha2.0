@@ -41,6 +41,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       availablePersonRelation: '',
       availablePersonRelationOther: '',
       aadhar: '',
+      panNumber: '',
     },
   });
 
@@ -158,6 +159,39 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
               <Text style={styles.errorText}>
                 {errors.applicantName.message}
               </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="panNumber"
+        rules={{
+          required: 'PAN number is required',
+          pattern: {
+            value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+            message: 'Invalid PAN number format',
+          },
+        }}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>PAN Number</Text>
+            <TextInput
+              style={[styles.input, {color: colors.text.primary}]}
+              value={value}
+              onChangeText={text => {
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter PAN number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.panNumber && (
+              <Text style={styles.errorText}>{errors.panNumber.message}</Text>
             )}
           </View>
         )}

@@ -80,8 +80,8 @@ const AttendanceCard: React.FC<{
   const isValidTime = () => {
     const currentTime = dayjs();
 
-    const start = currentTime.clone().hour(8).minute(0).second(0);
-    const end = currentTime.clone().hour(11).minute(0).second(0);
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       // console.log('in bounds');
       return true;
@@ -114,10 +114,10 @@ const AttendanceCard: React.FC<{
         </>
       ) : (
         <View style={{}}>
-          <Icon name="information-circle-outline" size={28} color={'green'} />
+          <Icon name="information-circle-outline" size={28} color={'orange'} />
           <Text
             style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
-            Already logged in for the day
+            Login is unavailable now
           </Text>
         </View>
       )}

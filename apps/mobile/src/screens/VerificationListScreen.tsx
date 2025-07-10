@@ -76,6 +76,7 @@ const VerificationListScreen = () => {
         appNumberFilter,
       );
       // console.log(response);
+      console.log(response?.data?.isAvailableToday ? 'Available' : null);
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
         date: dayjs().format('YYYY-MM-DD'),
@@ -159,9 +160,12 @@ const VerificationListScreen = () => {
   const checkAttendance = async () => {
     try {
       const details = await getItem('attendance');
+      console.log(details);
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-      setIsLoggedIn(isToday);
+      isToday && details?.status === 'Available'
+        ? setIsLoggedIn(true)
+        : setIsLoggedIn(false);
     } catch (error) {
       console.log(error);
     }
@@ -169,8 +173,8 @@ const VerificationListScreen = () => {
 
   const validTime = () => {
     const currentTime = dayjs();
-    const start = currentTime.clone().hour(8).minute(0).second(0);
-    const end = currentTime.clone().hour(11).minute(0).second(0);
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
 
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       return true;
@@ -365,6 +369,7 @@ const VerificationListScreen = () => {
               id: item?.id,
               verificationId: item?.loanId,
               address: item?.applicantAddress,
+              businessName: item?.businessName,
             };
             if (item?.type === 'Work') {
               navigation.navigate('WorkVerification' as any, {

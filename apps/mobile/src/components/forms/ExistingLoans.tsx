@@ -101,6 +101,8 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                 ]}
                 value={value}
                 onChangeText={onChange}
+                placeholder="Enter bank name"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.loans?.[index]?.bankName && (
                 <Text style={styles.errorText}>
@@ -124,6 +126,8 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                 ]}
                 value={value}
                 onChangeText={onChange}
+                placeholder="Enter purpose"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.loans?.[index]?.purpose && (
                 <Text style={styles.errorText}>
@@ -154,6 +158,8 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                   }
                 }}
                 keyboardType="numeric"
+                placeholder="Enter loan amount"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.loans?.[index]?.loanAmount && (
                 <Text style={styles.errorText}>
@@ -184,6 +190,8 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                   }
                 }}
                 keyboardType="numeric"
+                placeholder="Enter EMI"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.loans?.[index]?.emi && (
                 <Text style={styles.errorText}>
@@ -214,6 +222,8 @@ const ExistingLoans: React.FC<Props> = ({initialData, onSubmit}) => {
                   }
                 }}
                 keyboardType="numeric"
+                placeholder="Enter tenure"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.loans?.[index]?.tenure && (
                 <Text style={styles.errorText}>

@@ -22,6 +22,8 @@ export type BusinessBasicDetailsFormData = {
   businessAddress: string;
   isAddressSame: string;
   addressCorrection?: string;
+  isBusinessNameSame: string;
+  correctedBusinessName: string;
 };
 
 type BusinessBasicDetailsProps = {
@@ -60,6 +62,8 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       businessAddress: '',
       isAddressSame: '',
       addressCorrection: '',
+      isBusinessNameSame: '',
+      correctedBusinessName: '',
     },
   });
 
@@ -71,9 +75,11 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
 
   const personMetSheetRef = useRef<ActionSheetRef>(null);
   const isAddressSameSheetRef = useRef<ActionSheetRef>(null);
+  const isBusinessNameRef = useRef<ActionSheetRef>(null);
 
   const watchedPersonMet = watch('personMet');
   const watchedIsAddressSame = watch('isAddressSame');
+  const watchedIsBusinessNameSame = watch('isBusinessNameSame');
 
   return (
     <ScrollView style={styles.container}>
@@ -188,7 +194,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Business Name</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.readOnlyInput]}
               placeholder="Enter business name"
               onBlur={onBlur}
               onChangeText={onChange}
@@ -196,15 +202,72 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
               placeholderTextColor={colors.text.disabled}
               multiline
               numberOfLines={3}
+              readOnly
             />
-            {errors.businessAddress && (
+            {errors.businessName && (
               <Text style={styles.errorText}>
-                {errors.businessAddress.message}
+                {errors.businessName.message}
               </Text>
             )}
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="isBusinessNameSame"
+        rules={{
+          required: 'Please specify if business name is same as initiated',
+        }}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Is business name same as initiated?
+            </Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isBusinessNameRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isBusinessNameSame && (
+              <Text style={styles.errorText}>
+                {errors.isBusinessNameSame.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+      {/* Address Correction if No */}
+      {watchedIsBusinessNameSame === 'No' && (
+        <Controller
+          control={control}
+          name="correctedBusinessName"
+          rules={{required: 'Please provide the corrected business name'}}
+          render={({field: {onChange, onBlur, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Business Name Correction</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter corrected business name"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+                multiline
+                numberOfLines={2}
+              />
+              {errors.correctedBusinessName && (
+                <Text style={styles.errorText}>
+                  {errors.correctedBusinessName.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -356,6 +419,27 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
                   setValue('addressCorrection', '');
                 }
                 isAddressSameSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      <ActionSheet ref={isBusinessNameRef} containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>
+            Is the business name same as initiated?
+          </Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isBusinessNameSame', option);
+                if (option === 'Yes') {
+                  setValue('correctedBusinessName', '');
+                }
+                isBusinessNameRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
