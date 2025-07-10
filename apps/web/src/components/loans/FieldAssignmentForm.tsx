@@ -89,10 +89,28 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       setLoading(true);
       if (verification) {
         await updateExecutivesApi(loanId, finalData);
+        // Determine which fields are being updated
+        const feChanged =
+          finalData.fieldExecutiveId &&
+          finalData.fieldExecutiveId !== verification.fieldExecutiveId;
+        const verifierChanged =
+          finalData.verifierId &&
+          finalData.verifierId !== verification.verifierId;
+        let msg = "";
+        if (feChanged && verifierChanged) {
+          msg = "Field executive and verifier updated successfully";
+        } else if (feChanged) {
+          msg = "Field executive updated successfully";
+        } else if (verifierChanged) {
+          msg = "Verifier updated successfully";
+        } else {
+          msg = "Assignment updated successfully";
+        }
+        message.success(msg);
       } else {
         await assignExecutivesApi(loanId, finalData);
+        message.success("Field executive and verifier are assigned successfully");
       }
-      message.success("Field executive assigned successfully");
       fetchLoans();
       setCurrentOffice(userDetails?.officeId);
       setFieldExecutiveEdit((prev: any) => ({ ...prev, [type]: false }));
@@ -300,7 +318,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 rules={[
                   {
                     required: true,
-                    message: "Please select a field executive",
+                    message: "Please select a verifier",
                   },
                 ]}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
