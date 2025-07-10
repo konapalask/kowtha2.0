@@ -447,7 +447,8 @@ export class LoanService {
     fieldExecutiveId?: number,
     address?: string,
     verifierId?: number,
-    locationType?: LocationType
+    locationType?: LocationType,
+    businessName?: string
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -475,6 +476,7 @@ export class LoanService {
               status: 'Pending',
               applicantAddress: address || null,
               locationType: locationType || null,
+              businessName: businessName || null,
              }
            });
 
@@ -732,6 +734,13 @@ export class LoanService {
                   employeeCode: true,
                   role: true
                 }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
               }
             }
           }
@@ -976,6 +985,7 @@ export class LoanService {
     fieldExecutiveId?: number,
     address?: string,
     verifierId?: number,
+    businessName?: string
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -1011,6 +1021,7 @@ export class LoanService {
             ...(fieldExecutiveId && { fieldExecutiveId }),
             ...(verifierId && { verifierId }),
             ...(address && { applicantAddress: address }),
+            ...(businessName && { businessName }),
             status: 'Pending', // Reset status when assignment is updated
           },
         });
@@ -1448,6 +1459,13 @@ export class LoanService {
           verifications: {
             include: {
               fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
+              },
+              verifier: {
                 select: {
                   id: true,
                   name: true,

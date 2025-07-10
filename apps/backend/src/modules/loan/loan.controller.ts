@@ -278,7 +278,7 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number; locationType?: LocationType },
+    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number; locationType?: LocationType; businessName?: string },
   ) {
     const parsedLoanId = parseInt(loanId, 10);
     if (isNaN(parsedLoanId)) {
@@ -291,7 +291,8 @@ export class LoanController {
       body.fieldExecutiveId,
       body.address,
       body.verifierId,
-      body.locationType
+      body.locationType,
+      body.businessName
     );
     return {
       status: 200,

@@ -35,4 +35,12 @@ export class UpdateAssignmentDto {
   @IsNumber()
   @IsOptional()
   verifierId?: number;
+
+  @ApiProperty({
+    description: 'Business name for verification',
+    required: false
+  })
+  @IsNumber()
+  @IsOptional()
+  businessName?: string;
 } 
