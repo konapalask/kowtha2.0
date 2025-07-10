@@ -348,9 +348,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       (v: any) => v.type === type
                     );
                     return (
-                      <Col md={12} lg={12} xl={12} xxl={6}>
+                      <Col md={12} lg={12} xl={12} xxl={6} key={type}>
                         <Card
-                          key={type}
                           size={"small"}
                           title={label}
                           style={{
@@ -384,11 +383,6 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   {verification.status}
                                 </Tag>
                               )}
-                              {/* {verification&&(
-                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
-                             <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f"}} />
-                           </Popconfirm>
-                          )} */}
                             </>
                           }
                         >
@@ -497,6 +491,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   </div>
                                 </div>
                               )}
+                              {fieldExecutiveEdit[type] ? (
+                                <div style={{ marginTop: 8 }}></div>
+                              ) : (
+                                <div style={{ marginTop: 8 }}>
+                                  <span>Verifier:</span>{" "}
+                                  {verification?.verifier?.name ||
+                                    "Not assigned"}
+                                </div>
+                              )}
                             </div>
                           )}
                           {(!verification || fieldExecutiveEdit[type]) && (
@@ -522,26 +525,6 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                     );
                   })}
                 </Row>
-                {/* <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 16,
-                  }}
-                > */}
-                <Card size="small" style={{ marginTop: 16, width: 300 }}>
-                  <Form.Item layout="vertical" label="Select Verifier">
-                    <Select
-                      placeholder="Select Verifier"
-                      value={loanDetails?.verifierId || null}
-                      options={verifiers}
-                      style={{ width: 200 }}
-                      onSelect={handleVerifierSelect}
-                    />
-                  </Form.Item>
-                </Card>
-                {/* </div> */}
               </>
             )}
           </>

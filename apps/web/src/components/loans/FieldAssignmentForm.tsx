@@ -14,6 +14,7 @@ import {
 import React from "react";
 import { assignExecutivesApi } from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
+import { UserOutlined } from "@ant-design/icons";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -68,12 +69,12 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       office?: string;
       fieldExecutiveId: any;
       address: string;
-      // verifierId: string;
+      verifierId: string;
     }
   ) => {
-    // console.log(values?.fieldExecutiveId?.value);
+    // console.log(values);
     const finalData = {
-      // verifierId: 8,
+      verifierId: values?.verifierId,
       verificationType: getVerificationType(type),
       fieldExecutiveId: values.fieldExecutiveId?.value,
       address: values.address,
@@ -105,7 +106,11 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         initialValues={
           verification
             ? {
-                assignmentMethod: null,
+                assignmentMethod:
+                  verification?.office &&
+                  verification?.office !== userDetails?.officeId
+                    ? "Remote"
+                    : "Local",
                 office: verification?.office,
                 fieldExecutiveId: verification?.fieldExecutiveId?.value,
                 address: verification?.applicantAddress || "",
@@ -214,7 +219,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             return (
               <Form.Item
                 name="fieldExecutiveId"
-                // label="Field Executive"
+                label="Field Executive"
                 rules={[
                   {
                     required: true,
@@ -249,23 +254,61 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   }
                   style={{ width: "100%" }}
                   options={fieldExecutives}
-                  onSelect={() => form.submit()}
+                  // onSelect={() => form.submit()}
+                />
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues?.assignmentMethod !== currentValues?.assignmentMethod ||
+            prevValues?.office !== currentValues?.office ||
+            !prevValues?.address
+          }
+        >
+          {({ getFieldValue }) => {
+            const address = getFieldValue("address");
+            const assignmentMethod = getFieldValue("assignmentMethod");
+            const office = getFieldValue("office");
+            return (
+              <Form.Item
+                label=" Verifier"
+                name={"verifierId"}
+                style={{ marginBottom: 0 }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a field executive",
+                  },
+                ]}
+                hidden={!address || (assignmentMethod === "Remote" && !office)}
+              >
+                <Select
+                  placeholder="Select Verifier"
+                  value={verification?.verifierId || null}
+                  options={verifiers}
+                  style={{ width: "100%" }}
+                  disabled={
+                    !address || (assignmentMethod === "Remote" && !office)
+                  }
                 />
               </Form.Item>
             );
           }}
         </Form.Item>
 
-        {/* <Form.Item>
+        <Form.Item>
           <Button
             // type="primary"
             htmlType="submit"
             loading={loading}
             icon={<UserOutlined />}
           >
-            {verification ? "Update Assignment" : "Assign Executive"}
+            {verification ? "Update Assignment" : "Assign Executives"}
           </Button>
-        </Form.Item> */}
+        </Form.Item>
       </Form>
     </div>
   );
