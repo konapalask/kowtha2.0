@@ -492,13 +492,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                 </div>
                               )}
                               {fieldExecutiveEdit[type] ? (
-                                <div style={{ marginTop: 8 }}>
-                                 
-                                </div>
+                                <div style={{ marginTop: 8 }}></div>
                               ) : (
                                 <div style={{ marginTop: 8 }}>
-                                  <b>Verifier:</b>{" "}
-                                  {verification?.verifier?.name || "Not assigned"}
+                                  <span>Verifier:</span>{" "}
+                                  {verification?.verifier?.name ||
+                                    "Not assigned"}
                                 </div>
                               )}
                             </div>
