@@ -451,56 +451,34 @@ export class LoanService {
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
+
       if (!loan) {
         await this.loggingService.warn('Verification assignment failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
-      if (!fieldExecutiveId && !verifierId) {
+      if (!fieldExecutiveId || !verifierId) {
         throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
       }
 
-      if (verifierId) {
-        // Start a transaction to ensure all operations succeed or fail together
-      return await this.prisma.$transaction(async (prisma) => {
-        // Update loan with verifier if provided
-        await prisma.loan.update({
-          where: { id: loanId },
-          data: { verifierId }
-        });
-      });
-    }
-
-    else{
-      // If field executive is provided, address is mandatory
-      if (!fieldExecutiveId || !address || !verificationType) {
+      if (fieldExecutiveId && (!address || !verificationType)) {
         throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
       }
 
-        const verification = await this.prisma.verification.upsert({
-          where: {
-            loanId_type: {
-              loanId,
-              type: verificationType,
-            },
-          },
-          update: {
-            fieldExecutiveId,
-            status: 'Pending',
-            applicantAddress: address || null,
-            locationType: locationType || null,
-          },
-          create: {
-            loan: { connect: { id: loan.id } },
-            type: verificationType,
-            fieldExecutive: { connect: { id: fieldExecutiveId } },
-            status: 'Pending',
-            applicantAddress: address || null,
-            locationType: locationType || null,
-          },
-        });
+      return await this.prisma.$transaction(async (prisma) => {
+           const verification = await prisma.verification.create({
+             data: {
+              loan: { connect: { id: loan.id } },
+              type: verificationType || 'AddressOne',
+              verifier: { connect: { id: verifierId } },
+              fieldExecutive: { connect: { id: fieldExecutiveId } },
+              status: 'Pending',
+              applicantAddress: address || null,
+              locationType: locationType || null,
+             }
+           });
 
-        const loanStatusChange = await this.prisma.loan.update({
+        const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
           data: { status: 'Assigned' },
         });
@@ -515,7 +493,7 @@ export class LoanService {
         });
 
         return verification;
-      };
+      });
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
@@ -613,7 +591,6 @@ export class LoanService {
       const updatedLoan = await this.prisma.loan.update({
         where: { id: loanId },
         data: {
-          verifierId,
           status,
         },
       });
@@ -663,18 +640,18 @@ export class LoanService {
               role: true
             }
           },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
           verifications: {
             include: {
               fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              },
+              verifier: {
                 select: {
                   id: true,
                   name: true,
@@ -787,31 +764,22 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.LoanWhereInput = {};
+      let whereCondition: Prisma.VerificationWhereInput = {};
       
       if (role === UserRole.Admin) {
-        // For Admin, get all loans
+        // For Admin, get all verifications
         whereCondition = {};
       } else if (role === UserRole.Verifier) {
-        // For Verifier, get only loans assigned to them
+        // For Verifier, get only verifications assigned to them
         whereCondition = { verifierId };
       }
 
-      const loans = await this.prisma.loan.findMany({
+      const verifications = await this.prisma.verification.findMany({
         where: whereCondition,
         include: {
-          operationsExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verifications: {
+          loan: {
             include: {
-              fieldExecutive: {
+              operationsExecutive: {
                 select: {
                   id: true,
                   name: true,
@@ -821,12 +789,35 @@ export class LoanService {
                 }
               }
             }
+          },
+          fieldExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
           }
         },
         orderBy: {
           createdAt: 'desc'
         }
       });
+
+      // Group verifications by loan to avoid duplicates
+      const loanMap = new Map();
+      verifications.forEach(verification => {
+        if (!loanMap.has(verification.loan.id)) {
+          loanMap.set(verification.loan.id, {
+            ...verification.loan,
+            verifications: []
+          });
+        }
+        loanMap.get(verification.loan.id).verifications.push(verification);
+      });
+
+      const loans = Array.from(loanMap.values());
 
       await this.loggingService.info('Retrieved loans by verifier', {
         verifierId,
@@ -917,15 +908,6 @@ export class LoanService {
               role: true
             }
           },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
           verifications: {
             include: {
               fieldExecutive: {
@@ -942,7 +924,16 @@ export class LoanService {
                     }
                   }
                 }
-              }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              },
             }
           }
         },
@@ -1008,14 +999,6 @@ export class LoanService {
 
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
-        // Update loan with verifier if provided
-        if (verifierId) {
-          await prisma.loan.update({
-            where: { id: loanId },
-            data: { verifierId }
-          });
-        }
-
         // Update verification
         const verification = await prisma.verification.update({
           where: {
@@ -1026,6 +1009,7 @@ export class LoanService {
           },
           data: {
             ...(fieldExecutiveId && { fieldExecutiveId }),
+            ...(verifierId && { verifierId }),
             ...(address && { applicantAddress: address }),
             status: 'Pending', // Reset status when assignment is updated
           },
@@ -1094,7 +1078,10 @@ export class LoanService {
 
       if (filters?.applicationNumber) {
         where.loan = {
-          applicationNumber: filters.applicationNumber
+          applicationNumber: {
+            contains: filters.applicationNumber,
+            mode: 'insensitive'
+          }
         };
       }
 
@@ -1564,9 +1551,6 @@ export class LoanService {
             operationsExecutive: { connect: { id: operationsExecutiveId } },
             ...(fieldExecutiveId && {
               fieldExecutive: { connect: { id: fieldExecutiveId } }
-            }),
-            ...(verifierId && {
-              verifier: { connect: { id: Number(verifierId) } }
             })
           };
 

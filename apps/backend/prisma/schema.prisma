@@ -114,8 +114,8 @@ model User {
   updatedAt                DateTime             @updatedAt
   // Relations
   operationsExecutiveLoans Loan[]               @relation("OperationsExecutive")
-  verifiedLoans            Loan[]               @relation("LoanVerifier")
   verifications            Verification[]       @relation("VerificationFieldExecutive")
+  verificationsVerifier    Verification[]       @relation("VerificationVerifier")
   sessions                 Session[]
   editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
   editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
@@ -151,6 +151,8 @@ model Verification {
   type                VerificationType
   addressType         AddressType?
   approvedStatus      ApprovedStatus?
+  verifierId          Int?
+  verifier            User?               @relation("VerificationVerifier", fields: [verifierId], references: [id])
   fieldExecutiveId    Int
   fieldExecutive      User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status              VerificationStatus
@@ -184,8 +186,6 @@ model Loan {
   office                Office              @relation(fields: [officeId], references: [id])
   operationsExecutiveId Int
   operationsExecutive   User                @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
-  verifierId            Int?
-  verifier              User?               @relation("LoanVerifier", fields: [verifierId], references: [id])
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
