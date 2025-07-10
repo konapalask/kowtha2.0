@@ -75,6 +75,7 @@ export type ResidenceDetailsFormData = {
   yearsAtCurrentAddress: string;
   // nameBoardVisible: string;
   politicalSymbolVisible: string;
+  leaseAmount: string;
 };
 
 export type FamilyEmploymentDetailsFormData = {

@@ -26,6 +26,7 @@ export type BusinessMiscellaneousFormData = {
   areaOfPremises: string;
   localityOfBusiness: string;
   employeesUnderApplicant: string;
+  leaseAmount: string;
 };
 
 type BusinessMiscellaneousProps = {
@@ -33,7 +34,7 @@ type BusinessMiscellaneousProps = {
   initialData?: BusinessMiscellaneousFormData;
 };
 
-const OWNERSHIP_OPTIONS = ['Owned', 'Rented', 'Leased', 'Others'];
+const OWNERSHIP_OPTIONS = ['Owned', 'Rented', 'Leased'];
 const STOCK_SEEN_OPTIONS = ['Yes', 'No'];
 // const EMPLOYEES_SEEN_OPTIONS = ['None', '1-2', '3-5', '6+'];
 const ILLEGAL_SETUP_OPTIONS = ['Yes', 'No'];
@@ -75,6 +76,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       areaOfPremises: '',
       localityOfBusiness: '',
       employeesUnderApplicant: '',
+      leaseAmount: '',
     },
   });
 
@@ -179,6 +181,32 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
               {errors.rentalAmount && (
                 <Text style={styles.errorText}>
                   {errors.rentalAmount.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
+      {ownershipOfPremises === 'Leased' && (
+        <Controller
+          control={control}
+          name="leaseAmount"
+          rules={{required: 'lease is required'}}
+          render={({field: {value, onChange, onBlur}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Lease Amount</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter lease paid"
+                keyboardType="numeric"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+              />
+              {errors.leaseAmount && (
+                <Text style={styles.errorText}>
+                  {errors.leaseAmount.message}
                 </Text>
               )}
             </View>
