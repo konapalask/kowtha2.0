@@ -109,86 +109,92 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     return `${day}, ${formattedDate}`;
   };
 
+  // Refactor uploadImage to accept an array of images
   const uploadImage = async (
-    imageUri: string,
-    type: string,
-    locationOrOverlay: {
-      latitude?: number;
-      longitude?: number;
-      isOverlayNeeded: boolean;
-    },
-    isCamera?: boolean,
+    images: Array<{
+      uri: string;
+      type: string;
+      locationOrOverlay: {
+        latitude?: number;
+        longitude?: number;
+        isOverlayNeeded: boolean;
+      };
+      isCamera?: boolean;
+    }>,
   ) => {
     try {
       setIsUploading(true);
+      const newItems: ExtendedUploadedItem[] = [];
+      for (const image of images) {
+        // Generate a unique filename
+        const timestamp = new Date().getTime();
+        const fileName = `verification/${loanId}/${timestamp}-${Math.random()
+          .toString(36)
+          .substring(7)}.jpg`;
 
-      // Generate a unique filename
-      const timestamp = new Date().getTime();
-      const fileName = `verification/${loanId}/${timestamp}-${Math.random()
-        .toString(36)
-        .substring(7)}.jpg`;
+        // Get presigned URL
+        const {
+          data: {url: presignedUrl},
+        } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
 
-      // Get presigned URL
-      const {
-        data: {url: presignedUrl},
-      } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
+        // Convert image to blob
+        const imageResponse = await fetch(image.uri);
+        const blob = await imageResponse.blob();
 
-      // Convert image to blob
-      const imageResponse = await fetch(imageUri);
-      const blob = await imageResponse.blob();
+        // Upload to S3 using PUT request
+        const uploadResponse = await fetch(presignedUrl, {
+          method: 'PUT',
+          body: blob,
+          headers: {
+            'Content-Type': 'image/jpeg',
+          },
+        });
 
-      // Upload to S3 using PUT request
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: blob,
-        headers: {
-          'Content-Type': 'image/jpeg',
-        },
-      });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        throw new Error(
-          `Upload failed with status: ${uploadResponse.status}, message: ${errorText}`,
-        );
-      }
-
-      // Create new item with S3 URL
-      const newItem: ExtendedUploadedItem = {
-        id: Date.now().toString(),
-        uri: imageUri,
-        s3ImageUrl: fileName,
-        type: 'photo',
-        timestamp: new Date().toISOString(),
-        isCamera: isCamera || false,
-        isOverlayNeeded: locationOrOverlay.isOverlayNeeded,
-      };
-
-      // Add location details if available
-      if (locationOrOverlay.latitude && locationOrOverlay.longitude) {
-        try {
-          const locationDetails = await getLocationDetails(
-            locationOrOverlay.latitude,
-            locationOrOverlay.longitude,
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          throw new Error(
+            `Upload failed with status: ${uploadResponse.status}, message: ${errorText}`,
           );
-          newItem.latitude = locationOrOverlay.latitude;
-          newItem.longitude = locationOrOverlay.longitude;
-          newItem.locality = locationDetails.locality;
-          newItem.pincode = locationDetails.pincode;
-        } catch (locationError) {
-          console.error('Error getting location details:', locationError);
-          newItem.latitude = locationOrOverlay.latitude;
-          newItem.longitude = locationOrOverlay.longitude;
-          newItem.locality = 'Unknown';
-          newItem.pincode = 'Unknown';
         }
-      }
 
-      const updatedItems = [...uploadedItems, newItem];
+        // Create new item with S3 URL
+        const newItem: ExtendedUploadedItem = {
+          id: Date.now().toString() + Math.random().toString(36).substring(2),
+          uri: image.uri,
+          s3ImageUrl: fileName,
+          type: 'photo',
+          timestamp: new Date().toISOString(),
+          isCamera: image.isCamera || false,
+          isOverlayNeeded: image.locationOrOverlay.isOverlayNeeded,
+        };
+
+        // Add location details if available
+        if (
+          image.locationOrOverlay.latitude &&
+          image.locationOrOverlay.longitude
+        ) {
+          try {
+            const locationDetails = await getLocationDetails(
+              image.locationOrOverlay.latitude,
+              image.locationOrOverlay.longitude,
+            );
+            newItem.latitude = image.locationOrOverlay.latitude;
+            newItem.longitude = image.locationOrOverlay.longitude;
+            newItem.locality = locationDetails.locality;
+            newItem.pincode = locationDetails.pincode;
+          } catch (locationError) {
+            console.error('Error getting location details:', locationError);
+            newItem.latitude = image.locationOrOverlay.latitude;
+            newItem.longitude = image.locationOrOverlay.longitude;
+            newItem.locality = 'Unknown';
+            newItem.pincode = 'Unknown';
+          }
+        }
+        newItems.push(newItem);
+      }
+      const updatedItems = [...uploadedItems, ...newItems];
       setUploadedItems(updatedItems);
       onUploadedItemsChange(updatedItems);
-
-      Alert.alert('Success', 'Image uploaded successfully');
     } catch (error) {
       console.error('Error uploading image:', error);
       Alert.alert(
@@ -202,6 +208,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     }
   };
 
+  // Update handleCapture to use array API
   const handleCapture = async () => {
     try {
       if (uploadedItems.length >= MAX_UPLOADS) {
@@ -230,7 +237,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           {
             text: 'No',
             onPress: () => {
-              uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
+              uploadImage([
+                {
+                  uri: photoUri,
+                  type: 'photo',
+                  locationOrOverlay: {isOverlayNeeded: false},
+                  isCamera: true,
+                },
+              ]);
             },
           },
           {
@@ -254,12 +268,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                           text: 'Cancel',
                           style: 'cancel',
                           onPress: () => {
-                            uploadImage(
-                              photoUri,
-                              'photo',
-                              {isOverlayNeeded: false},
-                              true,
-                            );
+                            uploadImage([
+                              {
+                                uri: photoUri,
+                                type: 'photo',
+                                locationOrOverlay: {isOverlayNeeded: false},
+                                isCamera: true,
+                              },
+                            ]);
                           },
                         },
                         {
@@ -271,12 +287,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                             if (result === RESULTS.GRANTED) {
                               handleCapture();
                             } else {
-                              uploadImage(
-                                photoUri,
-                                'photo',
-                                {isOverlayNeeded: false},
-                                true,
-                              );
+                              uploadImage([
+                                {
+                                  uri: photoUri,
+                                  type: 'photo',
+                                  locationOrOverlay: {isOverlayNeeded: false},
+                                  isCamera: true,
+                                },
+                              ]);
                             }
                           },
                         },
@@ -291,23 +309,32 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   timeout: 15000,
                 });
 
-                await uploadImage(
-                  photoUri,
-                  'photo',
+                await uploadImage([
                   {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    isOverlayNeeded: true
+                    uri: photoUri,
+                    type: 'photo',
+                    locationOrOverlay: {
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                      isOverlayNeeded: true,
+                    },
+                    isCamera: true,
                   },
-                  true,
-                );
+                ]);
               } catch (error) {
                 console.error('Error getting location:', error);
                 Alert.alert(
                   'Location Error',
                   'Failed to get location. Uploading without geotag.',
                 );
-                uploadImage(photoUri, 'photo', {isOverlayNeeded: false}, true);
+                uploadImage([
+                  {
+                    uri: photoUri,
+                    type: 'photo',
+                    locationOrOverlay: {isOverlayNeeded: false},
+                    isCamera: true,
+                  },
+                ]);
               }
             },
           },
@@ -320,6 +347,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     }
   };
 
+  // Update handleGallery to allow multiple selection and use array API
   const handleGallery = async () => {
     try {
       if (uploadedItems.length >= MAX_UPLOADS) {
@@ -372,15 +400,18 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
+        selectionLimit: MAX_UPLOADS - uploadedItems.length, // allow as many as possible
       });
 
-      if (result.assets && result.assets[0]) {
-        await uploadImage(
-          result.assets[0].uri || '',
-          'photo',
-          {isOverlayNeeded: false},
-          false,
-        );
+      if (result.assets && result.assets.length > 0) {
+        // Map all selected assets to the new image object format
+        const imagesToUpload = result.assets.map(asset => ({
+          uri: asset.uri || '',
+          type: 'photo',
+          locationOrOverlay: {isOverlayNeeded: false},
+          isCamera: false,
+        }));
+        await uploadImage(imagesToUpload);
       }
     } catch (error) {
       console.error('Error selecting photo:', error);

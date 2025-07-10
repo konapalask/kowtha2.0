@@ -101,7 +101,53 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="residenceStatus"
       />
 
-      {residenceStatus === 'Rented' && (
+      {['Rented', 'Leased']?.includes(residenceStatus) && (
+        <Controller
+          control={control}
+          rules={{
+            required: 'Amount is required',
+            validate: value => {
+              if (isNaN(Number(value))) {
+                return 'Please enter a valid number';
+              }
+              return true;
+            },
+          }}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>
+                {residenceStatus === 'Rented'
+                  ? 'Rent per month'
+                  : 'Lease Amount'}
+                *
+              </Text>
+              <TextInput
+                style={[styles.input]}
+                onChangeText={text => {
+                  // Only update if the entire string is digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
+                  // Otherwise ignore the input
+                }}
+                value={value}
+                placeholder="Enter amount"
+                placeholderTextColor={colors.text.disabled}
+                keyboardType="numeric" // Show numeric keyboard on mobile
+                inputMode="decimal" // Modern alternative to keyboardType
+              />
+              {errors.rentDetails && (
+                <Text style={styles.errorText}>
+                  {errors.rentDetails.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="rentDetails"
+        />
+      )}
+
+      {/* {['Rented', 'Leased']?.includes(residenceStatus) && (
         <Controller
           control={control}
           rules={{
@@ -140,7 +186,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           )}
           name="rentDetails"
         />
-      )}
+      )} */}
 
       <Controller
         control={control}
@@ -428,7 +474,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={localityTypeRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
@@ -445,7 +491,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={accessibilityRef}
@@ -466,7 +512,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={nameBoardVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
@@ -483,7 +529,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={politicalSymbolVisibleRef}

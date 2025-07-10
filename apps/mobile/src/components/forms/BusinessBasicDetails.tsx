@@ -239,7 +239,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Business Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.readOnlyInput]}
               placeholder="Enter business address"
               onBlur={onBlur}
               onChangeText={onChange}
