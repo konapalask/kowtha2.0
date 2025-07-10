@@ -467,6 +467,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                       flexDirection: "column",
                                     }}
                                   >
+                                    {type === "Business" && (
+                                      <span>
+                                        Business Name:{" "}
+                                        {verification?.businessName}
+                                      </span>
+                                    )}
                                     <span>
                                       Address: {verification?.applicantAddress}
                                     </span>

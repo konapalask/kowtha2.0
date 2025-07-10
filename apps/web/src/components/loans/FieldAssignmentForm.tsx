@@ -109,7 +109,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         message.success(msg);
       } else {
         await assignExecutivesApi(loanId, finalData);
-        message.success("Field executive and verifier are assigned successfully");
+        message.success(
+          "Field executive and verifier are assigned successfully"
+        );
       }
       fetchLoans();
       setCurrentOffice(userDetails?.officeId);
@@ -158,7 +160,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         }
       >
         {type === "Business" && (
-          <Form.Item name={"businessName"}>
+          <Form.Item required name={"businessName"}>
             <Input minLength={3} maxLength={20} placeholder="Business Name" />
           </Form.Item>
         )}

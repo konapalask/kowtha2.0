@@ -59,11 +59,11 @@ const VerificationListScreen = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const disabled = !isLoggedIn;
   const [testUser, setTestUser] = useState(false);
   // const disabled = false;
-  // console.log(isLoggedIn);
+  console.log(isLoggedIn, 'lllllllllllllllllllllllll');
   // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
 
@@ -163,6 +163,7 @@ const VerificationListScreen = () => {
       console.log(details);
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
+      console.log(isToday && details?.status === 'Available');
       isToday && details?.status === 'Available'
         ? setIsLoggedIn(true)
         : setIsLoggedIn(false);
@@ -516,6 +517,17 @@ const VerificationListScreen = () => {
           <Text style={styles.noResultsText}>
             No matching applications found
           </Text>
+          <TouchableOpacity onPress={() => fetchData(1, false)}>
+            <Text
+              style={{
+                color: '#007AFF',
+                marginTop: 12,
+                fontWeight: 'bold',
+                fontSize: 16,
+              }}>
+              Refresh
+            </Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList

@@ -24,6 +24,8 @@ export type BusinessBasicDetailsFormData = {
   addressCorrection?: string;
   isBusinessNameSame: string;
   correctedBusinessName: string;
+  aadhar: string;
+  panNumber: string;
 };
 
 type BusinessBasicDetailsProps = {
@@ -64,6 +66,8 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       addressCorrection: '',
       isBusinessNameSame: '',
       correctedBusinessName: '',
+      aadhar: '',
+      panNumber: '',
     },
   });
 
@@ -104,6 +108,60 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
               <Text style={styles.errorText}>
                 {errors.applicantName.message}
               </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="panNumber"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>PAN Number</Text>
+            <TextInput
+              style={[styles.input, {color: colors.text.primary}]}
+              value={value}
+              onChangeText={text => {
+                // Convert to uppercase and remove any non-alphanumeric characters
+                const formattedText = text
+                  .replace(/[^A-Za-z0-9]/g, '')
+                  .toUpperCase();
+                onChange(formattedText);
+              }}
+              maxLength={10}
+              placeholder="Enter PAN number"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.panNumber && (
+              <Text style={styles.errorText}>{errors.panNumber.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="aadhar"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Aadhar Number</Text>
+            <TextInput
+              style={[styles.input]}
+              value={value}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              maxLength={12}
+              keyboardType="numeric"
+              placeholder="Enter Aadhar"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.aadhar && (
+              <Text style={styles.errorText}>{errors.aadhar.message}</Text>
             )}
           </View>
         )}

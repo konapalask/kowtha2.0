@@ -63,19 +63,19 @@ const AttendanceCard: React.FC<{
 }> = ({setVisible, isLoggedIn, setIsLoggedIn}) => {
   // const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  useEffect(() => {
-    const checkAttendance = async () => {
-      try {
-        const details = await getItem('attendance');
-        const currentTime = dayjs();
-        const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-        setIsLoggedIn(isToday);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    checkAttendance();
-  }, []);
+  // useEffect(() => {
+  //   const checkAttendance = async () => {
+  //     try {
+  //       const details = await getItem('attendance');
+  //       const currentTime = dayjs();
+  //       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
+  //       setIsLoggedIn(isToday);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   checkAttendance();
+  // }, []);
 
   const isValidTime = () => {
     const currentTime = dayjs();
