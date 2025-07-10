@@ -135,13 +135,13 @@ export default function Users() {
         const response = await updateUserApi(editingUser?.id, values);
         console.log(response);
         message.success("User updated successfully");
-        fetchUsers();
+        fetchUsers(pagination.current, pagination.pageSize); // <-- Stay on same page
       } else {
         const response = await createUserApi(values);
         console.log(response);
         message.success("User added successfully");
+        fetchUsers(); // New user, can go to first page
       }
-      fetchUsers();
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
