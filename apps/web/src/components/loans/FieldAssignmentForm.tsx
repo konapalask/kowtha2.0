@@ -12,7 +12,10 @@ import {
 } from "antd";
 // import { UserOutlined } from "@ant-design/icons";
 import React from "react";
-import { assignExecutivesApi } from "@/services/loans.services";
+import {
+  assignExecutivesApi,
+  updateExecutivesApi,
+} from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
 
@@ -81,7 +84,11 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     };
     try {
       setLoading(true);
-      await assignExecutivesApi(loanId, finalData);
+      if (verification) {
+        await updateExecutivesApi(loanId, finalData);
+      } else {
+        await assignExecutivesApi(loanId, finalData);
+      }
       message.success("Field executive assigned successfully");
       fetchLoans();
       setCurrentOffice(userDetails?.officeId);
@@ -89,6 +96,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       fetchExecutives();
     } catch (error) {
       message.error("Failed to assign field executive");
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -97,6 +105,8 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   const remoteOffices = offices?.filter(
     (option: any) => option?.value !== userDetails?.officeId
   );
+
+  // console.log(verification);
 
   return (
     <div>
@@ -112,8 +122,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     ? "Remote"
                     : "Local",
                 office: verification?.office,
-                fieldExecutiveId: verification?.fieldExecutiveId?.value,
+                fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
+                verifierId: verification?.verifierId,
               }
             : {
                 assignmentMethod: "Local",
