@@ -338,6 +338,9 @@ export class LoanController {
       parsedLoanId,
       updateAssignmentDto.verificationType,
       updateAssignmentDto.fieldExecutiveId,
+      updateAssignmentDto.address,
+      updateAssignmentDto.verifierId,
+      updateAssignmentDto.businessName
     );
     return {
       status: 200,
