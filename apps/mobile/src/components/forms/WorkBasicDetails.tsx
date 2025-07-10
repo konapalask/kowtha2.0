@@ -23,7 +23,7 @@ interface WorkBasicDetailsFormData {
   loanAmount: string;
   tenure: string;
   panNumber: string;
-  aadharNumber: string;
+  aadhar: string;
   qualification: string;
 }
 
@@ -39,16 +39,16 @@ const validationSchema = yup.object().shape({
   purposeOfLoan: yup.string().required('Purpose of Loan is required'),
   // loanAmount: yup.string().required('Loan Amount is required'),
   tenure: yup.string().required('Tenure is required'),
-  // panNumber: yup
-  //   .string()
-  //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
-  //   .optional()
-  //   .default(''),
-  // aadharNumber: yup
-  //   .string()
-  //   .matches(/^\d{12}$/, 'Invalid Aadhar number')
-  //   .optional()
-  //   .default(''),
+  panNumber: yup
+    .string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    .optional()
+    .default(''),
+  aadhar: yup
+    .string()
+    .matches(/^\d{12}$/, 'Invalid Aadhar number')
+    .optional()
+    .default(''),
   qualification: yup.string().required('Qualification is required'),
 });
 
@@ -142,6 +142,8 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               value={value}
               onChangeText={onChange}
               editable={false}
+              multiline
+              numberOfLines={2}
             />
             {errors.bankName && (
               <Text style={styles.errorText}>{errors.bankName.message}</Text>
@@ -224,7 +226,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      {/* <Controller
+      <Controller
         control={control}
         name="panNumber"
         render={({field: {onChange, value}}) => (
@@ -257,12 +259,12 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
 
       <Controller
         control={control}
-        name="aadharNumber"
+        name="aadhar"
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Aadhar Number</Text>
             <TextInput
-              style={[styles.input, errors.aadharNumber && styles.inputError]}
+              style={[styles.input, errors.aadhar && styles.inputError]}
               value={value}
               onChangeText={text => {
                 // Only pass numeric values to onChange
@@ -272,17 +274,15 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               maxLength={12}
               keyboardType="numeric"
-              placeholder="Enter Aadhar number"
+              placeholder="Enter Aadhar"
               placeholderTextColor={colors.text.disabled}
             />
-            {errors.aadharNumber && (
-              <Text style={styles.errorText}>
-                {errors.aadharNumber.message}
-              </Text>
+            {errors.aadhar && (
+              <Text style={styles.errorText}>{errors.aadhar.message}</Text>
             )}
           </View>
         )}
-      /> */}
+      />
 
       <Controller
         control={control}

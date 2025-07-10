@@ -201,7 +201,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 },
               ]}
             >
-              <InputNumber min={0} style={{ width: "100%" }} />
+              <InputNumber min={0} max={1000000000} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>
