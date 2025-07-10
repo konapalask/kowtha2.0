@@ -1117,10 +1117,17 @@ export class LoanService {
         take: Number(limit)
       });
       
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
       const isAvailableToday = await this.prisma.attendance.findFirst({
         where: {
           userId: fieldExecutiveId,
-          date: new Date()
+          date: {
+            gte: startOfToday,
+            lt: startOfTomorrow
+          }
         }
       }) ? true : false;
 
