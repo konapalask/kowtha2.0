@@ -40,7 +40,7 @@ export class UpdateAssignmentDto {
     description: 'Business name for verification',
     required: false
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
   businessName?: string;
 } 

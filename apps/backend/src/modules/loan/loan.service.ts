@@ -989,22 +989,15 @@ export class LoanService {
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
+
       if (!loan) {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
-      // If field executive is provided, address is mandatory
-      if (fieldExecutiveId && !address) {
+      // // If field executive is provided, address is mandatory
+      if (!fieldExecutiveId && !address && !businessName && !verifierId) {
         throw new BadRequestException('Address is required when assigning a field executive');
-      }
-
-      // If no updates provided, return current verification
-      if (!verificationType && !fieldExecutiveId && !verifierId) {
-        const verification = await this.prisma.verification.findFirst({
-          where: { loanId }
-        });
-        return verification;
       }
 
       // Start a transaction to ensure all operations succeed or fail together

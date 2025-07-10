@@ -27,7 +27,7 @@ import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors
 @Controller('loans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LoanController {
-  constructor(private loanService: LoanService, private s3Service: S3Service) { }
+  constructor(private loanService: LoanService) { }
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -338,6 +338,9 @@ export class LoanController {
       parsedLoanId,
       updateAssignmentDto.verificationType,
       updateAssignmentDto.fieldExecutiveId,
+      updateAssignmentDto.address,
+      updateAssignmentDto.verifierId,
+      updateAssignmentDto.businessName
     );
     return {
       status: 200,

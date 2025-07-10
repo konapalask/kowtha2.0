@@ -98,13 +98,19 @@ export class DashboardService {
   async getAppDeployments() {
     try {
       const appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
-      
-      const deployments = await this.prisma.appDeployment.findFirst({
-        where: { isActive: true },
-        orderBy: { createdAt: 'desc' }
+      console.log(appDetails);
+      const createDeployment = await this.prisma.appDeployment.create({
+        data: {
+          version: appDetails.version,
+          isActive: true,
+          source: 'Google Play',
+          playStoreUrl: appDetails.url,
+          forceUpdate: true,
+        }
       });
-      await this.loggingService.info('Fetched app deployments', { deployments });
-      return deployments;
+
+      await this.loggingService.info('Fetched app deployments', { createDeployment });
+      return createDeployment;
     } catch (error) {
       await this.loggingService.error('Failed to fetch app deployments', {
         error: error.message,
