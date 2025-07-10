@@ -73,13 +73,16 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       fieldExecutiveId: any;
       address: string;
       verifierId: string;
+      businessName: string;
     }
   ) => {
     // console.log(values);
     const finalData = {
+      ...(type === "Business" ? { businessName: values?.businessName } : {}),
       verifierId: values?.verifierId,
       verificationType: getVerificationType(type),
-      fieldExecutiveId: values.fieldExecutiveId?.value,
+      fieldExecutiveId:
+        values.fieldExecutiveId?.value ?? values.fieldExecutiveId,
       address: values.address,
     };
     try {
@@ -116,6 +119,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         initialValues={
           verification
             ? {
+                businessName: verification?.businessName,
                 assignmentMethod:
                   verification?.office &&
                   verification?.office !== userDetails?.officeId
@@ -135,6 +139,11 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           handleVerificationAssign(selectedLoan.id, type, values)
         }
       >
+        {type === "Business" && (
+          <Form.Item name={"businessName"}>
+            <Input minLength={3} maxLength={20} placeholder="Business Name" />
+          </Form.Item>
+        )}
         <Form.Item
           name="address"
           // label={type === "AddressOne" ? "Address 1" :type === "AddressTwo" ? "Address 2" : type === "Work" ? "Work Address" : type === "Business" ? "Business Address" : "Address"}
