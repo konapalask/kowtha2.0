@@ -10,8 +10,9 @@ import {
   Badge,
   Row,
   Col,
+  Popconfirm,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 // import type { ColumnsType } from "antd/es/table";
@@ -22,6 +23,7 @@ import {
   // updateLoanApi,
   importLoansApi,
   type Loan,
+  deleteLoanApi,
 } from "@/services/loans.services";
 import { getOfficesApi, Office } from "@/services/settings.services";
 import {
@@ -427,18 +429,39 @@ export default function Loans() {
             fixed: "right",
             align: "center",
             render: (_: any, record: any) => (
-              <Button
-                type="link"
-                // icon={<EditOutlined />}
-                onClick={() => {
-                  setSelectedLoan(record?.id);
-                  setIsDrawerVisible(true);
-                }}
-              >
-                Edit
-              </Button>
+              <span>
+                <Button
+                  type="link"
+                  onClick={() => {
+                    setSelectedLoan(record?.id);
+                    setIsDrawerVisible(true);
+                  }}
+                >
+                  Edit
+                </Button>
+                {(userDetails?.role === "Admin" || userDetails?.role === "OperationsExecutive") && (
+                  <Popconfirm
+                    title="Are you sure you want to delete this loan?"
+                    onConfirm={async () => {
+                      try {
+                        await deleteLoanApi(record?.id);
+                        message.success("Loan deleted successfully");
+                        fetchLoans(); // Refresh the table
+                      } catch (error) {
+                        message.error("Failed to delete loan");
+                      }
+                    }}
+                  >
+                    <Button
+                      icon={<DeleteOutlined />}
+                      style={{ border: "none", color: "#ff4d4f" }}
+                      type="link"
+                    />
+                  </Popconfirm>
+                )}
+              </span>
             ),
-            width: 100,
+            width: 140,
           },
         ]
       : []),
