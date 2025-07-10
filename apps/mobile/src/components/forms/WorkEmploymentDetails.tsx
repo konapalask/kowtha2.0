@@ -16,6 +16,8 @@ import {yupResolver} from '@hookform/resolvers/yup';
 interface WorkEmploymentDetailsFormData {
   currentOfficeName: string;
   officeAddress: string;
+  isAddressSame: string;
+  addressCorrection: string;
   yearsInCurrentJob: string;
   totalWorkExperience: string;
   companySize: string;
@@ -36,9 +38,13 @@ interface Props {
   onSubmit: (data: WorkEmploymentDetailsFormData) => void;
 }
 
+const yesNoOptions = ['Yes', 'No'];
+
 const validationSchema = yup.object().shape({
   currentOfficeName: yup.string().required('Current Office Name is required'),
   officeAddress: yup.string().required('Office Address is required'),
+  isAddressSame: yup.string().required(`Is address same is required`),
+  addressCorrection: yup.string().required(`Address correction is required`),
   yearsInCurrentJob: yup.string().required('Years in Current Job is required'),
   totalWorkExperience: yup
     .string()
@@ -59,9 +65,11 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const salaryModeSheetRef = useRef<ActionSheetRef>(null);
   const employerTypeSheetRef = useRef<ActionSheetRef>(null);
   const natureOfServiceSheetRef = useRef<ActionSheetRef>(null);
-  const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
-  const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
-    useState(false);
+  const isAddressSameSheetRef = useRef<ActionSheetRef>(null);
+
+  // const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
+  // const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
+  //   useState(false);
 
   const {
     control,
@@ -74,6 +82,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     defaultValues: initialData || {
       currentOfficeName: '',
       officeAddress: '',
+      isAddressSame: '',
+      addressCorrection: '',
       yearsInCurrentJob: '',
       totalWorkExperience: '',
       companySize: '',
@@ -132,9 +142,15 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     natureOfServiceSheetRef.current?.show();
   };
 
+  const showIsAddressSameSheet = () => {
+    isAddressSameSheetRef.current?.show();
+  };
+
   const onFormSubmit = (data: WorkEmploymentDetailsFormData) => {
     onSubmit(data);
   };
+
+  const watchedIsAddressSame = watch('isAddressSame');
 
   return (
     <ScrollView style={styles.container}>
@@ -168,15 +184,12 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Office Address</Text>
             <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                errors.officeAddress && styles.inputError,
-              ]}
+              style={[styles.input, styles.textArea, styles.readOnlyInput]}
               value={value}
               onChangeText={onChange}
               multiline
               numberOfLines={4}
+              readOnly
             />
             {errors.officeAddress && (
               <Text style={styles.errorText}>
@@ -186,6 +199,58 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="isAddressSame"
+        rules={{required: 'Please specify if the address is same as initiated'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Is the address same as initiated?</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showIsAddressSameSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isAddressSame && (
+              <Text style={styles.errorText}>
+                {errors.isAddressSame.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+      {/* Address Correction if No */}
+      {watchedIsAddressSame === 'No' && (
+        <Controller
+          control={control}
+          name="addressCorrection"
+          rules={{required: 'Please provide the corrected address'}}
+          render={({field: {onChange, onBlur, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Address Correction</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter corrected address"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+                multiline
+                numberOfLines={3}
+              />
+              {errors.addressCorrection && (
+                <Text style={styles.errorText}>
+                  {errors.addressCorrection.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -610,6 +675,30 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           ))}
         </View>
       </ActionSheet>
+
+      <ActionSheet
+        ref={isAddressSameSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>
+            Is the address same as initiated?
+          </Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isAddressSame', option);
+                if (option === 'Yes') {
+                  setValue('addressCorrection', '');
+                }
+                isAddressSameSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
     </ScrollView>
   );
 };
@@ -702,6 +791,10 @@ const styles = StyleSheet.create({
     color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  readOnlyInput: {
+    backgroundColor: colors.input.disabled,
+    color: colors.text.primary,
   },
 });
 

@@ -59,7 +59,7 @@ const Investigable: React.FC<InvestigableProps> = ({
   // const geoTag = watch('geoTag');
   const selectedDate = watch('date');
   const [userDetails, setUserDetails] = useState<any>({});
-  console.log(userDetails);
+  // console.log(userDetails);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
