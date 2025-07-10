@@ -164,7 +164,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             rules={[
               {
                 required: true,
-                message: "Please enter the address",
+                message: "Please enter business name",
               },
             ]}
             name={"businessName"}

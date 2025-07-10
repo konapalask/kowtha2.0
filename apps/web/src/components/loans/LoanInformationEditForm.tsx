@@ -17,6 +17,7 @@ import {
   loanTypeOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty } from "@/utils/utility";
+// import { useWatch } from "antd/es/form/Form";
 interface LoanInfoFormProps {
   form: any;
   selectedLoan: any;
@@ -40,6 +41,8 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   // console.log(selectedLoan);
   // console.log(form.getFieldsValue());
 
+  const loanType = Form.useWatch("loanType", form);
+
   return (
     <div>
       <Form
@@ -54,12 +57,15 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 applicantMobile: selectedLoan?.applicantMobile,
                 loanAmount: selectedLoan?.loanAmount,
                 applicantAddress: selectedLoan?.applicantAddress,
-                loanType:
-                  loanTypeOptions.find(
-                    (option) =>
-                      option.value.toLowerCase() ===
-                      selectedLoan?.loanType?.toLowerCase()
-                  )?.value || selectedLoan?.loanType,
+                loanType: loanTypeOptions.some(
+                  (option) =>
+                    option.value.toLowerCase() ===
+                    selectedLoan?.loanType?.toLowerCase()
+                )
+                  ? selectedLoan?.loanType
+                  : "Others",
+
+                specifyLoanType: selectedLoan?.loanType,
                 bankName: selectedLoan?.bankName,
                 applicantType: selectedLoan?.applicantType,
               }
@@ -67,9 +73,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         onFinish={async (values) => {
           try {
             setLoading(true);
-            let result: any;
             if (!selectedLoan?.id) {
-              // Create new loan
               const loanData = {
                 ...values,
                 // officeId: userDetails?.officeId,
@@ -78,12 +82,16 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 applicantName: values.applicantName?.trim(),
                 applicantMobile: values.applicantMobile?.trim(),
                 applicantAddress: values.applicantAddress?.trim(),
-                loanType: values.loanType,
+                loanType:
+                  values.loanType === "Others"
+                    ? values?.specifyLoanType
+                    : values.loanType,
                 bankName: values.bankName,
                 loanAmount: Number(values.loanAmount),
                 // applicantType: values.applicantType,
               };
               // console.log(loanData?.applicationNumber)
+              delete loanData.specifyLoanType;
               const response = await createLoanApi([loanData]);
               const data = response?.data;
               // console.log(response?.data);
@@ -110,7 +118,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 console.log(response?.data);
                 // message.error(data?.data?.failed?.[0]?.error);
                 message.error(
-                  "Loan with this Application nubmer and Applicant type exists"
+                  "Loan with this Application number and Applicant type exists"
                 );
                 // setEditLoanInfo(false);
               } else {
@@ -127,7 +135,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               // Update existing loan
               // console.log(values)
               const { applicationNumber, ...rest } = values;
-              result = await updateLoanApi(selectedLoan?.id, rest);
+              await updateLoanApi(selectedLoan?.id, rest);
               message.success("Loan information updated");
             }
             // console.log("passed")
@@ -214,9 +222,26 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <Select
                 placeholder="Select loan type"
                 options={loanTypeOptions}
+                onSelect={(e) => {
+                  if (e === "Others") {
+                    form.setFieldValue("specifyLoanType", null);
+                  }
+                }}
               />
             </Form.Item>
           </Col>
+          {loanType === "Others" && (
+            <Col xs={24} sm={6} style={{ padding: 4 }}>
+              <Form.Item
+                labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                label="Specify Loan Type"
+                name="specifyLoanType"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Input maxLength={25} />
+              </Form.Item>
+            </Col>
+          )}
           <Col xs={24} sm={6} style={{ padding: 4 }}>
             <Form.Item
               labelCol={{ span: 24, style: { marginBottom: 0 } }}

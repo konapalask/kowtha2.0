@@ -431,7 +431,13 @@ export default function Loans() {
             fixed: "right",
             align: "center",
             render: (_: any, record: any) => (
-              <span>
+              <span
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <Button
                   type="link"
                   onClick={() => {
@@ -441,10 +447,7 @@ export default function Loans() {
                 >
                   Edit
                 </Button>
-                <Divider
-                  type="vertical"
-                  style={{ background: "#F6FAFC", margin: 0 }}
-                />
+                {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
                 {(userDetails?.role === "Admin" ||
                   userDetails?.role === "OperationsExecutive") && (
                   <Popconfirm
