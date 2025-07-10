@@ -348,7 +348,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       (v: any) => v.type === type
                     );
                     return (
-                      <Col md={12} lg={12} xl={12} xxl={6} key={type}>
+                      <Col md={12} lg={12} xl={12} xxl={12} key={type}>
                         <Card
                           size={"small"}
                           title={label}
@@ -485,7 +485,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                       </Tag>
                                     </span>
                                     <span>
-                                      FE mobile:{" "}
+                                      Mobile:{" "}
                                       {verification?.fieldExecutive?.mobile}
                                     </span>
                                   </div>

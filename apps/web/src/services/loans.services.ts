@@ -109,6 +109,13 @@ export const assignExecutivesApi = (loanId: number, payload: any) => {
   );
 };
 
+export const updateExecutivesApi = (loanId: number, payload: any) => {
+  return axiosInstance.patch<Verification>(
+    `/loans/${loanId}/update-executive`,
+    payload
+  );
+};
+
 export const getExecutivesApi = () => {
   return axiosInstance.get<any>(`/accounts/users?role=FieldExecutive`);
 };
