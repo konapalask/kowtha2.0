@@ -160,7 +160,15 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         }
       >
         {type === "Business" && (
-          <Form.Item required name={"businessName"}>
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Please enter the address",
+              },
+            ]}
+            name={"businessName"}
+          >
             <Input minLength={3} maxLength={20} placeholder="Business Name" />
           </Form.Item>
         )}
