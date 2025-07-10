@@ -14,6 +14,7 @@ import {
 import React from "react";
 import { assignExecutivesApi } from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
+import { UserOutlined } from "@ant-design/icons";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -105,7 +106,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         initialValues={
           verification
             ? {
-                assignmentMethod: null,
+                assignmentMethod: verification?.office && verification?.office !== userDetails?.officeId ? "Remote" : "Local",
                 office: verification?.office,
                 fieldExecutiveId: verification?.fieldExecutiveId?.value,
                 address: verification?.applicantAddress || "",
@@ -249,14 +250,40 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                   }
                   style={{ width: "100%" }}
                   options={fieldExecutives}
-                  onSelect={() => form.submit()}
+                  // onSelect={() => form.submit()}
                 />
               </Form.Item>
+
             );
           }}
         </Form.Item>
+        <Form.Item label="Select Verifier" style={{ marginBottom: 0 }}>
+                                    <Select
+                                      placeholder="Select Verifier"
+                                      value={verification?.verifierId || null}
+                                      options={verifiers}
+                                      style={{ width: "100%" }}
+                                      onSelect={async (value) => {
+                                        if (!loanDetails?.id) return;
+                                        setLoading(true);
+                                        try {
+                                          await assignExecutivesApi(loanDetails.id, {
+                                            verificationType: type,
+                                            verifierId: value,
+                                          });
+                                          message.success("Verifier assigned successfully");
+                                          fetchLoanDetails();
+                                          setRefresh(true);
+                                        } catch (error) {
+                                          message.error("Failed to assign verifier");
+                                        } finally {
+                                          setLoading(false);
+                                        }
+                                      }}
+                                    />
+                                  </Form.Item>
 
-        {/* <Form.Item>
+         <Form.Item>
           <Button
             // type="primary"
             htmlType="submit"
@@ -265,7 +292,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           >
             {verification ? "Update Assignment" : "Assign Executive"}
           </Button>
-        </Form.Item> */}
+        </Form.Item> 
       </Form>
     </div>
   );
