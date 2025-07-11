@@ -48,7 +48,11 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
           </tr>
         `;
     }
-    
+
+    let ownershipOfPremises = '';
+    if(verificationData.miscellaneous?.ownershipOfPremises === 'Leased') {
+        ownershipOfPremises = verificationData.miscellaneous?.leaseAmount || '';
+    }
     return `
     <div class="align-wrapper">
         <table class="section-table">
