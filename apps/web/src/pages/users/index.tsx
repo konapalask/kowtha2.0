@@ -320,13 +320,17 @@ export default function Users() {
           loading={loading}
           onChange={handleTableChange}
           sticky
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showTotal: (total) => `Total ${total} users`,
-            position: ["bottomCenter"],
-          }}
+          pagination={
+            pagination.total > 10
+              ? {
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
+                  showTotal: (total) => `Total ${total} users`,
+                  position: ["bottomCenter"],
+                }
+              : false
+          }
           scroll={{ x: 1500 }}
           bordered
         />
