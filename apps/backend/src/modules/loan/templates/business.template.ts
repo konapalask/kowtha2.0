@@ -49,10 +49,13 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
         `;
     }
 
-    let ownershipOfPremises = '';
+    let rentalAmount = '';
     if(verificationData.miscellaneous?.ownershipOfPremises === 'Leased') {
-        ownershipOfPremises = verificationData.miscellaneous?.leaseAmount || '';
+        rentalAmount = verificationData.miscellaneous?.leaseAmount || '';
+    } else if (verificationData.miscellaneous?.ownershipOfPremises === 'Rented') {
+        rentalAmount = verificationData.miscellaneous?.rentalAmount || '';
     }
+    
     return `
     <div class="align-wrapper">
         <table class="section-table">
