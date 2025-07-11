@@ -1,6 +1,6 @@
 import { BusinessVerificationData } from "./business.interface";
 
-export const businessTemplate = (verificationData: BusinessVerificationData, bankName: string, path: string, finalRecommendationHtml: string, imageDataUri: string, imageUrls: string[]) => {
+export const businessTemplate = (verificationData: BusinessVerificationData, bankName: string, path: string, finalRecommendationHtml: string, imageDataUri: string, imageUrls: string[], imagesData: string) => {
     // Constitution check for others
     let constitution = '';
     if(verificationData.businessDetails?.constitution === 'Others') {
@@ -48,7 +48,14 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
           </tr>
         `;
     }
-    
+
+    let rentalAmount = '';
+    if(verificationData.miscellaneous?.ownershipOfPremises === 'Leased') {
+        rentalAmount = verificationData.miscellaneous?.leaseAmount || '';
+    } else if (verificationData.miscellaneous?.ownershipOfPremises === 'Rented') {
+        rentalAmount = verificationData.miscellaneous?.rentalAmount || '';
+    }
+
     return `
     <div class="align-wrapper">
         <table class="section-table">
@@ -253,31 +260,6 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
-           
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
+          ${imagesData}
   `
 }

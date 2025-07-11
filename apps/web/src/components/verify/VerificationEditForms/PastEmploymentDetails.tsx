@@ -118,9 +118,9 @@ const PastEmploymentRow: React.FC<{
           name={[field.name, "reasonForMovement"]}
           fieldKey={[String(field.fieldKey), "reasonForMovement"]}
           label={idx === 0 ? "Reason for Movement" : ""}
-          rules={[
-            { required: true, message: "Please enter reason for movement" },
-          ]}
+          // rules={[
+          //   { required: true, message: "Please enter reason for movement" },
+          // ]}
         >
           <Input placeholder="Reason for movement" />
         </Form.Item>

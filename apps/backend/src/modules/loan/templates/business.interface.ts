@@ -18,6 +18,7 @@ export interface BusinessVerificationData {
     miscellaneous?: {
       stockSeen: string;
       rentalAmount: string;
+      leaseAmount: string;
       employeesSeen: string;
       businessActivity: string;
       otherSetupObserved: string;

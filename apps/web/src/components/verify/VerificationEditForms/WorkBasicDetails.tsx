@@ -1,13 +1,13 @@
-import React from 'react';
-import { Form, Input, Select, Col, Button } from 'antd';
+import React from "react";
+import { Form, Input, Select, Col, Button } from "antd";
 
 const QUALIFICATION_OPTIONS = [
-  'Below 10th',
-  '10th Pass',
-  '12th Pass',
-  'Diploma/ITI Certification',
-  'Graduate',
-  'PG/Professional Certification',
+  "Below 10th",
+  "10th Pass",
+  "12th Pass",
+  "Diploma/ITI Certification",
+  "Graduate",
+  "PG/Professional Certification",
 ];
 
 interface WorkBasicDetailsFormData {
@@ -20,7 +20,7 @@ interface WorkBasicDetailsFormData {
   qualification: string;
 }
 
-const WorkBasicDetails: React.FC<{form: any}> = ({form}) => {
+const WorkBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   return (
     <>
       <Col span={8}>
@@ -72,6 +72,54 @@ const WorkBasicDetails: React.FC<{form: any}> = ({form}) => {
           <Input disabled />
         </Form.Item>
       </Col>
+      <Col span={8}>
+        <Form.Item
+          label="PAN Number"
+          name="panNumber"
+          rules={[
+            { required: true, message: "PAN number is required" },
+            {
+              pattern: /^[A-Z0-9]{10}$/,
+              message: "PAN must be 10 alphanumeric uppercase characters",
+            },
+          ]}
+        >
+          <Input
+            maxLength={10}
+            onChange={(e) => {
+              const formatted = e.target.value
+                .replace(/[^A-Za-z0-9]/g, "")
+                .toUpperCase();
+              form.setFieldsValue({ panNumber: formatted });
+            }}
+            placeholder="Enter PAN number"
+          />
+        </Form.Item>
+      </Col>
+
+      {/* Aadhar Number */}
+      <Col span={8}>
+        <Form.Item
+          label="Aadhar Number"
+          name="aadhar"
+          rules={[
+            { required: true, message: "Aadhar is required" },
+            {
+              pattern: /^\d{12}$/,
+              message: "Aadhar must be 12 digits",
+            },
+          ]}
+        >
+          <Input
+            maxLength={12}
+            onChange={(e) => {
+              const numeric = e.target.value.replace(/\D/g, "");
+              form.setFieldsValue({ aadhar: numeric });
+            }}
+            placeholder="Enter Aadhar number"
+          />
+        </Form.Item>
+      </Col>
 
       <Col span={8}>
         <Form.Item
@@ -79,7 +127,7 @@ const WorkBasicDetails: React.FC<{form: any}> = ({form}) => {
           label="Tenure (in months)"
           rules={[
             { required: true, message: "Tenure is required" },
-            { pattern: /^\d+$/, message: "Please enter valid number" }
+            { pattern: /^\d+$/, message: "Please enter valid number" },
           ]}
         >
           <Input type="number" placeholder="Enter tenure in months" />

@@ -51,6 +51,14 @@ const BusinessMiscellaneousDescription: React.FC<{
               {data?.miscellaneous?.rentalAmount}
             </Descriptions.Item>
           )}
+          {data?.miscellaneous?.ownershipOfPremises === "Leased" && (
+            <Descriptions.Item
+              label="Lease"
+              contentStyle={getItemStyle("leaseAmount")}
+            >
+              {data?.miscellaneous?.leaseAmount}
+            </Descriptions.Item>
+          )}
           <Descriptions.Item
             label="Area of Premises"
             contentStyle={getItemStyle("areaOfPremises")}
