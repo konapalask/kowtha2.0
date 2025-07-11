@@ -148,7 +148,6 @@ export class S3Service {
     const img = await loadImage(inputPath);
     // Check orientation and set preferred resolution
     let preferredWidth: number, preferredHeight: number;
-    console.log(img.width, img.height);
 
     if (img.width > img.height) {
       preferredWidth = 960;
@@ -210,12 +209,10 @@ export class S3Service {
     const stream = canvas.createJPEGStream();
     stream.pipe(out);
     await new Promise<void>(resolve => out.on('finish', () => resolve()));
-    console.log(`Processed image saved to ${outputPath}`);
   }
 
   async processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number, timestamp: string): Promise<string> {
     try {
-      console.log('received signal into processAndUploadImage', s3ImageUrl);
       // Download the image from S3
       const getCommand = new GetObjectCommand({
         Bucket: this.bucketName,
@@ -223,8 +220,9 @@ export class S3Service {
       });
     
       const s3Response = await this.s3Client.send(getCommand);
-      console.log('s3Response', s3Response);
+
       const chunks: Buffer[] = [];
+
       for await (const chunk of s3Response.Body as any) {
         chunks.push(chunk);
       }
@@ -235,7 +233,7 @@ export class S3Service {
     
       // Determine size
       let preferredWidth: number, preferredHeight: number;
-      console.log('img', img.width, img.height);
+
       if (img.width > img.height) {
         preferredWidth = 960;
         preferredHeight = 650;
@@ -301,7 +299,6 @@ export class S3Service {
       });
     
       await this.s3Client.send(putCommand);
-      console.log('Processed image uploaded back to S3:', s3ImageUrl);
     
       // Return the same URL
       return `https://${this.bucketName}.s3.amazonaws.com/${s3ImageUrl}`;
