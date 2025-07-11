@@ -1,26 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole, ApprovedStatus } from '@prisma/client';
-import { LoggingService } from '../common/logging/logging.service';
-import { CreateLoanDto } from './dto/create-loan.dto';
-import * as XLSX from 'xlsx';
-import { Logger } from '@nestjs/common';
-import { Roles } from '../accounts/decorators/roles.decorator';
-import * as puppeteer from 'puppeteer';
-import PDFDocument = require('pdfkit');
-import { Buffer } from 'buffer'; // Import the Buffer type
 import * as fs from 'fs';
 import * as path from 'path';
-import { EditLoanDto } from './dto/edit-loan.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { S3Service } from '../common/s3utils/s3.service';
+import * as XLSX from 'xlsx';
+import { Buffer } from 'buffer'; // Import the Buffer type
+import { Logger } from '@nestjs/common';
+import * as puppeteer from 'puppeteer';
 import { GetLoansDto } from './dto/get-loans.dto';
+import { EditLoanDto } from './dto/edit-loan.dto';
+import { PrismaService } from '../../prisma.service';
+import { CreateLoanDto } from './dto/create-loan.dto';
+import { S3Service } from '../common/s3utils/s3.service';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { VerifyLoanDto } from './dto/verify-loan.dto';
-import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { EditVerificationDto } from './dto/edit-verification.dto';
+import { LoggingService } from '../common/logging/logging.service';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
-
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, 
+            AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
+import { businessTemplate } from './templates/business.template';
+import { BusinessVerificationData } from './templates/business.interface';
 
 interface VerificationData {
   applicantDetails?: {
@@ -191,63 +188,6 @@ interface WorkVerificationData {
       timestamp: string;
       s3ImageUrl: string;
     }>;
-}
-
-interface BusinessVerificationData {
-  basicDetails?: {
-    personMet: string;
-    personMetRelation: string;
-    businessName: string;
-    applicantName: string;
-    isAddressSame: string;
-    businessAddress: string;
-    businessAddress2: string;
-    personMetName: string;
-  };
-  miscellaneous?: {
-    stockSeen: string;
-    rentalAmount: string;
-    employeesSeen: string;
-    businessActivity: string;
-    otherSetupObserved: string;
-    ownershipOfPremises: string;
-    illegalSetupObserved: string;
-    politicallyConnected: string;
-    businessActivityOther: string;
-    privateFinanceOrChits: string;
-    yearsInCurrentPremises: string;
-    areaOfPremises: string;
-    localityOfBusiness: string;
-    employeesUnderApplicant: string;
-  };
-  uploadedItems?: Array<{
-    id: string;
-    uri: string;
-    type: string;
-    timestamp: string;
-    s3ImageUrl: string;
-  }>;
-  thirdPartyCheck?: {
-    checks: Array<{
-      tpcName: string;
-      relationship: string;
-      comments: string;
-      feedbackStatus: string;
-      mobileNumber: string;
-    }>;
-  };
-  businessDetails?: {
-    geoTag: string;
-    constitution: string;
-    nameBoardSeen: string;
-    totalExperience: string;
-    businessProfile: string;
-    nameBoardMatched: string;
-    isBusinessSeasonal: string;
-    businessStartYear: string;
-    constitutionOther: string;
-    isAddressTraceable: string;
-  };
 }
 
 @Injectable()
@@ -446,58 +386,41 @@ export class LoanService {
     verificationType?: VerificationType,
     fieldExecutiveId?: number,
     address?: string,
-    verifierId?: number
+    verifierId?: number,
+    locationType?: LocationType,
+    businessName?: string
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
+
       if (!loan) {
         await this.loggingService.warn('Verification assignment failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
-      if (!fieldExecutiveId && !verifierId) {
+      if (!fieldExecutiveId || !verifierId) {
         throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
       }
 
-      if (verifierId) {
-        // Start a transaction to ensure all operations succeed or fail together
-      return await this.prisma.$transaction(async (prisma) => {
-        // Update loan with verifier if provided
-        await prisma.loan.update({
-          where: { id: loanId },
-          data: { verifierId }
-        });
-      });
-    }
-
-    else{
-      // If field executive is provided, address is mandatory
-      if (!fieldExecutiveId || !address || !verificationType) {
+      if (fieldExecutiveId && (!address || !verificationType)) {
         throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
       }
 
-        const verification = await this.prisma.verification.upsert({
-          where: {
-            loanId_type: {
-              loanId,
-              type: verificationType,
-            },
-          },
-          update: {
-            fieldExecutiveId,
-            status: 'Pending',
-            applicantAddress: address || null,
-          },
-          create: {
-            loan: { connect: { id: loan.id } },
-            type: verificationType,
-            fieldExecutive: { connect: { id: fieldExecutiveId } },
-            status: 'Pending',
-            applicantAddress: address || null,
-          },
-        });
+      return await this.prisma.$transaction(async (prisma) => {
+           const verification = await prisma.verification.create({
+             data: {
+              loan: { connect: { id: loan.id } },
+              type: verificationType || 'AddressOne',
+              verifier: { connect: { id: verifierId } },
+              fieldExecutive: { connect: { id: fieldExecutiveId } },
+              status: 'Pending',
+              applicantAddress: address || null,
+              locationType: locationType || null,
+              businessName: businessName || null,
+             }
+           });
 
-        const loanStatusChange = await this.prisma.loan.update({
+        const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
           data: { status: 'Assigned' },
         });
@@ -512,7 +435,7 @@ export class LoanService {
         });
 
         return verification;
-      };
+      });
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
@@ -610,7 +533,6 @@ export class LoanService {
       const updatedLoan = await this.prisma.loan.update({
         where: { id: loanId },
         data: {
-          verifierId,
           status,
         },
       });
@@ -660,18 +582,18 @@ export class LoanService {
               role: true
             }
           },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
           verifications: {
             include: {
               fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
+                  role: true
+                }
+              },
+              verifier: {
                 select: {
                   id: true,
                   name: true,
@@ -752,6 +674,13 @@ export class LoanService {
                   employeeCode: true,
                   role: true
                 }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
               }
             }
           }
@@ -784,31 +713,22 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.LoanWhereInput = {};
+      let whereCondition: Prisma.VerificationWhereInput = {};
       
       if (role === UserRole.Admin) {
-        // For Admin, get all loans
+        // For Admin, get all verifications
         whereCondition = {};
       } else if (role === UserRole.Verifier) {
-        // For Verifier, get only loans assigned to them
+        // For Verifier, get only verifications assigned to them
         whereCondition = { verifierId };
       }
 
-      const loans = await this.prisma.loan.findMany({
+      const verifications = await this.prisma.verification.findMany({
         where: whereCondition,
         include: {
-          operationsExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
-          verifications: {
+          loan: {
             include: {
-              fieldExecutive: {
+              operationsExecutive: {
                 select: {
                   id: true,
                   name: true,
@@ -818,12 +738,35 @@ export class LoanService {
                 }
               }
             }
+          },
+          fieldExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              employeeCode: true,
+              role: true
+            }
           }
         },
         orderBy: {
           createdAt: 'desc'
         }
       });
+
+      // Group verifications by loan to avoid duplicates
+      const loanMap = new Map();
+      verifications.forEach(verification => {
+        if (!loanMap.has(verification.loan.id)) {
+          loanMap.set(verification.loan.id, {
+            ...verification.loan,
+            verifications: []
+          });
+        }
+        loanMap.get(verification.loan.id).verifications.push(verification);
+      });
+
+      const loans = Array.from(loanMap.values());
 
       await this.loggingService.info('Retrieved loans by verifier', {
         verifierId,
@@ -852,6 +795,10 @@ export class LoanService {
 
       if (filters?.status) {
         where.status = filters.status;
+      }
+
+      if (filters?.id) {
+        where.id = Number(filters.id);
       }
 
       if (filters?.applicationNumber) {
@@ -910,15 +857,6 @@ export class LoanService {
               role: true
             }
           },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true,
-              employeeCode: true,
-              role: true
-            }
-          },
           verifications: {
             include: {
               fieldExecutive: {
@@ -927,9 +865,24 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
+                  role: true,
+                  office: {
+                    select: {
+                      id: true,
+                      name: true
+                    }
+                  }
+                }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true,
+                  employeeCode: true,
                   role: true
                 }
-              }
+              },
             }
           }
         },
@@ -972,37 +925,23 @@ export class LoanService {
     fieldExecutiveId?: number,
     address?: string,
     verifierId?: number,
+    businessName?: string
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
+
       if (!loan) {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
 
-      // If field executive is provided, address is mandatory
-      if (fieldExecutiveId && !address) {
+      // // If field executive is provided, address is mandatory
+      if (!fieldExecutiveId && !address && !businessName && !verifierId) {
         throw new BadRequestException('Address is required when assigning a field executive');
-      }
-
-      // If no updates provided, return current verification
-      if (!verificationType && !fieldExecutiveId && !verifierId) {
-        const verification = await this.prisma.verification.findFirst({
-          where: { loanId }
-        });
-        return verification;
       }
 
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
-        // Update loan with verifier if provided
-        if (verifierId) {
-          await prisma.loan.update({
-            where: { id: loanId },
-            data: { verifierId }
-          });
-        }
-
         // Update verification
         const verification = await prisma.verification.update({
           where: {
@@ -1013,7 +952,9 @@ export class LoanService {
           },
           data: {
             ...(fieldExecutiveId && { fieldExecutiveId }),
+            ...(verifierId && { verifierId }),
             ...(address && { applicantAddress: address }),
+            ...(businessName && { businessName }),
             status: 'Pending', // Reset status when assignment is updated
           },
         });
@@ -1066,8 +1007,8 @@ export class LoanService {
         NOT: {
           verificationRetries: {
             some: {
-              date: {
-                gte: today,
+              createdAt: {
+                gt: today,
                 lt: tomorrow
               }
             }
@@ -1081,7 +1022,10 @@ export class LoanService {
 
       if (filters?.applicationNumber) {
         where.loan = {
-          applicationNumber: filters.applicationNumber
+          applicationNumber: {
+            contains: filters.applicationNumber,
+            mode: 'insensitive'
+          }
         };
       }
 
@@ -1113,10 +1057,17 @@ export class LoanService {
         take: Number(limit)
       });
       
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
       const isAvailableToday = await this.prisma.attendance.findFirst({
         where: {
           userId: fieldExecutiveId,
-          date: new Date()
+          date: {
+            gte: startOfToday,
+            lt: startOfTomorrow
+          }
         }
       }) ? true : false;
 
@@ -1377,6 +1328,16 @@ export class LoanService {
         throw new BadRequestException('Cannot delete a completed verification');
       }
 
+      const verificationRetries = await this.prisma.verificationRetries.findMany({
+        where: {
+          verificationId: verification.id,
+        },
+      });
+
+      if (verificationRetries.length > 0) {
+        throw new BadRequestException('Cannot delete the verification as it has been rescheduled');
+      }
+
       // Delete the verification
       const deletedVerification = await this.prisma.verification.delete({
         where: {
@@ -1443,6 +1404,13 @@ export class LoanService {
                   name: true,
                   mobile: true
                 }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
               }
             }
           },
@@ -1460,6 +1428,7 @@ export class LoanService {
         return {
           id: verification.id,
           type: verification.type,
+          path: verification.path,
           status: verification.status,
           approvedStatus: verification.approvedStatus,
           finalReportPath: verification.finalReportPath,
@@ -1540,9 +1509,6 @@ export class LoanService {
             operationsExecutive: { connect: { id: operationsExecutiveId } },
             ...(fieldExecutiveId && {
               fieldExecutive: { connect: { id: fieldExecutiveId } }
-            }),
-            ...(verifierId && {
-              verifier: { connect: { id: Number(verifierId) } }
             })
           };
 
@@ -2091,7 +2057,6 @@ export class LoanService {
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
 
-
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -2301,202 +2266,7 @@ export class LoanService {
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
 
-    return `
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Business Verification</td></tr>
-          <tr>
-            <th>Name of the Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Name</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Profile</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessAddress || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Total Work Experience</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name Board Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name Board Matched</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Date of Commencement of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Is Address Traceable</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Seasonal</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isBusinessSeasonal || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Constitution</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.constitution || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Area of Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.areaOfPremises || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Locality of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.localityOfBusiness || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Number of Employees Working Under Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesUnderApplicant || ''}</span></td>
-          </tr>
-        </table>
-      </div>
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Miscellaneous Details</td></tr>
-          <tr>
-            <th>Stock Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.stockSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Ownership of Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.ownershipOfPremises || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Rent Paid</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Employees Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Activity</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.businessActivity || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Other Setup Observed</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.otherSetupObserved || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Politically Connected</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.politicallyConnected || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Years in Current Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
-          </tr>
-        </table>
-      </div>
-      <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Mobile Number</th>
-          <th>Relationship</th>
-          <th>Feedback Status</th>
-          <th>Comments</th>
-        </tr>
-        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
-          ? verificationData.thirdPartyCheck.checks.map(tpc => `
-            <tr>
-              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
-              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
-              <td><span class="var-value">${tpc.relationship || ''}</span></td>
-              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
-              <td><span class="var-value">${tpc.comments || ''}</span></td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
-        </table>
-      </div>
-
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Remarks</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Final Recommendation</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${finalRecommendationHtml}
-              </ul>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br>
-      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-          <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-    `;
+    return businessTemplate(verificationData, bankName, path, finalRecommendationHtml, imageDataUri, imageUrls);
   }
 
     private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
@@ -2566,10 +2336,6 @@ export class LoanService {
           </tr> 
           <tr>
             <th>If Less than 3 Years in current city, then mention Reason for Change</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
-          </tr>
-          <tr>
-            <th>Reason for Change</th>
             <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
           </tr>
         </table>
@@ -2813,6 +2579,58 @@ export class LoanService {
         data: createVerificationRetryDto,
         error: error.message,
         stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async deleteLoan(loanId: number) {
+    try {
+      // Start a transaction to delete all related entities
+      return await this.prisma.$transaction(async (prisma) => {
+        // Delete VerificationRetries for all verifications of this loan
+        const verifications = await prisma.verification.findMany({
+          where: { loanId },
+          select: { id: true },
+        });
+        const verificationIds = verifications.map(v => v.id);
+        if (verificationIds.length > 0) {
+          await prisma.verificationRetries.deleteMany({
+            where: { verificationId: { in: verificationIds } },
+          });
+        }
+
+        // Delete EditRequests for this loan
+        await prisma.editRequest.deleteMany({
+          where: { loanId },
+        });
+        // Delete EditRequests for verifications of this loan
+        if (verificationIds.length > 0) {
+          await prisma.editRequest.deleteMany({
+            where: { verificationId: { in: verificationIds } },
+          });
+        }
+
+        // Delete Verifications for this loan
+        await prisma.verification.deleteMany({
+          where: { loanId },
+        });
+
+        // Finally, delete the loan
+        const deletedLoan = await prisma.loan.delete({
+          where: { id: loanId },
+        });
+
+        await this.loggingService.info('Loan and all related entities deleted', {
+          loanId,
+        });
+        return { message: 'Loan and all related entities deleted', deletedLoan };
+      });
+    } catch (error) {
+      await this.loggingService.error('Failed to delete loan and related entities', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }

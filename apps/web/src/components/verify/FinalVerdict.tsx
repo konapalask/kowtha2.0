@@ -5,7 +5,7 @@ import "react-quill/dist/quill.snow.css";
 
 interface FinalVerdictProps {
   disabled?: boolean;
-  verdict: boolean;
+  verdict: boolean | null | string;
   setVerdict: any;
   editorContent: any;
   setEditorContent: any;
@@ -95,7 +95,11 @@ const FinalVerdict: React.FC<FinalVerdictProps> = ({
             formats={["list"]}
           />
           <div className="flex-end" style={{ margin: 8 }}>
-            <Button disabled={!verdict} type="primary" onClick={handleSave}>
+            <Button
+              disabled={!verdict || disabled}
+              type="primary"
+              onClick={handleSave}
+            >
               Save
             </Button>
           </div>

@@ -35,6 +35,7 @@ export interface BasicDetailsFormData {
   availablePersonRelation: string;
   availablePersonRelationOther: string;
   aadhar: string;
+  panNumber: string;
 }
 
 export type ApplicantInformationFormData = {
@@ -74,6 +75,7 @@ export type ResidenceDetailsFormData = {
   yearsAtCurrentAddress: string;
   // nameBoardVisible: string;
   politicalSymbolVisible: string;
+  leaseAmount: string;
 };
 
 export type FamilyEmploymentDetailsFormData = {

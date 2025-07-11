@@ -1,15 +1,15 @@
 .customRadioGroup :global(.ant-radio-button-wrapper-checked) {
-  background-color: var(--primary-200) !important;
+  background-color: #173a73 !important;
   color: #fff !important;
-  border-color: var(--primary-200) !important;
+  border-color: #173a73 !important;
 }
 
 .customRadioGroup :global(.ant-radio-button-wrapper-checked:hover) {
-  background-color: var(--primary-200) !important;
+  background-color: #173a73 !important;
   color: #fff !important;
-  border-color: var(--primary-200) !important;
+  border-color: #173a73 !important;
 }
 
 .customRadioGroup :global(.ant-radio-button-wrapper:hover) {
   color: var(--primary-800);
-} 
+}

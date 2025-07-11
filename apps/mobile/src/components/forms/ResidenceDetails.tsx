@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useRef} from 'react';
 import {
   View,
   Text,
@@ -20,8 +20,8 @@ interface ResidenceDetailsProps {
 const RESIDENCE_STATUS_OPTIONS = ['Owned', 'Rented', 'Leased'];
 const RESIDENCE_TYPE_OPTIONS = ['House', 'Apartment', 'Villa', 'Others'];
 const QUALITY_OPTIONS = ['Excellent', 'Good', 'Average', 'Poor'];
-const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
-const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
+// const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
+// const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
 const ACCESSIBILITY_OPTIONS = ['Easy', 'Moderate', 'Difficult'];
 const YES_NO_OPTIONS = ['Yes', 'No'];
 
@@ -47,19 +47,20 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       rentDetails: '',
       yearsAtCurrentAddress: '',
       politicalSymbolVisible: '',
+      leaseAmount: '',
     },
   });
 
   const residenceStatusRef = useRef<ActionSheetRef>(null);
   const residenceTypeRef = useRef<ActionSheetRef>(null);
-  const constructionQualityRef = useRef<ActionSheetRef>(null);
+  // const constructionQualityRef = useRef<ActionSheetRef>(null);
   const standardOfLivingRef = useRef<ActionSheetRef>(null);
-  const locationCategoryRef = useRef<ActionSheetRef>(null);
-  const localityTypeRef = useRef<ActionSheetRef>(null);
+  // const locationCategoryRef = useRef<ActionSheetRef>(null);
+  // const localityTypeRef = useRef<ActionSheetRef>(null);
   const accessibilityRef = useRef<ActionSheetRef>(null);
-  const nameBoardVisibleRef = useRef<ActionSheetRef>(null);
+  // const nameBoardVisibleRef = useRef<ActionSheetRef>(null);
   const politicalSymbolVisibleRef = useRef<ActionSheetRef>(null);
-  const [showRentDetails, setShowRentDetails] = useState(false);
+  // const [showRentDetails, setShowRentDetails] = useState(false);
 
   const residenceStatus = watch('residenceStatus');
   const residenceType = watch('residenceType');
@@ -105,6 +106,88 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         <Controller
           control={control}
           rules={{
+            required: 'Amount is required',
+            validate: value => {
+              if (isNaN(Number(value))) {
+                return 'Please enter a valid number';
+              }
+              return true;
+            },
+          }}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Rent per month*</Text>
+              <TextInput
+                style={[styles.input]}
+                onChangeText={text => {
+                  // Only update if the entire string is digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
+                  // Otherwise ignore the input
+                }}
+                value={value}
+                placeholder="Enter amount"
+                placeholderTextColor={colors.text.disabled}
+                keyboardType="numeric" // Show numeric keyboard on mobile
+                inputMode="decimal" // Modern alternative to keyboardType
+              />
+              {errors.rentDetails && (
+                <Text style={styles.errorText}>
+                  {errors.rentDetails.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="rentDetails"
+        />
+      )}
+
+      {residenceStatus === 'Leased' && (
+        <Controller
+          control={control}
+          rules={{
+            required: 'Amount is required',
+            validate: value => {
+              if (isNaN(Number(value))) {
+                return 'Please enter a valid number';
+              }
+              return true;
+            },
+          }}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Lease Amount*</Text>
+              <TextInput
+                style={[styles.input]}
+                onChangeText={text => {
+                  // Only update if the entire string is digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
+                  // Otherwise ignore the input
+                }}
+                value={value}
+                placeholder="Enter amount"
+                placeholderTextColor={colors.text.disabled}
+                keyboardType="numeric" // Show numeric keyboard on mobile
+                inputMode="decimal" // Modern alternative to keyboardType
+              />
+              {errors.leaseAmount && (
+                <Text style={styles.errorText}>
+                  {errors.leaseAmount.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="leaseAmount"
+        />
+      )}
+
+      {/* {['Rented', 'Leased']?.includes(residenceStatus) && (
+        <Controller
+          control={control}
+          rules={{
             required: 'Rent is required',
             validate: value => {
               if (isNaN(Number(value))) {
@@ -140,7 +223,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           )}
           name="rentDetails"
         />
-      )}
+      )} */}
 
       <Controller
         control={control}
@@ -375,7 +458,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={residenceStatusRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Residence Status</Text>
           {RESIDENCE_STATUS_OPTIONS.map(option => (
             <TouchableOpacity
@@ -394,7 +477,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={residenceTypeRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Residence Type</Text>
           {RESIDENCE_TYPE_OPTIONS.map(option => (
             <TouchableOpacity
@@ -413,7 +496,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         ref={standardOfLivingRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Standard of Living</Text>
           {QUALITY_OPTIONS.map(option => (
             <TouchableOpacity
@@ -428,11 +511,11 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={localityTypeRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Locality Type</Text>
           {LOCALITY_TYPE_OPTIONS.map(option => (
             <TouchableOpacity
@@ -445,13 +528,13 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={accessibilityRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Accessibility</Text>
           {ACCESSIBILITY_OPTIONS.map(option => (
             <TouchableOpacity
@@ -466,11 +549,11 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={nameBoardVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Visibility</Text>
           {YES_NO_OPTIONS.map(option => (
             <TouchableOpacity
@@ -483,13 +566,13 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={politicalSymbolVisibleRef}
         containerStyle={styles.actionSheet}
         gestureEnabled={true}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Visibility</Text>
           {YES_NO_OPTIONS.map(option => (
             <TouchableOpacity

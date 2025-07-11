@@ -199,7 +199,7 @@ export default function Verify() {
           loading={loading}
           pagination={{
             pageSize: 10,
-            // showSizeChanger: true,
+            showSizeChanger: false,
             showTotal: (total) => `Total ${total ?? 0} items`,
             position: ["bottomCenter"],
           }}

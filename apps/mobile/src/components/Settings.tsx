@@ -21,9 +21,9 @@ type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   'VerificationList'
 >;
 
-const fetchUserDetails = async () => {
-  return await getItem('userDetails');
-};
+// const fetchUserDetails = async () => {
+//   return await getItem('userDetails');
+// };
 
 const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   isLoggedIn,
@@ -36,15 +36,29 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   // console.log(userDetails);
   const [userDetails, setUserDetails] = useState<any>({});
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [testUser, setTestUser] = useState(false);
 
   useLayoutEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const details = await getItem('userDetails');
         setUserDetails(details);
+        console.log(details);
       } catch (error) {
+        if (testUser) {
+          setUserDetails({
+            name: 'Test',
+            employeeCode: 'Test123',
+            role: 'Field Executive',
+          });
+        }
         console.log(error);
       }
+    };
+
+    const checkTestUser = async () => {
+      const testUser = await getItem('testUser');
+      setTestUser(testUser);
     };
 
     // const checkAttendance = async () => {
@@ -56,10 +70,12 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
     //     console.log(error);
     //   }
     // };
-
-    fetchUserDetails();
+    if (profileModalVisible) {
+      checkTestUser();
+      fetchUserDetails();
+    }
     // checkAttendance();
-  }, []);
+  }, [profileModalVisible]);
 
   const toggleMenu = () => setVisible(!visible);
 
@@ -71,7 +87,8 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   const handleLogout = () => {
     clearItem('accessToken');
     clearItem('refreshToken');
-    // clearItem('attendance');
+    clearItem('testUser');
+    clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],

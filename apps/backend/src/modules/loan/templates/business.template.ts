@@ -1,0 +1,283 @@
+import { BusinessVerificationData } from "./business.interface";
+
+export const businessTemplate = (verificationData: BusinessVerificationData, bankName: string, path: string, finalRecommendationHtml: string, imageDataUri: string, imageUrls: string[]) => {
+    // Constitution check for others
+    let constitution = '';
+    if(verificationData.businessDetails?.constitution === 'Others') {
+        constitution = verificationData.businessDetails?.constitutionOther || '';
+    }
+
+    // Corrected Business Name check
+    let correctedBusinessName = '';
+    if(verificationData.basicDetails?.isBusinessNameSame === 'No') {
+        correctedBusinessName = `
+        <tr>
+            <th>Corrected Business Name</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.correctedBusinessName || ''}</span></td>
+        </tr>
+        `;
+    }
+
+    // Corrected Address check
+    let correctedAddress = '';
+    if(verificationData.basicDetails?.isAddressSame === 'No') {
+        correctedAddress = `
+        <tr>
+            <th>Corrected Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.addressCorrection || ''}</span></td>
+        </tr>
+        `;
+    }
+
+    // Aadhar Number masking
+    let aadhar = verificationData.basicDetails?.aadhar || '';
+    if(aadhar.length > 4) {
+      aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
+    }
+
+    let personMet = '';
+    if(verificationData.basicDetails?.personMet === 'Others') {
+        personMet = `
+        <tr>
+            <th>Person Met Name</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Person Met Relation</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
+          </tr>
+        `;
+    }
+    
+    return `
+    <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Business Verification</td></tr>
+          <tr>
+            <th>Name of the Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Aadhar Number</th>
+            <td colspan="5"><span class="var-value">${aadhar}</span></td>
+          </tr>
+          <tr>
+            <th>PAN Number</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.panNumber || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Name</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Profile</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessProfile || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Address</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessAddress || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Is Business Name Same</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.isBusinessNameSame || ''}</span></td>
+          </tr>
+          ${correctedBusinessName}
+          <tr>
+            <th>Is Address Same</th>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.isAddressSame || ''}</span></td>
+          </tr>
+          ${correctedAddress}
+          ${personMet}
+          <tr>
+            <th>Total Work Experience</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Name Board Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Name Board Matched</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Date of Commencement of Business</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Is Address Traceable</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Business Seasonal</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isBusinessSeasonal || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Constitution</th>
+            <td colspan="5"><span class="var-value">${constitution}</span></td>
+          </tr>
+        </table>
+      </div>
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+      <div style="page-break-before: always;"></div>
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Miscellaneous Details</td></tr>
+          <tr>
+            <th>Stock Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.stockSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Ownership of Premises</th>
+            <td colspan="5"><span class="var-value">Lease</span></td>
+          </tr>
+          <tr>
+            <th>Area of Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.areaOfPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Locality of Business</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.localityOfBusiness || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Rental/Lease Amount</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Number of Employees Working Under Applicant</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesUnderApplicant || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Employees Seen</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesSeen || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Other Setup Observed</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.otherSetupObserved || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Politically Connected</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.politicallyConnected || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Years in Current Premises</th>
+            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
+          </tr>
+        </table>
+      </div>
+      <div class="align-wrapper">
+        <table class="section-table">
+        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
+        <tr>
+          <th>Name</th>
+          <th>Mobile Number</th>
+          <th>Relationship</th>
+          <th>Feedback Status</th>
+          <th>Comments</th>
+        </tr>
+        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
+          ? verificationData.thirdPartyCheck.checks.map(tpc => `
+            <tr>
+              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
+              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
+              <td><span class="var-value">${tpc.relationship || ''}</span></td>
+              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
+              <td><span class="var-value">${tpc.comments || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
+        </table>
+      </div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+        <tr><td colspan="6" class="section-header">Existing Loans</td></tr>
+        <tr>
+          <th>Bank Name</th>
+          <th>Loan Amount</th>
+          <th>Tenure</th>
+          <th>EMI</th>
+          <th>Purpose</th>
+        </tr>
+        ${Array.isArray(verificationData.existingLoans?.loans) && verificationData.existingLoans.loans.length > 0
+          ? verificationData.existingLoans.loans.map(loan => `
+            <tr>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.loanAmount || ''}</span></td>
+              <td><span class="var-value">${loan.tenure || ''}</span></td>
+              <td><span class="var-value">${loan.emi || ''}</span></td>
+              <td><span class="var-value">${loan.purpose || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
+        </table>
+      </div>
+
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+
+
+      <div style="page-break-before: always;"></div>
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+          <tr>
+            <th>Remarks</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${path || ''}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Final Recommendation</th>
+            <td colspan="5">
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                ${finalRecommendationHtml}
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <br>
+      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
+
+          <div class="footer">
+            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+            Generated on ${new Date().toLocaleString()}
+          </div>
+           
+
+      <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${imageUrls.map(url => `
+                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+  `
+}

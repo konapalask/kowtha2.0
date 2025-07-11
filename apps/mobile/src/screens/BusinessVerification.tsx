@@ -23,6 +23,7 @@ import Toast from 'react-native-toast-message';
 import {getItem, setItem, clearItem} from '../helpers/utility';
 import {BusinessDetailsFormData} from '../components/forms/BusinessDetails';
 import Investigable from '../components/forms/Investigable';
+import ExistingLoans from '../components/forms/ExistingLoans';
 
 interface BusinessVerificationFormData {
   basicDetails: {
@@ -54,6 +55,15 @@ interface BusinessVerificationFormData {
   };
   thirdPartyCheck: ThirdPartyCheckFormData;
   uploadedItems: UploadedItem[];
+  existingLoans: {
+    loans: Array<{
+      bankName: string;
+      purpose: string;
+      loanAmount: string;
+      emi: string;
+      tenure: string;
+    }>;
+  };
 }
 
 const BusinessVerification = () => {
@@ -70,6 +80,7 @@ const BusinessVerification = () => {
     miscellaneous: false,
     thirdPartyCheck: false,
     photoCapture: false,
+    existingLoans: false,
   });
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   const [expandedSections, setExpandedSections] = useState<{
@@ -81,6 +92,7 @@ const BusinessVerification = () => {
     thirdPartyCheck: false,
     photoCapture: false,
     investigable: investigable ?? true,
+    existingLoans: false,
   });
 
   const [formData, setFormData] = useState<BusinessVerificationFormData>({
@@ -92,7 +104,7 @@ const BusinessVerification = () => {
       businessAddress: item?.address,
       isAddressSame: '',
       addressCorrection: '',
-      businessName: '',
+      businessName: item?.businessName ?? '',
     },
     businessDetails: {
       nameBoardSeen: '',
@@ -128,6 +140,17 @@ const BusinessVerification = () => {
       checks: [{tpcName: '', mobileNumber: '', relationship: '', comments: ''}],
     },
     uploadedItems: [],
+    existingLoans: {
+      loans: [
+        {
+          bankName: '',
+          purpose: '',
+          loanAmount: '',
+          emi: '',
+          tenure: '',
+        },
+      ],
+    },
   });
 
   useEffect(() => {
@@ -158,6 +181,17 @@ const BusinessVerification = () => {
               ],
             },
             uploadedItems: savedData.uploadedItems || [],
+            existingLoans: savedData.existingLoans || {
+              loans: [
+                {
+                  bankName: '',
+                  purpose: '',
+                  loanAmount: '',
+                  emi: '',
+                  tenure: '',
+                },
+              ],
+            },
           };
           setFormData(completeFormData);
           const updatedSections = {
@@ -166,6 +200,7 @@ const BusinessVerification = () => {
             miscellaneous: !!savedData.miscellaneous,
             thirdPartyCheck: !!savedData.thirdPartyCheck,
             photoCapture: savedData.uploadedItems?.length > 0,
+            existingLoans: !!savedData.existingLoans,
           };
 
           setValidSections(updatedSections);
@@ -265,6 +300,22 @@ const BusinessVerification = () => {
     await saveFormData('thirdPartyCheck', data);
   };
 
+  const handleExistingLoansSubmit = async (
+    data: BusinessVerificationFormData['existingLoans'],
+  ) => {
+    const updatedData = {
+      ...formData,
+      existingLoans: data,
+    };
+    setFormData(updatedData);
+    setValidSections(prev => ({
+      ...prev,
+      existingLoans: true,
+    }));
+    setExpandedSections(prev => ({...prev, existingLoans: false}));
+    await saveFormData('existingLoans', data);
+  };
+
   const handleUploadedItemsChange = async (items: UploadedItem[]) => {
     const updatedData = {
       ...formData,
@@ -279,16 +330,15 @@ const BusinessVerification = () => {
   };
 
   const handleSubmit = async () => {
-    const allSectionsValid = Object.values(validSections).every(
-      isValid => isValid,
-    );
+    const {existingLoans, ...rest} = validSections;
+    const allSectionsValid = Object.values(rest).every(isValid => isValid);
 
     if (!allSectionsValid) {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
         text2: 'Please fill all mandatory fields before submitting',
-        position: 'bottom',
+        position: 'top',
       });
       return;
     }
@@ -362,6 +412,17 @@ const BusinessVerification = () => {
               <BusinessMiscellaneous
                 initialData={formData.miscellaneous}
                 onSubmit={handleMiscellaneousSubmit}
+              />
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Existing Loans"
+              isExpanded={expandedSections.existingLoans}
+              onToggle={() => toggleSection('existingLoans')}
+              isValid={validSections.existingLoans}>
+              <ExistingLoans
+                initialData={formData.existingLoans}
+                onSubmit={handleExistingLoansSubmit}
               />
             </CollapsibleSection>
 

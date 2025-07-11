@@ -52,7 +52,10 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
       // Only proceed if validation passes
-      const formValues = values;
+
+      const formValues =
+        formKey === "familyMemberDetails" ? Object.values(values) : values;
+      console.log(formValues);
       const initialValues = await getInitialValues();
       const cleanedInitialValues = Object.fromEntries(
         Object.entries(initialValues).filter(
@@ -66,7 +69,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (isChanged) {
         const mappedKey = formKeyMapping[formKey] || formKey;
         const finalData = {
-          [mappedKey]: values,
+          [mappedKey]: formValues,
         };
 
         const request = indexedDB.open("editLogs", 1);

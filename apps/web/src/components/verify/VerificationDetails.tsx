@@ -33,6 +33,8 @@ interface VerificationDetailsProps {
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
   verificationType: string;
+  completeVerificationData: any;
+  fetchVerificationData: any;
 }
 
 export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
@@ -43,17 +45,26 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   fetchEditRequests,
   hasEditRequest,
   verificationType,
+  completeVerificationData,
+  fetchVerificationData,
 }) => {
+  // console.log(completeVerificationData?.approvedStatus);
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
+    completeVerificationData?.path || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState<boolean>(false);
-  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  const [verdict, setVerdict] = useState(
+    completeVerificationData?.approvedStatus === "Positive"
+      ? "positive"
+      : completeVerificationData?.approvedStatus === "Negative"
+        ? "negative"
+        : null
+  );
   // const [editorContent, setEditorContent] = useState(initialRemarks);
   // const [verdict, setVerdict] = useState<string | null>(null);
   // const [loading, setLoading] = useState<boolean>(false);
@@ -69,6 +80,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         // setLoading(true);
         // setOpen(false);
         // router?.push("/verify");
+        fetchVerificationData();
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -201,28 +213,24 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
 
   return (
     <>
-      {/* Basic Details Section */}
       <BasicDetailsDescription
         data={data}
         extra={getButton("basicDetails")}
         logs={false}
       />
 
-      {/* Address Verification Section */}
       <AddressVerificationDescription
         data={data}
         extra={getButton("addressVerification")}
         logs={false}
       />
 
-      {/* Residence Details Section */}
       <ResidenceDetailsDescription
         data={data}
         extra={getButton("residenceDetails")}
         logs={false}
       />
 
-      {/* Family & Employment Details Section */}
       <FamilyEmploymentDescription
         data={data}
         extra={getButton("familyEmploymentDetails")}
@@ -235,7 +243,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           extra={
             <Button
               // type="primary"
-              style={{ border: "none" }}
+              disabled={hasEditRequest}
+              style={{ border: "none", background: "transparent" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("familyMemberDetails")}
             />
@@ -280,19 +289,6 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 dataIndex: "stayingWithApplicant",
                 key: "stayingWithApplicant",
               },
-
-              // {
-              //   title: "Actions",
-              //   key: "actions",
-              //   render: (_, record) => (
-              //     <Button
-              //       type="text"
-              //       icon={<EditOutlined />}
-              //       onClick={() => onEdit("colleagueReferences")}
-              //       disabled={hasEditRequest}
-              //     />
-              //   ),
-              // },
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
@@ -313,7 +309,8 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
           extra={
             <Button
               // type="primary"
-              style={{ border: "none" }}
+              disabled={hasEditRequest}
+              style={{ border: "none", background: "transparent" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("thirdPartyCheck")}
             />
@@ -391,7 +388,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       objectFit: "cover",
                       borderRadius: "4px",
                     }}
-                    preview={false}
+                    // preview={false}
                   />
                   {/* <Button
                     type="text"
@@ -467,7 +464,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         editorContent={editorContent}
         disabled={hasEditRequest}
         handleSave={handleSave}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         open={open}
         setOpen={setOpen}
         verificationType={verificationType}

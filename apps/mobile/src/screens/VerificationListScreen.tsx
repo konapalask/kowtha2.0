@@ -48,29 +48,6 @@ interface VerificationItem {
   };
 }
 
-// Dummy data
-// const dummyData: VerificationItem[] = [
-//   {
-//     id: '1',
-//     name: 'B. Yedukondalu',
-//     age: 25,
-//     sex: 'Male',
-//     address: 'H.no: 123, Street: 1, City: Amalapuram',
-//     status: 'In Progress',
-//     verificationType: 'Current Address',
-//   },
-//   {
-//     id: '2',
-//     name: 'B. Mudukondalu',
-//     age: 30,
-//     sex: 'Male',
-//     address: 'H.no: 456, Street: 2, City: Amalapuram',
-//     status: 'Completed',
-//     verificationType: 'Work Address',
-//   },
-//   // Add more dummy data as needed
-// ];
-
 const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
   const [data, setData] = useState<VerificationItem[]>([]);
@@ -82,18 +59,24 @@ const VerificationListScreen = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [showAttendanceModal, setShowAttendanceModal] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const disabled = !isLoggedIn;
+  const [testUser, setTestUser] = useState(false);
   // const disabled = false;
-  // console.log(isLoggedIn);
-
+  console.log(isLoggedIn, 'lllllllllllllllllllllllll');
+  // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
 
   const fetchData = async (page = 1, shouldAppend = false) => {
     try {
       setLoading(true);
-      const response = await getFieldData(page, selectedFilter);
+      const response = await getFieldData(
+        page,
+        selectedFilter,
+        appNumberFilter,
+      );
       // console.log(response);
+      console.log(response?.data?.isAvailableToday ? 'Available' : null);
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
         date: dayjs().format('YYYY-MM-DD'),
@@ -108,28 +91,82 @@ const VerificationListScreen = () => {
       setHasMore(page < totalPages);
       setPage(page);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to fetch verifications',
-        position: 'bottom',
-      });
+      // if (testUser) {
+      // }
+      if (!testUser) {
+        console.error('Error fetching data:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to fetch verifications',
+          position: 'top',
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(1, false);
+    const checkTestUserAndSetData = async () => {
+      const testUser = await getItem('testUser');
+      setTestUser(testUser);
+      if (testUser) {
+        // Use the provided dummy data structure
+        const dummyItems: VerificationItem[] = [
+          {
+            id: '206',
+            loanId: '99',
+            type: 'Business',
+            status: 'Pending',
+            applicantAddress: 'Sree krishna sai residency, Kondapur',
+            loan: {
+              applicationNumber: 'ABHF-00020',
+              applicantName: 'Prem',
+            },
+          },
+          {
+            id: '166',
+            loanId: '78',
+            type: 'AddressOne',
+            status: 'Pending',
+            applicantAddress: 'Kondapur',
+            loan: {
+              applicationNumber: 'ABHF-00002',
+              applicantName: 'Conduit',
+            },
+          },
+          {
+            id: '300',
+            loanId: '120',
+            type: 'Work',
+            status: 'Completed',
+            applicantAddress: 'Madhapur',
+            loan: {
+              applicationNumber: 'ABHF-00099',
+              applicantName: 'Test Completed',
+            },
+          },
+        ];
+        setData(dummyItems);
+        setHasMore(false);
+      } else {
+        fetchData(1, false);
+      }
+    };
+    checkTestUserAndSetData();
   }, []);
 
   const checkAttendance = async () => {
     try {
       const details = await getItem('attendance');
+      console.log(details);
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-      setIsLoggedIn(isToday);
+      console.log(isToday && details?.status === 'Available');
+      isToday && details?.status === 'Available'
+        ? setIsLoggedIn(true)
+        : setIsLoggedIn(false);
     } catch (error) {
       console.log(error);
     }
@@ -137,8 +174,8 @@ const VerificationListScreen = () => {
 
   const validTime = () => {
     const currentTime = dayjs();
-    const start = currentTime.clone().hour(8).minute(0).second(0);
-    const end = currentTime.clone().hour(11).minute(0).second(0);
+    const start = currentTime.clone().hour(9).minute(0).second(0);
+    const end = currentTime.clone().hour(12).minute(0).second(0);
 
     if (currentTime.isAfter(start) && currentTime.isBefore(end)) {
       return true;
@@ -155,7 +192,7 @@ const VerificationListScreen = () => {
 
   useEffect(() => {
     fetchData(1, false);
-  }, [selectedFilter]);
+  }, [selectedFilter, appNumberFilter]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -333,6 +370,7 @@ const VerificationListScreen = () => {
               id: item?.id,
               verificationId: item?.loanId,
               address: item?.applicantAddress,
+              businessName: item?.businessName,
             };
             if (item?.type === 'Work') {
               navigation.navigate('WorkVerification' as any, {
@@ -479,6 +517,17 @@ const VerificationListScreen = () => {
           <Text style={styles.noResultsText}>
             No matching applications found
           </Text>
+          <TouchableOpacity onPress={() => fetchData(1, false)}>
+            <Text
+              style={{
+                color: '#007AFF',
+                marginTop: 12,
+                fontWeight: 'bold',
+                fontSize: 16,
+              }}>
+              Refresh
+            </Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList

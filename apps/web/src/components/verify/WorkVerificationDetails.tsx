@@ -40,6 +40,8 @@ interface WorkVerificationDetailsProps {
   verificationId: string;
   fetchEditRequests: () => void;
   hasEditRequest: boolean;
+  completeVerificationData: any;
+  fetchVerificationData: any;
 }
 
 export const WorkVerificationDetails: React.FC<
@@ -51,17 +53,25 @@ export const WorkVerificationDetails: React.FC<
   verificationId,
   fetchEditRequests,
   hasEditRequest,
+  completeVerificationData,
+  fetchVerificationData,
 }) => {
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [editorContent, setEditorContent] = useState(
-    verificationData?.finalObservations?.remarks || "<ul><li><br></li></ul>"
+    completeVerificationData?.path || "<ul><li><br></li></ul>"
   );
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
-  const [verdict, setVerdict] = useState(verificationData?.finalVerdict);
+  const [verdict, setVerdict] = useState<string | null>(
+    completeVerificationData?.approvedStatus === "Positive"
+      ? "positive"
+      : completeVerificationData?.approvedStatus === "Negative"
+        ? "negative"
+        : null
+  );
   // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
@@ -77,6 +87,7 @@ export const WorkVerificationDetails: React.FC<
         // router?.push("/verify");
         // // setVerdict(verdict);
         // setLoading(true);
+        fetchVerificationData();
       })
       .catch((error) => {
         console.log("error: ", error);
@@ -144,17 +155,17 @@ export const WorkVerificationDetails: React.FC<
 
   const data = verificationData || {};
 
-  const handleEditorChange = (content: string) => {
-    // const liMatch = content.match(/<li>/g);
-    // const liCount = liMatch ? liMatch.length : 0;
+  // const handleEditorChange = (content: string) => {
+  //   // const liMatch = content.match(/<li>/g);
+  //   // const liCount = liMatch ? liMatch.length : 0;
 
-    // if (liCount === 0) {
-    //   // force at least one <li>
-    //   setEditorContent("<ul><li></li></ul>");
-    // } else {
-    setEditorContent(content);
-    // }
-  };
+  //   // if (liCount === 0) {
+  //   //   // force at least one <li>
+  //   //   setEditorContent("<ul><li></li></ul>");
+  //   // } else {
+  //   setEditorContent(content);
+  //   // }
+  // };
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -369,7 +380,7 @@ export const WorkVerificationDetails: React.FC<
               {
                 title: "Actions",
                 key: "actions",
-                render: (_, record) => (
+                render: () => (
                   <Button
                     type="text"
                     icon={<EditOutlined />}
@@ -407,7 +418,7 @@ export const WorkVerificationDetails: React.FC<
                     objectFit: "cover",
                     borderRadius: "4px",
                   }}
-                  preview={false}
+                  // preview={false}
                 />
                 {/* <Button
                   type="text"
@@ -482,7 +493,7 @@ export const WorkVerificationDetails: React.FC<
         editorContent={editorContent}
         disabled={hasEditRequest}
         handleSave={handleSave}
-        verdict={verdict}
+        verdict={completeVerificationData?.approvedStatus}
         open={open}
         setOpen={setOpen}
         verificationType="Work"

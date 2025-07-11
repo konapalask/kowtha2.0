@@ -190,11 +190,11 @@ export default function LoanVerifyDetails() {
     const verification = verificationData?.verifications?.find(
       (v: any) => v.addressType === type
     );
-    console.log(verification);
+    // console.log(verification);
     return verification;
   };
 
-  getCompleteVerificationData("PermanentAddress");
+  // getCompleteVerificationData("PermanentAddress");
 
   const getComponentByType = (type: string) => {
     const { verification, status, id, approvedStatus } =
@@ -213,9 +213,10 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("PermanentAddress")}
             verificationType={getVerificationType("PermanentAddress")}
-            // completeVerificationData={getCompleteVerificationData(
-            //   "PermanentAddress"
-            // )}
+            completeVerificationData={getCompleteVerificationData(
+              "PermanentAddress"
+            )}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "CurrentAddress":
@@ -228,9 +229,10 @@ export default function LoanVerifyDetails() {
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("CurrentAddress")}
             verificationType={getVerificationType("CurrentAddress")}
-            // completeVerificationData={getCompleteVerificationData(
-            //   "CurrentAddress"
-            // )}
+            completeVerificationData={getCompleteVerificationData(
+              "CurrentAddress"
+            )}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "Work":
@@ -242,7 +244,8 @@ export default function LoanVerifyDetails() {
             verificationId={getVerificationId("Work")}
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Work")}
-            // completeVerificationData={getCompleteVerificationData("Work")}
+            completeVerificationData={getCompleteVerificationData("Work")}
+            fetchVerificationData={fetchVerificationData}
           />
         );
       case "Business":
@@ -254,7 +257,8 @@ export default function LoanVerifyDetails() {
             verificationId={getVerificationId("Business")}
             fetchEditRequests={fetchEditRequests}
             hasEditRequest={hasEditRequest("Business")}
-            // completeVerificationData={getCompleteVerificationData("Business")}
+            completeVerificationData={getCompleteVerificationData("Business")}
+            fetchVerificationData={fetchVerificationData}
           />
         );
     }

@@ -1,8 +1,23 @@
-import { Form, Radio, Select, Button, message, Input, Row, Col } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  Form,
+  Radio,
+  Select,
+  Button,
+  message,
+  Input,
+  Row,
+  Col,
+  Typography,
+  Tag,
+} from "antd";
+// import { UserOutlined } from "@ant-design/icons";
 import React from "react";
-import { assignExecutivesApi } from "@/services/loans.services";
+import {
+  assignExecutivesApi,
+  updateExecutivesApi,
+} from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
+import { UserOutlined } from "@ant-design/icons";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -55,27 +70,56 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     values: {
       assignmentMethod: "Local" | "Remote";
       office?: string;
-      fieldExecutiveId: string;
+      fieldExecutiveId: any;
       address: string;
-      // verifierId: string;
+      verifierId: string;
+      businessName: string;
     }
   ) => {
+    // console.log(values);
     const finalData = {
-      // verifierId: 8,
+      ...(type === "Business" ? { businessName: values?.businessName } : {}),
+      verifierId: values?.verifierId,
       verificationType: getVerificationType(type),
-      fieldExecutiveId: values.fieldExecutiveId,
+      fieldExecutiveId:
+        values.fieldExecutiveId?.value ?? values.fieldExecutiveId,
       address: values.address,
     };
     try {
       setLoading(true);
-      await assignExecutivesApi(loanId, finalData);
-      message.success("Field executive assigned successfully");
+      if (verification) {
+        await updateExecutivesApi(loanId, finalData);
+        // Determine which fields are being updated
+        const feChanged =
+          finalData.fieldExecutiveId &&
+          finalData.fieldExecutiveId !== verification.fieldExecutiveId;
+        const verifierChanged =
+          finalData.verifierId &&
+          finalData.verifierId !== verification.verifierId;
+        let msg = "";
+        if (feChanged && verifierChanged) {
+          msg = "Field executive and verifier updated successfully";
+        } else if (feChanged) {
+          msg = "Field executive updated successfully";
+        } else if (verifierChanged) {
+          msg = "Verifier updated successfully";
+        } else {
+          msg = "Assignment updated successfully";
+        }
+        message.success(msg);
+      } else {
+        await assignExecutivesApi(loanId, finalData);
+        message.success(
+          "Field executive and verifier are assigned successfully"
+        );
+      }
       fetchLoans();
       setCurrentOffice(userDetails?.officeId);
       setFieldExecutiveEdit((prev: any) => ({ ...prev, [type]: false }));
       fetchExecutives();
     } catch (error) {
       message.error("Failed to assign field executive");
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -85,6 +129,8 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     (option: any) => option?.value !== userDetails?.officeId
   );
 
+  // console.log(verification);
+
   return (
     <div>
       <Form
@@ -93,10 +139,16 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         initialValues={
           verification
             ? {
-                assignmentMethod: null,
+                businessName: verification?.businessName,
+                assignmentMethod:
+                  verification?.office &&
+                  verification?.office !== userDetails?.officeId
+                    ? "Remote"
+                    : "Local",
                 office: verification?.office,
                 fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
+                verifierId: verification?.verifierId,
               }
             : {
                 assignmentMethod: "Local",
@@ -107,6 +159,19 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           handleVerificationAssign(selectedLoan.id, type, values)
         }
       >
+        {type === "Business" && (
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Please enter business name",
+              },
+            ]}
+            name={"businessName"}
+          >
+            <Input minLength={3} maxLength={20} placeholder="Business Name" />
+          </Form.Item>
+        )}
         <Form.Item
           name="address"
           // label={type === "AddressOne" ? "Address 1" :type === "AddressTwo" ? "Address 2" : type === "Work" ? "Work Address" : type === "Business" ? "Business Address" : "Address"}
@@ -143,6 +208,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                       message: "Please select assignment method",
                     },
                   ]}
+                  hidden={!address}
                 >
                   <Radio.Group
                     disabled={!address}
@@ -151,9 +217,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     onChange={(e) => {
                       if (e.target.value === "Local") {
                         setCurrentOffice(userDetails?.officeId || "");
-                        form.setFieldValue("fieldExecutiveId", null);
-                        form.setFieldValue("office", null);
                       }
+                      form.setFieldValue("fieldExecutiveId", null);
+                      form.setFieldValue("office", null);
                     }}
                   >
                     <Radio.Button value="Local">Local</Radio.Button>
@@ -201,38 +267,96 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             return (
               <Form.Item
                 name="fieldExecutiveId"
-                // label="Field Executive"
+                label="Field Executive"
                 rules={[
                   {
                     required: true,
                     message: "Please select a field executive",
                   },
                 ]}
+                initialValue={{
+                  label: (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography.Text>
+                        {verification?.fieldExecutive?.name}
+                      </Typography.Text>
+                      <Tag color="blue">
+                        {verification?.fieldExecutive?.employeeCode}
+                      </Tag>
+                    </div>
+                  ),
+                  value: verification?.fieldExecutive?.employeeCode,
+                }}
+                hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
+                  placeholder="Select an Executive"
+                  labelInValue
                   disabled={
                     !address || (assignmentMethod === "Remote" && !office)
                   }
-                  placeholder="Select field executive"
                   style={{ width: "100%" }}
                   options={fieldExecutives}
-                  onSelect={() => form.submit()}
+                  // onSelect={() => form.submit()}
+                />
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues?.assignmentMethod !== currentValues?.assignmentMethod ||
+            prevValues?.office !== currentValues?.office ||
+            !prevValues?.address
+          }
+        >
+          {({ getFieldValue }) => {
+            const address = getFieldValue("address");
+            const assignmentMethod = getFieldValue("assignmentMethod");
+            const office = getFieldValue("office");
+            return (
+              <Form.Item
+                label=" Verifier"
+                name={"verifierId"}
+                style={{ marginBottom: 0 }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a verifier",
+                  },
+                ]}
+                hidden={!address || (assignmentMethod === "Remote" && !office)}
+              >
+                <Select
+                  placeholder="Select Verifier"
+                  value={verification?.verifierId || null}
+                  options={verifiers}
+                  style={{ width: "100%" }}
+                  disabled={
+                    !address || (assignmentMethod === "Remote" && !office)
+                  }
                 />
               </Form.Item>
             );
           }}
         </Form.Item>
 
-        {/* <Form.Item>
+        <Form.Item>
           <Button
             // type="primary"
             htmlType="submit"
             loading={loading}
             icon={<UserOutlined />}
           >
-            {verification ? "Update Assignment" : "Assign Executive"}
+            {verification ? "Update Assignment" : "Assign Executives"}
           </Button>
-        </Form.Item> */}
+        </Form.Item>
       </Form>
     </div>
   );

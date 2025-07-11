@@ -239,7 +239,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         footer={
           <div className="flex-end">
             <Button onClick={handleSaveAndClose} type="primary">
-              Save & Close
+              Close
             </Button>
           </div>
         }
@@ -348,9 +348,8 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                       (v: any) => v.type === type
                     );
                     return (
-                      <Col span={6}>
+                      <Col md={12} lg={12} xl={12} xxl={12} key={type}>
                         <Card
-                          key={type}
                           size={"small"}
                           title={label}
                           style={{
@@ -384,11 +383,6 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                   {verification.status}
                                 </Tag>
                               )}
-                              {/* {verification&&(
-                           <Popconfirm title="Are you sure you want to delete" onConfirm={()=>handleDelete(verification?.id)}>
-                             <Button icon={<DeleteOutlined />} style={{border:"none", color:"#ff4d4f"}} />
-                           </Popconfirm>
-                          )} */}
                             </>
                           }
                         >
@@ -473,20 +467,43 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                       flexDirection: "column",
                                     }}
                                   >
+                                    {type === "Business" && (
+                                      <span>
+                                        Business Name:{" "}
+                                        {verification?.businessName}
+                                      </span>
+                                    )}
                                     <span>
                                       Address: {verification?.applicantAddress}
                                     </span>
                                     <span>
-                                      Field Executive:{" "}
+                                      FE:{" "}
+                                      <Typography.Text
+                                        style={{ marginRight: 5 }}
+                                      >
+                                        {verification?.fieldExecutive?.name}
+                                      </Typography.Text>
                                       <Tag color="blue">
-                                        Id:{" "}
                                         {
                                           verification.fieldExecutive
                                             ?.employeeCode
                                         }
                                       </Tag>
                                     </span>
+                                    <span>
+                                      Mobile:{" "}
+                                      {verification?.fieldExecutive?.mobile}
+                                    </span>
                                   </div>
+                                </div>
+                              )}
+                              {fieldExecutiveEdit[type] ? (
+                                <div style={{ marginTop: 8 }}></div>
+                              ) : (
+                                <div style={{ marginTop: 8 }}>
+                                  <span>Verifier:</span>{" "}
+                                  {verification?.verifier?.name ||
+                                    "Not assigned"}
                                 </div>
                               )}
                             </div>
@@ -514,26 +531,6 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                     );
                   })}
                 </Row>
-                {/* <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 16,
-                  }}
-                > */}
-                <Card size="small" style={{ marginTop: 16, width: 300 }}>
-                  <Form.Item layout="vertical" label="Select Verifier">
-                    <Select
-                      placeholder="Select Verifier"
-                      value={loanDetails?.verifierId || null}
-                      options={verifiers}
-                      style={{ width: 200 }}
-                      onSelect={handleVerifierSelect}
-                    />
-                  </Form.Item>
-                </Card>
-                {/* </div> */}
               </>
             )}
           </>

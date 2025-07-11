@@ -21,11 +21,12 @@ export type BusinessMiscellaneousFormData = {
   // illegalSetupObserved: string;
   politicallyConnected: string;
   // privateFinanceOrChits: string;
-  businessActivity: string;
+  // businessActivity: string;
   // businessActivityOther?: string;
   areaOfPremises: string;
   localityOfBusiness: string;
   employeesUnderApplicant: string;
+  leaseAmount: string;
 };
 
 type BusinessMiscellaneousProps = {
@@ -33,7 +34,7 @@ type BusinessMiscellaneousProps = {
   initialData?: BusinessMiscellaneousFormData;
 };
 
-const OWNERSHIP_OPTIONS = ['Owned', 'Rented', 'Leased', 'Others'];
+const OWNERSHIP_OPTIONS = ['Owned', 'Rented', 'Leased'];
 const STOCK_SEEN_OPTIONS = ['Yes', 'No'];
 // const EMPLOYEES_SEEN_OPTIONS = ['None', '1-2', '3-5', '6+'];
 const ILLEGAL_SETUP_OPTIONS = ['Yes', 'No'];
@@ -70,11 +71,12 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       // illegalSetupObserved: '',
       politicallyConnected: '',
       // privateFinanceOrChits: '',
-      businessActivity: '',
+      // businessActivity: '',
       // businessActivityOther: '',
       areaOfPremises: '',
       localityOfBusiness: '',
       employeesUnderApplicant: '',
+      leaseAmount: '',
     },
   });
 
@@ -83,7 +85,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
   }, [initialData, reset]);
 
   const ownershipOfPremises = watch('ownershipOfPremises');
-  const businessActivity = watch('businessActivity');
+  // const businessActivity = watch('businessActivity');
 
   // ActionSheet refs
   const ownershipSheetRef = useRef<ActionSheetRef>(null);
@@ -179,6 +181,32 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
               {errors.rentalAmount && (
                 <Text style={styles.errorText}>
                   {errors.rentalAmount.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
+      {ownershipOfPremises === 'Leased' && (
+        <Controller
+          control={control}
+          name="leaseAmount"
+          rules={{required: 'lease is required'}}
+          render={({field: {value, onChange, onBlur}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Lease Amount</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter lease paid"
+                keyboardType="numeric"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+              />
+              {errors.leaseAmount && (
+                <Text style={styles.errorText}>
+                  {errors.leaseAmount.message}
                 </Text>
               )}
             </View>
@@ -410,7 +438,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         )}
       /> */}
       {/* 25. Business activity (Trading/Services/Manufacturing/Others, with 'others' input) */}
-      <Controller
+      {/* <Controller
         control={control}
         name="businessActivity"
         rules={{required: 'Business activity is required'}}
@@ -432,7 +460,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* {businessActivity === 'Others' && (
         <Controller
           control={control}
@@ -466,7 +494,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
 
       {/* ActionSheets */}
       <ActionSheet ref={ownershipSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Ownership Type</Text>
           {OWNERSHIP_OPTIONS.map((type, index) => (
             <TouchableOpacity
@@ -483,7 +511,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       </ActionSheet>
 
       <ActionSheet ref={stockSeenSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Stock Seen?</Text>
           {STOCK_SEEN_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -502,7 +530,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       {/* <ActionSheet
         ref={employeesSeenSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Number of Employees Seen</Text>
           {EMPLOYEES_SEEN_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -518,10 +546,10 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         </View>
       </ActionSheet> */}
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={illegalSetupSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Illegal Setup Observed?</Text>
           {ILLEGAL_SETUP_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -535,12 +563,12 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
       <ActionSheet
         ref={areaOfPremisesSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Area of premises</Text>
           {areaOfPremisesOptions.map((option, index) => (
             <TouchableOpacity
@@ -559,7 +587,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={locationTypeSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Locality of Business</Text>
           {localityOptions.map((option, index) => (
             <TouchableOpacity
@@ -578,7 +606,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
       <ActionSheet
         ref={politicallyConnectedSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Politically Connected?</Text>
           {POLITICALLY_CONNECTED_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -594,10 +622,10 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
         </View>
       </ActionSheet>
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={privateFinanceSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>
             Private Finance/Chits Operated?
           </Text>
@@ -613,12 +641,12 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
 
-      <ActionSheet
+      {/* <ActionSheet
         ref={businessActivitySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Business Activity</Text>
           {BUSINESS_ACTIVITY_OPTIONS.map((option, index) => (
             <TouchableOpacity
@@ -632,7 +660,7 @@ const BusinessMiscellaneous: React.FC<BusinessMiscellaneousProps> = ({
             </TouchableOpacity>
           ))}
         </View>
-      </ActionSheet>
+      </ActionSheet> */}
     </ScrollView>
   );
 };

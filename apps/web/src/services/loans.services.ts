@@ -65,10 +65,8 @@ export const getLoansApi = (
   });
 };
 
-export const getLoansByIdApi = (applicationNumber: string) => {
-  return axiosInstance.get<Loan>(
-    `/loans?applicationNumber=${applicationNumber}`
-  );
+export const getLoansByIdApi = (id: string) => {
+  return axiosInstance.get<Loan>(`/loans?id=${id}`);
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {
@@ -111,6 +109,13 @@ export const assignExecutivesApi = (loanId: number, payload: any) => {
   );
 };
 
+export const updateExecutivesApi = (loanId: number, payload: any) => {
+  return axiosInstance.patch<Verification>(
+    `/loans/${loanId}/update-executive`,
+    payload
+  );
+};
+
 export const getExecutivesApi = () => {
   return axiosInstance.get<any>(`/accounts/users?role=FieldExecutive`);
 };
@@ -131,4 +136,8 @@ export const deleteFieldAssignmentApi = (
   return axiosInstance.delete<any>(`/loans/${loanId}/verification/${type}`, {
     data: payload,
   });
+};
+
+export const deleteLoanApi = (id: number) => {
+  return axiosInstance.delete<any>(`/loans/${id}`);
 };

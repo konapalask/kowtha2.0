@@ -10,8 +10,10 @@ import {
   Badge,
   Row,
   Col,
+  Popconfirm,
+  Divider,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 // import type { ColumnsType } from "antd/es/table";
@@ -22,6 +24,7 @@ import {
   // updateLoanApi,
   importLoansApi,
   type Loan,
+  deleteLoanApi,
 } from "@/services/loans.services";
 import { getOfficesApi, Office } from "@/services/settings.services";
 import {
@@ -144,7 +147,7 @@ export default function Loans() {
       const options =
         result?.data?.data?.map((item: any) => ({
           label: (
-            <Row gutter={[0, 0]} style={{ width: "100%" }}>
+            <Row gutter={[0, 5]} style={{ width: "100%" }}>
               <Col xs={24} sm={24} md={1} xl={1}>
                 <Badge
                   dot
@@ -156,13 +159,18 @@ export default function Loans() {
                 xs={24}
                 sm={12}
                 md={8}
-                xl={15}
+                xl={10}
                 style={{ wordWrap: "break-word" }}
               >
-                <Typography.Text>{item?.name}</Typography.Text>
+                <Typography.Text>
+                  {" "}
+                  {item?.name?.length > 15
+                    ? item.name.slice(0, 15) + "..."
+                    : item?.name}
+                </Typography.Text>
               </Col>
 
-              <Col xs={24} sm={6} md={6} xl={4}>
+              <Col xs={24} sm={6} md={6} xl={9}>
                 <Tag color="blue">{item?.employeeCode}</Tag>
               </Col>
 
@@ -212,6 +220,7 @@ export default function Loans() {
       key: "applicationNumber",
       fixed: "left",
       width: 200,
+      align: "center",
     },
     {
       title: "Applicant Name",
@@ -422,16 +431,45 @@ export default function Loans() {
             fixed: "right",
             align: "center",
             render: (_: any, record: any) => (
-              <Button
-                type="link"
-                // icon={<EditOutlined />}
-                onClick={() => {
-                  setSelectedLoan(record?.applicationNumber);
-                  setIsDrawerVisible(true);
+              <span
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
                 }}
               >
-                Edit
-              </Button>
+                <Button
+                  type="link"
+                  onClick={() => {
+                    setSelectedLoan(record?.id);
+                    setIsDrawerVisible(true);
+                  }}
+                >
+                  Edit
+                </Button>
+                {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
+                {(userDetails?.role === "Admin" ||
+                  userDetails?.role === "OperationsExecutive") && (
+                  <Popconfirm
+                    title="Are you sure you want to delete this loan?"
+                    onConfirm={async () => {
+                      try {
+                        await deleteLoanApi(record?.id);
+                        message.success("Loan deleted successfully");
+                        fetchLoans(); // Refresh the table
+                      } catch (error) {
+                        message.error("Failed to delete loan");
+                      }
+                    }}
+                  >
+                    <Button
+                      icon={<DeleteOutlined />}
+                      style={{ border: "none", color: "#ff4d4f" }}
+                      type="link"
+                    />
+                  </Popconfirm>
+                )}
+              </span>
             ),
             width: 100,
           },

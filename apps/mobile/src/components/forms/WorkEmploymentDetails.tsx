@@ -16,6 +16,8 @@ import {yupResolver} from '@hookform/resolvers/yup';
 interface WorkEmploymentDetailsFormData {
   currentOfficeName: string;
   officeAddress: string;
+  isAddressSame: string;
+  addressCorrection: string;
   yearsInCurrentJob: string;
   totalWorkExperience: string;
   companySize: string;
@@ -36,9 +38,13 @@ interface Props {
   onSubmit: (data: WorkEmploymentDetailsFormData) => void;
 }
 
+const yesNoOptions = ['Yes', 'No'];
+
 const validationSchema = yup.object().shape({
   currentOfficeName: yup.string().required('Current Office Name is required'),
   officeAddress: yup.string().required('Office Address is required'),
+  isAddressSame: yup.string().required(`Is address same is required`),
+  addressCorrection: yup.string(),
   yearsInCurrentJob: yup.string().required('Years in Current Job is required'),
   totalWorkExperience: yup
     .string()
@@ -59,9 +65,11 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const salaryModeSheetRef = useRef<ActionSheetRef>(null);
   const employerTypeSheetRef = useRef<ActionSheetRef>(null);
   const natureOfServiceSheetRef = useRef<ActionSheetRef>(null);
-  const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
-  const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
-    useState(false);
+  const isAddressSameSheetRef = useRef<ActionSheetRef>(null);
+
+  // const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
+  // const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
+  //   useState(false);
 
   const {
     control,
@@ -74,6 +82,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     defaultValues: initialData || {
       currentOfficeName: '',
       officeAddress: '',
+      isAddressSame: '',
+      addressCorrection: '',
       yearsInCurrentJob: '',
       totalWorkExperience: '',
       companySize: '',
@@ -132,9 +142,15 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     natureOfServiceSheetRef.current?.show();
   };
 
+  const showIsAddressSameSheet = () => {
+    isAddressSameSheetRef.current?.show();
+  };
+
   const onFormSubmit = (data: WorkEmploymentDetailsFormData) => {
     onSubmit(data);
   };
+
+  const watchedIsAddressSame = watch('isAddressSame');
 
   return (
     <ScrollView style={styles.container}>
@@ -151,6 +167,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               ]}
               value={value}
               onChangeText={onChange}
+              placeholder="Enter office name"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.currentOfficeName && (
               <Text style={styles.errorText}>
@@ -168,15 +186,12 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Office Address</Text>
             <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                errors.officeAddress && styles.inputError,
-              ]}
+              style={[styles.input, styles.textArea, styles.readOnlyInput]}
               value={value}
               onChangeText={onChange}
               multiline
               numberOfLines={4}
+              readOnly
             />
             {errors.officeAddress && (
               <Text style={styles.errorText}>
@@ -186,6 +201,58 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="isAddressSame"
+        rules={{required: 'Please specify if the address is same as initiated'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Is the address same as initiated?</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={showIsAddressSameSheet}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isAddressSame && (
+              <Text style={styles.errorText}>
+                {errors.isAddressSame.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+      {/* Address Correction if No */}
+      {watchedIsAddressSame === 'No' && (
+        <Controller
+          control={control}
+          name="addressCorrection"
+          rules={{required: 'Please provide the corrected address'}}
+          render={({field: {onChange, onBlur, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Address Correction</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter corrected address"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+                multiline
+                numberOfLines={3}
+              />
+              {errors.addressCorrection && (
+                <Text style={styles.errorText}>
+                  {errors.addressCorrection.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -207,6 +274,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="decimal-pad"
               placeholder="Enter years in current job"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.yearsInCurrentJob && (
               <Text style={styles.errorText}>
@@ -237,6 +305,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="decimal-pad"
               placeholder="Enter total work experience"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.totalWorkExperience && (
               <Text style={styles.errorText}>
@@ -267,6 +336,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter company size"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.companySize && (
               <Text style={styles.errorText}>{errors.companySize.message}</Text>
@@ -289,7 +359,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showNatureOfServiceSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Nature of Service'}
+                {value || 'Select nature of service'}
               </Text>
             </TouchableOpacity>
             {errors.natureOfService && (
@@ -340,7 +410,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showOfficeLocalitySheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Office Locality'}
+                {value || 'Select office locality'}
               </Text>
             </TouchableOpacity>
             {errors.officeLocality && (
@@ -372,6 +442,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               placeholder="Enter ID card number"
               autoCapitalize="characters"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.idCardNumber && (
               <Text style={styles.errorText}>
@@ -392,6 +463,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               style={[styles.input, errors.designation && styles.inputError]}
               value={value}
               onChangeText={onChange}
+              placeholder="Enter designation"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.designation && (
               <Text style={styles.errorText}>{errors.designation.message}</Text>
@@ -414,7 +487,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showSalaryModeSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Salary Mode'}
+                {value || 'Select salary mode'}
               </Text>
             </TouchableOpacity>
             {errors.salaryMode && (
@@ -438,7 +511,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showEmployerTypeSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Employer Type'}
+                {value || 'Select employer type'}
               </Text>
             </TouchableOpacity>
             {errors.employerType && (
@@ -495,6 +568,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter gross salary"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.grossSalary && (
               <Text style={styles.errorText}>{errors.grossSalary.message}</Text>
@@ -523,6 +597,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter net salary"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.netSalary && (
               <Text style={styles.errorText}>{errors.netSalary.message}</Text>
@@ -540,7 +615,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={officeLocalitySheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Office Locality</Text>
           {officeLocalityOptions.map((option, index) => (
             <TouchableOpacity
@@ -557,7 +632,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       </ActionSheet>
 
       <ActionSheet ref={salaryModeSheetRef} containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Salary Mode</Text>
           {salaryModeOptions.map((option, index) => (
             <TouchableOpacity
@@ -576,7 +651,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={employerTypeSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Employer Type</Text>
           {employerTypeOptions.map((option, index) => (
             <TouchableOpacity
@@ -595,7 +670,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       <ActionSheet
         ref={natureOfServiceSheetRef}
         containerStyle={styles.actionSheet}>
-        <View style={styles.actionSheetContent}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
           <Text style={styles.actionSheetTitle}>Select Nature of Service</Text>
           {natureOfServiceOptions.map((option, index) => (
             <TouchableOpacity
@@ -604,6 +679,30 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPressIn={() => {
                 setValue('natureOfService', option);
                 natureOfServiceSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet
+        ref={isAddressSameSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>
+            Is the address same as initiated?
+          </Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isAddressSame', option);
+                if (option === 'Yes') {
+                  setValue('addressCorrection', '');
+                }
+                isAddressSameSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
@@ -702,6 +801,10 @@ const styles = StyleSheet.create({
     color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  readOnlyInput: {
+    backgroundColor: colors.input.disabled,
+    color: colors.text.primary,
   },
 });
 

@@ -1,33 +1,32 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { LoanService } from './loan.service';
-import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
-import { RolesGuard } from '../accounts/guards/roles.guard';
-import { Roles } from '../accounts/decorators/roles.decorator';
-import { VerificationType, LoanStatus, UserRole, VerificationStatus, AddressType, ApprovedStatus } from '@prisma/client';
-import { AuthenticatedRequest } from '../common/types/request.types';
+import { EditLoanDto } from './dto/edit-loan.dto';
 import { GetLoansDto } from './dto/get-loans.dto';
+import { NotFoundException } from '@nestjs/common';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
+import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RolesGuard } from '../accounts/guards/roles.guard';
+import { Roles } from '../accounts/decorators/roles.decorator';
+import { EditVerificationDto } from './dto/edit-verification.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { AuthenticatedRequest } from '../common/types/request.types';
+import { DeleteVerificationDto } from './dto/delete-verification.dto';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { log } from 'console';
-import * as XLSX from 'xlsx';
-import { Response } from 'express';
-import { NotFoundException } from '@nestjs/common';
-import { EditLoanDto } from './dto/edit-loan.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
-import { DeleteVerificationDto } from './dto/delete-verification.dto';
-import { S3Service } from '../common/s3utils/s3.service';
-import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
+import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
+            AddressType, ApprovedStatus, LocationType } from '@prisma/client';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
+          UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 
 @ApiTags('loans')
 @Controller('loans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LoanController {
-  constructor(private loanService: LoanService, private s3Service: S3Service) { }
+  constructor(private loanService: LoanService) { }
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -278,7 +277,7 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number },
+    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number; locationType?: LocationType; businessName?: string },
   ) {
     const parsedLoanId = parseInt(loanId, 10);
     if (isNaN(parsedLoanId)) {
@@ -290,7 +289,9 @@ export class LoanController {
       body.verificationType,
       body.fieldExecutiveId,
       body.address,
-      body.verifierId
+      body.verifierId,
+      body.locationType,
+      body.businessName
     );
     return {
       status: 200,
@@ -336,6 +337,9 @@ export class LoanController {
       parsedLoanId,
       updateAssignmentDto.verificationType,
       updateAssignmentDto.fieldExecutiveId,
+      updateAssignmentDto.address,
+      updateAssignmentDto.verifierId,
+      updateAssignmentDto.businessName
     );
     return {
       status: 200,
@@ -950,6 +954,30 @@ export class LoanController {
     return {
       status: 201,
       message: 'Verification retry created successfully',
+      data: result
+    };
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Delete a loan and all related entities (cascade)' })
+  @ApiResponse({
+    status: 200,
+    description: 'The loan and all related entities have been successfully deleted',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Loan and all related entities deleted' },
+        data: { type: 'object' }
+      }
+    }
+  })
+  async deleteLoan(@Param('id') loanId: string) {
+    const result = await this.loanService.deleteLoan(Number(loanId));
+    return {
+      status: 200,
+      message: 'Loan and all related entities deleted',
       data: result
     };
   }

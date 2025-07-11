@@ -25,6 +25,7 @@ import { getUserDetails, isEmpty } from "@/utils/utility";
 import ColleagueReferencesDescription from "./Descriptions/ColleagueReferencesDescription";
 import PastEmploymentsDescription from "./Descriptions/PastEmploymentsDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
+import FamilyMemberDetailsDescription from "./Descriptions/FamilyMemberDetailsDescription";
 
 const { Text } = Typography;
 
@@ -42,6 +43,7 @@ const getLabels = {
   existingLoans: "Existing Loans",
   businessDetails: "Business Details",
   miscellaneous: "Business Miscellaneous Details",
+  familyMemberDetails: "Family Member Details",
 };
 
 const getDescriptions = (activeTab: string) => ({
@@ -63,6 +65,7 @@ const getDescriptions = (activeTab: string) => ({
   existingLoans: ExistingLoansDescription,
   businessDetails: BusinessDetailsDescription,
   miscellaneous: BusinessMiscellaneousDescription,
+  familyMemberDetails: FamilyMemberDetailsDescription,
 });
 
 interface EditRequestLogsProps {
@@ -256,7 +259,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                 borderColor: disabled ? "#d9d9d9" : undefined,
                 color: disabled ? "rgba(248, 248, 248, 0.75)" : undefined,
               }}
-              // disabled={disabled}
+              disabled={disabled}
             >
               Request Approval
             </Button>

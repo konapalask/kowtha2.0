@@ -12,7 +12,6 @@ export class AttendanceService {
   async createAttendance(userId: number, createAttendanceDto: CreateAttendanceDto) {
     const { status = AttendanceStatus.Available, date } = createAttendanceDto;
     
-    // Use current date if not provided
     const attendanceDate = new Date(date);
     
     if (attendanceDate.getDate() !== new Date(date).getDate() || attendanceDate.getMonth() !== new Date(date).getMonth() || attendanceDate.getFullYear() !== new Date(date).getFullYear()) {

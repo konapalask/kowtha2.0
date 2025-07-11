@@ -49,6 +49,7 @@ const ColleagueReferencesDescription: React.FC<{
 }> = ({ data, extra, logs = false, changedFields = [], changedData = {} }) => {
   const references = data?.colleagueReferences?.references || [];
   const prevReferences = changedData?.colleagueReferences?.references || [];
+  // console.log(references);
 
   function renderCell(field: string, idx: number, value: any) {
     if (
@@ -58,9 +59,9 @@ const ColleagueReferencesDescription: React.FC<{
     ) {
       return (
         <span>
-          <span style={{ textDecoration: "line-through", color: "#888" }}>
+          {/* <span style={{ textDecoration: "line-through", color: "#888" }}>
             {prevReferences[idx][field]}
-          </span>
+          </span> */}
           <span style={{ marginLeft: 8, color: "#d4380d", fontWeight: 600 }}>
             {value}
           </span>

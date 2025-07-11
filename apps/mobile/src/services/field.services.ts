@@ -1,9 +1,15 @@
 import axiosInstance from '../config/axios';
 
-export const getFieldData = async (page: number, status: string) => {
-  return axiosInstance.get(
-    `/loans/field-executive/assigned?page=${page}&status=${status}`,
-  );
+export const getFieldData = async (
+  page: number,
+  status: string,
+  applicationNumber?: string,
+) => {
+  let url = `/loans/field-executive/assigned?page=${page}&status=${status}`;
+  if (applicationNumber) {
+    url += `&applicationNumber=${encodeURIComponent(applicationNumber)}`;
+  }
+  return axiosInstance.get(url);
 };
 
 export const getUserDetails = async () => {

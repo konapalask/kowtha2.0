@@ -155,6 +155,7 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* <StatusBar /> */}
       {!isConnected && (
         <View style={styles.offlineContainer}>
           <Text style={styles.offlineText}>No Internet</Text>

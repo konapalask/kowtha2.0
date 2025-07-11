@@ -13,6 +13,10 @@ enum UserRole {
   OperationsExecutive
   FieldExecutive
   Verifier
+  PDAdmin
+  PDFieldExecutive
+  PDVerifier
+  PDOperationsExecutive
 }
 
 enum UserStatus {
@@ -89,6 +93,11 @@ enum AttendanceStatus {
   Unavailable
 }
 
+enum LocationType {
+  Local
+  Remote
+}
+
 model User {
   id                       Int                  @id @default(autoincrement())
   mobile                   String               @unique
@@ -105,8 +114,8 @@ model User {
   updatedAt                DateTime             @updatedAt
   // Relations
   operationsExecutiveLoans Loan[]               @relation("OperationsExecutive")
-  verifiedLoans            Loan[]               @relation("LoanVerifier")
   verifications            Verification[]       @relation("VerificationFieldExecutive")
+  verificationsVerifier    Verification[]       @relation("VerificationVerifier")
   sessions                 Session[]
   editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
   editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
@@ -136,23 +145,27 @@ model Office {
 }
 
 model Verification {
-  id               Int                @id @default(autoincrement())
-  loanId           Int
-  loan             Loan               @relation(fields: [loanId], references: [id])
-  type             VerificationType
-  addressType      AddressType?
-  approvedStatus   ApprovedStatus?
-  fieldExecutiveId Int
-  fieldExecutive   User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
-  status           VerificationStatus
-  path             String? // Array of S3 paths for verification documents
-  finalReportPath  String? // S3 path for final report
-  applicantAddress String?
-  verificationData Json? // JSON field to store address/work data
-  pictureSource    PictureSource? // Source of the uploaded picture
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  editRequests     EditRequest[] // Add this relation
+  id                  Int                @id @default(autoincrement())
+  loanId              Int
+  loan                Loan               @relation(fields: [loanId], references: [id])
+  type                VerificationType
+  addressType         AddressType?
+  approvedStatus      ApprovedStatus?
+  verifierId          Int?
+  verifier            User?               @relation("VerificationVerifier", fields: [verifierId], references: [id])
+  fieldExecutiveId    Int
+  fieldExecutive      User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
+  status              VerificationStatus
+  locationType        LocationType?
+  businessName        String?
+  path                String? // Array of S3 paths for verification documents
+  finalReportPath     String? // S3 path for final report
+  applicantAddress    String?
+  verificationData    Json? // JSON field to store address/work data
+  pictureSource       PictureSource? // Source of the uploaded picture
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  editRequests        EditRequest[] // Add this relation
   verificationRetries VerificationRetries[]
   @@unique([loanId, type])
 }
@@ -174,8 +187,6 @@ model Loan {
   office                Office              @relation(fields: [officeId], references: [id])
   operationsExecutiveId Int
   operationsExecutive   User                @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
-  verifierId            Int?
-  verifier              User?               @relation("LoanVerifier", fields: [verifierId], references: [id])
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt

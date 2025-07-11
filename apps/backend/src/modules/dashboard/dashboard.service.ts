@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { ApprovedStatus, LoanStatus, VerificationStatus } from '@prisma/client';
 import { LoggingService } from '../common/logging/logging.service';
 import { GetMetricsDto } from './dto/get-metrics.dto';
+import gplay from 'google-play-scraper';
 
 @Injectable()
 export class DashboardService {
@@ -10,40 +11,6 @@ export class DashboardService {
     private prisma: PrismaService,
     private loggingService: LoggingService,
   ) {}
-
-  async getHealthStatus() {
-    try {
-      // Check database connectivity
-      await this.prisma.$queryRaw`SELECT 1`;
-      
-      const healthStatus = {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        services: {
-          database: 'connected',
-          server: 'running'
-        }
-      };
-
-      await this.loggingService.info('Health check completed successfully', healthStatus);
-      return healthStatus;
-    } catch (error) {
-      await this.loggingService.error('Health check failed', {
-        error: error.message,
-        stack: error.stack,
-      });
-      
-      return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        services: {
-          database: 'disconnected',
-          server: 'running'
-        },
-        error: error.message
-      };
-    }
-  }
 
   async getLoanMetrics(filters?: GetMetricsDto) {
     try {
@@ -130,12 +97,20 @@ export class DashboardService {
 
   async getAppDeployments() {
     try {
-      const deployments = await this.prisma.appDeployment.findFirst({
-        where: { isActive: true },
-        orderBy: { createdAt: 'desc' }
+      const appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
+      console.log(appDetails);
+      const createDeployment = await this.prisma.appDeployment.create({
+        data: {
+          version: appDetails.version,
+          isActive: true,
+          source: 'Google Play',
+          playStoreUrl: appDetails.url,
+          forceUpdate: true,
+        }
       });
-      await this.loggingService.info('Fetched app deployments', { deployments });
-      return deployments;
+
+      await this.loggingService.info('Fetched app deployments', { createDeployment });
+      return createDeployment;
     } catch (error) {
       await this.loggingService.error('Failed to fetch app deployments', {
         error: error.message,
