@@ -448,8 +448,7 @@ export default function Loans() {
                   Edit
                 </Button>
                 {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
-                {(userDetails?.role === "Admin" ||
-                  userDetails?.role === "OperationsExecutive") && (
+                {userDetails?.role === "Admin" && (
                   <Popconfirm
                     title="Are you sure you want to delete this loan?"
                     onConfirm={async () => {

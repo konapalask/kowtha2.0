@@ -168,8 +168,14 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
               },
             ]}
             name={"businessName"}
+            label={"Business Name"}
           >
-            <Input minLength={3} maxLength={20} placeholder="Business Name" />
+            <Input.TextArea
+              autoSize={{ minRows: 1, maxRows: 2 }}
+              minLength={3}
+              maxLength={60}
+              placeholder="Business Name"
+            />
           </Form.Item>
         )}
         <Form.Item

@@ -162,19 +162,19 @@ export default function Users() {
     setIsModalVisible(true);
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setUsers(users.filter((user) => user.id !== id));
-      message.success("User deleted successfully");
-    } catch (error) {
-      message.error("Failed to delete user");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleDelete = async (id: number) => {
+  //   try {
+  //     setLoading(true);
+  //     // Mock API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+  //     setUsers(users.filter((user) => user.id !== id));
+  //     message.success("User deleted successfully");
+  //   } catch (error) {
+  //     message.error("Failed to delete user");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleUserStatus = (status: string) => {
     // Implement the logic to deactivate the user
