@@ -1729,9 +1729,9 @@ export class LoanService {
     let finalResult = [];
     let count = 0;
     for(let i = 0; i < images.length; i++) {
-      result.push(`<div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${images[i]}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+      result.push(`<div style="width: 48%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
+                  <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
+                  <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
                   </div>`);
       
       count++;
