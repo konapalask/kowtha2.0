@@ -51,7 +51,7 @@ const DashboardLayout = dynamic(
 const FiRoleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
-  { label: "Verifier", value: "Verifer" },
+  { label: "Verifier", value: "Verifier" },
   { label: "Field Executive", value: "FieldExecutive" },
 ];
 
