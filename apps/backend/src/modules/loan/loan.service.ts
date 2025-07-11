@@ -1839,25 +1839,20 @@ export class LoanService {
       const bankName = loan.bankName;
 
       const imagesData = await this.formatImages(validImageUrls, bankName);
-      console.log(validImageUrls, 'validImageUrls');
       
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path, bankName, imagesData);
       }
       else if(addressType === 'Work') {
-        
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
         this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName, imagesData);
       }
       else if(addressType === 'Business') {
-        
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName, imagesData);
       }
       else {
-
         throw new NotFoundException('Invalid address type');
       }
 
@@ -2279,7 +2274,7 @@ export class LoanService {
     `;
   }
   
-  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
+  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string, imagesData: string): string {
     
     if (path) {
       path = path.replace('<ul>', '').replace('</ul>', '')
@@ -2292,10 +2287,10 @@ export class LoanService {
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
 
-    return businessTemplate(verificationData, bankName, path, finalRecommendationHtml, imageDataUri, imageUrls);
+    return businessTemplate(verificationData, bankName, path, finalRecommendationHtml, imageDataUri, imageUrls, imagesData);
   }
 
-    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
+    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string, imagesData: string): string {
     // Use provided remarks or default list
     
     if (path) {
@@ -2451,31 +2446,7 @@ export class LoanService {
             <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
-           
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
+          ${imagesData}
     `;
   }
 
