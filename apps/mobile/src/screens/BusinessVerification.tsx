@@ -104,7 +104,7 @@ const BusinessVerification = () => {
       businessAddress: item?.address,
       isAddressSame: '',
       addressCorrection: '',
-      businessName: '',
+      businessName: item?.businessName ?? '',
     },
     businessDetails: {
       nameBoardSeen: '',
