@@ -5,7 +5,6 @@ import { GetLoansDto } from './dto/get-loans.dto';
 import { NotFoundException } from '@nestjs/common';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { VerifyLoanDto } from './dto/verify-loan.dto';
-import { S3Service } from '../common/s3utils/s3.service';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RolesGuard } from '../accounts/guards/roles.guard';
