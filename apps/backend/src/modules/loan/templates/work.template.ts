@@ -11,7 +11,43 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
       };
 
       const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
-  
+      
+      let aadhar = verificationData.basicDetails?.aadhar || '';
+      if(aadhar.length > 4) {
+        aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
+      }
+
+      let employerType = verificationData.employmentDetails?.employerType || '';
+      if(employerType === 'Others') {
+        employerType = verificationData.employmentDetails?.employerTypeOther || '';
+      }
+
+      let natureOfService = verificationData.employmentDetails?.natureOfService || '';
+      if(natureOfService === 'Others') {
+        natureOfService = verificationData.employmentDetails?.natureOfServiceOther || '';
+      }
+
+      let isAddressSame = verificationData.employmentDetails?.isAddressSame || '';
+      if(isAddressSame === 'No') {
+        isAddressSame = `
+          <tr>
+            <th>Is Address Same</th>
+            <td colspan="5"><span class="var-value">${isAddressSame}</span></td>
+          </tr>
+          <tr>
+          <th>Address Correction Details</th>
+          <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.addressCorrection || ''}</span></td>
+        </tr>
+        `;
+      } else if(isAddressSame === 'Yes') {
+        isAddressSame = `
+          <tr>
+            <th>Is Address Same</th>
+            <td colspan="5"><span class="var-value">${isAddressSame}</span></td>
+          </tr>
+        `;
+      }
+
       return `
         <div class="align-wrapper">
           <table class="section-table">
@@ -19,6 +55,18 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             <tr>
               <th>Name of the the Applicant</th>
               <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
+            </tr>
+            <tr>
+              <th>Aadhar Number</th>
+              <td colspan="5"><span class="var-value">${aadhar}</span></td>
+            </tr>
+            <tr>
+              <th>PAN Number</th>
+              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.panNumber || ''}</span></td>
+            </tr>
+            <tr>
+              <th>Applicant's Qualification</th>
+              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.qualification || ''}</span></td>
             </tr>
             <tr>
               <th>Name of the Current Employer</th>
@@ -29,22 +77,22 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
             </tr>
             <tr>
-              <th>Number of years in Current Job</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
-            </tr>
-            <tr>
+              <th>No. of years in Current Job</th>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
               <th>Total Work Experience</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
             </tr>
             <tr>
-              <th>Number of Employees in the Company</th>
+              <th>No. of Employees in the Company</th>
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
             </tr>
             <tr>
               <th>Employee ID(Copy/Photograph Mandatory)</th>
-              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
+              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
+            </tr>
+            <tr>
               <th>Designation</th>
-              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
+              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
             </tr>
             <tr>
               <th>Mode of Salary</th>
@@ -52,24 +100,27 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             </tr>
             <tr>
               <th>Type of Employer</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.employerType || ''}</span></td>
+              <td colspan="5"><span class="var-value">${employerType}</span></td>
             </tr>
             <tr>
               <th>Type of Industry</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.natureOfService || ''}</span></td>
+              <td colspan="5"><span class="var-value">${natureOfService}</span></td>
             </tr>
             <tr>
               <th>Type of Office Locality</th>
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeLocality || ''}</span></td>
             </tr>
-              <tr><td colspan="6" class="section-header">Financial Details</td></tr>
             <tr>
               <th>Monthly Gross Salary</th>
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.grossSalary || ''}</span></td>
               <th>Monthly Net Salary</th>
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
             </tr>
+            ${isAddressSame}
           </table>
+          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+            Field Executive: ${html_data.fieldExecutive || ''}
+          </div>
         </div>
         <div class="footer">
           <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
@@ -102,8 +153,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             `).join('') || '<tr><td colspan="7" style="text-align: center;">No past employment history found</td></tr>'}
           </table>
         </div>
-  
-        
   
         <div class="align-wrapper">
           <table class="section-table">
@@ -149,8 +198,17 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               </tr>
             `).join('') || '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
           </table>
+          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+            Field Executive: ${html_data.fieldExecutive || ''}
+          </div>
+        </div>
+
+        <div class="footer">
+          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+          Generated on ${new Date().toLocaleString()}
         </div>
   
+        <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
           <table class="section-table">
             <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
@@ -171,6 +229,9 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               </td>
             </tr>
           </table>
+          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+            Field Executive: ${html_data.fieldExecutive || ''}
+          </div>
         </div>
         <br>
         <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />

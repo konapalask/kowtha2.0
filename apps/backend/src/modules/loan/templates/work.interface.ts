@@ -1,14 +1,14 @@
 export interface WorkVerificationData {
     basicDetails?: {
-        tenure: string;
-        bankName: string;
-        panNumber: string;
-        loanAmount: string;
-        aadhar: string;
-        applicantName: string;
-        purposeOfLoan: string;
-        qualification: string;
-        prospectNumber: string;
+      aadhar: string;
+      tenure: string;
+      bankName: string;
+      panNumber: string;
+      loanAmount: string;
+      applicantName: string;
+      purposeOfLoan: string;
+      qualification: string;
+      prospectNumber: string;
       };
       existingLoans?: {
         loans: Array<{
@@ -38,10 +38,13 @@ export interface WorkVerificationData {
         grossSalary: string;
         employerType: string;
         idCardNumber: string;
+        isAddressSame: string;
         officeAddress: string;
         officeLocality: string;
         natureOfService: string;
+        addressCorrection: string;
         currentOfficeName: string;
+        employerTypeOther: string;
         yearsInCurrentJob: string;
         totalWorkExperience: string;
         natureOfServiceOther: string;
@@ -56,20 +59,17 @@ export interface WorkVerificationData {
           contactNumber: string;
         }>;
       };
-      finalObservations?: {
-        overallStatus: string;
-        cooperativeness: string;
-        remarks: string;
-      };
       uploadedItems?: Array<{
         id: string;
         uri: string;
         type: string;
         pincode: string;
+        isCamera: string;
         latitude: string;
         locality: string;
         longitude: string;
         timestamp: string;
         s3ImageUrl: string;
+        isOverlayNeeded: string;
       }>;
 }

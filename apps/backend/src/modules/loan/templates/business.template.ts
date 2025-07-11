@@ -137,6 +137,9 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
             <td colspan="5"><span class="var-value">${constitution}</span></td>
           </tr>
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
@@ -235,9 +238,10 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
           `).join('')
           : '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
-
-
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
@@ -265,6 +269,9 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
             </td>
           </tr>
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
       <br>
       <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
