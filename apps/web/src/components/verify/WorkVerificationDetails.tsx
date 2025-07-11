@@ -377,18 +377,18 @@ export const WorkVerificationDetails: React.FC<
                 dataIndex: "tenure",
                 key: "tenure",
               },
-              {
-                title: "Actions",
-                key: "actions",
-                render: () => (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit("existingLoans")}
-                    disabled={hasEditRequest}
-                  />
-                ),
-              },
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: () => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("existingLoans")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              // },
             ]}
             pagination={false}
             locale={{ emptyText: "No existing loans added yet" }}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Form, Input, Select, Col } from "antd";
 
-const OWNERSHIP_OPTIONS = ["Owned", "Rented", "Leased", "Others"];
+const OWNERSHIP_OPTIONS = ["Owned", "Rented", "Leased"];
 const STOCK_SEEN_OPTIONS = ["Yes", "No"];
 const EMPLOYEES_SEEN_OPTIONS = ["None", "1-2", "3-5", "6+"];
 const ILLEGAL_SETUP_OPTIONS = ["Yes", "No"];
@@ -33,7 +33,7 @@ export type BusinessMiscellaneousFormData = {
 const BusinessMiscellaneous: React.FC<{ form: any }> = ({ form }) => {
   // Watch values for conditional rendering
   const ownershipOfPremises = Form.useWatch("ownershipOfPremises", form);
-  const businessActivity = Form.useWatch("businessActivity", form);
+  // const businessActivity = Form.useWatch("businessActivity", form);
 
   return (
     <>
@@ -73,7 +73,19 @@ const BusinessMiscellaneous: React.FC<{ form: any }> = ({ form }) => {
           <Form.Item
             name="rentalAmount"
             label="Rent paid"
-            rules={[{ required: true, message: "Rent paid is required" }]}
+            rules={[{ required: true, message: "Amount is required" }]}
+          >
+            <Input type="number" placeholder="Enter rent paid" />
+          </Form.Item>
+        </Col>
+      )}
+
+      {ownershipOfPremises === "Leased" && (
+        <Col span={8}>
+          <Form.Item
+            name="leaseAmount"
+            label="Lease paid"
+            rules={[{ required: true, message: "Amount is required" }]}
           >
             <Input type="number" placeholder="Enter rent paid" />
           </Form.Item>

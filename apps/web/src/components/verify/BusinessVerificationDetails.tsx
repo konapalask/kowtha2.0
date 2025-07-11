@@ -189,6 +189,68 @@ export const BusinessVerificationDetails: React.FC<
         logs={false}
       />
 
+      {/* Existing Loans Section */}
+      <section style={{ marginBottom: 24 }}>
+        <Card
+          title="Existing Loans"
+          extra={
+            <Button
+              // type="primary"
+              style={{ border: "none" }}
+              icon={<EditOutlined />}
+              onClick={() => onEdit("existingLoans")}
+            />
+          }
+        >
+          <Table
+            className="striped-table"
+            dataSource={data?.existingLoans?.loans || []}
+            columns={[
+              {
+                title: "Bank Name",
+                dataIndex: "bankName",
+                key: "bankName",
+              },
+              {
+                title: "Purpose",
+                dataIndex: "purpose",
+                key: "purpose",
+              },
+              {
+                title: "Loan Amount",
+                dataIndex: "loanAmount",
+                key: "loanAmount",
+              },
+              {
+                title: "EMI",
+                dataIndex: "emi",
+                key: "emi",
+              },
+              {
+                title: "Tenure",
+                dataIndex: "tenure",
+                key: "tenure",
+              },
+              // {
+              //   title: "Actions",
+              //   key: "actions",
+              //   render: () => (
+              //     <Button
+              //       type="text"
+              //       icon={<EditOutlined />}
+              //       onClick={() => onEdit("existingLoans")}
+              //       disabled={hasEditRequest}
+              //     />
+              //   ),
+              // },
+            ]}
+            pagination={false}
+            locale={{ emptyText: "No existing loans added yet" }}
+            bordered
+          />
+        </Card>
+      </section>
+
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Third Party Check"
