@@ -1,26 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
-import { LoggingService } from '../common/logging/logging.service';
-import { CreateLoanDto } from './dto/create-loan.dto';
-import * as XLSX from 'xlsx';
-import { Logger } from '@nestjs/common';
-import { Roles } from '../accounts/decorators/roles.decorator';
-import * as puppeteer from 'puppeteer';
-import PDFDocument = require('pdfkit');
-import { Buffer } from 'buffer'; // Import the Buffer type
 import * as fs from 'fs';
 import * as path from 'path';
-import { EditLoanDto } from './dto/edit-loan.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { S3Service } from '../common/s3utils/s3.service';
+import * as XLSX from 'xlsx';
+import { Buffer } from 'buffer'; // Import the Buffer type
+import { Logger } from '@nestjs/common';
+import * as puppeteer from 'puppeteer';
 import { GetLoansDto } from './dto/get-loans.dto';
+import { EditLoanDto } from './dto/edit-loan.dto';
+import { PrismaService } from '../../prisma.service';
+import { CreateLoanDto } from './dto/create-loan.dto';
+import { S3Service } from '../common/s3utils/s3.service';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { VerifyLoanDto } from './dto/verify-loan.dto';
-import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { EditVerificationDto } from './dto/edit-verification.dto';
+import { LoggingService } from '../common/logging/logging.service';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
-
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma, LoanStatus, VerificationType, VerificationStatus, 
+            AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
+import { businessTemplate } from './templates/business.template';
+import { BusinessVerificationData } from './templates/business.interface';
 
 interface VerificationData {
   applicantDetails?: {
@@ -191,63 +188,6 @@ interface WorkVerificationData {
       timestamp: string;
       s3ImageUrl: string;
     }>;
-}
-
-interface BusinessVerificationData {
-  basicDetails?: {
-    personMet: string;
-    personMetRelation: string;
-    businessName: string;
-    applicantName: string;
-    isAddressSame: string;
-    businessAddress: string;
-    businessAddress2: string;
-    personMetName: string;
-  };
-  miscellaneous?: {
-    stockSeen: string;
-    rentalAmount: string;
-    employeesSeen: string;
-    businessActivity: string;
-    otherSetupObserved: string;
-    ownershipOfPremises: string;
-    illegalSetupObserved: string;
-    politicallyConnected: string;
-    businessActivityOther: string;
-    privateFinanceOrChits: string;
-    yearsInCurrentPremises: string;
-    areaOfPremises: string;
-    localityOfBusiness: string;
-    employeesUnderApplicant: string;
-  };
-  uploadedItems?: Array<{
-    id: string;
-    uri: string;
-    type: string;
-    timestamp: string;
-    s3ImageUrl: string;
-  }>;
-  thirdPartyCheck?: {
-    checks: Array<{
-      tpcName: string;
-      relationship: string;
-      comments: string;
-      feedbackStatus: string;
-      mobileNumber: string;
-    }>;
-  };
-  businessDetails?: {
-    geoTag: string;
-    constitution: string;
-    nameBoardSeen: string;
-    totalExperience: string;
-    businessProfile: string;
-    nameBoardMatched: string;
-    isBusinessSeasonal: string;
-    businessStartYear: string;
-    constitutionOther: string;
-    isAddressTraceable: string;
-  };
 }
 
 @Injectable()
@@ -2117,7 +2057,6 @@ export class LoanService {
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
 
-
     return `
       <div class="align-wrapper">
         <table class="section-table">
@@ -2327,202 +2266,7 @@ export class LoanService {
     
     const finalRecommendationHtml = recommendationStyles[status] || '';
 
-    return `
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Business Verification</td></tr>
-          <tr>
-            <th>Name of the Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Name</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Profile</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessAddress || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Total Work Experience</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.totalExperience || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name Board Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name Board Matched</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.nameBoardMatched || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Date of Commencement of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessStartYear || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Is Address Traceable</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isAddressTraceable || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProfile || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Seasonal</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.isBusinessSeasonal || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Constitution</th>
-            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.constitution || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Area of Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.areaOfPremises || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Locality of Business</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.localityOfBusiness || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Number of Employees Working Under Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesUnderApplicant || ''}</span></td>
-          </tr>
-        </table>
-      </div>
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Miscellaneous Details</td></tr>
-          <tr>
-            <th>Stock Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.stockSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Ownership of Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.ownershipOfPremises || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Rent Paid</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Employees Seen</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.employeesSeen || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Business Activity</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.businessActivity || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Other Setup Observed</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.otherSetupObserved || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Politically Connected</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.politicallyConnected || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Years in Current Premises</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
-          </tr>
-        </table>
-      </div>
-      <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Mobile Number</th>
-          <th>Relationship</th>
-          <th>Feedback Status</th>
-          <th>Comments</th>
-        </tr>
-        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
-          ? verificationData.thirdPartyCheck.checks.map(tpc => `
-            <tr>
-              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
-              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
-              <td><span class="var-value">${tpc.relationship || ''}</span></td>
-              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
-              <td><span class="var-value">${tpc.comments || ''}</span></td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
-        </table>
-      </div>
-
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Remarks</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Final Recommendation</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${finalRecommendationHtml}
-              </ul>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br>
-      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-          <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-    `;
+    return businessTemplate(verificationData, bankName, path, finalRecommendationHtml, imageDataUri, imageUrls);
   }
 
     private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {

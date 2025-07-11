@@ -37,7 +37,7 @@ const validationSchema = yup.object().shape({
     .of(
       yup.object().shape({
         name: yup.string().required('Name is required'),
-        address: yup.string().required('Address is required'),
+        address: yup.string(),
         designation: yup.string().required('Designation is required'),
         yearsKnown: yup.string().required('Number of Years Known is required'),
         contactNumber: yup
@@ -115,6 +115,8 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 ]}
                 value={value}
                 onChangeText={onChange}
+                placeholder="Enter name"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.name && (
                 <Text style={styles.errorText}>
@@ -141,6 +143,8 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 onChangeText={onChange}
                 multiline
                 numberOfLines={4}
+                placeholder="Enter address"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.address && (
                 <Text style={styles.errorText}>
@@ -164,6 +168,8 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 ]}
                 value={value}
                 onChangeText={onChange}
+                placeholder="Enter designation"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.designation && (
                 <Text style={styles.errorText}>
@@ -244,7 +250,7 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
           name={`references.${index}.emailAddress`}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email Address</Text>
+              <Text style={styles.label}>E-mail Address</Text>
               <TextInput
                 style={[
                   styles.input,
@@ -254,6 +260,8 @@ const ColleagueReferences: React.FC<Props> = ({initialData, onSubmit}) => {
                 onChangeText={onChange}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                placeholder="Enter e-mail"
+                placeholderTextColor={colors.text.disabled}
               />
               {errors.references?.[index]?.emailAddress && (
                 <Text style={styles.errorText}>

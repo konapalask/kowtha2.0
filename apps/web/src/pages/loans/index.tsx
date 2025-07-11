@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   Popconfirm,
+  Divider,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -219,6 +220,7 @@ export default function Loans() {
       key: "applicationNumber",
       fixed: "left",
       width: 200,
+      align: "center",
     },
     {
       title: "Applicant Name",
@@ -429,7 +431,13 @@ export default function Loans() {
             fixed: "right",
             align: "center",
             render: (_: any, record: any) => (
-              <span>
+              <span
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <Button
                   type="link"
                   onClick={() => {
@@ -439,7 +447,9 @@ export default function Loans() {
                 >
                   Edit
                 </Button>
-                {(userDetails?.role === "Admin" || userDetails?.role === "OperationsExecutive") && (
+                {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
+                {(userDetails?.role === "Admin" ||
+                  userDetails?.role === "OperationsExecutive") && (
                   <Popconfirm
                     title="Are you sure you want to delete this loan?"
                     onConfirm={async () => {
@@ -461,7 +471,7 @@ export default function Loans() {
                 )}
               </span>
             ),
-            width: 140,
+            width: 100,
           },
         ]
       : []),

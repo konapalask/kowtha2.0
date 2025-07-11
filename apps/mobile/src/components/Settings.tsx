@@ -88,7 +88,7 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
     clearItem('accessToken');
     clearItem('refreshToken');
     clearItem('testUser');
-    // clearItem('attendance');
+    clearItem('attendance');
     navigation.reset({
       index: 0,
       routes: [{name: 'Login'}],

@@ -4,6 +4,8 @@ export const loanTypeOptions = [
   { value: "Vehicle Loan", label: "Vehicle Loan" },
   { value: "Agricultural Loan", label: "Agricultural Loan" },
   { value: "Mortgage Loan", label: "Mortgage Loan" },
+  { value: "Top-up Loan", label: "Top-up Loan" },
+  { value: "Others", label: "Others" },
 ];
 
 export const bankOptions = [

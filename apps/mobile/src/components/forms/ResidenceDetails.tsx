@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useRef} from 'react';
 import {
   View,
   Text,
@@ -20,8 +20,8 @@ interface ResidenceDetailsProps {
 const RESIDENCE_STATUS_OPTIONS = ['Owned', 'Rented', 'Leased'];
 const RESIDENCE_TYPE_OPTIONS = ['House', 'Apartment', 'Villa', 'Others'];
 const QUALITY_OPTIONS = ['Excellent', 'Good', 'Average', 'Poor'];
-const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
-const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
+// const LOCATION_CATEGORY_OPTIONS = ['Urban', 'Semi-Urban', 'Rural'];
+// const LOCALITY_TYPE_OPTIONS = ['Residential', 'Commercial', 'Mixed'];
 const ACCESSIBILITY_OPTIONS = ['Easy', 'Moderate', 'Difficult'];
 const YES_NO_OPTIONS = ['Yes', 'No'];
 
@@ -47,19 +47,20 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
       rentDetails: '',
       yearsAtCurrentAddress: '',
       politicalSymbolVisible: '',
+      leaseAmount: '',
     },
   });
 
   const residenceStatusRef = useRef<ActionSheetRef>(null);
   const residenceTypeRef = useRef<ActionSheetRef>(null);
-  const constructionQualityRef = useRef<ActionSheetRef>(null);
+  // const constructionQualityRef = useRef<ActionSheetRef>(null);
   const standardOfLivingRef = useRef<ActionSheetRef>(null);
-  const locationCategoryRef = useRef<ActionSheetRef>(null);
-  const localityTypeRef = useRef<ActionSheetRef>(null);
+  // const locationCategoryRef = useRef<ActionSheetRef>(null);
+  // const localityTypeRef = useRef<ActionSheetRef>(null);
   const accessibilityRef = useRef<ActionSheetRef>(null);
-  const nameBoardVisibleRef = useRef<ActionSheetRef>(null);
+  // const nameBoardVisibleRef = useRef<ActionSheetRef>(null);
   const politicalSymbolVisibleRef = useRef<ActionSheetRef>(null);
-  const [showRentDetails, setShowRentDetails] = useState(false);
+  // const [showRentDetails, setShowRentDetails] = useState(false);
 
   const residenceStatus = watch('residenceStatus');
   const residenceType = watch('residenceType');
@@ -101,7 +102,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="residenceStatus"
       />
 
-      {['Rented', 'Leased']?.includes(residenceStatus) && (
+      {residenceStatus === 'Rented' && (
         <Controller
           control={control}
           rules={{
@@ -115,12 +116,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           }}
           render={({field: {onChange, value}}) => (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>
-                {residenceStatus === 'Rented'
-                  ? 'Rent per month'
-                  : 'Lease Amount'}
-                *
-              </Text>
+              <Text style={styles.label}>Rent per month*</Text>
               <TextInput
                 style={[styles.input]}
                 onChangeText={text => {
@@ -144,6 +140,47 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
             </View>
           )}
           name="rentDetails"
+        />
+      )}
+
+      {residenceStatus === 'Leased' && (
+        <Controller
+          control={control}
+          rules={{
+            required: 'Amount is required',
+            validate: value => {
+              if (isNaN(Number(value))) {
+                return 'Please enter a valid number';
+              }
+              return true;
+            },
+          }}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Lease Amount*</Text>
+              <TextInput
+                style={[styles.input]}
+                onChangeText={text => {
+                  // Only update if the entire string is digits
+                  if (/^\d*$/.test(text)) {
+                    onChange(text);
+                  }
+                  // Otherwise ignore the input
+                }}
+                value={value}
+                placeholder="Enter amount"
+                placeholderTextColor={colors.text.disabled}
+                keyboardType="numeric" // Show numeric keyboard on mobile
+                inputMode="decimal" // Modern alternative to keyboardType
+              />
+              {errors.leaseAmount && (
+                <Text style={styles.errorText}>
+                  {errors.leaseAmount.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name="leaseAmount"
         />
       )}
 

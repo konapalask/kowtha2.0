@@ -44,7 +44,7 @@ const validationSchema = yup.object().shape({
   currentOfficeName: yup.string().required('Current Office Name is required'),
   officeAddress: yup.string().required('Office Address is required'),
   isAddressSame: yup.string().required(`Is address same is required`),
-  addressCorrection: yup.string().required(`Address correction is required`),
+  addressCorrection: yup.string(),
   yearsInCurrentJob: yup.string().required('Years in Current Job is required'),
   totalWorkExperience: yup
     .string()
@@ -167,6 +167,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               ]}
               value={value}
               onChangeText={onChange}
+              placeholder="Enter office name"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.currentOfficeName && (
               <Text style={styles.errorText}>
@@ -272,6 +274,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="decimal-pad"
               placeholder="Enter years in current job"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.yearsInCurrentJob && (
               <Text style={styles.errorText}>
@@ -302,6 +305,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="decimal-pad"
               placeholder="Enter total work experience"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.totalWorkExperience && (
               <Text style={styles.errorText}>
@@ -332,6 +336,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter company size"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.companySize && (
               <Text style={styles.errorText}>{errors.companySize.message}</Text>
@@ -354,7 +359,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showNatureOfServiceSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Nature of Service'}
+                {value || 'Select nature of service'}
               </Text>
             </TouchableOpacity>
             {errors.natureOfService && (
@@ -405,7 +410,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showOfficeLocalitySheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Office Locality'}
+                {value || 'Select office locality'}
               </Text>
             </TouchableOpacity>
             {errors.officeLocality && (
@@ -437,6 +442,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               placeholder="Enter ID card number"
               autoCapitalize="characters"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.idCardNumber && (
               <Text style={styles.errorText}>
@@ -457,6 +463,8 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               style={[styles.input, errors.designation && styles.inputError]}
               value={value}
               onChangeText={onChange}
+              placeholder="Enter designation"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.designation && (
               <Text style={styles.errorText}>{errors.designation.message}</Text>
@@ -479,7 +487,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showSalaryModeSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Salary Mode'}
+                {value || 'Select salary mode'}
               </Text>
             </TouchableOpacity>
             {errors.salaryMode && (
@@ -503,7 +511,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPress={showEmployerTypeSheet}>
               <Text
                 style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Employer Type'}
+                {value || 'Select employer type'}
               </Text>
             </TouchableOpacity>
             {errors.employerType && (
@@ -560,6 +568,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter gross salary"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.grossSalary && (
               <Text style={styles.errorText}>{errors.grossSalary.message}</Text>
@@ -588,6 +597,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               }}
               keyboardType="numeric"
               placeholder="Enter net salary"
+              placeholderTextColor={colors.text.disabled}
             />
             {errors.netSalary && (
               <Text style={styles.errorText}>{errors.netSalary.message}</Text>
