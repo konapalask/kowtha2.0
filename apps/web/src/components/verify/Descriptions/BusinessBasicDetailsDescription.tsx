@@ -38,6 +38,18 @@ const BusinessBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.applicantName}
           </Descriptions.Item>
           <Descriptions.Item
+            label="PAN Number"
+            contentStyle={getItemStyle("panNumber")}
+          >
+            {data?.basicDetails?.panNumber}
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="Aadhar Number"
+            contentStyle={getItemStyle("aadhar")}
+          >
+            {data?.basicDetails?.aadhar}
+          </Descriptions.Item>
+          <Descriptions.Item
             label="Person Met"
             contentStyle={getItemStyle("personMet")}
           >
@@ -67,6 +79,20 @@ const BusinessBasicDetailsDescription: React.FC<{
           >
             {data?.basicDetails?.businessName}
           </Descriptions.Item>
+          <Descriptions.Item
+            label="Is Business Name Same as Initiated"
+            contentStyle={getItemStyle("isBusinessNameSame")}
+          >
+            {data?.basicDetails?.isBusinessNameSame}
+          </Descriptions.Item>
+          {data?.basicDetails?.isBusinessNameSame === "No" && (
+            <Descriptions.Item
+              label="Business Name Correction"
+              contentStyle={getItemStyle("correctedBusinessName")}
+            >
+              {data?.basicDetails?.correctedBusinessName}
+            </Descriptions.Item>
+          )}
           <Descriptions.Item
             label="Business Profile"
             contentStyle={getItemStyle("businessProfile")}

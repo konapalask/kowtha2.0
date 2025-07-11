@@ -32,7 +32,7 @@ const ColleagueReferenceRow: React.FC<{
           name={[field.name, "address"]}
           fieldKey={[String(field.fieldKey), "address"]}
           label={idx === 0 ? "Address" : ""}
-          rules={[{ required: true, message: "Please enter address" }]}
+          // rules={[{ required: true, message: "Please enter address" }]}
         >
           <Input placeholder="Enter address" />
         </Form.Item>
@@ -83,7 +83,7 @@ const ColleagueReferenceRow: React.FC<{
           fieldKey={[String(field.fieldKey), "emailAddress"]}
           label={idx === 0 ? "Email Address" : ""}
           rules={[
-            { required: true, message: "Please enter email address" },
+            // { required: true, message: "Please enter email address" },
             { type: "email", message: "Please enter a valid email address" },
           ]}
         >

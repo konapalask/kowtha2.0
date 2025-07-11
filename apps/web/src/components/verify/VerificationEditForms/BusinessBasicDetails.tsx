@@ -25,6 +25,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   // Watch values for conditional rendering
   const personMet = Form.useWatch("personMet", form);
   const isAddressSame = Form.useWatch("isAddressSame", form);
+  const isBusinessNameSame = Form.useWatch("isBusinessNameSame", form);
 
   return (
     <>
@@ -36,7 +37,56 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
             { required: true, message: "Name of the applicant is required" },
           ]}
         >
-          <Input disabled />
+          <Input style={{ color: "#000" }} disabled />
+        </Form.Item>
+      </Col>
+      {/* PAN Number */}
+      <Col span={8}>
+        <Form.Item
+          label="PAN Number"
+          name="panNumber"
+          rules={[
+            { required: true, message: "PAN number is required" },
+            {
+              pattern: /^[A-Z0-9]{10}$/,
+              message: "PAN must be 10 alphanumeric uppercase characters",
+            },
+          ]}
+        >
+          <Input
+            maxLength={10}
+            onChange={(e) => {
+              const formatted = e.target.value
+                .replace(/[^A-Za-z0-9]/g, "")
+                .toUpperCase();
+              form.setFieldsValue({ panNumber: formatted });
+            }}
+            placeholder="Enter PAN number"
+          />
+        </Form.Item>
+      </Col>
+
+      {/* Aadhar Number */}
+      <Col span={8}>
+        <Form.Item
+          label="Aadhar Number"
+          name="aadhar"
+          rules={[
+            { required: true, message: "Aadhar is required" },
+            {
+              pattern: /^\d{12}$/,
+              message: "Aadhar must be 12 digits",
+            },
+          ]}
+        >
+          <Input
+            maxLength={12}
+            onChange={(e) => {
+              const numeric = e.target.value.replace(/\D/g, "");
+              form.setFieldsValue({ aadhar: numeric });
+            }}
+            placeholder="Enter Aadhar number"
+          />
         </Form.Item>
       </Col>
 
@@ -94,11 +144,53 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
         <Form.Item
           name="businessName"
           label="Business Name"
-          rules={[{ required: true, message: "Please enter business name" }]}
+          // rules={[{ required: true, message: "Please enter business name" }]}
         >
-          <Input placeholder="Enter Business Name" />
+          <Input
+            disabled
+            style={{ color: "#000" }}
+            placeholder="Enter Business Name"
+          />
         </Form.Item>
       </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="isBusinessNameSame"
+          label="Is the business name same as initiated?"
+          rules={[
+            {
+              required: true,
+              message: "Please specify if the name is same as initiated",
+            },
+          ]}
+        >
+          <Select placeholder="Select Yes/No">
+            {yesNoOptions.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+
+      {isBusinessNameSame === "No" && (
+        <Col span={24}>
+          <Form.Item
+            name="correctedBusinessName"
+            label="Business Name Correction"
+            rules={[
+              {
+                required: true,
+                message: "Please provide the corrected name",
+              },
+            ]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter corrected name" />
+          </Form.Item>
+        </Col>
+      )}
 
       <Col span={8}>
         <Form.Item
@@ -119,6 +211,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           <Input.TextArea
             rows={3}
             disabled
+            style={{ color: "#000" }}
             placeholder="Enter business address"
           />
         </Form.Item>
