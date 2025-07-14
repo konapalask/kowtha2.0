@@ -69,6 +69,18 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="5"><span class="var-value">${verificationData.basicDetails?.qualification || ''}</span></td>
             </tr>
             <tr>
+              <th>Purpose of Loan</th>
+              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.purposeOfLoan || ''}</span></td>
+            </tr>
+            <tr>
+              <th>Loan Amount</th>
+              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.loanAmount || ''}</span></td>
+            </tr>
+            <tr>
+              <th>Tenure</th>
+              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.tenure || ''}</span></td>
+            </tr>
+            <tr>
               <th>Name of the Current Employer</th>
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
             </tr>

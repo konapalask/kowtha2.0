@@ -1688,7 +1688,7 @@ export class LoanService {
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        addressTemplate(verificationData as VerificationData, html_data);
+        addressTemplate(verificationData as VerificationData, html_data, addressType);
       }
       else if(addressType === 'Work') {
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 

@@ -1,6 +1,6 @@
 import { VerificationData } from "./address.interface";
 
-export const addressTemplate = (verificationData: VerificationData, html_data: any) => {
+export const addressTemplate = (verificationData: VerificationData, html_data: any, addressType: string) => {
     if (html_data.path) {
         html_data.path = html_data.path.replace('<ul>', '').replace('</ul>', '')
       }
@@ -115,6 +115,10 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         <tr>
           <th>PAN Number</th>
           <td colspan="5"><span class="var-value">${verificationData.basicDetails?.panNumber || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Address Type</th>
+          <td colspan="5"><span class="var-value">${addressType === 'PermanentAddress' ? 'Permanent Address' : 'Current Address'}</span></td>
         </tr>
         <tr>
           <th>Residential Address</th>
@@ -267,7 +271,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         ? verificationData.familyMemberDetails.map(fmd => `
           <tr>
             <td><span class="var-value">${fmd.name || ''}</span></td>
-            <td><span class="var-value">${fmd.relation || ''}</span></td>
+            <td><span class="var-value">${fmd.relation === 'Other' ? fmd.otherRelation : fmd.relation || ''}</span></td>
             <td><span class="var-value">${fmd.age || ''}</span></td>
             <td><span class="var-value">${fmd.employmentType || ''}</span></td>
             <td><span class="var-value">${fmd.stayingWithApplicant || ''}</span></td>

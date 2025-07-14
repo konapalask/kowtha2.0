@@ -50,13 +50,20 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
     if(personMet === 'Others') {
         personMet = `
         <tr>
-            <th>Person Met Name</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Person Met Relation</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
-          </tr>
+          <th>Person Met Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Person Met Relation</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
+        </tr>
+      `;
+    } else if(personMet === 'Applicant') {
+        personMet = `
+        <tr>
+          <th>Person Met</th>
+          <td colspan="5"><span class="var-value">Applicant</span></td>
+        </tr>
         `;
     }
 
