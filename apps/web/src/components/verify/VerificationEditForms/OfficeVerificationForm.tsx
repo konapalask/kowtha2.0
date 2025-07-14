@@ -30,14 +30,14 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           label="Office Address"
           rules={[{ required: true, message: "Please enter office address" }]}
         >
-          <Input.TextArea rows={2} />
+          <Input.TextArea rows={2} disabled />
         </Form.Item>
       </Col>
 
-      <Col span={16}>
+      <Col span={4}>
         <Form.Item
           name="isAddressSame"
-          label="Is Address Same?"
+          label="Address Mismatch"
           rules={[{ required: true, message: "Please enter office address" }]}
         >
           <Select>
@@ -57,7 +57,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
-      <Col span={8}>
+      {/* <Col span={8}>
         <Form.Item
           name="isAddressSame"
           label="Address Mismatch?"
@@ -68,8 +68,8 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Select.Option value="No">No</Select.Option>
           </Select>
         </Form.Item>
-      </Col>
-      {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
+      </Col> */}
+      {/* {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
         <Col span={16}>
           <Form.Item
             name="addressCorrection"
@@ -79,7 +79,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Input.TextArea rows={2} placeholder="Enter corrected address" />
           </Form.Item>
         </Col>
-      )}
+      )} */}
       <Col span={8}>
       <Form.Item
           name="yearsInCurrentJob"
