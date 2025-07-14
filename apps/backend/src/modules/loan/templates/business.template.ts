@@ -27,6 +27,8 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.correctedBusinessName || ''}</span></td>
         </tr>
         `;
+    } else {
+      correctedBusinessName = '';
     }
 
     // Corrected Address check
@@ -38,6 +40,8 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.addressCorrection || ''}</span></td>
         </tr>
         `;
+    } else {
+      correctedAddress = '';
     }
 
     // Aadhar Number masking
