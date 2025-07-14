@@ -197,12 +197,16 @@ export default function Verify() {
             record?.id?.toString() ?? Math.random().toString()
           }
           loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: false,
-            showTotal: (total) => `Total ${total ?? 0} items`,
-            position: ["bottomCenter"],
-          }}
+          pagination={
+            filteredLoans.length >= 10
+              ? {
+                  pageSize: 10,
+                  showSizeChanger: false,
+                  showTotal: (total) => `Total ${total ?? 0} items`,
+                  position: ["bottomCenter"],
+                }
+              : false
+          }
           // size="small"
           // scroll={{ y: 400 }}
           sticky

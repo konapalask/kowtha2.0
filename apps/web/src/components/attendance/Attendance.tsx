@@ -112,12 +112,10 @@ export default function Attendance({ dateRange }: AttendanceProps) {
           <Input
             placeholder="Search name"
             value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => {
-              setFilters((f) => ({ ...f, name: selectedKeys[0] || "" }));
-              confirm();
+            onChange={(e) => {
+              setSelectedKeys(e.target.value ? [e.target.value] : []);
+              setFilters((f) => ({ ...f, name: e.target.value || "" }));
+              confirm({ closeDropdown: false });
             }}
             style={{ width: 188, marginBottom: 8, display: "block" }}
           />
@@ -182,25 +180,17 @@ export default function Attendance({ dateRange }: AttendanceProps) {
           <Input
             placeholder="Search code"
             value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => {
-              setFilters((f) => ({
-                ...f,
-                employeeCode: selectedKeys[0] || "",
-              }));
-              confirm();
+            onChange={(e) => {
+              setSelectedKeys(e.target.value ? [e.target.value] : []);
+              setFilters((f) => ({ ...f, employeeCode: e.target.value || "" }));
+              confirm({ closeDropdown: false });
             }}
             style={{ width: 188, marginBottom: 8, display: "block" }}
           />
           <Space>
             <a
               onClick={() => {
-                setFilters((f) => ({
-                  ...f,
-                  employeeCode: selectedKeys[0] || "",
-                }));
+                setFilters((f) => ({ ...f, employeeCode: selectedKeys[0] || "" }));
                 confirm();
               }}
               style={{ color: "#1890ff" }}

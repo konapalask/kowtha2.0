@@ -1,15 +1,26 @@
 import { BusinessVerificationData } from "./business.interface";
 
-export const businessTemplate = (verificationData: BusinessVerificationData, bankName: string, path: string, finalRecommendationHtml: string, imageDataUri: string, imageUrls: string[], imagesData: string) => {
-    // Constitution check for others
-    let constitution = '';
-    if(verificationData.businessDetails?.constitution === 'Others') {
+export const businessTemplate = (verificationData: BusinessVerificationData, html_data: any) => {
+    
+  if (html_data.path) {
+    html_data.path = html_data.path.replace('<ul>', '').replace('</ul>', '')
+  }
+
+  const recommendationStyles: Record<string, string> = {
+    Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+    Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+  };
+  
+  const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
+  // Constitution check for others
+    let constitution = verificationData.businessDetails?.constitution || '';
+    if(constitution === 'Others') {
         constitution = verificationData.businessDetails?.constitutionOther || '';
     }
 
     // Corrected Business Name check
-    let correctedBusinessName = '';
-    if(verificationData.basicDetails?.isBusinessNameSame === 'No') {
+    let correctedBusinessName = verificationData.basicDetails?.isBusinessNameSame || '';
+    if(correctedBusinessName === 'No') {
         correctedBusinessName = `
         <tr>
             <th>Corrected Business Name</th>
@@ -19,8 +30,8 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
     }
 
     // Corrected Address check
-    let correctedAddress = '';
-    if(verificationData.basicDetails?.isAddressSame === 'No') {
+    let correctedAddress = verificationData.basicDetails?.isAddressSame || '';
+    if(correctedAddress === 'No') {
         correctedAddress = `
         <tr>
             <th>Corrected Address</th>
@@ -35,25 +46,34 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
       aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
     }
 
-    let personMet = '';
-    if(verificationData.basicDetails?.personMet === 'Others') {
+    let personMet = verificationData.basicDetails?.personMet || '';
+    if(personMet === 'Others') {
         personMet = `
         <tr>
-            <th>Person Met Name</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Person Met Relation</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
-          </tr>
+          <th>Person Met Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Person Met Relation</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
+        </tr>
+      `;
+    } else if(personMet === 'Applicant') {
+        personMet = `
+        <tr>
+          <th>Person Met</th>
+          <td colspan="5"><span class="var-value">Applicant</span></td>
+        </tr>
         `;
     }
 
-    let rentalAmount = '';
-    if(verificationData.miscellaneous?.ownershipOfPremises === 'Leased') {
-        rentalAmount = verificationData.miscellaneous?.leaseAmount || '';
-    } else if (verificationData.miscellaneous?.ownershipOfPremises === 'Rented') {
-        rentalAmount = verificationData.miscellaneous?.rentalAmount || '';
+    let rentalAmount = verificationData.miscellaneous?.ownershipOfPremises || '';
+    if(rentalAmount === 'Leased') {
+        rentalAmount = verificationData.miscellaneous?.leaseAmount || '0';
+    } else if (rentalAmount === 'Rented') {
+        rentalAmount = verificationData.miscellaneous?.rentalAmount || '0';
+    } else {
+        rentalAmount = '0';
     }
 
     return `
@@ -124,9 +144,12 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
             <td colspan="5"><span class="var-value">${constitution}</span></td>
           </tr>
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
       <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -222,11 +245,12 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
           `).join('')
           : '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
-
-
       <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
         Generated on ${new Date().toLocaleString()}
       </div>
 
@@ -239,7 +263,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
             <th>Remarks</th>
             <td colspan="5">
               <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
+                ${html_data.path || ''}
               </ul>
             </td>
           </tr>
@@ -252,14 +276,17 @@ export const businessTemplate = (verificationData: BusinessVerificationData, ban
             </td>
           </tr>
         </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+          Field Executive: ${html_data.fieldExecutive || ''}
+        </div>
       </div>
       <br>
-      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
+      <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
 
           <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+            <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
             Generated on ${new Date().toLocaleString()}
           </div>
-          ${imagesData}
+          ${html_data.imagesData}
   `
 }
