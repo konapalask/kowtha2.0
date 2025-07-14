@@ -974,7 +974,8 @@ export class LoanService {
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; 
+                  latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
             try {
               
               if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
@@ -1005,7 +1006,7 @@ export class LoanService {
         data: {
           status: 'Completed',
           verificationData: verificationData || null,
-          addressType: addressType || null,
+          addressType: updatedAddressType || null,
           updatedAt: new Date(),
         },
       });
