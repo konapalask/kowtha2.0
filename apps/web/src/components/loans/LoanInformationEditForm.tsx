@@ -73,72 +73,49 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
         onFinish={async (values) => {
           try {
             setLoading(true);
+
+            const loanTypeFinal =
+              values.loanType === "Others"
+                ? values?.specifyLoanType
+                : values.loanType;
+
+            const normalizedLoanData = {
+              ...values,
+              applicationNumber: values.applicationNumber?.trim(),
+              applicantName: values.applicantName?.trim(),
+              applicantMobile: values.applicantMobile?.trim(),
+              applicantAddress: values.applicantAddress?.trim(),
+              loanType: loanTypeFinal,
+              bankName: values.bankName,
+              loanAmount: Number(values.loanAmount),
+            };
+
+            delete normalizedLoanData.specifyLoanType;
+
             if (!selectedLoan?.id) {
               const loanData = {
-                ...values,
-                // officeId: userDetails?.officeId,
+                ...normalizedLoanData,
                 operationsExecutiveId: userDetails?.sub,
-                applicationNumber: values.applicationNumber?.trim(),
-                applicantName: values.applicantName?.trim(),
-                applicantMobile: values.applicantMobile?.trim(),
-                applicantAddress: values.applicantAddress?.trim(),
-                loanType:
-                  values.loanType === "Others"
-                    ? values?.specifyLoanType
-                    : values.loanType,
-                bankName: values.bankName,
-                loanAmount: Number(values.loanAmount),
-                // applicantType: values.applicantType,
               };
-              // console.log(loanData?.applicationNumber)
-              delete loanData.specifyLoanType;
+
               const response = await createLoanApi([loanData]);
               const data = response?.data;
-              // console.log(response?.data);
-              // console.log(response);
-              // Handle the new response format
-              // if (
-              //   result.data.data.successful &&
-              //   result.data.data.successful.length > 0
-              // ) {
-              // const createdLoan = result.data.data.successful[0];
-              // // Create a new loan object with the loanId as id
-              // const newLoan = {
-              //   ...loanData,
-              //   id: createdLoan.loanId,
-              //   applicationNumber: createdLoan.applicationNumber,
-              //   status: "Pending",
-              //   verifications: [],
-              // };
-              // console.log(result)
-              // console.log(newLoan)
-              // if()
-              // console.log(loanData?.applicationNumber)
+
               if (data?.status === 201 && data?.data?.failedCount > 0) {
-                console.log(response?.data);
-                // message.error(data?.data?.failed?.[0]?.error);
                 message.error(
                   "Loan with this Application number and Applicant type exists"
                 );
-                // setEditLoanInfo(false);
               } else {
                 setSelectedLoan(data?.data?.successful?.[0]?.id);
-                // Add the new loan to the loans list
                 message.success("Loan created successfully");
               }
-
-              // setIsDrawerVisible(false);
-              // } else {
-              //   message.error("Failed to create loan");
-              // }
             } else {
-              // Update existing loan
-              // console.log(values)
-              const { applicationNumber, ...rest } = values;
+              const { applicationNumber, ...rest } = normalizedLoanData;
+
               await updateLoanApi(selectedLoan?.id, rest);
               message.success("Loan information updated");
             }
-            // console.log("passed")
+
             fetchLoanDetails();
             setEditLoanInfo(false);
           } catch (error) {

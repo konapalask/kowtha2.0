@@ -54,7 +54,9 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       // Only proceed if validation passes
 
       const formValues =
-        formKey === "familyMemberDetails" ? Object.values(values) : values;
+        formKey === "familyMemberDetails"
+          ? Object.values(values?.familyMemberDetails)
+          : values;
       console.log(formValues);
       const initialValues = await getInitialValues();
       const cleanedInitialValues = Object.fromEntries(
@@ -217,10 +219,10 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
   // console.log(initialValues);
 
-  // console.log(
-  //   initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
-  //     ?.verificationData?.[formKeyMapping[formKey] || formKey]
-  // );
+  console.log(
+    initialValues?.verifications?.find((v: any) => v.addressType === currentTab)
+      ?.verificationData?.[formKeyMapping[formKey] || formKey]
+  );
 
   return (
     <Modal
@@ -238,9 +240,15 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         form={form}
         layout="vertical"
         initialValues={
-          initialValues?.verifications?.find(
-            (v: any) => v.addressType === currentTab
-          )?.verificationData?.[formKeyMapping[formKey] || formKey]
+          formKey === "familyMemberDetails"
+            ? {
+                familyMemberDetails: initialValues?.verifications?.find(
+                  (v: any) => v.addressType === currentTab
+                )?.verificationData?.[formKeyMapping[formKey] || formKey],
+              }
+            : initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.[formKeyMapping[formKey] || formKey]
         }
         // onValuesChange={() => setDirty(true)}
         // preserve={false}
@@ -251,6 +259,11 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             formKey={formKey}
             currentTab={currentTab}
             getMaritalStatus={getMaritalStatus}
+            // initialValues={
+            //   initialValues?.verifications?.find(
+            //     (v: any) => v.addressType === currentTab
+            //   )?.verificationData?.[formKeyMapping[formKey] || formKey]
+            // }
           />
         </Row>
       </Form>

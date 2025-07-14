@@ -56,8 +56,6 @@ const FamilyMemberDetailsDescription: React.FC<{
   const familyMemberDetails = data?.familyMemberDetails || [];
   const prevDetails = changedData?.familyMemberDetails || [];
 
-  console.log(familyMemberDetails);
-
   function renderCell(field: string, idx: number, value: any) {
     if (
       prevDetails[idx] &&
