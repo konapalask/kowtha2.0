@@ -18,177 +18,12 @@ import { Prisma, LoanStatus, VerificationType, VerificationStatus,
             AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
 import { businessTemplate } from './templates/business.template';
 import { BusinessVerificationData } from './templates/business.interface';
-
-interface VerificationData {
-  applicantDetails?: {
-    applicantName: string;
-    pan: string;
-    coApplicantName: string;
-    coApplicantPan: string;
-    coApplicantAadhar: string;
-    address: string;
-  };
-  basicDetails?: {
-    category: string;
-    applicantName: string;
-    categoryOther: string;
-    verificationType: string;
-    applicationNumber: string;
-    applicantMaritalStatus: string;
-    educationQualification: string;
-    applicantMaritalStatusOther: string;
-    aadhar: string;
-  };
-  applicantInformation?: {
-    applicantAge: string;
-    applicantGender: string;
-    applicantEducation: string;
-    applicantMaritalStatus: string;
-  };
-  residenceDetails?: {
-    houseArea: string;
-    rentDetails: string;
-    localityType: string;
-    accessibility: string;
-    residenceType: string;
-    residenceStatus: string;
-    locationCategory: string;
-    nameplateVisible: string;
-    standardOfLiving: string;
-    constructionQuality: string;
-    yearsAtCurrentAddress: string;
-  };
-  familyEmploymentDetails?: {
-    totalFamilyMembers: string;
-    earningMembers: string;
-    dependents: string;
-    isSpouseWorking: string;
-    spouseEmploymentDetails: string;
-    assetsObserved: string;
-  };
-  familyMemberDetails?:Array<{
-    name:string;
-    relation:string;
-    age:string;
-    employmentType:string;
-    educationalQualification:string;
-    mobileNumber:string;
-    stayingWithApplicant:string;
-  }>;
-  thirdPartyCheck?: {
-    checks: Array<{
-      tpcName: string;
-      relationship: string;
-      comments: string;
-      feedbackStatus: string;
-      mobileNumber: string;
-    }>;
-  };
-  addressVerification?: {
-    address: string;
-    addressType: string;
-    previousCity: string;
-    addressCategory: string;
-    reasonForChange: string;
-    addressSubCategory: string;
-    addressDetails: string;
-    geoTag: string;
-    numberOfYearsAtCurrentCity: string;
-    numberOfYearsAtPreviousCity: string;
-    numberOfYearsAtCurrentResidence: string;
-  };
-  finalObservations?: {
-    overallStatus: string;
-    cooperativeness: string;
-    remarks: string;
-  };
-  uploadedItems?: Array<{
-    id: string;
-    uri: string;
-    type: string;
-    timestamp: string;
-    s3ImageUrl: string;
-    latitude?: string;
-    longitude?: string;
-  }>;
-}
+import { WorkVerificationData } from './templates/work.interface';
+import { workTemplate } from './templates/work.template';
+import { VerificationData } from './templates/address.interface';
+import { addressTemplate } from './templates/address.template';
 
 
-interface WorkVerificationData {
-    basicDetails?: {
-      tenure: string;
-      bankName: string;
-      panNumber: string;
-      loanAmount: string;
-      aadhar: string;
-      applicantName: string;
-      purposeOfLoan: string;
-      qualification: string;
-      prospectNumber: string;
-    };
-    existingLoans?: {
-      loans: Array<{
-        emi: string;
-        tenure: string;
-        purpose: string;
-        bankName: string;
-        loanAmount: string;
-      }>;
-    };
-    pastEmployment?: {
-      employments: Array<{
-        toDate: string;
-        fromDate: string;
-        designation: string;
-        employerName: string;
-        contactPersonName: string;
-        reasonForMovement: string;
-        contactPersonNumber: string;
-      }>;
-    };
-    employmentDetails?: {
-      netSalary: string;
-      salaryMode: string;
-      companySize: string;
-      designation: string;
-      grossSalary: string;
-      employerType: string;
-      idCardNumber: string;
-      officeAddress: string;
-      officeLocality: string;
-      natureOfService: string;
-      currentOfficeName: string;
-      yearsInCurrentJob: string;
-      totalWorkExperience: string;
-      natureOfServiceOther: string;
-    };
-    colleagueReferences?: {
-      references: Array<{
-        name: string;
-        address: string;
-        yearsKnown: string;
-        designation: string;
-        emailAddress: string;
-        contactNumber: string;
-      }>;
-    };
-    finalObservations?: {
-      overallStatus: string;
-      cooperativeness: string;
-      remarks: string;
-    };
-    uploadedItems?: Array<{
-      id: string;
-      uri: string;
-      type: string;
-      pincode: string;
-      latitude: string;
-      locality: string;
-      longitude: string;
-      timestamp: string;
-      s3ImageUrl: string;
-    }>;
-}
 
 @Injectable()
 export class LoanService {
@@ -1109,17 +944,19 @@ export class LoanService {
     addressType?: AddressType,
   ) {
     try {
+      let updatedAddressType = addressType;
       // First, check if a verification with the same loanId and addressType exists and is completed
       if (addressType) {
         const completedVerification = await this.prisma.verification.findFirst({
           where: {
             loanId,
-            addressType,
+            addressType: addressType,
             status: 'Completed',
           },
         });
+
         if (completedVerification) {
-          throw new Error(`Verification type - ${addressType} verification is already completed`);
+          updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
         }
       }
 
@@ -1137,7 +974,8 @@ export class LoanService {
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
+          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; 
+                  latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
             try {
               
               if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
@@ -1168,7 +1006,7 @@ export class LoanService {
         data: {
           status: 'Completed',
           verificationData: verificationData || null,
-          addressType: addressType || null,
+          addressType: updatedAddressType || null,
           updatedAt: new Date(),
         },
       });
@@ -1700,6 +1538,57 @@ export class LoanService {
     }
   }
 
+  async returnHTMLImageData(data: string[], bankName: string, fieldExecutive: string): Promise<string> {
+    return `
+    <div style="page-break-before: always;"></div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
+          <tr>
+            <td colspan="6">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
+                ${data.join('')}
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+        Field Executive: ${fieldExecutive || ''}
+      </div>
+      </div>
+
+      <div class="footer">
+        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
+        Generated on ${new Date().toLocaleString()}
+      </div>
+    `
+  }
+
+  async formatImages(images: string[], bankName: string, fieldExecutive: string): Promise<string> {
+    let result = [];
+    let finalResult = [];
+    let count = 0;
+    for(let i = 0; i < images.length; i++) {
+      result.push(`<div style="width: 70%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
+                  <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
+                  <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  </div>`);
+      
+      count++;
+      if(count % 4 === 0) {
+        finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
+        result = [];
+        count = 0;
+      }
+    }
+
+    if(count > 0 && count < 4) {
+      finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
+    }
+    
+    return finalResult.join('');
+  }
 
   async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
     try {
@@ -1788,25 +1677,31 @@ export class LoanService {
       const validImageUrls = imageUrls.filter(url => url !== null);
 
       let htmlTemplate = '';
-      const bankName = loan.bankName;
+
+      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
+      
+      const html_data = {
+        bankName: loan.bankName,
+        path: verification.path,
+        status: status,
+        imageDataUri: imageDataUri,
+        imagesData: imagesData,
+        fieldExecutive: verification.fieldExecutive?.name || '',
+      }
 
       if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateAddressVerificationContent(verificationData as VerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        addressTemplate(verificationData as VerificationData, html_data, addressType);
       }
       else if(addressType === 'Work') {
-        
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateWorkVerificationContent(verificationData as WorkVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        workTemplate(verificationData as WorkVerificationData, html_data);
       }
       else if(addressType === 'Business') {
-        
         htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        this.generateBusinessVerificationContent(verificationData as BusinessVerificationData, validImageUrls, imageDataUri, status, verification.path, bankName);
+        businessTemplate(verificationData as BusinessVerificationData, html_data);
       }
       else {
-
         throw new NotFoundException('Invalid address type');
       }
 
@@ -1860,6 +1755,14 @@ export class LoanService {
   }
 
   private generateBaseHTMLTemplate(loan: any, address: string): string {
+    let mailId = '';
+
+    if (address.includes('Vijayawada') || address.includes('vijayawada') || address.includes('VIJAYAWADA') ) {
+      mailId = 'apfi@cakowtha.co.in';
+    } else {
+      mailId = 'tsfi@cakowtha.co.in';
+    }
+
     return `
       <!DOCTYPE html>
       <html>
@@ -2022,8 +1925,8 @@ export class LoanService {
             <div class="address">${address}</div>
           </div>
           <div class="contact">
-            Mobile no: 9491821359<br>
-            Mail ID: opsfi@cakowtha.co.in
+            Mobile no: 8332037517<br>
+            Mail ID: ${mailId}
           </div>
         </div>
 
@@ -2041,415 +1944,6 @@ export class LoanService {
             </table>
           </div>
         </div>
-    `;
-  }
-
-  private generateWorkVerificationContent(verificationData: WorkVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
-
-    if (path) {
-      path = path.replace('<ul>', '').replace('</ul>', '')
-    }
-
-    const recommendationStyles: Record<string, string> = {
-      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    };
-    
-    const finalRecommendationHtml = recommendationStyles[status] || '';
-
-    return `
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
-          <tr>
-            <th>Name of the the Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name of the Current Employer</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Office Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeAddress || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Number of years in Current Job</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Total Work Experience</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Number of Employees in the Company</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Employee ID(Copy/Photograph Mandatory)</th>
-            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
-            <th>Designation</th>
-            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Mode of Salary</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Employer</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.employerType || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Industry</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.natureOfService || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Office Locality</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeLocality || ''}</span></td>
-          </tr>
-            <tr><td colspan="6" class="section-header">Financial Details</td></tr>
-          <tr>
-            <th>Monthly Gross Salary</th>
-            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.grossSalary || ''}</span></td>
-            <th>Monthly Net Salary</th>
-            <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
-          </tr>
-        </table>
-      </div>
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
-          <tr>
-            <th>Employer Name</th>
-            <th>Designation</th>
-            <th>From Date</th>
-            <th>To Date</th>
-            <th>Contact Person</th>
-            <th>Contact Number</th>
-            <th>Reason for Movement</th>
-          </tr>
-          ${verificationData.pastEmployment?.employments?.map(employment => `
-            <tr>
-              <td><span class="var-value">${employment.employerName || ''}</span></td>
-              <td><span class="var-value">${employment.designation || ''}</span></td>
-              <td><span class="var-value">${employment.fromDate || ''}</span></td>
-              <td><span class="var-value">${employment.toDate || ''}</span></td>
-              <td><span class="var-value">${employment.contactPersonName || ''}</span></td>
-              <td><span class="var-value">${employment.contactPersonNumber || ''}</span></td>
-              <td><span class="var-value">${employment.reasonForMovement || ''}</span></td>
-            </tr>
-          `).join('') || '<tr><td colspan="7" style="text-align: center;">No past employment history found</td></tr>'}
-        </table>
-      </div>
-
-      
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Colleague References</td></tr>
-          <tr>
-            <th>Name</th>
-            <th>Designation</th>
-            <th>Mobile</th>
-            <th>Email Address</th>
-            <th>Address</th>
-            <th>Years Known</th>
-          </tr>
-          ${verificationData.colleagueReferences?.references?.map(reference => `
-            <tr>
-              <td><span class="var-value">${reference.name || ''}</span></td>
-              <td><span class="var-value">${reference.designation || ''}</span></td>
-              <td><span class="var-value">${reference.contactNumber || ''}</span></td>
-              <td><span class="var-value">${reference.emailAddress || ''}</span></td>
-              <td><span class="var-value">${reference.address || ''}</span></td>
-              <td><span class="var-value">${reference.yearsKnown || ''}</span></td>
-            </tr>
-          `).join('') || '<tr><td colspan="6" style="text-align: center;">No colleague references found</td></tr>'}
-        </table>
-      </div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Existing Loans</td></tr>
-          <tr>
-            <th>Bank Name</th>
-            <th>Loan Amount</th>
-            <th>EMI</th>
-            <th>Tenure</th>
-            <th>Purpose</th>
-          </tr>
-          ${verificationData.existingLoans?.loans?.map(loan => `
-            <tr>
-              <td><span class="var-value">${loan.bankName || ''}</span></td>
-              <td><span class="var-value">${loan.loanAmount || ''}</span></td>
-              <td><span class="var-value">${loan.emi || ''}</span></td>
-              <td><span class="var-value">${loan.tenure || ''}</span></td>
-              <td><span class="var-value">${loan.purpose || ''}</span></td>
-            </tr>
-          `).join('') || '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
-        </table>
-      </div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Remarks</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Final Recommendation</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${finalRecommendationHtml}
-              </ul>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br>
-      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-          <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-    `;
-  }
-  
-  private generateBusinessVerificationContent(verificationData: BusinessVerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
-    
-    if (path) {
-      path = path.replace('<ul>', '').replace('</ul>', '')
-    }
-
-    const recommendationStyles: Record<string, string> = {
-      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    };
-    
-    const finalRecommendationHtml = recommendationStyles[status] || '';
-
-    return businessTemplate(verificationData, bankName, path, finalRecommendationHtml, imageDataUri, imageUrls);
-  }
-
-    private generateAddressVerificationContent(verificationData: VerificationData, imageUrls: string[], imageDataUri: string, status: string, path: string, bankName: string): string {
-    // Use provided remarks or default list
-    
-    if (path) {
-      path = path.replace('<ul>', '').replace('</ul>', '')
-    }
-    let aadhar = verificationData.basicDetails?.aadhar || '';
-
-    if(aadhar.length > 4) {
-      aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
-    }
-
-    const recommendationStyles: Record<string, string> = {
-      Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-      Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    };
-    
-    const finalRecommendationHtml = recommendationStyles[status] || '';
-
-    return `
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Residence Verification</td></tr>
-          <tr>
-            <th>Initiated Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name of the Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>PAN Number</th>
-            <td colspan="5"><span class="var-value">${verificationData.applicantDetails?.pan || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Aadhar Number</th>
-            <td colspan="5"><span class="var-value">${aadhar}</span></td>
-          </tr>
-          <tr>
-            <th>Residential Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressDetails || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Marital Status</th>
-            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.applicantMaritalStatus || ''}</span></td>
-            <th>Educational Qualification</th>
-            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.educationQualification || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Category</th>
-            <td colspan="2"><span class="var-value">${verificationData.basicDetails?.category || ''}</span></td>
-            <th>Number of Dependents</th>
-            <td colspan="2"><span class="var-value">${verificationData.familyEmploymentDetails?.dependents || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Number of Years stayed in the Current City</th>
-            <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentCity || 'NA'}</span></td>
-            <th>Number of years in Current Residence</th>
-            <td colspan="2"><span class="var-value">${verificationData.addressVerification?.numberOfYearsAtCurrentResidence || ''}</span></td>
-          </tr>
-          <tr>
-            <th>If Less than 2 Year, then Previous Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.previousCity || ''}</span></td>
-          </tr> 
-          <tr>
-            <th>If Less than 3 Years in current city, then mention Reason for Change</th>
-            <td colspan="5"><span class="var-value">${verificationData.addressVerification?.reasonForChange || 'NA'}</span></td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
-
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="6" class="section-header">Family Member Details</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Relation</th>
-          <th>Age</th>
-          <th>Employment Type</th>
-          <th>Staying With Applicant</th>
-        </tr>
-        ${Array.isArray(verificationData.familyMemberDetails) && verificationData.familyMemberDetails.length > 0
-          ? verificationData.familyMemberDetails.map(fmd => `
-            <tr>
-              <td><span class="var-value">${fmd.name || ''}</span></td>
-              <td><span class="var-value">${fmd.relation || ''}</span></td>
-              <td><span class="var-value">${fmd.age || ''}</span></td>
-              <td><span class="var-value">${fmd.employmentType || ''}</span></td>
-              <td><span class="var-value">${fmd.stayingWithApplicant || ''}</span></td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="5" style="text-align: center;">No Family Member Details found</td></tr>'}
-        </table>
-      </div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Mobile Number</th>
-          <th>Relationship</th>
-          <th>Feedback Status</th>
-          <th>Comments</th>
-        </tr>
-        ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
-          ? verificationData.thirdPartyCheck.checks.map(tpc => `
-            <tr>
-              <td><span class="var-value">${tpc.tpcName || ''}</span></td>
-              <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
-              <td><span class="var-value">${tpc.relationship || ''}</span></td>
-              <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
-              <td><span class="var-value">${tpc.comments || ''}</span></td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
-        </table>
-      </div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-          <tr>
-            <th>Remarks</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${path || ''}
-              </ul>
-            </td>
-          </tr>
-          <tr>
-            <th>Final Recommendation</th>
-            <td colspan="5">
-              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                ${finalRecommendationHtml}
-              </ul>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <br>
-      <img src="${imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-          <div class="footer">
-            <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
-          </div>
-           
-      <div style="page-break-before: always;"></div>
-
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
-          <tr>
-            <td colspan="6">
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${imageUrls.map(url => `
-                  <div style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                    <img src="${url}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
-                    <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
     `;
   }
 

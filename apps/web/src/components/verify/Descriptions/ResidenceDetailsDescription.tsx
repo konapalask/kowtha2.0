@@ -46,6 +46,14 @@ const ResidenceDetailsDescription: React.FC<{
                 {data?.residenceDetails?.rentDetails}
               </Descriptions.Item>
             )}
+            {data?.residenceDetails?.residenceStatus === "Leased" && (
+              <Descriptions.Item
+                label="Lease"
+                contentStyle={getItemStyle("leaseAmount")}
+              >
+                {data?.residenceDetails?.leaseAmount}
+              </Descriptions.Item>
+            )}
             <Descriptions.Item
               label="Type of Residence"
               contentStyle={getItemStyle("residenceType")}

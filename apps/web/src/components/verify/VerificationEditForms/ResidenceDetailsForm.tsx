@@ -34,12 +34,24 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      {(residenceStatus === "Rented" || residenceStatus === "Leased") && (
+      {residenceStatus === "Rented" && (
         <Col span={4}>
           <Form.Item
             name="rentDetails"
             label="Rent (per month)"
             rules={[{ required: true, message: "Please enter rent" }]}
+          >
+            <InputNumber />
+          </Form.Item>
+        </Col>
+      )}
+
+      {residenceStatus === "Leased" && (
+        <Col span={4}>
+          <Form.Item
+            name="leaseAmount"
+            label="Lease Amount"
+            rules={[{ required: true, message: "Please enter lease" }]}
           >
             <InputNumber />
           </Form.Item>

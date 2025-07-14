@@ -1,12 +1,13 @@
-import React from 'react';
-import { Form, Input, Select, Col, Typography } from 'antd';
+import React from "react";
+import { Form, Input, Select, Col, Typography } from "antd";
 
+const { Option } = Select;
 const { Title } = Typography;
 
-const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
-  const employerType = Form.useWatch('employerType', form);
-  const salaryMode = Form.useWatch('salaryMode', form);
-  // const 
+const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
+  const employerType = Form.useWatch("employerType", form);
+  const salaryMode = Form.useWatch("salaryMode", form);
+  const isAddressSame = Form.useWatch("isAddressSame", form);
 
   return (
     <>
@@ -32,6 +33,30 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
           <Input.TextArea rows={2} />
         </Form.Item>
       </Col>
+
+      <Col span={16}>
+        <Form.Item
+          name="isAddressSame"
+          label="Is Address Same?"
+          rules={[{ required: true, message: "Please enter office address" }]}
+        >
+          <Select>
+            <Option value="Yes">Yes</Option>
+            <Option value="No">No</Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      {isAddressSame && (
+        <Col span={16}>
+          <Form.Item
+            name="addressCorrection"
+            label="Address Correction"
+            rules={[{ required: true, message: "Please enter office address" }]}
+          >
+            <Input.TextArea rows={2} />
+          </Form.Item>
+        </Col>
+      )}
       <Col span={8}>
         <Form.Item
           name="isAddressSame"
@@ -59,7 +84,9 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
       <Form.Item
           name="yearsInCurrentJob"
           label="Years in Current Job"
-          rules={[{ required: true, message: "Please enter years in current job" }]}
+          rules={[
+            { required: true, message: "Please enter years in current job" },
+          ]}
         >
           <Input type="number" min={0} />
         </Form.Item>
@@ -70,16 +97,18 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         <Title level={5} style={{ marginTop: 16 }}>Employment Details</Title>
       </Col> */}
       <Col span={8}>
-      <Form.Item
+        <Form.Item
           name="totalWorkExperience"
           label="Total Work Experience"
-          rules={[{ required: true, message: "Please enter total work experience" }]}
+          rules={[
+            { required: true, message: "Please enter total work experience" },
+          ]}
         >
           <Input type="number" min={0} />
         </Form.Item>
       </Col>
       <Col span={8}>
-      <Form.Item
+        <Form.Item
           name="companySize"
           label="Company Size"
           rules={[{ required: true, message: "Please enter company size" }]}
@@ -91,9 +120,11 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         <Form.Item
           name="natureOfService"
           label="Nature of Service/Business"
-          rules={[{ required: true, message: "Please enter nature of service" }]}
+          rules={[
+            { required: true, message: "Please enter nature of service" },
+          ]}
         >
-           <Select>
+          <Select>
             <Select.Option value="Agricultural">Agricultural</Select.Option>
             <Select.Option value="Construction">Construction</Select.Option>
             <Select.Option value="Education">Education</Select.Option>
@@ -101,14 +132,18 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
             <Select.Option value="Health Care">Health Care</Select.Option>
             <Select.Option value="Manufacturing">Manufacturing</Select.Option>
             <Select.Option value="Services">Services</Select.Option>
-            <Select.Option value="Travel & Tourism & Hotel">Travel & Tourism & Hotel</Select.Option>
-            <Select.Option value="Travel & Tourism & Hotel">Travel & Tourism & Hotel</Select.Option>
+            <Select.Option value="Travel & Tourism & Hotel">
+              Travel & Tourism & Hotel
+            </Select.Option>
+            <Select.Option value="Travel & Tourism & Hotel">
+              Travel & Tourism & Hotel
+            </Select.Option>
             <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
       <Col span={8}>
-      <Form.Item
+        <Form.Item
           name="officeLocality"
           label="Locality of Office Premises"
           rules={[{ required: true, message: "Please select office locality" }]}
@@ -130,7 +165,7 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={8}>
-      <Form.Item
+        <Form.Item
           name="designation"
           label="Designation"
           rules={[{ required: true, message: "Please enter designation" }]}
@@ -151,28 +186,32 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={8}>
-      <Form.Item
+        <Form.Item
           name="employerType"
           label="Type of Employer"
           rules={[{ required: true, message: "Please select employer type" }]}
         >
           <Select>
             <Select.Option value="Government/PSU">Government/PSU</Select.Option>
-            <Select.Option value="Unlisted Pvt. Ltd">Unlisted Pvt. Ltd</Select.Option>
-            <Select.Option value="MNC/Listed Pvt. Ltd">MNC/Listed Pvt. Ltd</Select.Option>
-            <Select.Option value="Proprietorship/Partnership/NGO/Trust">Proprietorship/Partnership/NGO/Trust</Select.Option>
+            <Select.Option value="Unlisted Pvt. Ltd">
+              Unlisted Pvt. Ltd
+            </Select.Option>
+            <Select.Option value="MNC/Listed Pvt. Ltd">
+              MNC/Listed Pvt. Ltd
+            </Select.Option>
+            <Select.Option value="Proprietorship/Partnership/NGO/Trust">
+              Proprietorship/Partnership/NGO/Trust
+            </Select.Option>
             <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
-     
-    
 
       {/* Salary Details */}
       {/* <Col span={24}>
         <Title level={5} style={{ marginTop: 16 }}>Salary Details</Title>
       </Col> */}
-      
+
       <Col span={8}>
         <Form.Item
           name="grossSalary"
@@ -238,4 +277,4 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
   );
 };
 
-export default OfficeVerificationForm; 
+export default OfficeVerificationForm;
