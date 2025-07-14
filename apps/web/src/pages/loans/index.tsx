@@ -163,10 +163,10 @@ export default function Loans() {
                 style={{ wordWrap: "break-word" }}
               >
                 <Typography.Text>
-                  {" "}
-                  {item?.name?.length > 15
+                  {item?.name}
+                  {/* {item?.name?.length > 15
                     ? item.name.slice(0, 15) + "..."
-                    : item?.name}
+                    : item?.name} */}
                 </Typography.Text>
               </Col>
 

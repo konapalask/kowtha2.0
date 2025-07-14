@@ -280,24 +280,24 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a field executive",
                   },
                 ]}
-                // initialValue={{
-                //   label: (
-                //     <div
-                //       style={{
-                //         display: "flex",
-                //         justifyContent: "space-between",
-                //       }}
-                //     >
-                //       <Typography.Text>
-                //         {verification?.fieldExecutive?.name}
-                //       </Typography.Text>
-                //       <Tag color="blue">
-                //         {verification?.fieldExecutive?.employeeCode}
-                //       </Tag>
-                //     </div>
-                //   ),
-                //   value: verification?.fieldExecutive?.employeeCode,
-                // }}
+                initialValue={{
+                  label: (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography.Text>
+                        {verification?.fieldExecutive?.name}
+                      </Typography.Text>
+                      <Tag color="blue">
+                        {verification?.fieldExecutive?.employeeCode}
+                      </Tag>
+                    </div>
+                  ),
+                  value: verification?.fieldExecutive?.employeeCode,
+                }}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
