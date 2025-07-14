@@ -944,17 +944,19 @@ export class LoanService {
     addressType?: AddressType,
   ) {
     try {
+      let updatedAddressType = addressType;
       // First, check if a verification with the same loanId and addressType exists and is completed
       if (addressType) {
         const completedVerification = await this.prisma.verification.findFirst({
           where: {
             loanId,
-            addressType,
+            addressType: addressType,
             status: 'Completed',
           },
         });
+
         if (completedVerification) {
-          throw new Error(`Verification type - ${addressType} verification is already completed`);
+          updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
         }
       }
 
