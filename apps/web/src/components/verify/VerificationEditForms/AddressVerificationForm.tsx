@@ -60,7 +60,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           label="Address Details"
           rules={[{ required: true, message: "Please enter address details" }]}
         >
-          <Input />
+          <Input disabled={form.getFieldValue && (form.getFieldValue("address") === "PermanentAddress" || form.getFieldValue("address") === "CurrentAddress")}/>
         </Form.Item>
       </Col>
       <Col span={6}>

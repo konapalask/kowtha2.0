@@ -38,7 +38,7 @@ const WorkEmploymentDetailsDescription: React.FC<{
             {data?.employmentDetails?.officeAddress}
           </Descriptions.Item>
           <Descriptions.Item
-              label="Address Mismatch"
+              label="Is Address Same?"
               contentStyle={getItemStyle("isAddressSame")}
             >
               {data?.employmentDetails?.isAddressSame}
