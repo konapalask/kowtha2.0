@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, Input, Button, Row, Col, Popconfirm, Select } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -11,6 +11,10 @@ const FamilyMemberRow: React.FC<{
   fieldsLength: any;
   form: any;
 }> = ({ field, idx, remove, fieldsLength, form }) => {
+  const relation = Form.useWatch(
+    ["familyMemberDetails", field.name, "relation"],
+    form
+  );
   return (
     <Row
       gutter={8}
@@ -37,21 +41,35 @@ const FamilyMemberRow: React.FC<{
           rules={[{ required: true, message: "Please select relation" }]}
         >
           <Select placeholder="Select relation">
+            <Option value="Spouse">Spouse</Option>
+            <Option value="Daughter">Daughter</Option>
+            <Option value="Son">Son</Option>
             <Option value="Father">Father</Option>
             <Option value="Mother">Mother</Option>
-            <Option value="Spouse">Spouse</Option>
-            <Option value="Son">Son</Option>
-            <Option value="Daughter">Daughter</Option>
             <Option value="Brother">Brother</Option>
             <Option value="Sister">Sister</Option>
-            <Option value="Grandfather">Grandfather</Option>
-            <Option value="Grandmother">Grandmother</Option>
-            <Option value="Uncle">Uncle</Option>
-            <Option value="Aunt">Aunt</Option>
             <Option value="Other">Other</Option>
           </Select>
         </Form.Item>
       </Col>
+      {relation === "Other" && (
+        <Col span={5}>
+          <Form.Item
+            {...field}
+            name={[field.name, "otherRelation"]}
+            fieldKey={[String(field.fieldKey), "otherRelation"]}
+            label={idx === 0 ? "Specify Relationship" : ""}
+            rules={[
+              {
+                required: true,
+                message: "Please specify relationship",
+              },
+            ]}
+          >
+            <Input placeholder="Specify relationship" />
+          </Form.Item>
+        </Col>
+      )}
       <Col span={2}>
         <Form.Item
           {...field}
@@ -155,33 +173,35 @@ const FamilyMemberRow: React.FC<{
   );
 };
 
-const FamilyMemberForm: React.FC<{ form: any }> = ({ form }) => (
-  <Form.List name={[]}>
-    {(fields, { add, remove }) => (
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {fields.map((field, idx) => (
-          <FamilyMemberRow
-            key={field.key}
-            field={field}
-            idx={idx}
-            remove={remove}
-            fieldsLength={fields.length}
-            form={form}
-          />
-        ))}
-        <Form.Item>
-          <Button
-            type="dashed"
-            onClick={() => add()}
-            icon={<PlusOutlined />}
-            style={{ width: "100%", marginTop: 8 }}
-          >
-            Add Family Member
-          </Button>
-        </Form.Item>
-      </div>
-    )}
-  </Form.List>
-);
+const FamilyMemberForm: React.FC<{ form: any }> = ({ form }) => {
+  return (
+    <Form.List name={"familyMemberDetails"}>
+      {(fields, { add, remove }) => (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {fields.map((field, idx) => (
+            <FamilyMemberRow
+              key={field.key}
+              field={field}
+              idx={idx}
+              remove={remove}
+              fieldsLength={fields.length}
+              form={form}
+            />
+          ))}
+          <Form.Item>
+            <Button
+              type="dashed"
+              onClick={() => add()}
+              icon={<PlusOutlined />}
+              style={{ width: "100%", marginTop: 8 }}
+            >
+              Add Family Member
+            </Button>
+          </Form.Item>
+        </div>
+      )}
+    </Form.List>
+  );
+};
 
 export default FamilyMemberForm;

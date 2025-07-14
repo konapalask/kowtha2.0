@@ -220,7 +220,7 @@ export default function Loans() {
       key: "applicationNumber",
       fixed: "left",
       width: 200,
-      align: "center",
+      // align: "center",
     },
     {
       title: "Applicant Name",
@@ -279,10 +279,20 @@ export default function Loans() {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
-            return pav ? pav?.fieldExecutive?.employeeCode : "-";
+            return pav ? (
+              <span>
+                {pav?.fieldExecutive?.name}
+                {/* {pav?.fieldExecutive?.name?.length > 15
+                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
+                  : pav?.fieldExecutive?.name}{" "} */}
+                <Tag color="blue">{pav?.fieldExecutive?.employeeCode}</Tag>
+              </span>
+            ) : (
+              "-"
+            );
           },
           align: "center",
-          width: 100,
+          width: 120,
         },
         {
           title: "Status",
@@ -319,10 +329,20 @@ export default function Loans() {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
-            return cav ? cav?.fieldExecutive?.employeeCode : "-";
+            return cav ? (
+              <span>
+                {cav?.fieldExecutive?.name}
+                {/* {pav?.fieldExecutive?.name?.length > 15
+                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
+                  : pav?.fieldExecutive?.name}{" "} */}
+                <Tag color="blue">{cav?.fieldExecutive?.employeeCode}</Tag>
+              </span>
+            ) : (
+              "-"
+            );
           },
           align: "center",
-          width: 100,
+          width: 120,
         },
         {
           title: "Status",
@@ -359,10 +379,20 @@ export default function Loans() {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
-            return wv ? wv?.fieldExecutive?.employeeCode : "-";
+            return wv ? (
+              <span>
+                {wv?.fieldExecutive?.name}
+                {/* {pav?.fieldExecutive?.name?.length > 15
+                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
+                  : pav?.fieldExecutive?.name}{" "} */}
+                <Tag color="blue">{wv?.fieldExecutive?.employeeCode}</Tag>
+              </span>
+            ) : (
+              "-"
+            );
           },
           align: "center",
-          width: 100,
+          width: 120,
         },
         {
           title: "Status",
@@ -399,10 +429,20 @@ export default function Loans() {
             const business = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
-            return business ? business?.fieldExecutive?.employeeCode : "-";
+            return business ? (
+              <span>
+                {business?.fieldExecutive?.name}
+                {/* {pav?.fieldExecutive?.name?.length > 15
+                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
+                  : pav?.fieldExecutive?.name}{" "} */}
+                <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
+              </span>
+            ) : (
+              "-"
+            );
           },
           align: "center",
-          width: 100,
+          width: 120,
         },
         {
           title: "Status",

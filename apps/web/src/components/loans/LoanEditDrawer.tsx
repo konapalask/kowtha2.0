@@ -24,6 +24,7 @@ import {
   getLoansByIdApi,
 } from "@/services/loans.services";
 import { getUserDetails } from "@/utils/utility";
+import dayjs from "dayjs";
 
 interface LoanDetails {
   id: number;
@@ -375,12 +376,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                               {verification && (
                                 <Tag
                                   color={
-                                    verification.status === "Completed"
-                                      ? "green"
-                                      : "orange"
+                                    verification?.isPostponed
+                                      ? "volcano"
+                                      : verification.status === "Completed"
+                                        ? "green"
+                                        : "orange"
                                   }
                                 >
-                                  {verification.status}
+                                  {verification?.isPostponed
+                                    ? "Postponed"
+                                    : verification.status}
                                 </Tag>
                               )}
                             </>
@@ -467,6 +472,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                       flexDirection: "column",
                                     }}
                                   >
+                                    {verification?.isPostponed && (
+                                      <span>
+                                        Postponed to:{" "}
+                                        {dayjs(
+                                          verification?.postponedDate
+                                        ).format("MMM DD,YYYY")}
+                                      </span>
+                                    )}
                                     {type === "Business" && (
                                       <span>
                                         Business Name:{" "}

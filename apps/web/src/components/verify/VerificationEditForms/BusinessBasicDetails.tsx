@@ -5,7 +5,7 @@ const personMetOptions = [
   "Applicant",
   "Co-Applicant",
   "Family",
-  "Guaranteer",
+  "Guarantor",
   "Others",
 ];
 
