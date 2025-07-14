@@ -47,7 +47,14 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
     }
 
     let personMet = verificationData.basicDetails?.personMet || '';
-    if(personMet === 'Others') {
+    if(personMet === 'Applicant') {
+      personMet = `
+      <tr>
+        <th>Person Met</th>
+        <td colspan="5"><span class="var-value">Applicant</span></td>
+      </tr>
+      `;
+      } else if(personMet === 'Others') {
         personMet = `
         <tr>
           <th>Person Met Name</th>
@@ -58,13 +65,17 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
           <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
         </tr>
       `;
-    } else if(personMet === 'Applicant') {
-        personMet = `
+    } else {
+      personMet = `
         <tr>
-          <th>Person Met</th>
-          <td colspan="5"><span class="var-value">Applicant</span></td>
+          <th>Person Met Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
         </tr>
-        `;
+        <tr>
+          <th>Person Met Relation</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetRelation || ''}</span></td>
+        </tr>
+      `;
     }
 
     let rentalAmount = verificationData.miscellaneous?.ownershipOfPremises || '';
