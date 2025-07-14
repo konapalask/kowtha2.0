@@ -135,13 +135,24 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Select.Option value="Travel & Tourism & Hotel">
               Travel & Tourism & Hotel
             </Select.Option>
-            <Select.Option value="Travel & Tourism & Hotel">
-              Travel & Tourism & Hotel
-            </Select.Option>
             <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
+      {/* Show this field only if natureOfService is 'Others' */}
+      {form.getFieldValue && form.getFieldValue("natureOfService") === "Others" && (
+        <Col span={8}>
+          <Form.Item
+            name="natureOfServiceOther"
+            label="Specify Nature of Service/Business"
+            rules={[
+              { required: true, message: "Please specify nature of service/business" },
+            ]}
+          >
+            <Input placeholder="Enter nature of service/business" />
+          </Form.Item>
+        </Col>
+      )}
       <Col span={8}>
         <Form.Item
           name="officeLocality"
@@ -193,19 +204,27 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
         >
           <Select>
             <Select.Option value="Government/PSU">Government/PSU</Select.Option>
-            <Select.Option value="Unlisted Pvt. Ltd">
-              Unlisted Pvt. Ltd
-            </Select.Option>
-            <Select.Option value="MNC/Listed Pvt. Ltd">
-              MNC/Listed Pvt. Ltd
-            </Select.Option>
-            <Select.Option value="Proprietorship/Partnership/NGO/Trust">
-              Proprietorship/Partnership/NGO/Trust
-            </Select.Option>
+            <Select.Option value="Unlisted Pvt. Ltd">Unlisted Pvt. Ltd</Select.Option>
+            <Select.Option value="MNC/Listed Pvt. Ltd">MNC/Listed Pvt. Ltd</Select.Option>
+            <Select.Option value="Proprietorship/Partnership/NGO/Trust">Proprietorship/Partnership/NGO/Trust</Select.Option>
             <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
+      {/* Show this field only if employerType is 'Others' */}
+      {form.getFieldValue && form.getFieldValue("employerType") === "Others" && (
+        <Col span={8}>
+          <Form.Item
+            name="employerTypeOther"
+            label="Specify Type of Employer"
+            rules={[
+              { required: true, message: "Please specify type of employer" },
+            ]}
+          >
+            <Input placeholder="Enter type of employer" />
+          </Form.Item>
+        </Col>
+      )}
 
       {/* Salary Details */}
       {/* <Col span={24}>
