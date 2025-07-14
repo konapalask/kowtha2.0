@@ -165,6 +165,7 @@ const BusinessMiscellaneous: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
+      {/*
       <Col span={8}>
         <Form.Item
           name="businessActivity"
@@ -180,6 +181,7 @@ const BusinessMiscellaneous: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
+      */}
 
       <Col span={24}>
         <Form.Item

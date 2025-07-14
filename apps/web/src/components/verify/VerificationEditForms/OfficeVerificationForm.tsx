@@ -33,6 +33,29 @@ const OfficeVerificationForm: React.FC<{form:any}> = ({form}) => {
         </Form.Item>
       </Col>
       <Col span={8}>
+        <Form.Item
+          name="isAddressSame"
+          label="Address Mismatch?"
+          rules={[{ required: true, message: "Please specify if address matches" }]}
+        >
+          <Select placeholder="Select">
+            <Select.Option value="Yes">Yes</Select.Option>
+            <Select.Option value="No">No</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
+        <Col span={16}>
+          <Form.Item
+            name="addressCorrection"
+            label="Corrected Address"
+            rules={[{ required: true, message: "Please enter corrected address" }]}
+          >
+            <Input.TextArea rows={2} placeholder="Enter corrected address" />
+          </Form.Item>
+        </Col>
+      )}
+      <Col span={8}>
       <Form.Item
           name="yearsInCurrentJob"
           label="Years in Current Job"

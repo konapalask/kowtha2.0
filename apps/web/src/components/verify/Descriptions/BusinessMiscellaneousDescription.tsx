@@ -93,12 +93,12 @@ const BusinessMiscellaneousDescription: React.FC<{
           >
             {data?.miscellaneous?.politicallyConnected}
           </Descriptions.Item>
-          <Descriptions.Item
+          {/* <Descriptions.Item
             label="Business Activity"
             contentStyle={getItemStyle("businessActivity")}
           >
             {data?.miscellaneous?.businessActivity}
-          </Descriptions.Item>
+          </Descriptions.Item> */}
           {/* {data?.miscellaneous?.businessActivity === "Others" && (
             <Descriptions.Item
               label="Other Business Activity"

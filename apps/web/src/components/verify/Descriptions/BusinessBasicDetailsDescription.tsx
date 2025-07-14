@@ -68,7 +68,7 @@ const BusinessBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.businessName}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Business Profile"
+            label="Nature of Business"
             contentStyle={getItemStyle("businessProfile")}
           >
             {data?.basicDetails?.businessProfile}
