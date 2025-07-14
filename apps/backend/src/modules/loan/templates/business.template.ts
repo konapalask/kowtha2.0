@@ -61,6 +61,10 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       } else if(personMet === 'Others') {
         personMet = `
         <tr>
+        <th>Person Met</th>
+        <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMet || ''}</span></td>
+      </tr>
+        <tr>
           <th>Person Met Name</th>
           <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
         </tr>
@@ -71,6 +75,10 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       `;
     } else {
       personMet = `
+      <tr>
+        <th>Person Met</th>
+        <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMet || ''}</span></td>
+      </tr>
         <tr>
           <th>Person Met Name</th>
           <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMetName || ''}</span></td>
