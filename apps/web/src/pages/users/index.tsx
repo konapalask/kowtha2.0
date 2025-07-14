@@ -82,10 +82,11 @@ export default function Users() {
     role: undefined,
   });
 
-  const fetchUsers = async (page = 1, limit = 10) => {
+ 
+  const fetchUsers = async (page = 1, pageSize = 10, filters = {}) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await getUsersApi(page, limit, filters);
+      const response = await getUsersApi(page, pageSize, filters);
       const data = response?.data?.data;
       setUsers(data?.records ?? []);
       setPagination({
@@ -95,7 +96,6 @@ export default function Users() {
         totalPages: data.meta.totalPages,
       });
     } catch (error) {
-      console.log(error);
       message.error("Failed to fetch users");
     } finally {
       setLoading(false);
@@ -103,8 +103,8 @@ export default function Users() {
   };
 
   useEffect(() => {
-    fetchUsers(pagination.current, pagination.pageSize);
-  }, [pagination.current, pagination.pageSize, filters]);
+    fetchUsers(1, pagination.pageSize, filters);
+  }, []);
 
   useEffect(() => {
     getOfficesApi()
@@ -114,7 +114,6 @@ export default function Users() {
             label: `${item.name} - ${item.location}`,
             value: item.id,
           })) ?? [];
-        // console.log("Offices:", options);
         setOffices(options);
       })
       .catch((err) => {
@@ -127,26 +126,18 @@ export default function Users() {
       setLoading(true);
 
       if (editingUser) {
-        // setUsers(
-        //   users.map((user) =>
-        //     user.id === editingUser.id ? { ...user, ...values } : user
-        //   )
-        // );
         const response = await updateUserApi(editingUser?.id, values);
-        console.log(response);
         message.success("User updated successfully");
-        fetchUsers();
+        fetchUsers(pagination.current, pagination.pageSize, filters); 
       } else {
         const response = await createUserApi(values);
-        console.log(response);
         message.success("User added successfully");
+        fetchUsers(1, pagination.pageSize, filters); 
       }
-      fetchUsers();
       setIsModalVisible(false);
       form.resetFields();
       setEditingUser(null);
     } catch (error: any) {
-      console.log(error?.response?.data?.message);
       message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
@@ -165,9 +156,8 @@ export default function Users() {
   const handleDelete = async (id: number) => {
     try {
       setLoading(true);
-      // Mock API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      setUsers(users.filter((user) => user.id !== id));
+      fetchUsers(pagination.current, pagination.pageSize, filters);
       message.success("User deleted successfully");
     } catch (error) {
       message.error("Failed to delete user");
@@ -177,8 +167,6 @@ export default function Users() {
   };
 
   const handleUserStatus = (status: string) => {
-    // Implement the logic to deactivate the user
-    console.log("Deactivating user");
     form.setFieldsValue({ status });
     handleSubmit({
       ...form.getFieldsValue(),
@@ -187,11 +175,12 @@ export default function Users() {
   };
 
   const handleTableChange = (newPagination: any) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: newPagination.current,
-      pageSize: newPagination.pageSize,
-    }));
+    fetchUsers(newPagination.current, newPagination.pageSize, filters);
+  };
+
+  const handleFilterChange = (newFilters: UserFilters) => {
+    setFilters(newFilters);
+    fetchUsers(1, pagination.pageSize, newFilters);
   };
 
   const columns: ColumnsType<User> = [
@@ -296,7 +285,7 @@ export default function Users() {
           >
             <FilterOverlay
               filters={filters}
-              onFilterChange={(newFilters: any) => setFilters(newFilters)}
+              onFilterChange={handleFilterChange}
             />
             <Button
               type="primary"

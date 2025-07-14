@@ -274,35 +274,30 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a field executive",
                   },
                 ]}
-                initialValue={{
-                  label: (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Typography.Text>
-                        {verification?.fieldExecutive?.name}
-                      </Typography.Text>
-                      <Tag color="blue">
-                        {verification?.fieldExecutive?.employeeCode}
-                      </Tag>
-                    </div>
-                  ),
-                  value: verification?.fieldExecutive?.employeeCode,
-                }}
+                // initialValue={{
+                //   label: (
+                //     <div
+                //       style={{
+                //         display: "flex",
+                //         justifyContent: "space-between",
+                //       }}
+                //     >
+                //       <Typography.Text>
+                //         {verification?.fieldExecutive?.name}
+                //       </Typography.Text>
+                //       <Tag color="blue">
+                //         {verification?.fieldExecutive?.employeeCode}
+                //       </Tag>
+                //     </div>
+                //   ),
+                //   value: verification?.fieldExecutive?.employeeCode,
+                // }}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
-                  placeholder="Select an Executive"
-                  labelInValue
-                  disabled={
-                    !address || (assignmentMethod === "Remote" && !office)
-                  }
-                  style={{ width: "100%" }}
+                  placeholder="Select a Field Executive"
                   options={fieldExecutives}
-                  // onSelect={() => form.submit()}
+                  // onSelect removed to allow form validation to show error
                 />
               </Form.Item>
             );

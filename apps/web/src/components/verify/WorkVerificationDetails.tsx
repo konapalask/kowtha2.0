@@ -233,6 +233,11 @@ export const WorkVerificationDetails: React.FC<
                 dataIndex: "emailAddress",
                 key: "emailAddress",
               },
+              {
+                title: "Address",
+                dataIndex: "address",
+                key: "address",
+              },
               // {
               //   title: "Actions",
               //   key: "actions",
