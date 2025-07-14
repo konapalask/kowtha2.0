@@ -150,7 +150,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+        Generated on ${new Date().toLocaleString()}
       </div>
 
       <div style="page-break-before: always;"></div>
@@ -255,7 +255,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+        Generated on ${new Date().toLocaleString()}
       </div>
 
 
@@ -289,7 +289,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
 
           <div class="footer">
             <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+            Generated on ${new Date().toLocaleString()}
           </div>
           ${html_data.imagesData}
   `
