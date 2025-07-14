@@ -38,12 +38,12 @@ const WorkEmploymentDetailsDescription: React.FC<{
             {data?.employmentDetails?.officeAddress}
           </Descriptions.Item>
           <Descriptions.Item
-              label="Address Mismatch?"
+              label="Address Mismatch"
               contentStyle={getItemStyle("isAddressSame")}
             >
               {data?.employmentDetails?.isAddressSame}
             </Descriptions.Item>
-            {data?.employmentDetails?.isAddressSame === "No" && (
+            {data?.employmentDetails?.isAddressSame === "Yes" && (
               <>
                 <Descriptions.Item
                   label="Corrected Address"
