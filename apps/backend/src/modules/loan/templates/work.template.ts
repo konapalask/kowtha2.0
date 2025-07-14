@@ -79,12 +79,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="2"><span class="var-value">${verificationData.basicDetails?.tenure || ''}</span></td>
             </tr>
             <tr>
-              <th>No. of Employees in the Company</th>
-              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
-              <th>Employee ID(Copy/Photograph Mandatory)</th>
-              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
-            </tr>
-            <tr>
               <th>Name of the Current Employer</th>
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.currentOfficeName || ''}</span></td>
             </tr>
@@ -103,8 +97,14 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.designation || ''}</span></td>
             </tr>
             <tr>
+              <th>No. of Employees in the Company</th>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
               <th>Mode of Salary</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.salaryMode || ''}</span></td>
+            </tr>
+            <tr>
+              <th>Employee ID(Copy/Photograph Mandatory)</th>
+              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
             </tr>
             <tr>
               <th>Type of Employer</th>

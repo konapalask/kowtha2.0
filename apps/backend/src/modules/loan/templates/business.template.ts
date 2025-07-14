@@ -150,7 +150,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
+        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
       </div>
 
       <div style="page-break-before: always;"></div>
@@ -196,6 +196,10 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
           <tr>
             <th>Years in Current Premises</th>
             <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.yearsInCurrentPremises || ''}</span></td>
+          </tr>
+          <tr>
+            <th>Geotag</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails?.geoTag || ''}</span></td>
           </tr>
         </table>
       </div>
@@ -251,7 +255,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
+        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
       </div>
 
 
@@ -285,7 +289,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
 
           <div class="footer">
             <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString()}
+            Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
           </div>
           ${html_data.imagesData}
   `
