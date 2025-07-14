@@ -17,6 +17,7 @@ export interface ThirdPartyCheckItem {
   tpcName: string;
   mobileNumber: string;
   relationship: string;
+  otherRelation: string;
   feedbackStatus: string;
   comments: string;
 }
@@ -49,6 +50,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
   const feedbackStatusRef = React.useRef<ActionSheetRef>(null);
 
   const {
+    watch,
     control,
     handleSubmit,
     setValue,
@@ -60,6 +62,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
           tpcName: '',
           mobileNumber: '',
           relationship: '',
+          otherRelation: '',
           feedbackStatus: '',
           comments: '',
         },
@@ -83,144 +86,170 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
     }
   };
 
-  const renderCheckFields = (index: number) => (
-    <View key={fields[index].id} style={styles.checkContainer}>
-      <View style={styles.checkHeader}>
-        <Text style={styles.checkTitle}>Third Party Check {index + 1}</Text>
-        {index > 0 && (
-          <TouchableOpacity
-            onPress={() => remove(index)}
-            style={styles.removeButton}>
-            <Icon name="delete" size={24} color={colors.error} />
-          </TouchableOpacity>
+  const renderCheckFields = (index: number) => {
+    const relationValue = watch(`checks.${index}.relationship`);
+
+    return (
+      <View key={fields[index].id} style={styles.checkContainer}>
+        <View style={styles.checkHeader}>
+          <Text style={styles.checkTitle}>Third Party Check {index + 1}</Text>
+          {index > 0 && (
+            <TouchableOpacity
+              onPress={() => remove(index)}
+              style={styles.removeButton}>
+              <Icon name="delete" size={24} color={colors.error} />
+            </TouchableOpacity>
+          )}
+        </View>
+        <Controller
+          control={control}
+          rules={{required: 'TPC/Neighbor name is required'}}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Name of TPC/Neighbor*</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Enter name"
+              />
+              {errors.checks?.[index]?.tpcName && (
+                <Text style={styles.errorText}>
+                  {errors.checks[index]?.tpcName?.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name={`checks.${index}.tpcName`}
+        />
+        <Controller
+          control={control}
+          // rules={{required: 'Mobile number is required'}}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mobile Number*</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={text => {
+                  if (/^\d*$/.test(text)) {
+                    onChange(text.slice(0, 10));
+                  }
+                }}
+                value={value}
+                placeholder="Enter mobile number"
+                keyboardType="numeric"
+                maxLength={10}
+              />
+              {errors.checks?.[index]?.mobileNumber && (
+                <Text style={styles.errorText}>
+                  {errors.checks[index]?.mobileNumber?.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name={`checks.${index}.mobileNumber`}
+        />
+        <Controller
+          control={control}
+          rules={{required: 'Relationship is required'}}
+          render={({field: {value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Relationship to Applicant*</Text>
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => {
+                  setActiveRelationshipIndex(index);
+                  relationshipRef.current?.show();
+                }}>
+                <Text
+                  style={value ? styles.selectButtonText : styles.placeholder}>
+                  {value || 'Select relationship'}
+                </Text>
+              </TouchableOpacity>
+              {errors.checks?.[index]?.relationship && (
+                <Text style={styles.errorText}>
+                  {errors.checks[index]?.relationship?.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name={`checks.${index}.relationship`}
+        />
+        {relationValue === 'Other' && (
+          <Controller
+            control={control}
+            name={`checks.${index}.otherRelation`}
+            render={({field: {onChange, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Specify Relation</Text>
+                <TextInput
+                  style={[styles.input]}
+                  placeholder="Enter relation"
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.checks?.[index]?.otherRelation && (
+                  <Text style={styles.errorText}>
+                    {errors.checks?.[index]?.otherRelation?.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
         )}
+        <Controller
+          control={control}
+          rules={{required: 'Feedback status is required'}}
+          render={({field: {value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Feedback Status*</Text>
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => {
+                  setActiveRelationshipIndex(index);
+                  feedbackStatusRef.current?.show();
+                }}>
+                <Text
+                  style={value ? styles.selectButtonText : styles.placeholder}>
+                  {value || 'Select Feedback Status'}
+                </Text>
+              </TouchableOpacity>
+              {errors.checks?.[index]?.feedbackStatus && (
+                <Text style={styles.errorText}>
+                  {errors.checks[index]?.feedbackStatus?.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name={`checks.${index}.feedbackStatus`}
+        />
+        <Controller
+          control={control}
+          rules={{required: 'Comments/Remarks is required'}}
+          render={({field: {onChange, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Comments/Remarks*</Text>
+              <TextInput
+                style={[styles.textArea, styles.input]}
+                onChangeText={onChange}
+                value={value}
+                placeholder="Enter comments or remarks"
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+              {errors.checks?.[index]?.comments && (
+                <Text style={styles.errorText}>
+                  {errors.checks[index]?.comments?.message}
+                </Text>
+              )}
+            </View>
+          )}
+          name={`checks.${index}.comments`}
+        />
       </View>
-      <Controller
-        control={control}
-        rules={{required: 'TPC/Neighbor name is required'}}
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name of TPC/Neighbor*</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter name"
-            />
-            {errors.checks?.[index]?.tpcName && (
-              <Text style={styles.errorText}>
-                {errors.checks[index]?.tpcName?.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name={`checks.${index}.tpcName`}
-      />
-      <Controller
-        control={control}
-        // rules={{required: 'Mobile number is required'}}
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Mobile Number*</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={text => {
-                if (/^\d*$/.test(text)) {
-                  onChange(text.slice(0, 10));
-                }
-              }}
-              value={value}
-              placeholder="Enter mobile number"
-              keyboardType="numeric"
-              maxLength={10}
-            />
-            {errors.checks?.[index]?.mobileNumber && (
-              <Text style={styles.errorText}>
-                {errors.checks[index]?.mobileNumber?.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name={`checks.${index}.mobileNumber`}
-      />
-      <Controller
-        control={control}
-        rules={{required: 'Relationship is required'}}
-        render={({field: {value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Relationship to Applicant*</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => {
-                setActiveRelationshipIndex(index);
-                relationshipRef.current?.show();
-              }}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select relationship'}
-              </Text>
-            </TouchableOpacity>
-            {errors.checks?.[index]?.relationship && (
-              <Text style={styles.errorText}>
-                {errors.checks[index]?.relationship?.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name={`checks.${index}.relationship`}
-      />
-      <Controller
-        control={control}
-        rules={{required: 'Feedback status is required'}}
-        render={({field: {value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Feedback Status*</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => {
-                setActiveRelationshipIndex(index);
-                feedbackStatusRef.current?.show();
-              }}>
-              <Text
-                style={value ? styles.selectButtonText : styles.placeholder}>
-                {value || 'Select Feedback Status'}
-              </Text>
-            </TouchableOpacity>
-            {errors.checks?.[index]?.feedbackStatus && (
-              <Text style={styles.errorText}>
-                {errors.checks[index]?.feedbackStatus?.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name={`checks.${index}.feedbackStatus`}
-      />
-      <Controller
-        control={control}
-        rules={{required: 'Comments/Remarks is required'}}
-        render={({field: {onChange, value}}) => (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Comments/Remarks*</Text>
-            <TextInput
-              style={[styles.textArea, styles.input]}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter comments or remarks"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-            {errors.checks?.[index]?.comments && (
-              <Text style={styles.errorText}>
-                {errors.checks[index]?.comments?.message}
-              </Text>
-            )}
-          </View>
-        )}
-        name={`checks.${index}.comments`}
-      />
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>

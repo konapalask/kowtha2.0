@@ -82,7 +82,6 @@ export default function Users() {
     role: undefined,
   });
 
- 
   const fetchUsers = async (page = 1, pageSize = 10, filters = {}) => {
     setLoading(true);
     try {
@@ -128,11 +127,11 @@ export default function Users() {
       if (editingUser) {
         const response = await updateUserApi(editingUser?.id, values);
         message.success("User updated successfully");
-        fetchUsers(pagination.current, pagination.pageSize, filters); 
+        fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
         const response = await createUserApi(values);
         message.success("User added successfully");
-        fetchUsers(1, pagination.pageSize, filters); 
+        fetchUsers(1, pagination.pageSize, filters);
       }
       setIsModalVisible(false);
       form.resetFields();

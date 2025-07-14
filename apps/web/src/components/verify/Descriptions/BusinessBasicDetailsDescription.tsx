@@ -80,6 +80,20 @@ const BusinessBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.businessName}
           </Descriptions.Item>
           <Descriptions.Item
+            label="Is Business Name Same as Initiated"
+            contentStyle={getItemStyle("isBusinessNameSame")}
+          >
+            {data?.basicDetails?.isBusinessNameSame}
+          </Descriptions.Item>
+          {data?.basicDetails?.isBusinessNameSame === "No" && (
+            <Descriptions.Item
+              label="Business Name Correction"
+              contentStyle={getItemStyle("correctedBusinessName")}
+            >
+              {data?.basicDetails?.correctedBusinessName}
+            </Descriptions.Item>
+          )}
+          <Descriptions.Item
             label="Nature of Business"
             contentStyle={getItemStyle("businessProfile")}
           >

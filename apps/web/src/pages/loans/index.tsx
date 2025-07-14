@@ -163,10 +163,10 @@ export default function Loans() {
                 style={{ wordWrap: "break-word" }}
               >
                 <Typography.Text>
-                  {" "}
-                  {item?.name?.length > 15
+                  {item?.name}
+                  {/* {item?.name?.length > 15
                     ? item.name.slice(0, 15) + "..."
-                    : item?.name}
+                    : item?.name} */}
                 </Typography.Text>
               </Col>
 
@@ -448,8 +448,7 @@ export default function Loans() {
                   Edit
                 </Button>
                 {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
-                {(userDetails?.role === "Admin" ||
-                  userDetails?.role === "OperationsExecutive") && (
+                {userDetails?.role === "Admin" && (
                   <Popconfirm
                     title="Are you sure you want to delete this loan?"
                     onConfirm={async () => {
