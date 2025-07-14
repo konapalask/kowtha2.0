@@ -718,6 +718,12 @@ export class LoanService {
                   role: true
                 }
               },
+              verificationRetries: {
+                select: {
+                  reason: true,
+                  date: true,
+                }
+              }
             }
           }
         },
@@ -727,6 +733,7 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
+      
 
       await this.loggingService.debug('Retrieved loans with filters', {
         filters,
