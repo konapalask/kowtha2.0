@@ -1755,6 +1755,14 @@ export class LoanService {
   }
 
   private generateBaseHTMLTemplate(loan: any, address: string): string {
+    let mailId = '';
+
+    if (address.includes('Vijayawada') || address.includes('vijayawada') || address.includes('VIJAYAWADA') ) {
+      mailId = 'apfi@cakowtha.co.in';
+    } else {
+      mailId = 'tsfi@cakowtha.co.in';
+    }
+
     return `
       <!DOCTYPE html>
       <html>
@@ -1917,8 +1925,8 @@ export class LoanService {
             <div class="address">${address}</div>
           </div>
           <div class="contact">
-            Mobile no: 9491821359<br>
-            Mail ID: opsfi@cakowtha.co.in
+            Mobile no: 8332037517<br>
+            Mail ID: ${mailId}
           </div>
         </div>
 

@@ -305,6 +305,13 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       </table>
     </div>
 
+    <div class="footer">
+      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+      Generated on ${new Date().toLocaleString()}
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="6" class="section-header">Final Remarks</td></tr>

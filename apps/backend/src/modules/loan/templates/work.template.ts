@@ -74,11 +74,15 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             </tr>
             <tr>
               <th>Loan Amount</th>
-              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.loanAmount || ''}</span></td>
+              <td colspan="2"><span class="var-value">${verificationData.basicDetails?.loanAmount || ''}</span></td>
+              <th>Tenure</th>
+              <td colspan="2"><span class="var-value">${verificationData.basicDetails?.tenure || ''}</span></td>
             </tr>
             <tr>
-              <th>Tenure</th>
-              <td colspan="5"><span class="var-value">${verificationData.basicDetails?.tenure || ''}</span></td>
+              <th>No. of Employees in the Company</th>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
+              <th>Employee ID(Copy/Photograph Mandatory)</th>
+              <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
             </tr>
             <tr>
               <th>Name of the Current Employer</th>
@@ -93,14 +97,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.yearsInCurrentJob || ''}</span></td>
               <th>Total Work Experience</th>
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.totalWorkExperience || ''}</span></td>
-            </tr>
-            <tr>
-              <th>No. of Employees in the Company</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.companySize || ''}</span></td>
-            </tr>
-            <tr>
-              <th>Employee ID(Copy/Photograph Mandatory)</th>
-              <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.idCardNumber || ''}</span></td>
             </tr>
             <tr>
               <th>Designation</th>
