@@ -33,6 +33,16 @@ const AddressVerificationDescription: React.FC<{
             extra={extra}
           >
             <Descriptions.Item
+              label="Address Type"
+              contentStyle={getItemStyle("address")}
+            >
+              {data?.addressVerification?.address === "CurrentAddress"
+                ? "Current Address"
+                : data?.addressVerification?.address === "PermanentAddress"
+                ? "Permanent Address"
+                : data?.addressVerification?.address}
+            </Descriptions.Item>
+            <Descriptions.Item
               label="Address Category"
               contentStyle={getItemStyle("addressCategory")}
             >

@@ -5,7 +5,7 @@ const personMetOptions = [
   "Applicant",
   "Co-Applicant",
   "Family",
-  "Guaranteer",
+  "Guarantor",
   "Others",
 ];
 
@@ -195,10 +195,10 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
       <Col span={8}>
         <Form.Item
           name="businessProfile"
-          label="Business Profile"
+          label="Nature of Business"
           rules={[{ required: true, message: "Please enter business profile" }]}
         >
-          <Input placeholder="Enter Business Profile" />
+          <Input placeholder="Enter Nature of Business" />
         </Form.Item>
       </Col>
 

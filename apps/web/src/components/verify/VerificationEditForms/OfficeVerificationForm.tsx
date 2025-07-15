@@ -5,9 +5,10 @@ const { Option } = Select;
 const { Title } = Typography;
 
 const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
-  const employerType = Form.useWatch("employerType", form);
-  const salaryMode = Form.useWatch("salaryMode", form);
+  // const employerType = Form.useWatch("employerType", form);
+  // const salaryMode = Form.useWatch("salaryMode", form);
   const isAddressSame = Form.useWatch("isAddressSame", form);
+  const natureOfService = Form.useWatch("natureOfService", form);
 
   return (
     <>
@@ -30,14 +31,14 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           label="Office Address"
           rules={[{ required: true, message: "Please enter office address" }]}
         >
-          <Input.TextArea rows={2} />
+          <Input.TextArea rows={2} disabled />
         </Form.Item>
       </Col>
 
-      <Col span={16}>
+      <Col span={4}>
         <Form.Item
           name="isAddressSame"
-          label="Is Address Same?"
+          label="Address Mismatch"
           rules={[{ required: true, message: "Please enter office address" }]}
         >
           <Select>
@@ -57,6 +58,29 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
+      {/* <Col span={8}>
+        <Form.Item
+          name="isAddressSame"
+          label="Address Mismatch?"
+          rules={[{ required: true, message: "Please specify if address matches" }]}
+        >
+          <Select placeholder="Select">
+            <Select.Option value="Yes">Yes</Select.Option>
+            <Select.Option value="No">No</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col> */}
+      {/* {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
+        <Col span={16}>
+          <Form.Item
+            name="addressCorrection"
+            label="Corrected Address"
+            rules={[{ required: true, message: "Please enter corrected address" }]}
+          >
+            <Input.TextArea rows={2} placeholder="Enter corrected address" />
+          </Form.Item>
+        </Col>
+      )} */}
       <Col span={8}>
         <Form.Item
           name="yearsInCurrentJob"
@@ -102,23 +126,53 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           ]}
         >
           <Select>
-            <Select.Option value="Agricultural">Agricultural</Select.Option>
-            <Select.Option value="Construction">Construction</Select.Option>
-            <Select.Option value="Education">Education</Select.Option>
-            <Select.Option value="FMCG">FMCG</Select.Option>
-            <Select.Option value="Health Care">Health Care</Select.Option>
-            <Select.Option value="Manufacturing">Manufacturing</Select.Option>
-            <Select.Option value="Services">Services</Select.Option>
-            <Select.Option value="Travel & Tourism & Hotel">
+            <Select.Option key={1} value="Agricultural">
+              Agricultural
+            </Select.Option>
+            <Select.Option key={2} value="Construction">
+              Construction
+            </Select.Option>
+            <Select.Option key={3} value="Education">
+              Education
+            </Select.Option>
+            <Select.Option key={4} value="FMCG">
+              FMCG
+            </Select.Option>
+            <Select.Option key={5} value="Health Care">
+              Health Care
+            </Select.Option>
+            <Select.Option key={6} value="Manufacturing">
+              Manufacturing
+            </Select.Option>
+            <Select.Option key={7} value="Services">
+              Services
+            </Select.Option>
+            <Select.Option key={8} value="Travel, Tourism & Hotel">
               Travel & Tourism & Hotel
             </Select.Option>
-            <Select.Option value="Travel & Tourism & Hotel">
-              Travel & Tourism & Hotel
+            <Select.Option key={9} value="Others">
+              Others
             </Select.Option>
-            <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
+      {/* Show this field only if natureOfService is 'Others' */}
+      {natureOfService === "Others" && (
+        <Col span={8}>
+          <Form.Item
+            name="natureOfServiceOther"
+            label="Specify Nature of Service/Business"
+            rules={[
+              {
+                required: true,
+                message: "Please specify nature of service/business",
+              },
+            ]}
+          >
+            <Input placeholder="Enter nature of service/business" />
+          </Form.Item>
+        </Col>
+      )}
       <Col span={8}>
         <Form.Item
           name="officeLocality"
@@ -183,6 +237,21 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
+      {/* Show this field only if employerType is 'Others' */}
+      {form.getFieldValue &&
+        form.getFieldValue("employerType") === "Others" && (
+          <Col span={8}>
+            <Form.Item
+              name="employerTypeOther"
+              label="Specify Type of Employer"
+              rules={[
+                { required: true, message: "Please specify type of employer" },
+              ]}
+            >
+              <Input placeholder="Enter type of employer" />
+            </Form.Item>
+          </Col>
+        )}
 
       {/* Salary Details */}
       {/* <Col span={24}>

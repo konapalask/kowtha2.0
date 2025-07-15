@@ -101,7 +101,7 @@ const FamilyMemberDetails: React.FC<FamilyMemberDetailsProps> = ({
   }
 
   const relationOptions = [
-    'Wife',
+    'Spouse',
     'Daughter',
     'Son',
     'Father',

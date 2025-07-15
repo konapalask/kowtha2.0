@@ -301,14 +301,9 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
-                  placeholder="Select an Executive"
-                  labelInValue
-                  disabled={
-                    !address || (assignmentMethod === "Remote" && !office)
-                  }
-                  style={{ width: "100%" }}
+                  placeholder="Select a Field Executive"
                   options={fieldExecutives}
-                  // onSelect={() => form.submit()}
+                  // onSelect removed to allow form validation to show error
                 />
               </Form.Item>
             );

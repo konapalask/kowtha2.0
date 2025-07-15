@@ -1,11 +1,12 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
 import {
+  CloseCircleOutlined,
   // CloseCircleOutlined,
   EditOutlined,
   // EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, message, Table } from "antd";
+import { Button, Card, Image, message, Modal, Table, Typography } from "antd";
 // import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 // const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -211,6 +212,43 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
   //   </div>
   // );
 
+  const handlePhotoRemoval = async (pid: any) => {
+    // const updatedItems = data.uploadedItems.filter(
+    //   (i: any) => i.id !== item.id
+    // );
+    const updatedItems =
+      completeVerificationData?.verificationData?.uploadedItems?.filter(
+        (photo: any) => photo?.id !== pid
+      );
+
+    const updatedData = {
+      findings: "",
+      verificationData: {
+        ...completeVerificationData.verificationData,
+        uploadedItems: updatedItems,
+      },
+      // path: "",
+      approvedStatus: "Positive",
+    };
+    // console.log(updatedData);
+    verifierEditApi(id as string, completeVerificationData?.type, updatedData)
+      .then((res) => console.log(res?.data))
+      .catch((error) => console.log(`Error:`, error));
+  };
+
+  const handleDeleteClick = (id: any) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this picture?",
+      okText: "Yes, delete it",
+      okType: "danger",
+      cancelText: "Cancel",
+      centered: true,
+      onOk: () => {
+        handlePhotoRemoval(id);
+      },
+    });
+  };
+
   return (
     <>
       <BasicDetailsDescription
@@ -263,6 +301,12 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 title: "Relation",
                 dataIndex: "relation",
                 key: "relation",
+                render: (text, record: any) => (
+                  <Typography.Text>
+                    {text}{" "}
+                    {record?.otherRelation && `- ${record?.otherRelation}`}
+                  </Typography.Text>
+                ),
               },
               {
                 title: "Age",
@@ -390,7 +434,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                     }}
                     // preview={false}
                   />
-                  {/* <Button
+                  <Button
                     type="text"
                     danger
                     icon={<CloseCircleOutlined />}
@@ -402,15 +446,9 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                       borderRadius: "50%",
                       padding: 4,
                     }}
-                    disabled={hasEditRequest}
-                    onClick={() => {
-                      // Handle photo removal
-                      const updatedItems = data.uploadedItems.filter(
-                        (i: any) => i.id !== item.id
-                      );
-                      // onEdit("photoCapture");
-                    }}
-                  /> */}
+                    // disabled={hasEditRequest}
+                    onClick={() => handleDeleteClick(item.id)}
+                  />
                   <div
                     style={{
                       position: "absolute",

@@ -37,7 +37,7 @@ const personMetOptions = [
   'Applicant',
   'Co-Applicant',
   'Family',
-  'Guaranteer',
+  'Guarantor',
   'Others',
 ];
 const yesNoOptions = ['Yes', 'No'];
@@ -333,7 +333,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
         rules={{required: 'Required'}}
         render={({field: {onChange, onBlur, value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Business Profile</Text>
+            <Text style={styles.label}>Nature of Business</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter business profile"

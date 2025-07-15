@@ -5,10 +5,10 @@
  * @format
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {requestUserPermission, setupFCM} from './src/config/fcm';
+// import {requestUserPermission, setupFCM} from './src/config/fcm';
 import LoginScreen from './src/screens/LoginScreen';
 import VerificationListScreen from './src/screens/VerificationListScreen';
 import VerificationItemScreen from './src/screens/VerificationItemScreen';
@@ -104,7 +104,7 @@ const App = () => {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const checkForceUpdate = async () => {
       if (!isAuthenticated) return;
       try {
