@@ -222,7 +222,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
       );
 
     const updatedData = {
-      findings: "",
+      // findings: "",
       verificationData: {
         ...completeVerificationData.verificationData,
         uploadedItems: updatedItems,
@@ -232,7 +232,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
     };
     // console.log(updatedData);
     verifierEditApi(id as string, completeVerificationData?.type, updatedData)
-      .then((res) => console.log(res?.data))
+      .then((res) => fetchVerificationData())
       .catch((error) => console.log(`Error:`, error));
   };
 
