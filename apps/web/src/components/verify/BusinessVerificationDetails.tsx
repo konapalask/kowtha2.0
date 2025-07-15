@@ -1,6 +1,7 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
 import {
+  CloseCircleOutlined,
   // CloseCircleOutlined,
   EditOutlined,
   // EyeOutlined,
@@ -165,6 +166,43 @@ export const BusinessVerificationDetails: React.FC<
       disabled={hasEditRequest}
     />
   );
+
+  const handlePhotoRemoval = async (pid: any) => {
+    // const updatedItems = data.uploadedItems.filter(
+    //   (i: any) => i.id !== item.id
+    // );
+    const updatedItems =
+      completeVerificationData?.verificationData?.uploadedItems?.filter(
+        (photo: any) => photo?.id !== pid
+      );
+
+    const updatedData = {
+      // findings: "",
+      verificationData: {
+        ...completeVerificationData.verificationData,
+        uploadedItems: updatedItems,
+      },
+      // path: "",
+      approvedStatus: "Positive",
+    };
+    // console.log(updatedData);
+    verifierEditApi(id as string, "Business", updatedData)
+      .then((res) => fetchVerificationData())
+      .catch((error) => console.log(`Error:`, error));
+  };
+
+  const handleDeleteClick = (id: any) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this picture?",
+      okText: "Yes, delete it",
+      okType: "danger",
+      cancelText: "Cancel",
+      centered: true,
+      onOk: () => {
+        handlePhotoRemoval(id);
+      },
+    });
+  };
 
   return (
     <>
@@ -336,7 +374,7 @@ export const BusinessVerificationDetails: React.FC<
                   }}
                   // preview={false}
                 />
-                {/* <Button
+                <Button
                   type="text"
                   danger
                   icon={<CloseCircleOutlined />}
@@ -349,13 +387,8 @@ export const BusinessVerificationDetails: React.FC<
                     padding: 4,
                   }}
                   disabled={hasEditRequest}
-                  onClick={() => {
-                    const updatedItems = data.uploadedItems.filter(
-                      (i: any) => i.id !== item.id
-                    );
-                    // onEdit("photoCapture");
-                  }}
-                /> */}
+                  onClick={() => handleDeleteClick(item.id)}
+                />
                 <div
                   style={{
                     position: "absolute",

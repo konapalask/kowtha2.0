@@ -23,7 +23,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
 
   return (
     <>
-      <Col span={8}>
+      {/* <Col span={8}>
         <Form.Item
           name="address"
           label="Address Type"
@@ -38,7 +38,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             </Select.Option>
           </Select>
         </Form.Item>
-      </Col>
+      </Col> */}
       <Col span={8}>
         <Form.Item
           name="addressCategory"
@@ -60,7 +60,13 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           label="Address Details"
           rules={[{ required: true, message: "Please enter address details" }]}
         >
-          <Input disabled={form.getFieldValue && (form.getFieldValue("address") === "PermanentAddress" || form.getFieldValue("address") === "CurrentAddress")}/>
+          <Input
+            disabled={
+              form.getFieldValue &&
+              (form.getFieldValue("address") === "PermanentAddress" ||
+                form.getFieldValue("address") === "CurrentAddress")
+            }
+          />
         </Form.Item>
       </Col>
       <Col span={6}>

@@ -1,3 +1,4 @@
+import { useTabContext } from "@/pages/verify/[id]";
 import { Card, Descriptions } from "antd";
 import React from "react";
 
@@ -14,6 +15,8 @@ const AddressVerificationDescription: React.FC<{
   changedFields = [],
   isCurrentVersion = false,
 }) => {
+  const { activeTab } = useTabContext();
+
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
 
@@ -32,16 +35,16 @@ const AddressVerificationDescription: React.FC<{
             column={logs ? 1 : 3}
             extra={extra}
           >
-            <Descriptions.Item
+            {/* <Descriptions.Item
               label="Address Type"
               contentStyle={getItemStyle("address")}
             >
-              {data?.addressVerification?.address === "CurrentAddress"
+              {activeTab === "CurrentAddress"
                 ? "Current Address"
-                : data?.addressVerification?.address === "PermanentAddress"
-                ? "Permanent Address"
-                : data?.addressVerification?.address}
-            </Descriptions.Item>
+                : activeTab === "PermanentAddress"
+                  ? "Permanent Address"
+                  : activeTab}
+            </Descriptions.Item> */}
             <Descriptions.Item
               label="Address Category"
               contentStyle={getItemStyle("addressCategory")}
