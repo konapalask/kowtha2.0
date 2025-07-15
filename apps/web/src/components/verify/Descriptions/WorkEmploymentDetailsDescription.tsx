@@ -7,12 +7,18 @@ const WorkEmploymentDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
-}> = ({ data, extra, logs = false, changedFields = [], isCurrentVersion = false }) => {
+}> = ({
+  data,
+  extra,
+  logs = false,
+  changedFields = [],
+  isCurrentVersion = false,
+}) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
-    
+
     return {
-      backgroundColor: isCurrentVersion ? '#fff1f0' : '#f6ffed'  // Red for current version, green for new version
+      backgroundColor: isCurrentVersion ? "#fff1f0" : "#f6ffed", // Red for current version, green for new version
     };
   };
 
@@ -25,101 +31,101 @@ const WorkEmploymentDetailsDescription: React.FC<{
           column={logs ? 1 : 2}
           extra={extra}
         >
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Current Office Name"
-            contentStyle={getItemStyle('currentOfficeName')}
+            contentStyle={getItemStyle("currentOfficeName")}
           >
             {data?.employmentDetails?.currentOfficeName}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Office Address"
-            contentStyle={getItemStyle('officeAddress')}
+            contentStyle={getItemStyle("officeAddress")}
           >
             {data?.employmentDetails?.officeAddress}
           </Descriptions.Item>
           <Descriptions.Item
-              label="Address Mismatch"
-              contentStyle={getItemStyle("isAddressSame")}
-            >
-              {data?.employmentDetails?.isAddressSame}
-            </Descriptions.Item>
-            {data?.employmentDetails?.isAddressSame === "Yes" && (
-              <>
-                <Descriptions.Item
-                  label="Corrected Address"
-                  contentStyle={getItemStyle("addressCorrection")}
-                >
-                  {data?.employmentDetails?.addressCorrection}
-                </Descriptions.Item>
-              </>
-            )}
-          <Descriptions.Item 
+            label="Address Mismatch"
+            contentStyle={getItemStyle("isAddressSame")}
+          >
+            {data?.employmentDetails?.isAddressSame}
+          </Descriptions.Item>
+          {data?.employmentDetails?.isAddressSame === "Yes" && (
+            <>
+              <Descriptions.Item
+                label="Corrected Address"
+                contentStyle={getItemStyle("addressCorrection")}
+              >
+                {data?.employmentDetails?.addressCorrection}
+              </Descriptions.Item>
+            </>
+          )}
+          <Descriptions.Item
             label="Years in Current Job"
-            contentStyle={getItemStyle('yearsInCurrentJob')}
+            contentStyle={getItemStyle("yearsInCurrentJob")}
           >
             {data?.employmentDetails?.yearsInCurrentJob}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Total Work Experience"
-            contentStyle={getItemStyle('totalWorkExperience')}
+            contentStyle={getItemStyle("totalWorkExperience")}
           >
             {data?.employmentDetails?.totalWorkExperience}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Company Size"
-            contentStyle={getItemStyle('companySize')}
+            contentStyle={getItemStyle("companySize")}
           >
             {data?.employmentDetails?.companySize}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Nature of Service/Business"
-            contentStyle={getItemStyle('natureOfService')}
+            contentStyle={getItemStyle("natureOfService")}
           >
             {data?.employmentDetails?.natureOfService}
-            {data?.employmentDetails?.natureOfService === "Other" &&
+            {data?.employmentDetails?.natureOfService === "Others" &&
               ` - ${data?.employmentDetails?.natureOfServiceOther}`}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Office Locality"
-            contentStyle={getItemStyle('officeLocality')}
+            contentStyle={getItemStyle("officeLocality")}
           >
             {data?.employmentDetails?.officeLocality}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="ID Card Number"
-            contentStyle={getItemStyle('idCardNumber')}
+            contentStyle={getItemStyle("idCardNumber")}
           >
             {data?.employmentDetails?.idCardNumber}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Designation"
-            contentStyle={getItemStyle('designation')}
+            contentStyle={getItemStyle("designation")}
           >
             {data?.employmentDetails?.designation}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Mode of Salary"
-            contentStyle={getItemStyle('salaryMode')}
+            contentStyle={getItemStyle("salaryMode")}
           >
             {data?.employmentDetails?.salaryMode}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Type of Employer"
-            contentStyle={getItemStyle('employerType')}
+            contentStyle={getItemStyle("employerType")}
           >
             {data?.employmentDetails?.employerType}
             {data?.employmentDetails?.employerType === "Other" &&
               ` - ${data?.employmentDetails?.employerTypeOther}`}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Gross Salary per Month"
-            contentStyle={getItemStyle('grossSalary')}
+            contentStyle={getItemStyle("grossSalary")}
           >
             {data?.employmentDetails?.grossSalary}
           </Descriptions.Item>
-          <Descriptions.Item 
+          <Descriptions.Item
             label="Net Salary per Month"
-            contentStyle={getItemStyle('netSalary')}
+            contentStyle={getItemStyle("netSalary")}
           >
             {data?.employmentDetails?.netSalary}
           </Descriptions.Item>
@@ -129,4 +135,4 @@ const WorkEmploymentDetailsDescription: React.FC<{
   );
 };
 
-export default WorkEmploymentDetailsDescription; 
+export default WorkEmploymentDetailsDescription;
