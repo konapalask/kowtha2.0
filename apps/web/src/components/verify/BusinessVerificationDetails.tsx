@@ -186,7 +186,7 @@ export const BusinessVerificationDetails: React.FC<
       approvedStatus: "Positive",
     };
     // console.log(updatedData);
-    verifierEditApi(id as string, "Work", updatedData)
+    verifierEditApi(id as string, "Business", updatedData)
       .then((res) => fetchVerificationData())
       .catch((error) => console.log(`Error:`, error));
   };
