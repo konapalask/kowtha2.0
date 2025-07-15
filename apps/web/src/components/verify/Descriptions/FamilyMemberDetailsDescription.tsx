@@ -96,7 +96,13 @@ const FamilyMemberDetailsDescription: React.FC<{
   const tableData = familyMemberDetails.map((emp: any, idx: number) => ({
     key: idx,
     renderedName: renderCell("name", idx, emp.name),
-    renderedRelation: renderCell("relation", idx, emp.relation),
+    renderedRelation: renderCell(
+      "relation",
+      idx,
+      emp?.relation === "Other"
+        ? `${emp.relation}-${emp.otherRelation}`
+        : emp?.relation
+    ),
     renderedAge: renderCell("age", idx, emp.age),
     renderedEmploymentType: renderCell(
       "employmentType",
