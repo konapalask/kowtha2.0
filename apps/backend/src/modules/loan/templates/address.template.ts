@@ -263,12 +263,13 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="align-wrapper">
       <table class="section-table">
-      <tr><td colspan="6" class="section-header">Family Member Details</td></tr>
+      <tr><td colspan="7" class="section-header">Family Member Details</td></tr>
       <tr>
         <th>Name</th>
         <th>Relation</th>
         <th>Age</th>
         <th>Employment Type</th>
+        <th>Educational Qualification</th>
         <th>Staying With Applicant</th>
       </tr>
       ${Array.isArray(verificationData.familyMemberDetails) && verificationData.familyMemberDetails.length > 0
@@ -278,6 +279,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
             <td><span class="var-value">${fmd.relation === 'Other' ? fmd.otherRelation : fmd.relation || ''}</span></td>
             <td><span class="var-value">${fmd.age || ''}</span></td>
             <td><span class="var-value">${fmd.employmentType || ''}</span></td>
+            <td><span class="var-value">${fmd.educationalQualification || ''}</span></td>
             <td><span class="var-value">${fmd.stayingWithApplicant || ''}</span></td>
           </tr>
         `).join('')
