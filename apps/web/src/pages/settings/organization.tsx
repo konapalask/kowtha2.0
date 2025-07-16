@@ -136,7 +136,8 @@ export default function OrganizationSettings() {
   const handleArchive = async (id: number, archive: boolean) => {
     try {
       setLoading(true);
-      const values = officeForm.validateFields();
+      const values = await officeForm.validateFields();
+      console.log(values);
       await updateOfficeApi(id, { ...values, archived: archive });
       fetchOffices();
       message.success(
@@ -277,6 +278,13 @@ export default function OrganizationSettings() {
               loading={loading}
               scroll={{ y: 400 }}
               bordered
+              // onRow={(record) => {
+              //   return {
+              //     style: {
+              //       backgroundColor: record.archived ? "#f5f5f5" : undefined,
+              //     },
+              //   };
+              // }}
             />
           </Card>
         </TabPane>
@@ -292,7 +300,16 @@ export default function OrganizationSettings() {
         }}
         footer={null}
       >
-        <Form form={officeForm} layout="vertical" onFinish={handleOfficeSubmit}>
+        <Form
+          form={officeForm}
+          layout="vertical"
+          initialValues={{
+            name: editingOffice?.name,
+            location: editingOffice?.location,
+            address: editingOffice?.address,
+          }}
+          onFinish={handleOfficeSubmit}
+        >
           <Form.Item
             name="name"
             label="Branch Name"
@@ -396,7 +413,7 @@ export default function OrganizationSettings() {
                 okText="Yes"
                 cancelText="No"
               >
-                <a style={{ color: "#cf1322" }}>Unarchive Office</a>
+                <a style={{ color: "green" }}>Unarchive Office</a>
               </Popconfirm>
             </div>
           )}
