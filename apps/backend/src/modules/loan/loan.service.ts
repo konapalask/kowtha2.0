@@ -782,8 +782,8 @@ export class LoanService {
             },
           },
           data: {
-            ...(updateData.address && {address : updateData.address}),
-            ...(updateData.businessName && {address : updateData.businessName}),
+            ...(updateData.address && {applicantAddress : updateData.address}),
+            ...(updateData.businessName && {businessName : updateData.businessName}),
             ...(updateData.verifierId && {verifierId : updateData.verifierId}),
             ...(updateData.fieldExecutiveId && {fieldExecutiveId : updateData.fieldExecutiveId}),
             ...(updateData.currentOfficeName && {currentOfficeName : updateData.currentOfficeName}),
