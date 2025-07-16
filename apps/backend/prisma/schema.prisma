@@ -159,6 +159,7 @@ model Verification {
   locationType        LocationType?
   isPostponed         Boolean?
   postponedDate       DateTime?
+  postponedReason     String?
   businessName        String?
   path                String? // Array of S3 paths for verification documents
   finalReportPath     String? // S3 path for final report

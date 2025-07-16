@@ -2072,7 +2072,8 @@ export class LoanService {
         },
         data:{
           isPostponed: true,
-          postponedDate: new Date(createVerificationRetryDto.date)
+          postponedDate: new Date(createVerificationRetryDto.date),
+          postponedReason: createVerificationRetryDto.reason
         }
       });
 
