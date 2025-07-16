@@ -764,9 +764,10 @@ export class LoanService {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-
+      console.log(updateData.verificationType);
+      
       // // If field executive is provided, address is mandatory
-      if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.verifierId) {
+      if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
         throw new BadRequestException('Address is required when assigning a field executive');
       }
 
@@ -781,7 +782,11 @@ export class LoanService {
             },
           },
           data: {
-            ...(updateData),
+            ...(updateData.address && {address : updateData.address}),
+            ...(updateData.businessName && {address : updateData.businessName}),
+            ...(updateData.verifierId && {verifierId : updateData.verifierId}),
+            ...(updateData.fieldExecutiveId && {fieldExecutiveId : updateData.fieldExecutiveId}),
+            ...(updateData.currentOfficeName && {currentOfficeName : updateData.currentOfficeName}),
             status: 'Pending', // Reset status when assignment is updated
           },
         });

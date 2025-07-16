@@ -17,7 +17,7 @@ export class createAssignmentDto {
     enum: LocationType,
     required: false
   })
-  @IsEnum(VerificationType)
+  @IsEnum(LocationType)
   @IsOptional()
   locationType?: LocationType;
 
