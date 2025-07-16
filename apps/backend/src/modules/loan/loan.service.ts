@@ -640,16 +640,6 @@ export class LoanService {
         where.applicationNumber = {contains: filters.applicationNumber, mode: 'insensitive'};
       }
 
-      type VerificationFromDB = {
-        verificationRetries: { date: string, reason: string }[];
-        // other fields from DB
-      };
-      
-      type ExtendedVerification = VerificationFromDB & {
-        isPostponed?: boolean;
-        postponedDate?: string;
-      };
-
       // Add date range filter
       if (filters?.startDate || filters?.endDate) {
         where.createdAt = {
@@ -743,21 +733,6 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
-      
-      if (filters?.id && loans.length > 0){
-        loans.forEach(loan => {
-          loan.verifications.forEach(verification => {
-            const verificationFromDB = verification as unknown as ExtendedVerification;
-            if (verification.verificationRetries.length > 0 && verification.verificationRetries[0].date) {
-              let postponedDate = new Date(verification.verificationRetries[0].date);
-              if (postponedDate > new Date()) {
-                verificationFromDB.isPostponed = true;
-                verificationFromDB.postponedDate = verificationFromDB.verificationRetries[0].date;
-              }
-            }
-          });
-        });
-      }
 
       await this.loggingService.debug('Retrieved loans with filters', {
         filters,
@@ -2088,6 +2063,16 @@ export class LoanService {
               employeeCode: true
             }
           }
+        }
+      });
+
+      const updateVerification = await this.prisma.verification.update({
+        where:{
+          id: verification.id
+        },
+        data:{
+          isPostponed: true,
+          postponedDate: new Date(createVerificationRetryDto.date)
         }
       });
 

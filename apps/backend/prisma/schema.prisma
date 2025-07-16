@@ -157,6 +157,8 @@ model Verification {
   fieldExecutive      User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
   status              VerificationStatus
   locationType        LocationType?
+  isPostponed         Boolean?
+  postponedDate       DateTime?
   businessName        String?
   path                String? // Array of S3 paths for verification documents
   finalReportPath     String? // S3 path for final report
