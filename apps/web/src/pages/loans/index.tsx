@@ -301,15 +301,20 @@ export default function Loans() {
             const pav = record?.verifications?.find(
               (v: any) => v.type === "AddressOne"
             );
-            return pav ? (
-              <Tag color={pav.status === "Completed" ? "green" : "orange"}>
-                {pav.status}
-              </Tag>
-            ) : (
-              "-"
-            );
+            if (!pav) return "-";
+
+            const isPostponed = pav.isPostponed === true && pav.status === "Pending";
+            const status = isPostponed ? "Postponed" : pav.status;
+            const color = isPostponed
+              ? "red"
+              : pav.status === "Completed"
+              ? "green"
+              : "orange";
+
+            return <Tag color={color}>{status}</Tag>;
           },
           width: 100,
+          align: "center",
         },
       ],
     },
@@ -351,15 +356,20 @@ export default function Loans() {
             const cav = record?.verifications?.find(
               (v: any) => v.type === "AddressTwo"
             );
-            return cav ? (
-              <Tag color={cav.status === "Completed" ? "green" : "orange"}>
-                {cav.status}
-              </Tag>
-            ) : (
-              "-"
-            );
+            if (!cav) return "-";
+
+            const isPostponed = cav.isPostponed === true && cav.status === "Pending";
+            const status = isPostponed ? "Postponed" : cav.status;
+            const color = isPostponed
+              ? "red"
+              : cav.status === "Completed"
+              ? "green"
+              : "orange";
+
+            return <Tag color={color}>{status}</Tag>;
           },
           width: 100,
+          align: "center",
         },
       ],
     },
@@ -401,15 +411,20 @@ export default function Loans() {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Work"
             );
-            return wv ? (
-              <Tag color={wv.status === "Completed" ? "green" : "orange"}>
-                {wv.status}
-              </Tag>
-            ) : (
-              "-"
-            );
+            if (!wv) return "-";
+
+            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const status = isPostponed ? "Postponed" : wv.status;
+            const color = isPostponed
+              ? "red"
+              : wv.status === "Completed"
+              ? "green"
+              : "orange";
+
+            return <Tag color={color}>{status}</Tag>;
           },
           width: 100,
+          align: "center",
         },
       ],
     },
@@ -451,15 +466,20 @@ export default function Loans() {
             const wv = record?.verifications?.find(
               (v: any) => v.type === "Business"
             );
-            return wv ? (
-              <Tag color={wv.status === "Completed" ? "green" : "orange"}>
-                {wv.status}
-              </Tag>
-            ) : (
-              "-"
-            );
+            if (!wv) return "-";
+
+            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const status = isPostponed ? "Postponed" : wv.status;
+            const color = isPostponed
+              ? "red"
+              : wv.status === "Completed"
+              ? "green"
+              : "orange";
+
+            return <Tag color={color}>{status}</Tag>;
           },
           width: 100,
+          align: "center",
         },
       ],
     },

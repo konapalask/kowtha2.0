@@ -480,6 +480,12 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                         ).format("MMM DD,YYYY")}
                                       </span>
                                     )}
+                                    {verification?.isPostponed && verification?.postponedReason && (
+                                      <span>
+                                        Reason:{" "}
+                                        {verification?.postponedReason}
+                                      </span>
+                                    )}
                                     {type === "Business" && (
                                       <span>
                                         Business Name:{" "}
