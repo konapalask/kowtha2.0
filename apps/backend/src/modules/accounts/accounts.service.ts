@@ -729,7 +729,12 @@ export class AccountsService {
 
       const updatedOffice = await this.prisma.office.update({
         where: { id: officeId },
-        data: updateOfficeDto,
+        data: {
+          ...(updateOfficeDto.name && {name: updateOfficeDto.name}),
+          ...(updateOfficeDto.location && {location: updateOfficeDto.location}),
+          ...(updateOfficeDto.address && {address: updateOfficeDto.address}),
+          ...(updateOfficeDto.archived && {archived: updateOfficeDto.archived})
+        },
       });
 
       await this.loggingService.info('Office updated successfully', {
