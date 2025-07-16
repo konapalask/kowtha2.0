@@ -96,9 +96,9 @@ export const getFormFields = (formKey: string, currentTab: string) => {
         { name: "rentDetails", label: "Rent Details", type: "input" },
         {
           name: "residenceType",
-          label: "Type of Residence",
+          label: "Residence Type",
           type: "select",
-          options: ["House", "Apartment", "Villa"],
+          options: ["House", "Apartment", "Villa", "Others"],
           required: true,
         },
         {

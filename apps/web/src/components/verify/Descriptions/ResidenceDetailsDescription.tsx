@@ -55,7 +55,7 @@ const ResidenceDetailsDescription: React.FC<{
               </Descriptions.Item>
             )}
             <Descriptions.Item
-              label="Type of Residence"
+              label="Residence Type"
               contentStyle={getItemStyle("residenceType")}
             >
               {data?.residenceDetails?.residenceType}
