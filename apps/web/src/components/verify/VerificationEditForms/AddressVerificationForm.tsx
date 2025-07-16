@@ -23,7 +23,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
 
   return (
     <>
-      {/* <Col span={8}>
+      <Col span={8}>
         <Form.Item
           name="address"
           label="Address Type"
@@ -38,7 +38,7 @@ const AddressVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             </Select.Option>
           </Select>
         </Form.Item>
-      </Col> */}
+      </Col>
       <Col span={8}>
         <Form.Item
           name="addressCategory"

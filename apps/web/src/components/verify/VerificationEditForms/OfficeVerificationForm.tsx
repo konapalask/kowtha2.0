@@ -38,7 +38,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
       <Col span={4}>
         <Form.Item
           name="isAddressSame"
-          label="Address Mismatch"
+          label="is address same as initated?"
           rules={[{ required: true, message: "Please enter office address" }]}
         >
           <Select>
@@ -47,7 +47,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
-      {isAddressSame && (
+      {isAddressSame === "No" && (
         <Col span={16}>
           <Form.Item
             name="addressCorrection"

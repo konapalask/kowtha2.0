@@ -11,6 +11,7 @@ import { RolesGuard } from '../accounts/guards/roles.guard';
 import { Roles } from '../accounts/decorators/roles.decorator';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { createAssignmentDto } from './dto/assign-loan-executive';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { DeleteVerificationDto } from './dto/delete-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
@@ -277,21 +278,16 @@ export class LoanController {
   })
   async assignLoan(
     @Param('id') loanId: string,
-    @Body() body: { verificationType?: VerificationType; fieldExecutiveId?: number; address?: string; verifierId?: number; locationType?: LocationType; businessName?: string },
+    @Body() createAssignmentDto: createAssignmentDto,
   ) {
-    const parsedLoanId = parseInt(loanId, 10);
-    if (isNaN(parsedLoanId)) {
+    const loan = parseInt(loanId, 10);
+    if (isNaN(loan)) {
       throw new BadRequestException('Invalid loan ID');
     }
 
     const result = await this.loanService.assignVerification(
-      parsedLoanId,
-      body.verificationType,
-      body.fieldExecutiveId,
-      body.address,
-      body.verifierId,
-      body.locationType,
-      body.businessName
+      loan,
+      createAssignmentDto
     );
     return {
       status: 200,
@@ -328,18 +324,14 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
   ) {
-    const parsedLoanId = parseInt(loanId, 10);
-    if (isNaN(parsedLoanId)) {
+    const loan = parseInt(loanId, 10);
+    if (isNaN(loan)) {
       throw new BadRequestException('Invalid loan ID');
     }
 
     const result = await this.loanService.updateVerificationAssignment(
-      parsedLoanId,
-      updateAssignmentDto.verificationType,
-      updateAssignmentDto.fieldExecutiveId,
-      updateAssignmentDto.address,
-      updateAssignmentDto.verifierId,
-      updateAssignmentDto.businessName
+      loan,
+      updateAssignmentDto
     );
     return {
       status: 200,

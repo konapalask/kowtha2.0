@@ -39,7 +39,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
     defaultValues: initialData || {
       residenceStatus: '',
       residenceType: '',
-      specifyResidenceType: '',
+      // specifyResidenceType: '',
       standardOfLiving: '',
       // localityType: '',
       accessibility: '',
@@ -230,7 +230,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         rules={{required: 'Residence type is required'}}
         render={({field: {value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Type of Residence*</Text>
+            <Text style={styles.label}>Residence Type*</Text>
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => residenceTypeRef.current?.show()}>
@@ -249,7 +249,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
         name="residenceType"
       />
 
-      {residenceType === 'Others' && (
+      {/* {residenceType === 'Others' && (
         <Controller
           control={control}
           rules={{required: 'Specify Residence type is required'}}
@@ -274,7 +274,7 @@ const ResidenceDetails: React.FC<ResidenceDetailsProps> = ({
           )}
           name="specifyResidenceType"
         />
-      )}
+      )} */}
 
       <Controller
         control={control}

@@ -61,7 +61,7 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
       <Col span={6}>
         <Form.Item
           name="residenceType"
-          label="Type of Residence"
+          label="Residence Type"
           rules={[{ required: true, message: "Please select residence type" }]}
         >
           <Select>
@@ -74,7 +74,7 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      {residenceType === "Others" && (
+      {/* {residenceType === "Others" && (
         <Col span={6}>
           <Form.Item
             name="residenceTypeOther"
@@ -86,7 +86,7 @@ const ResidenceDetailsForm: React.FC<{ form: any }> = ({ form }) => {
             <Input />
           </Form.Item>
         </Col>
-      )}
+      )} */}
 
       <Col span={8}>
         <Form.Item

@@ -111,7 +111,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="5"><span class="var-value">${employerType}</span></td>
             </tr>
             <tr>
-              <th>Type of Industry</th>
+              <th>Nature of Business/Service</th>
               <td colspan="5"><span class="var-value">${natureOfService}</span></td>
             </tr>
             <tr>

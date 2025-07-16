@@ -13,6 +13,8 @@ import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { LoggingService } from '../common/logging/logging.service';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { createAssignmentDto } from './dto/assign-loan-executive';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma, LoanStatus, VerificationType, VerificationStatus, 
             AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
@@ -218,12 +220,7 @@ export class LoanService {
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    verificationType?: VerificationType,
-    fieldExecutiveId?: number,
-    address?: string,
-    verifierId?: number,
-    locationType?: LocationType,
-    businessName?: string
+    createData: createAssignmentDto
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -233,11 +230,11 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      if (!fieldExecutiveId || !verifierId) {
+      if (!createData.fieldExecutiveId || !createData.verifierId) {
         throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
       }
 
-      if (fieldExecutiveId && (!address || !verificationType)) {
+      if (createData.fieldExecutiveId && (!createData.address || !createData.verificationType)) {
         throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
       }
 
@@ -245,13 +242,14 @@ export class LoanService {
            const verification = await prisma.verification.create({
              data: {
               loan: { connect: { id: loan.id } },
-              type: verificationType || 'AddressOne',
-              verifier: { connect: { id: verifierId } },
-              fieldExecutive: { connect: { id: fieldExecutiveId } },
+              type: createData.verificationType || 'AddressOne',
+              verifier: { connect: { id: createData.verifierId } },
+              fieldExecutive: { connect: { id: createData.fieldExecutiveId } },
               status: 'Pending',
-              applicantAddress: address || null,
-              locationType: locationType || null,
-              businessName: businessName || null,
+              applicantAddress: createData.address || null,
+              locationType: createData.locationType || null,
+              businessName: createData.businessName || null,
+              currentOfficeName: createData.currentOfficeName || null,
              }
            });
 
@@ -262,11 +260,7 @@ export class LoanService {
 
         await this.loggingService.info('Verification assigned successfully', {
           loanId,
-          verificationType,
-          fieldExecutiveId,
-          hasAddress: !!address,
-          verifierId,
-          verificationId: verification.id
+          createData
         });
 
         return verification;
@@ -277,8 +271,7 @@ export class LoanService {
       }
       await this.loggingService.error('Failed to assign verification', {
         loanId,
-        verificationType,
-        fieldExecutiveId,
+        createData,
         error: error.message,
         stack: error.stack
       });
@@ -640,16 +633,6 @@ export class LoanService {
         where.applicationNumber = {contains: filters.applicationNumber, mode: 'insensitive'};
       }
 
-      type VerificationFromDB = {
-        verificationRetries: { date: string, reason: string }[];
-        // other fields from DB
-      };
-      
-      type ExtendedVerification = VerificationFromDB & {
-        isPostponed?: boolean;
-        postponedDate?: string;
-      };
-
       // Add date range filter
       if (filters?.startDate || filters?.endDate) {
         where.createdAt = {
@@ -743,21 +726,6 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
-      
-      if (filters?.id && loans.length > 0){
-        loans.forEach(loan => {
-          loan.verifications.forEach(verification => {
-            const verificationFromDB = verification as unknown as ExtendedVerification;
-            if (verification.verificationRetries.length > 0 && verification.verificationRetries[0].date) {
-              let postponedDate = new Date(verification.verificationRetries[0].date);
-              if (postponedDate > new Date()) {
-                verificationFromDB.isPostponed = true;
-                verificationFromDB.postponedDate = verificationFromDB.verificationRetries[0].date;
-              }
-            }
-          });
-        });
-      }
 
       await this.loggingService.debug('Retrieved loans with filters', {
         filters,
@@ -787,12 +755,8 @@ export class LoanService {
 
   async updateVerificationAssignment(
     loanId: number,
-    verificationType?: VerificationType,
-    fieldExecutiveId?: number,
-    address?: string,
-    verifierId?: number,
-    businessName?: string
-  ) {
+    updateData: UpdateAssignmentDto
+    ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
@@ -800,9 +764,10 @@ export class LoanService {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-
+      console.log(updateData.verificationType);
+      
       // // If field executive is provided, address is mandatory
-      if (!fieldExecutiveId && !address && !businessName && !verifierId) {
+      if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
         throw new BadRequestException('Address is required when assigning a field executive');
       }
 
@@ -813,25 +778,22 @@ export class LoanService {
           where: {
             loanId_type: {
               loanId,
-              type: verificationType,
+              type: updateData.verificationType,
             },
           },
           data: {
-            ...(fieldExecutiveId && { fieldExecutiveId }),
-            ...(verifierId && { verifierId }),
-            ...(address && { applicantAddress: address }),
-            ...(businessName && { businessName }),
+            ...(updateData.address && {applicantAddress : updateData.address}),
+            ...(updateData.businessName && {businessName : updateData.businessName}),
+            ...(updateData.verifierId && {verifierId : updateData.verifierId}),
+            ...(updateData.fieldExecutiveId && {fieldExecutiveId : updateData.fieldExecutiveId}),
+            ...(updateData.currentOfficeName && {currentOfficeName : updateData.currentOfficeName}),
             status: 'Pending', // Reset status when assignment is updated
           },
         });
 
         await this.loggingService.info('Verification assignment updated successfully', {
           loanId,
-          verificationType,
-          fieldExecutiveId,
-          hasAddress: !!address,
-          verifierId,
-          verificationId: verification.id
+          updateData
         });
 
         return verification;
@@ -842,8 +804,7 @@ export class LoanService {
       }
       await this.loggingService.error('Failed to update verification assignment', {
         loanId,
-        verificationType,
-        fieldExecutiveId,
+        updateData,
         error: error.message,
         stack: error.stack
       });
@@ -1647,7 +1608,7 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true } }
+              fieldExecutive: { select: { name: true, office: { select: { address: true, location: true, name: true } } } }
             }
           },
         }
@@ -1657,8 +1618,6 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      const address = loan.office.address;
-
       const verification = loan.verifications[0];
       
       if (!verification) {
@@ -1666,6 +1625,12 @@ export class LoanService {
       }
 
       const status = verification?.approvedStatus || '';
+
+      let address = verification.fieldExecutive?.office?.address || '' + 
+                    ', ' + verification.fieldExecutive?.office?.location || '' + 
+                    ', ' + verification.fieldExecutive?.office?.name || '' ;
+
+      address = address.toLocaleLowerCase();
 
       // Get the verification data
       let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
@@ -1788,7 +1753,7 @@ export class LoanService {
   private generateBaseHTMLTemplate(loan: any, address: string): string {
     let mailId = '';
 
-    if (address.includes('Vijayawada') || address.includes('vijayawada') || address.includes('VIJAYAWADA') ) {
+    if (address.includes('vijayawada')) {
       mailId = 'apfi@cakowtha.co.in';
     } else {
       mailId = 'tsfi@cakowtha.co.in';
@@ -2084,6 +2049,17 @@ export class LoanService {
               employeeCode: true
             }
           }
+        }
+      });
+
+      const updateVerification = await this.prisma.verification.update({
+        where:{
+          id: verification.id
+        },
+        data:{
+          isPostponed: true,
+          postponedDate: new Date(createVerificationRetryDto.date),
+          postponedReason: createVerificationRetryDto.reason
         }
       });
 
