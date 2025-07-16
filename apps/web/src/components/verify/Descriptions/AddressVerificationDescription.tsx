@@ -35,7 +35,7 @@ const AddressVerificationDescription: React.FC<{
             column={logs ? 1 : 3}
             extra={extra}
           >
-            {/* <Descriptions.Item
+            <Descriptions.Item
               label="Address Type"
               contentStyle={getItemStyle("address")}
             >
@@ -44,7 +44,7 @@ const AddressVerificationDescription: React.FC<{
                 : activeTab === "PermanentAddress"
                   ? "Permanent Address"
                   : activeTab}
-            </Descriptions.Item> */}
+            </Descriptions.Item>
             <Descriptions.Item
               label="Address Category"
               contentStyle={getItemStyle("addressCategory")}
