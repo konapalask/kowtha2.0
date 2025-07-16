@@ -67,7 +67,7 @@ export type ResidenceDetailsFormData = {
   residenceStatus: string;
   rentDetails: string;
   residenceType: string;
-  specifyResidenceType: string;
+  // specifyResidenceType: string;
   standardOfLiving: string;
   // localityType: string;
   accessibility: string;
