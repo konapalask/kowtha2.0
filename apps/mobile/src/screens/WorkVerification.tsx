@@ -124,7 +124,7 @@ const WorkVerification = () => {
       qualification: '',
     },
     employmentDetails: {
-      currentOfficeName: '',
+      currentOfficeName: item?.currentOfficeName,
       officeAddress: userData?.applicantAddress ?? '',
       yearsInCurrentJob: '',
       totalWorkExperience: '',
@@ -248,10 +248,15 @@ const WorkVerification = () => {
   };
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setExpandedSections(prev => {
+      const isCurrentlyOpen = !!prev[section];
+
+      // If it's open, close it (set all to false)
+      if (isCurrentlyOpen) return {};
+
+      // Otherwise, open this one and close others
+      return {[section]: true};
+    });
   };
 
   const handleBasicDetailsSubmit = async (
