@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsString, IsOptional } from 'class-validator';
-import { VerificationType } from '@prisma/client';
+import { LocationType, VerificationType } from '@prisma/client';
 
-export class UpdateAssignmentDto {
+export class createAssignmentDto {
   @ApiProperty({
     description: 'Type of verification',
     enum: VerificationType,
@@ -11,6 +11,15 @@ export class UpdateAssignmentDto {
   @IsEnum(VerificationType)
   @IsOptional()
   verificationType?: VerificationType;
+
+  @ApiProperty({
+    description: 'Location type',
+    enum: LocationType,
+    required: false
+  })
+  @IsEnum(VerificationType)
+  @IsOptional()
+  locationType?: LocationType;
 
   @ApiProperty({
     description: 'ID of the field executive to assign',
@@ -37,7 +46,7 @@ export class UpdateAssignmentDto {
   verifierId?: number;
 
   @ApiProperty({
-    description: 'Business name for verification',
+    description: 'Business name for Business verification',
     required: false
   })
   @IsString()
