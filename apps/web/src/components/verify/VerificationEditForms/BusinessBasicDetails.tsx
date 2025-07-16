@@ -196,7 +196,9 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
         <Form.Item
           name="businessProfile"
           label="Nature of Business"
-          rules={[{ required: true, message: "Please enter business profile" }]}
+          rules={[
+            { required: true, message: "Please enter nature of business" },
+          ]}
         >
           <Input placeholder="Enter Nature of Business" />
         </Form.Item>

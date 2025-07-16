@@ -151,7 +151,7 @@ export default function Loans() {
               <Col xs={24} sm={24} md={1} xl={1}>
                 <Badge
                   dot
-                  status={item?.isAvailbleToday ? "success" : "error"}
+                  status={item?.availabletoday ? "success" : "error"}
                 />
               </Col>
 
@@ -303,13 +303,14 @@ export default function Loans() {
             );
             if (!pav) return "-";
 
-            const isPostponed = pav.isPostponed === true && pav.status === "Pending";
+            const isPostponed =
+              pav.isPostponed === true && pav.status === "Pending";
             const status = isPostponed ? "Postponed" : pav.status;
             const color = isPostponed
               ? "red"
               : pav.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -358,13 +359,14 @@ export default function Loans() {
             );
             if (!cav) return "-";
 
-            const isPostponed = cav.isPostponed === true && cav.status === "Pending";
+            const isPostponed =
+              cav.isPostponed === true && cav.status === "Pending";
             const status = isPostponed ? "Postponed" : cav.status;
             const color = isPostponed
               ? "red"
               : cav.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -413,13 +415,14 @@ export default function Loans() {
             );
             if (!wv) return "-";
 
-            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const isPostponed =
+              wv.isPostponed === true && wv.status === "Pending";
             const status = isPostponed ? "Postponed" : wv.status;
             const color = isPostponed
               ? "red"
               : wv.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -468,13 +471,14 @@ export default function Loans() {
             );
             if (!wv) return "-";
 
-            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const isPostponed =
+              wv.isPostponed === true && wv.status === "Pending";
             const status = isPostponed ? "Postponed" : wv.status;
             const color = isPostponed
               ? "red"
               : wv.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },

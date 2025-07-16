@@ -16,7 +16,13 @@ import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
-import { createOfficeApi, getOfficesApi, getOrganizationApi, Office, updateOfficeApi } from "@/services/settings.services";
+import {
+  createOfficeApi,
+  getOfficesApi,
+  getOrganizationApi,
+  Office,
+  updateOfficeApi,
+} from "@/services/settings.services";
 import { getUserDetails } from "@/utils/utility";
 
 const { TabPane } = Tabs;
@@ -36,8 +42,8 @@ interface Organization {
 }
 
 export default function OrganizationSettings() {
-  const userDetails = getUserDetails()
-  const isAdmin = userDetails?.role==="Admin"
+  const userDetails = getUserDetails();
+  const isAdmin = userDetails?.role === "Admin";
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -54,8 +60,8 @@ export default function OrganizationSettings() {
     const fetchOrganization = async () => {
       try {
         const result = await getOrganizationApi();
-          setOrganization(result.data);
-          form.setFieldsValue(result.data);
+        setOrganization(result.data);
+        form.setFieldsValue(result.data);
       } catch (error) {
         console.error("Fetch organization error:", error);
         // message.error("Failed to load organization details");
@@ -68,27 +74,25 @@ export default function OrganizationSettings() {
   const fetchOffices = async () => {
     try {
       const result = await getOfficesApi();
-        setOffices(result?.data?.data ?? []);
+      setOffices(result?.data?.data ?? []);
     } catch (error) {
       console.error("Fetch offices error:", error);
       // message.error("Failed to load branches");
     }
   };
   useEffect(() => {
-    
     fetchOffices();
   }, []);
 
   const handleOrganizationUpdate = async (values: any) => {
     try {
       setLoading(true);
-       await axiosInstance.put(
+      await axiosInstance.put(
         `/accounts/organization/${organization.id}`,
         values
       );
-        setOrganization({ ...organization, ...values });
-        message.success("Organization details updated successfully");
-      
+      setOrganization({ ...organization, ...values });
+      message.success("Organization details updated successfully");
     } catch (error) {
       message.error("Failed to update organization details");
     } finally {
@@ -102,13 +106,13 @@ export default function OrganizationSettings() {
 
       if (editingOffice) {
         // Update existing office
-        await updateOfficeApi(editingOffice.id,values)
-        fetchOffices()
+        await updateOfficeApi(editingOffice.id, values);
+        fetchOffices();
         message.success("Branch updated successfully");
       } else {
         // Create new office
-        await createOfficeApi(values)
-        fetchOffices()
+        await createOfficeApi(values);
+        fetchOffices();
         message.success("Branch added successfully");
       }
 
@@ -129,21 +133,23 @@ export default function OrganizationSettings() {
     setIsModalVisible(true);
   };
 
-  const handleDeleteOffice = async (id: number) => {
+  const handleArchive = async (id: number, archive: boolean) => {
     try {
       setLoading(true);
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOffices(offices.filter((office) => office.id !== id));
-      message.success("Branch deleted successfully");
+      const values = officeForm.validateFields();
+      await updateOfficeApi(id, { ...values, archived: archive });
+      fetchOffices();
+      message.success(
+        `Branch ${archive ? "Deleted" : "Unarchived"} successfully`
+      );
     } catch (error) {
-      message.error("Failed to delete Branch");
+      message.error(`Failed to ${archive ? "Delete" : "Unarchive"} Branch`);
     } finally {
       setLoading(false);
     }
   };
 
-  const officeColumns:any[] = [
+  const officeColumns: any[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -169,26 +175,28 @@ export default function OrganizationSettings() {
       render: (value: number | undefined) => value ?? 0,
       width: 150,
     },
-    ...(isAdmin?[
-      {
-        title: "Actions",
-        key: "actions",
-        align: "center",
-        render: (_: any, record: Office) => (
-          <Space>
-            <Button
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => handleEditOffice(record)}
-            >
-              Edit
-            </Button>
-          </Space>
-        ),
-        width: 100,
-        fixed: "right",
-      }
-    ]:[]),
+    ...(isAdmin
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            align: "center",
+            render: (_: any, record: Office) => (
+              <Space>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEditOffice(record)}
+                >
+                  Edit
+                </Button>
+              </Space>
+            ),
+            width: 100,
+            fixed: "right",
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -220,40 +228,46 @@ export default function OrganizationSettings() {
                 //     : value
                 // }
               >
-                <Input  onBlur={(e) => {
-                  e.target.value = e.target.value.trim();
-                }}
-                readOnly={!isAdmin} />
+                <Input
+                  onBlur={(e) => {
+                    e.target.value = e.target.value.trim();
+                  }}
+                  readOnly={!isAdmin}
+                />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
                 <Input.TextArea rows={4} readOnly={!isAdmin} />
               </Form.Item>
 
-            {isAdmin &&  <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                  Save Changes
-                </Button>
-              </Form.Item>}
+              {isAdmin && (
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" loading={loading}>
+                    Save Changes
+                  </Button>
+                </Form.Item>
+              )}
             </Form>
           </Card>
         </TabPane>
 
         <TabPane tab="Branches" key="2">
           <Card>
-            {isAdmin&&<div style={{ marginBottom: 16 }} className="flex-end">
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditingOffice(null);
-                  officeForm.resetFields();
-                  setIsModalVisible(true);
-                }}
-              >
-                Add Branch
-              </Button>
-            </div>}
+            {isAdmin && (
+              <div style={{ marginBottom: 16 }} className="flex-end">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setEditingOffice(null);
+                    officeForm.resetFields();
+                    setIsModalVisible(true);
+                  }}
+                >
+                  Add Branch
+                </Button>
+              </div>
+            )}
 
             <Table
               className="striped-table"
@@ -282,31 +296,41 @@ export default function OrganizationSettings() {
           <Form.Item
             name="name"
             label="Branch Name"
-            rules={[{ required: true, message: "Please enter branch name" },{
-              validator: (_, value) =>
-                value && /^\s/.test(value)
-                  ? Promise.reject(new Error("Can't start with a space"))
-                  : Promise.resolve(),
-            },]}
+            rules={[
+              { required: true, message: "Please enter branch name" },
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+            ]}
           >
-            <Input  onBlur={(e) => {
-               e.target.value = e.target.value.trim();
-            }} />
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim();
+              }}
+            />
           </Form.Item>
 
           <Form.Item
             name="location"
             label="Town/City"
-            rules={[{ required: true, message: "Please enter town or city" },{
-              validator: (_, value) =>
-                value && /^\s/.test(value)
-                  ? Promise.reject(new Error("Can't start with a space"))
-                  : Promise.resolve(),
-            },]}
+            rules={[
+              { required: true, message: "Please enter town or city" },
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+            ]}
           >
-            <Input  onBlur={(e) => {
-              e.target.value = e.target.value.trim(); // or just .trim() to remove both ends
-            }} />
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim(); // or just .trim() to remove both ends
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -334,32 +358,45 @@ export default function OrganizationSettings() {
             </Space>
           </Form.Item>
 
-          {editingOffice && (
+          {!editingOffice?.archived && (
             <div style={{ marginTop: 8 }}>
               <Popconfirm
                 title="Are you sure you want to archive this office?"
                 onConfirm={async () => {
                   setLoading(true);
-                  // Mock API call for archiving
-                  await new Promise((resolve) => setTimeout(resolve, 1000));
-                  setOffices(
-                    offices.map((office) =>
-                      office.id === editingOffice.id
-                        ? { ...office, archived: true }
-                        : office
-                    )
-                  );
+                  handleArchive(editingOffice?.id, true);
                   setIsModalVisible(false);
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  message.success("Branch archived");
+                  // message.success("Branch deleted");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
                 cancelText="No"
               >
-                <a style={{ color: "#cf1322" }}>Archive Office</a>
+                <a style={{ color: "#cf1322" }}>Delete Office</a>
+              </Popconfirm>
+            </div>
+          )}
+          {editingOffice?.archived && (
+            <div style={{ marginTop: 8 }}>
+              <Popconfirm
+                title="Are you sure you want to archive this office?"
+                onConfirm={async () => {
+                  setLoading(true);
+                  handleArchive(editingOffice?.id, false);
+                  setIsModalVisible(false);
+                  setEditingOffice(null);
+                  officeForm.resetFields();
+                  setLoading(false);
+                  // message.success("Branch deleted");
+                }}
+                onCancel={() => {}}
+                okText="Yes"
+                cancelText="No"
+              >
+                <a style={{ color: "#cf1322" }}>Unarchive Office</a>
               </Popconfirm>
             </div>
           )}
