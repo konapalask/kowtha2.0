@@ -120,7 +120,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessName || ''}</span></td>
           </tr>
           <tr>
-            <th>Business Profile</th>
+            <th>Nature of Business/Service</th>
             <td colspan="5"><span class="var-value">${verificationData.basicDetails?.businessProfile || ''}</span></td>
           </tr>
           <tr>

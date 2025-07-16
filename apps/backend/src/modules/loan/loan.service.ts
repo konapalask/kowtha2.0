@@ -1647,7 +1647,7 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true } }
+              fieldExecutive: { select: { name: true, office: { select: { address: true, location: true, name: true } } } }
             }
           },
         }
@@ -1657,8 +1657,6 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
 
-      const address = loan.office.address;
-
       const verification = loan.verifications[0];
       
       if (!verification) {
@@ -1666,6 +1664,12 @@ export class LoanService {
       }
 
       const status = verification?.approvedStatus || '';
+
+      let address = verification.fieldExecutive?.office?.address || '' + 
+                    ', ' + verification.fieldExecutive?.office?.location || '' + 
+                    ', ' + verification.fieldExecutive?.office?.name || '' ;
+
+      address = address.toLocaleLowerCase();
 
       // Get the verification data
       let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
@@ -1788,7 +1792,7 @@ export class LoanService {
   private generateBaseHTMLTemplate(loan: any, address: string): string {
     let mailId = '';
 
-    if (address.includes('Vijayawada') || address.includes('vijayawada') || address.includes('VIJAYAWADA') ) {
+    if (address.includes('vijayawada')) {
       mailId = 'apfi@cakowtha.co.in';
     } else {
       mailId = 'tsfi@cakowtha.co.in';
