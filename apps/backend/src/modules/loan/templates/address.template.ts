@@ -37,7 +37,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         `;
       } else if(isApplicantAvailable === 'No') {
         let availablePersonRelation = verificationData.basicDetails?.availablePersonRelation || '';
-        if(availablePersonRelation === 'Other') {
+        if(availablePersonRelation === 'Others') {
           availablePersonRelation = verificationData.basicDetails?.availablePersonRelationOther || '';
         }
         isApplicantAvailable = `
@@ -93,7 +93,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <th>Spouse Employment Details</th>
           <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.spouseEmploymentDetails || ''}</span></td>
         </tr>
-          
         `
       }
     return `
@@ -146,10 +145,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
         </tr>
         <tr>
-          <th>Accessibility</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
-        </tr>
-        <tr>
           <th>Residence Type</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceType || ''}</span></td>
         </tr>
@@ -168,10 +163,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         <tr>
           <th>Years at Current Address</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
-        </tr>
-        <tr>
-          <th>Political Symbol Visible</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.politicalSymbolVisible || ''}</span></td>
         </tr>
       </table>
       <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
@@ -192,6 +183,14 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         <tr>
           <th>Address Proof Submitted</th>
           <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressProof || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Political Symbol Visible</th>
+          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.politicalSymbolVisible || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Accessibility</th>
+          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
         </tr>
         <tr>
           <th>Previous City</th>
@@ -309,6 +308,9 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         `).join('')
         : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
       </table>
+      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
+        Field Executive: ${html_data.fieldExecutive || ''}
+      </div>
     </div>
 
     <div class="footer">

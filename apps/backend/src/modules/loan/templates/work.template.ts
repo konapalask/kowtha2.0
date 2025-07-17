@@ -47,7 +47,45 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </tr>
         `;
       }
+      
+      let isOfficeNameSame = verificationData.employmentDetails?.isOfficeNameSame || '';
+      if(isOfficeNameSame === 'Yes') {
+        isOfficeNameSame = `
+          <tr>
+            <th>Is Office Name Same</th>
+            <td colspan="5"><span class="var-value">${isOfficeNameSame}</span></td>
+          </tr>
+        `;
+      } else if(isOfficeNameSame === 'No') {
+        isOfficeNameSame = `
+          <tr>
+            <th>Is Office Name Same</th>
+            <td colspan="5"><span class="var-value">${isOfficeNameSame}</span></td>
+          </tr>
+          <tr>
+            <th>Office Name Correction</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.correctedOfficeName || ''}</span></td>
+          </tr>
+        `;
+      } else {
+        isOfficeNameSame = '';
+      }
 
+
+      let references_loans = '';
+      if(verificationData.pastEmployment?.employments?.length > 4 || (verificationData.existingLoans?.loans?.length > 2 && verificationData.colleagueReferences?.references?.length > 2)){
+        references_loans = `
+        <div class="footer">
+          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+          Generated on ${new Date().toLocaleString()}
+        </div>
+      <div style="page-break-before: always;"></div>
+
+        `
+      } else {
+        references_loans = '';
+      }
+      
       return `
         <div class="align-wrapper">
           <table class="section-table">
@@ -124,7 +162,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <th>Monthly Net Salary</th>
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
             </tr>
-            ${isAddressSame}
           </table>
           <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
             Field Executive: ${html_data.fieldExecutive || ''}
@@ -137,6 +174,11 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
   
         <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
+          <table class="section-table">
+            <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
+            ${isAddressSame}
+            ${isOfficeNameSame}
+          </table>
           <table class="section-table">
             <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
             <tr>
@@ -162,6 +204,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </table>
         </div>
   
+        ${references_loans}
         <div class="align-wrapper">
           <table class="section-table">
             <tr><td colspan="6" class="section-header">Colleague References</td></tr>
@@ -244,10 +287,10 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         <br>
         <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
   
-            <div class="footer">
-              <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-              Generated on ${new Date().toLocaleString()}
-            </div>
-            ${html_data.imagesData}
+        <div class="footer">
+          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+          Generated on ${new Date().toLocaleString()}
+        </div>
+        ${html_data.imagesData}
       `;
 }

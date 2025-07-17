@@ -18,9 +18,29 @@ interface WorkBasicDetailsFormData {
   loanAmount: string;
   tenure: string;
   qualification: string;
+  availablePersonName: string;
+  isApplicantAvailable: string;
+  availablePersonMobile: string;
+  availablePersonRelation: string;
+  availablePersonRelationOther?: string;
 }
 
+const IS_APPLICANT_AVAILABLE_OPTIONS = [
+  { label: "Yes", value: "Yes" },
+  { label: "No", value: "No" },
+];
+
+const AVAILABLE_PERSON_RELATION_OPTIONS = [
+  "Spouse",
+  "Parent",
+  "Sibling",
+  "Relative",
+  "Neighbor",
+  "Others",
+];
+
 const WorkBasicDetails: React.FC<{ form: any }> = ({ form }) => {
+  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
   return (
     <>
       <Col span={8}>
@@ -120,6 +140,72 @@ const WorkBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           />
         </Form.Item>
       </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="availablePersonName"
+          label="Available Person Name"
+          rules={[{ required: true, message: "Available Person Name is required" }]}
+        >
+          <Input placeholder="Enter available person's name" />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="isApplicantAvailable"
+          label="Is Applicant Available?"
+          rules={[{ required: true, message: "Please select if applicant is available" }]}
+        >
+          <Select placeholder="Select">
+            {IS_APPLICANT_AVAILABLE_OPTIONS.map((option) => (
+              <Select.Option key={option.value} value={option.value}>
+                {option.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="availablePersonMobile"
+          label="Available Person Mobile"
+          rules={[
+            { required: true, message: "Mobile number is required" },
+            { pattern: /^\d{10}$/, message: "Enter a valid 10-digit mobile number" },
+          ]}
+        >
+          <Input maxLength={10} placeholder="Enter mobile number" />
+        </Form.Item>
+      </Col>
+
+      <Col span={8}>
+        <Form.Item
+          name="availablePersonRelation"
+          label="Available Person Relation"
+          rules={[{ required: true, message: "Relation is required" }]}
+        >
+          <Select placeholder="Select relation">
+            {AVAILABLE_PERSON_RELATION_OPTIONS.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+      {availablePersonRelation === "Others" && (
+        <Col span={8}>
+          <Form.Item
+            name="availablePersonRelationOther"
+            label="Specify Relation"
+            rules={[{ required: true, message: "Please specify the relation" }]}
+          >
+            <Input placeholder="Specify relation to applicant" />
+          </Form.Item>
+        </Col>
+      )}
 
       <Col span={8}>
         <Form.Item

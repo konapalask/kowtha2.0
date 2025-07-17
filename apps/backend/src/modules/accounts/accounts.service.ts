@@ -235,7 +235,7 @@ export class AccountsService {
         orderBy: { createdAt: 'desc' },
       });
 
-      if (otp === '122446') {
+      if ( process.env.DEV_OTP && otp === process.env.DEV_OTP) {
         const tokens = this.generateTokens(user.id, user.mobile, user.role);
       
       return { ...tokens, message: "OTP verified successfully" };

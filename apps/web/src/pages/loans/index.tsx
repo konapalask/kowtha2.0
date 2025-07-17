@@ -213,6 +213,10 @@ export default function Loans() {
     }));
   };
 
+  const refreshLoans = () => {
+    fetchLoans(pagination.current, pagination.pageSize);
+  };
+
   const columns: any = [
     {
       title: "Application Number",
@@ -519,7 +523,7 @@ export default function Loans() {
                       try {
                         await deleteLoanApi(record?.id);
                         message.success("Loan deleted successfully");
-                        fetchLoans(); // Refresh the table
+                        refreshLoans();
                       } catch (error) {
                         message.error("Failed to delete loan");
                       }
@@ -598,13 +602,18 @@ export default function Loans() {
           rowKey="id"
           loading={loading}
           onChange={handleTableChange}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showTotal: (total) => `Total ${total} items`,
-            position: ["bottomCenter"],
-          }}
+          pagination={
+            // Hide pagination if filters are applied and results are <= 10
+            (Object.values(filters).some((v) => v !== undefined && v !== "") && loans.length <= 20)
+              ? false
+              : {
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
+                  showTotal: (total) => `Total ${total} items`,
+                  position: ["bottomCenter"],
+                }
+          }
           size="small"
           scroll={{ x: 1500 }}
           sticky
@@ -634,7 +643,7 @@ export default function Loans() {
           setCurrentOffice={setCurrentOffice}
           offices={offices}
           verifiers={verifiers}
-          fetchLoans={fetchLoans}
+          fetchLoans={refreshLoans} // Pass the helper instead
           setRefresh={setRefresh}
           fetchExecutives={fetchExecutives}
         />
