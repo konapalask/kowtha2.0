@@ -93,7 +93,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <th>Spouse Employment Details</th>
           <td colspan="5"><span class="var-value">${verificationData.familyEmploymentDetails?.spouseEmploymentDetails || ''}</span></td>
         </tr>
-          
         `
       }
     return `
@@ -169,10 +168,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <th>Years at Current Address</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
         </tr>
-        <tr>
-          <th>Political Symbol Visible</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.politicalSymbolVisible || ''}</span></td>
-        </tr>
       </table>
       <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
         Field Executive: ${html_data.fieldExecutive || ''}
@@ -192,6 +187,10 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         <tr>
           <th>Address Proof Submitted</th>
           <td colspan="5"><span class="var-value">${verificationData.addressVerification?.addressProof || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Political Symbol Visible</th>
+          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.politicalSymbolVisible || ''}</span></td>
         </tr>
         <tr>
           <th>Previous City</th>
