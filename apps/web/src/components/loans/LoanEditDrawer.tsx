@@ -161,7 +161,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
       Work: false,
       Business: false,
     });
-    fetchLoans();
+    fetchLoans(); 
   };
 
   const handleDelete = async (
