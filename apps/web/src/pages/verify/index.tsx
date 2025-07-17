@@ -43,14 +43,19 @@ export default function Verify() {
   const [loading, setLoading] = useState(false);
   // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loans, setLoans] = useState<LoanData[]>([]);
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   getFieldExecutivesApi()?.then((res) => {
-  //     console.log(res)
-  //   })?.catch((err) => {
-  //     console.log(err)
-  //   });
-  // }, []);
+  // Pagination state
+  const pageSize = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Restore page from query string on mount
+  useEffect(() => {
+    if (router.query.page) {
+      const page = parseInt(router.query.page as string, 10);
+      if (!isNaN(page)) setCurrentPage(page);
+    }
+  }, [router.query.page]);
 
   useEffect(() => {
     getVerifierLoansApi()
@@ -61,8 +66,6 @@ export default function Verify() {
         console.log(err);
       });
   }, []);
-
-  const router = useRouter();
 
   const filteredLoans =
     loans?.filter((loan) =>
@@ -153,7 +156,10 @@ export default function Verify() {
         <Button
           type="link"
           icon={<EyeOutlined />}
-          onClick={() => record?.id && router?.push?.(`/verify/${record.id}`)}
+          onClick={() => {
+            // Pass current page in query string
+            record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
+          }}
         >
           View
         </Button>
@@ -162,6 +168,26 @@ export default function Verify() {
       fixed: "right",
     },
   ];
+
+  // Table pagination config
+  const paginationConfig =
+    filteredLoans.length >= pageSize
+      ? {
+          current: currentPage,
+          pageSize,
+          showSizeChanger: false,
+          showTotal: (total: number) => `Total ${total ?? 0} items`,
+          position: ["bottomCenter" as "bottomCenter"],
+          onChange: (page: number) => {
+            setCurrentPage(page);
+            // Update query string
+            router.replace({
+              pathname: router.pathname,
+              query: { ...router.query, page },
+            }, undefined, { shallow: true });
+          },
+        }
+      : false;
 
   return (
     <DashboardLayout>
@@ -197,16 +223,7 @@ export default function Verify() {
             record?.id?.toString() ?? Math.random().toString()
           }
           loading={loading}
-          pagination={
-            filteredLoans.length >= 10
-              ? {
-                  pageSize: 10,
-                  showSizeChanger: false,
-                  showTotal: (total) => `Total ${total ?? 0} items`,
-                  position: ["bottomCenter"],
-                }
-              : false
-          }
+          pagination={paginationConfig}
           // size="small"
           // scroll={{ y: 400 }}
           sticky
