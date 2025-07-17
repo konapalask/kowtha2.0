@@ -47,9 +47,19 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </tr>
         `;
       }
+      let references_loans = '';
+      
+      if(verificationData.pastEmployment?.employments?.length > 4 || (verificationData.existingLoans?.loans?.length > 2 && verificationData.colleagueReferences?.references?.length > 2)){
+        references_loans = `
+        <div class="footer">
+          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+          Generated on ${new Date().toLocaleString()}
+        </div>
+      <div style="page-break-before: always;"></div>
 
-      if(verificationData.pastEmployment?.employments?.length > 0){
-        
+        `
+      } else {
+        references_loans = '';
       }
       
       return `
@@ -166,6 +176,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </table>
         </div>
   
+        ${references_loans}
         <div class="align-wrapper">
           <table class="section-table">
             <tr><td colspan="6" class="section-header">Colleague References</td></tr>
@@ -248,10 +259,10 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         <br>
         <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
   
-            <div class="footer">
-              <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-              Generated on ${new Date().toLocaleString()}
-            </div>
-            ${html_data.imagesData}
+        <div class="footer">
+          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
+          Generated on ${new Date().toLocaleString()}
+        </div>
+        ${html_data.imagesData}
       `;
 }
