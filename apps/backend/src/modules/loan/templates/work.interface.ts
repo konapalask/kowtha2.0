@@ -38,7 +38,7 @@ export interface WorkVerificationData {
         grossSalary: string;
         employerType: string;
         isOfficeNameSame: string;
-        officeNameCorrection: string;
+        correctedOfficeName: string;
         idCardNumber: string;
         isAddressSame: string;
         officeAddress: string;

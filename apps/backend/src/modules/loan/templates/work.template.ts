@@ -64,7 +64,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </tr>
           <tr>
             <th>Office Name Correction</th>
-            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeNameCorrection || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.correctedOfficeName || ''}</span></td>
           </tr>
         `;
       } else {
