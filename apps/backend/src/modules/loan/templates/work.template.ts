@@ -151,7 +151,10 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
           <table class="section-table">
+            <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
             ${isAddressSame}
+          </table>
+          <table class="section-table">
             <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
             <tr>
               <th>Employer Name</th>
