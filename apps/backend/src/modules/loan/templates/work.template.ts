@@ -47,8 +47,32 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           </tr>
         `;
       }
-      let references_loans = '';
       
+      let isOfficeNameSame = verificationData.employmentDetails?.isOfficeNameSame || '';
+      if(isOfficeNameSame === 'Yes') {
+        isOfficeNameSame = `
+          <tr>
+            <th>Is Office Name Same</th>
+            <td colspan="5"><span class="var-value">${isOfficeNameSame}</span></td>
+          </tr>
+        `;
+      } else if(isOfficeNameSame === 'No') {
+        isOfficeNameSame = `
+          <tr>
+            <th>Is Office Name Same</th>
+            <td colspan="5"><span class="var-value">${isOfficeNameSame}</span></td>
+          </tr>
+          <tr>
+            <th>Office Name Correction</th>
+            <td colspan="5"><span class="var-value">${verificationData.employmentDetails?.officeNameCorrection || ''}</span></td>
+          </tr>
+        `;
+      } else {
+        isOfficeNameSame = '';
+      }
+
+
+      let references_loans = '';
       if(verificationData.pastEmployment?.employments?.length > 4 || (verificationData.existingLoans?.loans?.length > 2 && verificationData.colleagueReferences?.references?.length > 2)){
         references_loans = `
         <div class="footer">
@@ -153,6 +177,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
           <table class="section-table">
             <tr><td colspan="6" class="section-header">Employment Verification</td></tr>
             ${isAddressSame}
+            ${isOfficeNameSame}
           </table>
           <table class="section-table">
             <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
