@@ -37,7 +37,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         `;
       } else if(isApplicantAvailable === 'No') {
         let availablePersonRelation = verificationData.basicDetails?.availablePersonRelation || '';
-        if(availablePersonRelation === 'Other') {
+        if(availablePersonRelation === 'Others') {
           availablePersonRelation = verificationData.basicDetails?.availablePersonRelationOther || '';
         }
         isApplicantAvailable = `

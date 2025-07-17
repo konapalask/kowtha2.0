@@ -48,6 +48,10 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         `;
       }
 
+      if(verificationData.pastEmployment?.employments?.length > 0){
+        
+      }
+      
       return `
         <div class="align-wrapper">
           <table class="section-table">
@@ -124,7 +128,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <th>Monthly Net Salary</th>
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
             </tr>
-            ${isAddressSame}
           </table>
           <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
             Field Executive: ${html_data.fieldExecutive || ''}
@@ -138,6 +141,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
           <table class="section-table">
+            ${isAddressSame}
             <tr><td colspan="7" class="section-header">Past Employment History</td></tr>
             <tr>
               <th>Employer Name</th>
