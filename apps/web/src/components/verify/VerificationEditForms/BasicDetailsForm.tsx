@@ -18,6 +18,7 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
   const maritalStatus = Form.useWatch("maritalStatus", form);
   const category = Form.useWatch("category", form);
   const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
+  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
 
   return (
     <>
@@ -234,6 +235,19 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
               </Select>
             </Form.Item>
           </Col>
+          {availablePersonRelation === "Others" && (
+            <Col span={8}>
+              <Form.Item
+                name="availablePersonRelationOther"
+                label="Specify Relation"
+                rules={[
+                  { required: true, message: "Please specify the relation" },
+                ]}
+              >
+                <Input placeholder="Specify relation to applicant" />
+              </Form.Item>
+            </Col>
+          )}
         </>
       )}
     </>

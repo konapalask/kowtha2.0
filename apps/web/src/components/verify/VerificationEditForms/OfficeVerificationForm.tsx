@@ -9,6 +9,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
   // const salaryMode = Form.useWatch("salaryMode", form);
   const isAddressSame = Form.useWatch("isAddressSame", form);
   const natureOfService = Form.useWatch("natureOfService", form);
+  const isOfficeNameSame = Form.useWatch("isOfficeNameSame", form);
 
   return (
     <>
@@ -58,7 +59,32 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
-      {/* <Col span={8}>
+      {form.getFieldValue("isOfficeNameSame") !== undefined && form.getFieldValue("isOfficeNameSame") !== null && (
+        <Col span={8}>
+          <Form.Item
+            name="isOfficeNameSame"
+            label="Is Office Name Same as Initiated?"
+            rules={[{ required: true, message: "Please specify if office name is same as initiated" }]}
+          >
+            <Select placeholder="Select Yes/No">
+              <Select.Option value="Yes">Yes</Select.Option>
+              <Select.Option value="No">No</Select.Option>
+            </Select>
+          </Form.Item>
+        </Col>
+      )}
+      {form.getFieldValue("isOfficeNameSame") === "No" && form.getFieldValue("correctedOfficeName") !== undefined && form.getFieldValue("correctedOfficeName") !== null && (
+        <Col span={16}>
+          <Form.Item
+            name="correctedOfficeName"
+            label="Corrected Office Name"
+            rules={[{ required: true, message: "Please enter corrected office name" }]}
+          >
+            <Input.TextArea rows={2} placeholder="Enter corrected office name" />
+          </Form.Item>
+        </Col>
+      )}
+       <Col span={8}>
         <Form.Item
           name="isAddressSame"
           label="Address Mismatch?"
@@ -69,8 +95,8 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Select.Option value="No">No</Select.Option>
           </Select>
         </Form.Item>
-      </Col> */}
-      {/* {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
+      </Col> 
+       {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
         <Col span={16}>
           <Form.Item
             name="addressCorrection"
@@ -80,7 +106,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Input.TextArea rows={2} placeholder="Enter corrected address" />
           </Form.Item>
         </Col>
-      )} */}
+      )} 
       <Col span={8}>
         <Form.Item
           name="yearsInCurrentJob"
