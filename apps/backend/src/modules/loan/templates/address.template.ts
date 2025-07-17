@@ -145,10 +145,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
         </tr>
         <tr>
-          <th>Accessibility</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
-        </tr>
-        <tr>
           <th>Residence Type</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.residenceType || ''}</span></td>
         </tr>
@@ -191,6 +187,10 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         <tr>
           <th>Political Symbol Visible</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.politicalSymbolVisible || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Accessibility</th>
+          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.accessibility || ''}</span></td>
         </tr>
         <tr>
           <th>Previous City</th>
