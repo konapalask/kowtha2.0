@@ -6,7 +6,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         html_data.path = html_data.path.replace('<ul>', '').replace('</ul>', '')
       }
       const date = new Date();
-      const timeZone = 'Europe/London';
+      const timeZone = 'Asia/Kolkata';
       const zonedDate = toZonedTime(date, timeZone);
 
       const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });

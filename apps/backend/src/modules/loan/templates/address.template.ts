@@ -14,7 +14,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       
 
       const date = new Date();
-      const timeZone = 'Europe/London';
+      const timeZone = 'Asia/Kolkata';
       const zonedDate = toZonedTime(date, timeZone);
 
       const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
