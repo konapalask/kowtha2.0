@@ -9,7 +9,15 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       if(aadhar.length > 4) {
         aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
       }
-  
+      
+      const formatter = new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+      
+      const istDate = formatter.format(new Date());
+
       const recommendationStyles: Record<string, string> = {
         Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
         Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
@@ -172,7 +180,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      Generated on ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -255,7 +263,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      Generated on ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -315,7 +323,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      Generated on ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -350,7 +358,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
         <div class="footer">
           <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+          Generated on ${istDate}
         </div>
         ${html_data.imagesData}
   `;
