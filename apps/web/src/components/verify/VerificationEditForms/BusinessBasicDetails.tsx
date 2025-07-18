@@ -26,6 +26,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   const personMet = Form.useWatch("personMet", form);
   const isAddressSame = Form.useWatch("isAddressSame", form);
   const isBusinessNameSame = Form.useWatch("isBusinessNameSame", form);
+  const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
 
   return (
     <>
@@ -90,6 +91,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
         </Form.Item>
       </Col>
 
+      {/*
       <Col span={8}>
         <Form.Item
           name="personMet"
@@ -122,6 +124,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
+      */}
 
       {personMet === "Others" && (
         <Col span={8}>
@@ -138,6 +141,45 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
             <Input placeholder="Specify relationship" />
           </Form.Item>
         </Col>
+      )}
+
+      {/* Is Applicant Available */}
+      <Col span={8}>
+        <Form.Item
+          name="isApplicantAvailable"
+          label="Is Applicant Available"
+          rules={[{ required: true, message: "Please select if applicant is available" }]}
+        >
+          <Select placeholder="Select">
+            <Select.Option value="Yes">Yes</Select.Option>
+            <Select.Option value="No">No</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      {isApplicantAvailable === "No" && (
+        <>
+          <Col span={8}>
+            <Form.Item
+              name="availablePersonName"
+              label="Name of the person met"
+              rules={[{ required: true, message: "Please enter the name of the person met" }]}
+            >
+              <Input placeholder="Enter name of the person met" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="availablePersonMobile"
+              label="Contact Number"
+              rules={[
+                { required: true, message: "Please enter contact number" },
+                { pattern: /^\d{10}$/, message: "Please enter a valid 10-digit mobile number" },
+              ]}
+            >
+              <Input maxLength={10} placeholder="Enter contact number" />
+            </Form.Item>
+          </Col>
+        </>
       )}
 
       <Col span={8}>

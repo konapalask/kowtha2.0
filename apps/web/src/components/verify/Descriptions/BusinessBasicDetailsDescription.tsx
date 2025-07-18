@@ -49,7 +49,7 @@ const BusinessBasicDetailsDescription: React.FC<{
           >
             {data?.basicDetails?.aadhar}
           </Descriptions.Item>
-          <Descriptions.Item
+          {/* <Descriptions.Item
             label="Person Met"
             contentStyle={getItemStyle("personMet")}
           >
@@ -72,7 +72,7 @@ const BusinessBasicDetailsDescription: React.FC<{
                 </Descriptions.Item>
               )}
             </>
-          )}
+          )} */}
           <Descriptions.Item
             label="Business Name"
             contentStyle={getItemStyle("businessName")}
@@ -118,6 +118,34 @@ const BusinessBasicDetailsDescription: React.FC<{
             >
               {data?.basicDetails?.addressCorrection}
             </Descriptions.Item>
+          )}
+          {data?.basicDetails?.isApplicantAvailable && (
+            <Descriptions.Item
+              label="Is Applicant Available"
+              contentStyle={getItemStyle("isApplicantAvailable")}
+            >
+              {data?.basicDetails?.isApplicantAvailable}
+            </Descriptions.Item>
+          )}
+          {data?.basicDetails?.isApplicantAvailable === "No" && (
+            <>
+              {data?.basicDetails?.availablePersonName && (
+                <Descriptions.Item
+                  label="Name of the person met"
+                  contentStyle={getItemStyle("availablePersonName")}
+                >
+                  {data?.basicDetails?.availablePersonName}
+                </Descriptions.Item>
+              )}
+              {data?.basicDetails?.availablePersonMobile && (
+                <Descriptions.Item
+                  label="Contact Number"
+                  contentStyle={getItemStyle("availablePersonMobile")}
+                >
+                  {data?.basicDetails?.availablePersonMobile}
+                </Descriptions.Item>
+              )}
+            </>
           )}
         </Descriptions>
       </Card>
