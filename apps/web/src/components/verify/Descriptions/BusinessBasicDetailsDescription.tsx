@@ -49,7 +49,7 @@ const BusinessBasicDetailsDescription: React.FC<{
           >
             {data?.basicDetails?.aadhar}
           </Descriptions.Item>
-          <Descriptions.Item
+          {/* <Descriptions.Item
             label="Person Met"
             contentStyle={getItemStyle("personMet")}
           >
@@ -72,7 +72,7 @@ const BusinessBasicDetailsDescription: React.FC<{
                 </Descriptions.Item>
               )}
             </>
-          )}
+          )} */}
           <Descriptions.Item
             label="Business Name"
             contentStyle={getItemStyle("businessName")}
