@@ -1,4 +1,6 @@
 import { VerificationData } from "./address.interface";
+import { format, toZonedTime } from 'date-fns-tz';
+
 
 export const addressTemplate = (verificationData: VerificationData, html_data: any, addressType: string) => {
     if (html_data.path) {
@@ -10,13 +12,13 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
       }
       
-      const formatter = new Intl.DateTimeFormat('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      });
-      
-      const istDate = formatter.format(new Date());
+
+      const date = new Date();
+      const timeZone = 'Europe/London';
+      const zonedDate = toZonedTime(date, timeZone);
+
+      const istDate = format(date, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+      console.log(istDate, "istDate");
 
       const recommendationStyles: Record<string, string> = {
         Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -62,6 +64,15 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
               <td colspan="5"><span class="var-value">${verificationData.basicDetails?.availablePersonMobile || ''}</span></td>
             </tr>
         `;
+      }
+
+      let rentalAmount = verificationData.residenceDetails?.residenceStatus || '';
+      if(rentalAmount === 'Rented') {
+        rentalAmount = verificationData.residenceDetails?.rentDetails || '0';
+      } else if (rentalAmount === 'Leased') {
+        rentalAmount = verificationData.residenceDetails?.leaseAmount || '0';
+      } else {
+        rentalAmount = '';
       }
 
       let addressMismatch = verificationData.addressVerification?.addressMismatch || '';
@@ -150,7 +161,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         </tr>
         <tr>
           <th>Rent Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
+          <td colspan="5"><span class="var-value">${rentalAmount}</span></td>
         </tr>
         <tr>
           <th>Residence Type</th>
@@ -180,7 +191,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${istDate}
+      Generated on today ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -263,7 +274,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${istDate}
+      Generated on today ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -323,7 +334,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <div class="footer">
       <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${istDate}
+      Generated on today ${istDate}
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -358,7 +369,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
         <div class="footer">
           <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${istDate}
+          Generated on today ${istDate}
         </div>
         ${html_data.imagesData}
   `;

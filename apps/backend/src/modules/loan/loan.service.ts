@@ -1718,11 +1718,10 @@ export class LoanService {
       else {
         throw new NotFoundException('Invalid address type');
       }
-
       // Launch a new browser instance
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
       });
 
       // Create a new page

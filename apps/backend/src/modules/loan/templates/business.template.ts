@@ -1,10 +1,18 @@
 import { BusinessVerificationData } from "./business.interface";
+import { format, toZonedTime } from 'date-fns-tz';
 
 export const businessTemplate = (verificationData: BusinessVerificationData, html_data: any) => {
     
   if (html_data.path) {
     html_data.path = html_data.path.replace('<ul>', '').replace('</ul>', '')
   }
+
+  const date = new Date();
+      const timeZone = 'Europe/London';
+      const zonedDate = toZonedTime(date, timeZone);
+
+      const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+      console.log(istDate, "istDate");
 
   const recommendationStyles: Record<string, string> = {
     Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -173,7 +181,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+        Generated on ${istDate}
       </div>
 
       <div style="page-break-before: always;"></div>
@@ -198,7 +206,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
           </tr>
           <tr>
             <th>Rental/Lease Amount</th>
-            <td colspan="5"><span class="var-value">${verificationData.miscellaneous?.rentalAmount || ''}</span></td>
+            <td colspan="5"><span class="var-value">${rentalAmount}</span></td>
           </tr>
           <tr>
             <th>Number of Employees Working Under Applicant</th>
@@ -278,7 +286,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
       </div>
       <div class="footer">
         <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+        Generated on ${istDate}
       </div>
 
 
@@ -312,7 +320,7 @@ export const businessTemplate = (verificationData: BusinessVerificationData, htm
 
           <div class="footer">
             <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-            Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+            Generated on ${istDate}
           </div>
           ${html_data.imagesData}
   `
