@@ -963,7 +963,7 @@ export class LoanService {
           },
         });
 
-        if (completedVerification) {
+        if (completedVerification && (addressType === 'CurrentAddress' || addressType === 'PermanentAddress')) {
           updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
         }
       }
