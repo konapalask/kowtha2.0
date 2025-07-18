@@ -1908,7 +1908,7 @@ export class LoanService {
               color: #388e3c;
               font-size: 18px;
             }
-            .footer {
+            .pdf-footer {
               position: fixed;
               bottom: 0;
               left: 0;
@@ -1918,7 +1918,8 @@ export class LoanService {
               font-size: 12px;
               border-top: 1px solid #eee;
               padding: 8px 0 6px 0;
-              background-color: white; /* Optional, helps avoid overlay */
+              background-color: transparent;
+              z-index: 1000;
             }
             .logo {
               margin-top: 24px;

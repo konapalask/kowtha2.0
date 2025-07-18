@@ -1,9 +1,15 @@
+import { format, toZonedTime } from "date-fns-tz";
 import { WorkVerificationData } from "./work.interface"
 
 export const workTemplate = (verificationData: WorkVerificationData, html_data: any) => {
     if (html_data.path) {
         html_data.path = html_data.path.replace('<ul>', '').replace('</ul>', '')
       }
+      const date = new Date();
+      const timeZone = 'Europe/London';
+      const zonedDate = toZonedTime(date, timeZone);
+
+      const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
       
       const recommendationStyles: Record<string, string> = {
         Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -75,12 +81,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
       let references_loans = '';
       if(verificationData.pastEmployment?.employments?.length > 4 || (verificationData.existingLoans?.loans?.length > 2 && verificationData.colleagueReferences?.references?.length > 2)){
         references_loans = `
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString()}
-        </div>
       <div style="page-break-before: always;"></div>
-
         `
       } else {
         references_loans = '';
@@ -167,10 +168,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             Field Executive: ${html_data.fieldExecutive || ''}
           </div>
         </div>
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString()}
-        </div>
   
         <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
@@ -253,11 +250,6 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
             Field Executive: ${html_data.fieldExecutive || ''}
           </div>
         </div>
-
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString()}
-        </div>
   
         <div style="page-break-before: always;"></div>
         <div class="align-wrapper">
@@ -286,11 +278,10 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
         </div>
         <br>
         <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-  
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString()}
-        </div>
+        <footer class="pdf-footer">
+          <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
+          Generated on ${istDate}
+        </footer>
         ${html_data.imagesData}
       `;
 }

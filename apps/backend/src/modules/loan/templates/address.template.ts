@@ -17,8 +17,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       const timeZone = 'Europe/London';
       const zonedDate = toZonedTime(date, timeZone);
 
-      const istDate = format(date, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
-      console.log(istDate, "istDate");
+      const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
 
       const recommendationStyles: Record<string, string> = {
         Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -189,11 +188,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       </div>
     </div>
 
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on today ${istDate}
-    </div>
-
     <div style="page-break-before: always;"></div>
     
 
@@ -272,11 +266,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       </div>
     </div>
 
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on today ${istDate}
-    </div>
-
     <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
@@ -332,11 +321,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       </div>
     </div>
 
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on today ${istDate}
-    </div>
-
     <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
@@ -366,11 +350,10 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on today ${istDate}
-        </div>
-        ${html_data.imagesData}
+    <footer class="pdf-footer">
+      <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
+      Generated on ${istDate}
+    </footer>
+    ${html_data.imagesData}
   `;
 }
