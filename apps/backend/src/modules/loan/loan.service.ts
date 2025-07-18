@@ -27,6 +27,7 @@ import { workTemplate } from './templates/work.template';
 import { VerificationData } from './templates/address.interface';
 import { addressTemplate } from './templates/address.template';
 import { contains } from 'class-validator';
+import { format, toZonedTime } from 'date-fns-tz';
 
 
 
@@ -990,13 +991,16 @@ export class LoanService {
             latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean
           }) => {
             try {
-
+              const timeZone = 'Asia/Kolkata';
+              const zonedDate = toZonedTime(item.timestamp, timeZone);
+              const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+              
               if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
                   parseFloat(item.longitude),
-                  item.timestamp,
+                  istDate,
                 );
               }
             } catch (error) {
