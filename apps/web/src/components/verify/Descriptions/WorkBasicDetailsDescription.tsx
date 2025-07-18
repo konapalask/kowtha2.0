@@ -50,18 +50,6 @@ const WorkBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.prospectNumber}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Purpose of Loan"
-            contentStyle={getItemStyle("purposeOfLoan")}
-          >
-            {data?.basicDetails?.purposeOfLoan}
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="Loan Amount"
-            contentStyle={getItemStyle("loanAmount")}
-          >
-            {data?.basicDetails?.loanAmount}
-          </Descriptions.Item>
-          <Descriptions.Item
             label="PAN Number"
             contentStyle={getItemStyle("panNumber")}
           >
@@ -72,12 +60,6 @@ const WorkBasicDetailsDescription: React.FC<{
             contentStyle={getItemStyle("aadhar")}
           >
             {data?.basicDetails?.aadhar}
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="Tenure"
-            contentStyle={getItemStyle("tenure")}
-          >
-            {data?.basicDetails?.tenure}
           </Descriptions.Item>
           <Descriptions.Item
             label="Qualification"
