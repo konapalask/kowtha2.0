@@ -966,6 +966,9 @@ export class LoanService {
         if (completedVerification && (addressType === 'CurrentAddress' || addressType === 'PermanentAddress')) {
           updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
         }
+        else {
+          throw new BadRequestException('Verification already exists for this address type');
+        }
       }
 
       const verification = await this.prisma.verification.findFirst({
