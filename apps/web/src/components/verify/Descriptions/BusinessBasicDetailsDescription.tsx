@@ -145,6 +145,16 @@ const BusinessBasicDetailsDescription: React.FC<{
                   {data?.basicDetails?.availablePersonMobile}
                 </Descriptions.Item>
               )}
+              {data?.basicDetails?.availablePersonRelation && (
+                <Descriptions.Item
+                  label="Relation to the applicant"
+                  contentStyle={getItemStyle("availablePersonRelation")}
+                >
+                  {data?.basicDetails?.availablePersonRelation === "Others"
+                    ? `Others - ${data?.basicDetails?.availablePersonRelationOther || ""}`
+                    : data?.basicDetails?.availablePersonRelation}
+                </Descriptions.Item>
+              )}
             </>
           )}
         </Descriptions>

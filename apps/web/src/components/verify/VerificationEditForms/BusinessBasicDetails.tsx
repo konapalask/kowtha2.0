@@ -27,6 +27,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
   const isAddressSame = Form.useWatch("isAddressSame", form);
   const isBusinessNameSame = Form.useWatch("isBusinessNameSame", form);
   const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
+  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
 
   return (
     <>
@@ -179,6 +180,33 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
               <Input maxLength={10} placeholder="Enter contact number" />
             </Form.Item>
           </Col>
+          <Col span={8}>
+            <Form.Item
+              name="availablePersonRelation"
+              label="Relation to Applicant"
+              rules={[{ required: true, message: "Please select relation" }]}
+            >
+              <Select placeholder="Select relation">
+                <Select.Option value="Spouse">Spouse</Select.Option>
+                <Select.Option value="Parent">Parent</Select.Option>
+                <Select.Option value="Sibling">Sibling</Select.Option>
+                <Select.Option value="Relative">Relative</Select.Option>
+                <Select.Option value="Neighbor">Neighbor</Select.Option>
+                <Select.Option value="Others">Others</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          {availablePersonRelation === "Others" && (
+            <Col span={8}>
+              <Form.Item
+                name="availablePersonRelationOther"
+                label="Specify Relation"
+                rules={[{ required: true, message: "Please specify the relation" }]}
+              >
+                <Input placeholder="Specify relation to applicant" />
+              </Form.Item>
+            </Col>
+          )}
         </>
       )}
 
