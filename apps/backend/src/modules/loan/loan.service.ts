@@ -1571,10 +1571,6 @@ export class LoanService {
       </div>
       </div>
 
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
     `
   }
 
