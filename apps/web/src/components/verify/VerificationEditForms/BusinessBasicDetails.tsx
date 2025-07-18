@@ -148,19 +148,14 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
         <Form.Item
           name="isApplicantAvailable"
           label="Is Applicant Available"
-          rules={[{ required: true, message: "Please specify if applicant is available" }]}
+          rules={[{ required: true, message: "Please select if applicant is available" }]}
         >
-          <Select placeholder="Select Yes/No">
-            {yesNoOptions.map((option) => (
-              <Select.Option key={option} value={option}>
-                {option}
-              </Select.Option>
-            ))}
+          <Select placeholder="Select">
+            <Select.Option value="Yes">Yes</Select.Option>
+            <Select.Option value="No">No</Select.Option>
           </Select>
         </Form.Item>
       </Col>
-
-      {/* Name of the person met and Contact Number if applicant not available */}
       {isApplicantAvailable === "No" && (
         <>
           <Col span={8}>
@@ -177,8 +172,8 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
               name="availablePersonMobile"
               label="Contact Number"
               rules={[
-                { required: true, message: "Please enter the contact number" },
-                { pattern: /^\d{10}$/, message: "Contact number must be 10 digits" },
+                { required: true, message: "Please enter contact number" },
+                { pattern: /^\d{10}$/, message: "Please enter a valid 10-digit mobile number" },
               ]}
             >
               <Input maxLength={10} placeholder="Enter contact number" />
