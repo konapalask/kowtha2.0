@@ -965,6 +965,9 @@ export class LoanService {
 
         if (completedVerification && (addressType === 'CurrentAddress' || addressType === 'PermanentAddress')) {
           updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
+          if (verificationData && verificationData.addressVerification) {
+            verificationData.addressVerification.address = updatedAddressType;
+          }
         }
       }
 
