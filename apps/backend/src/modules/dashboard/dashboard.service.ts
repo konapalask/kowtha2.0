@@ -109,6 +109,7 @@ export class DashboardService {
         if (getDeployment.version === appDetails.version) {
           if (process.env.NODE_ENV === 'development') {
             getDeployment.playStoreUrl = null;
+            getDeployment.version = null;
             return getDeployment;
           }
           return getDeployment;
