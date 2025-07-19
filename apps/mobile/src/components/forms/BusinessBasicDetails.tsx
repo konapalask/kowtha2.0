@@ -14,9 +14,9 @@ import {colors} from '../../constants/colors';
 // Define the form data type for business basic details
 export type BusinessBasicDetailsFormData = {
   applicantName: string;
-  personMet: string;
-  personMetName?: string;
-  personMetRelation?: string;
+  // personMet: string;
+  // personMetName?: string;
+  // personMetRelation?: string;
   businessName: string;
   businessProfile: string;
   businessAddress: string;
@@ -64,9 +64,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       applicantName: '',
       businessName: '',
       businessProfile: '',
-      personMet: '',
-      personMetName: '',
-      personMetRelation: '',
+      // personMet: '',
+      // personMetName: '',
+      // personMetRelation: '',
       businessAddress: '',
       isAddressSame: '',
       addressCorrection: '',
@@ -183,7 +183,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       />
 
       {/* Person Met */}
-      <Controller
+      {/* <Controller
         control={control}
         name="personMet"
         rules={{required: 'Please select who was met'}}
@@ -203,9 +203,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* If not Applicant, show name field */}
-      {watchedPersonMet && watchedPersonMet !== 'Applicant' && (
+      {/* {watchedPersonMet && watchedPersonMet !== 'Applicant' && (
         <Controller
           control={control}
           name="personMetName"
@@ -229,9 +229,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
       {/* If Others, show relation field */}
-      {watchedPersonMet === 'Others' && (
+      {/* {watchedPersonMet === 'Others' && (
         <Controller
           control={control}
           name="personMetRelation"
@@ -257,7 +257,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
 
       <Controller
         control={control}

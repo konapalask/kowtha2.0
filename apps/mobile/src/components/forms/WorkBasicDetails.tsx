@@ -19,9 +19,9 @@ interface WorkBasicDetailsFormData {
   applicantName: string;
   bankName: string;
   prospectNumber: string;
-  purposeOfLoan: string;
+  // purposeOfLoan: string;
   // loanAmount: string;
-  tenure: string;
+  // tenure: string;
   panNumber: string;
   aadhar: string;
   qualification: string;
@@ -41,9 +41,9 @@ const validationSchema = yup.object().shape({
   applicantName: yup.string().required('Applicant Name is required'),
   bankName: yup.string().required('Bank Name is required'),
   prospectNumber: yup.string().required('Prospect Number is required'),
-  purposeOfLoan: yup.string().required('Purpose of Loan is required'),
+  // purposeOfLoan: yup.string().required('Purpose of Loan is required'),
   // loanAmount: yup.string().required('Loan Amount is required'),
-  tenure: yup.string().required('Tenure is required'),
+  // tenure: yup.string().required('Tenure is required'),
   panNumber: yup
     .string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
@@ -95,9 +95,9 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       applicantName: '',
       bankName: '',
       prospectNumber: '',
-      purposeOfLoan: '',
+      // purposeOfLoan: '',
       // loanAmount: '',
-      tenure: '',
+      // tenure: '',
       // panNumber: '',
       // aadharNumber: '',
       qualification: '',
@@ -168,7 +168,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onChangeText={onChange}
               editable={false}
               multiline
-              numberOfLines={2}
+              numberOfLines={4}
             />
             {errors.bankName && (
               <Text style={styles.errorText}>{errors.bankName.message}</Text>
@@ -202,7 +202,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="purposeOfLoan"
         render={({field: {onChange, value}}) => (
@@ -225,7 +225,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
       {/* <Controller
         control={control}
@@ -309,7 +309,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="tenure"
         render={({field: {onChange, value}}) => (
@@ -337,7 +337,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
       <Controller
         control={control}

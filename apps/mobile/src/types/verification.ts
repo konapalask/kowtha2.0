@@ -37,6 +37,8 @@ export interface BasicDetailsFormData {
   aadhar: string;
   panNumber: string;
   loanAmount: string;
+  tenure: string;
+  purposeOfLoan: string;
 }
 
 export type ApplicantInformationFormData = {

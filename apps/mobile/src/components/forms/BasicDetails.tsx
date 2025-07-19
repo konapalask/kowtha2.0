@@ -43,6 +43,8 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       aadhar: '',
       panNumber: '',
       loanAmount: '',
+      tenure: '',
+      purposeOfLoan: '',
     },
   });
 
@@ -167,19 +169,67 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
 
       <Controller
         control={control}
+        name="purposeOfLoan"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Purpose of Loan</Text>
+            <TextInput
+              style={[styles.input, styles.readOnlyInput]}
+              value={value}
+              onChangeText={onChange}
+              editable={false}
+            />
+            {errors.purposeOfLoan && (
+              <Text style={styles.errorText}>
+                {errors.purposeOfLoan.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
         name="loanAmount"
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Loan Amount</Text>
             <TextInput
-              style={[styles.input, styles.readOnlyInput]}
+              style={styles.input}
               value={value}
               onChangeText={onChange}
               keyboardType="numeric"
-              editable={false}
+              // editable={false}
             />
             {errors.loanAmount && (
               <Text style={styles.errorText}>{errors.loanAmount.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="tenure"
+        rules={{required: 'Tenure is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Tenure (in months)</Text>
+            <TextInput
+              style={[styles.input, {color: colors.text.primary}]}
+              value={value}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              keyboardType="numeric"
+              placeholder="Enter tenure in months"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.tenure && (
+              <Text style={styles.errorText}>{errors.tenure.message}</Text>
             )}
           </View>
         )}
