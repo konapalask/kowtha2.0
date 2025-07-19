@@ -22,6 +22,7 @@ import {UploadedItem} from '../../types/verification';
 import {colors} from '../../constants/colors';
 import {getImageUploadPresignedUrl} from '../../services/field.services';
 import Icons from 'react-native-vector-icons/AntDesign';
+import compress from 'react-native-compressor';
 
 const MAX_UPLOADS = 20;
 
@@ -109,7 +110,22 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     return `${day}, ${formattedDate}`;
   };
 
-  // Refactor uploadImage to accept an array of images
+  // Add the image compression function
+  const handleImageCompression = async (imageUri: string) => {
+    try {
+      const compressedUri = await compress.Image.compress(imageUri, {
+        // maxWidth: 1280,
+        quality: 0.9,
+      });
+      console.log('Compressed image path:', compressedUri);
+      return compressedUri;
+    } catch (error) {
+      console.error('Image compression failed:', error);
+      return imageUri; // fallback to original if compression fails
+    }
+  };
+
+  // Refactor uploadImage to use compression
   const uploadImage = async (
     images: Array<{
       uri: string;
@@ -126,6 +142,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       setIsUploading(true);
       const newItems: ExtendedUploadedItem[] = [];
       for (const image of images) {
+        // Compress the image before upload, fallback to original if fails
+        const compressedUri = await handleImageCompression(image.uri);
+
         // Generate a unique filename
         const timestamp = new Date().getTime();
         const fileName = `verification/${loanId}/${timestamp}-${Math.random()
@@ -138,7 +157,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
 
         // Convert image to blob
-        const imageResponse = await fetch(image.uri);
+        const imageResponse = await fetch(compressedUri); // use compressedUri
         const blob = await imageResponse.blob();
 
         // Upload to S3 using PUT request
@@ -160,7 +179,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         // Create new item with S3 URL
         const newItem: ExtendedUploadedItem = {
           id: Date.now().toString() + Math.random().toString(36).substring(2),
-          uri: image.uri,
+          uri: compressedUri, // use compressedUri
           s3ImageUrl: fileName,
           type: 'photo',
           timestamp: new Date().toISOString(),

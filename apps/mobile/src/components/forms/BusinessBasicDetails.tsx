@@ -14,9 +14,9 @@ import {colors} from '../../constants/colors';
 // Define the form data type for business basic details
 export type BusinessBasicDetailsFormData = {
   applicantName: string;
-  personMet: string;
-  personMetName?: string;
-  personMetRelation?: string;
+  // personMet: string;
+  // personMetName?: string;
+  // personMetRelation?: string;
   businessName: string;
   businessProfile: string;
   businessAddress: string;
@@ -26,6 +26,11 @@ export type BusinessBasicDetailsFormData = {
   correctedBusinessName: string;
   aadhar: string;
   panNumber: string;
+  isApplicantAvailable: string;
+  availablePersonName: string;
+  availablePersonMobile: string;
+  availablePersonRelation: string;
+  availablePersonRelationOther: string;
 };
 
 type BusinessBasicDetailsProps = {
@@ -41,6 +46,7 @@ const personMetOptions = [
   'Others',
 ];
 const yesNoOptions = ['Yes', 'No'];
+const relationOptions = ['Co Applicant', 'Family', 'Colleague', 'Others'];
 
 const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
   onSubmit,
@@ -58,9 +64,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       applicantName: '',
       businessName: '',
       businessProfile: '',
-      personMet: '',
-      personMetName: '',
-      personMetRelation: '',
+      // personMet: '',
+      // personMetName: '',
+      // personMetRelation: '',
       businessAddress: '',
       isAddressSame: '',
       addressCorrection: '',
@@ -68,6 +74,11 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       correctedBusinessName: '',
       aadhar: '',
       panNumber: '',
+      isApplicantAvailable: '',
+      availablePersonName: '',
+      availablePersonMobile: '',
+      availablePersonRelation: '',
+      availablePersonRelationOther: '',
     },
   });
 
@@ -80,10 +91,14 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
   const personMetSheetRef = useRef<ActionSheetRef>(null);
   const isAddressSameSheetRef = useRef<ActionSheetRef>(null);
   const isBusinessNameRef = useRef<ActionSheetRef>(null);
+  const isApplicantAvailableSheetRef = useRef<ActionSheetRef>(null);
+  const relationSheetRef = useRef<ActionSheetRef>(null);
 
   const watchedPersonMet = watch('personMet');
   const watchedIsAddressSame = watch('isAddressSame');
   const watchedIsBusinessNameSame = watch('isBusinessNameSame');
+  const watchedIsApplicantAvailable = watch('isApplicantAvailable');
+  const watchedAvailablePersonRelation = watch('availablePersonRelation');
 
   return (
     <ScrollView style={styles.container}>
@@ -168,7 +183,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
       />
 
       {/* Person Met */}
-      <Controller
+      {/* <Controller
         control={control}
         name="personMet"
         rules={{required: 'Please select who was met'}}
@@ -188,9 +203,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             )}
           </View>
         )}
-      />
+      /> */}
       {/* If not Applicant, show name field */}
-      {watchedPersonMet && watchedPersonMet !== 'Applicant' && (
+      {/* {watchedPersonMet && watchedPersonMet !== 'Applicant' && (
         <Controller
           control={control}
           name="personMetName"
@@ -214,9 +229,9 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
       {/* If Others, show relation field */}
-      {watchedPersonMet === 'Others' && (
+      {/* {watchedPersonMet === 'Others' && (
         <Controller
           control={control}
           name="personMetRelation"
@@ -242,7 +257,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             </View>
           )}
         />
-      )}
+      )} */}
 
       <Controller
         control={control}
@@ -336,7 +351,7 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
             <Text style={styles.label}>Nature of Business</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter business profile"
+              placeholder="Enter nature of business"
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
@@ -432,6 +447,136 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
         />
       )}
 
+      {/* Is Applicant Available */}
+      <Controller
+        control={control}
+        name="isApplicantAvailable"
+        rules={{required: 'Please specify if applicant is available'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Is the applicant available at the time of verification?
+            </Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isApplicantAvailableSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Availability'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isApplicantAvailable && (
+              <Text style={styles.errorText}>
+                {errors.isApplicantAvailable.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {/* Available Person Name - Only show if applicant is not available */}
+      {watchedIsApplicantAvailable === 'No' && (
+        <>
+          <Controller
+            control={control}
+            name="availablePersonName"
+            rules={{required: 'Name of available person is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Name of Person Available</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter name of person available"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonName && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonName.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonMobile"
+            rules={{required: 'Mobile number is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Mobile Number of Person Available
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter mobile number"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonMobile && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonMobile.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonRelation"
+            rules={{required: 'Relation is required'}}
+            render={({field: {value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Relation to Applicant</Text>
+                <TouchableOpacity
+                  style={styles.selectButton}
+                  onPress={() => relationSheetRef.current?.show()}>
+                  <Text
+                    style={
+                      value ? styles.selectButtonText : styles.placeholder
+                    }>
+                    {value || 'Select Relation'}
+                  </Text>
+                </TouchableOpacity>
+                {errors.availablePersonRelation && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonRelation.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          {watchedAvailablePersonRelation === 'Others' && (
+            <Controller
+              control={control}
+              name="availablePersonRelationOther"
+              rules={{required: 'Please specify relation'}}
+              render={({field: {onChange, onBlur, value}}) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Specify Relation</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Specify relation"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors.availablePersonRelationOther && (
+                    <Text style={styles.errorText}>
+                      {errors.availablePersonRelationOther.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+          )}
+        </>
+      )}
+
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onSubmit)}>
@@ -498,6 +643,47 @@ const BusinessBasicDetails: React.FC<BusinessBasicDetailsProps> = ({
                   setValue('correctedBusinessName', '');
                 }
                 isBusinessNameRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      <ActionSheet
+        ref={isApplicantAvailableSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>Is Applicant Available?</Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isApplicantAvailable', option);
+                if (option === 'Yes') {
+                  setValue('availablePersonName', ''); // Clear name if Yes is selected
+                }
+                isApplicantAvailableSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet ref={relationSheetRef} containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>Select Relation</Text>
+          {relationOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('availablePersonRelation', option);
+                if (option !== 'Others') {
+                  setValue('availablePersonRelationOther', '');
+                }
+                relationSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

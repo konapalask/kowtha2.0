@@ -13,18 +13,23 @@ import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import ExtraDimensions from 'react-native-extra-dimensions-android';
+// import ExtraDimensions from 'react-native-extra-dimensions-android';
 
 interface WorkBasicDetailsFormData {
   applicantName: string;
   bankName: string;
   prospectNumber: string;
-  purposeOfLoan: string;
-  loanAmount: string;
-  tenure: string;
+  // purposeOfLoan: string;
+  // loanAmount: string;
+  // tenure: string;
   panNumber: string;
   aadhar: string;
   qualification: string;
+  isApplicantAvailable: string;
+  availablePersonName: string;
+  availablePersonMobile: string;
+  availablePersonRelation: string;
+  availablePersonRelationOther: string;
 }
 
 interface Props {
@@ -36,9 +41,9 @@ const validationSchema = yup.object().shape({
   applicantName: yup.string().required('Applicant Name is required'),
   bankName: yup.string().required('Bank Name is required'),
   prospectNumber: yup.string().required('Prospect Number is required'),
-  purposeOfLoan: yup.string().required('Purpose of Loan is required'),
+  // purposeOfLoan: yup.string().required('Purpose of Loan is required'),
   // loanAmount: yup.string().required('Loan Amount is required'),
-  tenure: yup.string().required('Tenure is required'),
+  // tenure: yup.string().required('Tenure is required'),
   panNumber: yup
     .string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
@@ -50,6 +55,13 @@ const validationSchema = yup.object().shape({
     .optional()
     .default(''),
   qualification: yup.string().required('Qualification is required'),
+  isApplicantAvailable: yup
+    .string()
+    .required(`Is Applicant Available? is required`),
+  availablePersonName: yup.string(),
+  availablePersonMobile: yup.string(),
+  availablePersonRelation: yup.string(),
+  availablePersonRelationOther: yup.string(),
 });
 
 const QUALIFICATION_OPTIONS = [
@@ -60,9 +72,14 @@ const QUALIFICATION_OPTIONS = [
   'Graduate',
   'PG/Professional Certification',
 ];
+const yesNoOptions = ['Yes', 'No'];
+const relationOptions = ['Co Applicant', 'Family', 'Colleague', 'Others'];
 
 const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const qualificationSheetRef = useRef<ActionSheetRef>(null);
+  const isApplicantAvailableSheetRef = useRef<ActionSheetRef>(null);
+  const relationSheetRef = useRef<ActionSheetRef>(null);
+
   const insets = useSafeAreaInsets();
   // console.log(insets);
   const {
@@ -71,20 +88,28 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
     formState: {errors},
     setValue,
     reset,
+    watch,
   } = useForm<WorkBasicDetailsFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: initialData || {
       applicantName: '',
       bankName: '',
       prospectNumber: '',
-      purposeOfLoan: '',
-      loanAmount: '',
-      tenure: '',
+      // purposeOfLoan: '',
+      // loanAmount: '',
+      // tenure: '',
       // panNumber: '',
       // aadharNumber: '',
       qualification: '',
+      isApplicantAvailable: '',
+      availablePersonName: '',
+      availablePersonMobile: '',
+      availablePersonRelation: '',
+      availablePersonRelationOther: '',
     },
   });
+  const watchedIsApplicantAvailable = watch('isApplicantAvailable');
+  const watchedAvailablePersonRelation = watch('availablePersonRelation');
 
   useEffect(() => {
     if (initialData) {
@@ -143,7 +168,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onChangeText={onChange}
               editable={false}
               multiline
-              numberOfLines={2}
+              numberOfLines={4}
             />
             {errors.bankName && (
               <Text style={styles.errorText}>{errors.bankName.message}</Text>
@@ -177,7 +202,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="purposeOfLoan"
         render={({field: {onChange, value}}) => (
@@ -200,9 +225,9 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
-      <Controller
+      {/* <Controller
         control={control}
         name="loanAmount"
         render={({field: {onChange, value}}) => (
@@ -224,7 +249,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
       <Controller
         control={control}
@@ -284,7 +309,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
-      <Controller
+      {/* <Controller
         control={control}
         name="tenure"
         render={({field: {onChange, value}}) => (
@@ -312,7 +337,7 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             )}
           </View>
         )}
-      />
+      /> */}
 
       <Controller
         control={control}
@@ -340,6 +365,135 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         )}
       />
 
+      <Controller
+        control={control}
+        name="isApplicantAvailable"
+        rules={{required: 'Please specify if applicant is available'}}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Is the applicant available at the time of verification?
+            </Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isApplicantAvailableSheetRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Availability'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isApplicantAvailable && (
+              <Text style={styles.errorText}>
+                {errors.isApplicantAvailable.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      {/* Available Person Name - Only show if applicant is not available */}
+      {watchedIsApplicantAvailable === 'No' && (
+        <>
+          <Controller
+            control={control}
+            name="availablePersonName"
+            rules={{required: 'Name of available person is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Name of Person Available</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter name of person available"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonName && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonName.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonMobile"
+            rules={{required: 'Mobile number is required'}}
+            render={({field: {onChange, onBlur, value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Mobile Number of Person Available
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter mobile number"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                {errors.availablePersonMobile && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonMobile.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          <Controller
+            control={control}
+            name="availablePersonRelation"
+            rules={{required: 'Relation is required'}}
+            render={({field: {value}}) => (
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Relation to Applicant</Text>
+                <TouchableOpacity
+                  style={styles.selectButton}
+                  onPress={() => relationSheetRef.current?.show()}>
+                  <Text
+                    style={
+                      value ? styles.selectButtonText : styles.placeholder
+                    }>
+                    {value || 'Select Relation'}
+                  </Text>
+                </TouchableOpacity>
+                {errors.availablePersonRelation && (
+                  <Text style={styles.errorText}>
+                    {errors.availablePersonRelation.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+          {watchedAvailablePersonRelation === 'Others' && (
+            <Controller
+              control={control}
+              name="availablePersonRelationOther"
+              rules={{required: 'Please specify relation'}}
+              render={({field: {onChange, onBlur, value}}) => (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Specify Relation</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Specify relation"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                  {errors.availablePersonRelationOther && (
+                    <Text style={styles.errorText}>
+                      {errors.availablePersonRelationOther.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+          )}
+        </>
+      )}
+
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onFormSubmit)}>
@@ -362,6 +516,47 @@ const WorkBasicDetails: React.FC<Props> = ({initialData, onSubmit}) => {
               onPressIn={() => {
                 setValue('qualification', option);
                 qualificationSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+      <ActionSheet
+        ref={isApplicantAvailableSheetRef}
+        containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>Is Applicant Available?</Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isApplicantAvailable', option);
+                if (option === 'Yes') {
+                  setValue('availablePersonName', ''); // Clear name if Yes is selected
+                }
+                isApplicantAvailableSheetRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
+
+      <ActionSheet ref={relationSheetRef} containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>Select Relation</Text>
+          {relationOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('availablePersonRelation', option);
+                if (option !== 'Others') {
+                  setValue('availablePersonRelationOther', '');
+                }
+                relationSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>
