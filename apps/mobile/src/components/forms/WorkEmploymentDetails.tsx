@@ -31,6 +31,8 @@ interface WorkEmploymentDetailsFormData {
   employerTypeOther?: string;
   grossSalary: string;
   netSalary: string;
+  isOfficeNameSame: string;
+  correctedOfficeName: string;
 }
 
 interface Props {
@@ -58,6 +60,8 @@ const validationSchema = yup.object().shape({
   employerType: yup.string().required('Employer Type is required'),
   grossSalary: yup.string().required('Gross Salary is required'),
   netSalary: yup.string().required('Net Salary is required'),
+  isOfficeNameSame: yup.string().required(`Is Company name same? is required `),
+  correctedOfficeName: yup.string(),
 });
 
 const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
@@ -66,6 +70,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
   const employerTypeSheetRef = useRef<ActionSheetRef>(null);
   const natureOfServiceSheetRef = useRef<ActionSheetRef>(null);
   const isAddressSameSheetRef = useRef<ActionSheetRef>(null);
+  const isCompanyNameRef = useRef<ActionSheetRef>(null);
 
   // const [showEmployerTypeOther, setShowEmployerTypeOther] = useState(false);
   // const [showNatureOfServiceOther, setShowNatureOfServiceOther] =
@@ -97,11 +102,14 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
       employerTypeOther: '',
       grossSalary: '',
       netSalary: '',
+      isOfficeNameSame: '',
+      correctedOfficeName: '',
     },
   });
 
   const employerType = watch('employerType');
   const natureOfService = watch('natureOfService');
+  const watchedIsBusinessNameSame = watch('isOfficeNameSame');
 
   const officeLocalityOptions = ['Residential', 'Commercial', 'Industry'];
   const salaryModeOptions = ['Cash', 'Online', 'Cheque', 'Mixed'];
@@ -163,6 +171,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
             <TextInput
               style={[
                 styles.input,
+                styles.readOnlyInput,
                 errors.currentOfficeName && styles.inputError,
               ]}
               value={value}
@@ -178,6 +187,60 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
           </View>
         )}
       />
+
+      <Controller
+        control={control}
+        name="isOfficeNameSame"
+        rules={{
+          required: 'Please specify if office name is same as initiated',
+        }}
+        render={({field: {value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Is office name same as initiated?</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => isCompanyNameRef.current?.show()}>
+              <Text
+                style={value ? styles.selectButtonText : styles.placeholder}>
+                {value || 'Select Yes/No'}
+              </Text>
+            </TouchableOpacity>
+            {errors.isOfficeNameSame && (
+              <Text style={styles.errorText}>
+                {errors.isOfficeNameSame.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+      {/* Address Correction if No */}
+      {watchedIsBusinessNameSame === 'No' && (
+        <Controller
+          control={control}
+          name="correctedOfficeName"
+          rules={{required: 'Please provide the corrected office name'}}
+          render={({field: {onChange, onBlur, value}}) => (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Office Name Correction</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter corrected office name"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.text.disabled}
+                multiline
+                numberOfLines={2}
+              />
+              {errors.correctedOfficeName && (
+                <Text style={styles.errorText}>
+                  {errors.correctedOfficeName.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+      )}
 
       <Controller
         control={control}
@@ -321,7 +384,7 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         name="companySize"
         render={({field: {onChange, value}}) => (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Company Size</Text>
+            <Text style={styles.label}>Office Size</Text>
             <TextInput
               style={[
                 styles.input,
@@ -611,6 +674,28 @@ const WorkEmploymentDetails: React.FC<Props> = ({initialData, onSubmit}) => {
         onPress={handleSubmit(onFormSubmit)}>
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
+
+      <ActionSheet ref={isCompanyNameRef} containerStyle={styles.actionSheet}>
+        <View style={[styles.actionSheetContent, {paddingBottom: 50}]}>
+          <Text style={styles.actionSheetTitle}>
+            Is the office name same as initiated?
+          </Text>
+          {yesNoOptions.map(option => (
+            <TouchableOpacity
+              key={option}
+              style={styles.actionSheetItem}
+              onPressIn={() => {
+                setValue('isOfficeNameSame', option);
+                if (option === 'Yes') {
+                  setValue('correctedOfficeName', '');
+                }
+                isCompanyNameRef.current?.hide();
+              }}>
+              <Text style={styles.actionSheetItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ActionSheet>
 
       <ActionSheet
         ref={officeLocalitySheetRef}

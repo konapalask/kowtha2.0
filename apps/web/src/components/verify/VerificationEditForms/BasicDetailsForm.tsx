@@ -18,6 +18,7 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
   const maritalStatus = Form.useWatch("maritalStatus", form);
   const category = Form.useWatch("category", form);
   const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
+  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
 
   return (
     <>
@@ -111,7 +112,7 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
       {maritalStatus === "Others" && (
         <Col span={8}>
           <Form.Item
-            name="maritalStatusOther"
+            name="applicantMaritalStatusOther"
             label="Specify Marital Status"
             rules={[
               { required: true, message: "Please specify marital status" },
@@ -234,8 +235,48 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
               </Select>
             </Form.Item>
           </Col>
+          {availablePersonRelation === "Others" && (
+            <Col span={8}>
+              <Form.Item
+                name="availablePersonRelationOther"
+                label="Specify Relation"
+                rules={[
+                  { required: true, message: "Please specify the relation" },
+                ]}
+              >
+                <Input placeholder="Specify relation to applicant" />
+              </Form.Item>
+            </Col>
+          )}
         </>
       )}
+      <Col span={8}>
+        <Form.Item
+          name="purposeOfLoan"
+          label="Purpose of Loan"
+          rules={[{ required: true, message: "Please enter purpose of loan" }]}
+        >
+          <Input placeholder="Enter purpose of loan" />
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="loanAmount"
+          label="Loan Amount"
+          rules={[{ required: true, message: "Please enter loan amount" }]}
+        >
+          <Input placeholder="Enter loan amount" />
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="tenure"
+          label="Tenure"
+          rules={[{ required: true, message: "Please enter tenure" }]}
+        >
+          <Input placeholder="Enter tenure" />
+        </Form.Item>
+      </Col>
     </>
   );
 };

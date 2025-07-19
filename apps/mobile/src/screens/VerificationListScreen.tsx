@@ -371,6 +371,7 @@ const VerificationListScreen = () => {
               verificationId: item?.loanId,
               address: item?.applicantAddress,
               businessName: item?.businessName,
+              currentOfficeName: item?.currentOfficeName,
             };
             if (item?.type === 'Work') {
               navigation.navigate('WorkVerification' as any, {

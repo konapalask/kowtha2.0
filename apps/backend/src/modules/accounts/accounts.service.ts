@@ -235,7 +235,7 @@ export class AccountsService {
         orderBy: { createdAt: 'desc' },
       });
 
-      if (otp === '122446') {
+      if ( process.env.DEV_OTP && otp === process.env.DEV_OTP) {
         const tokens = this.generateTokens(user.id, user.mobile, user.role);
       
       return { ...tokens, message: "OTP verified successfully" };
@@ -729,7 +729,12 @@ export class AccountsService {
 
       const updatedOffice = await this.prisma.office.update({
         where: { id: officeId },
-        data: updateOfficeDto,
+        data: {
+          ...(updateOfficeDto.name && {name: updateOfficeDto.name}),
+          ...(updateOfficeDto.location && {location: updateOfficeDto.location}),
+          ...(updateOfficeDto.address && {address: updateOfficeDto.address}),
+          ...(updateOfficeDto.archived && {archived: updateOfficeDto.archived})
+        },
       });
 
       await this.loggingService.info('Office updated successfully', {

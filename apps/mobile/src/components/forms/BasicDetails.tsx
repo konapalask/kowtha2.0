@@ -42,6 +42,9 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
       availablePersonRelationOther: '',
       aadhar: '',
       panNumber: '',
+      loanAmount: '',
+      tenure: '',
+      purposeOfLoan: '',
     },
   });
 
@@ -57,7 +60,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
   const categorySheetRef = useRef<ActionSheetRef>(null);
   const isApplicantAvailableSheetRef = useRef<ActionSheetRef>(null);
   const relationSheetRef = useRef<ActionSheetRef>(null);
-  const [showRelationSheet, setShowRelationSheet] = useState(false);
+  // const [showRelationSheet, setShowRelationSheet] = useState(false);
 
   const maritalStatusOptions = ['Single', 'Married', 'Divorced', 'Others'];
   const educationQualificationOptions = [
@@ -77,13 +80,13 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
   const watchedIsApplicantAvailable = watch('isApplicantAvailable');
   const watchedAvailablePersonRelation = watch('availablePersonRelation');
 
-  useEffect(() => {
-    if (showRelationSheet) {
-      relationSheetRef.current?.show();
-    } else {
-      relationSheetRef.current?.hide();
-    }
-  }, [showRelationSheet]);
+  // useEffect(() => {
+  //   if (showRelationSheet) {
+  //     relationSheetRef.current?.show();
+  //   } else {
+  //     relationSheetRef.current?.hide();
+  //   }
+  // }, [showRelationSheet]);
 
   return (
     <ScrollView style={styles.container}>
@@ -159,6 +162,74 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
               <Text style={styles.errorText}>
                 {errors.applicantName.message}
               </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="purposeOfLoan"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Purpose of Loan</Text>
+            <TextInput
+              style={[styles.input, styles.readOnlyInput]}
+              value={value}
+              onChangeText={onChange}
+              editable={false}
+            />
+            {errors.purposeOfLoan && (
+              <Text style={styles.errorText}>
+                {errors.purposeOfLoan.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="loanAmount"
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Loan Amount</Text>
+            <TextInput
+              style={styles.input}
+              value={value}
+              onChangeText={onChange}
+              keyboardType="numeric"
+              // editable={false}
+            />
+            {errors.loanAmount && (
+              <Text style={styles.errorText}>{errors.loanAmount.message}</Text>
+            )}
+          </View>
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="tenure"
+        rules={{required: 'Tenure is required'}}
+        render={({field: {onChange, value}}) => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Tenure (in months)</Text>
+            <TextInput
+              style={[styles.input, {color: colors.text.primary}]}
+              value={value}
+              onChangeText={text => {
+                // Only pass numeric values to onChange
+                if (/^\d*$/.test(text)) {
+                  onChange(text);
+                }
+              }}
+              keyboardType="numeric"
+              placeholder="Enter tenure in months"
+              placeholderTextColor={colors.text.disabled}
+            />
+            {errors.tenure && (
+              <Text style={styles.errorText}>{errors.tenure.message}</Text>
             )}
           </View>
         )}
@@ -435,7 +506,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
                 <Text style={styles.label}>Relation to Applicant</Text>
                 <TouchableOpacity
                   style={styles.selectButton}
-                  onPress={() => setShowRelationSheet(true)}>
+                  onPress={() => relationSheetRef.current?.show()}>
                   <Text
                     style={
                       value ? styles.selectButtonText : styles.placeholder
@@ -582,7 +653,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({onSubmit, initialData}) => {
                 if (option !== 'Others') {
                   setValue('availablePersonRelationOther', '');
                 }
-                setShowRelationSheet(false);
+                relationSheetRef.current?.hide();
               }}>
               <Text style={styles.actionSheetItemText}>{option}</Text>
             </TouchableOpacity>

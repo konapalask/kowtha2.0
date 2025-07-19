@@ -5,10 +5,11 @@ const { Option } = Select;
 const { Title } = Typography;
 
 const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
-  // const employerType = Form.useWatch("employerType", form);
+  const employerType = Form.useWatch("employerType", form);
   // const salaryMode = Form.useWatch("salaryMode", form);
   const isAddressSame = Form.useWatch("isAddressSame", form);
   const natureOfService = Form.useWatch("natureOfService", form);
+  const isOfficeNameSame = Form.useWatch("isOfficeNameSame", form);
 
   return (
     <>
@@ -58,7 +59,37 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
-      {/* <Col span={8}>
+      <Col span={8}>
+        <Form.Item
+          name="isOfficeNameSame"
+          label="Is Office Name Same as Initiated?"
+          rules={[{ required: true, message: "Please specify if office name is same as initiated" }]}
+        >
+          <Select placeholder="Select Yes/No">
+            <Select.Option value="Yes">Yes</Select.Option>
+            <Select.Option value="No">No</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      <Col span={16}>
+        <Form.Item
+          name="correctedOfficeName"
+          label="Corrected Office Name"
+          rules={[
+            ({ getFieldValue }) => ({
+              required: getFieldValue("isOfficeNameSame") === "No",
+              message: "Please enter corrected office name"
+            })
+          ]}
+        >
+          <Input.TextArea
+            rows={2}
+            placeholder="Enter corrected office name"
+            disabled={form.getFieldValue("isOfficeNameSame") !== "No"}
+          />
+        </Form.Item>
+      </Col>
+       <Col span={8}>
         <Form.Item
           name="isAddressSame"
           label="Address Mismatch?"
@@ -69,8 +100,8 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Select.Option value="No">No</Select.Option>
           </Select>
         </Form.Item>
-      </Col> */}
-      {/* {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
+      </Col> 
+       {form.getFieldValue && form.getFieldValue("isAddressSame") === "No" && (
         <Col span={16}>
           <Form.Item
             name="addressCorrection"
@@ -80,7 +111,7 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
             <Input.TextArea rows={2} placeholder="Enter corrected address" />
           </Form.Item>
         </Col>
-      )} */}
+      )} 
       <Col span={8}>
         <Form.Item
           name="yearsInCurrentJob"
@@ -224,34 +255,24 @@ const OfficeVerificationForm: React.FC<{ form: any }> = ({ form }) => {
         >
           <Select>
             <Select.Option value="Government/PSU">Government/PSU</Select.Option>
-            <Select.Option value="Unlisted Pvt. Ltd">
-              Unlisted Pvt. Ltd
-            </Select.Option>
-            <Select.Option value="MNC/Listed Pvt. Ltd">
-              MNC/Listed Pvt. Ltd
-            </Select.Option>
-            <Select.Option value="Proprietorship/Partnership/NGO/Trust">
-              Proprietorship/Partnership/NGO/Trust
-            </Select.Option>
+            <Select.Option value="Unlisted Pvt. Ltd">Unlisted Pvt. Ltd</Select.Option>
+            <Select.Option value="MNC/Listed Pvt. Ltd">MNC/Listed Pvt. Ltd</Select.Option>
+            <Select.Option value="Proprietorship/Partnership/NGO/Trust">Proprietorship/Partnership/NGO/Trust</Select.Option>
             <Select.Option value="Others">Others</Select.Option>
           </Select>
         </Form.Item>
       </Col>
-      {/* Show this field only if employerType is 'Others' */}
-      {form.getFieldValue &&
-        form.getFieldValue("employerType") === "Others" && (
-          <Col span={8}>
-            <Form.Item
-              name="employerTypeOther"
-              label="Specify Type of Employer"
-              rules={[
-                { required: true, message: "Please specify type of employer" },
-              ]}
-            >
-              <Input placeholder="Enter type of employer" />
-            </Form.Item>
-          </Col>
-        )}
+      {employerType === "Others" && (
+        <Col span={8}>
+          <Form.Item
+            name="employerTypeOther"
+            label="Specify Type of Employer"
+            rules={[{ required: true, message: "Please specify type of employer" }]}
+          >
+            <Input placeholder="Enter type of employer" />
+          </Form.Item>
+        </Col>
+      )}
 
       {/* Salary Details */}
       {/* <Col span={24}>

@@ -37,6 +37,22 @@ const WorkEmploymentDetailsDescription: React.FC<{
           >
             {data?.employmentDetails?.currentOfficeName}
           </Descriptions.Item>
+          {data?.employmentDetails?.isOfficeNameSame && (
+            <Descriptions.Item
+              label="Is Office Name Same as Initiated?"
+              contentStyle={getItemStyle("isOfficeNameSame")}
+            >
+              {data?.employmentDetails?.isOfficeNameSame}
+            </Descriptions.Item>
+          )}
+          {data?.employmentDetails?.isOfficeNameSame === "No" && data?.employmentDetails?.correctedOfficeName && (
+            <Descriptions.Item
+              label="Corrected Office Name"
+              contentStyle={getItemStyle("correctedOfficeName")}
+            >
+              {data?.employmentDetails?.correctedOfficeName}
+            </Descriptions.Item>
+          )}
           <Descriptions.Item
             label="Office Address"
             contentStyle={getItemStyle("officeAddress")}
@@ -114,7 +130,7 @@ const WorkEmploymentDetailsDescription: React.FC<{
             contentStyle={getItemStyle("employerType")}
           >
             {data?.employmentDetails?.employerType}
-            {data?.employmentDetails?.employerType === "Other" &&
+            {data?.employmentDetails?.employerType === "Others" &&
               ` - ${data?.employmentDetails?.employerTypeOther}`}
           </Descriptions.Item>
           <Descriptions.Item

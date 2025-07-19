@@ -5,6 +5,7 @@ import { LoggingService } from '../logging/logging.service';
 import { createCanvas, loadImage, Canvas, Image as CanvasImage, CanvasRenderingContext2D } from 'canvas';
 import fetch from 'node-fetch';
 import fs from 'fs';
+import { format, toZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class S3Service {
@@ -172,8 +173,12 @@ export class S3Service {
     ctx.font = '20px Arial';
     const maxTextWidth = preferredWidth - 80;
     const addressLines = await this.wrapText(ctx, address, maxTextWidth);
-    const now = new Date();
-    const timestamp = now.toLocaleString('en-GB', { hour12: true, timeZone: 'Asia/Kolkata' }) + ' IST';
+    
+    const date = new Date();
+    const timeZone = 'Asia/Kolkata';
+    const zonedDate = toZonedTime(date, timeZone);
+
+  const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
 
     // Calculate text block height
     const lineSpacing = 15;
@@ -202,7 +207,7 @@ export class S3Service {
       ctx.fillText(line, x, currentY + 20);
       currentY += 20 + lineSpacing;
     }
-    ctx.fillText(timestamp, x, currentY + 20);
+    ctx.fillText(istDate, x, currentY + 20);
 
     // Save output
     const out = fs.createWriteStream(outputPath);

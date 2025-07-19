@@ -151,7 +151,7 @@ export default function Loans() {
               <Col xs={24} sm={24} md={1} xl={1}>
                 <Badge
                   dot
-                  status={item?.isAvailbleToday ? "success" : "error"}
+                  status={item?.availabletoday ? "success" : "error"}
                 />
               </Col>
 
@@ -211,6 +211,10 @@ export default function Loans() {
       current: newPagination.current,
       pageSize: newPagination.pageSize,
     }));
+  };
+
+  const refreshLoans = () => {
+    fetchLoans(pagination.current, pagination.pageSize);
   };
 
   const columns: any = [
@@ -303,13 +307,14 @@ export default function Loans() {
             );
             if (!pav) return "-";
 
-            const isPostponed = pav.isPostponed === true && pav.status === "Pending";
+            const isPostponed =
+              pav.isPostponed === true && pav.status === "Pending";
             const status = isPostponed ? "Postponed" : pav.status;
             const color = isPostponed
               ? "red"
               : pav.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -358,13 +363,14 @@ export default function Loans() {
             );
             if (!cav) return "-";
 
-            const isPostponed = cav.isPostponed === true && cav.status === "Pending";
+            const isPostponed =
+              cav.isPostponed === true && cav.status === "Pending";
             const status = isPostponed ? "Postponed" : cav.status;
             const color = isPostponed
               ? "red"
               : cav.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -413,13 +419,14 @@ export default function Loans() {
             );
             if (!wv) return "-";
 
-            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const isPostponed =
+              wv.isPostponed === true && wv.status === "Pending";
             const status = isPostponed ? "Postponed" : wv.status;
             const color = isPostponed
               ? "red"
               : wv.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -468,13 +475,14 @@ export default function Loans() {
             );
             if (!wv) return "-";
 
-            const isPostponed = wv.isPostponed === true && wv.status === "Pending";
+            const isPostponed =
+              wv.isPostponed === true && wv.status === "Pending";
             const status = isPostponed ? "Postponed" : wv.status;
             const color = isPostponed
               ? "red"
               : wv.status === "Completed"
-              ? "green"
-              : "orange";
+                ? "green"
+                : "orange";
 
             return <Tag color={color}>{status}</Tag>;
           },
@@ -515,7 +523,7 @@ export default function Loans() {
                       try {
                         await deleteLoanApi(record?.id);
                         message.success("Loan deleted successfully");
-                        fetchLoans(); // Refresh the table
+                        refreshLoans();
                       } catch (error) {
                         message.error("Failed to delete loan");
                       }
@@ -594,13 +602,18 @@ export default function Loans() {
           rowKey="id"
           loading={loading}
           onChange={handleTableChange}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showTotal: (total) => `Total ${total} items`,
-            position: ["bottomCenter"],
-          }}
+          pagination={
+            // Hide pagination if filters are applied and results are <= 10
+            (Object.values(filters).some((v) => v !== undefined && v !== "") && loans.length <= 20)
+              ? false
+              : {
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
+                  showTotal: (total) => `Total ${total} items`,
+                  position: ["bottomCenter"],
+                }
+          }
           size="small"
           scroll={{ x: 1500 }}
           sticky
@@ -630,7 +643,7 @@ export default function Loans() {
           setCurrentOffice={setCurrentOffice}
           offices={offices}
           verifiers={verifiers}
-          fetchLoans={fetchLoans}
+          fetchLoans={refreshLoans} // Pass the helper instead
           setRefresh={setRefresh}
           fetchExecutives={fetchExecutives}
         />

@@ -161,7 +161,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
       Work: false,
       Business: false,
     });
-    fetchLoans();
+    fetchLoans(); 
   };
 
   const handleDelete = async (
@@ -480,16 +480,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                         ).format("MMM DD,YYYY")}
                                       </span>
                                     )}
-                                    {verification?.isPostponed && verification?.postponedReason && (
-                                      <span>
-                                        Reason:{" "}
-                                        {verification?.postponedReason}
-                                      </span>
-                                    )}
+                                    {verification?.isPostponed &&
+                                      verification?.postponedReason && (
+                                        <span>
+                                          Reason:{" "}
+                                          {verification?.postponedReason}
+                                        </span>
+                                      )}
                                     {type === "Business" && (
                                       <span>
                                         Business Name:{" "}
                                         {verification?.businessName}
+                                      </span>
+                                    )}
+                                    {type === "Work" && (
+                                      <span>
+                                        Business Name:{" "}
+                                        {verification?.currentOfficeName}
                                       </span>
                                     )}
                                     <span>

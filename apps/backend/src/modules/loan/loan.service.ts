@@ -16,14 +16,18 @@ import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Prisma, LoanStatus, VerificationType, VerificationStatus, 
-            AddressType, UserRole, ApprovedStatus, LocationType } from '@prisma/client';
+import {
+  Prisma, LoanStatus, VerificationType, VerificationStatus,
+  AddressType, UserRole, ApprovedStatus, LocationType
+} from '@prisma/client';
 import { businessTemplate } from './templates/business.template';
 import { BusinessVerificationData } from './templates/business.interface';
 import { WorkVerificationData } from './templates/work.interface';
 import { workTemplate } from './templates/work.template';
 import { VerificationData } from './templates/address.interface';
 import { addressTemplate } from './templates/address.template';
+import { contains } from 'class-validator';
+import { format, toZonedTime } from 'date-fns-tz';
 
 
 
@@ -34,7 +38,7 @@ export class LoanService {
     private loggingService: LoggingService,
     private logger: Logger,
     private s3Service: S3Service,
-  ) {}
+  ) { }
 
   async createLoan(data: CreateLoanDto, officeId: number) {
     try {
@@ -239,19 +243,19 @@ export class LoanService {
       }
 
       return await this.prisma.$transaction(async (prisma) => {
-           const verification = await prisma.verification.create({
-             data: {
-              loan: { connect: { id: loan.id } },
-              type: createData.verificationType || 'AddressOne',
-              verifier: { connect: { id: createData.verifierId } },
-              fieldExecutive: { connect: { id: createData.fieldExecutiveId } },
-              status: 'Pending',
-              applicantAddress: createData.address || null,
-              locationType: createData.locationType || null,
-              businessName: createData.businessName || null,
-              currentOfficeName: createData.currentOfficeName || null,
-             }
-           });
+        const verification = await prisma.verification.create({
+          data: {
+            loan: { connect: { id: loan.id } },
+            type: createData.verificationType || 'AddressOne',
+            verifier: { connect: { id: createData.verifierId } },
+            fieldExecutive: { connect: { id: createData.fieldExecutiveId } },
+            status: 'Pending',
+            applicantAddress: createData.address || null,
+            locationType: createData.locationType || null,
+            businessName: createData.businessName || null,
+            currentOfficeName: createData.currentOfficeName || null,
+          }
+        });
 
         const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
@@ -542,7 +546,7 @@ export class LoanService {
       }
 
       let whereCondition: Prisma.VerificationWhereInput = {};
-      
+
       if (role === UserRole.Admin) {
         // For Admin, get all verifications
         whereCondition = {};
@@ -616,7 +620,7 @@ export class LoanService {
   async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
       const where: Prisma.LoanWhereInput = {};
-      
+
       if (role === UserRole.OperationsExecutive) {
         where.officeId = officeId;
       }
@@ -630,16 +634,16 @@ export class LoanService {
       }
 
       if (filters?.applicationNumber) {
-        where.applicationNumber = {contains: filters.applicationNumber, mode: 'insensitive'};
+        where.applicationNumber = { contains: filters.applicationNumber, mode: 'insensitive' };
       }
 
       // Add date range filter
       if (filters?.startDate || filters?.endDate) {
         where.createdAt = {
-          ...(filters.startDate && { 
+          ...(filters.startDate && {
             gte: new Date(`${filters.startDate}T00:00:00.000Z`)
           }),
-          ...(filters.endDate && { 
+          ...(filters.endDate && {
             lte: new Date(`${filters.endDate}T23:59:59.999Z`)
           })
         };
@@ -756,7 +760,7 @@ export class LoanService {
   async updateVerificationAssignment(
     loanId: number,
     updateData: UpdateAssignmentDto
-    ) {
+  ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
@@ -765,7 +769,7 @@ export class LoanService {
         throw new NotFoundException('Loan not found');
       }
       console.log(updateData.verificationType);
-      
+
       // // If field executive is provided, address is mandatory
       if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
         throw new BadRequestException('Address is required when assigning a field executive');
@@ -782,11 +786,11 @@ export class LoanService {
             },
           },
           data: {
-            ...(updateData.address && {applicantAddress : updateData.address}),
-            ...(updateData.businessName && {businessName : updateData.businessName}),
-            ...(updateData.verifierId && {verifierId : updateData.verifierId}),
-            ...(updateData.fieldExecutiveId && {fieldExecutiveId : updateData.fieldExecutiveId}),
-            ...(updateData.currentOfficeName && {currentOfficeName : updateData.currentOfficeName}),
+            ...(updateData.address && { applicantAddress: updateData.address }),
+            ...(updateData.businessName && { businessName: updateData.businessName }),
+            ...(updateData.verifierId && { verifierId: updateData.verifierId }),
+            ...(updateData.fieldExecutiveId && { fieldExecutiveId: updateData.fieldExecutiveId }),
+            ...(updateData.currentOfficeName && { currentOfficeName: updateData.currentOfficeName }),
             status: 'Pending', // Reset status when assignment is updated
           },
         });
@@ -825,24 +829,35 @@ export class LoanService {
       // Calculate today's date range
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
 
-      const where: Prisma.VerificationWhereInput = { 
+
+      const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
-        // Exclude verifications that have retries for today
-        NOT: {
-          verificationRetries: {
-            some: {
-              createdAt: {
-                gt: today,
-                lt: tomorrow
+        // Exclude verifications that have retries not for today
+        OR: [
+          {
+            postponedDate: {
+              gte: today,
+              lt: tomorrow,
+            },
+          },
+          {
+            OR: [
+              {
+                isPostponed: null,
+              },
+              {
+                isPostponed: false,
               }
-            }
+            ]
           }
-        }
+
+        ]
       };
-      
+
       if (filters?.status) {
         where.status = filters.status;
       }
@@ -883,7 +898,7 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
-      
+
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -909,13 +924,15 @@ export class LoanService {
       return {
         isAvailableToday,
         data:
-        {items: verifications,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }}
+        {
+          items: verifications,
+          meta: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+          }
+        }
       };
     } catch (error) {
       await this.loggingService.error('Failed to get assigned loans with verifications', {
@@ -947,8 +964,11 @@ export class LoanService {
           },
         });
 
-        if (completedVerification) {
+        if (completedVerification && (addressType === 'CurrentAddress' || addressType === 'PermanentAddress')) {
           updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
+          if (verificationData && verificationData.addressVerification) {
+            verificationData.addressVerification.address = updatedAddressType;
+          }
         }
       }
 
@@ -966,16 +986,21 @@ export class LoanService {
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: { id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string; 
-                  latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean}) => {
+          verificationData.uploadedItems.map(async (item: {
+            id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string;
+            latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean
+          }) => {
             try {
-              
+              const timeZone = 'Asia/Kolkata';
+              const zonedDate = toZonedTime(item.timestamp, timeZone);
+              const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+
               if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
                 const processedUrl = await this.s3Service.processAndUploadImage(
                   item.s3ImageUrl,
                   parseFloat(item.latitude),
                   parseFloat(item.longitude),
-                  item.timestamp,
+                  istDate,
                 );
               }
             } catch (error) {
@@ -1330,7 +1355,7 @@ export class LoanService {
 
           // Generate application number if not provided
           const applicationNumber = dto.applicationNumber || `APP${Date.now()}`;
-          
+
           const loanData = {
             ...rest,
             applicationNumber,
@@ -1465,7 +1490,7 @@ export class LoanService {
 
 
   async generateFinalReportPDF(loanId: number, addressType: AddressType): Promise<string> {
-    
+
     const loan = await this.prisma.loan.findUnique({
       where: { id: loanId },
       select: {
@@ -1499,9 +1524,9 @@ export class LoanService {
     if (!loan) {
       throw new NotFoundException('Loan not found');
     }
-    
+
     const verification = loan.verifications[0];
-    
+
     if (!verification) {
       throw new NotFoundException(`Verification for address type ${addressType} not found`);
     }
@@ -1512,7 +1537,7 @@ export class LoanService {
 
     const s3_path = `final_pdf/${loanId}/${addressType}.pdf`;
 
-    if(finalReportPath) {
+    if (finalReportPath) {
       finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
       return finalReportPdfUrl;
     }
@@ -1550,10 +1575,6 @@ export class LoanService {
       </div>
       </div>
 
-      <div class="footer">
-        <span style="color: #138808;">${bankName}</span><span style="color: #FF9933;"></span><br>
-        Generated on ${new Date().toLocaleString()}
-      </div>
     `
   }
 
@@ -1561,24 +1582,28 @@ export class LoanService {
     let result = [];
     let finalResult = [];
     let count = 0;
-    for(let i = 0; i < images.length; i++) {
+    const date = new Date();
+    const timeZone = 'Asia/Kolkata';
+    const zonedDate = toZonedTime(date, timeZone);
+    const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+    for (let i = 0; i < images.length; i++) {
       result.push(`<div style="width: 70%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
                   <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
-                  <div style="font-size: 12px; color: #666;">Uploaded on: ${new Date().toLocaleString()}</div>
+                  <div style="font-size: 12px; color: #666;">Uploaded on: ${istDate}</div>
                   </div>`);
-      
+
       count++;
-      if(count % 4 === 0) {
+      if (count % 4 === 0) {
         finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
         result = [];
         count = 0;
       }
     }
 
-    if(count > 0 && count < 4) {
+    if (count > 0 && count < 4) {
       finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
     }
-    
+
     return finalResult.join('');
   }
 
@@ -1619,16 +1644,16 @@ export class LoanService {
       }
 
       const verification = loan.verifications[0];
-      
+
       if (!verification) {
         throw new NotFoundException(`Verification for address type ${addressType} not found`);
       }
 
       const status = verification?.approvedStatus || '';
 
-      let address = verification.fieldExecutive?.office?.address || '' + 
-                    ', ' + verification.fieldExecutive?.office?.location || '' + 
-                    ', ' + verification.fieldExecutive?.office?.name || '' ;
+      let address = verification.fieldExecutive?.office?.address || '' +
+        ', ' + verification.fieldExecutive?.office?.location || '' +
+        ', ' + verification.fieldExecutive?.office?.name || '';
 
       address = address.toLocaleLowerCase();
 
@@ -1637,16 +1662,16 @@ export class LoanService {
       if (addressType === 'Work') {
         verificationData = verification.verificationData as WorkVerificationData || {};
       }
-      else if(addressType === 'Business') {
+      else if (addressType === 'Business') {
         verificationData = verification.verificationData as BusinessVerificationData || {};
       }
-      else if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
+      else if (addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
         verificationData = verification.verificationData as VerificationData || {};
       }
       else {
         throw new NotFoundException('Invalid address type');
       }
-      
+
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
@@ -1675,7 +1700,7 @@ export class LoanService {
       let htmlTemplate = '';
 
       const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
-      
+
       const html_data = {
         bankName: loan.bankName,
         path: verification.path,
@@ -1685,26 +1710,25 @@ export class LoanService {
         fieldExecutive: verification.fieldExecutive?.name || '',
       }
 
-      if(addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        addressTemplate(verificationData as VerificationData, html_data, addressType);
+      if (addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
+          addressTemplate(verificationData as VerificationData, html_data, addressType);
       }
-      else if(addressType === 'Work') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        workTemplate(verificationData as WorkVerificationData, html_data);
+      else if (addressType === 'Work') {
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
+          workTemplate(verificationData as WorkVerificationData, html_data);
       }
-      else if(addressType === 'Business') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) + 
-        businessTemplate(verificationData as BusinessVerificationData, html_data);
+      else if (addressType === 'Business') {
+        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
+          businessTemplate(verificationData as BusinessVerificationData, html_data);
       }
       else {
         throw new NotFoundException('Invalid address type');
       }
-
       // Launch a new browser instance
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
       });
 
       // Create a new page
@@ -1891,7 +1915,7 @@ export class LoanService {
               color: #388e3c;
               font-size: 18px;
             }
-            .footer {
+            .pdf-footer {
               position: fixed;
               bottom: 0;
               left: 0;
@@ -1901,7 +1925,8 @@ export class LoanService {
               font-size: 12px;
               border-top: 1px solid #eee;
               padding: 8px 0 6px 0;
-              background-color: white; /* Optional, helps avoid overlay */
+              background-color: transparent;
+              z-index: 1000;
             }
             .logo {
               margin-top: 24px;
@@ -2053,10 +2078,10 @@ export class LoanService {
       });
 
       const updateVerification = await this.prisma.verification.update({
-        where:{
+        where: {
           id: verification.id
         },
-        data:{
+        data: {
           isPostponed: true,
           postponedDate: new Date(createVerificationRetryDto.date),
           postponedReason: createVerificationRetryDto.reason

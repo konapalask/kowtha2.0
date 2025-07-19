@@ -301,7 +301,14 @@ export default function LoanVerifyDetails() {
           <div style={{ paddingTop: 8, paddingLeft: 8 }}>
             <LeftOutlined
               style={{ fontSize: 24 }}
-              onClick={() => router?.push("/verify")}
+              onClick={() => {
+                const page = router.query.page;
+                if (page) {
+                  router.push({ pathname: "/verify", query: { page } });
+                } else {
+                  router.push("/verify");
+                }
+              }}
             />
           </div>
           <div

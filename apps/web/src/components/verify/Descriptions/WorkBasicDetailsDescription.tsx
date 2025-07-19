@@ -50,18 +50,6 @@ const WorkBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.prospectNumber}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Purpose of Loan"
-            contentStyle={getItemStyle("purposeOfLoan")}
-          >
-            {data?.basicDetails?.purposeOfLoan}
-          </Descriptions.Item>
-          <Descriptions.Item
-            label="Loan Amount"
-            contentStyle={getItemStyle("loanAmount")}
-          >
-            {data?.basicDetails?.loanAmount}
-          </Descriptions.Item>
-          <Descriptions.Item
             label="PAN Number"
             contentStyle={getItemStyle("panNumber")}
           >
@@ -74,17 +62,41 @@ const WorkBasicDetailsDescription: React.FC<{
             {data?.basicDetails?.aadhar}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Tenure"
-            contentStyle={getItemStyle("tenure")}
-          >
-            {data?.basicDetails?.tenure}
-          </Descriptions.Item>
-          <Descriptions.Item
             label="Qualification"
             contentStyle={getItemStyle("qualification")}
           >
             {data?.basicDetails?.qualification}
           </Descriptions.Item>
+          <Descriptions.Item
+            label="Is Applicant Available"
+            contentStyle={getItemStyle("isApplicantAvailable")}
+          >
+            {data?.basicDetails?.isApplicantAvailable}
+          </Descriptions.Item>
+          {data?.basicDetails?.isApplicantAvailable === "No" && (
+            <>
+              <Descriptions.Item
+                label="Name of the person met"
+                contentStyle={getItemStyle("availablePersonName")}
+              >
+                {data?.basicDetails?.availablePersonName}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label="Contact Number"
+                contentStyle={getItemStyle("availablePersonMobile")}
+              >
+                {data?.basicDetails?.availablePersonMobile}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label="Relation to the applicant"
+                contentStyle={getItemStyle("availablePersonRelation")}
+              >
+                {data?.basicDetails?.availablePersonRelation === "Others"
+                  ? `Others - ${data?.basicDetails?.availablePersonRelationOther || ""}`
+                  : data?.basicDetails?.availablePersonRelation}
+              </Descriptions.Item>
+            </>
+          )}
         </Descriptions>
       </Card>
     </section>

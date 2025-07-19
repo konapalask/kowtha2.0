@@ -378,6 +378,10 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
                 title: "Relationship",
                 dataIndex: "relationship",
                 key: "relationship",
+                render: (text: string, record: any) =>
+                  text === "Other" && record.relationshipOther
+                    ? `Other - ${record.relationshipOther}`
+                    : text,
               },
               {
                 title: "Feedback Status",

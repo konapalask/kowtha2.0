@@ -74,11 +74,15 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       address: string;
       verifierId: string;
       businessName: string;
+      currentOfficeName: string;
     }
   ) => {
     // console.log(values);
     const finalData = {
       ...(type === "Business" ? { businessName: values?.businessName } : {}),
+      ...(type === "Work"
+        ? { currentOfficeName: values?.currentOfficeName }
+        : {}),
       verifierId: values?.verifierId,
       verificationType: getVerificationType(type),
       fieldExecutiveId:
@@ -140,6 +144,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           verification
             ? {
                 businessName: verification?.businessName,
+                currentOfficeName: verification?.currentOfficeName,
                 assignmentMethod:
                   verification?.office &&
                   verification?.office !== userDetails?.officeId
@@ -175,6 +180,25 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
               minLength={3}
               maxLength={60}
               placeholder="Business Name"
+            />
+          </Form.Item>
+        )}
+        {type === "Work" && (
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Please enter company name",
+              },
+            ]}
+            name={"currentOfficeName"}
+            label={"Company Name"}
+          >
+            <Input.TextArea
+              autoSize={{ minRows: 1, maxRows: 2 }}
+              minLength={3}
+              maxLength={60}
+              placeholder="Company Name"
             />
           </Form.Item>
         )}

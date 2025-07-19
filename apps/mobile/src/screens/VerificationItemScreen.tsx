@@ -44,6 +44,7 @@ const VerificationItemScreen = () => {
   const navigation = useNavigation<VerificationItemScreenNavigationProp>();
   const route = useRoute();
   const {item} = route.params as {item: VerificationItem};
+  const {userData} = route.params as {userData: any};
   const {verificationType} = route.params as {verificationType: string};
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
@@ -90,6 +91,8 @@ const VerificationItemScreen = () => {
       availablePersonMobile: '',
       availablePersonRelation: '',
       availablePersonRelationOther: '',
+      loanAmount: userData?.loan?.loanAmount?.toString() ?? '',
+      purposeOfLoan: userData?.loan?.loanType,
     },
     addressVerification: {
       address: '',
@@ -214,10 +217,15 @@ const VerificationItemScreen = () => {
   };
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setExpandedSections(prev => {
+      const isCurrentlyOpen = !!prev[section];
+
+      // If it's open, close it (set all to false)
+      if (isCurrentlyOpen) return {};
+
+      // Otherwise, open this one and close others
+      return {[section]: true};
+    });
   };
 
   const handleBasicDetailsSubmit = async (data: BasicDetailsFormData) => {
