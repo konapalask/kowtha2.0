@@ -884,7 +884,9 @@ export class LoanService {
             select: {
               id: true,
               applicationNumber: true,
+              applicantMobile: true,
               applicantName: true,
+              applicantType: true,
               loanAmount: true,
               status: true,
               bankName: true,
