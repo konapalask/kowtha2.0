@@ -123,13 +123,19 @@ export default function Users() {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
+      const trimmedValues = { ...values };
+      ["name", "mobile", "email", "employeeCode", "locality"].forEach((field) => {
+        if (typeof trimmedValues[field] === "string") {
+          trimmedValues[field] = trimmedValues[field].trim();
+        }
+      });
 
       if (editingUser) {
-        const response = await updateUserApi(editingUser?.id, values);
+        const response = await updateUserApi(editingUser?.id, trimmedValues);
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
-        const response = await createUserApi(values);
+        const response = await createUserApi(trimmedValues);
         message.success("User added successfully");
         fetchUsers(1, pagination.pageSize, filters);
       }
@@ -343,7 +349,20 @@ export default function Users() {
           <Form.Item
             name="name"
             label="Name"
-            rules={[{ required: true, message: "Please enter name" }]}
+            rules={[
+              { required: true, message: "Please enter name" },
+              {
+                validator: (_, value) => {
+                  if (value && value.startsWith(' ')) {
+                    return Promise.reject('Cannot start with a space.');
+                  }
+                  if (value && /[^A-Za-z0-9 ]/.test(value)) {
+                    return Promise.reject('Special characters are not allowed.');
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
             style={{ marginBottom: 8 }}
           >
             <Input maxLength={40} />
@@ -354,6 +373,7 @@ export default function Users() {
             rules={[
               { required: true, message: "Please enter mobile number" },
               { max: 10, message: "Cannot be more than 10 characters" },
+              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
               {
                 pattern: /^[0-9]+$/,
                 message: "Please enter a valid mobile number",
@@ -368,10 +388,7 @@ export default function Users() {
             label="Email"
             style={{ marginBottom: 8 }}
             rules={[
-              // {
-              //   required: true,
-              //   message: "Please input your email!",
-              // },
+              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
               {
                 type: "email",
                 message: "Please enter a valid email address!",
@@ -383,7 +400,20 @@ export default function Users() {
           <Form.Item
             name="employeeCode"
             label="Employee Code"
-            rules={[{ required: true, message: "Please enter employee code" }]}
+            rules={[
+              { required: true, message: "Please enter employee code" },
+              {
+                validator: (_, value) => {
+                  if (value && value.startsWith(' ')) {
+                    return Promise.reject('Cannot start with a space.');
+                  }
+                  if (value && /[^A-Za-z0-9 ]/.test(value)) {
+                    return Promise.reject('Special characters are not allowed.');
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
             style={{ marginBottom: 8 }}
           >
             <Input
@@ -404,7 +434,20 @@ export default function Users() {
           <Form.Item
             name="locality"
             label="Location"
-            rules={[{ required: true, message: "Please enter location" }]}
+            rules={[
+              { required: true, message: "Please enter location" },
+              {
+                validator: (_, value) => {
+                  if (value && value.startsWith(' ')) {
+                    return Promise.reject('Cannot start with a space.');
+                  }
+                  if (value && /[^A-Za-z0-9 ]/.test(value)) {
+                    return Promise.reject('Special characters are not allowed.');
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
             style={{ marginBottom: 8 }}
           >
             <Input maxLength={30} />
