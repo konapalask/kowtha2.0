@@ -92,6 +92,33 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
           />
         </Form.Item>
       </Col>
+      <Col span={8}>
+        <Form.Item
+          name="purposeOfLoan"
+          label="Purpose of Loan"
+          rules={[{ required: true, message: "Please enter purpose of loan" }]}
+        >
+          <Input placeholder="Enter purpose of loan" />
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="loanAmount"
+          label="Loan Amount"
+          rules={[{ required: true, message: "Please enter loan amount" }]}
+        >
+          <Input placeholder="Enter loan amount" />
+        </Form.Item>
+      </Col>
+      <Col span={8}>
+        <Form.Item
+          name="tenure"
+          label="Tenure"
+          rules={[{ required: true, message: "Please enter tenure" }]}
+        >
+          <Input placeholder="Enter tenure" />
+        </Form.Item>
+      </Col>
 
       <Col span={8}>
         <Form.Item
@@ -250,33 +277,6 @@ const BasicDetailsForm: React.FC<{ form: FormInstance }> = ({ form }) => {
           )}
         </>
       )}
-      <Col span={8}>
-        <Form.Item
-          name="purposeOfLoan"
-          label="Purpose of Loan"
-          rules={[{ required: true, message: "Please enter purpose of loan" }]}
-        >
-          <Input placeholder="Enter purpose of loan" />
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
-          name="loanAmount"
-          label="Loan Amount"
-          rules={[{ required: true, message: "Please enter loan amount" }]}
-        >
-          <Input placeholder="Enter loan amount" />
-        </Form.Item>
-      </Col>
-      <Col span={8}>
-        <Form.Item
-          name="tenure"
-          label="Tenure"
-          rules={[{ required: true, message: "Please enter tenure" }]}
-        >
-          <Input placeholder="Enter tenure" />
-        </Form.Item>
-      </Col>
     </>
   );
 };
