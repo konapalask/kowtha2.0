@@ -495,7 +495,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                                     )}
                                     {type === "Work" && (
                                       <span>
-                                        Business Name:{" "}
+                                        Office Name:{" "}
                                         {verification?.currentOfficeName}
                                       </span>
                                     )}

@@ -674,6 +674,7 @@ export class LoanController {
                     properties: {
                       id: { type: 'number' },
                       applicationNumber: { type: 'string' },
+                      applicationMobile: { type: 'string' },
                       applicantName: { type: 'string' },
                       loanAmount: { type: 'number' },
                       status: { type: 'string', enum: Object.values(LoanStatus) },
