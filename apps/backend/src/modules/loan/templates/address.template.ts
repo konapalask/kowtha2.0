@@ -175,10 +175,6 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.standardOfLiving || ''}</span></td>
         </tr>
         <tr>
-          <th>Specify Residence Type</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.specifyResidenceType || ''}</span></td>
-        </tr>
-        <tr>
           <th>Years at Current Address</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
         </tr>
