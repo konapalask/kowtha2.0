@@ -179,9 +179,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
         </tr>
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -257,9 +255,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         </tr>
         ${spouseWorking}
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -312,9 +308,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         `).join('')
         : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -339,9 +333,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           </td>
         </tr>
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
+      
     </div>
 
     <br>

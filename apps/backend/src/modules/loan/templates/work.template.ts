@@ -164,9 +164,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               <td colspan="2"><span class="var-value">${verificationData.employmentDetails?.netSalary || ''}</span></td>
             </tr>
           </table>
-          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-            Field Executive: ${html_data.fieldExecutive || ''}
-          </div>
+          
         </div>
   
         <div style="page-break-before: always;"></div>
@@ -246,9 +244,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               </tr>
             `).join('') || '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
           </table>
-          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-            Field Executive: ${html_data.fieldExecutive || ''}
-          </div>
+          
         </div>
   
         <div style="page-break-before: always;"></div>
@@ -272,9 +268,7 @@ export const workTemplate = (verificationData: WorkVerificationData, html_data: 
               </td>
             </tr>
           </table>
-          <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-            Field Executive: ${html_data.fieldExecutive || ''}
-          </div>
+          
         </div>
         <br>
         <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
