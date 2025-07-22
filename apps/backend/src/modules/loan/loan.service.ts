@@ -1573,9 +1573,7 @@ export class LoanService {
             </td>
           </tr>
         </table>
-        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${fieldExecutive || ''}
-      </div>
+        
       </div>
 
     `
