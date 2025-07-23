@@ -201,10 +201,18 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               label="Loan Amount"
               name="loanAmount"
               rules={[
-                // { required: true, message: "Required" },
                 {
                   type: "number",
                   message: "Please enter a valid amount",
+                },
+                {
+                  validator: (_, value) => {
+                    if (value === undefined || value === null || value === "") return Promise.resolve();
+                    if (value < 100 || value > 9999999999) {
+                      return Promise.reject("Please enter min of 3 digits and max of 10 digits");
+                    }
+                    return Promise.resolve();
+                  },
                 },
               ]}
             >
