@@ -286,6 +286,9 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                             {
                               validator: (_, value) => {
                                 if (value === undefined || value === null || value === "") return Promise.resolve();
+                                if (typeof value === "string" && value.startsWith(" ")) {
+                                    return Promise.reject("Cannot start with a space");
+                                }
                                 if (value < 100 || value > 9999999999) {
                                   return Promise.reject("Please enter min of 3 digits and max of 10 digits");
                                 }
@@ -294,11 +297,14 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                             },
                           ]}
                         >
-                          <InputNumber
-                            min={0}
-                            style={{ width: "100%", height: "32px" }}
-                            addonAfter={"₹"}
-                          />
+                         <InputNumber
+                              min={0}
+                              max={9999999999}
+                              maxLength={10}
+                              precision={0}
+                              style={{ width: "100%", height: "32px" }}
+                              addonAfter={"₹"}
+                            />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={6} lg={5} xl={3} style={{ padding: 4 }}>
