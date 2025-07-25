@@ -305,7 +305,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a field executive",
                   },
                 ]}
-                initialValue={{
+                initialValue={verification?.fieldExecutive ? {
                   label: (
                     <div
                       style={{
@@ -322,12 +322,16 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     </div>
                   ),
                   value: verification?.fieldExecutive?.employeeCode,
-                }}
+                } : undefined}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
                   placeholder="Select a Field Executive"
                   options={fieldExecutives}
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label?.toString().toLowerCase() || '').includes(input.toLowerCase())
+                  }
                   // onSelect removed to allow form validation to show error
                 />
               </Form.Item>
