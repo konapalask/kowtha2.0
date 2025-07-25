@@ -202,24 +202,51 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               name="loanAmount"
               rules={[
                 {
-                  type: "number",
-                  message: "Please enter a valid amount",
-                },
-                {
                   validator: (_, value) => {
-                    if (value === undefined || value === null || value === "") return Promise.resolve();
-                      if (typeof value === "string" && value.startsWith(" ")) {
-                            return Promise.reject("Cannot start with a space");
-                          }
-                    if (value < 100 || value > 9999999999) {
+                    if (value === undefined || value === null || value === "") {
+                      return Promise.resolve();
+                    }
+                    
+                    const numValue = Number(value);
+                    if (isNaN(numValue)) {
+                      return Promise.reject("Please enter a valid amount");
+                    }
+                    
+                    if (numValue < 100 || numValue > 9999999999) {
                       return Promise.reject("Please enter min of 3 digits and max of 10 digits");
                     }
+                    
                     return Promise.resolve();
                   },
                 },
               ]}
             >
-              <InputNumber min={0} max={9999999999}  maxLength={10} style={{ width: "100%" }} />
+              <Input
+                maxLength={10}
+                style={{ width: "100%" }}
+                onKeyDown={(e) => {
+                  // Allow only numbers, backspace, delete, tab, arrows, home, end
+                  const allowedKeys = [
+                    'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight',
+                    'ArrowUp', 'ArrowDown', 
+                  ];
+                  
+                  const isNumber = /^[0-9]$/.test(e.key);
+                  
+                  if (!isNumber && !allowedKeys.includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  // Remove any non-numeric characters that might have been pasted
+                  const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                  if (numericValue !== e.target.value) {
+                    e.target.value = numericValue;
+                  }
+                  
+                  form.setFieldValue('loanAmount', numericValue ? Number(numericValue) : undefined);
+                }}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>
