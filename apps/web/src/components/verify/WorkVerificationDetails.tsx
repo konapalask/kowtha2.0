@@ -43,6 +43,7 @@ interface WorkVerificationDetailsProps {
   hasEditRequest: boolean;
   completeVerificationData: any;
   fetchVerificationData: any;
+  editRequests?: any[];
 }
 
 export const WorkVerificationDetails: React.FC<
@@ -56,6 +57,7 @@ export const WorkVerificationDetails: React.FC<
   hasEditRequest,
   completeVerificationData,
   fetchVerificationData,
+  editRequests = [],
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -167,6 +169,14 @@ export const WorkVerificationDetails: React.FC<
   //   setEditorContent(content);
   //   // }
   // };
+
+  const hasPendingEditRequestForKeySections = () => {
+    if (!hasEditRequest) return false;
+    const keySections = ['workBasicDetails', 'employmentDetails'];
+    return Object.keys(changedData).some(key => keySections.includes(key));
+  };
+  const shouldDisableOtherSections = hasEditRequest || hasPendingEditRequestForKeySections();
+
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -238,6 +248,7 @@ export const WorkVerificationDetails: React.FC<
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("colleagueReferences")}
+              disabled={shouldDisableOtherSections}
             />
           }
         >
@@ -305,6 +316,7 @@ export const WorkVerificationDetails: React.FC<
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("pastEmployment")}
+              disabled={shouldDisableOtherSections}
             />
           }
         >
@@ -387,6 +399,7 @@ export const WorkVerificationDetails: React.FC<
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("existingLoans")}
+              disabled={shouldDisableOtherSections}
             />
           }
         >

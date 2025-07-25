@@ -208,6 +208,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 {
                   validator: (_, value) => {
                     if (value === undefined || value === null || value === "") return Promise.resolve();
+                      if (typeof value === "string" && value.startsWith(" ")) {
+                            return Promise.reject("Cannot start with a space");
+                          }
                     if (value < 100 || value > 9999999999) {
                       return Promise.reject("Please enter min of 3 digits and max of 10 digits");
                     }
@@ -216,7 +219,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 },
               ]}
             >
-              <InputNumber min={0} max={1000000000} style={{ width: "100%" }} />
+              <InputNumber min={0} max={9999999999}  maxLength={10} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6} style={{ padding: 4 }}>

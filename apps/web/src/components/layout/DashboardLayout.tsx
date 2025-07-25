@@ -265,18 +265,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             background: "var(--background-primary)",
             padding: "0 24px",
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "flex-end", // align items to the left
             alignItems: "center",
             boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
             fontFamily: "Noto Sans, sans-serif",
           }}
         >
-          <Button
+          {/* <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
-          />
+          /> */}
           <Space>
             {userDetails?.role === "Admin" && (
               <Popover
@@ -439,6 +439,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         .ant-menu-item-selected .anticon {
           color: var(--primary-800) !important;
         }
+        .ant-layout-sider-trigger {
+            background: var(--primary-50) !important;
+            color: var(--primary-800) !important;
+            font-size: 20px !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+          .ant-layout-sider-trigger:hover {
+            background: var(--primary-100) !important;
+            color: var(--primary-700) !important;
+          }
       `}</style>
     </Layout>
   );
