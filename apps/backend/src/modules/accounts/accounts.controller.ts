@@ -65,18 +65,9 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
+    console.log(req.user, 'req.user.sub');
     const user = await this.accountsService.validateUser(req.user.sub);
-    return {
-      sub: user.id,
-      mobile: user.mobile,
-      role: user.role,
-      officeId: user.officeId,
-      employeeCode: user.employeeCode,
-      name: user.name,
-      email: user.email,
-      status: user.status,
-      locality: user.locality
-    };
+    return user;
   }
 
   @Get('users')

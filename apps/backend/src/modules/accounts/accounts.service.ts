@@ -12,6 +12,7 @@ import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
+import { getUserWithDepartmentRoles } from '../common/types/request.types';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -23,8 +24,8 @@ export class AccountsService {
     // private configService: ConfigService,
   ) {}
 
-  private generateTokens(userId: number, mobile: string, role: UserRole) {
-    const payload = { sub: userId, mobile, role };
+  private generateTokens(userId: number) {
+    const payload = { sub: userId };
     
     // Generate access token (expires in 24 hours)
     const accessToken = this.jwtService.sign(payload, {
@@ -92,15 +93,20 @@ export class AccountsService {
 
   async generateOTP(mobile: string, isMobile: Boolean): Promise<{ message: string }> {
     try {
+
       const user = await this.prisma.user.findUnique({
-        where: { mobile: mobile, status: 'Active' }
+        where: { mobile },
       });
 
-      if (!user || !user.role) {
+      if (!user) {
         throw new NotFoundException('Please use a valid number');
       }
 
-      if (isMobile && !([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)) {
+      const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
+
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
+
+      if (isMobile && !hasRole) {
         throw new BadRequestException('Access denied: You are not authorized to login');
       }
 
@@ -138,9 +144,12 @@ export class AccountsService {
 
   async verifyOTP(mobile: string, otp: string, deviceId?: string): Promise<{ accessToken: string; refreshToken: string; message: string }> {
     try {
+
       const user = await this.prisma.user.findUnique({
-        where: { mobile, status: 'Active' }
+        where: { mobile },
       });
+
+      const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
       await this.loggingService.info('User found', {
         user: user,
@@ -153,22 +162,23 @@ export class AccountsService {
         throw new NotFoundException('Access denied: User not found with this mobile number');
       }
 
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
 
-      if((user.role === UserRole.FieldExecutive || user.role === UserRole.PDFieldExecutive) && !deviceId){
+      if(hasRole && !deviceId){
         throw new UnauthorizedException('Access denied: Please contact administrator');
       }
       
       if(deviceId){
 
-        if(!([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)){
+        if(!hasRole){
           throw new UnauthorizedException('Access denied: You are not Authorized to login');
         }
 
         let updateUser = null;
 
-        if(!user.deviceId){
+        if(!userRoles.deviceId){
           updateUser  = await this.prisma.user.update({
-            where: { id: user.id },
+            where: { id: userRoles.sub },
             data: { deviceId }
           });
           await this.loggingService.info('Device ID updated successfully', {
@@ -176,15 +186,14 @@ export class AccountsService {
           });
         }
 
-        const newUser = await this.prisma.user.findUnique({
-          where: { mobile, status: 'Active' }
-        });
+        const newUserRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-        if(deviceId !== newUser.deviceId){
+
+        if(deviceId !== newUserRoles.deviceId){
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
               requester: {
-                id: user.id
+                id: userRoles.sub
               },
               type: EditRequestType.Login,
               status: EditRequestStatus.Pending
@@ -198,25 +207,24 @@ export class AccountsService {
             const editRequest = await this.prisma.editRequest.create({
               data: {
                 requester: {
-                  connect: { id: user.id }
+                  connect: { id: userRoles.sub }
                 },
                 changes: {
-                  oldDeviceId: user.deviceId,
                   newDeviceId: deviceId,
-                  userName: user.name,
-                  mobile: user.mobile,
-                  employeeCode: user.employeeCode,
-                  role: user.role,
-                  officeId: user.officeId,
+                  mobile: userRoles.mobile,
+                  userName: userRoles.name,
+                  officeId: userRoles.officeId,
+                  oldDeviceId: userRoles.deviceId,
+                  employeeCode: userRoles.employeeCode,
                 },
                 type: EditRequestType.Login,
                 status: EditRequestStatus.Pending
               }
             });
             await this.loggingService.info('Device change request created', {
-              userId: user.id,
+              userId: userRoles.sub,
               deviceId,
-              oldDeviceId: user.deviceId,
+              oldDeviceId: userRoles.deviceId,
               status: 'Pending',
             });
             throw new BadRequestException('Device has been changed. Please contact administrator');
@@ -236,7 +244,7 @@ export class AccountsService {
       });
 
       if ( process.env.DEV_OTP && otp === process.env.DEV_OTP) {
-        const tokens = this.generateTokens(user.id, user.mobile, user.role);
+        const tokens = this.generateTokens(user.id);
       
       return { ...tokens, message: "OTP verified successfully" };
       }
@@ -262,7 +270,7 @@ export class AccountsService {
       });
 
       // Generate both tokens
-      const tokens = this.generateTokens(user.id, user.mobile, user.role);
+      const tokens = this.generateTokens(user.id);
       
       return { ...tokens, message: "OTP verified successfully" };
     } catch (error) {
@@ -280,10 +288,8 @@ export class AccountsService {
 
   async validateUser(id: number): Promise<any> {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id },
-      });
-
+      const user = await getUserWithDepartmentRoles(this.prisma, id);
+      console.log(user, id);
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -293,7 +299,17 @@ export class AccountsService {
       }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
-      return user;
+      return {
+        sub: user.sub,
+        mobile: user.mobile,
+        role: user.departmentRoles[0].role,
+        officeId: user.officeId,
+        employeeCode: user.employeeCode,
+        name: user.name,
+        email: user.email,
+        status: user.status,
+        locality: user.locality
+      };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -334,7 +350,6 @@ export class AccountsService {
           id: true,
           name: true,
           mobile: true,
-          role: true,
           employeeCode: true,
           status: true,
           office: {
@@ -445,7 +460,6 @@ export class AccountsService {
           mobile: true,
           email: true,
           employeeCode: true,
-          role: true,
           status: true,
           office: {
             select: {
@@ -508,13 +522,12 @@ export class AccountsService {
 
       // Generate new access token
       const accessToken = this.jwtService.sign(
-        { sub: user.id, mobile: user.mobile, role: user.role },
+        { sub: user.id },
         { expiresIn: '24h' }
       );
 
       await this.loggingService.info('Token refreshed successfully', { 
         userId: user.id,
-        role: user.role 
       });
 
       return { accessToken };
@@ -579,7 +592,6 @@ export class AccountsService {
 
       await this.loggingService.info('User created successfully', {
         userId: user.id,
-        role: user.role,
         officeId: user.officeId,
       });
 

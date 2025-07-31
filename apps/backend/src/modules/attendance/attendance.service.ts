@@ -28,9 +28,9 @@ export class AttendanceService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.role !== UserRole.FieldExecutive) {
-      throw new BadRequestException('Only field executives can record attendance');
-    }
+    // if (user.role !== UserRole.FieldExecutive) {
+    //   throw new BadRequestException('Only field executives can record attendance');
+    // }
 
     // Check if attendance record already exists for this user and date
     const existingAttendance = await this.prisma.attendance.findFirst({
@@ -59,7 +59,6 @@ export class AttendanceService {
             id: true,
             name: true,
             mobile: true,
-            role: true
           }
         }
       }
@@ -98,14 +97,14 @@ export class AttendanceService {
     // Get all field executives
     const fieldExecutives = await this.prisma.user.findMany({
       where: {
-        role: UserRole.FieldExecutive,
+        // role: UserRole.FieldExecutive,
         status: 'Active'
       },
       select: {
         id: true,
         name: true,
         mobile: true,
-        role: true,
+        // role: true,
         employeeCode: true
       }
     });

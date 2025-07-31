@@ -411,7 +411,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
+              // role: true
             }
           },
           verifications: {
@@ -422,7 +422,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  // role: true
                 }
               },
               verifier: {
@@ -431,7 +431,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  // role: true
                 }
               }
             }
@@ -493,7 +493,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
+              // role: true
             }
           },
           verifications: {
@@ -504,7 +504,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  // role: true
                 }
               },
               verifier: {
@@ -566,7 +566,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  // role: true
                 }
               }
             }
@@ -577,7 +577,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
+              // role: true
             }
           }
         },
@@ -686,7 +686,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
+              // role: true
             }
           },
           verifications: {
@@ -697,7 +697,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true,
+                  // role: true,
                   office: {
                     select: {
                       id: true,
@@ -712,7 +712,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
+                  // role: true
                 }
               },
               verificationRetries: {
