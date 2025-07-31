@@ -17,6 +17,7 @@ export interface UserWithDepartmentRoles {
   email: string | null;
   employeeCode: string | null;
   locality: string | null;
+  defaultDepartment: Department | null;
   deviceId: string | null;
   officeId: number;
   status: string;

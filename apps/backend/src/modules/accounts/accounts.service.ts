@@ -307,6 +307,7 @@ export class AccountsService {
         employeeCode: user.employeeCode,
         name: user.name,
         email: user.email,
+        defaultDepartment: user.defaultDepartment,
         status: user.status,
         locality: user.locality,
         departmentRoles: user.departmentRoles,
