@@ -65,7 +65,7 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    console.log(req.user, 'req.user.id');
+    // console.log(req.user.id, 'req.user, ====================');
     const user = await this.accountsService.validateUser(req.user.id);
     return user;
   }
