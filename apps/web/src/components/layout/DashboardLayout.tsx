@@ -22,6 +22,7 @@ import {
   CheckCircleOutlined,
   AuditOutlined,
   NotificationOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -32,6 +33,7 @@ import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 import { getOfficesApi } from "@/services/settings.services";
 import { getUserDetails } from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
+import UserSettingsModal from "../UserSettingsModal";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -73,6 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const userDetails = getUserDetails();
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>([]);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   // Add dummy login requests data
 
   useEffect(() => {
@@ -199,11 +202,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const avatarColor = getAvatarColor(userDetails?.id);
   const initials = getInitials(userDetails);
 
+  const handleSettingsClick = () => {
+    setIsSettingsModalVisible(true);
+  };
+
+  const handleSettingsModalClose = () => {
+    setIsSettingsModalVisible(false);
+  };
+
   const menu = (
     <Menu>
-      {/* <Menu.Item key="profile">
-        <Link href="/profile">My Profile</Link>
-      </Menu.Item> */}
+      <Menu.Item key="settings" onClick={handleSettingsClick}>
+        <Space>
+          <UserOutlined />
+          Settings
+        </Space>
+      </Menu.Item>
       <Menu.Item key="logout">
         <Link href="/logout">Logout</Link>
       </Menu.Item>
@@ -454,6 +468,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             color: var(--primary-700) !important;
           }
       `}</style>
+      
+      <UserSettingsModal
+        visible={isSettingsModalVisible}
+        onCancel={handleSettingsModalClose}
+        userData={userDetails}
+      />
     </Layout>
   );
 }

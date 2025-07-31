@@ -113,3 +113,6 @@ logs
 # Docker
 **/docker-compose.override.yml
 
+#lock
+.package-lock.json
+
