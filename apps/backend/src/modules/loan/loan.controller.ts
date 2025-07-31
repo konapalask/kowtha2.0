@@ -244,7 +244,7 @@ export class LoanController {
       throw new BadRequestException('No file uploaded');
     }
 
-    const result = await this.loanService.importLoans(file, req.user.sub, req.user.officeId);
+    const result = await this.loanService.importLoans(file, req.user.id, req.user.officeId);
     return {
       status: 200,
       message: 'Loans imported successfully',
@@ -392,7 +392,7 @@ export class LoanController {
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
   async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByVerifier(req.user.sub, req.user.role as UserRole);
+    const result = await this.loanService.getLoansByVerifier(req.user.id, req.user.role as UserRole);
     return {
       status: 200,
       message: 'Verifier loans fetched successfully',
@@ -538,7 +538,7 @@ export class LoanController {
   ) {
     const result = await this.loanService.verifyLoan(
       Number(loanId),
-      req.user.sub,
+      req.user.id,
       verifyLoanDto.status,
       verifyLoanDto.approvedStatus,
       verifyLoanDto.comments,
@@ -640,7 +640,7 @@ export class LoanController {
     description: 'Returns a list of loans assigned to the same field executive calling this API'
   })
   async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByFieldExecutive(req.user.sub);
+    const result = await this.loanService.getLoansByFieldExecutive(req.user.id);
     return {
       status: 200,
       message: 'Field executive loans fetched successfully',
@@ -709,7 +709,7 @@ export class LoanController {
     @Request() req: AuthenticatedRequest,
     @Query() filters: FieldExecutiveAssignedDto
   ) {
-    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub, filters);
+    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.id, filters);
     return {
       status: 200,
       isAvailableToday: result.isAvailableToday,
@@ -760,7 +760,7 @@ export class LoanController {
     const result = await this.loanService.editVerificationReport(
       Number(loanId),
       body.verificationType,
-      req.user.sub,
+      req.user.id,
       body.findings,
       body.verificationData,
       body.addressType,
@@ -804,7 +804,7 @@ export class LoanController {
     const result = await this.loanService.updateVerificationStatus(
       Number(loanId),
       updateStatusDto.type,
-      req.user.sub,
+      req.user.id,
       updateStatusDto.status,
     );
     return {
@@ -940,7 +940,7 @@ export class LoanController {
   ) {
     // If the user is a field executive, ensure they can only create retries for themselves
     if (req.user.role === UserRole.FieldExecutive) {
-      createVerificationRetryDto.fieldExecutiveId = req.user.sub;
+      createVerificationRetryDto.fieldExecutiveId = req.user.id;
     }
 
     const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);

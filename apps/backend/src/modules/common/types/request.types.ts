@@ -3,7 +3,7 @@ import { UserRole, Department } from '@prisma/client';
 
 export interface AuthenticatedRequest extends Request {
   user: {
-    sub: number;
+    id: number;
     mobile: string;
     role: string;
     officeId: number;
@@ -11,7 +11,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export interface UserWithDepartmentRoles {
-  sub: number;
+  id: number;
   mobile: string;
   name: string;
   email: string | null;

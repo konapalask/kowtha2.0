@@ -25,7 +25,7 @@ export class AccountsService {
   ) {}
 
   private generateTokens(userId: number) {
-    const payload = { sub: userId };
+    const payload = { id: userId };
     
     // Generate access token (expires in 24 hours)
     const accessToken = this.jwtService.sign(payload, {
@@ -178,7 +178,7 @@ export class AccountsService {
 
         if(!userRoles.deviceId){
           updateUser  = await this.prisma.user.update({
-            where: { id: userRoles.sub },
+            where: { id: userRoles.id },
             data: { deviceId }
           });
           await this.loggingService.info('Device ID updated successfully', {
@@ -193,7 +193,7 @@ export class AccountsService {
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
               requester: {
-                id: userRoles.sub
+                id: userRoles.id
               },
               type: EditRequestType.Login,
               status: EditRequestStatus.Pending
@@ -207,7 +207,7 @@ export class AccountsService {
             const editRequest = await this.prisma.editRequest.create({
               data: {
                 requester: {
-                  connect: { id: userRoles.sub }
+                  connect: { id: userRoles.id }
                 },
                 changes: {
                   newDeviceId: deviceId,
@@ -222,7 +222,7 @@ export class AccountsService {
               }
             });
             await this.loggingService.info('Device change request created', {
-              userId: userRoles.sub,
+              userId: userRoles.id,
               deviceId,
               oldDeviceId: userRoles.deviceId,
               status: 'Pending',
@@ -289,7 +289,7 @@ export class AccountsService {
   async validateUser(id: number): Promise<any> {
     try {
       const user = await getUserWithDepartmentRoles(this.prisma, id);
-      console.log(user, id);
+
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -300,7 +300,7 @@ export class AccountsService {
 
       await this.loggingService.debug('User validated successfully', { userId: id });
       return {
-        sub: user.sub,
+        id: user.id,
         mobile: user.mobile,
         role: user.departmentRoles[0].role,
         officeId: user.officeId,
@@ -308,7 +308,8 @@ export class AccountsService {
         name: user.name,
         email: user.email,
         status: user.status,
-        locality: user.locality
+        locality: user.locality,
+        departmentRoles: user.departmentRoles,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
@@ -510,19 +511,19 @@ export class AccountsService {
       
       // Get the user from the database
       const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub }
+        where: { id: payload.id }
       });
 
       if (!user) {
         await this.loggingService.warn('Token refresh failed - User not found', { 
-          userId: payload.sub 
+          userId: payload.id 
         });
         throw new UnauthorizedException('Invalid refresh token');
       }
 
       // Generate new access token
       const accessToken = this.jwtService.sign(
-        { sub: user.id },
+        { id: user.id },
         { expiresIn: '24h' }
       );
 

@@ -65,8 +65,8 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    console.log(req.user, 'req.user.sub');
-    const user = await this.accountsService.validateUser(req.user.sub);
+    console.log(req.user, 'req.user.id');
+    const user = await this.accountsService.validateUser(req.user.id);
     return user;
   }
 
@@ -370,7 +370,7 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('organization')
   async getOrganization(@Request() req: AuthenticatedRequest) {
-    return this.accountsService.getOrganizationByUser(req.user.sub);
+    return this.accountsService.getOrganizationByUser(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
