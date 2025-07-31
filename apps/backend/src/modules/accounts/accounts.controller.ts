@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedExc
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { Roles } from './decorators/roles.decorator';
+import { Roles, DeptFromQuery } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
@@ -212,7 +212,7 @@ export class AccountsController {
   })
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const user = await this.accountsService.updateUser(id, updateUserDto);
     return {
