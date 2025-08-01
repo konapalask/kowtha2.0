@@ -15,11 +15,13 @@ import {
   generateOtpApi,
   verifyOtpApi,
   getUserDetailsApi,
+  updateUserDepartmentApi,
 } from "@/services/auth.services";
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
 import { getUserDetails, isEmpty, setUserDetails } from "@/utils/utility";
+import SelectDepartmentModal from "@/components/SelectDepartmentModal";
 // import { useUser } from "@/components/layout/UserContextProvider";
 
 const { Title, Text } = Typography;
@@ -31,6 +33,9 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   // const { userDetails, setUserDetails } = useContext(UserContext);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
+  const [userDetailsTemp, setUserDetailsTemp] = useState<any>(null);
   const userDetails = getUserDetails();
 
   useEffect(() => {
@@ -139,8 +144,33 @@ export default function Login() {
         if (!userDetailsResponse?.data) {
           throw new Error("No user details received");
         }
-        setUserDetails(userDetailsResponse.data);
-        // Navigation will happen automatically through the useEffect
+
+      
+        const userData = {
+          ...userDetailsResponse.data,
+          id: userDetailsResponse.data.id || userDetailsResponse.data.sub,
+          mobile: userDetailsResponse.data.mobile || "",
+          role: userDetailsResponse.data.role || "User",
+          officeId: userDetailsResponse.data.officeId || null,
+          employeeCode: userDetailsResponse.data.employeeCode || "",
+          name: userDetailsResponse.data.name || "",
+          email: userDetailsResponse.data.email || "",
+          defaultDepartment: userDetailsResponse.data.defaultDepartment || "",
+          status: userDetailsResponse.data.status || "Active",
+          locality: userDetailsResponse.data.locality || "",
+          departmentRoles: userDetailsResponse.data.departmentRoles || []
+        };
+
+        // Check if user has a default department
+        if (!userData.defaultDepartment) {
+          // Show department selection modal
+          setUserDetailsTemp(userData);
+          setUserDepartmentRoles(userData.departmentRoles || []);
+          setShowDepartmentModal(true);
+        } else {
+          // User already has a default department, proceed normally
+          setUserDetails(userData);
+        }
       } catch (error) {
         console.error("Error fetching user details:", error);
         message.error("Failed to fetch user details");
@@ -166,6 +196,27 @@ export default function Login() {
   const handleBack = () => {
     form.resetFields();
     setOtpSent(false);
+  };
+
+  const handleDepartmentSelect = async (department: string) => {
+    try {
+      // Update user with selected default department using PATCH API
+      await updateUserDepartmentApi(userDetailsTemp.id, department);
+
+      // Update user details with the new default department
+      const updatedUserDetails = {
+        ...userDetailsTemp,
+        defaultDepartment: department,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      setShowDepartmentModal(false);
+      message.success("Default department updated successfully");
+    } catch (error) {
+      console.error("Error updating default department:", error);
+      message.error("Failed to update default department");
+    }
   };
 
   // const handleResend = () =>{
@@ -329,6 +380,12 @@ export default function Login() {
           </Form>
         </Space>
       </Card>
+      <SelectDepartmentModal
+        visible={showDepartmentModal}
+        departmentRoles={userDepartmentRoles}
+        onSelect={handleDepartmentSelect}
+        onCancel={() => setShowDepartmentModal(false)}
+      />
     </div>
   );
 }

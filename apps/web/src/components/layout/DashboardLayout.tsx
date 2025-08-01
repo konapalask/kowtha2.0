@@ -10,6 +10,8 @@ import {
   Badge,
   notification,
   Popover,
+  message,
+  Tooltip,
 } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -23,6 +25,7 @@ import {
   AuditOutlined,
   NotificationOutlined,
   UserOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -31,9 +34,11 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 // import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, setUserDetails } from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
+import { updateUserDepartmentApi } from "@/services/auth.services";
 import UserSettingsModal from "../UserSettingsModal";
+import SelectDepartmentModal from "../SelectDepartmentModal";
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -76,6 +81,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>([]);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
   // Add dummy login requests data
 
   useEffect(() => {
@@ -210,6 +217,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSettingsModalVisible(false);
   };
 
+  const handleChangeDepartment = () => {
+    // Set user's department roles for the modal
+    setUserDepartmentRoles(userDetails?.departmentRoles || []);
+    setShowDepartmentModal(true);
+  };
+
+  const handleDepartmentSelect = async (department: string) => {
+    try {
+      // Update user with selected default department using PATCH API
+      await updateUserDepartmentApi(userDetails.id, department);
+      
+      // Create updated user details with new default department
+      const updatedUserDetails = {
+        ...userDetails,
+        defaultDepartment: department,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      setShowDepartmentModal(false);
+      message.success("Default department updated successfully");
+      
+      // Force a re-render by updating the component state if needed
+      // The userDetails will be automatically updated in localStorage via setUserDetails
+    } catch (error) {
+      console.error("Error updating default department:", error);
+      message.error("Failed to update default department");
+      setShowDepartmentModal(false);
+    }
+  };
+
   const menu = (
     <Menu>
       <Menu.Item key="settings" onClick={handleSettingsClick}>
@@ -292,6 +330,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           /> */}
           <Space>
+            {/* Change Default Department Button */}
+            {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
+              <Tooltip title="Change Default Department">
+                <Button
+                  type="text"
+                  icon={<SwapOutlined />}
+                  onClick={handleChangeDepartment}
+                  style={{
+                    color: "var(--primary-800)",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              </Tooltip>
+            )}
+            
             {userDetails?.role === "Admin" && (
               <Popover
                 placement="bottomRight"
@@ -473,6 +529,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         visible={isSettingsModalVisible}
         onCancel={handleSettingsModalClose}
         userData={userDetails}
+      />
+      
+      <SelectDepartmentModal
+        visible={showDepartmentModal}
+        departmentRoles={userDepartmentRoles}
+        onSelect={handleDepartmentSelect}
+        onCancel={() => setShowDepartmentModal(false)}
       />
     </Layout>
   );

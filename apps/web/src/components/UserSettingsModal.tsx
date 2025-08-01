@@ -1,10 +1,11 @@
 import React from "react";
-import { Modal, Descriptions, Typography, Card, Space, Tag } from "antd";
-import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined } from "@ant-design/icons";
+import { Modal, Descriptions, Typography, Card, Space, Tag, Divider } from "antd";
+import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined, TeamOutlined, ApartmentOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 interface UserData {
+  id?: number;
   email?: string;
   employeeCode?: string;
   locality?: string;
@@ -14,6 +15,11 @@ interface UserData {
   role?: string;
   status?: string;
   sub?: number;
+  defaultDepartment?: string;
+  departmentRoles?: Array<{
+    department: string;
+    role: string;
+  }>;
 }
 
 interface UserSettingsModalProps {
@@ -165,7 +171,47 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               </Space>
             }
           >
-            {userData.sub || "N/A"}
+            {userData.id || userData.sub || "N/A"}
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            label={
+              <Space>
+                <ApartmentOutlined />
+                Default Department
+              </Space>
+            }
+          >
+            {userData.defaultDepartment || "N/A"}
+          </Descriptions.Item>
+
+          <Descriptions.Item
+            label={
+              <Space>
+                <TeamOutlined />
+                Department Roles
+              </Space>
+            }
+          >
+            {userData.departmentRoles && userData.departmentRoles.length > 0 ? (
+              <Space wrap>
+                {userData.departmentRoles.map((deptRole, index) => (
+                  <Tag
+                    key={index}
+                    color="blue"
+                    style={{
+                      marginBottom: 4,
+                      fontWeight: 500,
+                      borderRadius: 4
+                    }}
+                  >
+                    {deptRole.department} - {deptRole.role}
+                  </Tag>
+                ))}
+              </Space>
+            ) : (
+              "N/A"
+            )}
           </Descriptions.Item>
         </Descriptions>
       </Card>

@@ -47,3 +47,9 @@ export const verifyOtpApi = (payload: VerifyOtpPayload) => {
 export const getUserDetailsApi = () => {
   return axiosInstance.get<any>("/accounts/profile");
 };
+
+export const updateUserDepartmentApi = (userId: number, department: string) => {
+  return axiosInstance.patch(`/accounts/users/${userId}?department=${department}`, {
+    defaultDepartment: department,
+  });
+};
