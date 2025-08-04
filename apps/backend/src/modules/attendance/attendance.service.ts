@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { GetAttendanceDto } from './dto/get-attendance.dto';
-import { AttendanceStatus, UserRole } from '@prisma/client';
+import { AttendanceStatus, Department, UserRole } from '@prisma/client';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class AttendanceService {
   }
 
   async getAttendance(filters: GetAttendanceDto, currentUserId: number, currentUserRole: UserRole) {
-    const { startDate, endDate, status, userId } = filters;
+    const { startDate, endDate, status, userId, department } = filters;
     
     // Set default date range to one month from today if not provided
     const today = new Date();
@@ -98,7 +98,13 @@ export class AttendanceService {
     const fieldExecutives = await this.prisma.user.findMany({
       where: {
         // role: UserRole.FieldExecutive,
-        status: 'Active'
+        status: 'Active',
+        departmentRoles: {
+          some: {
+            department: department,
+            role: department === Department.FI ? UserRole.FieldExecutive : UserRole.PDFieldExecutive
+          }
+        }
       },
       select: {
         id: true,
