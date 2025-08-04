@@ -1,4 +1,5 @@
 import axiosInstance from "@/config/axios.config";
+import { getWithDepartment, postWithDepartment, patchWithDepartment } from "./api.services";
 
 export interface Organization {
   id: number;
@@ -18,7 +19,7 @@ export interface Office {
 }
 
 export const getOrganizationApi = () => {
-  return axiosInstance.get<Organization>(`/accounts/organization`);
+  return getWithDepartment(`/accounts/organization`);
 };
 
 // export const updateOrganizationApi = (organization: Organization) => {
@@ -26,13 +27,13 @@ export const getOrganizationApi = () => {
 // };
 
 export const getOfficesApi = () => {
-  return axiosInstance.get<any>(`/accounts/offices`);
+  return getWithDepartment(`/accounts/offices`);
 };
 
 export const updateOfficeApi = (id:number, values:any) =>{
-  return axiosInstance.patch( `/accounts/offices/${id}`,values)
+  return patchWithDepartment(`/accounts/offices/${id}`, values);
 }
 
 export const createOfficeApi = (values:any)=>{
-  return axiosInstance.post(`/accounts/offices`,values)
+  return postWithDepartment(`/accounts/offices`, values);
 }

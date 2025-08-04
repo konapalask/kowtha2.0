@@ -5,7 +5,6 @@ import {
   Space,
   Typography,
   Avatar,
-  Dropdown,
   Grid,
   Badge,
   notification,
@@ -34,9 +33,10 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 // import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
-import { getUserDetails, setUserDetails } from "@/utils/utility";
+import { getUserDetails, setUserDetails, getCurrentDepartment, setCurrentDepartment, initializeCurrentDepartment } from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
-import { updateUserDepartmentApi } from "@/services/auth.services";
+import { updateUserDepartmentApi, getUserDetailsApi } from "@/services/auth.services";
+import { updateUserApi } from "@/services/users.services";
 import UserSettingsModal from "../UserSettingsModal";
 import SelectDepartmentModal from "../SelectDepartmentModal";
 
@@ -77,13 +77,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [currentTime] = useState(new Date());
   const [office, setOffice] = useState<string>("");
-  const userDetails = getUserDetails();
+  const [userDetails, setUserDetailsState] = useState(getUserDetails());
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>([]);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
-  // Add dummy login requests data
+  const [modalUserData, setModalUserData] = useState(userDetails);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
+  const [currentDept, setCurrentDept] = useState<string>('');
+  useEffect(() => {
+    const initialCurrentDept = initializeCurrentDepartment();
+    setCurrentDept(initialCurrentDept);
+  }, [userDetails?.defaultDepartment]);
 
   useEffect(() => {
     if (userDetails?.officeId) {
@@ -209,8 +215,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const avatarColor = getAvatarColor(userDetails?.id);
   const initials = getInitials(userDetails);
 
-  const handleSettingsClick = () => {
+  const handleSettingsClick = async () => {
     setIsSettingsModalVisible(true);
+    await fetchFreshUserData();
+  };
+
+  const fetchFreshUserData = async () => {
+    setIsLoadingUserData(true);
+    try {
+      console.log('Fetching fresh user data from /api/accounts/profile');
+      const response = await getUserDetailsApi();
+      const freshUserData = response.data;
+      console.log('Fresh user data received:', freshUserData);
+      
+      // Update modal user data
+      setModalUserData(freshUserData);
+      
+      // Also update the main user details state and localStorage
+      setUserDetails(freshUserData);
+      setUserDetailsState(freshUserData);
+      
+    } catch (error) {
+      console.error('Error fetching fresh user data:', error);
+      message.error('Failed to load latest user information');
+      // Fallback to current user details if API fails
+      setModalUserData(userDetails);
+    } finally {
+      setIsLoadingUserData(false);
+    }
   };
 
   const handleSettingsModalClose = () => {
@@ -218,49 +250,102 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const handleChangeDepartment = () => {
-    // Set user's department roles for the modal
+    // Set user's department roles for the modal (for changing current department)
     setUserDepartmentRoles(userDetails?.departmentRoles || []);
     setShowDepartmentModal(true);
   };
 
+  const handleCurrentDepartmentChange = (newCurrentDepartment: string) => {
+    console.log('Changing current department to:', newCurrentDepartment);
+    setCurrentDept(newCurrentDepartment);
+    setCurrentDepartment(newCurrentDepartment);
+    message.success(`Current department changed to ${newCurrentDepartment}`);
+  };
+
   const handleDepartmentSelect = async (department: string) => {
     try {
-      // Update user with selected default department using PATCH API
-      await updateUserDepartmentApi(userDetails.id, department);
-      
-      // Create updated user details with new default department
-      const updatedUserDetails = {
-        ...userDetails,
-        defaultDepartment: department,
-      };
-
-      // Update localStorage with the new user details
-      setUserDetails(updatedUserDetails);
+      // This now changes the current department, not the default department
+      handleCurrentDepartmentChange(department);
       setShowDepartmentModal(false);
-      message.success("Default department updated successfully");
-      
-      // Force a re-render by updating the component state if needed
-      // The userDetails will be automatically updated in localStorage via setUserDetails
     } catch (error) {
-      console.error("Error updating default department:", error);
-      message.error("Failed to update default department");
+      console.error("Error changing current department:", error);
+      message.error("Failed to change current department");
       setShowDepartmentModal(false);
     }
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="settings" onClick={handleSettingsClick}>
-        <Space>
-          <UserOutlined />
-          Settings
-        </Space>
-      </Menu.Item>
-      <Menu.Item key="logout">
-        <Link href="/logout">Logout</Link>
-      </Menu.Item>
-    </Menu>
-  );
+  const handleUserUpdate = async (updatedData: { name: string; email: string }) => {
+    try {
+      console.log('Attempting to update user:', userDetails.id, updatedData);
+      
+      // Update user with name and email using PATCH API
+      const response = await updateUserApi(userDetails.id, updatedData);
+      console.log('User update response:', response);
+      
+      // Create updated user details with new name and email
+      const updatedUserDetails = {
+        ...userDetails,
+        name: updatedData.name,
+        email: updatedData.email,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      // Update component state to trigger re-render
+      setUserDetailsState(updatedUserDetails);
+      message.success("User information updated successfully");
+      
+    } catch (error: any) {
+      console.error("Error updating user information:", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
+      
+      const errorMessage = error?.response?.data?.message || "Failed to update user information";
+      message.error(errorMessage);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
+  const handleUserDepartmentChange = async (newDefaultDepartment: string) => {
+    try {
+      // Validate department parameter
+      if (!newDefaultDepartment || newDefaultDepartment.trim() === '') {
+        message.error('Please select a valid department');
+        return;
+      }
+      
+      console.log('Attempting to update department:', userDetails.id, newDefaultDepartment);
+      console.log('User details:', userDetails);
+      
+      // Update user with selected default department using PATCH API
+      const response = await updateUserDepartmentApi(userDetails.id, newDefaultDepartment);
+      console.log('Department update response:', response);
+      
+      // Create updated user details with new default department
+      const updatedUserDetails = {
+        ...userDetails,
+        defaultDepartment: newDefaultDepartment,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      // Update component state to trigger re-render
+      setUserDetailsState(updatedUserDetails);
+      message.success("Default department updated successfully");
+      
+    } catch (error: any) {
+      console.error("Error updating default department:", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error status:", error?.response?.status);
+      console.error("Error message:", error?.message);
+      
+      const errorMessage = error?.message || error?.response?.data?.message || "Failed to update default department";
+      message.error(errorMessage);
+      throw error; // Re-throw to let the modal handle the error
+    }
+  };
+
+  // Removed dropdown menu - profile avatar will directly open modal
 
   return (
     <Layout style={{ minHeight: "100vh", fontFamily: "Noto Sans, sans-serif" }}>
@@ -330,22 +415,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           /> */}
           <Space>
-            {/* Change Default Department Button */}
-            {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
-              <Tooltip title="Change Default Department">
-                <Button
-                  type="text"
-                  icon={<SwapOutlined />}
-                  onClick={handleChangeDepartment}
-                  style={{
-                    color: "var(--primary-800)",
-                    fontSize: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                />
-              </Tooltip>
+            {/* Current Department Display and Change Button */}
+            {currentDept && (
+              <Space>
+                <Text style={{ fontWeight: 600, color: "var(--primary-800)" }}>
+                  {currentDept}
+                </Text>
+                {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
+                  <Tooltip title="Change Current Department">
+                    <Button
+                      type="text"
+                      icon={<SwapOutlined />}
+                      onClick={handleChangeDepartment}
+                      style={{
+                        color: "var(--primary-800)",
+                        fontSize: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    />
+                  </Tooltip>
+                )}
+              </Space>
             )}
             
             {userDetails?.role === "Admin" && (
@@ -447,26 +539,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 hour12: true,
               })}
             </Text>
-            <Dropdown
-              overlay={menu}
-              placement="bottomRight"
-              trigger={["click"]}
+            <Avatar
+              onClick={handleSettingsClick}
+              style={{
+                backgroundColor: avatarColor,
+                color: "var(--primary-800)",
+                fontWeight: 700,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                fontSize: 18,
+                borderRadius: "50%",
+                cursor: "pointer",
+              }}
+              size={40}
             >
-              <Avatar
-                style={{
-                  backgroundColor: avatarColor,
-                  color: "var(--primary-800)",
-                  fontWeight: 700,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                  fontSize: 18,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                }}
-                size={40}
-              >
-                {initials}
-              </Avatar>
-            </Dropdown>
+              {initials}
+            </Avatar>
           </Space>
         </Header>
         <Content
@@ -528,7 +615,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <UserSettingsModal
         visible={isSettingsModalVisible}
         onCancel={handleSettingsModalClose}
-        userData={userDetails}
+        userData={modalUserData}
+        onUpdateUser={handleUserUpdate}
+        onChangeDepartment={handleUserDepartmentChange}
+        onChangeCurrentDepartment={handleCurrentDepartmentChange}
+        loading={isLoadingUserData}
       />
       
       <SelectDepartmentModal
@@ -536,7 +627,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         departmentRoles={userDepartmentRoles}
         onSelect={handleDepartmentSelect}
         onCancel={() => setShowDepartmentModal(false)}
+        isCurrentDepartment={true}
       />
     </Layout>
   );
 }
+

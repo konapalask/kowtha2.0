@@ -1,4 +1,5 @@
 import axiosInstance from "../config/axios.config";
+import { getWithDepartment, postWithDepartment, patchWithDepartment, deleteWithDepartment } from "./api.services";
 
 export interface Verification {
   id: number;
@@ -56,7 +57,7 @@ export const getLoansApi = (
   limit?: number,
   filters?: LoanFilters
 ) => {
-  return axiosInstance.get<any>("/loans", {
+  return getWithDepartment("/loans", {
     params: {
       page,
       limit,
@@ -66,11 +67,13 @@ export const getLoansApi = (
 };
 
 export const getLoansByIdApi = (id: string) => {
-  return axiosInstance.get<Loan>(`/loans?id=${id}`);
+  return getWithDepartment(`/loans`, {
+    params: { id }
+  });
 };
 
 export const updateLoanApi = (loanId: number, payload: Partial<Loan>) => {
-  return axiosInstance.patch<Loan>(`/loans/${loanId}`, payload);
+  return patchWithDepartment(`/loans/${loanId}`, payload);
 };
 
 export const assignVerificationApi = (
@@ -82,7 +85,7 @@ export const assignVerificationApi = (
     assignee: string;
   }
 ) => {
-  return axiosInstance.post<Verification>(
+  return postWithDepartment(
     `/loans/${loanId}/verifications/${verificationType}/assign`,
     payload
   );
@@ -91,7 +94,7 @@ export const assignVerificationApi = (
 export const importLoansApi = (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  return axiosInstance.post<{ message: string }>("/loans/import", formData, {
+  return postWithDepartment("/loans/import", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -99,33 +102,35 @@ export const importLoansApi = (file: File) => {
 };
 
 export const getVerifierLoansApi = () => {
-  return axiosInstance.get<VerifierLoan[]>(`/loans/get-verifier-loans`);
+  return getWithDepartment(`/loans/get-verifier-loans`);
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {
-  return axiosInstance.post<Verification>(
+  return postWithDepartment(
     `/loans/${loanId}/assign-loan-executive`,
     payload
   );
 };
 
 export const updateExecutivesApi = (loanId: number, payload: any) => {
-  return axiosInstance.patch<Verification>(
+  return patchWithDepartment(
     `/loans/${loanId}/update-executive`,
     payload
   );
 };
 
 export const getExecutivesApi = () => {
-  return axiosInstance.get<any>(`/accounts/users?role=FieldExecutive`);
+  return getWithDepartment(`/accounts/users`, {
+    params: { role: "FieldExecutive" }
+  });
 };
 
 export const getFieldExecutivesApi = () => {
-  return axiosInstance.get<any[]>(`/loans/field-executive`);
+  return getWithDepartment(`/loans/field-executive`);
 };
 
 export const createLoanApi = (payload: any) => {
-  return axiosInstance.post<any>(`/loans`, payload);
+  return postWithDepartment(`/loans`, payload);
 };
 
 export const deleteFieldAssignmentApi = (
@@ -133,11 +138,11 @@ export const deleteFieldAssignmentApi = (
   type: string,
   payload: any
 ) => {
-  return axiosInstance.delete<any>(`/loans/${loanId}/verification/${type}`, {
+  return deleteWithDepartment(`/loans/${loanId}/verification/${type}`, {
     data: payload,
   });
 };
 
 export const deleteLoanApi = (id: number) => {
-  return axiosInstance.delete<any>(`/loans/${id}`);
+  return deleteWithDepartment(`/loans/${id}`);
 };

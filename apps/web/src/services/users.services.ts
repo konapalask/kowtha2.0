@@ -1,4 +1,5 @@
 import axiosInstance from "../config/axios.config";
+import { getWithDepartment, postWithDepartment, patchWithDepartment } from "./api.services";
 
 export interface UserFilters {
   employeeCode?: string;
@@ -7,7 +8,7 @@ export interface UserFilters {
 }
 
 export const getUsersApi = async (page?: number, limit?: number, filters?: UserFilters) => {
-  return axiosInstance.get("/accounts/all-users", {
+  return getWithDepartment("/accounts/all-users", {
     params: {
       page,
       limit,
@@ -17,23 +18,34 @@ export const getUsersApi = async (page?: number, limit?: number, filters?: UserF
 };
 
 export const getFieldExecutivesByOfficeIdApi = async (officeId: string) => {
-  return axiosInstance.get(
-    `/accounts/users?role=FieldExecutive&officeId=${officeId}`
-  );
+  return getWithDepartment(`/accounts/users`, {
+    params: {
+      role: "FieldExecutive",
+      officeId: officeId
+    }
+  });
 };
 
 export const getVerifiersApi = async () => {
-  return axiosInstance.get("/accounts/users?role=Verifier");
+  return getWithDepartment("/accounts/users", {
+    params: {
+      role: "Verifier"
+    }
+  });
 };
 
 export const createUserApi = async (userData: any) => {
-  return axiosInstance.post("/accounts/users", userData);
+  return postWithDepartment("/accounts/users", userData);
 };
 
 export const updateUserApi = async (userId: number, userData: any) => {
-  return axiosInstance.patch(`/accounts/users/${userId}`, userData);
+  return patchWithDepartment(`/accounts/users/${userId}`, userData);
 };
 
 export const getAllFieldExecutivesApi = async () => {
-  return axiosInstance.get("/accounts/users?role=FieldExecutive");
+  return getWithDepartment("/accounts/users", {
+    params: {
+      role: "FieldExecutive"
+    }
+  });
 };

@@ -1,5 +1,6 @@
 import axiosInstance from "@/config/axios.config"
+import { getWithDepartment } from "./api.services";
 
 export const getAttendanceRecodsApi =(filters:any)=>{
-    return axiosInstance.get<any>(`/attendance`,{params:{...filters}})
+    return getWithDepartment(`/attendance`, {params:{...filters}});
 }

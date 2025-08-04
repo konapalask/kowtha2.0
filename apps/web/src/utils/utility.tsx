@@ -46,3 +46,32 @@ export const setUserDetails = (userDetails: any) => {
   if (typeof window === "undefined") return;
   localStorage.setItem(USER_DETAILS, JSON.stringify(userDetails));
 };
+
+// Current Department Management
+export const getCurrentDepartment = (): string => {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem('currentDepartment') || "";
+};
+
+export const setCurrentDepartment = (department: string) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem('currentDepartment', department);
+};
+
+export const initializeCurrentDepartment = () => {
+  if (typeof window === "undefined") return "";
+  
+  const storedCurrentDept = getCurrentDepartment();
+  if (storedCurrentDept) {
+    return storedCurrentDept;
+  }
+  
+  // If no current department is stored, use default department
+  const userDetails = getUserDetails();
+  if (userDetails?.defaultDepartment) {
+    setCurrentDepartment(userDetails.defaultDepartment);
+    return userDetails.defaultDepartment;
+  }
+  
+  return "";
+};

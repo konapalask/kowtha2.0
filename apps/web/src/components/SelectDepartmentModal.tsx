@@ -13,6 +13,7 @@ interface SelectDepartmentModalProps {
   departmentRoles: DepartmentRole[];
   onSelect: (department: string) => void;
   onCancel: () => void;
+  isCurrentDepartment?: boolean; // New prop to distinguish between default and current department selection
 }
 
 const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
@@ -20,6 +21,7 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
   departmentRoles,
   onSelect,
   onCancel,
+  isCurrentDepartment = false,
 }) => {
   const [selectedDepartment, setSelectedDepartment] = React.useState<string | null>(null);
 
@@ -65,14 +67,14 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
   return (
     <Modal
       title={
-        <div style={{ 
-          color: "white", 
-          fontWeight: 600, 
-          fontSize: 18, 
+        <div style={{
+          color: "white",
+          fontWeight: 600,
+          fontSize: 18,
           lineHeight: 1.5,
           paddingRight: 30
         }}>
-          Select Default Department
+          {isCurrentDepartment ? "Select Current Department" : "Select Default Department"}
         </div>
       }
       open={visible}
@@ -123,11 +125,14 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
       aria-labelledby="department-modal-title"
       aria-describedby="department-modal-description"
     >
-      <p 
+      <p
         id="department-modal-description"
         style={{ color: "#475569", fontSize: 16, marginBottom: 24, fontWeight: 500 }}
       >
-        Please select your default department:
+        {isCurrentDepartment
+          ? "Please select your current working department:"
+          : "Please select your default department:"
+        }
       </p>
 
       <Radio.Group
