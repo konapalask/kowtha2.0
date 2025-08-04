@@ -332,9 +332,21 @@ export class AccountsService {
       const where: any = {
         status: filters?.status || 'Active'
       };
+
+      if (filters.department) {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }
       
       if (filters?.role) {
-        where.role = filters.role;
+        where.departmentRoles = {
+          some: {
+            role: filters.role
+          }
+        };
       }
       
       if (filters?.officeId) {
@@ -345,15 +357,6 @@ export class AccountsService {
         where.locality = {
           contains: filters.locality,
           mode: 'insensitive'
-        };
-      }
-
-      // If department filter is provided, filter users by department roles
-      if (filters?.department) {
-        where.departmentRoles = {
-          some: {
-            department: filters.department
-          }
         };
       }
 

@@ -41,9 +41,8 @@ export class ListUsersDto {
   @ApiProperty({
     description: 'Filter users by department',
     enum: Department,
-    required: false
+    required: true
   })
   @IsEnum(Department)
-  @IsOptional()
   department?: Department;
 } 
