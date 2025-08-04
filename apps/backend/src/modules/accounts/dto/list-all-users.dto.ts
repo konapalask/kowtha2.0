@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { UserRole } from '@prisma/client';
+import { Department, UserRole } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class ListAllUsersDto extends PaginationDto {
@@ -36,4 +36,11 @@ export class ListAllUsersDto extends PaginationDto {
   @IsString()
   @IsOptional()
   locality?: string;
+
+  @ApiProperty({
+    description: 'Filter users by department',
+    required: true
+  })
+  @IsEnum(Department)
+  department?: Department;
 } 

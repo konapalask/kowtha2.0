@@ -482,6 +482,14 @@ export class AccountsService {
         };
       }
 
+      if (filters?.department) {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }
+
       const page = filters?.page || 1;
       const limit = filters?.limit || 10;
       const skip = (page - 1) * limit;
