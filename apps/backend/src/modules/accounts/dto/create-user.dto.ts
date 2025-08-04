@@ -21,10 +21,6 @@ export class CreateUserDto {
   @IsOptional()
   employeeCode?: string;
 
-  @ApiProperty({ description: 'User\'s role', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
-
   @ApiProperty({ description: 'Office ID where the user belongs' })
   @IsNumber()
   officeId: number;

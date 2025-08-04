@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
 import { LoggingService } from '../common/logging/logging.service';
-import { EditRequestStatus, EditRequestType, UserRole } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
 import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,6 +12,8 @@ import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
+import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
+import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
 // import { ConfigService } from '@nestjs/config';
 
@@ -346,6 +348,15 @@ export class AccountsService {
         };
       }
 
+      // If department filter is provided, filter users by department roles
+      if (filters?.department) {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }
+
       const users = await this.prisma.user.findMany({
         where,
         select: {
@@ -371,6 +382,12 @@ export class AccountsService {
             }
           },
           locality: true,
+          departmentRoles: {
+            select: {
+              department: true,
+              role: true
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
@@ -393,10 +410,27 @@ export class AccountsService {
             }
           }
         });
+
+        // Transform department roles based on filter
+        let departmentRole = null;
+        if (filters?.department) {
+          // If department filter is applied, find the specific department role
+          const filteredDepartmentRole = user.departmentRoles.find(dr => dr.department === filters.department);
+          if (filteredDepartmentRole) {
+            departmentRole = {
+              department: filteredDepartmentRole.department,
+              role: filteredDepartmentRole.role
+            };
+          }
+        }
+
         return {
           ...user,
           pendingVerifications: user._count.verifications,
           availabletoday: !!attendance,
+          department: departmentRole?.department, // Single object instead of array
+          role: departmentRole?.role, // Single object instead of array
+          departmentRoles: undefined, // Remove the array
           _count: undefined // Remove the _count field
         };
       }));
@@ -880,6 +914,203 @@ export class AccountsService {
         data,
         error: error.message,
         stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  // Create department role for a user
+  async createDepartmentRole(department: Department, createDepartmentRoleDto: CreateDepartmentRoleDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: createDepartmentRoleDto.userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role already exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: createDepartmentRoleDto.userId,
+            department: department,
+          },
+        },
+      });
+
+      if (existingDepartmentRole) {
+        throw new ConflictException(`Department role already exists for user ${createDepartmentRoleDto.userId} in department ${department}`);
+      }
+
+      // Create the department role
+      const departmentRole = await this.prisma.departmentRole.create({
+        data: {
+          userId: createDepartmentRoleDto.userId,
+          department: department,
+          role: createDepartmentRoleDto.role,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role created successfully', {
+        userId: createDepartmentRoleDto.userId,
+        department,
+        role: createDepartmentRoleDto.role,
+        departmentRoleId: departmentRole.id,
+      });
+
+      return departmentRole;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create department role', {
+        userId: createDepartmentRoleDto.userId,
+        department,
+        role: createDepartmentRoleDto.role,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Update department role for a user
+  async updateDepartmentRole(userId: number, department: Department, updateDepartmentRoleDto: UpdateDepartmentRoleDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      if (!existingDepartmentRole) {
+        throw new NotFoundException(`Department role not found for user ${userId} in department ${department}`);
+      }
+
+      // Update the department role
+      const departmentRole = await this.prisma.departmentRole.update({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+        data: {
+          role: updateDepartmentRoleDto.role,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role updated successfully', {
+        userId: userId,
+        department,
+        role: updateDepartmentRoleDto.role,
+        departmentRoleId: departmentRole.id,
+      });
+
+      return departmentRole;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update department role', {
+        userId: userId,
+        department,
+        role: updateDepartmentRoleDto.role,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Delete department role for a user
+  async deleteDepartmentRole(userId: number, department: Department) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      if (!existingDepartmentRole) {
+        throw new NotFoundException(`Department role not found for user ${userId} in department ${department}`);
+      }
+
+      // Delete the department role
+      await this.prisma.departmentRole.delete({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role deleted successfully', {
+        userId,
+        department,
+        departmentRoleId: existingDepartmentRole.id,
+      });
+
+      return { message: 'Department role deleted successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to delete department role', {
+        userId,
+        department,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }
