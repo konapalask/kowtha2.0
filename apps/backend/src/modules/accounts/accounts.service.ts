@@ -333,13 +333,13 @@ export class AccountsService {
         status: filters?.status || 'Active'
       };
 
-      if (filters.department) {
-        where.departmentRoles = {
-          some: {
-            department: filters.department
-          }
-        };
-      }
+      // if (filters.department) {
+      //   where.departmentRoles = {
+      //     some: {
+      //       department: filters.department
+      //     }
+      //   };
+      // }
       
       if (filters?.role) {
         where.departmentRoles = {
@@ -459,9 +459,19 @@ export class AccountsService {
   async listAllUsers(filters?: ListAllUsersDto): Promise<PaginatedResponse<any>> {
     try {
       const where: any = {};
-      
+
+      where.departmentRoles = {
+        some: {
+          department: filters.department
+        }
+      };
+
       if (filters?.role) {
-        where.role = filters.role;
+        where.departmentRoles = {
+          some: {
+            role: filters.role
+          }
+        };
       }
       
       if (filters?.employeeCode) {
@@ -485,14 +495,6 @@ export class AccountsService {
         };
       }
 
-      if (filters?.department) {
-        where.departmentRoles = {
-          some: {
-            department: filters.department
-          }
-        };
-      }
-
       const page = filters?.page || 1;
       const limit = filters?.limit || 10;
       const skip = (page - 1) * limit;
@@ -508,6 +510,12 @@ export class AccountsService {
           email: true,
           employeeCode: true,
           status: true,
+          departmentRoles: {
+            select: {
+              department: true,
+              role: true
+            }
+          },
           office: {
             select: {
               id: true,
@@ -524,6 +532,13 @@ export class AccountsService {
         take: limit
       });
 
+      const transformedUsers = users.map(user => ({
+        ...user,
+        department: user.departmentRoles[0].department,
+        role: user.departmentRoles[0].role,
+        departmentRoles: undefined
+      }));
+
       await this.loggingService.info('All users listed successfully', {
         filter: filters,
         count: users.length,
@@ -532,7 +547,7 @@ export class AccountsService {
       });
 
       return {
-        items: users,
+        items: transformedUsers,
         meta: {
           total,
           page,

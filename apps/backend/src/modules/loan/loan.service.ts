@@ -18,7 +18,8 @@ import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, LocationType
+  AddressType, UserRole, ApprovedStatus, LocationType,
+  Department
 } from '@prisma/client';
 import { businessTemplate } from './templates/business.template';
 import { BusinessVerificationData } from './templates/business.interface';
@@ -392,7 +393,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByOffice(officeId: number) {
+  async getLoansByOffice(officeId: number, department: Department) {
     try {
       const office = await this.prisma.office.findUnique({
         where: { id: officeId }
@@ -403,7 +404,10 @@ export class LoanService {
       }
 
       const loans = await this.prisma.loan.findMany({
-        where: { officeId },
+        where: { 
+          officeId,
+          department: department
+        },
         include: {
           operationsExecutive: {
             select: {
@@ -411,7 +415,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              // role: true
             }
           },
           verifications: {
@@ -422,7 +425,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true
                 }
               },
               verifier: {
@@ -431,7 +433,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true
                 }
               }
             }
@@ -444,6 +445,7 @@ export class LoanService {
 
       await this.loggingService.info('Retrieved loans by office', {
         officeId,
+        department,
         count: loans.length
       });
 
@@ -451,6 +453,7 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to get loans by office', {
         officeId,
+        department,
         error: error.message,
         stack: error.stack
       });
@@ -458,7 +461,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByFieldExecutive(fieldExecutiveId: number) {
+  async getLoansByFieldExecutive(fieldExecutiveId: number, department: Department) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
         where: { id: fieldExecutiveId }
@@ -469,7 +472,10 @@ export class LoanService {
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: { fieldExecutiveId },
+        where: { 
+          fieldExecutiveId,
+          department: department
+        },
         include: {
           loan: {
             select: {
@@ -485,7 +491,10 @@ export class LoanService {
 
       const loanIds = verifications.map(v => v.loanId);
       const loans = await this.prisma.loan.findMany({
-        where: { id: { in: loanIds } },
+        where: { 
+          id: { in: loanIds },
+          department: department
+        },
         include: {
           operationsExecutive: {
             select: {
@@ -493,7 +502,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              // role: true
             }
           },
           verifications: {
@@ -504,7 +512,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true
                 }
               },
               verifier: {
@@ -521,6 +528,7 @@ export class LoanService {
 
       await this.loggingService.debug('Retrieved loans by field executive', {
         fieldExecutiveId,
+        department,
         count: loans.length
       });
 
@@ -528,6 +536,7 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to get loans by field executive', {
         fieldExecutiveId,
+        department,
         error: error.message,
         stack: error.stack
       });
@@ -535,7 +544,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByVerifier(verifierId: number, role: UserRole) {
+  async getLoansByVerifier(verifierId: number, role: UserRole, department: Department) {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId }
@@ -545,7 +554,11 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.VerificationWhereInput = {};
+      let whereCondition: Prisma.VerificationWhereInput = {
+        loan: {
+          department: department
+        }
+      };
 
       if (role === UserRole.Admin) {
         // For Admin, get all verifications
@@ -566,7 +579,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true
                 }
               }
             }
@@ -577,7 +589,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              // role: true
             }
           }
         },
@@ -619,7 +630,9 @@ export class LoanService {
 
   async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
-      const where: Prisma.LoanWhereInput = {};
+      const where: Prisma.LoanWhereInput = {
+        department: filters.department
+      };
 
       if (role === UserRole.OperationsExecutive) {
         where.officeId = officeId;
@@ -686,7 +699,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              // role: true
             }
           },
           verifications: {
@@ -697,7 +709,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true,
                   office: {
                     select: {
                       id: true,
@@ -712,7 +723,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  // role: true
                 }
               },
               verificationRetries: {
@@ -836,6 +846,7 @@ export class LoanService {
 
       const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
+        department: filters.department,
         // Exclude verifications that have retries not for today
         OR: [
           {

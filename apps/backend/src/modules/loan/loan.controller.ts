@@ -19,7 +19,7 @@ import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto'
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
-            AddressType, ApprovedStatus, LocationType } from '@prisma/client';
+            AddressType, ApprovedStatus, LocationType, Department } from '@prisma/client';
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 
@@ -34,14 +34,14 @@ export class LoanController {
   */
 
   @Get('office/:officeId')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Get loans by office' })
   @ApiResponse({
     status: 200,
     description: 'Returns a list of loans for the specified office'
   })
-  async getLoansByOffice(@Param('officeId') officeId: number) {
-    const result = await this.loanService.getLoansByOffice(officeId);
+  async getLoansByOffice(@Param('officeId') officeId: number, @Query('department') department: string) {
+    const result = await this.loanService.getLoansByOffice(officeId, department as Department);
     return {
       status: 200,
       message: 'Office loans fetched successfully',
@@ -50,7 +50,7 @@ export class LoanController {
   }
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier, UserRole.PDOperationsExecutive, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
   @ApiResponse({
     status: 200,
@@ -137,7 +137,11 @@ export class LoanController {
     }
   })
   async getLoans(@Query() filters: GetLoansDto, @Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoans(req.user.officeId, req.user.role as UserRole,filters);
+    // Get the role for the specific department from the user's department roles
+    const userDepartmentRole = req.user.departmentRoles?.find(dr => dr.department === filters.department);
+    const userRole = userDepartmentRole?.role || UserRole.Admin;
+    
+    const result = await this.loanService.getLoans(req.user.officeId, userRole, filters);
     return {
       status: 200,
       message: 'Loans fetched successfully',
@@ -146,7 +150,7 @@ export class LoanController {
   }
 
   @Post()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Create one or multiple loans' })
   @ApiResponse({
     status: 201,
@@ -179,7 +183,7 @@ export class LoanController {
   }
 
   @Post('import')
-  @Roles(UserRole.OperationsExecutive)
+  @Roles(UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Operations Executive will Import loans from Excel file' })
   @ApiConsumes('multipart/form-data')
@@ -253,7 +257,7 @@ export class LoanController {
   }
 
   @Post(':id/assign-loan-executive')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Assign a field executive to a loan verification' })
   @ApiResponse({
     status: 200,
@@ -297,7 +301,7 @@ export class LoanController {
   }
 
   @Patch(':id/update-executive')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
   @ApiResponse({
     status: 200,
@@ -341,7 +345,7 @@ export class LoanController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.OperationsExecutive)
+  @Roles(UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Patch API to Edit loan details' })
   @ApiResponse({
     status: 200,
@@ -385,14 +389,14 @@ export class LoanController {
   */
 
   @Get('get-verifier-loans')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.PDVerifier, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to verifier' })
   @ApiResponse({
     status: 200,
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
-  async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByVerifier(req.user.id, req.user.role as UserRole);
+  async getLoansByVerifier(@Request() req: AuthenticatedRequest, @Query('department') department: string) {
+    const result = await this.loanService.getLoansByVerifier(req.user.id, req.user.role as UserRole, department as Department);
     return {
       status: 200,
       message: 'Verifier loans fetched successfully',
@@ -402,7 +406,7 @@ export class LoanController {
 
 
   @Get(':id/preview-final-report')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Generate PDF Preview for loan details' })
   @ApiResponse({ status: 200, description: 'PDF generated successfully' })
   @ApiResponse({ status: 404, description: 'Loan not found' })
@@ -433,7 +437,7 @@ export class LoanController {
 
 
   @Get(':id/generate-final-report')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Generate Final Report PDF for loan details without further improvements' })
   @ApiResponse({ status: 200, description: 'PDF generated successfully' })
   @ApiResponse({ status: 404, description: 'Loan not found' })
@@ -463,7 +467,7 @@ export class LoanController {
 
 
   @Get(':id/verification-data')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Get verification data for a loan' })
   @ApiResponse({
     status: 200,
@@ -525,7 +529,7 @@ export class LoanController {
   }
 
   @Post(':id/verify')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Verifier will approve or reject a loan and add comments' })
   @ApiResponse({
     status: 200,
@@ -551,7 +555,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/:type')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Edit verification data' })
   @ApiResponse({
     status: 200,
@@ -594,7 +598,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/:type/approve')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Approve or change status and path for a verification (Admin/Verifier only)' })
   @ApiResponse({
     status: 200,
@@ -633,14 +637,14 @@ export class LoanController {
   */
 
   @Get('get-field-executive-loans')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to field executive' })
   @ApiResponse({
     status: 200,
     description: 'Returns a list of loans assigned to the same field executive calling this API'
   })
-  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByFieldExecutive(req.user.id);
+  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest, @Query('department') department: string) {
+    const result = await this.loanService.getLoansByFieldExecutive(req.user.id, department as Department);
     return {
       status: 200,
       message: 'Field executive loans fetched successfully',
@@ -649,7 +653,7 @@ export class LoanController {
   }
 
   @Get('field-executive/assigned')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Get all loans assigned to field executive with verification details' })
   @ApiResponse({
     status: 200,
@@ -719,7 +723,7 @@ export class LoanController {
   }
 
   @Patch(':id/submit-verification-report')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Edit verification report' })
   @ApiResponse({
     status: 200,
@@ -773,7 +777,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/status')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Update verification status' })
   @ApiResponse({
     status: 200,
@@ -815,7 +819,7 @@ export class LoanController {
   }
 
   @Delete(':id/verification/:type')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Delete verification assigned to a field executive' })
   @ApiBody({
     type: DeleteVerificationDto,
@@ -874,7 +878,7 @@ export class LoanController {
   }
 
   @Post('verification-retry')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
   @ApiOperation({ summary: 'Create a verification retry record' })
   @ApiResponse({
     status: 201,
@@ -952,7 +956,7 @@ export class LoanController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
   @ApiOperation({ summary: 'Delete a loan and all related entities (cascade)' })
   @ApiResponse({
     status: 200,
