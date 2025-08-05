@@ -11,6 +11,10 @@ import {
   message,
   Popconfirm,
   Tag,
+  Checkbox,
+  Row,
+  Col,
+  FormInstance,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -61,6 +65,91 @@ const RoleOptions = [
   { label: "Verifier", value: "Verifier" },
   { label: "Field Executive", value: "FieldExecutive" }
 ];
+
+// import { Form, Checkbox, Select, Row, Col } from "antd";
+// import { useState } from "react";
+
+const FIroleOptions = [
+  { label: "Admin", value: "Admin" },
+  { label: "Operations Executive", value: "OperationsExecutive" },
+  { label: "Verifier", value: "Verifier" },
+  { label: "Field Executive", value: "FieldExecutive" }
+];
+
+const PDroleOptions = [
+  { label: "Admin", value: "PDAdmin" },
+  { label: "Operations Executive", value: "PDOperationsExecutive" },
+  { label: "Verifier", value: "PDVerifier" },
+  { label: "Field Executive", value: "PDFieldExecutive" }
+];
+
+const departments = ["FI", "PD"];
+
+const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+
+  const handleCheck = (checked: boolean, dept: string) => {
+    let updated = [...selectedDepartments];
+    if (checked) {
+      updated.push(dept);
+    } else {
+      updated = updated.filter((d) => d !== dept);
+      const current = form.getFieldValue("department_roles") || [];
+      form.setFieldsValue({
+        department_roles: current.filter((item: any) => item.department !== dept)
+      });
+    }
+    setSelectedDepartments(updated);
+  };
+
+  return (
+    <Form.Item label="Department & Role" required>
+      {departments.map((dept, index) => {
+        const roleFieldName = ["department_roles", index, "role"];
+        const deptFieldName = ["department_roles", index, "department"];
+        const isChecked = selectedDepartments.includes(dept);
+
+        return (
+          <Row key={dept} align="middle" gutter={16} style={{ marginBottom: 12 }}>
+            <Col>
+              <Checkbox
+                checked={isChecked}
+                onChange={(e) => handleCheck(e.target.checked, dept)}
+              >
+                {dept}
+              </Checkbox>
+            </Col>
+            <Col flex={1}>
+              {isChecked && (
+                <>
+                  <Form.Item
+                    name={roleFieldName}
+                    rules={[{ required: true, message: `Select role for ${dept}` }]}
+                    noStyle
+                  >
+                    <Select
+                      options={dept === "FI" ? FIroleOptions : PDroleOptions}
+                      placeholder={`Select role for ${dept}`}
+                      style={{ width: 200 }}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name={deptFieldName}
+                    initialValue={dept}
+                    hidden
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
+            </Col>
+          </Row>
+        );
+      })}
+    </Form.Item>
+  );
+}; 
+
 
 export default function Users() {
   const [form] = Form.useForm();
@@ -135,6 +224,7 @@ export default function Users() {
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
+        console.log(trimmedValues);
         const response = await createUserApi(trimmedValues);
         message.success("User added successfully");
         fetchUsers(1, pagination.pageSize, filters);
@@ -444,14 +534,7 @@ export default function Users() {
               }}
             />
           </Form.Item>
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Please select role" }]}
-            style={{ marginBottom: 8 }}
-          >
-            <Select options={RoleOptions} />
-          </Form.Item>
+          <DepartmentRoleSelector form={form} />
           <Form.Item
             name="locality"
             label="Location"

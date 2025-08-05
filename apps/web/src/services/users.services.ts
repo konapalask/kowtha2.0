@@ -44,6 +44,7 @@ export const createUserApi = async (userData: any) => {
         name: userData.name,
         mobile: userData.mobile,
         email: userData.email,
+        departmentRoles: userData.department_roles,
         employeeCode: userData.employeeCode,
         officeId: userData.officeId,
         status: userData.status || "Active",
