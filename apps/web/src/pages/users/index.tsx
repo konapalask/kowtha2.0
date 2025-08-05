@@ -30,12 +30,19 @@ const { Option } = Select;
 
 interface User {
   id: number;
-  firstName: string;
-  lastName: string;
+  name: string;
   mobile: string;
+  email: string;
+  employeeCode: string;
+  locality: string;
+  deviceId?: string;
+  defaultDepartment?: string;
+  officeId: number;
   status: "Active" | "Inactive";
   role: string;
   office?: any;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Office {
@@ -48,18 +55,11 @@ const DashboardLayout = dynamic(
   { ssr: false }
 );
 
-const FiRoleOptions = [
+const RoleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
   { label: "Verifier", value: "Verifier" },
-  { label: "Field Executive", value: "FieldExecutive" },
-];
-
-const PdRoleOptions = [
-  { label: "PD-Admin", value: "PD-Admin" },
-  { label: "PD-Operations Executive", value: "PD-OperationsExecutive" },
-  { label: "PD-Verifier", value: "PD-Verifer" },
-  { label: "PD-Field Executive", value: "PD-FieldExecutive" },
+  { label: "Field Executive", value: "FieldExecutive" }
 ];
 
 export default function Users() {
@@ -152,8 +152,13 @@ export default function Users() {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     form.setFieldsValue({
-      ...user,
-      officeId: user?.office?.id,
+      name: user.name,
+      mobile: user.mobile,
+      email: user.email,
+      employeeCode: user.employeeCode,
+      role: user.role,
+      locality: user.locality,
+      officeId: user?.office?.id || user.officeId,
     });
     setIsModalVisible(true);
   };
@@ -207,32 +212,48 @@ export default function Users() {
       key: "mobile",
       width: 60,
     },
-    // {
-    //   title: "Email",
-    //   dataIndex: "email",
-    //   key: "email",
-    //   width: 200,
-    // },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 120,
+    },
     {
       title: "Role",
       dataIndex: "role",
       key: "role",
       width: 80,
-      render: (role: string) => (
-        <Tag
-          color={
-            role === "Admin"
-              ? "geekblue"
-              : role === "OperationsExecutive"
-                ? "gold"
-                : role === "FieldExecutive"
-                  ? "green"
-                  : "volcano"
+      render: (role: string) => {
+        const getRoleColor = (role: string) => {
+          switch (role) {
+            case "Admin":
+            case "PDAdmin":
+              return "geekblue";
+            case "OperationsExecutive":
+            case "PDOperationsExecutive":
+              return "gold";
+            case "FieldExecutive":
+            case "PDFieldExecutive":
+              return "green";
+            case "Verifier":
+            case "PDVerifier":
+              return "volcano";
+            default:
+              return "default";
           }
-        >
-          {role}
-        </Tag>
-      ),
+        };
+
+        const getRoleLabel = (role: string) => {
+          const roleOption = RoleOptions.find(option => option.value === role);
+          return roleOption ? roleOption.label : role;
+        };
+
+        return (
+          <Tag color={getRoleColor(role)}>
+            {getRoleLabel(role)}
+          </Tag>
+        );
+      },
     },
     {
       title: "Branch",
@@ -429,7 +450,7 @@ export default function Users() {
             rules={[{ required: true, message: "Please select role" }]}
             style={{ marginBottom: 8 }}
           >
-            <Select options={FiRoleOptions} />
+            <Select options={RoleOptions} />
           </Form.Item>
           <Form.Item
             name="locality"
