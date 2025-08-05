@@ -37,20 +37,31 @@ export const getVerifiersApi = async () => {
 export const createUserApi = async (userData: any) => {
   try {
     // Step 1: Create user without role
-    const createUserResponse = await postWithDepartment("/accounts/users", {
-      name: userData.name,
-      mobile: userData.mobile,
-      email: userData.email,
-      employeeCode: userData.employeeCode,
-      officeId: userData.officeId,
-      status: userData.status || "Active",
-      locality: userData.locality
-    });
+    const department = userData.defaultDepartment || userData.department;
+    const createUserResponse = await postWithDepartment(
+      "/accounts/users/",
+      {
+        name: userData.name,
+        mobile: userData.mobile,
+        email: userData.email,
+        employeeCode: userData.employeeCode,
+        officeId: userData.officeId,
+        status: userData.status || "Active",
+        locality: userData.locality
+      },
+      { params: { department } }
+    );
 
     // Step 2: Assign role to the created user using the returned user ID
     if (createUserResponse?.data?.data?.id && userData.role) {
-      const department = userData.defaultDepartment || userData.department;
-      await assignUserRoleApi(createUserResponse.data.data.id, userData.role, department);
+      await postWithDepartment(
+        "/accounts/users/department-roles",
+        {
+          userId: createUserResponse.data.data.id,
+          role: userData.role
+        },
+        { params: { department } }
+      );
     }
 
     return createUserResponse;
