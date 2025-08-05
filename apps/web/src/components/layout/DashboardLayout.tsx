@@ -260,6 +260,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setCurrentDept(newCurrentDepartment);
     setCurrentDepartment(newCurrentDepartment);
     message.success(`Current department changed to ${newCurrentDepartment}`);
+    // Reload the current page to fetch data for the new department
+    router.reload();
   };
 
   const handleDepartmentSelect = async (department: string) => {
