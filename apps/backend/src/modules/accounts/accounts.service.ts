@@ -647,17 +647,55 @@ export class AccountsService {
         throw new NotFoundException('Office not found');
       }
 
-      // Create user
-      const user = await this.prisma.user.create({
-        data: createUserDto,
+      // Validate department roles
+      if (!createUserDto.departmentRoles || createUserDto.departmentRoles.length === 0) {
+        throw new BadRequestException('At least one department role is required');
+      }
+
+      // Check for duplicate department roles
+      const departments = createUserDto.departmentRoles.map(dr => dr.department);
+      const uniqueDepartments = new Set(departments);
+      if (departments.length !== uniqueDepartments.size) {
+        throw new BadRequestException('Duplicate department roles are not allowed');
+      }
+
+      // Use transaction to create user and department roles atomically
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // Extract department roles from DTO
+        const { departmentRoles, ...userData } = createUserDto;
+
+        // Create user
+        const user = await prisma.user.create({
+          data: userData,
+        });
+
+        // Create department roles
+        const createdDepartmentRoles = await Promise.all(
+          departmentRoles.map(async (deptRole) => {
+            return await prisma.departmentRole.create({
+              data: {
+                userId: user.id,
+                department: deptRole.department,
+                role: deptRole.role,
+              },
+            });
+          })
+        );
+
+        // Return user with department roles
+        return {
+          ...user,
+          departmentRoles: createdDepartmentRoles,
+        };
       });
 
-      await this.loggingService.info('User created successfully', {
-        userId: user.id,
-        officeId: user.officeId,
+      await this.loggingService.info('User created successfully with department roles', {
+        userId: result.id,
+        officeId: result.officeId,
+        departmentRolesCount: result.departmentRoles.length,
       });
 
-      return user;
+      return result;
     } catch (error) {
       await this.loggingService.error('Failed to create user', {
         userData: createUserDto,

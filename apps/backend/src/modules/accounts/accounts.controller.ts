@@ -158,10 +158,10 @@ export class AccountsController {
   @Post('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Create a new user' })
+  @ApiOperation({ summary: 'Create a new user with department roles' })
   @ApiResponse({ 
     status: 201, 
-    description: 'User has been successfully created',
+    description: 'User has been successfully created with department roles',
     schema: {
       type: 'object',
       properties: {
@@ -177,7 +177,21 @@ export class AccountsController {
             officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            updatedAt: { type: 'string', format: 'date-time' },
+            departmentRoles: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  userId: { type: 'number' },
+                  department: { type: 'string', enum: ['FI', 'PD'] },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            }
           }
         }
       }
