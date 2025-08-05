@@ -126,7 +126,9 @@ export class AccountsService {
       });
 
       // Send OTP via Fast2SMS
-      await this.sendOTPViaSMS(mobile, otp);
+      if(process.env.NODE_ENV === 'production'){
+        await this.sendOTPViaSMS(mobile, otp);
+      }
 
       await this.loggingService.info('OTP generated and sent successfully', { 
         mobile, 
@@ -532,13 +534,6 @@ export class AccountsService {
         take: limit
       });
 
-      const transformedUsers = users.map(user => ({
-        ...user,
-        department: user.departmentRoles[0].department,
-        role: user.departmentRoles[0].role,
-        departmentRoles: undefined
-      }));
-
       await this.loggingService.info('All users listed successfully', {
         filter: filters,
         count: users.length,
@@ -547,7 +542,7 @@ export class AccountsService {
       });
 
       return {
-        items: transformedUsers,
+        items: users,
         meta: {
           total,
           page,
