@@ -15,6 +15,7 @@ import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -307,36 +308,33 @@ export class AccountsController {
   @Patch('users/:id/department-roles')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Update a department role for a user' })
-  @ApiQuery({ 
-    name: 'department', 
-    enum: Department, 
-    description: 'Department to update the role for (FI or PD)',
-    example: 'FI'
-  })
+  @ApiOperation({ summary: 'Update department roles for a user' })
   @ApiResponse({ 
     status: 200, 
-    description: 'Department role has been successfully updated',
+    description: 'Department roles have been successfully updated',
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Department role updated successfully' },
+        message: { type: 'string', example: 'Department roles updated successfully' },
         data: {
-          type: 'object',
-          properties: {
-            id: { type: 'number' },
-            userId: { type: 'number' },
-            department: { type: 'string', enum: ['FI', 'PD'] },
-            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-            user: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-                mobile: { type: 'string' },
-                email: { type: 'string' }
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              userId: { type: 'number' },
+              department: { type: 'string', enum: ['FI', 'PD'] },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+              user: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  name: { type: 'string' },
+                  mobile: { type: 'string' },
+                  email: { type: 'string' }
+                }
               }
             }
           }
@@ -344,24 +342,17 @@ export class AccountsController {
       }
     }
   })
-  async updateDepartmentRole(
+  async updateDepartmentRoles(
     @Param('id', ParseIntPipe) userId: number,
-    @Query('department') department: string,
-    @Body() updateDepartmentRoleDto: UpdateDepartmentRoleDto,
+    @Body() updateUserDepartmentRolesDto: UpdateUserDepartmentRolesDto,
   ) {
-    // Validate department parameter
-    if (!department || !Object.values(Department).includes(department as Department)) {
-      throw new BadRequestException('Valid department parameter is required (FI or PD)');
-    }
-    
-    const departmentRole = await this.accountsService.updateDepartmentRole(
+    const departmentRoles = await this.accountsService.updateUserDepartmentRoles(
       userId,
-      department as Department,
-      updateDepartmentRoleDto
+      updateUserDepartmentRolesDto
     );
     return {
-      message: 'Department role updated successfully',
-      data: departmentRole
+      message: 'Department roles updated successfully',
+      data: departmentRoles
     };
   }
    

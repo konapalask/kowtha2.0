@@ -14,6 +14,7 @@ import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
 import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
 import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 import { getUserWithDepartmentRoles } from '../common/types/request.types';
 // import { ConfigService } from '@nestjs/config';
 
@@ -1111,6 +1112,84 @@ export class AccountsService {
         userId: userId,
         department,
         role: updateDepartmentRoleDto.role,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Update multiple department roles for a user
+  async updateUserDepartmentRoles(userId: number, updateUserDepartmentRolesDto: UpdateUserDepartmentRolesDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Validate department roles
+      if (!updateUserDepartmentRolesDto.departmentRoles || updateUserDepartmentRolesDto.departmentRoles.length === 0) {
+        throw new BadRequestException('At least one department role is required');
+      }
+
+      // Check for duplicate departments
+      const departments = updateUserDepartmentRolesDto.departmentRoles.map(dr => dr.department);
+      const uniqueDepartments = new Set(departments);
+      if (departments.length !== uniqueDepartments.size) {
+        throw new BadRequestException('Duplicate departments are not allowed');
+      }
+
+      // Use transaction to update department roles atomically
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // Delete existing department roles for this user
+        await prisma.departmentRole.deleteMany({
+          where: { userId },
+        });
+
+        // Create new department roles
+        const createdDepartmentRoles = await Promise.all(
+          updateUserDepartmentRolesDto.departmentRoles.map(async (deptRole) => {
+            return await prisma.departmentRole.create({
+              data: {
+                userId: userId,
+                department: deptRole.department,
+                role: deptRole.role,
+              },
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    mobile: true,
+                    email: true,
+                  },
+                },
+              },
+            });
+          })
+        );
+
+        return createdDepartmentRoles;
+      });
+
+      await this.loggingService.info('User department roles updated successfully', {
+        userId: userId,
+        departmentRolesCount: result.length,
+        departments: result.map(dr => dr.department),
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update user department roles', {
+        userId: userId,
+        departmentRoles: updateUserDepartmentRolesDto.departmentRoles,
         error: error.message,
         stack: error.stack,
       });
