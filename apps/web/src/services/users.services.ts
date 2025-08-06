@@ -93,6 +93,7 @@ export const updateUserApi = async (userId: number, userData: any) => {
       mobile: userData.mobile,
       email: userData.email,
       employeeCode: userData.employeeCode,
+      departmentRoles: userData.departmentRoles,
       officeId: userData.officeId,
       status: userData.status,
       locality: userData.locality,

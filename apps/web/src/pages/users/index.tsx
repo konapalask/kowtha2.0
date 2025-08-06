@@ -47,6 +47,7 @@ interface User {
   office?: any;
   createdAt: string;
   updatedAt: string;
+  departmentRoles: any[];
 }
 
 interface Office {
@@ -88,25 +89,29 @@ const departments = ["FI", "PD"];
 const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
 
+  useEffect(() => {
+    const currentRoles = form.getFieldValue("departmentRoles") || [];
+    const departments = currentRoles.map((r: any) => r.department);
+    setSelectedDepartments(departments);
+  }, [form]);
+
   const handleCheck = (checked: boolean, dept: string) => {
-    let updated = [...selectedDepartments];
+    const current = form.getFieldValue("departmentRoles") || [];
     if (checked) {
-      updated.push(dept);
-    } else {
-      updated = updated.filter((d) => d !== dept);
-      const current = form.getFieldValue("department_roles") || [];
       form.setFieldsValue({
-        department_roles: current.filter((item: any) => item.department !== dept)
+        departmentRoles: [...current, { department: dept, role: undefined }],
       });
+      setSelectedDepartments([...selectedDepartments, dept]);
+    } else {
+      const updated = current.filter((item: any) => item.department !== dept);
+      form.setFieldsValue({ departmentRoles: updated });
+      setSelectedDepartments(updated.map((item: any) => item.department));
     }
-    setSelectedDepartments(updated);
   };
 
   return (
     <Form.Item label="Department & Role" required>
       {departments.map((dept, index) => {
-        const roleFieldName = ["department_roles", index, "role"];
-        const deptFieldName = ["department_roles", index, "department"];
         const isChecked = selectedDepartments.includes(dept);
 
         return (
@@ -123,7 +128,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
               {isChecked && (
                 <>
                   <Form.Item
-                    name={roleFieldName}
+                    name={["departmentRoles", selectedDepartments.indexOf(dept), "role"]}
                     rules={[{ required: true, message: `Select role for ${dept}` }]}
                     noStyle
                   >
@@ -134,7 +139,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
                     />
                   </Form.Item>
                   <Form.Item
-                    name={deptFieldName}
+                    name={["departmentRoles", selectedDepartments.indexOf(dept), "department"]}
                     initialValue={dept}
                     hidden
                   >
@@ -148,7 +153,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
       })}
     </Form.Item>
   );
-}; 
+};
 
 
 export default function Users() {
@@ -224,7 +229,6 @@ export default function Users() {
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
-        console.log(trimmedValues);
         const response = await createUserApi(trimmedValues);
         message.success("User added successfully");
         fetchUsers(1, pagination.pageSize, filters);
@@ -249,6 +253,7 @@ export default function Users() {
       role: user.role,
       locality: user.locality,
       officeId: user?.office?.id || user.officeId,
+      departmentRoles: user.departmentRoles,
     });
     setIsModalVisible(true);
   };
