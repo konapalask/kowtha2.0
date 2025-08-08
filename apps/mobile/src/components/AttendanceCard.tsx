@@ -112,12 +112,20 @@ const AttendanceCard: React.FC<{
             </Pressable>
           </View>
         </>
+      ) : isLoggedIn ? (
+        <View style={{}}>
+          <Icon name="information-circle-outline" size={28} color={'green'} />
+          <Text
+            style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
+            You have already logged in for the day
+          </Text>
+        </View>
       ) : (
         <View style={{}}>
           <Icon name="information-circle-outline" size={28} color={'orange'} />
           <Text
             style={[styles.loginText, {textAlign: 'left', fontWeight: '400'}]}>
-            Login is unavailable now
+            Login is available between 9AM and 12PM
           </Text>
         </View>
       )}
