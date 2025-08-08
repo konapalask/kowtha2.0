@@ -82,8 +82,8 @@ android {
         applicationId "com.beyondscale.kowthafi"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 14
-        versionName "1.0.14"
+        versionCode 17
+        versionName "1.0.17"
     }
     signingConfigs {
         debug {
@@ -116,6 +116,8 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation 'androidx.activity:activity:1.7.0'
+implementation 'androidx.activity:activity-ktx:1.7.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

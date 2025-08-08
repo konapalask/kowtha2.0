@@ -378,48 +378,49 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       }
 
       // Check for storage permissions
-      const storagePermission = await check(
-        PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
-      );
-      if (storagePermission !== RESULTS.GRANTED) {
-        const permissionResult = await request(
-          PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
-        );
-        if (permissionResult !== RESULTS.GRANTED) {
-          Alert.alert(
-            'Permission Required',
-            'Storage permission is required to access photos from gallery. Would you like to grant permission?',
-            [
-              {
-                text: 'Cancel',
-                style: 'cancel',
-              },
-              {
-                text: 'Grant Permission',
-                onPress: async () => {
-                  const result = await request(
-                    PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
-                  );
-                  if (result === RESULTS.GRANTED) {
-                    handleGallery();
-                  } else {
-                    Alert.alert(
-                      'Permission Denied',
-                      'Storage permission is required to access photos from gallery',
-                    );
-                  }
-                },
-              },
-            ],
-          );
-          return;
-        }
-      }
+      // const storagePermission = await check(
+      //   PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      // );
+      // if (storagePermission !== RESULTS.GRANTED) {
+      //   const permissionResult = await request(
+      //     PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      //   );
+      //   if (permissionResult !== RESULTS.GRANTED) {
+      //     Alert.alert(
+      //       'Permission Required',
+      //       'Storage permission is required to access photos from gallery. Would you like to grant permission?',
+      //       [
+      //         {
+      //           text: 'Cancel',
+      //           style: 'cancel',
+      //         },
+      //         {
+      //           text: 'Grant Permission',
+      //           onPress: async () => {
+      //             const result = await request(
+      //               PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      //             );
+      //             if (result === RESULTS.GRANTED) {
+      //               handleGallery();
+      //             } else {
+      //               Alert.alert(
+      //                 'Permission Denied',
+      //                 'Storage permission is required to access photos from gallery',
+      //               );
+      //             }
+      //           },
+      //         },
+      //       ],
+      //     );
+      //     return;
+      //   }
+      // }
 
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
         selectionLimit: MAX_UPLOADS - uploadedItems.length, // allow as many as possible
+        // presentationStyle: 'fullScreen',
       });
 
       if (result.assets && result.assets.length > 0) {
