@@ -50,7 +50,7 @@ const Investigable: React.FC<InvestigableProps> = ({
   }>({
     defaultValues: {
       reason: '',
-      date: dayjs().add(1, 'day').toDate(),
+      date: dayjs().toDate(),
       geoTag: '',
     },
   });
@@ -216,7 +216,7 @@ const Investigable: React.FC<InvestigableProps> = ({
             mode="date"
             onConfirm={handleConfirm}
             onCancel={() => setDatePickerVisible(false)}
-            minimumDate={dayjs().add(1, 'day').toDate()}
+            minimumDate={dayjs().toDate()}
           />
           {errors.date && <Text style={{color: 'red'}}>Date is required</Text>}
           {/* Reason Input */}

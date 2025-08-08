@@ -53,7 +53,7 @@ export class AttendanceController {
     @Body() createAttendanceDto: CreateAttendanceDto
   ) {
     const attendance = await this.attendanceService.createAttendance(
-      req.user.sub,
+      req.user.id,
       createAttendanceDto
     );
     
@@ -122,7 +122,7 @@ export class AttendanceController {
   ) {
     const result = await this.attendanceService.getAttendance(
       filters,
-      req.user.sub,
+      req.user.id,
       req.user.role as UserRole
     );
     

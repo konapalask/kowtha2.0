@@ -16,6 +16,10 @@ export class DashboardService {
     try {
       const where: any = {};
       
+      if (filters.department) {
+        where.department= filters.department
+      }
+
       // Add date filters if provided
       if (filters?.fromDate || filters?.toDate) {
         where.createdAt = {};

@@ -21,7 +21,7 @@ import { Roles } from '../accounts/decorators/roles.decorator';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
-    sub: number;
+    id: number;
     mobile: string;
     role: string;
     officeId: number;
@@ -36,10 +36,10 @@ export class EditRequestController {
   @Post()
   @Roles(UserRole.Verifier)
   create(@Request() req: RequestWithUser, @Body() createEditRequestDto: CreateEditRequestDto) { 
-    if (!req.user?.sub) {
+    if (!req.user?.id) {
       throw new Error('User not authenticated. Please ensure you are sending a valid JWT token.');
     }
-    return this.editRequestService.createEditRequest(req.user.sub, createEditRequestDto);
+    return this.editRequestService.createEditRequest(req.user.id, createEditRequestDto);
   }
 
   @Get()
@@ -64,7 +64,7 @@ export class EditRequestController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEditRequestDto: UpdateEditRequestDto,
   ) {
-    return this.editRequestService.updateEditRequest(id, req.user.sub, updateEditRequestDto);
+    return this.editRequestService.updateEditRequest(id, req.user.id, updateEditRequestDto);
   }
 
   @Public()

@@ -194,6 +194,7 @@ export default function Dashboard() {
             "This Year": [dayjs().startOf("year"), dayjs()],
           }}
           style={{ width: "280px" }}
+          disabledDate={current => current && current > dayjs().endOf('day')}
         />
       </div>
 

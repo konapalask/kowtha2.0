@@ -34,6 +34,7 @@ interface BusinessVerificationDetailsProps {
   hasEditRequest: boolean;
   completeVerificationData: any;
   fetchVerificationData: any;
+  editRequests?: any[];
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -47,6 +48,7 @@ export const BusinessVerificationDetails: React.FC<
   hasEditRequest,
   completeVerificationData,
   fetchVerificationData,
+  editRequests = [],
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -158,6 +160,16 @@ export const BusinessVerificationDetails: React.FC<
     // }
   };
 
+  // Check if there are pending edit requests for key sections (Basic Details, Business Details, or Business Miscellaneous Details)
+  const hasPendingEditRequestForKeySections = () => {
+    if (!hasEditRequest) return false;
+    const keySections = ['businessBasicDetails', 'businessDetails', 'miscellaneous'];
+    return Object.keys(changedData).some(key => keySections.includes(key));
+  };
+
+  // Determine if Existing Loans and Third Party Check edit buttons should be disabled
+  const shouldDisableExistingLoansAndThirdPartyCheck = hasEditRequest || hasPendingEditRequestForKeySections();
+
   const getButton = (formKey: string) => (
     <Button
       type="text"
@@ -237,6 +249,7 @@ export const BusinessVerificationDetails: React.FC<
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("existingLoans")}
+              disabled={shouldDisableExistingLoansAndThirdPartyCheck}
             />
           }
         >
@@ -298,6 +311,7 @@ export const BusinessVerificationDetails: React.FC<
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("thirdPartyCheck")}
+              disabled={shouldDisableExistingLoansAndThirdPartyCheck}
             />
           }
         >
@@ -319,6 +333,10 @@ export const BusinessVerificationDetails: React.FC<
                 title: "Relationship",
                 dataIndex: "relationship",
                 key: "relationship",
+                render: (text: string, record: any) =>
+                  text === "Other" && record.relationshipOther
+                    ? `Other - ${record.relationshipOther}`
+                    : text,
               },
               {
                 title: "Feedback Status",

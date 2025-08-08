@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { GetAttendanceDto } from './dto/get-attendance.dto';
-import { AttendanceStatus, UserRole } from '@prisma/client';
+import { AttendanceStatus, Department, UserRole } from '@prisma/client';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
@@ -28,9 +28,9 @@ export class AttendanceService {
       throw new NotFoundException('User not found');
     }
 
-    if (user.role !== UserRole.FieldExecutive) {
-      throw new BadRequestException('Only field executives can record attendance');
-    }
+    // if (user.role !== UserRole.FieldExecutive) {
+    //   throw new BadRequestException('Only field executives can record attendance');
+    // }
 
     // Check if attendance record already exists for this user and date
     const existingAttendance = await this.prisma.attendance.findFirst({
@@ -59,7 +59,6 @@ export class AttendanceService {
             id: true,
             name: true,
             mobile: true,
-            role: true
           }
         }
       }
@@ -69,7 +68,7 @@ export class AttendanceService {
   }
 
   async getAttendance(filters: GetAttendanceDto, currentUserId: number, currentUserRole: UserRole) {
-    const { startDate, endDate, status, userId } = filters;
+    const { startDate, endDate, status, userId, department } = filters;
     
     // Set default date range to one month from today if not provided
     const today = new Date();
@@ -98,14 +97,20 @@ export class AttendanceService {
     // Get all field executives
     const fieldExecutives = await this.prisma.user.findMany({
       where: {
-        role: UserRole.FieldExecutive,
-        status: 'Active'
+        // role: UserRole.FieldExecutive,
+        status: 'Active',
+        departmentRoles: {
+          some: {
+            department: department,
+            role: department === Department.FI ? UserRole.FieldExecutive : UserRole.PDFieldExecutive
+          }
+        }
       },
       select: {
         id: true,
         name: true,
         mobile: true,
-        role: true,
+        // role: true,
         employeeCode: true
       }
     });

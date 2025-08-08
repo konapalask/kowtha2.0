@@ -152,18 +152,24 @@ export default function Verify() {
       title: "Actions",
       key: "actions",
       align: "center",
-      render: (_, record) => (
-        <Button
-          type="link"
-          icon={<EyeOutlined />}
-          onClick={() => {
-            // Pass current page in query string
-            record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
-          }}
-        >
-          View
-        </Button>
-      ),
+      render: (_, record) => {
+        const statusTags = getStatusTags(record);
+        const hasInvestigations = statusTags && statusTags.props && statusTags.props.children && statusTags.props.children.some((child: any) => child !== null);
+        return (
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              if (hasInvestigations) {
+                record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
+              }
+            }}
+            disabled={!hasInvestigations}
+          >
+            View
+          </Button>
+        );
+      },
       width: 100,
       fixed: "right",
     },
