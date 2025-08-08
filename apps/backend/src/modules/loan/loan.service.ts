@@ -225,7 +225,7 @@ export class LoanService {
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    createData: createAssignmentDto
+    createData: createAssignmentDto,
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -255,6 +255,7 @@ export class LoanService {
             locationType: createData.locationType || null,
             businessName: createData.businessName || null,
             currentOfficeName: createData.currentOfficeName || null,
+            department: loan.department
           }
         });
 
@@ -544,7 +545,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByVerifier(verifierId: number, role: UserRole, department: Department) {
+  async getLoansByVerifier(verifierId: number, department: Department, role: any) {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId }
@@ -554,22 +555,18 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.VerificationWhereInput = {
-        loan: {
+      const where: Prisma.VerificationWhereInput = {
           department: department
-        }
       };
 
-      if (role === UserRole.Admin) {
-        // For Admin, get all verifications
-        whereCondition = {};
-      } else if (role === UserRole.Verifier) {
-        // For Verifier, get only verifications assigned to them
-        whereCondition = { verifierId };
+      const userRole = role.find((r: any) => r.department === department);
+
+      if (userRole.role === UserRole.Verifier) {
+        where.verifierId = verifierId;
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: whereCondition,
+        where: where,
         include: {
           loan: {
             include: {
@@ -628,15 +625,11 @@ export class LoanService {
     }
   }
 
-  async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+  async getLoans(officeId: number, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
       const where: Prisma.LoanWhereInput = {
         department: filters.department
       };
-
-      if (role === UserRole.OperationsExecutive) {
-        where.officeId = officeId;
-      }
 
       if (filters?.status) {
         where.status = filters.status;
@@ -778,7 +771,6 @@ export class LoanService {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-      console.log(updateData.verificationType);
 
       // // If field executive is provided, address is mandatory
       if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
@@ -801,7 +793,7 @@ export class LoanService {
             ...(updateData.verifierId && { verifierId: updateData.verifierId }),
             ...(updateData.fieldExecutiveId && { fieldExecutiveId: updateData.fieldExecutiveId }),
             ...(updateData.currentOfficeName && { currentOfficeName: updateData.currentOfficeName }),
-            status: 'Pending', // Reset status when assignment is updated
+            status: 'Pending' // Reset status when assignment is updated
           },
         });
 
@@ -1333,7 +1325,7 @@ export class LoanService {
     }
   }
 
-  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number) {
+  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number, department: Department) {
     try {
       const results = {
         successful: [],
@@ -1342,6 +1334,9 @@ export class LoanService {
         successfulCount: 0,
         failedCount: 0
       };
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
 
       for (const dto of createLoanDtos) {
         try {
@@ -1373,6 +1368,7 @@ export class LoanService {
           const loanData = {
             ...rest,
             applicationNumber,
+            department,
             status: dto.status || 'Unassigned',
             office: { connect: { id: officeId } },
             operationsExecutive: { connect: { id: operationsExecutiveId } },

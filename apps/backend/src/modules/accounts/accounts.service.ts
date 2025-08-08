@@ -193,7 +193,6 @@ export class AccountsService {
 
         const newUserRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-
         if(deviceId !== newUserRoles.deviceId){
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {

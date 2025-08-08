@@ -33,22 +33,6 @@ export class LoanController {
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
   */
 
-  @Get('office/:officeId')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
-  @ApiOperation({ summary: 'Get loans by office' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a list of loans for the specified office'
-  })
-  async getLoansByOffice(@Param('officeId') officeId: number, @Query('department') department: string) {
-    const result = await this.loanService.getLoansByOffice(officeId, department as Department);
-    return {
-      status: 200,
-      message: 'Office loans fetched successfully',
-      data: result
-    };
-  }
-
   @Get()
   @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier, UserRole.PDOperationsExecutive, UserRole.PDVerifier)
   @ApiOperation({ summary: 'Get all loans with optional status filter' })
@@ -137,11 +121,9 @@ export class LoanController {
     }
   })
   async getLoans(@Query() filters: GetLoansDto, @Request() req: AuthenticatedRequest) {
-    // Get the role for the specific department from the user's department roles
-    const userDepartmentRole = req.user.departmentRoles?.find(dr => dr.department === filters.department);
-    const userRole = userDepartmentRole?.role || UserRole.Admin;
+    // Get the role for the specific department from the user's department roles    
     
-    const result = await this.loanService.getLoans(req.user.officeId, userRole, filters);
+    const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
       status: 200,
       message: 'Loans fetched successfully',
@@ -173,8 +155,11 @@ export class LoanController {
       }
     }
   })
-  async createLoan(@Body() createLoanDtos: CreateLoanDto[], @Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId);
+  async createLoan(@Body() createLoanDtos: CreateLoanDto[], 
+                   @Request() req: AuthenticatedRequest,
+                   @Query('department') department: Department) 
+  {
+    const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId, department);
     return {
       status: 201,
       message: 'Loans created successfully',
@@ -284,13 +269,8 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() createAssignmentDto: createAssignmentDto,
   ) {
-    const loan = parseInt(loanId, 10);
-    if (isNaN(loan)) {
-      throw new BadRequestException('Invalid loan ID');
-    }
-
     const result = await this.loanService.assignVerification(
-      loan,
+      Number(loanId),
       createAssignmentDto
     );
     return {
@@ -328,13 +308,8 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
   ) {
-    const loan = parseInt(loanId, 10);
-    if (isNaN(loan)) {
-      throw new BadRequestException('Invalid loan ID');
-    }
-
     const result = await this.loanService.updateVerificationAssignment(
-      loan,
+      Number(loanId),
       updateAssignmentDto
     );
     return {
@@ -396,7 +371,7 @@ export class LoanController {
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
   async getLoansByVerifier(@Request() req: AuthenticatedRequest, @Query('department') department: string) {
-    const result = await this.loanService.getLoansByVerifier(req.user.id, req.user.role as UserRole, department as Department);
+    const result = await this.loanService.getLoansByVerifier(req.user.id, department as Department, req.user.role);
     return {
       status: 200,
       message: 'Verifier loans fetched successfully',
@@ -877,83 +852,83 @@ export class LoanController {
     };
   }
 
-  @Post('verification-retry')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
-  @ApiOperation({ summary: 'Create a verification retry record' })
-  @ApiResponse({
-    status: 201,
-    description: 'Verification retry created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 201 },
-        message: { type: 'string', example: 'Verification retry created successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            id: { type: 'number' },
-            verificationId: { type: 'number' },
-            date: { type: 'string', format: 'date-time' },
-            geotag: { type: 'string', nullable: true },
-            address: { type: 'string', nullable: true },
-            reason: { type: 'string', nullable: true },
-            fieldExecutiveId: { type: 'number' },
-            verification: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                type: { type: 'string' },
-                status: { type: 'string' },
-                loan: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'number' },
-                    applicationNumber: { type: 'string' },
-                    applicantName: { type: 'string' }
-                  }
-                }
-              }
-            },
-            fieldExecutive: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-                mobile: { type: 'string' },
-                employeeCode: { type: 'string' }
-              }
-            },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    }
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid data provided'
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Verification or field executive not found'
-  })
-  async createVerificationRetry(
-    @Body() createVerificationRetryDto: CreateVerificationRetryDto,
-    @Request() req: AuthenticatedRequest
-  ) {
-    // If the user is a field executive, ensure they can only create retries for themselves
-    if (req.user.role === UserRole.FieldExecutive) {
-      createVerificationRetryDto.fieldExecutiveId = req.user.id;
-    }
+  // @Post('verification-retry')
+  // @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
+  // @ApiOperation({ summary: 'Create a verification retry record' })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'Verification retry created successfully',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       status: { type: 'number', example: 201 },
+  //       message: { type: 'string', example: 'Verification retry created successfully' },
+  //       data: {
+  //         type: 'object',
+  //         properties: {
+  //           id: { type: 'number' },
+  //           verificationId: { type: 'number' },
+  //           date: { type: 'string', format: 'date-time' },
+  //           geotag: { type: 'string', nullable: true },
+  //           address: { type: 'string', nullable: true },
+  //           reason: { type: 'string', nullable: true },
+  //           fieldExecutiveId: { type: 'number' },
+  //           verification: {
+  //             type: 'object',
+  //             properties: {
+  //               id: { type: 'number' },
+  //               type: { type: 'string' },
+  //               status: { type: 'string' },
+  //               loan: {
+  //                 type: 'object',
+  //                 properties: {
+  //                   id: { type: 'number' },
+  //                   applicationNumber: { type: 'string' },
+  //                   applicantName: { type: 'string' }
+  //                 }
+  //               }
+  //             }
+  //           },
+  //           fieldExecutive: {
+  //             type: 'object',
+  //             properties: {
+  //               id: { type: 'number' },
+  //               name: { type: 'string' },
+  //               mobile: { type: 'string' },
+  //               employeeCode: { type: 'string' }
+  //             }
+  //           },
+  //           createdAt: { type: 'string', format: 'date-time' },
+  //           updatedAt: { type: 'string', format: 'date-time' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Bad request - Invalid data provided'
+  // })
+  // @ApiResponse({
+  //   status: 404,
+  //   description: 'Verification or field executive not found'
+  // })
+  // async createVerificationRetry(
+  //   @Body() createVerificationRetryDto: CreateVerificationRetryDto,
+  //   @Request() req: AuthenticatedRequest
+  // ) {
+  //   // If the user is a field executive, ensure they can only create retries for themselves
+  //   if (req.user.role === UserRole.FieldExecutive) {
+  //     createVerificationRetryDto.fieldExecutiveId = req.user.id;
+  //   }
 
-    const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
-    return {
-      status: 201,
-      message: 'Verification retry created successfully',
-      data: result
-    };
-  }
+  //   const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
+  //   return {
+  //     status: 201,
+  //     message: 'Verification retry created successfully',
+  //     data: result
+  //   };
+  // }
 
   @Delete(':id')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
