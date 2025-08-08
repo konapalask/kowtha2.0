@@ -1,4 +1,6 @@
 import { VerificationData } from "./address.interface";
+import { format, toZonedTime } from 'date-fns-tz';
+
 
 export const addressTemplate = (verificationData: VerificationData, html_data: any, addressType: string) => {
     if (html_data.path) {
@@ -9,7 +11,14 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
       if(aadhar.length > 4) {
         aadhar = 'XXXX-XXXX-' + aadhar.slice(aadhar.length - 4);
       }
-  
+      
+
+      const date = new Date();
+      const timeZone = 'Asia/Kolkata';
+      const zonedDate = toZonedTime(date, timeZone);
+
+      const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+
       const recommendationStyles: Record<string, string> = {
         Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
         Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
@@ -54,6 +63,15 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
               <td colspan="5"><span class="var-value">${verificationData.basicDetails?.availablePersonMobile || ''}</span></td>
             </tr>
         `;
+      }
+
+      let rentalAmount = verificationData.residenceDetails?.residenceStatus || '';
+      if(rentalAmount === 'Rented') {
+        rentalAmount = verificationData.residenceDetails?.rentDetails || '0';
+      } else if (rentalAmount === 'Leased') {
+        rentalAmount = verificationData.residenceDetails?.leaseAmount || '0';
+      } else {
+        rentalAmount = '';
       }
 
       let addressMismatch = verificationData.addressVerification?.addressMismatch || '';
@@ -142,7 +160,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         </tr>
         <tr>
           <th>Rent Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.rentDetails || ''}</span></td>
+          <td colspan="5"><span class="var-value">${rentalAmount}</span></td>
         </tr>
         <tr>
           <th>Residence Type</th>
@@ -157,22 +175,11 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.standardOfLiving || ''}</span></td>
         </tr>
         <tr>
-          <th>Specify Residence Type</th>
-          <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.specifyResidenceType || ''}</span></td>
-        </tr>
-        <tr>
           <th>Years at Current Address</th>
           <td colspan="5"><span class="var-value">${verificationData.residenceDetails?.yearsAtCurrentAddress || ''}</span></td>
         </tr>
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
-    </div>
-
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -248,14 +255,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         </tr>
         ${spouseWorking}
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
-    </div>
-
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -308,14 +308,7 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
         `).join('')
         : '<tr><td colspan="5" style="text-align: center;">No third party checks found</td></tr>'}
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
-    </div>
-
-    <div class="footer">
-      <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-      Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      
     </div>
 
     <div style="page-break-before: always;"></div>
@@ -340,18 +333,15 @@ export const addressTemplate = (verificationData: VerificationData, html_data: a
           </td>
         </tr>
       </table>
-      <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #333;">
-        Field Executive: ${html_data.fieldExecutive || ''}
-      </div>
+      
     </div>
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-
-        <div class="footer">
-          <span style="color: #138808;">${html_data.bankName}</span><span style="color: #FF9933;"></span><br>
-          Generated on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
-        </div>
-        ${html_data.imagesData}
+    <footer class="pdf-footer">
+      <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
+      Generated on ${istDate}
+    </footer>
+    ${html_data.imagesData}
   `;
 }

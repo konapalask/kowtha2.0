@@ -38,30 +38,37 @@ const ThirdPartyCheckDescription: React.FC<{
   // Prepare the checks data for the table
   const checks = data?.thirdPartyCheck?.checks || [];
   // If changedData is provided, use it for comparison
-  const prevChecks = changedData?.thirdPartyCheck?.checks || [];
-
-  // Helper to render cell with strikethrough if changed
-  function renderCell(field: string, idx: number, value: any) {
+  const prevChecks = changedData?.thirdPartyCheck?.checks || [];  function renderCell(field: string, idx: number, value: any, check?: any) {
+    let displayValue = value;
+    if (field === "relationship" && value === "Other" && check && check.relationshipOther) {
+      displayValue = `Other - ${check.relationshipOther}`;
+    }
     if (
       prevChecks[idx] &&
       prevChecks[idx][field] !== undefined &&
       prevChecks[idx][field] !== value
     ) {
+      let prevDisplayValue = prevChecks[idx][field];
+      if (
+        field === "relationship" &&
+        prevChecks[idx][field] === "Other" &&
+        prevChecks[idx].relationshipOther
+      ) {
+        prevDisplayValue = `Other - ${prevChecks[idx].relationshipOther}`;
+      }
       return (
         <span>
           <span style={{ textDecoration: "line-through", color: "#888" }}>
-            {prevChecks[idx][field]}
+            {prevDisplayValue}
           </span>
           <span style={{ marginLeft: 8, color: "#d4380d", fontWeight: 600 }}>
-            {value}
+            {displayValue}
           </span>
         </span>
       );
     }
-    return value;
+    return displayValue;
   }
-
-  // Helper to check if any field in the row is changed
   function isRowChanged(idx: number, check: any) {
     if (!prevChecks[idx]) return false;
     return ["tpcName", "mobileNumber", "relationship", "comments"].some(
@@ -73,10 +80,10 @@ const ThirdPartyCheckDescription: React.FC<{
 
   const tableData = checks.map((check: any, idx: number) => ({
     key: idx,
-    renderedTpcName: renderCell("tpcName", idx, check.tpcName),
-    renderedMobileNumber: renderCell("mobileNumber", idx, check.mobileNumber),
-    renderedRelationship: renderCell("relationship", idx, check.relationship),
-    renderedComments: renderCell("comments", idx, check.comments),
+    renderedTpcName: renderCell("tpcName", idx, check.tpcName, check),
+    renderedMobileNumber: renderCell("mobileNumber", idx, check.mobileNumber, check),
+    renderedRelationship: renderCell("relationship", idx, check.relationship, check),
+    renderedComments: renderCell("comments", idx, check.comments, check),
     isChanged: isRowChanged(idx, check),
     ...check,
   }));

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { UserRole, UserStatus } from '@prisma/client';
+import { UserRole, UserStatus, Department } from '@prisma/client';
 
 export class ListUsersDto {
   @ApiProperty({
@@ -37,4 +37,12 @@ export class ListUsersDto {
   @IsString()
   @IsOptional()
   locality?: string;
+
+  @ApiProperty({
+    description: 'Filter users by department',
+    enum: Department,
+    required: true
+  })
+  @IsEnum(Department)
+  department?: Department;
 } 

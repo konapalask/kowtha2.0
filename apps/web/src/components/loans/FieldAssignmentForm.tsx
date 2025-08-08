@@ -11,7 +11,7 @@ import {
   Tag,
 } from "antd";
 // import { UserOutlined } from "@ant-design/icons";
-import React from "react";
+import React, { useState } from "react";
 import {
   assignExecutivesApi,
   updateExecutivesApi,
@@ -44,8 +44,8 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   userDetails,
   offices,
   fieldExecutives,
-  loading,
-  setLoading,
+  loading: globalLoading,
+  setLoading: setGlobalLoading,
   verifiers = [],
   fetchLoans,
   setRefresh,
@@ -53,6 +53,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   fetchExecutives,
 }) => {
   const [form] = Form.useForm();
+  const [localLoading, setLocalLoading] = useState(false);
   const getVerificationType = (type: string) => {
     switch (type) {
       case "Address1":
@@ -90,7 +91,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       address: values.address,
     };
     try {
-      setLoading(true);
+      setLocalLoading(true);
       if (verification) {
         await updateExecutivesApi(loanId, finalData);
         // Determine which fields are being updated
@@ -125,7 +126,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       message.error("Failed to assign field executive");
       console.log(error);
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -304,7 +305,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     message: "Please select a field executive",
                   },
                 ]}
-                initialValue={{
+                initialValue={verification?.fieldExecutive ? {
                   label: (
                     <div
                       style={{
@@ -321,12 +322,16 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     </div>
                   ),
                   value: verification?.fieldExecutive?.employeeCode,
-                }}
+                } : undefined}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
                   placeholder="Select a Field Executive"
                   options={fieldExecutives}
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label?.toString().toLowerCase() || '').includes(input.toLowerCase())
+                  }
                   // onSelect removed to allow form validation to show error
                 />
               </Form.Item>
@@ -376,7 +381,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
           <Button
             // type="primary"
             htmlType="submit"
-            loading={loading}
+            loading={localLoading}
             icon={<UserOutlined />}
           >
             {verification ? "Update Assignment" : "Assign Executives"}

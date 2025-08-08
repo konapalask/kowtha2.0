@@ -140,7 +140,7 @@ const FamilyMemberRow: React.FC<{
           <Input maxLength={10} placeholder="Mobile number" />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col span={4}>
         <Form.Item
           {...field}
           name={[field.name, "stayingWithApplicant"]}

@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsEnum, IsNumber, IsOptional } from 'class-validator';
-import { UserRole, UserStatus } from '@prisma/client';
+import { Department, UserRole, UserStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -46,4 +46,9 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   locality?: string;
+
+  @ApiProperty({ description: 'User\'s default department', enum: Department, required: false })
+  @IsEnum(Department)
+  @IsOptional()
+  defaultDepartment?: Department;
 } 

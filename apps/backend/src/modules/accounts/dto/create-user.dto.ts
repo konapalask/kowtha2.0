@@ -1,6 +1,25 @@
-import { IsString, IsEmail, IsEnum, IsNumber, IsOptional } from 'class-validator';
-import { UserRole, UserStatus } from '@prisma/client';
+import { IsString, IsEmail, IsEnum, IsNumber, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { UserRole, UserStatus, Department } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+class DepartmentRoleDto {
+  @ApiProperty({ 
+    description: 'Department for this role',
+    enum: Department,
+    example: 'FI'
+  })
+  @IsEnum(Department)
+  department: Department;
+
+  @ApiProperty({ 
+    description: 'Role for this department',
+    enum: UserRole,
+    example: 'OperationsExecutive'
+  })
+  @IsEnum(UserRole)
+  role: UserRole;
+}
 
 export class CreateUserDto {
   @ApiProperty({ description: 'User\'s full name' })
@@ -21,10 +40,6 @@ export class CreateUserDto {
   @IsOptional()
   employeeCode?: string;
 
-  @ApiProperty({ description: 'User\'s role', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
-
   @ApiProperty({ description: 'Office ID where the user belongs' })
   @IsNumber()
   officeId: number;
@@ -43,4 +58,17 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   locality?: string;
+
+  @ApiProperty({ 
+    description: 'Array of department roles for the user',
+    type: [DepartmentRoleDto],
+    example: [
+      { department: 'FI', role: 'OperationsExecutive' },
+      { department: 'PD', role: 'PDVerifier' }
+    ]
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DepartmentRoleDto)
+  departmentRoles: DepartmentRoleDto[];
 } 

@@ -19,6 +19,7 @@ export interface VerificationData {
       residenceDetails?: {
         houseArea: string;
         rentDetails: string;
+        leaseAmount: string;
         accessibility: string;
         residenceType: string;
         residenceStatus: string;

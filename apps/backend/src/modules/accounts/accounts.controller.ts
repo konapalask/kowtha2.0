@@ -1,18 +1,21 @@
-import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException, Patch, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedException, Patch, Param, Put, BadRequestException, Delete } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { Roles } from './decorators/roles.decorator';
+import { Roles, DeptFromQuery } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { UserRole, Department } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ParseIntPipe } from '@nestjs/common';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
+import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
+import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -65,24 +68,14 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    const user = await this.accountsService.validateUser(req.user.sub);
-    return {
-      sub: user.id,
-      mobile: user.mobile,
-      role: user.role,
-      officeId: user.officeId,
-      employeeCode: user.employeeCode,
-      name: user.name,
-      email: user.email,
-      status: user.status,
-      locality: user.locality
-    };
+    const user = await this.accountsService.validateUser(req.user.id);
+    return user;
   }
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
-  @ApiOperation({ summary: 'List all users with optional role filter' })
+  @ApiOperation({ summary: 'List all users with optional filters including department' })
   @ApiResponse({ 
     status: 200, 
     description: 'Returns a list of users matching the filter criteria',
@@ -111,6 +104,15 @@ export class AccountsController {
                 description: 'Number of pending verifications assigned to the field executive'
               },
               locality: { type: 'string' },
+              departmentRole: {
+                type: 'object',
+                properties: {
+                  department: { type: 'string', enum: ['FI', 'PD'] },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] }
+                },
+                description: 'Department role for the filtered department (only present when department filter is applied)',
+                nullable: true
+              },
               createdAt: { type: 'string', format: 'date-time' }
             }
           }
@@ -157,10 +159,10 @@ export class AccountsController {
   @Post('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Create a new user' })
+  @ApiOperation({ summary: 'Create a new user with department roles' })
   @ApiResponse({ 
     status: 201, 
-    description: 'User has been successfully created',
+    description: 'User has been successfully created with department roles',
     schema: {
       type: 'object',
       properties: {
@@ -173,11 +175,24 @@ export class AccountsController {
             mobile: { type: 'string' },
             email: { type: 'string' },
             employeeCode: { type: 'string' },
-            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
             officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            updatedAt: { type: 'string', format: 'date-time' },
+            departmentRoles: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  userId: { type: 'number' },
+                  department: { type: 'string', enum: ['FI', 'PD'] },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+                  createdAt: { type: 'string', format: 'date-time' },
+                  updatedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            }
           }
         }
       }
@@ -222,13 +237,160 @@ export class AccountsController {
   })
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const user = await this.accountsService.updateUser(id, updateUserDto);
     return {
       message: 'User updated successfully',
       data: user
     };
+  }
+
+  @Post('users/department-roles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Add a department role for a user' })
+  @ApiQuery({ 
+    name: 'department', 
+    enum: Department, 
+    description: 'Department to assign the role to (FI or PD)',
+    example: 'FI'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Department role has been successfully created for the user',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Department role created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            userId: { type: 'number' },
+            department: { type: 'string', enum: ['FI', 'PD'] },
+            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                mobile: { type: 'string' },
+                email: { type: 'string' }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async createDepartmentRole(
+    @Query('department') department: string,
+    @Body() createDepartmentRoleDto: CreateDepartmentRoleDto,
+  ) {
+    // Validate department parameter
+    if (!department || !Object.values(Department).includes(department as Department)) {
+      throw new BadRequestException('Valid department parameter is required (FI or PD)');
+    }
+
+    const departmentRole = await this.accountsService.createDepartmentRole(
+      department as Department,
+      createDepartmentRoleDto
+    );
+    return {
+      message: 'Department role created successfully',
+      data: departmentRole
+    };
+    }
+
+  @Patch('users/:id/department-roles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update department roles for a user' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Department roles have been successfully updated',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Department roles updated successfully' },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              userId: { type: 'number' },
+              department: { type: 'string', enum: ['FI', 'PD'] },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+              user: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  name: { type: 'string' },
+                  mobile: { type: 'string' },
+                  email: { type: 'string' }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  async updateDepartmentRoles(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() updateUserDepartmentRolesDto: UpdateUserDepartmentRolesDto,
+  ) {
+    const departmentRoles = await this.accountsService.updateUserDepartmentRoles(
+      userId,
+      updateUserDepartmentRolesDto
+    );
+    return {
+      message: 'Department roles updated successfully',
+      data: departmentRoles
+    };
+  }
+   
+ 
+  @Delete('users/:id/department-roles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Delete a department role for a user' })
+  @ApiQuery({ 
+    name: 'department', 
+    enum: Department, 
+    description: 'Department to delete the role from (FI or PD)',
+    example: 'FI'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Department role has been successfully deleted',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Department role deleted successfully' }
+      }
+    }
+  })
+  async deleteDepartmentRole(
+    @Param('id', ParseIntPipe) userId: number,
+    @Query('department') department: string,
+  ) {
+    // Validate department parameter
+    if (!department || !Object.values(Department).includes(department as Department)) {
+      throw new BadRequestException('Valid department parameter is required (FI or PD)');
+    }
+
+    const result = await this.accountsService.deleteDepartmentRole(
+      userId,
+      department as Department
+    );
+    return result;
   }
 
   @Post('offices')
@@ -379,7 +541,7 @@ export class AccountsController {
   @UseGuards(JwtAuthGuard)
   @Get('organization')
   async getOrganization(@Request() req: AuthenticatedRequest) {
-    return this.accountsService.getOrganizationByUser(req.user.sub);
+    return this.accountsService.getOrganizationByUser(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

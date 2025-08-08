@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
-import { LoanStatus } from '@prisma/client';
+import { Department, LoanStatus } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -68,4 +68,11 @@ export class GetLoansDto extends PaginationDto {
     message: 'endDate must be in YYYY-MM-DD format'
   })
   endDate?: string;
+
+  @ApiProperty({
+    description: 'Filter loans by department',
+    required: true
+  })
+  @IsEnum(Department)
+  department: Department;  
 } 

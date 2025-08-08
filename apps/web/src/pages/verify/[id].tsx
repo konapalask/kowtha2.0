@@ -246,6 +246,7 @@ export default function LoanVerifyDetails() {
             hasEditRequest={hasEditRequest("Work")}
             completeVerificationData={getCompleteVerificationData("Work")}
             fetchVerificationData={fetchVerificationData}
+            editRequests={editRequests}
           />
         );
       case "Business":
@@ -259,6 +260,7 @@ export default function LoanVerifyDetails() {
             hasEditRequest={hasEditRequest("Business")}
             completeVerificationData={getCompleteVerificationData("Business")}
             fetchVerificationData={fetchVerificationData}
+            editRequests={editRequests}
           />
         );
     }

@@ -278,13 +278,14 @@ export default function OrganizationSettings() {
               loading={loading}
               scroll={{ y: 400 }}
               bordered
-              // onRow={(record) => {
-              //   return {
-              //     style: {
-              //       backgroundColor: record.archived ? "#f5f5f5" : undefined,
-              //     },
-              //   };
-              // }}
+              pagination={offices.length < 10 ? false : undefined}
+              onRow={(record) => {
+                return {
+                  style: record.archived
+                    ? { backgroundColor: 'rgba(255, 0, 0, 0.08)' }
+                    : {},
+                };
+              }}
             />
           </Card>
         </TabPane>

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsDateString, IsEnum } from 'class-validator';
-import { AttendanceStatus } from '@prisma/client';
+import { AttendanceStatus, Department } from '@prisma/client';
 
 export class GetAttendanceDto {
   @ApiProperty({
@@ -36,4 +36,11 @@ export class GetAttendanceDto {
   })
   @IsOptional()
   userId?: number;
+
+  @ApiProperty({
+    description: 'Department to filter attendance records for specific department',
+    required: false
+  })
+  @IsOptional()
+  department?: Department;
 } 
