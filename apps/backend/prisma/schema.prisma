@@ -211,8 +211,8 @@ model Loan {
   department            Department?
   officeId              Int
   office                Office              @relation(fields: [officeId], references: [id])
-  operationsExecutiveId Int
-  operationsExecutive   User                @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
+  operationsExecutiveId Int?
+  operationsExecutive   User?               @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
   verifications         Verification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt

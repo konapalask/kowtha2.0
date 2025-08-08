@@ -1341,13 +1341,18 @@ export class LoanService {
       for (const dto of createLoanDtos) {
         try {
           // Check if operations executive exists
-          const operationsExecutive = await this.prisma.user.findUnique({
+          if(dto.operationsExecutiveId){
+            const operationsExecutive = await this.prisma.user.findUnique({
             where: { id: dto.operationsExecutiveId }
           });
 
           if (!operationsExecutive) {
             throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
           }
+        }
+        else{
+          dto.operationsExecutiveId = null;
+        }
 
           // Check if field executive exists (if provided)
           if (dto.fieldExecutiveId) {
@@ -1358,6 +1363,9 @@ export class LoanService {
             if (!fieldExecutive) {
               throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
             }
+          }
+          else{
+            dto.fieldExecutiveId = null;
           }
 
           const { operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
@@ -1371,7 +1379,7 @@ export class LoanService {
             department,
             status: dto.status || 'Unassigned',
             office: { connect: { id: officeId } },
-            operationsExecutive: { connect: { id: operationsExecutiveId } },
+            ...(operationsExecutiveId && { operationsExecutive: { connect: { id: operationsExecutiveId } } }),
             ...(fieldExecutiveId && {
               fieldExecutive: { connect: { id: fieldExecutiveId } }
             })
