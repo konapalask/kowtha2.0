@@ -335,18 +335,17 @@ export class AccountsService {
         status: filters?.status || 'Active'
       };
 
-      if (filters.department) {
-        where.departmentRoles = {
-          some: {
-            department: filters.department
-          }
-        };
-      }
-      
       if (filters?.role) {
         where.departmentRoles = {
           some: {
-            role: filters.role
+            ...(filters.department && { department: filters.department }),
+            ...(filters.role && { role: filters.role })
+          }
+        };
+      } else {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
           }
         };
       }
@@ -361,6 +360,9 @@ export class AccountsService {
           mode: 'insensitive'
         };
       }
+
+      console.log(where);
+      
 
       const users = await this.prisma.user.findMany({
         where,
