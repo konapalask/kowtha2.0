@@ -124,6 +124,7 @@ export const bankOptions = [
     value: "NIPUN PROJECTS AND FINANCE PVT LTD",
     label: "NIPUN PROJECTS AND FINANCE PVT LTD",
   },
+  { value: "MUTHOOT FINANCE LIMITED", label: "MUTHOOT FINANCE LIMITED" },
 ];
 
 export const applicantTypeOptions = [
