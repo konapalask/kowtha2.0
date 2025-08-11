@@ -44,5 +44,5 @@ export class ListUsersDto {
     required: true
   })
   @IsEnum(Department)
-  department?: Department;
+  department: Department;
 } 

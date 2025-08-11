@@ -14,11 +14,9 @@ export class DashboardService {
 
   async getLoanMetrics(filters?: GetMetricsDto) {
     try {
-      const where: any = {};
-      
-      if (filters.department) {
-        where.department= filters.department
-      }
+      const where: any = {
+        department: filters.department
+      };
 
       // Add date filters if provided
       if (filters?.fromDate || filters?.toDate) {

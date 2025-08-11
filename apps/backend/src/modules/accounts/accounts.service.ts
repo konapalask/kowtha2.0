@@ -335,13 +335,13 @@ export class AccountsService {
         status: filters?.status || 'Active'
       };
 
-      // if (filters.department) {
-      //   where.departmentRoles = {
-      //     some: {
-      //       department: filters.department
-      //     }
-      //   };
-      // }
+      if (filters.department) {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }
       
       if (filters?.role) {
         where.departmentRoles = {

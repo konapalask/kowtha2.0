@@ -31,7 +31,6 @@ export class GetMetricsDto {
     description: 'Department to filter metrics for specific department',
     required: true
   })
-  @IsOptional()
   @IsEnum(Department)
   department: Department;
 } 
