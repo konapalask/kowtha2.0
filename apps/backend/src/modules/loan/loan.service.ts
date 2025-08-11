@@ -2,34 +2,31 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 import { Buffer } from 'buffer'; // Import the Buffer type
-import { Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
+import { Logger } from '@nestjs/common';
+import { format, toZonedTime } from 'date-fns-tz';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { PrismaService } from '../../prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
+import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
+import { workTemplate } from './templates/work.template';
 import { S3Service } from '../common/s3utils/s3.service';
+import { addressTemplate } from './templates/address.template';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { LoggingService } from '../common/logging/logging.service';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { businessTemplate } from './templates/business.template';
+import { VerificationData } from './templates/address.interface';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { WorkVerificationData } from './templates/work.interface';
+import { EditVerificationDto } from './dto/edit-verification.dto';
+import { LoggingService } from '../common/logging/logging.service';
+import { BusinessVerificationData } from './templates/business.interface';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, LocationType,
-  Department
-} from '@prisma/client';
-import { businessTemplate } from './templates/business.template';
-import { BusinessVerificationData } from './templates/business.interface';
-import { WorkVerificationData } from './templates/work.interface';
-import { workTemplate } from './templates/work.template';
-import { VerificationData } from './templates/address.interface';
-import { addressTemplate } from './templates/address.template';
-import { contains } from 'class-validator';
-import { format, toZonedTime } from 'date-fns-tz';
-
+  AddressType, UserRole, ApprovedStatus, Department} from '@prisma/client';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 
 
 @Injectable()
@@ -41,7 +38,49 @@ export class LoanService {
     private s3Service: S3Service,
   ) { }
 
-  async createLoan(data: CreateLoanDto, officeId: number) {
+  async createLambdaLoan(data: CreateLambdaLoanDto) {
+    try {
+
+      const office = await this.prisma.office.findFirst({
+        where: {
+          department: 'PD',
+        },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      const loan = await this.prisma.loan.create({
+        data: {
+          department: 'PD',
+          loanType: 'Business',
+          status: 'Unassigned',
+          bankName: data.bankName,
+          applicantName: data.applicantName,
+          applicantMobile: data.applicantMobile,
+          office: { connect: { id: office.id } },
+          applicantAddress: data.applicantAddress,
+          applicationNumber: data.applicationNumber,
+          applicantType: data.applicantType || 'Primary Applicant',
+        },  
+        include: {
+          office: true,
+        },
+      });
+      return loan;
+    }
+    catch (error) {
+      await this.loggingService.error('Failed to create lambo loan', {
+        data,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createLoan(data: CreateLoanDto, officeId: number, department: Department) {
     try {
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
@@ -181,7 +220,7 @@ export class LoanService {
             throw new Error('Missing required field: APPLICATION ID');
           }
 
-          const loan = await this.createLoan(loanData, officeId);
+          const loan = await this.createLoan(loanData, officeId, 'PD');
           results.push({
             row: row['__rowNum__'] + 1,
             loanId: loan.id,
