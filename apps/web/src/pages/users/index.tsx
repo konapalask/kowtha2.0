@@ -28,7 +28,7 @@ import {
 } from "@/services/users.services";
 import { getOfficesApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
@@ -164,6 +164,7 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const userDetails = getUserDetails();
+  const currentDepartment = getCurrentDepartment();
   const [offices, setOffices] = useState<Office[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -330,7 +331,14 @@ export default function Users() {
       dataIndex: "role",
       key: "role",
       width: 80,
-      render: (role: string) => {
+      render: (_: string, record: User) => {
+        let deptRole = record.role;
+        if (currentDepartment && Array.isArray(record.departmentRoles)) {
+          const found = record.departmentRoles.find((dr: any) => dr.department === currentDepartment);
+          if (found && found.role) {
+            deptRole = found.role;
+          }
+        }
         const getRoleColor = (role: string) => {
           switch (role) {
             case "Admin":
@@ -349,15 +357,14 @@ export default function Users() {
               return "default";
           }
         };
-
         const getRoleLabel = (role: string) => {
-          const roleOption = RoleOptions.find(option => option.value === role);
+          const allOptions = [...RoleOptions, ...FIroleOptions, ...PDroleOptions];
+          const roleOption = allOptions.find(option => option.value === role);
           return roleOption ? roleOption.label : role;
         };
-
         return (
-          <Tag color={getRoleColor(role)}>
-            {getRoleLabel(role)}
+          <Tag color={getRoleColor(deptRole)}>
+            {getRoleLabel(deptRole)}
           </Tag>
         );
       },
