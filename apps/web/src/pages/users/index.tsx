@@ -23,6 +23,7 @@ import {
   createUserApi,
   getUsersApi,
   updateUserApi,
+  updateUserDepartmentRolesApi, 
   UserFilters,
 } from "@/services/users.services";
 import { getOfficesApi } from "@/services/settings.services";
@@ -232,7 +233,10 @@ export default function Users() {
       console.log('Submitting user data:', trimmedValues);
 
       if (editingUser) {
-        const response = await updateUserApi(editingUser?.id, trimmedValues);
+        // Split PATCH: main fields, then departmentRoles
+        const { departmentRoles, ...mainFields } = trimmedValues;
+        await updateUserApi(editingUser?.id, mainFields);
+        await updateUserDepartmentRolesApi(editingUser?.id, departmentRoles);
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {

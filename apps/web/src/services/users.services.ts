@@ -82,7 +82,7 @@ export const assignUserRoleApi = async (userId: number, role: string, department
   );
 };
 
-// Update user fields (except role)
+// Update user fields (except role and departmentRoles)
 export const updateUserApi = async (userId: number, userData: any) => {
   // PATCH /accounts/users/{id}/?department=DEPT
   const department = userData.defaultDepartment || userData.department;
@@ -93,7 +93,6 @@ export const updateUserApi = async (userId: number, userData: any) => {
       mobile: userData.mobile,
       email: userData.email,
       employeeCode: userData.employeeCode,
-      departmentRoles: userData.departmentRoles,
       officeId: userData.officeId,
       status: userData.status,
       locality: userData.locality,
@@ -108,6 +107,13 @@ export const updateUserApi = async (userId: number, userData: any) => {
   }
 
   return updateResponse;
+};
+
+export const updateUserDepartmentRolesApi = async (userId: number, departmentRoles: any[]) => {
+  return patchWithDepartment(
+    `/accounts/users/${userId}/department-roles`,
+    { departmentRoles }
+  );
 };
 
 export const getAllFieldExecutivesApi = async () => {
