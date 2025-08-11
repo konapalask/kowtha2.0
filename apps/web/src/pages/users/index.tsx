@@ -110,7 +110,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
   };
 
   return (
-    <Form.Item label="Department & Role" required>
+    <div>
       {departments.map((dept, index) => {
         const isChecked = selectedDepartments.includes(dept);
 
@@ -151,7 +151,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
           </Row>
         );
       })}
-    </Form.Item>
+    </div>
   );
 };
 
@@ -224,6 +224,13 @@ export default function Users() {
         }
       });
 
+      // Ensure departmentRoles is always an array
+      if (!trimmedValues.departmentRoles || !Array.isArray(trimmedValues.departmentRoles)) {
+        trimmedValues.departmentRoles = [];
+      }
+
+      console.log('Submitting user data:', trimmedValues);
+
       if (editingUser) {
         const response = await updateUserApi(editingUser?.id, trimmedValues);
         message.success("User updated successfully");
@@ -237,6 +244,7 @@ export default function Users() {
       form.resetFields();
       setEditingUser(null);
     } catch (error: any) {
+      console.error('Error submitting user:', error);
       message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
@@ -460,6 +468,10 @@ export default function Users() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          initialValues={{
+            departmentRoles: [],
+            status: "Active"
+          }}
           style={{ gap: 8, display: "flex", flexDirection: "column" }}
         >
           <Form.Item
@@ -539,7 +551,32 @@ export default function Users() {
               }}
             />
           </Form.Item>
-          <DepartmentRoleSelector form={form} />
+          <Form.Item
+            name="departmentRoles"
+            label="Department & Role"
+            rules={[
+              { 
+                required: true, 
+                message: "Please select at least one department and role" 
+              },
+              {
+                validator: (_, value) => {
+                  if (!value || !Array.isArray(value) || value.length === 0) {
+                    return Promise.reject('Please select at least one department and role');
+                  }
+                  // Check if all selected departments have roles assigned
+                  const hasAllRoles = value.every((item: any) => item.department && item.role);
+                  // if (!hasAllRoles) {
+                  //   return Promise.reject('Please select roles for all departments');
+                  // }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+            style={{ marginBottom: 8 }}
+          >
+            <DepartmentRoleSelector form={form} />
+          </Form.Item>
           <Form.Item
             name="locality"
             label="Location"
