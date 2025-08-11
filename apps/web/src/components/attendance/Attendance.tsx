@@ -1,4 +1,5 @@
 import { getAttendanceRecodsApi } from "@/services/attendance.services";
+import { getCurrentDepartment } from "@/utils/utility";
 import {
   Table,
   Input,
@@ -52,6 +53,8 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   });
 
   const fetchAttendanceRecords = async () => {
+    const department = getCurrentDepartment();
+    if (!department) return; 
     setLoading(true);
     try {
       const [start, end] = dateRange || [];
@@ -72,6 +75,8 @@ export default function Attendance({ dateRange }: AttendanceProps) {
   };
 
   useEffect(() => {
+    const department = getCurrentDepartment();
+    if (!department) return; // Guard: only fetch if department is set
     fetchAttendanceRecords();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange, filters.status, filters.employeeCode]);

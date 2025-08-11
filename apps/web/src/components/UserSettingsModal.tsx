@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Descriptions, Typography, Card, Space, Tag, Divider, Button, Form, Input, message, Tooltip, Select, Spin } from "antd";
+import { Drawer, Descriptions, Typography, Card, Space, Tag, Divider, Button, Form, Input, message, Tooltip, Select, Spin } from "antd";
 import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined, TeamOutlined, ApartmentOutlined, EditOutlined, SaveOutlined, CloseOutlined, SwapOutlined, LogoutOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { getCurrentDepartment } from "@/utils/utility";
@@ -189,7 +189,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
   };
 
   return (
-    <Modal
+    <Drawer
       title={
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <Space>
@@ -227,31 +227,29 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           )}
         </div>
       }
+      placement="right"
       open={visible}
-      onCancel={onCancel}
-      footer={null}
+      onClose={onCancel}
       width={600}
-      style={{
-        position: 'fixed',
-        top: '64px', // Below navbar height
-        right: '20px', // Right corner with some margin
-        margin: 0,
-      }}
       bodyStyle={{
-        maxHeight: '80vh',
-        overflowY: 'auto',
-        padding: '16px'
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100% - 56px)' 
       }}
+      footer={null}
     >
       <Card
         style={{
           background: "var(--background-primary)",
           border: "1px solid var(--neutral-200)",
           position: "relative",
-          minHeight: "600px"
+          flex: 1,
+          display: "flex",
+          flexDirection: "column"
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 24, flexShrink: 0 }}>
           <Title level={4} style={{ margin: 0, color: "var(--primary-800)" }}>
             {currentUserData.name || "User"}
           </Title>
@@ -316,6 +314,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             backgroundColor: "var(--background-primary)",
             fontWeight: 500,
           }}
+          style={{ flex: 1, overflowY: 'auto' }}
         >
           {!isEditing && (
             <>
@@ -427,7 +426,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             </Space>
           </Descriptions.Item>
 
-          <Descriptions.Item
+          {/* <Descriptions.Item
             label={
               <Space>
                 <ApartmentOutlined style={{ color: "var(--success-600)" }} />
@@ -456,7 +455,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 </Tooltip>
               )}
             </Space>
-          </Descriptions.Item>
+          </Descriptions.Item> */}
 
           <Descriptions.Item
             label={
@@ -493,7 +492,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               display: "flex",
               justifyContent: "flex-end",
               marginTop: "20px",
-              paddingTop: "20px"
+              paddingTop: "20px",
+              flexShrink: 0
             }}>
           <Tooltip title="Logout">
             <Link href="/logout">
@@ -515,20 +515,27 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
       </Card>
 
       {/* Department Change Modal */}
-      <Modal
+      <Drawer
         title={
           <Space>
             <SwapOutlined />
             <span>Change Default Department</span>
           </Space>
         }
+        placement="right"
         open={showDepartmentModal}
-        onOk={handleDepartmentSave}
-        onCancel={handleDepartmentCancel}
-        okText="Save"
-        cancelText="Cancel"
+        onClose={handleDepartmentCancel}
         width={400}
-        centered
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Button onClick={handleDepartmentCancel} style={{ marginRight: 8 }}>
+              Cancel
+            </Button>
+            <Button type="primary" onClick={handleDepartmentSave}>
+              Save
+            </Button>
+          </div>
+        }
       >
         <div style={{ marginBottom: 16 }}>
           <Typography.Text>
@@ -553,23 +560,30 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             </Select.Option>
           ))}
         </Select>
-      </Modal>
+      </Drawer>
 
       {/* Current Department Change Modal */}
-      <Modal
+      <Drawer
         title={
           <Space>
             <SwapOutlined style={{ color: "var(--success-600)" }} />
             <span>Change Current Department</span>
           </Space>
         }
+        placement="right"
         open={showCurrentDepartmentModal}
-        onOk={handleCurrentDepartmentSave}
-        onCancel={handleCurrentDepartmentCancel}
-        okText="Change"
-        cancelText="Cancel"
+        onClose={handleCurrentDepartmentCancel}
         width={400}
-        centered
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Button onClick={handleCurrentDepartmentCancel} style={{ marginRight: 8 }}>
+              Cancel
+            </Button>
+            <Button type="primary" onClick={handleCurrentDepartmentSave}>
+              Change
+            </Button>
+          </div>
+        }
       >
         <div style={{ marginBottom: 16 }}>
           <Typography.Text>
@@ -594,7 +608,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             </Select.Option>
           ))}
         </Select>
-      </Modal>
+      </Drawer>
 
       <style jsx>{`
         .ant-descriptions-item-label {
@@ -604,7 +618,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
           font-family: "Noto Sans", sans-serif !important;
         }
       `}</style>
-    </Modal>
+    </Drawer>
   );
 };
 
