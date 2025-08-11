@@ -2,34 +2,31 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 import { Buffer } from 'buffer'; // Import the Buffer type
-import { Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
+import { Logger } from '@nestjs/common';
+import { format, toZonedTime } from 'date-fns-tz';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { PrismaService } from '../../prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
+import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
+import { workTemplate } from './templates/work.template';
 import { S3Service } from '../common/s3utils/s3.service';
+import { addressTemplate } from './templates/address.template';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { LoggingService } from '../common/logging/logging.service';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { businessTemplate } from './templates/business.template';
+import { VerificationData } from './templates/address.interface';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { WorkVerificationData } from './templates/work.interface';
+import { EditVerificationDto } from './dto/edit-verification.dto';
+import { LoggingService } from '../common/logging/logging.service';
+import { BusinessVerificationData } from './templates/business.interface';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, LocationType,
-  Department
-} from '@prisma/client';
-import { businessTemplate } from './templates/business.template';
-import { BusinessVerificationData } from './templates/business.interface';
-import { WorkVerificationData } from './templates/work.interface';
-import { workTemplate } from './templates/work.template';
-import { VerificationData } from './templates/address.interface';
-import { addressTemplate } from './templates/address.template';
-import { contains } from 'class-validator';
-import { format, toZonedTime } from 'date-fns-tz';
-
+  AddressType, UserRole, ApprovedStatus, Department} from '@prisma/client';
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 
 
 @Injectable()
@@ -41,7 +38,49 @@ export class LoanService {
     private s3Service: S3Service,
   ) { }
 
-  async createLoan(data: CreateLoanDto, officeId: number) {
+  async createLambdaLoan(data: CreateLambdaLoanDto) {
+    try {
+
+      const office = await this.prisma.office.findFirst({
+        where: {
+          department: 'PD',
+        },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      const loan = await this.prisma.loan.create({
+        data: {
+          department: 'PD',
+          loanType: 'Business',
+          status: 'Unassigned',
+          bankName: data.bankName,
+          applicantName: data.applicantName,
+          applicantMobile: data.applicantMobile,
+          office: { connect: { id: office.id } },
+          applicantAddress: data.applicantAddress,
+          applicationNumber: data.applicationNumber,
+          applicantType: data.applicantType || 'Primary Applicant',
+        },  
+        include: {
+          office: true,
+        },
+      });
+      return loan;
+    }
+    catch (error) {
+      await this.loggingService.error('Failed to create lambo loan', {
+        data,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createLoan(data: CreateLoanDto, officeId: number, department: Department) {
     try {
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
@@ -181,7 +220,7 @@ export class LoanService {
             throw new Error('Missing required field: APPLICATION ID');
           }
 
-          const loan = await this.createLoan(loanData, officeId);
+          const loan = await this.createLoan(loanData, officeId, 'PD');
           results.push({
             row: row['__rowNum__'] + 1,
             loanId: loan.id,
@@ -225,7 +264,7 @@ export class LoanService {
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    createData: createAssignmentDto
+    createData: createAssignmentDto,
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -255,6 +294,7 @@ export class LoanService {
             locationType: createData.locationType || null,
             businessName: createData.businessName || null,
             currentOfficeName: createData.currentOfficeName || null,
+            department: loan.department
           }
         });
 
@@ -544,7 +584,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByVerifier(verifierId: number, role: UserRole, department: Department) {
+  async getLoansByVerifier(verifierId: number, department: Department, role: any) {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId }
@@ -554,22 +594,18 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.VerificationWhereInput = {
-        loan: {
+      const where: Prisma.VerificationWhereInput = {
           department: department
-        }
       };
 
-      if (role === UserRole.Admin) {
-        // For Admin, get all verifications
-        whereCondition = {};
-      } else if (role === UserRole.Verifier) {
-        // For Verifier, get only verifications assigned to them
-        whereCondition = { verifierId };
+      const userRole = role.find((r: any) => r.department === department);
+
+      if (userRole.role === UserRole.Verifier) {
+        where.verifierId = verifierId;
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: whereCondition,
+        where: where,
         include: {
           loan: {
             include: {
@@ -628,15 +664,11 @@ export class LoanService {
     }
   }
 
-  async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+  async getLoans(officeId: number, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
       const where: Prisma.LoanWhereInput = {
         department: filters.department
       };
-
-      if (role === UserRole.OperationsExecutive) {
-        where.officeId = officeId;
-      }
 
       if (filters?.status) {
         where.status = filters.status;
@@ -778,7 +810,6 @@ export class LoanService {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-      console.log(updateData.verificationType);
 
       // // If field executive is provided, address is mandatory
       if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
@@ -801,7 +832,7 @@ export class LoanService {
             ...(updateData.verifierId && { verifierId: updateData.verifierId }),
             ...(updateData.fieldExecutiveId && { fieldExecutiveId: updateData.fieldExecutiveId }),
             ...(updateData.currentOfficeName && { currentOfficeName: updateData.currentOfficeName }),
-            status: 'Pending', // Reset status when assignment is updated
+            status: 'Pending' // Reset status when assignment is updated
           },
         });
 
@@ -1333,7 +1364,7 @@ export class LoanService {
     }
   }
 
-  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number) {
+  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number, department: Department) {
     try {
       const results = {
         successful: [],
@@ -1342,17 +1373,25 @@ export class LoanService {
         successfulCount: 0,
         failedCount: 0
       };
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
 
       for (const dto of createLoanDtos) {
         try {
           // Check if operations executive exists
-          const operationsExecutive = await this.prisma.user.findUnique({
+          if(dto.operationsExecutiveId){
+            const operationsExecutive = await this.prisma.user.findUnique({
             where: { id: dto.operationsExecutiveId }
           });
 
           if (!operationsExecutive) {
             throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
           }
+        }
+        else{
+          dto.operationsExecutiveId = null;
+        }
 
           // Check if field executive exists (if provided)
           if (dto.fieldExecutiveId) {
@@ -1364,6 +1403,9 @@ export class LoanService {
               throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
             }
           }
+          else{
+            dto.fieldExecutiveId = null;
+          }
 
           const { operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
 
@@ -1373,9 +1415,10 @@ export class LoanService {
           const loanData = {
             ...rest,
             applicationNumber,
+            department,
             status: dto.status || 'Unassigned',
             office: { connect: { id: officeId } },
-            operationsExecutive: { connect: { id: operationsExecutiveId } },
+            ...(operationsExecutiveId && { operationsExecutive: { connect: { id: operationsExecutiveId } } }),
             ...(fieldExecutiveId && {
               fieldExecutive: { connect: { id: fieldExecutiveId } }
             })

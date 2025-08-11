@@ -193,7 +193,6 @@ export class AccountsService {
 
         const newUserRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-
         if(deviceId !== newUserRoles.deviceId){
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
@@ -336,13 +335,13 @@ export class AccountsService {
         status: filters?.status || 'Active'
       };
 
-      // if (filters.department) {
-      //   where.departmentRoles = {
-      //     some: {
-      //       department: filters.department
-      //     }
-      //   };
-      // }
+      if (filters.department) {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }
       
       if (filters?.role) {
         where.departmentRoles = {
@@ -779,7 +778,7 @@ export class AccountsService {
     }
   }
 
-  async createOffice(createOfficeDto: CreateOfficeDto) {
+  async createOffice(createOfficeDto: CreateOfficeDto, department: Department) {
     try {
       // Check if office with same name already exists
       const existingOffice = await this.prisma.office.findFirst({
@@ -790,8 +789,15 @@ export class AccountsService {
         throw new BadRequestException('Office with this name already exists');
       }
 
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
+
       const office = await this.prisma.office.create({
-        data: createOfficeDto,
+        data: {
+          ...createOfficeDto,
+          department: department,
+        },
       });
 
       await this.loggingService.info('Office created successfully', {
@@ -865,9 +871,17 @@ export class AccountsService {
     }
   }
 
-  async listOffices() {
+  async listOffices(department: Department) {
     try {
+
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
+
       const offices = await this.prisma.office.findMany({
+        where: {
+          department: department,
+        },
         orderBy: {
           name: 'asc',
         },

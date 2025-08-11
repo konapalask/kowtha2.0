@@ -420,8 +420,8 @@ export class AccountsController {
       }
     }
   })
-  async createOffice(@Body() createOfficeDto: CreateOfficeDto) {
-    const office = await this.accountsService.createOffice(createOfficeDto);
+  async createOffice(@Body() createOfficeDto: CreateOfficeDto, @Query('department') department: Department) {
+    const office = await this.accountsService.createOffice(createOfficeDto, department);
     return {
       message: 'Office created successfully',
       data: office
@@ -496,8 +496,8 @@ export class AccountsController {
       }
     }
   })
-  async listOffices() {
-    const offices = await this.accountsService.listOffices();
+  async listOffices(@Query('department') department: Department) {
+    const offices = await this.accountsService.listOffices(department);
     return {
       message: 'Offices fetched successfully',
       data: offices

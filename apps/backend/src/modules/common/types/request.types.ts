@@ -5,12 +5,9 @@ export interface AuthenticatedRequest extends Request {
   user: {
     id: number;
     mobile: string;
-    role: string;
     officeId: number;
-    departmentRoles?: Array<{
-      department: Department;
-      role: UserRole;
-    }>;
+    department: Department;
+    role: UserRole;
   };
 }
 
