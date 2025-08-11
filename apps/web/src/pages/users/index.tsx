@@ -79,10 +79,10 @@ const FIroleOptions = [
 ];
 
 const PDroleOptions = [
-  { label: "Admin", value: "PDAdmin" },
-  { label: "Operations Executive", value: "PDOperationsExecutive" },
-  { label: "Verifier", value: "PDVerifier" },
-  { label: "Field Executive", value: "PDFieldExecutive" }
+  { label: "Admin", value: "Admin" },
+  { label: "Operations Executive", value: "OperationsExecutive" },
+  { label: "Verifier", value: "Verifier" },
+  { label: "Field Executive", value: "FieldExecutive" }
 ];
 
 const departments = ["FI", "PD"];
