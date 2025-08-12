@@ -218,7 +218,7 @@ model Loan {
   updatedAt             DateTime            @updatedAt
   editRequests          EditRequest[]
   applicantType         String?
-
+  pdEmailLogs           PDEmailLog[]
   @@unique([applicationNumber, applicantType]) // New optional field
 }
 
@@ -278,7 +278,7 @@ model Attendance {
 }
 
 model AppDeployment {
-  id            Int @id @default(autoincrement())
+  id            Int   @id @default(autoincrement())
   version       String
   isActive      Boolean @default(true)
   source        String
@@ -288,4 +288,24 @@ model AppDeployment {
   description   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model PDEmailLog {
+  id          Int      @id @default(autoincrement())
+  messageID   String
+  fromEmail   String[]
+  toEmail     String[]
+  ccEmail     String[]
+  bccEmail    String[]
+  subject     String
+  body        String
+  attachments String[]
+  receivedAt  DateTime?
+  parsedData  Json?
+  s3Path      String?
+  
+  loanId      Int?
+  loan        Loan?    @relation(fields: [loanId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

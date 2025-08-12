@@ -10,22 +10,23 @@ import { EditLoanDto } from './dto/edit-loan.dto';
 import { PrismaService } from '../../prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
-import { workTemplate } from './templates/work.template';
+import { workTemplate } from './templates/FI/work.template';
 import { S3Service } from '../common/s3utils/s3.service';
-import { addressTemplate } from './templates/address.template';
+import { addressTemplate } from './templates/FI/address.template';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { businessTemplate } from './templates/business.template';
-import { VerificationData } from './templates/address.interface';
+import { businessTemplate } from './templates/FI/business.template';
+import { VerificationData } from './templates/FI/address.interface';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { WorkVerificationData } from './templates/work.interface';
+import { WorkVerificationData } from './templates/FI/work.interface';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { LoggingService } from '../common/logging/logging.service';
-import { BusinessVerificationData } from './templates/business.interface';
+import { BusinessVerificationData } from './templates/FI/business.interface';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department} from '@prisma/client';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 
 
@@ -2160,6 +2161,60 @@ export class LoanService {
         data: createVerificationRetryDto,
         error: error.message,
         stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async createPDEmailLog(data: CreatePDEmailLogDto) {
+    try {
+      // If loanId is provided, verify the loan exists
+      if (data.loanId) {
+        const loan = await this.prisma.loan.findUnique({
+          where: { id: data.loanId },
+        });
+        
+        if (!loan) {
+          throw new NotFoundException('Loan not found');
+        }
+      }
+
+      const pdEmailLog = await this.prisma.pDEmailLog.create({
+        data: {
+          messageID: data.messageID,
+          fromEmail: data.fromEmail,
+          toEmail: data.toEmail,
+          ccEmail: data.ccEmail,
+          bccEmail: data.bccEmail,
+          subject: data.subject,
+          body: data.body,
+          attachments: data.attachments,
+          receivedAt: data.receivedAt ? new Date(data.receivedAt) : null,
+          parsedData: data.parsedData,
+          s3Path: data.s3Path,
+          ...(data.loanId && { loan: { connect: { id: data.loanId } } }),
+        },
+        include: {
+          loan: true,
+        },
+      });
+
+      await this.loggingService.info('PD Email Log created successfully', {
+        pdEmailLogId: pdEmailLog.id,
+        messageID: pdEmailLog.messageID,
+        subject: pdEmailLog.subject,
+        loanId: pdEmailLog.loanId,
+      });
+
+      return pdEmailLog;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create PD Email Log', {
+        data,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }
