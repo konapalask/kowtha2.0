@@ -87,14 +87,12 @@ const PDroleOptions = [
 
 const departments = ["FI", "PD"];
 
-const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
-
-  useEffect(() => {
+const DepartmentRoleSelector = ({ form, editingUser }: { form: FormInstance, editingUser: User | null }) => {
+  // Get current department roles directly from form
+  const getCurrentDepartments = () => {
     const currentRoles = form.getFieldValue("departmentRoles") || [];
-    const departments = currentRoles.map((r: any) => r.department);
-    setSelectedDepartments(departments);
-  }, [form]);
+    return currentRoles.map((r: any) => r.department);
+  };
 
   const handleCheck = (checked: boolean, dept: string) => {
     const current = form.getFieldValue("departmentRoles") || [];
@@ -102,18 +100,17 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
       form.setFieldsValue({
         departmentRoles: [...current, { department: dept, role: undefined }],
       });
-      setSelectedDepartments([...selectedDepartments, dept]);
     } else {
       const updated = current.filter((item: any) => item.department !== dept);
       form.setFieldsValue({ departmentRoles: updated });
-      setSelectedDepartments(updated.map((item: any) => item.department));
     }
   };
 
   return (
     <div>
       {departments.map((dept, index) => {
-        const isChecked = selectedDepartments.includes(dept);
+        const currentDepartments = getCurrentDepartments();
+        const isChecked = currentDepartments.includes(dept);
 
         return (
           <Row key={dept} align="middle" gutter={16} style={{ marginBottom: 12 }}>
@@ -129,7 +126,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
               {isChecked && (
                 <>
                   <Form.Item
-                    name={["departmentRoles", selectedDepartments.indexOf(dept), "role"]}
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "role"]}
                     rules={[{ required: true, message: `Select role for ${dept}` }]}
                     noStyle
                   >
@@ -140,7 +137,7 @@ const DepartmentRoleSelector = ({ form }: { form: FormInstance }) => {
                     />
                   </Form.Item>
                   <Form.Item
-                    name={["departmentRoles", selectedDepartments.indexOf(dept), "department"]}
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "department"]}
                     initialValue={dept}
                     hidden
                   >
@@ -433,6 +430,7 @@ export default function Users() {
               onClick={() => {
                 setEditingUser(null);
                 form.resetFields();
+                form.setFieldsValue({ departmentRoles: [] });
                 setIsModalVisible(true);
               }}
             >
@@ -472,6 +470,7 @@ export default function Users() {
           setIsModalVisible(false);
           setEditingUser(null);
           form.resetFields();
+          form.setFieldsValue({ departmentRoles: [] });
         }}
         footer={null}
       >
@@ -586,7 +585,7 @@ export default function Users() {
             ]}
             style={{ marginBottom: 8 }}
           >
-            <DepartmentRoleSelector form={form} />
+            <DepartmentRoleSelector form={form} editingUser={editingUser} />
           </Form.Item>
           <Form.Item
             name="locality"
@@ -661,6 +660,7 @@ export default function Users() {
                   setIsModalVisible(false);
                   setEditingUser(null);
                   form.resetFields();
+                  form.setFieldsValue({ departmentRoles: [] });
                 }}
               >
                 Cancel
