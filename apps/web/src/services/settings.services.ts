@@ -30,6 +30,11 @@ export const getOfficesApi = () => {
   return getWithDepartment(`/accounts/offices`);
 };
 
+
+export const getOfficesByDepartmentApi = (department: string) => {
+  return axiosInstance.get(`/accounts/offices`, { params: { department } });
+};
+
 export const updateOfficeApi = (id:number, values:any) =>{
   return patchWithDepartment(`/accounts/offices/${id}`, values);
 }

@@ -26,7 +26,7 @@ import {
   updateUserDepartmentRolesApi, 
   UserFilters,
 } from "@/services/users.services";
-import { getOfficesApi } from "@/services/settings.services";
+import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
 import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
@@ -91,7 +91,7 @@ const PDroleOptions = [
 
 const departments = ["FI", "PD"];
 
-const DepartmentRoleSelector = ({ form, editingUser }: { form: FormInstance, editingUser: User | null }) => {
+const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { form: FormInstance, editingUser: User | null, fiOffices: any[], pdOffices: any[] }) => {
   // Get current department roles directly from form
   const getCurrentDepartments = () => {
     const currentRoles = form.getFieldValue("departmentRoles") || [];
@@ -102,7 +102,7 @@ const DepartmentRoleSelector = ({ form, editingUser }: { form: FormInstance, edi
     const current = form.getFieldValue("departmentRoles") || [];
     if (checked) {
       form.setFieldsValue({
-        departmentRoles: [...current, { department: dept, role: undefined }],
+        departmentRoles: [...current, { department: dept, role: undefined, officeId: undefined }],
       });
     } else {
       const updated = current.filter((item: any) => item.department !== dept);
@@ -139,6 +139,25 @@ const DepartmentRoleSelector = ({ form, editingUser }: { form: FormInstance, edi
                       style={{ width: 200 }}
                     />
                   </Form.Item>
+                  {/* Branch per department */}
+                  <Form.Item
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "officeId"]}
+                    rules={[{ required: true, message: `Select branch for ${dept}` }]}
+                    style={{ display: "inline-block", marginLeft: 12 }}
+                  >
+                    <Select
+                      options={dept === "FI" ? fiOffices : pdOffices}
+                      placeholder={`Select ${dept} branch`}
+                      style={{ width: 240 }}
+                      onChange={(val) => {
+                        // Keep root officeId in sync for backend
+                        const rootOfficeId = form.getFieldValue("officeId");
+                        if (!rootOfficeId) {
+                          form.setFieldsValue({ officeId: val });
+                        }
+                      }}
+                    />
+                  </Form.Item>
                   <Form.Item
                     name={["departmentRoles", currentDepartments.indexOf(dept), "department"]}
                     initialValue={dept}
@@ -166,6 +185,8 @@ export default function Users() {
   const userDetails = getUserDetails();
   const currentDepartment = getCurrentDepartment();
   const [offices, setOffices] = useState<Office[]>([]);
+  const [fiOffices, setFiOffices] = useState<any[]>([]);
+  const [pdOffices, setPdOffices] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -204,17 +225,35 @@ export default function Users() {
   useEffect(() => {
     getOfficesApi()
       .then((res) => {
-        const options =
+        const all =
           res?.data?.data?.map((item: any) => ({
             label: `${item.name} - ${item.location}`,
             value: Number(item.id),
           })) ?? [];
-        console.log('Office options loaded:', options);
-        setOffices(options);
+        setOffices(all);
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch((err) => console.log(err));
+    getOfficesByDepartmentApi('FI')
+      .then((res) => {
+        const fi =
+          res?.data?.data?.map((item: any) => ({
+            label: `${item.name} - ${item.location}`,
+            value: Number(item.id),
+          })) ?? [];
+        setFiOffices(fi);
+      })
+      .catch((err) => console.log(err));
+
+    getOfficesByDepartmentApi('PD')
+      .then((res) => {
+        const pd =
+          res?.data?.data?.map((item: any) => ({
+            label: `${item.name} - ${item.location}`,
+            value: Number(item.id),
+          })) ?? [];
+        setPdOffices(pd);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
 
@@ -591,7 +630,7 @@ export default function Users() {
             ]}
             style={{ marginBottom: 8 }}
           >
-            <DepartmentRoleSelector form={form} editingUser={editingUser} />
+            <DepartmentRoleSelector form={form} editingUser={editingUser} fiOffices={fiOffices} pdOffices={pdOffices} />
           </Form.Item>
           <Form.Item
             name="locality"
@@ -614,21 +653,7 @@ export default function Users() {
           >
             <Input maxLength={30} />
           </Form.Item>
-          <Form.Item
-            name="officeId"
-            label="Branch"
-            rules={[{ required: true, message: "Please select branch" }]}
-            style={{ marginBottom: 8 }}
-          >
-            <Select 
-              options={offices} 
-              placeholder="Select branch"
-              // onChange={(value) => {
-              //   console.log('Office selected:', value);
-              //   console.log('Available offices:', offices);
-              // }}
-            />
-          </Form.Item>
+          {/* Removed global Branch field. Branch is now selected per department above. */}
           {editingUser && editingUser.status === "Active" && (
             <Form.Item style={{ marginBottom: 8 }}>
               <Popconfirm
