@@ -4,6 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 class DepartmentRoleDto {
+  @ApiProperty({ description: 'Office ID where the user belongs' })
+  @IsNumber()
+  officeId: number;
+
   @ApiProperty({ 
     description: 'Department for this role',
     enum: Department,
@@ -43,10 +47,6 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   employeeCode?: string;
-
-  @ApiProperty({ description: 'Office ID where the user belongs' })
-  @IsNumber()
-  officeId: number;
 
   @ApiProperty({ 
     description: 'User\'s status', 

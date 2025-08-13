@@ -627,7 +627,8 @@ export class AccountsService {
             data: {
               userId: existingUser.id,
               department: department,
-              role: createUserDto.departmentRoles.find(dr => dr.department === department)?.role as UserRole
+              role: createUserDto.departmentRoles.find(dr => dr.department === department)?.role as UserRole,
+              officeId: createUserDto.departmentRoles.find(dr => dr.department === department)?.officeId as number
             }
           });
           return {
@@ -659,15 +660,6 @@ export class AccountsService {
         }
       }
 
-      // Check if office exists
-      const office = await this.prisma.office.findUnique({
-        where: { id: createUserDto.officeId },
-      });
-
-      if (!office) {
-        throw new NotFoundException('Office not found');
-      }
-
       // Validate department roles
       if (!createUserDto.departmentRoles || createUserDto.departmentRoles.length === 0) {
         throw new BadRequestException('At least one department role is required');
@@ -686,18 +678,17 @@ export class AccountsService {
         const { departmentRoles, ...userData } = createUserDto;
 
         // Create user
-        const user = await prisma.user.create({
-          data: userData,
-        });
-
+        const user = await prisma.user.create({data: userData});
+ 
         // Create department roles
         const createdDepartmentRoles = await Promise.all(
           departmentRoles.map(async (deptRole) => {
             return await prisma.departmentRole.create({
               data: {
                 userId: user.id,
-                department: deptRole.department,
                 role: deptRole.role,
+                officeId: deptRole.officeId,
+                department: deptRole.department,
               },
             });
           })
