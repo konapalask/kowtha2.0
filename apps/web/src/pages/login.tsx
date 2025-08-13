@@ -163,12 +163,77 @@ export default function Login() {
 
         // Check if user has a default department
         if (!userData.defaultDepartment) {
-          // Show department selection modal
-          setUserDetailsTemp(userData);
-          setUserDepartmentRoles(userData.departmentRoles || []);
-          setShowDepartmentModal(true);
+          const departmentRoles = userData.departmentRoles || [];
+          if (!Array.isArray(departmentRoles) || departmentRoles.length === 0) {
+            message.error("Invalid department configuration. Please contact administrator.");
+            setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            return;
+          }
+          if (departmentRoles.length === 1) {
+            const singleDepartment = departmentRoles[0].department;
+            
+            // Validate department object structure
+            if (!singleDepartment || typeof singleDepartment !== 'string') {
+              console.log("Invalid department structure:", departmentRoles[0]);
+              message.error("Invalid department configuration. Please contact administrator.");
+              // Clear tokens since login cannot proceed
+              setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              return;
+            }
+            
+            try {
+              await updateUserDepartmentApi(userData.id, singleDepartment);
+              const updatedUserDetails = {
+                ...userData,
+                defaultDepartment: singleDepartment,
+              };
+
+              setUserDetails(updatedUserDetails);
+              message.success(`Default department set to ${singleDepartment}`);
+              
+              // Small delay to ensure state is updated before navigation
+              setTimeout(() => {
+                // The useEffect will handle navigation automatically
+              }, 100);
+            } catch (error) {
+              console.error("Error setting default department:", error);
+              message.error("Failed to set default department");
+              // Fallback to showing modal if API call fails
+              setUserDetailsTemp(userData);
+              setUserDepartmentRoles(departmentRoles);
+              setShowDepartmentModal(true);
+            }
+          } else if (departmentRoles.length > 1) {
+            console.log(`User has ${departmentRoles.length} departments, showing selection modal`);
+            // Validate all department objects have required structure
+            const validDepartments = departmentRoles.filter(dept => 
+              dept && dept.department && typeof dept.department === 'string' && 
+              dept.role && typeof dept.role === 'string'
+            );
+            
+            if (validDepartments.length !== departmentRoles.length) {
+              console.log("Some departments have invalid structure:", departmentRoles);
+              message.error("Invalid department configuration. Please contact administrator.");
+              setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              return;
+            }
+            
+            // User has multiple departments, show selection modal
+            setUserDetailsTemp(userData);
+            setUserDepartmentRoles(departmentRoles);
+            setShowDepartmentModal(true);
+          } else {
+            console.log("User has no departments assigned");
+            // User has no departments, handle appropriately
+            message.error("No departments assigned to user. Please contact administrator.");
+            // Clear tokens since login cannot proceed
+            setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+          }
         } else {
-          // User already has a default department, proceed normally
           setUserDetails(userData);
         }
       } catch (error) {
