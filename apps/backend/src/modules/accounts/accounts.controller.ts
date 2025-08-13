@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Get, Request, Query, UnauthorizedExc
 import { AccountsService } from './accounts.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { Roles, DeptFromQuery } from './decorators/roles.decorator';
+import { Roles, DeptFromQuery, All, PD } from './decorators/roles.decorator';
 import { AuthenticatedRequest } from '../common/types/request.types';
 import { ListUsersDto } from './dto/list-users.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
@@ -208,6 +208,7 @@ export class AccountsController {
 
   @Patch('users/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(All)
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiResponse({ 
     status: 200, 

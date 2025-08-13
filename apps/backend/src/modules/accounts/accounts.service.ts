@@ -517,7 +517,8 @@ export class AccountsService {
           departmentRoles: {
             select: {
               department: true,
-              role: true
+              role: true,
+              officeId: true
             }
           },
           office: {
@@ -677,6 +678,7 @@ export class AccountsService {
         // Extract department roles from DTO
         const { departmentRoles, ...userData } = createUserDto;
 
+        
         // Create user
         const user = await prisma.user.create({data: userData});
  
