@@ -630,6 +630,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onSelect={handleDepartmentSelect}
         onCancel={() => setShowDepartmentModal(false)}
         isCurrentDepartment={true}
+        currentDepartment={currentDept}
       />
     </Layout>
   );

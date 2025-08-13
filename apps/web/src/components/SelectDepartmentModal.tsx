@@ -13,7 +13,8 @@ interface SelectDepartmentModalProps {
   departmentRoles: DepartmentRole[];
   onSelect: (department: string) => void;
   onCancel: () => void;
-  isCurrentDepartment?: boolean; // New prop to distinguish between default and current department selection
+  isCurrentDepartment?: boolean; 
+  currentDepartment?: string; 
 }
 
 const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
@@ -22,6 +23,7 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
   onSelect,
   onCancel,
   isCurrentDepartment = false,
+  currentDepartment = "",
 }) => {
   const [selectedDepartment, setSelectedDepartment] = React.useState<string | null>(null);
 
@@ -38,8 +40,10 @@ const SelectDepartmentModal: React.FC<SelectDepartmentModalProps> = ({
   React.useEffect(() => {
     if (!visible) {
       setSelectedDepartment(null);
+    } else if (isCurrentDepartment && currentDepartment) {
+      setSelectedDepartment(currentDepartment);
     }
-  }, [visible]);
+  }, [visible, isCurrentDepartment, currentDepartment]);
 
   const modalStyles = {
     header: {
