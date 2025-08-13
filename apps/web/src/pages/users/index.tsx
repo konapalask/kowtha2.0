@@ -42,10 +42,14 @@ interface User {
   locality: string;
   deviceId?: string;
   defaultDepartment?: string;
-  officeId: number;
+  officeId?: number; // Made optional since it's not in API response
   status: "Active" | "Inactive";
   role: string;
-  office?: any;
+  office?: {
+    id: number;
+    name: string;
+    location?: string;
+  };
   createdAt: string;
   updatedAt: string;
   departmentRoles: any[];
@@ -127,7 +131,6 @@ const DepartmentRoleSelector = ({ form, editingUser }: { form: FormInstance, edi
                 <>
                   <Form.Item
                     name={["departmentRoles", currentDepartments.indexOf(dept), "role"]}
-                    rules={[{ required: true, message: `Select role for ${dept}` }]}
                     noStyle
                   >
                     <Select
@@ -204,14 +207,16 @@ export default function Users() {
         const options =
           res?.data?.data?.map((item: any) => ({
             label: `${item.name} - ${item.location}`,
-            value: item.id,
+            value: Number(item.id),
           })) ?? [];
+        console.log('Office options loaded:', options);
         setOffices(options);
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
+
 
   const handleSubmit = async (values: any) => {
     try {
@@ -254,6 +259,10 @@ export default function Users() {
   };
 
   const handleEdit = (user: User) => {
+    // console.log('Editing user data:', user);
+    // console.log('User office data:', user.office);
+    // console.log('User officeId:', user.officeId);
+    
     setEditingUser(user);
     form.setFieldsValue({
       name: user.name,
@@ -262,7 +271,7 @@ export default function Users() {
       employeeCode: user.employeeCode,
       role: user.role,
       locality: user.locality,
-      officeId: user?.office?.id || user.officeId,
+      officeId: user.office?.id || user.officeId, 
       departmentRoles: user.departmentRoles,
     });
     setIsModalVisible(true);
@@ -478,6 +487,9 @@ export default function Users() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          // onFinishFailed={(errorInfo) => {
+          //   console.log('Form validation failed:', errorInfo);
+          // }}
           initialValues={{
             departmentRoles: [],
             status: "Active"
@@ -510,12 +522,11 @@ export default function Users() {
             label="Mobile Number"
             rules={[
               { required: true, message: "Please enter mobile number" },
-              { max: 10, message: "Cannot be more than 10 characters" },
-              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
-              {
-                pattern: /^[0-9]+$/,
-                message: "Please enter a valid mobile number",
+              { 
+                pattern: /^[0-9]{10}$/, 
+                message: "Mobile number must be exactly 10 digits" 
               },
+              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
             ]}
             style={{ marginBottom: 8 }}
           >
@@ -565,20 +576,15 @@ export default function Users() {
             name="departmentRoles"
             label="Department & Role"
             rules={[
-              { 
-                required: true, 
-                message: "Please select at least one department and role" 
-              },
               {
                 validator: (_, value) => {
                   if (!value || !Array.isArray(value) || value.length === 0) {
                     return Promise.reject('Please select at least one department and role');
                   }
-                  // Check if all selected departments have roles assigned
                   const hasAllRoles = value.every((item: any) => item.department && item.role);
-                  // if (!hasAllRoles) {
-                  //   return Promise.reject('Please select roles for all departments');
-                  // }
+                  if (!hasAllRoles) {
+                    return Promise.reject('Please select roles for all departments');
+                  }
                   return Promise.resolve();
                 },
               },
@@ -614,7 +620,14 @@ export default function Users() {
             rules={[{ required: true, message: "Please select branch" }]}
             style={{ marginBottom: 8 }}
           >
-            <Select options={offices} placeholder="Select branch" />
+            <Select 
+              options={offices} 
+              placeholder="Select branch"
+              // onChange={(value) => {
+              //   console.log('Office selected:', value);
+              //   console.log('Available offices:', offices);
+              // }}
+            />
           </Form.Item>
           {editingUser && editingUser.status === "Active" && (
             <Form.Item style={{ marginBottom: 8 }}>
