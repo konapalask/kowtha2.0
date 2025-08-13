@@ -602,15 +602,39 @@ export class AccountsService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, department: Department) {
     try {
+
       // Check if user with same mobile already exists
       const existingUser = await this.prisma.user.findUnique({
         where: { mobile: createUserDto.mobile }
       });
 
       if (existingUser) {
-        throw new ConflictException('User with this mobile number already exists');
+        const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: existingUser.id,
+              department: department
+            }
+          }
+        });
+  
+        if (existingDepartmentRole) {
+          throw new ConflictException('User with this mobile number already exists');
+        } else {
+          const createDepartmentRole = await this.prisma.departmentRole.create({
+            data: {
+              userId: existingUser.id,
+              department: department,
+              role: createUserDto.departmentRoles.find(dr => dr.department === department)?.role as UserRole
+            }
+          });
+          return {
+            message: 'User created successfully',
+            data: createDepartmentRole
+          }
+        }
       }
 
       // Check if email is provided and already exists

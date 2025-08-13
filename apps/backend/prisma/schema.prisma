@@ -136,6 +136,8 @@ model DepartmentRole {
   userId      Int
   department  Department
   role        UserRole
+  officeId    Int?
+  office      Office?   @relation(fields: [officeId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -162,6 +164,7 @@ model Office {
   archived       Boolean      @default(false)
   organizationId Int          @default(1)
   organization   Organization @relation(fields: [organizationId], references: [id])
+  departmentRoles DepartmentRole[]
 }
 
 model Verification {

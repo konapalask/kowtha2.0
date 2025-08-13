@@ -198,8 +198,8 @@ export class AccountsController {
       }
     }
   })
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const user = await this.accountsService.createUser(createUserDto);
+  async createUser(@Body() createUserDto: CreateUserDto, @Query('department') department: Department) {
+    const user = await this.accountsService.createUser(createUserDto, department);
     return {
       message: 'User created successfully',
       data: user
@@ -208,7 +208,6 @@ export class AccountsController {
 
   @Patch('users/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiResponse({ 
     status: 200, 

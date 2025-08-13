@@ -5,6 +5,7 @@ import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
 import * as crypto from 'crypto';
 import * as puppeteer from 'puppeteer';
 import { cholaTemplate } from "./templates/PD/chola.template";
+import { adityabirlaTemplate } from "./templates/PD/adityabirla.template";
 import { Response } from "express";
 
 
@@ -49,7 +50,7 @@ export class CreateLoanController {
     // Create a new page
     const page = await browser.newPage();
     
-    const htmlTemplate = cholaTemplate();
+    const htmlTemplate = adityabirlaTemplate();
     // Set content to the HTML template
     await page.setContent(htmlTemplate, {
       waitUntil: 'networkidle0'

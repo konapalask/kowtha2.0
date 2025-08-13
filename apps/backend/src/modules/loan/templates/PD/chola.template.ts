@@ -372,7 +372,6 @@ export const cholaTemplate = () => {
       </table>
     </div>
 
-
     <div class="align-wrapper">
       <table class="section-table">
       <tr><td colspan="6" class="section-header">Existing Loan Details</td></tr>
@@ -486,6 +485,5 @@ export const cholaTemplate = () => {
       </table>
     </div>
      <div style="page-break-before: always;"></div>
-
     `
 }

@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsEnum, IsNumber, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsEmail, IsEnum, IsNumber, IsOptional, IsArray, ValidateNested, MinLength, MaxLength } from 'class-validator';
 import { UserRole, UserStatus, Department } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -24,10 +24,14 @@ class DepartmentRoleDto {
 export class CreateUserDto {
   @ApiProperty({ description: 'User\'s full name' })
   @IsString()
+  @MinLength(2)
+  @MaxLength(50)
   name: string;
 
   @ApiProperty({ description: 'User\'s mobile number' })
   @IsString()
+  @MinLength(10)
+  @MaxLength(10)
   mobile: string;
 
   @ApiProperty({ description: 'User\'s email address', required: false })
