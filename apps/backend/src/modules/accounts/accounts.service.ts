@@ -1191,6 +1191,7 @@ export class AccountsService {
                 userId: userId,
                 department: deptRole.department,
                 role: deptRole.role,
+                officeId: deptRole.officeId,
               },
               include: {
                 user: {
