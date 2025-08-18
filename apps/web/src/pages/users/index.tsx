@@ -187,6 +187,7 @@ export default function Users() {
   const [offices, setOffices] = useState<Office[]>([]);
   const [fiOffices, setFiOffices] = useState<any[]>([]);
   const [pdOffices, setPdOffices] = useState<any[]>([]);
+  const [officeMap, setOfficeMap] = useState<{[key: number]: string}>({});
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -231,6 +232,11 @@ export default function Users() {
             value: Number(item.id),
           })) ?? [];
         setOffices(all);
+        const officeNameMap: {[key: number]: string} = {};
+        res?.data?.data?.forEach((item: any) => {
+          officeNameMap[item.id] = item.name;
+        });
+        setOfficeMap(officeNameMap);
       })
       .catch((err) => console.log(err));
     getOfficesByDepartmentApi('FI')
@@ -419,7 +425,28 @@ export default function Users() {
       dataIndex: "office",
       key: "office",
       width: 50,
-      render: (office: any) => office?.name,
+      render: (office: any, record: User) => {
+        if (office?.name) {
+          return office.name;
+        }
+        
+        if (record.departmentRoles && Array.isArray(record.departmentRoles)) {
+          const branchNames = record.departmentRoles
+            .map((deptRole: any) => {
+              if (deptRole.officeId && officeMap[deptRole.officeId]) {
+                return officeMap[deptRole.officeId];
+              }
+              return null;
+            })
+            .filter((name: string | null) => name !== null);
+          
+          if (branchNames.length > 0) {
+            return branchNames.join(', ');
+          }
+        }
+        
+        return '-';
+      },
     },
     {
       title: "Status",
