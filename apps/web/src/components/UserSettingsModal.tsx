@@ -62,6 +62,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
     const currentDepartment = getCurrentDepartment();
     setCurrentDept(currentDepartment);
   }, []);
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -102,7 +103,6 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
       console.log('Saving user data:', values);
       if (onUpdateUser) {
         await onUpdateUser(values);
-        // Update local state immediately for UI responsiveness
         setCurrentUserData(prev => ({
           ...prev,
           name: values.name,
@@ -111,11 +111,9 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         setIsEditing(false);
       }
     } catch (error: any) {
-      // Check if it's a validation error or API error
       if (error?.errorFields) {
         message.error('Please fill in all required fields');
       } else {
-        // API error is already handled in the parent component
         console.error('Error updating user:', error);
       }
     }
@@ -147,7 +145,6 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         console.log('Updating department to:', selectedDepartment);
         console.log('Available departments:', currentUserData.departmentRoles);
         await onChangeDepartment(selectedDepartment);
-        // Update local state immediately for UI responsiveness
         setCurrentUserData(prev => ({
           ...prev,
           defaultDepartment: selectedDepartment
@@ -155,7 +152,6 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         setShowDepartmentModal(false);
       }
     } catch (error) {
-      // API error is already handled in the parent component
       console.error('Error updating department:', error);
     }
   };
@@ -235,9 +231,9 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        height: 'calc(100% - 56px)' 
+        height: 'calc(100% - 56px)',
+        paddingBottom: '80px' // Add space for logout button
       }}
-      footer={null}
     >
       <Card
         style={{
@@ -375,28 +371,6 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             {currentUserData.locality || "N/A"}
           </Descriptions.Item>
 
-          {/* <Descriptions.Item
-            label={
-              <Space>
-                <BankOutlined />
-                Office ID
-              </Space>
-            }
-          >
-            {currentUserData.officeId || "N/A"}
-          </Descriptions.Item> */}
-
-          {/* <Descriptions.Item
-            label={
-              <Space>
-                <UserOutlined />
-                User ID
-              </Space>
-            }
-          >
-            {currentUserData.id || currentUserData.sub || "N/A"}
-          </Descriptions.Item> */}
-
           <Descriptions.Item
             label={
               <Space>
@@ -425,37 +399,6 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               )}
             </Space>
           </Descriptions.Item>
-
-          {/* <Descriptions.Item
-            label={
-              <Space>
-                <ApartmentOutlined style={{ color: "var(--success-600)" }} />
-                Current Department
-              </Space>
-            }
-          >
-            <Space>
-              <Tag color="green" style={{ fontWeight: 500 }}>
-                {currentDept || "N/A"}
-              </Tag>
-              {currentUserData.departmentRoles && currentUserData.departmentRoles.length > 1 && (
-                <Tooltip title="Change Current Department">
-                  <Button
-                    type="text"
-                    icon={<SwapOutlined />}
-                    onClick={handleChangeCurrentDepartment}
-                    style={{
-                      color: "var(--success-600)",
-                      fontSize: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  />
-                </Tooltip>
-              )}
-            </Space>
-          </Descriptions.Item> */}
 
           <Descriptions.Item
             label={
@@ -486,33 +429,34 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             )}
           </Descriptions.Item>
         </Descriptions>
-        
-        {/* Logout Button in Bottom Right Corner */}
-        <div style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "20px",
-              paddingTop: "20px",
-              flexShrink: 0
-            }}>
-          <Tooltip title="Logout">
-            <Link href="/logout">
-              <Button
-                type="primary"
-                danger
-                icon={<LogoutOutlined />}
-                size="large"
-                style={{
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)"
-                }}
-              >
-                Logout
-              </Button>
-            </Link>
-          </Tooltip>
-        </div>
       </Card>
+
+      {/* Logout Button - Fixed at bottom right */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+        }}
+      >
+        <Tooltip title="Logout">
+          <Link href="/logout">
+            <Button
+              type="primary"
+              danger
+              icon={<LogoutOutlined />}
+              size="large"
+              style={{
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(255, 77, 79, 0.3)"
+              }}
+            >
+              Logout
+            </Button>
+          </Link>
+        </Tooltip>
+      </div>
 
       {/* Department Change Modal */}
       <Drawer
