@@ -18,11 +18,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const userRoles = await getUserWithDepartmentRoles(this.prisma, payload.id);
 
+    // Get officeId from the first department role that has an office
+    const officeId = userRoles?.departmentRoles?.find(dr => dr.officeId)?.officeId || null;
+
     return {
       id: userRoles.id,
       mobile: userRoles.mobile,
       role: userRoles.departmentRoles,
-      officeId: userRoles.officeId,
+      officeId: officeId,
       departmentRoles: userRoles.departmentRoles
     };
   }

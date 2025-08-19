@@ -217,7 +217,7 @@ export class AccountsService {
                   newDeviceId: deviceId,
                   mobile: userRoles.mobile,
                   userName: userRoles.name,
-                  officeId: userRoles.officeId,
+                  officeId: userRoles.departmentRoles?.find(dr => dr.officeId)?.officeId || null,
                   oldDeviceId: userRoles.deviceId,
                   employeeCode: userRoles.employeeCode,
                 },
@@ -228,7 +228,7 @@ export class AccountsService {
             await this.loggingService.info('Device change request created', {
               userId: userRoles.id,
               deviceId,
-              oldDeviceId: userRoles.deviceId,
+              oldDeviceId: user.deviceId,
               status: 'Pending',
             });
             throw new BadRequestException('Device has been changed. Please contact administrator');
@@ -303,11 +303,15 @@ export class AccountsService {
       }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
+      
+      // Get officeId from the first department role that has an office
+      const officeId = user.departmentRoles?.find(dr => dr.officeId)?.officeId || null;
+      
       return {
         id: user.id,
         mobile: user.mobile,
         role: user.departmentRoles[0].role,
-        officeId: user.officeId,
+        officeId: officeId,
         employeeCode: user.employeeCode,
         name: user.name,
         email: user.email,
@@ -351,7 +355,13 @@ export class AccountsService {
       }
       
       if (filters?.officeId) {
-        where.officeId = Number(filters.officeId);
+        where.departmentRoles = {
+          ...where.departmentRoles,
+          some: {
+            ...where.departmentRoles?.some,
+            officeId: Number(filters.officeId)
+          }
+        };
       }
 
       if (filters?.locality) {
@@ -372,12 +382,6 @@ export class AccountsService {
           mobile: true,
           employeeCode: true,
           status: true,
-          office: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
           createdAt: true,
           _count: {
             select: {
@@ -392,7 +396,8 @@ export class AccountsService {
           departmentRoles: {
             select: {
               department: true,
-              role: true
+              role: true,
+              officeId: true
             }
           }
         },
@@ -519,12 +524,6 @@ export class AccountsService {
               department: true,
               role: true,
               officeId: true
-            }
-          },
-          office: {
-            select: {
-              id: true,
-              name: true
             }
           },
           createdAt: true,
@@ -705,7 +704,6 @@ export class AccountsService {
 
       await this.loggingService.info('User created successfully with department roles', {
         userId: result.id,
-        officeId: result.officeId,
         departmentRolesCount: result.departmentRoles.length,
       });
 
@@ -752,25 +750,17 @@ export class AccountsService {
         }
       }
 
-      // Check if employee code is being updated and already exists
-      if (updateUserDto.employeeCode && updateUserDto.employeeCode !== user.employeeCode) {
+      // Check if employee code is provided and already exists
+      if (updateUserDto.employeeCode) {
         const existingEmployeeCode = await this.prisma.user.findFirst({
-          where: { employeeCode: updateUserDto.employeeCode },
+          where: { 
+            employeeCode: updateUserDto.employeeCode,
+            id: { not: userId }
+          },
         });
 
         if (existingEmployeeCode) {
           throw new BadRequestException('Employee code already registered');
-        }
-      }
-
-      // Check if office exists if being updated
-      if (updateUserDto.officeId) {
-        const office = await this.prisma.office.findUnique({
-          where: { id: updateUserDto.officeId },
-        });
-
-        if (!office) {
-          throw new NotFoundException('Office not found');
         }
       }
 
@@ -903,21 +893,13 @@ export class AccountsService {
         },
         orderBy: {
           name: 'asc',
-        },
-        include: {
-          _count: {
-            select: {
-              users: true
-            }
-          }
         }
       });
 
       // Transform the data to include employees count
       const officesWithEmployeeCount = offices.map(office => ({
         ...office,
-        employees: office._count.users,
-        _count: undefined // Remove the _count field
+        employees: undefined // Remove the _count field
       }));
 
       await this.loggingService.debug('Offices listed successfully', {
@@ -962,17 +944,19 @@ export class AccountsService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        include: { office: true },
+        // include: { office: true },
       });
 
-      if (!user || !user.office) {
-        await this.loggingService.warn('Organization not found for user', { userId });
-        return null;
-      }
+      // if (!user || !user.office) {
+      //   await this.loggingService.warn('Organization not found for user', { userId });
+      //   return null;
+      // }
 
-      const org = await this.prisma.organization.findUnique({
-        where: { id: user.office.organizationId },
-      });
+      // const org = await this.prisma.organization.findUnique({
+      //   where: { id: user.office.organizationId },
+      // });
+
+      const org = null;
 
       await this.loggingService.debug('Retrieved organization for user', { 
         userId,

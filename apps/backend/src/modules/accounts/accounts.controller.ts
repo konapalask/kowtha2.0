@@ -175,7 +175,6 @@ export class AccountsController {
             mobile: { type: 'string' },
             email: { type: 'string' },
             employeeCode: { type: 'string' },
-            officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
@@ -226,7 +225,6 @@ export class AccountsController {
             email: { type: 'string' },
             employeeCode: { type: 'string' },
             role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
-            officeId: { type: 'number' },
             locality: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }

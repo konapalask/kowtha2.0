@@ -32,11 +32,6 @@ export class UpdateUserDto {
   @IsOptional()
   role?: UserRole;
 
-  @ApiProperty({ description: 'Office ID where the user belongs', required: false })
-  @IsNumber()
-  @IsOptional()
-  officeId?: number;
-
   @ApiProperty({ 
     description: 'User\'s status', 
     enum: UserStatus,

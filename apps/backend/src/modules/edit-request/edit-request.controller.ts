@@ -24,7 +24,7 @@ interface RequestWithUser extends ExpressRequest {
     id: number;
     mobile: string;
     role: string;
-    officeId: number;
+    officeId?: number;
   };
 }
 

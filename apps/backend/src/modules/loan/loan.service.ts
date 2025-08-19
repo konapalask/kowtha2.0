@@ -742,12 +742,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  office: {
-                    select: {
-                      id: true,
-                      name: true
-                    }
-                  }
                 }
               },
               verifier: {
@@ -1689,7 +1683,7 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true, office: { select: { address: true, location: true, name: true } } } }
+              fieldExecutive: { select: { name: true } }
             }
           },
         }
@@ -1707,11 +1701,11 @@ export class LoanService {
 
       const status = verification?.approvedStatus || '';
 
-      let address = verification.fieldExecutive?.office?.address || '' +
-        ', ' + verification.fieldExecutive?.office?.location || '' +
-        ', ' + verification.fieldExecutive?.office?.name || '';
-
-      address = address.toLocaleLowerCase();
+      // let address = verification.fieldExecutive?.office?.address || '' +
+      //   ', ' + verification.fieldExecutive?.office?.location || '' +
+      //   ', ' + verification.fieldExecutive?.office?.name || '';
+      let address = '';
+      // address = address.toLocaleLowerCase();
 
       // Get the verification data
       let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};

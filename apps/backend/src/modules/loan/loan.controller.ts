@@ -34,11 +34,11 @@ export class LoanController {
   */
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier, UserRole.PDOperationsExecutive, UserRole.PDVerifier)
-  @ApiOperation({ summary: 'Get all loans with optional status filter' })
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive, UserRole.FieldExecutive, UserRole.Verifier, UserRole.PDFieldExecutive, UserRole.PDVerifier)
+  @ApiOperation({ summary: 'Get all loans with filters' })
   @ApiResponse({
     status: 200,
-    description: 'Returns a paginated list of loans matching the filter criteria',
+    description: 'Loans fetched successfully',
     schema: {
       type: 'object',
       properties: {
@@ -47,74 +47,11 @@ export class LoanController {
         data: {
           type: 'object',
           properties: {
-            items: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'number' },
-                  applicationNumber: { type: 'string' },
-                  applicantName: { type: 'string' },
-                  applicantMobile: { type: 'string' },
-                  loanType: { type: 'string' },
-                  bankName: { type: 'string' },
-                  loanAmount: { type: 'number' },
-                  status: { type: 'string', enum: Object.values(LoanStatus) },
-                  operationsExecutive: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' },
-                      mobile: { type: 'string' },
-                      employeeCode: { type: 'string' },
-                      role: { type: 'string' }
-                    }
-                  },
-                  verifier: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' },
-                      mobile: { type: 'string' },
-                      employeeCode: { type: 'string' },
-                      role: { type: 'string' }
-                    }
-                  },
-                  verifications: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'number' },
-                        type: { type: 'string' },
-                        status: { type: 'string' },
-                        fieldExecutive: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'number' },
-                            name: { type: 'string' },
-                            mobile: { type: 'string' },
-                            employeeCode: { type: 'string' },
-                            role: { type: 'string' }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  createdAt: { type: 'string', format: 'date-time' },
-                  updatedAt: { type: 'string', format: 'date-time' }
-                }
-              }
-            },
-            meta: {
-              type: 'object',
-              properties: {
-                total: { type: 'number' },
-                page: { type: 'number' },
-                limit: { type: 'number' },
-                totalPages: { type: 'number' }
-              }
-            }
+            items: { type: 'array', items: { type: 'object' } },
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' }
           }
         }
       }
@@ -122,6 +59,10 @@ export class LoanController {
   })
   async getLoans(@Query() filters: GetLoansDto, @Request() req: AuthenticatedRequest) {
     // Get the role for the specific department from the user's department roles    
+    
+    if (!req.user.officeId) {
+      throw new BadRequestException('User does not have an assigned office');
+    }
     
     const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
@@ -159,6 +100,10 @@ export class LoanController {
                    @Request() req: AuthenticatedRequest,
                    @Query('department') department: Department) 
   {
+    if (!req.user.officeId) {
+      throw new BadRequestException('User does not have an assigned office');
+    }
+    
     const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId, department);
     return {
       status: 201,
@@ -231,6 +176,10 @@ export class LoanController {
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
+    }
+
+    if (!req.user.officeId) {
+      throw new BadRequestException('User does not have an assigned office');
     }
 
     const result = await this.loanService.importLoans(file, req.user.id, req.user.officeId);

@@ -112,8 +112,6 @@ model User {
   locality                 String?
   deviceId                 String?
   defaultDepartment        Department?
-  officeId                 Int?
-  office                   Office?              @relation(fields: [officeId], references: [id])
   status                   UserStatus           @default(Active)
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt
@@ -126,7 +124,7 @@ model User {
   editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
   attendances              Attendance[]         @relation("UserAttendance")
   verificationRetries      VerificationRetries[]
-  departmentRoles          DepartmentRole[] @relation("UserDepartmentRole")
+  departmentRoles          DepartmentRole[]     @relation("UserDepartmentRole")
 }
 
 
@@ -159,7 +157,6 @@ model Office {
   department     Department?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  users          User[]
   loans          Loan[]
   archived       Boolean      @default(false)
   organizationId Int          @default(1)

@@ -13,7 +13,7 @@ interface changeData {
   mobile: string;
   employeeCode: string;
   role: string;
-  officeId: number;
+  officeId?: number;
 }
 
 interface LoginRequestData {
