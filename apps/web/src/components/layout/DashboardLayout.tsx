@@ -76,7 +76,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [currentTime] = useState(new Date());
-  const [office, setOffice] = useState<string>("");
   const [userDetails, setUserDetailsState] = useState(getUserDetails());
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>([]);
@@ -86,26 +85,38 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [modalUserData, setModalUserData] = useState(userDetails);
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   const [currentDept, setCurrentDept] = useState<string>('');
+  const [offices, setOffices] = useState<any[]>([]);
+  const [currentBranchName, setCurrentBranchName] = useState<string>('');
+
   useEffect(() => {
     const initialCurrentDept = initializeCurrentDepartment();
     setCurrentDept(initialCurrentDept);
   }, [userDetails?.defaultDepartment]);
 
   useEffect(() => {
-    if (userDetails?.officeId) {
-      getOfficesApi()
-        .then((res) => {
-          setOffice(
-            res?.data?.data?.find(
-              (office: any) => office?.id === userDetails?.officeId
-            )?.name
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    getOfficesApi()
+      .then((res) => {
+        setOffices(res?.data?.data || []);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (currentDept && userDetails?.departmentRoles && offices.length > 0) {
+      const currentDeptRole = userDetails.departmentRoles.find(
+        (role: any) => role.department === currentDept
+      );
+      
+      if (currentDeptRole?.officeId) {
+        const office = offices.find((office: any) => office.id === currentDeptRole.officeId);
+        setCurrentBranchName(office?.name || '');
+      } else {
+        setCurrentBranchName('');
+      }
     }
-  }, [userDetails?.officeId]);
+  }, [currentDept, userDetails?.departmentRoles, offices]);
 
   const fetchEditRequests = async () => {
     setLoading(true);
@@ -417,12 +428,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ fontSize: "16px", color: "var(--primary-800)" }}
           /> */}
           <Space>
-            {/* Current Department Display and Change Button */}
+            {/* Current Department and Branch Display */}
             {currentDept && (
               <Space>
                 <Text style={{ fontWeight: 600, color: "var(--primary-800)" }}>
                   {currentDept}
                 </Text>
+                {currentBranchName && (
+                  <Text style={{ fontWeight: 500, color: "var(--neutral-600)" }}>
+                    - {currentBranchName}
+                  </Text>
+                )}
                 {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
                   <Tooltip title="Change Current Department">
                     <Button
@@ -531,9 +547,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Badge>
               </Popover>
             )}
-            <Text type="secondary" style={{ fontWeight: 500 }}>
-              {office}
-            </Text>
+            {/* Removed default office display - now showing department-specific branch name */}
             <Text style={{ fontWeight: 500 }}>
               {currentTime.toLocaleTimeString([], {
                 hour: "2-digit",
