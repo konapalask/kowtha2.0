@@ -37,7 +37,7 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -66,6 +66,25 @@ export default function Loans() {
   const [loans, setLoans] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(false);
   const userDetails = getUserDetails();
+  const [currentDepartment, setCurrentDepartment] = useState(getCurrentDepartment());
+  
+  // Watch for department changes
+  useEffect(() => {
+    const checkDepartment = () => {
+      const dept = getCurrentDepartment();
+      if (dept !== currentDepartment) {
+        setCurrentDepartment(dept);
+      }
+    };
+    
+    // Check immediately
+    checkDepartment();
+    
+    // Set up interval to check for changes
+    const interval = setInterval(checkDepartment, 1000);
+    
+    return () => clearInterval(interval);
+  }, [currentDepartment]);
   const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] =
     useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
@@ -217,332 +236,439 @@ export default function Loans() {
     fetchLoans(pagination.current, pagination.pageSize);
   };
 
-  const columns: any = [
-    {
-      title: "Application Number",
-      dataIndex: "applicationNumber",
-      key: "applicationNumber",
-      fixed: "left",
-      width: 200,
-      // align: "center",
-    },
-    {
-      title: "Applicant Name",
-      dataIndex: "applicantName",
-      key: "applicantName",
-      width: 150,
-    },
-    {
-      title: "Mobile",
-      dataIndex: "applicantMobile",
-      key: "applicantMobile",
-      width: 100,
-    },
-
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: 100,
-      render: (status: string) => {
-        const color =
-          status === "Unassigned"
-            ? "magenta"
-            : status === "Assigned"
-              ? "geekblue"
-              : status === "Pending"
-                ? "orange"
-                : status === "Approved"
-                  ? "green"
-                  : status === "Rejected"
-                    ? "red"
-                    : "blue";
-        return <Tag color={color}>{status}</Tag>;
+  // Define columns based on department
+  console.log('Current department:', currentDepartment);
+  const getColumns = () => {
+    const baseColumns = [
+      {
+        title: "Application Number",
+        dataIndex: "applicationNumber",
+        key: "applicationNumber",
+        fixed: "left",
+        width: 200,
+        // align: "center",
       },
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
-      width: 120,
-    },
-    {
-      title: <Typography.Text>Address 1</Typography.Text>,
-      children: [
-        {
-          title: "Assignee",
-          key: "pavAssignee",
-          onFilter: (value: boolean | Key, record: Loan) => {
-            const pav = record?.verifications?.find(
-              (v: any) => v.type === "AddressOne"
-            );
-            return pav?.fieldExecutive?.employeeCode === value.toString();
-          },
-          render: (_: any, record: Loan) => {
-            const pav = record?.verifications?.find(
-              (v: any) => v.type === "AddressOne"
-            );
-            return pav ? (
-              <span>
-                {pav?.fieldExecutive?.name}
-                {/* {pav?.fieldExecutive?.name?.length > 15
-                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
-                  : pav?.fieldExecutive?.name}{" "} */}
-                <Tag color="blue">{pav?.fieldExecutive?.employeeCode}</Tag>
-              </span>
-            ) : (
-              "-"
-            );
-          },
-          align: "center",
-          width: 120,
+      {
+        title: "Applicant Name",
+        dataIndex: "applicantName",
+        key: "applicantName",
+        width: 150,
+      },
+      {
+        title: "Mobile",
+        dataIndex: "applicantMobile",
+        key: "applicantMobile",
+        width: 100,
+      },
+      {
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        width: 100,
+        render: (status: string) => {
+          const color =
+            status === "Unassigned"
+              ? "magenta"
+              : status === "Assigned"
+                ? "geekblue"
+                : status === "Pending"
+                  ? "orange"
+                  : status === "Approved"
+                    ? "green"
+                    : status === "Rejected"
+                      ? "red"
+                      : "blue";
+          return <Tag color={color}>{status}</Tag>;
         },
+      },
+      {
+        title: "Created At",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
+        width: 120,
+      },
+    ];
+
+    // If current department is 'PD', only show Business column
+    if (currentDepartment === 'PD') {
+      return [
+        ...baseColumns,
         {
-          title: "Status",
-          key: "pavStatus",
-          render: (_: any, record: Loan) => {
-            const pav = record?.verifications?.find(
-              (v: any) => v.type === "AddressOne"
-            );
-            if (!pav) return "-";
+          title: <Typography.Text>Business</Typography.Text>,
+          children: [
+            {
+              title: "Assignee",
+              key: "businessAssignee",
+              onFilter: (value: boolean | Key, record: Loan) => {
+                const business = record?.verifications?.find(
+                  (v: any) => v.type === "Business"
+                );
+                return business?.fieldExecutive?.employeeCode === value.toString();
+              },
+              render: (_: any, record: Loan) => {
+                const business = record?.verifications?.find(
+                  (v: any) => v.type === "Business"
+                );
+                return business ? (
+                  <span>
+                    {business?.fieldExecutive?.name}
+                    <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
+                  </span>
+                ) : (
+                  "-"
+                );
+              },
+              align: "center",
+              width: 120,
+            },
+            {
+              title: "Status",
+              key: "businessStatus",
+              render: (_: any, record: Loan) => {
+                const business = record?.verifications?.find(
+                  (v: any) => v.type === "Business"
+                );
+                if (!business) return "-";
 
-            const isPostponed =
-              pav.isPostponed === true && pav.status === "Pending";
-            const status = isPostponed ? "Postponed" : pav.status;
-            const color = isPostponed
-              ? "red"
-              : pav.status === "Completed"
-                ? "green"
-                : "orange";
+                const isPostponed =
+                  business.isPostponed === true && business.status === "Pending";
+                const status = isPostponed ? "Postponed" : business.status;
+                const color = isPostponed
+                  ? "red"
+                  : business.status === "Completed"
+                    ? "green"
+                    : "orange";
 
-            return <Tag color={color}>{status}</Tag>;
-          },
-          width: 100,
-          align: "center",
+                return <Tag color={color}>{status}</Tag>;
+              },
+              width: 100,
+              align: "center",
+            },
+          ],
         },
-      ],
-    },
-    {
-      title: <Typography.Text>Address 2</Typography.Text>,
-      children: [
-        {
-          title: "Assignee",
-          key: "cavAssignee",
-          onFilter: (value: boolean | Key, record: Loan) => {
-            const cav = record?.verifications?.find(
-              (v: any) => v.type === "AddressTwo"
-            );
-            return cav?.fieldExecutive?.employeeCode === value.toString();
-          },
-          render: (_: any, record: Loan) => {
-            const cav = record?.verifications?.find(
-              (v: any) => v.type === "AddressTwo"
-            );
-            return cav ? (
-              <span>
-                {cav?.fieldExecutive?.name}
-                {/* {pav?.fieldExecutive?.name?.length > 15
-                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
-                  : pav?.fieldExecutive?.name}{" "} */}
-                <Tag color="blue">{cav?.fieldExecutive?.employeeCode}</Tag>
-              </span>
-            ) : (
-              "-"
-            );
-          },
-          align: "center",
-          width: 120,
-        },
-        {
-          title: "Status",
-          key: "cavStatus",
-          render: (_: any, record: Loan) => {
-            const cav = record?.verifications?.find(
-              (v: any) => v.type === "AddressTwo"
-            );
-            if (!cav) return "-";
-
-            const isPostponed =
-              cav.isPostponed === true && cav.status === "Pending";
-            const status = isPostponed ? "Postponed" : cav.status;
-            const color = isPostponed
-              ? "red"
-              : cav.status === "Completed"
-                ? "green"
-                : "orange";
-
-            return <Tag color={color}>{status}</Tag>;
-          },
-          width: 100,
-          align: "center",
-        },
-      ],
-    },
-    {
-      title: <Typography.Text>Work</Typography.Text>,
-      children: [
-        {
-          title: "Assignee",
-          key: "wvAssignee",
-          onFilter: (value: boolean | Key, record: Loan) => {
-            const wv = record?.verifications?.find(
-              (v: any) => v.type === "Work"
-            );
-            return wv?.fieldExecutive?.employeeCode === value.toString();
-          },
-          render: (_: any, record: Loan) => {
-            const wv = record?.verifications?.find(
-              (v: any) => v.type === "Work"
-            );
-            return wv ? (
-              <span>
-                {wv?.fieldExecutive?.name}
-                {/* {pav?.fieldExecutive?.name?.length > 15
-                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
-                  : pav?.fieldExecutive?.name}{" "} */}
-                <Tag color="blue">{wv?.fieldExecutive?.employeeCode}</Tag>
-              </span>
-            ) : (
-              "-"
-            );
-          },
-          align: "center",
-          width: 120,
-        },
-        {
-          title: "Status",
-          key: "wvStatus",
-          render: (_: any, record: Loan) => {
-            const wv = record?.verifications?.find(
-              (v: any) => v.type === "Work"
-            );
-            if (!wv) return "-";
-
-            const isPostponed =
-              wv.isPostponed === true && wv.status === "Pending";
-            const status = isPostponed ? "Postponed" : wv.status;
-            const color = isPostponed
-              ? "red"
-              : wv.status === "Completed"
-                ? "green"
-                : "orange";
-
-            return <Tag color={color}>{status}</Tag>;
-          },
-          width: 100,
-          align: "center",
-        },
-      ],
-    },
-    {
-      title: <Typography.Text>Business</Typography.Text>,
-      children: [
-        {
-          title: "Assignee",
-          key: "businessAssignee",
-          onFilter: (value: boolean | Key, record: Loan) => {
-            const business = record?.verifications?.find(
-              (v: any) => v.type === "Business"
-            );
-            return business?.fieldExecutive?.employeeCode === value.toString();
-          },
-          render: (_: any, record: Loan) => {
-            const business = record?.verifications?.find(
-              (v: any) => v.type === "Business"
-            );
-            return business ? (
-              <span>
-                {business?.fieldExecutive?.name}
-                {/* {pav?.fieldExecutive?.name?.length > 15
-                  ? pav.fieldExecutive.name.slice(0, 15) + "..."
-                  : pav?.fieldExecutive?.name}{" "} */}
-                <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
-              </span>
-            ) : (
-              "-"
-            );
-          },
-          align: "center",
-          width: 120,
-        },
-        {
-          title: "Status",
-          key: "wvStatus",
-          render: (_: any, record: Loan) => {
-            const wv = record?.verifications?.find(
-              (v: any) => v.type === "Business"
-            );
-            if (!wv) return "-";
-
-            const isPostponed =
-              wv.isPostponed === true && wv.status === "Pending";
-            const status = isPostponed ? "Postponed" : wv.status;
-            const color = isPostponed
-              ? "red"
-              : wv.status === "Completed"
-                ? "green"
-                : "orange";
-
-            return <Tag color={color}>{status}</Tag>;
-          },
-          width: 100,
-          align: "center",
-        },
-      ],
-    },
-    ...(!(userDetails?.role === "Verifier")
-      ? [
-          {
-            title: "Actions",
-            key: "actions",
-            fixed: "right",
-            align: "center",
-            render: (_: any, record: any) => (
-              <span
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Button
-                  type="link"
-                  onClick={() => {
-                    setSelectedLoan(record?.id);
-                    setIsDrawerVisible(true);
-                  }}
-                >
-                  Edit
-                </Button>
-                {/* <Divider style={{ background: "#F6FAFC", margin: 0 }} /> */}
-                {userDetails?.role === "Admin" && (
-                  <Popconfirm
-                    title="Are you sure you want to delete this loan?"
-                    onConfirm={async () => {
-                      try {
-                        await deleteLoanApi(record?.id);
-                        message.success("Loan deleted successfully");
-                        refreshLoans();
-                      } catch (error) {
-                        message.error("Failed to delete loan");
-                      }
+        ...(!(userDetails?.role === "Verifier")
+          ? [
+              {
+                title: "Actions",
+                key: "actions",
+                fixed: "right",
+                align: "center",
+                render: (_: any, record: any) => (
+                  <span
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
                     }}
                   >
                     <Button
-                      icon={<DeleteOutlined />}
-                      style={{ border: "none", color: "#ff4d4f" }}
                       type="link"
-                    />
-                  </Popconfirm>
-                )}
-              </span>
-            ),
-            width: 100,
+                      onClick={() => {
+                        setSelectedLoan(record?.id);
+                        setIsDrawerVisible(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    {userDetails?.role === "Admin" && (
+                      <Popconfirm
+                        title="Are you sure you want to delete this loan?"
+                        onConfirm={async () => {
+                          try {
+                            await deleteLoanApi(record?.id);
+                            message.success("Loan deleted successfully");
+                            refreshLoans();
+                          } catch (error) {
+                            message.error("Failed to delete loan");
+                          }
+                        }}
+                      >
+                        <Button
+                          icon={<DeleteOutlined />}
+                          style={{ border: "none", color: "#ff4d4f" }}
+                          type="link"
+                        />
+                      </Popconfirm>
+                    )}
+                  </span>
+                ),
+                width: 100,
+              },
+            ]
+          : []),
+      ];
+    }
+
+    // For 'fi' department or any other department, show all columns
+    return [
+      ...baseColumns,
+      {
+        title: <Typography.Text>Address 1</Typography.Text>,
+        children: [
+          {
+            title: "Assignee",
+            key: "pavAssignee",
+            onFilter: (value: boolean | Key, record: Loan) => {
+              const pav = record?.verifications?.find(
+                (v: any) => v.type === "AddressOne"
+              );
+              return pav?.fieldExecutive?.employeeCode === value.toString();
+            },
+            render: (_: any, record: Loan) => {
+              const pav = record?.verifications?.find(
+                (v: any) => v.type === "AddressOne"
+              );
+              return pav ? (
+                <span>
+                  {pav?.fieldExecutive?.name}
+                  <Tag color="blue">{pav?.fieldExecutive?.employeeCode}</Tag>
+                </span>
+              ) : (
+                "-"
+              );
+            },
+            align: "center",
+            width: 120,
           },
-        ]
-      : []),
-  ];
+          {
+            title: "Status",
+            key: "pavStatus",
+            render: (_: any, record: Loan) => {
+              const pav = record?.verifications?.find(
+                (v: any) => v.type === "AddressOne"
+              );
+              if (!pav) return "-";
+
+              const isPostponed =
+                pav.isPostponed === true && pav.status === "Pending";
+              const status = isPostponed ? "Postponed" : pav.status;
+              const color = isPostponed
+                ? "red"
+                : pav.status === "Completed"
+                  ? "green"
+                  : "orange";
+
+              return <Tag color={color}>{status}</Tag>;
+            },
+            width: 100,
+            align: "center",
+          },
+        ],
+      },
+      {
+        title: <Typography.Text>Address 2</Typography.Text>,
+        children: [
+          {
+            title: "Assignee",
+            key: "cavAssignee",
+            onFilter: (value: boolean | Key, record: Loan) => {
+              const cav = record?.verifications?.find(
+                (v: any) => v.type === "AddressTwo"
+              );
+              return cav?.fieldExecutive?.employeeCode === value.toString();
+            },
+            render: (_: any, record: Loan) => {
+              const cav = record?.verifications?.find(
+                (v: any) => v.type === "AddressTwo"
+              );
+              return cav ? (
+                <span>
+                  {cav?.fieldExecutive?.name}
+                  <Tag color="blue">{cav?.fieldExecutive?.employeeCode}</Tag>
+                </span>
+              ) : (
+                "-"
+              );
+            },
+            align: "center",
+            width: 120,
+          },
+          {
+            title: "Status",
+            key: "cavStatus",
+            render: (_: any, record: Loan) => {
+              const cav = record?.verifications?.find(
+                (v: any) => v.type === "AddressTwo"
+              );
+              if (!cav) return "-";
+
+              const isPostponed =
+                cav.isPostponed === true && cav.status === "Pending";
+              const status = isPostponed ? "Postponed" : cav.status;
+              const color = isPostponed
+                ? "red"
+                : cav.status === "Completed"
+                  ? "green"
+                  : "orange";
+
+              return <Tag color={color}>{status}</Tag>;
+            },
+            width: 100,
+            align: "center",
+          },
+        ],
+      },
+      {
+        title: <Typography.Text>Work</Typography.Text>,
+        children: [
+          {
+            title: "Assignee",
+            key: "wvAssignee",
+            onFilter: (value: boolean | Key, record: Loan) => {
+              const wv = record?.verifications?.find(
+                (v: any) => v.type === "Work"
+              );
+              return wv?.fieldExecutive?.employeeCode === value.toString();
+            },
+            render: (_: any, record: Loan) => {
+              const wv = record?.verifications?.find(
+                (v: any) => v.type === "Work"
+              );
+              return wv ? (
+                <span>
+                  {wv?.fieldExecutive?.name}
+                  <Tag color="blue">{wv?.fieldExecutive?.employeeCode}</Tag>
+                </span>
+              ) : (
+                "-"
+              );
+            },
+            align: "center",
+            width: 120,
+          },
+          {
+            title: "Status",
+            key: "wvStatus",
+            render: (_: any, record: Loan) => {
+              const wv = record?.verifications?.find(
+                (v: any) => v.type === "Work"
+              );
+              if (!wv) return "-";
+
+              const isPostponed =
+                wv.isPostponed === true && wv.status === "Pending";
+              const status = isPostponed ? "Postponed" : wv.status;
+              const color = isPostponed
+                ? "red"
+                : wv.status === "Completed"
+                  ? "green"
+                  : "orange";
+
+              return <Tag color={color}>{status}</Tag>;
+            },
+            width: 100,
+            align: "center",
+          },
+        ],
+      },
+      {
+        title: <Typography.Text>Business</Typography.Text>,
+        children: [
+          {
+            title: "Assignee",
+            key: "businessAssignee",
+            onFilter: (value: boolean | Key, record: Loan) => {
+              const business = record?.verifications?.find(
+                (v: any) => v.type === "Business"
+              );
+              return business?.fieldExecutive?.employeeCode === value.toString();
+            },
+            render: (_: any, record: Loan) => {
+              const business = record?.verifications?.find(
+                (v: any) => v.type === "Business"
+              );
+              return business ? (
+                <span>
+                  {business?.fieldExecutive?.name}
+                  <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
+                </span>
+              ) : (
+                "-"
+              );
+            },
+            align: "center",
+            width: 120,
+          },
+          {
+            title: "Status",
+            key: "businessStatus",
+            render: (_: any, record: Loan) => {
+              const business = record?.verifications?.find(
+                (v: any) => v.type === "Business"
+              );
+              if (!business) return "-";
+
+              const isPostponed =
+                business.isPostponed === true && business.status === "Pending";
+              const status = isPostponed ? "Postponed" : business.status;
+              const color = isPostponed
+                ? "red"
+                : business.status === "Completed"
+                  ? "green"
+                  : "orange";
+
+              return <Tag color={color}>{status}</Tag>;
+            },
+            width: 100,
+            align: "center",
+          },
+        ],
+      },
+      ...(!(userDetails?.role === "Verifier")
+        ? [
+            {
+              title: "Actions",
+              key: "actions",
+              fixed: "right",
+              align: "center",
+              render: (_: any, record: any) => (
+                <span
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      setSelectedLoan(record?.id);
+                      setIsDrawerVisible(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  {userDetails?.role === "Admin" && (
+                    <Popconfirm
+                      title="Are you sure you want to delete this loan?"
+                      onConfirm={async () => {
+                        try {
+                          await deleteLoanApi(record?.id);
+                          message.success("Loan deleted successfully");
+                          refreshLoans();
+                        } catch (error) {
+                          message.error("Failed to delete loan");
+                        }
+                      }}
+                    >
+                      <Button
+                        icon={<DeleteOutlined />}
+                        style={{ border: "none", color: "#ff4d4f" }}
+                        type="link"
+                      />
+                    </Popconfirm>
+                  )}
+                </span>
+              ),
+              width: 100,
+            },
+          ]
+        : []),
+    ];
+  };
+
+  const columns: any = getColumns();
 
   return (
     <DashboardLayout>
