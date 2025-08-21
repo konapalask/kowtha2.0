@@ -37,7 +37,7 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId } from "@/utils/utility";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -89,7 +89,7 @@ export default function Loans() {
     useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
   const [currentOffice, setCurrentOffice] = useState<string>(
-    userDetails?.officeId || ""
+    getCurrentDepartmentOfficeId()?.toString() || userDetails?.officeId?.toString() || ""
   );
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
   const [offices, setOffices] = useState<Office[]>([]);
@@ -107,6 +107,14 @@ export default function Loans() {
     fieldExecutiveEmployeeCode: undefined,
     fieldExecutiveName: undefined,
   });
+
+  // Update currentOffice when department changes
+  useEffect(() => {
+    const deptOfficeId = getCurrentDepartmentOfficeId();
+    if (deptOfficeId) {
+      setCurrentOffice(deptOfficeId.toString());
+    }
+  }, [currentDepartment]);
 
   const fetchLoans = async (page = 1, limit = 20) => {
     try {

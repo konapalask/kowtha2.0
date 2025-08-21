@@ -75,3 +75,25 @@ export const initializeCurrentDepartment = () => {
   
   return "";
 };
+
+// Get office ID for a specific department
+export const getOfficeIdByDepartment = (department: string): number | null => {
+  if (typeof window === "undefined") return null;
+  
+  const userDetails = getUserDetails();
+  if (!userDetails?.departmentRoles) return null;
+  
+  const deptRole = userDetails.departmentRoles.find(
+    (role: any) => role.department === department
+  );
+  
+  return deptRole?.officeId || null;
+};
+
+// Get current department's office ID
+export const getCurrentDepartmentOfficeId = (): number | null => {
+  const currentDept = getCurrentDepartment();
+  if (!currentDept) return null;
+  
+  return getOfficeIdByDepartment(currentDept);
+};

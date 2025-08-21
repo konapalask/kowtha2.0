@@ -18,7 +18,7 @@ import { createLoanApi } from "@/services/loans.services";
 import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartmentOfficeId } from "@/utils/utility";
 
 interface BulkImportProps {
   isBulkImportDrawerVisible: boolean;
@@ -76,7 +76,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
       // Transform the form values into the required format
       const loansData = values.loans.map((loan: any) => ({
         ...loan,
-        officeId: userDetails?.officeId,
+        officeId: getCurrentDepartmentOfficeId() || userDetails?.officeId,
         operationsExecutiveId: userDetails?.sub,
       }));
       console.log(loansData);
