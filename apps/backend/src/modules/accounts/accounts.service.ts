@@ -466,7 +466,6 @@ export class AccountsService {
     try {
       const where: any = {};
 
-
       if (filters?.role) {
         if (filters?.role) {
           where.departmentRoles = {
@@ -476,7 +475,6 @@ export class AccountsService {
             }
           };
         }
-
       }
       else {
         where.departmentRoles = {
@@ -894,22 +892,30 @@ export class AccountsService {
         where: {
           department: department,
         },
+        include: {
+          _count: {
+            select: {
+              departmentRoles: true
+            }
+          }
+        },
         orderBy: {
           name: 'asc',
         }
       });
 
-      // Transform the data to include employees count
-      const officesWithEmployeeCount = offices.map(office => ({
+      // Transform the data to include number of employees
+      const result = offices.map(office => ({
         ...office,
-        employees: undefined // Remove the _count field
+        numberofemployees: office._count.departmentRoles,
+        _count: undefined // Remove the _count field
       }));
 
       await this.loggingService.debug('Offices listed successfully', {
         count: offices.length,
       });
 
-      return officesWithEmployeeCount;
+      return result;
     } catch (error) {
       await this.loggingService.error('Failed to list offices', {
         error: error.message,
