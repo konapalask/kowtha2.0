@@ -110,7 +110,6 @@ export const getCurrentDepartmentRole = (): string | null => {
   const deptRole = userDetails.departmentRoles.find(
     (role: any) => role.department === currentDept
   );
-  
   return deptRole?.role || null;
 };
 
@@ -191,3 +190,17 @@ export const subscribeToUserDetailsChanges = (callback: () => void) => {
 
 // Get the current update counter
 export const getUserDetailsUpdateCounter = () => userDetailsUpdateCounter;
+
+export const getFirstAvailableNavigationOption = (departmentRole: string): string => {
+  switch (departmentRole) {
+    case "Verifier":
+      return "/loans";
+    case "Admin":
+      return "/dashboard";
+    case "OperationsExecutive":
+    case "FieldExecutive":
+      return "/dashboard";
+    default:
+      return "/dashboard";
+  }
+};

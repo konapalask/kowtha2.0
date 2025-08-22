@@ -20,7 +20,7 @@ import {
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
-import { getUserDetails, isEmpty, setUserDetails, getCurrentDepartmentRole, getDefaultDepartmentRole } from "@/utils/utility";
+import { getUserDetails, isEmpty, setUserDetails, getCurrentDepartmentRole, getDefaultDepartmentRole, getFirstAvailableNavigationOption } from "@/utils/utility";
 import SelectDepartmentModal from "@/components/SelectDepartmentModal";
 // import { useUser } from "@/components/layout/UserContextProvider";
 
@@ -43,7 +43,7 @@ export default function Login() {
     if (Object.keys(userDetails).length > 0 && !isNavigating) {
       setIsNavigating(true);
       router
-        .push(getDefaultDepartmentRole() === "Verifier" ? "/loans" : "/dashboard")
+        .push(getFirstAvailableNavigationOption(getDefaultDepartmentRole() || ""))
         .catch((error) => {
           console.error("Navigation error:", error);
           setIsNavigating(false);

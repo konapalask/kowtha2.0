@@ -475,9 +475,9 @@ export default function Users() {
         ) : (
           <Tag color="red">Inactive</Tag>
         ),
-      ...(getCurrentDepartmentRole() !== "Admin" && { fixed: "right" }),
+      ...(getCurrentDepartmentRole() !== "Admin" && getCurrentDepartmentRole() !== "PDAdmin" && { fixed: "right" }),
     },
-    ...(getCurrentDepartmentRole() === "Admin"
+          ...(getCurrentDepartmentRole() === "Admin" 
       ? [
           {
             title: "Actions",
@@ -503,7 +503,7 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
-        {getCurrentDepartmentRole() === "Admin" && (
+        {(getCurrentDepartmentRole() === "Admin" ) && (
           <div
             style={{
               marginBottom: 16,

@@ -236,7 +236,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     <Card
       title={
         <div style={{ display: "flex", alignItems: "center" }}>
-          {getCurrentDepartmentRole() === "Admin" && (
+          {(getCurrentDepartmentRole() === "Admin" ) && (
             <LeftOutlined
               style={{ cursor: "pointer", marginRight: 8 }}
               onClick={() => window.history.back()}
@@ -264,7 +264,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               Request Approval
             </Button>
           )}
-          {getCurrentDepartmentRole() === "Admin" &&
+          {(getCurrentDepartmentRole() === "Admin" ) &&
             pathname.startsWith("/edit-requests") && (
               <Space>
                 <Button

@@ -43,7 +43,7 @@ interface Organization {
 
 export default function OrganizationSettings() {
   const userDetails = getUserDetails();
-  const isAdmin = getCurrentDepartmentRole() === "Admin";
+  const isAdmin = getCurrentDepartmentRole() === "Admin" ;
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -171,8 +171,9 @@ export default function OrganizationSettings() {
     },
     {
       title: "No. of Employees",
-      dataIndex: "employees",
-      key: "employees",
+      dataIndex: "numberofEmployees",
+      key: "emplnumberofEmployeesoyees",
+      sorter: (a: any, b: any) => a.employees - b.employees,
       render: (value: number | undefined) => value ?? 0,
       width: 150,
     },

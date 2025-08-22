@@ -379,7 +379,7 @@ export default function Loans() {
                     >
                       Edit
                     </Button>
-                    {getCurrentDepartmentRole() === "Admin" && (
+                    {(getCurrentDepartmentRole() === "Admin" ) && (
                       <Popconfirm
                         title="Are you sure you want to delete this loan?"
                         onConfirm={async () => {
@@ -647,7 +647,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                  {getCurrentDepartmentRole() === "Admin" && (
+                  {(getCurrentDepartmentRole() === "Admin" )&& (
                     <Popconfirm
                       title="Are you sure you want to delete this loan?"
                       onConfirm={async () => {
