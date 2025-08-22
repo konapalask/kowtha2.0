@@ -28,7 +28,7 @@ import {
 } from "@/services/users.services";
 import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange, getCurrentDepartmentRole } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
@@ -475,9 +475,9 @@ export default function Users() {
         ) : (
           <Tag color="red">Inactive</Tag>
         ),
-      ...(userDetails?.role !== "Admin" && { fixed: "right" }),
+      ...(getCurrentDepartmentRole() !== "Admin" && { fixed: "right" }),
     },
-    ...(userDetails?.role === "Admin"
+    ...(getCurrentDepartmentRole() === "Admin"
       ? [
           {
             title: "Actions",
@@ -503,7 +503,7 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
-        {userDetails?.role === "Admin" && (
+        {getCurrentDepartmentRole() === "Admin" && (
           <div
             style={{
               marginBottom: 16,

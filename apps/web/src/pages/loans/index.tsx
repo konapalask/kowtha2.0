@@ -37,7 +37,7 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId, getCurrentDepartmentRole } from "@/utils/utility";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -355,7 +355,7 @@ export default function Loans() {
             },
           ],
         },
-        ...(!(userDetails?.role === "Verifier")
+        ...(!(getCurrentDepartmentRole() === "Verifier")
           ? [
               {
                 title: "Actions",
@@ -379,7 +379,7 @@ export default function Loans() {
                     >
                       Edit
                     </Button>
-                    {userDetails?.role === "Admin" && (
+                    {getCurrentDepartmentRole() === "Admin" && (
                       <Popconfirm
                         title="Are you sure you want to delete this loan?"
                         onConfirm={async () => {
@@ -623,7 +623,7 @@ export default function Loans() {
           },
         ],
       },
-      ...(!(userDetails?.role === "Verifier")
+              ...(!(getCurrentDepartmentRole() === "Verifier")
         ? [
             {
               title: "Actions",
@@ -647,7 +647,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                  {userDetails?.role === "Admin" && (
+                  {getCurrentDepartmentRole() === "Admin" && (
                     <Popconfirm
                       title="Are you sure you want to delete this loan?"
                       onConfirm={async () => {
@@ -699,7 +699,7 @@ export default function Loans() {
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
           />
-          {!(userDetails?.role === "Verifier") && (
+          {!(getCurrentDepartmentRole() === "Verifier") && (
             <Button
               type="primary"
               icon={<PlusOutlined style={{ fontSize: 16 }} />}

@@ -23,7 +23,7 @@ import {
   Office,
   updateOfficeApi,
 } from "@/services/settings.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartmentRole } from "@/utils/utility";
 
 const { TabPane } = Tabs;
 
@@ -43,7 +43,7 @@ interface Organization {
 
 export default function OrganizationSettings() {
   const userDetails = getUserDetails();
-  const isAdmin = userDetails?.role === "Admin";
+  const isAdmin = getCurrentDepartmentRole() === "Admin";
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);

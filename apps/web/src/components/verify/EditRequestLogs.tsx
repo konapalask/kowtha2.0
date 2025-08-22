@@ -21,7 +21,7 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import { useRouter } from "next/router";
 import { useTabContext } from "@/pages/verify/[id]";
-import { getUserDetails, isEmpty } from "@/utils/utility";
+import { getUserDetails, isEmpty, getCurrentDepartmentRole } from "@/utils/utility";
 import ColleagueReferencesDescription from "./Descriptions/ColleagueReferencesDescription";
 import PastEmploymentsDescription from "./Descriptions/PastEmploymentsDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
@@ -236,7 +236,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     <Card
       title={
         <div style={{ display: "flex", alignItems: "center" }}>
-          {userDetails?.role === "Admin" && (
+          {getCurrentDepartmentRole() === "Admin" && (
             <LeftOutlined
               style={{ cursor: "pointer", marginRight: 8 }}
               onClick={() => window.history.back()}
@@ -264,7 +264,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               Request Approval
             </Button>
           )}
-          {userDetails?.role === "Admin" &&
+          {getCurrentDepartmentRole() === "Admin" &&
             pathname.startsWith("/edit-requests") && (
               <Space>
                 <Button

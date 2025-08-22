@@ -98,6 +98,46 @@ export const getCurrentDepartmentOfficeId = (): number | null => {
   return getOfficeIdByDepartment(currentDept);
 };
 
+// Get current department's role
+export const getCurrentDepartmentRole = (): string | null => {
+  if (typeof window === "undefined") return null;
+  
+  const userDetails = getUserDetails();
+  const currentDept = getCurrentDepartment();
+  
+  if (!userDetails?.departmentRoles || !currentDept) return null;
+  
+  const deptRole = userDetails.departmentRoles.find(
+    (role: any) => role.department === currentDept
+  );
+  
+  return deptRole?.role || null;
+};
+
+// Get role for a specific department
+export const getRoleByDepartment = (department: string): string | null => {
+  if (typeof window === "undefined") return null;
+  
+  const userDetails = getUserDetails();
+  if (!userDetails?.departmentRoles) return null;
+  
+  const deptRole = userDetails.departmentRoles.find(
+    (role: any) => role.department === department
+  );
+  
+  return deptRole?.role || null;
+};
+
+// Get role from default department
+export const getDefaultDepartmentRole = (): string | null => {
+  if (typeof window === "undefined") return null;
+  
+  const userDetails = getUserDetails();
+  if (!userDetails?.defaultDepartment) return null;
+  
+  return getRoleByDepartment(userDetails.defaultDepartment);
+};
+
 let userDetailsUpdateCallbacks: (() => void)[] = [];
 let userDetailsUpdateCounter = 0;
 

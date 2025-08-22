@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Drawer, Descriptions, Typography, Card, Space, Tag, Divider, Button, Form, Input, message, Tooltip, Select, Spin } from "antd";
 import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, IdcardOutlined, BankOutlined, TeamOutlined, ApartmentOutlined, EditOutlined, SaveOutlined, CloseOutlined, SwapOutlined, LogoutOutlined } from "@ant-design/icons";
 import Link from "next/link";
-import { getCurrentDepartment } from "@/utils/utility";
+import { getCurrentDepartment, getCurrentDepartmentRole } from "@/utils/utility";
 
 const { Title } = Typography;
 
@@ -82,8 +82,18 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         return 'purple';
       case 'verifier':
         return 'blue';
-      case 'user':
-        return 'cyan';
+      case 'operationsexecutive':
+        return 'green';
+      case 'fieldexecutive':
+        return 'orange';
+      case 'pdadmin':
+        return 'purple';
+      case 'pdverifier':
+        return 'blue';
+      case 'pdfieldexecutive':
+        return 'orange';
+      case 'pdoperationsexecutive':
+        return 'green';
       default:
         return 'default';
     }
@@ -250,8 +260,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             {currentUserData.name || "User"}
           </Title>
           <Space style={{ marginTop: 8 }}>
-            <Tag color={getRoleColor(currentUserData.role || "")} style={{ fontWeight: 500 }}>
-              {currentUserData.role || "N/A"}
+            <Tag color={getRoleColor(getCurrentDepartmentRole() || "")} style={{ fontWeight: 500 }}>
+              {getCurrentDepartmentRole() || "N/A"}
             </Tag>
             <Tag color={getStatusColor(currentUserData.status || "")} style={{ fontWeight: 500 }}>
               {currentUserData.status || "N/A"}
