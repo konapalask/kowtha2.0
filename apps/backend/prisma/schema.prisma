@@ -13,6 +13,7 @@ enum UserRole {
   OperationsExecutive
   FieldExecutive
   Verifier
+  // PD Roles
   PDAdmin
   PDFieldExecutive
   PDVerifier

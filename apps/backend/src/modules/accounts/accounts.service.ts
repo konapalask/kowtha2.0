@@ -98,7 +98,7 @@ export class AccountsService {
     try {
 
       const user = await this.prisma.user.findUnique({
-        where: { mobile },
+        where: { mobile, status: 'Active' },
       });
 
       if (!user) {
@@ -151,7 +151,7 @@ export class AccountsService {
     try {
 
       const user = await this.prisma.user.findUnique({
-        where: { mobile },
+        where: { mobile, status: 'Active' },
       });
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
@@ -305,13 +305,10 @@ export class AccountsService {
       await this.loggingService.debug('User validated successfully', { userId: id });
       
       // Get officeId from the first department role that has an office
-      const officeId = user.departmentRoles?.find(dr => dr.officeId)?.officeId || null;
       
       return {
         id: user.id,
         mobile: user.mobile,
-        role: user.departmentRoles[0].role,
-        officeId: officeId,
         employeeCode: user.employeeCode,
         name: user.name,
         email: user.email,
@@ -469,19 +466,25 @@ export class AccountsService {
     try {
       const where: any = {};
 
-      where.departmentRoles = {
-        some: {
-          department: filters.department
-        }
-      };
 
       if (filters?.role) {
+        if (filters?.role) {
+          where.departmentRoles = {
+            some: {
+              role: filters.role,
+              department: filters.department
+            }
+          };
+        }
+
+      }
+      else {
         where.departmentRoles = {
           some: {
-            role: filters.role
+            department: filters.department
           }
         };
-      }
+      }      
       
       if (filters?.employeeCode) {
         where.employeeCode = {
