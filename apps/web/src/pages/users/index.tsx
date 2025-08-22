@@ -28,7 +28,7 @@ import {
 } from "@/services/users.services";
 import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
@@ -285,6 +285,22 @@ export default function Users() {
         const { departmentRoles, ...mainFields } = trimmedValues;
         await updateUserApi(editingUser?.id, mainFields);
         await updateUserDepartmentRolesApi(editingUser?.id, departmentRoles);
+        
+        // Check if the current user is editing their own profile
+        if (editingUser.id === userDetails?.sub || editingUser.id === userDetails?.id) {
+          const updatedUserDetails = {
+            ...userDetails,
+            ...mainFields,
+            departmentRoles: departmentRoles
+          };
+          
+          setUserDetails(updatedUserDetails);
+          // Notify other components about the user details change
+          setTimeout(() => {
+            notifyUserDetailsChange();
+          }, 100);
+        }
+        
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {

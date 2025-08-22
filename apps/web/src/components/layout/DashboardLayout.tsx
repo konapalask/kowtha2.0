@@ -33,9 +33,9 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 // import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
-import { getUserDetails, setUserDetails, getCurrentDepartment, setCurrentDepartment, initializeCurrentDepartment } from "@/utils/utility";
+import { getUserDetails, setUserDetails, getCurrentDepartment, setCurrentDepartment, initializeCurrentDepartment, subscribeToUserDetailsChanges, notifyUserDetailsChange, getUserDetailsUpdateCounter } from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
-import { updateUserDepartmentApi, getUserDetailsApi } from "@/services/auth.services";
+import { updateUserDepartmentApi } from "@/services/auth.services";
 import { updateUserApi } from "@/services/users.services";
 import UserSettingsModal from "../UserSettingsModal";
 import SelectDepartmentModal from "../SelectDepartmentModal";
@@ -87,6 +87,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentDept, setCurrentDept] = useState<string>('');
   const [offices, setOffices] = useState<any[]>([]);
   const [currentBranchName, setCurrentBranchName] = useState<string>('');
+
+  useEffect(() => {
+    const handleUserDetailsChange = () => {
+      const currentUserDetails = getUserDetails();
+      setUserDetailsState(currentUserDetails);
+    };
+
+    // Subscribe to user details changes
+    const unsubscribe = subscribeToUserDetailsChanges(handleUserDetailsChange);
+
+    return () => unsubscribe();
+  }, []);
+
+  // Force re-render when user details update counter changes
+  useEffect(() => {
+    const checkForUpdates = () => {
+      const currentUserDetails = getUserDetails();
+      setUserDetailsState(currentUserDetails);
+    };
+
+    checkForUpdates();
+
+    const interval = setInterval(checkForUpdates, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const initialCurrentDept = initializeCurrentDepartment();
@@ -228,33 +253,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleSettingsClick = async () => {
     setIsSettingsModalVisible(true);
-    await fetchFreshUserData();
+    // Use current user details instead of fetching from API
+    setModalUserData(userDetails);
   };
 
-  const fetchFreshUserData = async () => {
-    setIsLoadingUserData(true);
-    try {
-      console.log('Fetching fresh user data from /api/accounts/profile');
-      const response = await getUserDetailsApi();
-      const freshUserData = response.data;
-      console.log('Fresh user data received:', freshUserData);
-      
-      // Update modal user data
-      setModalUserData(freshUserData);
-      
-      // Also update the main user details state and localStorage
-      setUserDetails(freshUserData);
-      setUserDetailsState(freshUserData);
-      
-    } catch (error) {
-      console.error('Error fetching fresh user data:', error);
-      message.error('Failed to load latest user information');
-      // Fallback to current user details if API fails
-      setModalUserData(userDetails);
-    } finally {
-      setIsLoadingUserData(false);
-    }
-  };
+
 
   const handleSettingsModalClose = () => {
     setIsSettingsModalVisible(false);
@@ -306,6 +309,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       setUserDetails(updatedUserDetails);
       // Update component state to trigger re-render
       setUserDetailsState(updatedUserDetails);
+      // Notify other components about the user details change
+      notifyUserDetailsChange();
       message.success("User information updated successfully");
       
     } catch (error: any) {
@@ -344,6 +349,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       setUserDetails(updatedUserDetails);
       // Update component state to trigger re-render
       setUserDetailsState(updatedUserDetails);
+      // Notify other components about the user details change
+      notifyUserDetailsChange();
       message.success("Default department updated successfully");
       
     } catch (error: any) {

@@ -97,3 +97,57 @@ export const getCurrentDepartmentOfficeId = (): number | null => {
   
   return getOfficeIdByDepartment(currentDept);
 };
+
+let userDetailsUpdateCallbacks: (() => void)[] = [];
+let userDetailsUpdateCounter = 0;
+
+export const notifyUserDetailsChange = () => {
+  if (typeof window !== "undefined") {
+    userDetailsUpdateCounter++;
+    
+    window.dispatchEvent(new CustomEvent('userDetailsChanged'));
+    
+    // Also trigger a storage event as a fallback
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'userDetails',
+      newValue: JSON.stringify(getUserDetails()),
+      oldValue: null,
+      storageArea: localStorage
+    }));
+    
+    // Call all registered callbacks
+    userDetailsUpdateCallbacks.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('Error in user details update callback:', error);
+      }
+    });
+  }
+};
+
+export const subscribeToUserDetailsChanges = (callback: () => void) => {
+  if (typeof window !== "undefined") {
+    userDetailsUpdateCallbacks.push(callback);
+    
+    // Listen for custom event
+    window.addEventListener('userDetailsChanged', callback);
+    
+    // Also listen for storage events as a fallback
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'userDetails') {
+        callback();
+      }
+    });
+    
+    return () => {
+      // Remove callback from global list
+      userDetailsUpdateCallbacks = userDetailsUpdateCallbacks.filter(cb => cb !== callback);
+      window.removeEventListener('userDetailsChanged', callback);
+    };
+  }
+  return () => {};
+};
+
+// Get the current update counter
+export const getUserDetailsUpdateCounter = () => userDetailsUpdateCounter;
