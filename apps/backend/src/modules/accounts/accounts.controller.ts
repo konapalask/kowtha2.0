@@ -485,7 +485,7 @@ export class AccountsController {
               address: { type: 'string' },
               contactNumber: { type: 'string' },
               email: { type: 'string' },
-              employees: { type: 'number', description: 'Number of employees in this office' },
+              numberofEmployees: { type: 'number', description: 'Number of employees in this office' },
               createdAt: { type: 'string', format: 'date-time' },
               updatedAt: { type: 'string', format: 'date-time' }
             }

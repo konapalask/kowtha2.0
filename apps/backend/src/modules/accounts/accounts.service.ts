@@ -907,7 +907,7 @@ export class AccountsService {
       // Transform the data to include number of employees
       const result = offices.map(office => ({
         ...office,
-        numberofemployees: office._count.departmentRoles,
+        numberofEmployees: office._count.departmentRoles,
         _count: undefined // Remove the _count field
       }));
 
