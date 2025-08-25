@@ -937,7 +937,7 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
-      console.log(verifications[0].loan.applicantMobile, "verifications");
+      // console.log(verifications[0].loan.applicantMobile, "verifications");
 
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());

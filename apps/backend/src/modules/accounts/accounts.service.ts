@@ -765,6 +765,22 @@ export class AccountsService {
         }
       }
 
+      // Check if defaultDepartment is being updated and if the role in that department is FieldExecutive
+      if (updateUserDto.defaultDepartment) {
+        const departmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: userId,
+              department: updateUserDto.defaultDepartment,
+            },
+          },
+        });
+
+        if (departmentRole && departmentRole.role === UserRole.FieldExecutive) {
+          throw new BadRequestException('Cannot set default department to a department where user has FieldExecutive role');
+        }
+      }
+
       // Update user
       const updatedUser = await this.prisma.user.update({
         where: { id: userId },
