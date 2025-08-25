@@ -37,7 +37,7 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId, getCurrentDepartmentRole } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId, getCurrentDepartmentRole, useDepartmentChange } from "@/utils/utility";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -66,25 +66,7 @@ export default function Loans() {
   const [loans, setLoans] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(false);
   const userDetails = getUserDetails();
-  const [currentDepartment, setCurrentDepartment] = useState(getCurrentDepartment());
-  
-  // Watch for department changes
-  useEffect(() => {
-    const checkDepartment = () => {
-      const dept = getCurrentDepartment();
-      if (dept !== currentDepartment) {
-        setCurrentDepartment(dept);
-      }
-    };
-    
-    // Check immediately
-    checkDepartment();
-    
-    // Set up interval to check for changes
-    const interval = setInterval(checkDepartment, 1000);
-    
-    return () => clearInterval(interval);
-  }, [currentDepartment]);
+  const currentDepartment = useDepartmentChange();
   const [isBulkImportDrawerVisible, setIsBulkImportDrawerVisible] =
     useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
@@ -137,7 +119,7 @@ export default function Loans() {
 
   useEffect(() => {
     fetchLoans(pagination.current, pagination.pageSize);
-  }, [refresh, pagination.current, pagination.pageSize, filters]);
+  }, [refresh, pagination.current, pagination.pageSize, filters, currentDepartment]); // Add currentDepartment as dependency
 
   useEffect(() => {
     getOfficesApi()

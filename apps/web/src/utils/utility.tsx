@@ -1,6 +1,7 @@
 import axiosInstance from "@/config/axios.config";
 import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getPresignedDownloadUrl } from "@/services/verifier.services";
+import { useState, useEffect } from "react";
 
 export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
   // Remove any leading slashes from the s3ImageUrl
@@ -190,6 +191,30 @@ export const subscribeToUserDetailsChanges = (callback: () => void) => {
 
 // Get the current update counter
 export const getUserDetailsUpdateCounter = () => userDetailsUpdateCounter;
+
+// Custom hook for department change monitoring
+export const useDepartmentChange = () => {
+  const [currentDepartment, setCurrentDepartment] = useState(getCurrentDepartment());
+
+  useEffect(() => {
+    const checkDepartment = () => {
+      const dept = getCurrentDepartment();
+      if (dept !== currentDepartment) {
+        setCurrentDepartment(dept);
+      }
+    };
+    
+    // Check immediately
+    checkDepartment();
+    
+    // Set up interval to check for changes
+    const interval = setInterval(checkDepartment, 1000);
+    
+    return () => clearInterval(interval);
+  }, [currentDepartment]);
+
+  return currentDepartment;
+};
 
 export const getFirstAvailableNavigationOption = (departmentRole: string): string => {
   switch (departmentRole) {

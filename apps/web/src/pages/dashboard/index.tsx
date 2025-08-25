@@ -26,6 +26,7 @@ import { getDashboardMetrics } from "@/services/dashboard.services";
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import Attendance from "@/components/attendance/Attendance";
+import { useDepartmentChange } from "@/utils/utility";
 
 interface DashboardMetrics {
   totalLoans: number | null | undefined;
@@ -65,6 +66,7 @@ export default function Dashboard() {
     const startDate = dayjs().startOf("month");
     return [startDate, endDate];
   });
+  const currentDepartment = useDepartmentChange();
 
   const handleDateRangeChange = (
     dates: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null,
@@ -117,7 +119,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchMetrics(dateRange?.[0], dateRange?.[1]);
-  }, []);
+  }, [currentDepartment]); // Add currentDepartment as dependency
 
   // const pendingLoansColumns = [
   //   {

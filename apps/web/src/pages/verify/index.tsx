@@ -16,6 +16,7 @@ import {
   getFieldExecutivesApi,
   getVerifierLoansApi,
 } from "@/services/loans.services";
+import { useDepartmentChange } from "@/utils/utility";
 
 dayjs.extend(relativeTime);
 
@@ -44,6 +45,7 @@ export default function Verify() {
   // const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loans, setLoans] = useState<LoanData[]>([]);
   const router = useRouter();
+  const currentDepartment = useDepartmentChange();
 
   // Pagination state
   const pageSize = 10;
@@ -65,7 +67,7 @@ export default function Verify() {
       ?.catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [currentDepartment]); // Add currentDepartment as dependency
 
   const filteredLoans =
     loans?.filter((loan) =>

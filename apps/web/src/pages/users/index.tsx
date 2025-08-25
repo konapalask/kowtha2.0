@@ -28,7 +28,7 @@ import {
 } from "@/services/users.services";
 import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange, getCurrentDepartmentRole } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange, getCurrentDepartmentRole, useDepartmentChange } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
@@ -183,7 +183,7 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const userDetails = getUserDetails();
-  const currentDepartment = getCurrentDepartment();
+  const currentDepartment = useDepartmentChange();
   const [offices, setOffices] = useState<Office[]>([]);
   const [fiOffices, setFiOffices] = useState<any[]>([]);
   const [pdOffices, setPdOffices] = useState<any[]>([]);
@@ -221,7 +221,7 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers(1, pagination.pageSize, filters);
-  }, []);
+  }, [currentDepartment]); 
 
   useEffect(() => {
     getOfficesApi()
@@ -260,7 +260,7 @@ export default function Users() {
         setPdOffices(pd);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [currentDepartment]); 
 
 
   const handleSubmit = async (values: any) => {

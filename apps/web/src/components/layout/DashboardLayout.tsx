@@ -168,7 +168,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     fetchEditRequests();
     const interval = setInterval(fetchEditRequests, 120000); // poll every 2 min
     return () => clearInterval(interval);
-  }, []);
+  }, [currentDept]); // Add currentDept as dependency to re-fetch when department changes
 
   // useEffect(() => {
   //   setCollapsed(!!(screens.xs || screens.sm || screens.md));
