@@ -34,7 +34,7 @@ export class LoanController {
   */
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive, UserRole.FieldExecutive, UserRole.Verifier, UserRole.PDFieldExecutive, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.FieldExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'Get all loans with filters' })
   @ApiResponse({
     status: 200,
@@ -73,7 +73,7 @@ export class LoanController {
   }
 
   @Post()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Create one or multiple loans' })
   @ApiResponse({
     status: 201,
@@ -112,86 +112,9 @@ export class LoanController {
     };
   }
 
-  @Post('import')
-  @Roles(UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Operations Executive will Import loans from Excel file' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'Excel file containing loan data'
-        }
-      }
-    }
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Loans have been successfully imported from Excel file',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Loans imported successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-            totalProcessed: { type: 'number' },
-            successful: { type: 'number' },
-            failed: { type: 'number' },
-            results: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  row: { type: 'number' },
-                  loanId: { type: 'number' },
-                  status: { type: 'string' }
-                }
-              }
-            },
-            errors: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  row: { type: 'number' },
-                  error: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  })
-  async importLoans(
-    @UploadedFile() file: Express.Multer.File,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-
-    if (!req.user.officeId) {
-      throw new BadRequestException('User does not have an assigned office');
-    }
-
-    const result = await this.loanService.importLoans(file, req.user.id, req.user.officeId);
-    return {
-      status: 200,
-      message: 'Loans imported successfully',
-      data: result
-    };
-  }
 
   @Post(':id/assign-loan-executive')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Operations Executive will Assign a field executive to a loan verification' })
   @ApiResponse({
     status: 200,
@@ -230,7 +153,7 @@ export class LoanController {
   }
 
   @Patch(':id/update-executive')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Patch API to edit loan verification assignment' })
   @ApiResponse({
     status: 200,
@@ -269,7 +192,7 @@ export class LoanController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Patch API to Edit loan details' })
   @ApiResponse({
     status: 200,
@@ -313,7 +236,7 @@ export class LoanController {
   */
 
   @Get('get-verifier-loans')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.PDVerifier, UserRole.PDFieldExecutive)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to verifier' })
   @ApiResponse({
     status: 200,
@@ -330,18 +253,25 @@ export class LoanController {
 
 
   @Get(':id/preview-final-report')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Generate PDF Preview for loan details' })
   @ApiResponse({ status: 200, description: 'PDF generated successfully' })
   @ApiResponse({ status: 404, description: 'Loan not found' })
   async generatePDFPreview(
     @Param('id') id: string,
     @Query('type') type: AddressType,
-    @Query('status') status: string,
+    @Query('department') department: Department,
     @Res() res: Response,
   ) {
     try {
-      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
+      let pdfBuffer = null;
+
+      if(department === Department.FI) {
+        pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
+      }
+      else if(department === Department.PD) {
+        pdfBuffer = await this.loanService.previewPDVerificationPDF(Number(id))
+      }
 
       res.set({
         'Content-Type': 'application/pdf',
@@ -361,7 +291,7 @@ export class LoanController {
 
 
   @Get(':id/generate-final-report')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Generate Final Report PDF for loan details without further improvements' })
   @ApiResponse({ status: 200, description: 'PDF generated successfully' })
   @ApiResponse({ status: 404, description: 'Loan not found' })
@@ -391,7 +321,7 @@ export class LoanController {
 
 
   @Get(':id/verification-data')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Get verification data for a loan' })
   @ApiResponse({
     status: 200,
@@ -443,17 +373,17 @@ export class LoanController {
       }
     }
   })
-  async getVerificationData(@Param('id') loanId: string) {
-    const result = await this.loanService.getVerificationData(Number(loanId));
+  async getVerificationData(@Param('id') loanId: string, @Query('department') department: Department) {
+    const result = await this.loanService.getVerificationData(Number(loanId), department);
     return {
       status: 200,
-      message: 'Verification data retrieved successfully',
       data: result
     };
   }
 
+
   @Post(':id/verify')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Verifier will approve or reject a loan and add comments' })
   @ApiResponse({
     status: 200,
@@ -479,7 +409,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/:type')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Edit verification data' })
   @ApiResponse({
     status: 200,
@@ -522,7 +452,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/:type/approve')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.PDVerifier)
+  @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Approve or change status and path for a verification (Admin/Verifier only)' })
   @ApiResponse({
     status: 200,
@@ -561,7 +491,7 @@ export class LoanController {
   */
 
   @Get('get-field-executive-loans')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get loans assigned to field executive' })
   @ApiResponse({
     status: 200,
@@ -577,7 +507,7 @@ export class LoanController {
   }
 
   @Get('field-executive/assigned')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Get all loans assigned to field executive with verification details' })
   @ApiResponse({
     status: 200,
@@ -647,7 +577,7 @@ export class LoanController {
   }
 
   @Patch(':id/submit-verification-report')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Edit verification report' })
   @ApiResponse({
     status: 200,
@@ -701,7 +631,7 @@ export class LoanController {
   }
 
   @Patch(':id/verification/status')
-  @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
   @ApiOperation({ summary: 'Update verification status' })
   @ApiResponse({
     status: 200,
@@ -743,7 +673,7 @@ export class LoanController {
   }
 
   @Delete(':id/verification/:type')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Delete verification assigned to a field executive' })
   @ApiBody({
     type: DeleteVerificationDto,
@@ -801,86 +731,86 @@ export class LoanController {
     };
   }
 
-  // @Post('verification-retry')
-  // @Roles(UserRole.Admin, UserRole.FieldExecutive, UserRole.PDFieldExecutive)
-  // @ApiOperation({ summary: 'Create a verification retry record' })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'Verification retry created successfully',
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       status: { type: 'number', example: 201 },
-  //       message: { type: 'string', example: 'Verification retry created successfully' },
-  //       data: {
-  //         type: 'object',
-  //         properties: {
-  //           id: { type: 'number' },
-  //           verificationId: { type: 'number' },
-  //           date: { type: 'string', format: 'date-time' },
-  //           geotag: { type: 'string', nullable: true },
-  //           address: { type: 'string', nullable: true },
-  //           reason: { type: 'string', nullable: true },
-  //           fieldExecutiveId: { type: 'number' },
-  //           verification: {
-  //             type: 'object',
-  //             properties: {
-  //               id: { type: 'number' },
-  //               type: { type: 'string' },
-  //               status: { type: 'string' },
-  //               loan: {
-  //                 type: 'object',
-  //                 properties: {
-  //                   id: { type: 'number' },
-  //                   applicationNumber: { type: 'string' },
-  //                   applicantName: { type: 'string' }
-  //                 }
-  //               }
-  //             }
-  //           },
-  //           fieldExecutive: {
-  //             type: 'object',
-  //             properties: {
-  //               id: { type: 'number' },
-  //               name: { type: 'string' },
-  //               mobile: { type: 'string' },
-  //               employeeCode: { type: 'string' }
-  //             }
-  //           },
-  //           createdAt: { type: 'string', format: 'date-time' },
-  //           updatedAt: { type: 'string', format: 'date-time' }
-  //         }
-  //       }
-  //     }
-  //   }
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Bad request - Invalid data provided'
-  // })
-  // @ApiResponse({
-  //   status: 404,
-  //   description: 'Verification or field executive not found'
-  // })
-  // async createVerificationRetry(
-  //   @Body() createVerificationRetryDto: CreateVerificationRetryDto,
-  //   @Request() req: AuthenticatedRequest
-  // ) {
-  //   // If the user is a field executive, ensure they can only create retries for themselves
-  //   if (req.user.role === UserRole.FieldExecutive) {
-  //     createVerificationRetryDto.fieldExecutiveId = req.user.id;
-  //   }
+  @Post('verification-retry')
+  @Roles(UserRole.Admin, UserRole.FieldExecutive)
+  @ApiOperation({ summary: 'Create a verification retry record' })
+  @ApiResponse({
+    status: 201,
+    description: 'Verification retry created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Verification retry created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            verificationId: { type: 'number' },
+            date: { type: 'string', format: 'date-time' },
+            geotag: { type: 'string', nullable: true },
+            address: { type: 'string', nullable: true },
+            reason: { type: 'string', nullable: true },
+            fieldExecutiveId: { type: 'number' },
+            verification: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                type: { type: 'string' },
+                status: { type: 'string' },
+                loan: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'number' },
+                    applicationNumber: { type: 'string' },
+                    applicantName: { type: 'string' }
+                  }
+                }
+              }
+            },
+            fieldExecutive: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                mobile: { type: 'string' },
+                employeeCode: { type: 'string' }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification or field executive not found'
+  })
+  async createVerificationRetry(
+    @Body() createVerificationRetryDto: CreateVerificationRetryDto,
+    @Request() req: AuthenticatedRequest
+  ) {
+    // If the user is a field executive, ensure they can only create retries for themselves
+    if (req.user.role === UserRole.FieldExecutive) {
+      createVerificationRetryDto.fieldExecutiveId = req.user.id;
+    }
 
-  //   const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
-  //   return {
-  //     status: 201,
-  //     message: 'Verification retry created successfully',
-  //     data: result
-  //   };
-  // }
+    const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
+    return {
+      status: 201,
+      message: 'Verification retry created successfully',
+      data: result
+    };
+  }
 
   @Delete(':id')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.PDOperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
   @ApiOperation({ summary: 'Delete a loan and all related entities (cascade)' })
   @ApiResponse({
     status: 200,

@@ -1,6 +1,6 @@
 import { format, toZonedTime } from 'date-fns-tz';
 
-export const adityabirlaTemplate = () => {
+export const adityabirlaTemplate = (verificationData1: any, html_data: any) => {
     const verificationData = {
         proposal_no: '1234567890',
         date_of_visit: '2025-01-01',

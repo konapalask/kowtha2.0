@@ -9,25 +9,28 @@ import { GetLoansDto } from './dto/get-loans.dto';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { PrismaService } from '../../prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
-import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
-import { workTemplate } from './templates/FI/work.template';
 import { S3Service } from '../common/s3utils/s3.service';
-import { addressTemplate } from './templates/FI/address.template';
+import { workTemplate } from './templates/FI/work.template';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { businessTemplate } from './templates/FI/business.template';
-import { VerificationData } from './templates/FI/address.interface';
+import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
+import { addressTemplate } from './templates/FI/address.template';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { WorkVerificationData } from './templates/FI/work.interface';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { LoggingService } from '../common/logging/logging.service';
+import { businessTemplate } from './templates/FI/business.template';
+import { VerificationData } from './templates/FI/address.interface';
+import { WorkVerificationData } from './templates/FI/work.interface';
 import { BusinessVerificationData } from './templates/FI/business.interface';
+import { PDBusinessVerificationData } from './templates/PD/pd-business.interface';
+import { adityabirlaTemplate } from './templates/PD/adityabirla.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department} from '@prisma/client';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { baseTemplate } from './templates/FI/base.template';
 
 
 @Injectable()
@@ -39,6 +42,35 @@ export class LoanService {
     private s3Service: S3Service,
   ) { }
 
+  async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
+    });
+    
+    const page = await browser.newPage();
+    await page.setContent(htmlTemplate, {
+      waitUntil: 'networkidle0'
+    });
+
+    const pdfArray = await page.pdf({
+      format: 'a4',
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      },
+      printBackground: true,
+      preferCSSPageSize: true
+    });
+    const pdfBuffer: Buffer = Buffer.from(pdfArray);
+
+    // Close the browser
+    await browser.close();
+    return pdfBuffer;
+  }
+  
   async createLambdaLoan(data: CreateLambdaLoanDto) {
     try {
 
@@ -169,94 +201,6 @@ export class LoanService {
         data,
         error: error.message,
         stack: error.stack,
-      });
-      throw error;
-    }
-  }
-
-  async importLoans(file: Express.Multer.File, operationsExecutiveId: number, officeId: number) {
-    try {
-      if (!file) {
-        throw new BadRequestException('No file uploaded');
-      }
-
-      // Read the Excel file
-      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(worksheet);
-
-      if (!data.length) {
-        throw new BadRequestException('Excel file is empty');
-      }
-
-      const results = [];
-      const errors = [];
-
-      // Process each row
-      for (const row of data) {
-        try {
-          const loanData: CreateLoanDto = {
-            applicantName: row['NAME OF THE APPLICANT'],
-            applicantType: row['APPLICANT TYPE'] || 'Primary Applicant',
-            applicantMobile: row['CONTACT NUMBER'].toString(),
-            applicantAddress: row['FULL ADDRESS'],
-            applicantAddress1: row['ADDRESS LINE 1'] || null,
-            applicantAddress2: row['ADDRESS LINE 2'] || null,
-            isAddressSame: row['IS_ADDRESS_SAME'] === 'YES' || false,
-            applicationNumber: row['APPLICATION ID'],
-            loanType: 'Personal', // Default to Personal if not specified
-            bankName: 'Default Bank', // Default bank if not specified
-            loanAmount: 100,
-            operationsExecutiveId: operationsExecutiveId,
-            status: LoanStatus.Unassigned,
-            verifierId: 9,
-          };
-
-          // Validate required fields
-          if (!loanData.applicantName || !loanData.applicantMobile) {
-            throw new Error('Missing required fields: Applicant Name or Contact Number');
-          }
-
-          if (!loanData.applicationNumber) {
-            throw new Error('Missing required field: APPLICATION ID');
-          }
-
-          const loan = await this.createLoan(loanData, officeId, 'PD');
-          results.push({
-            row: row['__rowNum__'] + 1,
-            loanId: loan.id,
-            status: 'success'
-          });
-        } catch (error) {
-          errors.push({
-            row: row['__rowNum__'] + 1,
-            error: error.message
-          });
-        }
-      }
-
-      await this.loggingService.info('Loans import completed', {
-        operationsExecutiveId,
-        fileName: file.originalname,
-        totalProcessed: data.length,
-        successful: results.length,
-        failed: errors.length
-      });
-
-      return {
-        message: 'Loans import completed',
-        totalProcessed: data.length,
-        successful: results.length,
-        failed: errors.length,
-        results,
-        errors
-      };
-    } catch (error) {
-      await this.loggingService.error('Failed to import loans', {
-        operationsExecutiveId,
-        fileName: file.originalname,
-        error: error.message,
-        stack: error.stack
       });
       throw error;
     }
@@ -966,7 +910,7 @@ export class LoanService {
         data:
         {
           items: verifications,
-          meta: {
+          meta: {           
             total,
             page,
             limit,
@@ -1286,7 +1230,7 @@ export class LoanService {
     }
   }
 
-  async getVerificationData(loanId: number) {
+  async getVerificationData(loanId: number, department: Department) {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
@@ -1833,189 +1777,7 @@ export class LoanService {
       mailId = 'tsfi@cakowtha.co.in';
     }
 
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              color: #222;
-              position: relative;
-              min-height: 60vh;
-            }
-            .header {
-              text-align: left;
-              padding: 24px 40px 8px 40px;
-              border-bottom: 2px solid #2c3e50;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-            }
-            .header .firm {
-              font-size: 28px;
-              font-weight: bold;
-              color: #1a237e;
-              letter-spacing: 1px;
-            }
-            .header .subtitle {
-              color: #1976d2;
-              font-style: italic;
-              font-size: 18px;
-              margin-bottom: 8px;
-            }
-            .header .address {
-              font-size: 14px;
-              margin-bottom: 4px;
-            }
-            .header .contact {
-              font-size: 14px;
-              text-align: right;
-            }
-            .logo {
-              display: block;
-              width: 220px;
-              filter: contrast(200%) brightness(80%) saturate(150%);
-              background: white;
-              image-rendering: auto;
-              margin-left: 0; /* aligns to left */
-              margin-bottom: 20px;
-            }
-            .report-title {
-              text-align: center;
-              font-size: 20px;
-              font-weight: bold;
-              margin: 24px 0 0 0;
-              letter-spacing: 1px;
-              text-decoration: underline;
-            }
-            .align-wrapper {
-              width: 90%;
-              margin: 0 auto;
-            }
-            .branch-box {
-              width: 100%;
-              margin: 18px 0 0 0;
-              border: 2px solid #888;
-              border-radius: 4px;
-              background: #f8f9fa;
-            }
-            .branch-table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            .branch-table td {
-              border: none;
-              padding: 10px 16px;
-              font-size: 16px;
-            }
-            .branch-label {
-              font-weight: bold;
-              width: 160px;
-            }
-            .branch-value {
-              font-size: 18px;
-              font-weight: bold;
-              color: #222;
-            }
-            .branch-note {
-              background: #ffe0b2;
-              color: #b26a00;
-              font-size: 13px;
-              text-align: center;
-              border-radius: 3px;
-              font-weight: bold;
-            }
-            .section-table {
-              width: 100%;
-              margin: 24px 0 0 0;
-              border-collapse: collapse;
-              font-size: 15px;
-            }
-            .section-header {
-              background: #f5f5f5;
-              font-weight: bold;
-              font-size: 16px;
-              text-align: center;
-              border: 1px solid #888;
-              padding: 8px;
-              letter-spacing: 1px;
-            }
-            .section-table th, .section-table td {
-              border: 1px solid #888;
-              padding: 8px 10px;
-              vertical-align: top;
-            }
-            .section-table th {
-              background: #f5f5f5;
-              font-weight: bold;
-              text-align: center; 
-              width: 220px;
-            }
-            .highlight {
-              font-weight: bold;
-              color: #1a237e;
-            }
-            .tick {
-              font-weight: bold;
-              color: #388e3c;
-              font-size: 18px;
-            }
-            .pdf-footer {
-              position: fixed;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              text-align: center;
-              color: #7f8c8d;
-              font-size: 12px;
-              border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: transparent;
-              z-index: 1000;
-            }
-            .logo {
-              margin-top: 24px;
-              text-align: center;
-              opacity: 0.15;
-            }
-            .var-value {
-              font-weight: bold;
-            }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div>
-            <div class="firm">KOWTHA & CO.</div>
-            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address">${address}</div>
-          </div>
-          <div class="contact">
-            Mobile no: 8332037517<br>
-            Mail ID: ${mailId}
-          </div>
-        </div>
-
-        <div class="report-title">DUE DILIGENCE REPORT</div>
-
-        <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
-              <tr>
-                <td class="branch-label">Application Number</td>
-                <td class="branch-value" style="border-right: 1px solid #000;">${loan.applicationNumber}</td>
-                <td class="branch-label">Bank Name</td>
-                <td class="branch-value">${loan.bankName}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-    `;
+    return baseTemplate(address, mailId, loan);
   }
 
   async updateVerificationApproval(
@@ -2258,6 +2020,162 @@ export class LoanService {
       });
     } catch (error) {
       await this.loggingService.error('Failed to delete loan and related entities', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // PD Verification PDF Generation
+
+  async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
+    try {
+      // Fetch loan details with verification data
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId, department: Department.PD },
+        select: {
+          applicationNumber: true,
+          applicantName: true,
+          applicantMobile: true,
+          applicantAddress: true,
+          loanType: true,
+          bankName: true,
+          loanAmount: true,
+          status: true,
+          office: { select: { name: true, address: true } },
+          operationsExecutive: { select: { name: true } },
+          verifications: {
+            where: { type: VerificationType.Business },
+            select: {
+              type: true,
+              status: true,
+              approvedStatus: true,
+              updatedAt: true,
+              verificationData: true,
+              path: true,
+              finalReportPath: true,
+              fieldExecutive: { select: { name: true } }
+            }
+          },
+        }
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      if (loan.verifications.length === 0) {
+        throw new NotFoundException(`Verification for address type Business not found`);
+      }
+
+      const verification = loan.verifications[0];
+
+      const status = verification?.approvedStatus || '';
+
+      // Get the verification data
+      let verificationData = verification.verificationData as PDBusinessVerificationData;
+
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+      // Get uploaded items for this verification only
+      const uploadedItems = verificationData?.uploadedItems || [];
+
+      // Generate presigned URLs for images
+      const imageUrls = await Promise.all(
+        uploadedItems.map(async (item) => {
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+          } catch (error) {
+            await this.loggingService.error('Failed to generate presigned URL for image', {
+              s3ImageUrl: item.s3ImageUrl,
+              error: error.message
+            });
+            return null;
+          }
+        })
+      );
+
+      // Filter out any failed URL generations
+      const validImageUrls = imageUrls.filter(url => url !== null);
+
+      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
+
+      const html_data = {
+        bankName: loan.bankName,
+        path: verification.path,
+        status: status,
+        imageDataUri: imageDataUri,
+        imagesData: imagesData,
+        fieldExecutive: verification.fieldExecutive?.name || '',
+      }
+      
+    const htmlTemplate = adityabirlaTemplate(verificationData, html_data);
+
+    const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
+
+    await this.loggingService.info('Verification PDF generated successfully', {
+      loanId,
+      applicationNumber: loan.applicationNumber,
+    });
+
+    return pdfBuffer;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate verification PDF', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async generatePDFinalReportPDF(loanId: number) {
+    try {
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        include: {
+          verifications: {
+            where: { addressType: 'Business' },
+            select: {
+              id: true,
+              type: true,
+              status: true,
+              approvedStatus: true,
+              updatedAt: true,
+              verificationData: true,
+              path: true,
+              finalReportPath: true,
+              fieldExecutive: { select: { name: true } }
+            }
+          }
+        }
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      const verification = loan.verifications[0];
+
+      if (!verification) {
+        throw new NotFoundException(`Verification for address type Business not found`);
+      }
+
+      const finalReportPath = verification.finalReportPath;
+
+      if (!finalReportPath) {
+        throw new NotFoundException('Final report path not found');
+      }
+
+      const finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+
+      return finalReportPdfUrl;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate Final Report PDF', {
         loanId,
         error: error.message,
         stack: error.stack,

@@ -40,14 +40,6 @@ export class RolesGuard implements CanActivate {
       if (role === All) {
         return user.departmentRoles && user.departmentRoles.length > 0;
       }
-      
-      // Handle 'PD' - allows any PD role
-      if (role === PD) {
-        return user.departmentRoles?.some((dr: any) => 
-          dr.department === Department.PD && 
-          [UserRole.PDAdmin, UserRole.PDFieldExecutive, UserRole.PDVerifier, UserRole.PDOperationsExecutive].includes(dr.role)
-        );
-      }
 
       // Handle regular role requirements
       const normalizedRequirement: RoleRequirement = typeof role === 'string' 

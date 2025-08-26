@@ -107,7 +107,7 @@ export class AccountsService {
 
       const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
 
       if (isMobile && !hasRole) {
         throw new BadRequestException('Access denied: You are not authorized to login');
@@ -167,7 +167,7 @@ export class AccountsService {
         throw new NotFoundException('Access denied: User not found with this mobile number');
       }
 
-      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive || r.role === UserRole.PDFieldExecutive);
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
 
       if(hasRole && !deviceId){
         throw new UnauthorizedException('Access denied: Please contact administrator');

@@ -108,7 +108,7 @@ export class AccountsController {
                 type: 'object',
                 properties: {
                   department: { type: 'string', enum: ['FI', 'PD'] },
-                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] }
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] }
                 },
                 description: 'Department role for the filtered department (only present when department filter is applied)',
                 nullable: true
@@ -186,7 +186,7 @@ export class AccountsController {
                   id: { type: 'number' },
                   userId: { type: 'number' },
                   department: { type: 'string', enum: ['FI', 'PD'] },
-                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+                  role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' }
                 }
@@ -267,7 +267,7 @@ export class AccountsController {
             id: { type: 'number' },
             userId: { type: 'number' },
             department: { type: 'string', enum: ['FI', 'PD'] },
-            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+            role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
             user: {
@@ -322,7 +322,7 @@ export class AccountsController {
               id: { type: 'number' },
               userId: { type: 'number' },
               department: { type: 'string', enum: ['FI', 'PD'] },
-              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier', 'PDAdmin', 'PDFieldExecutive', 'PDVerifier', 'PDOperationsExecutive'] },
+              role: { type: 'string', enum: ['Admin', 'OperationsExecutive', 'FieldExecutive', 'Verifier'] },
               createdAt: { type: 'string', format: 'date-time' },
               updatedAt: { type: 'string', format: 'date-time' },
               user: {

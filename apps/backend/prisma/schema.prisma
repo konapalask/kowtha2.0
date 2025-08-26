@@ -165,6 +165,33 @@ model Office {
   departmentRoles DepartmentRole[]
 }
 
+model Loan {
+  id                    Int                 @id @default(autoincrement())
+  applicationNumber     String              
+  applicantName         String
+  applicantMobile       String
+  applicantAddress      String?
+  applicantAddress1     String?
+  applicantAddress2     String?
+  isAddressSame         Boolean             @default(false)
+  loanType              String
+  bankName              String
+  loanAmount            Float?
+  status                LoanStatus
+  department            Department?
+  officeId              Int
+  office                Office              @relation(fields: [officeId], references: [id])
+  operationsExecutiveId Int?
+  operationsExecutive   User?               @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  applicantType         String?
+  editRequests          EditRequest[]
+  verifications         Verification[]
+  pdEmailLogs           PDEmailLog[]
+  @@unique([applicationNumber, applicantType]) // New optional field
+}
+
 model Verification {
   id                  Int                @id @default(autoincrement())
   loanId              Int
@@ -194,33 +221,6 @@ model Verification {
   editRequests        EditRequest[] // Add this relation
   verificationRetries VerificationRetries[]
   @@unique([loanId, type])
-}
-
-model Loan {
-  id                    Int                 @id @default(autoincrement())
-  applicationNumber     String              
-  applicantName         String
-  applicantMobile       String
-  applicantAddress      String?
-  applicantAddress1     String?
-  applicantAddress2     String?
-  isAddressSame         Boolean             @default(false)
-  loanType              String
-  bankName              String
-  loanAmount            Float?
-  status                LoanStatus
-  department            Department?
-  officeId              Int
-  office                Office              @relation(fields: [officeId], references: [id])
-  operationsExecutiveId Int?
-  operationsExecutive   User?               @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
-  verifications         Verification[]
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  editRequests          EditRequest[]
-  applicantType         String?
-  pdEmailLogs           PDEmailLog[]
-  @@unique([applicationNumber, applicantType]) // New optional field
 }
 
 model VerificationRetries {

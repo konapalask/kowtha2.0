@@ -67,8 +67,7 @@ export class CreateUserDto {
     description: 'Array of department roles for the user',
     type: [DepartmentRoleDto],
     example: [
-      { department: 'FI', role: 'OperationsExecutive' },
-      { department: 'PD', role: 'PDVerifier' }
+      { department: 'FI', role: 'OperationsExecutive' }
     ]
   })
   @IsArray()

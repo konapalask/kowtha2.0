@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from '../common/types/request.types';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { GetAttendanceDto } from './dto/get-attendance.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+import { Department, UserRole } from '@prisma/client';
 
 @ApiTags('attendance')
 @Controller('attendance')
@@ -50,10 +50,12 @@ export class AttendanceController {
   })
   async createAttendance(
     @Request() req: AuthenticatedRequest,
-    @Body() createAttendanceDto: CreateAttendanceDto
+    @Body() createAttendanceDto: CreateAttendanceDto,
+    @Query('department') department: Department
   ) {
     const attendance = await this.attendanceService.createAttendance(
       req.user.id,
+      department,
       createAttendanceDto
     );
     
