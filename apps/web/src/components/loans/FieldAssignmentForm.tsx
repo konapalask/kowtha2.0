@@ -18,6 +18,7 @@ import {
 } from "@/services/loans.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
+import { getCurrentDepartmentOfficeId } from "@/utils/utility";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -119,7 +120,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         );
       }
       fetchLoans();
-      setCurrentOffice(userDetails?.officeId);
+              setCurrentOffice(currentDepartmentOfficeId?.toString() || "");
       setFieldExecutiveEdit((prev: any) => ({ ...prev, [type]: false }));
       fetchExecutives();
     } catch (error) {
@@ -130,11 +131,10 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
     }
   };
 
+  const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
   const remoteOffices = offices?.filter(
-    (option: any) => option?.value !== userDetails?.officeId
+    (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
   );
-
-  // console.log(verification);
 
   return (
     <div>
@@ -148,7 +148,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                 currentOfficeName: verification?.currentOfficeName,
                 assignmentMethod:
                   verification?.office &&
-                  verification?.office !== userDetails?.officeId
+                  Number(verification?.office) !== Number(currentDepartmentOfficeId)
                     ? "Remote"
                     : "Local",
                 office: verification?.office,
@@ -247,7 +247,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     className={styles.customRadioGroup}
                     onChange={(e) => {
                       if (e.target.value === "Local") {
-                        setCurrentOffice(userDetails?.officeId || "");
+                        setCurrentOffice(currentDepartmentOfficeId?.toString() || "");
                       }
                       form.setFieldValue("fieldExecutiveId", null);
                       form.setFieldValue("office", null);
