@@ -9,6 +9,8 @@ import _ from "lodash";
 const formKeyMapping: Record<string, string> = {
   businessBasicDetails: "basicDetails",
   workBasicDetails: "basicDetails",
+  toGrossProfit: "toGrossProfit",
+  toNetProfit: "toNetProfit",
 };
 
 interface ExtendedEditFormModalProps extends EditFormModalProps {

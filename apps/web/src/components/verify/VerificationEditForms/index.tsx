@@ -14,6 +14,8 @@ import ColleagueReferencesDetails from "./ColleagueReferencesDetails";
 import PastEmploymentDetails from "./PastEmploymentDetails";
 import ExistingLoansDetails from "./ExistingLoansDetails";
 import FamilyMemberForm from "./FamilyMemberForm";
+import ToGrossProfitForm from "./ToGrossProfitForm";
+import ToNetProfitForm from "./ToNetProfitForm";
 
 interface FormSelectorProps {
   form: any;
@@ -64,6 +66,10 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       return <BusinessMiscellaneous form={form} />;
     case "familyMemberDetails":
       return <FamilyMemberForm form={form} />;
+    case "toGrossProfit":
+      return <ToGrossProfitForm form={form} />;
+    case "toNetProfit":
+      return <ToNetProfitForm form={form} />;
     default:
       return null;
   }

@@ -18,8 +18,11 @@ import { useRouter } from "next/router";
 import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
 import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
+import ToGrossProfitDescription from "./Descriptions/ToGrossProfitDescription";
+import ToNetProfitDescription from "./Descriptions/ToNetProfitDescription";
 // import PdfPreview from "./PdfPreview";
 import FinalVerdict from "./FinalVerdict";
+import Feedback from "./Feedback";
 import {
   patchFinalVerdict,
   verifierEditApi,
@@ -35,6 +38,7 @@ interface BusinessVerificationDetailsProps {
   completeVerificationData: any;
   fetchVerificationData: any;
   editRequests?: any[];
+  currentDepartment?: string;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -49,6 +53,7 @@ export const BusinessVerificationDetails: React.FC<
   completeVerificationData,
   fetchVerificationData,
   editRequests = [],
+  currentDepartment,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -428,6 +433,24 @@ export const BusinessVerificationDetails: React.FC<
         </Card>
       </section>
 
+      {/* To Gross Profit Section - Only for PD department */}
+      {currentDepartment === 'PD' && (
+        <ToGrossProfitDescription
+          data={data}
+          extra={getButton("toGrossProfit")}
+          logs={false}
+        />
+      )}
+
+      {/* To Net Profit Section - Only for PD department */}
+      {currentDepartment === 'PD' && (
+        <ToNetProfitDescription
+          data={data}
+          extra={getButton("toNetProfit")}
+          logs={false}
+        />
+      )}
+
       <section style={{ marginBottom: 24 }}>
         <EditRequestLogs
           currentData={data}
@@ -445,14 +468,25 @@ export const BusinessVerificationDetails: React.FC<
       {/* <Button icon={<EyeOutlined />} onClick={()=>{
           setOpen(true)
         }}>Preview</Button> */}
-      <FinalVerdict
-        disabled={hasEditRequest}
-        verdict={verdict}
-        setVerdict={setVerdict}
-        editorContent={editorContent}
-        setEditorContent={setEditorContent}
-        handleSave={handleSave}
-      />
+      {currentDepartment === 'PD' ? (
+        <Feedback
+          disabled={hasEditRequest}
+          verdict={verdict}
+          setVerdict={setVerdict}
+          editorContent={editorContent}
+          setEditorContent={setEditorContent}
+          handleSave={handleSave}
+        />
+      ) : (
+        <FinalVerdict
+          disabled={hasEditRequest}
+          verdict={verdict}
+          setVerdict={setVerdict}
+          editorContent={editorContent}
+          setEditorContent={setEditorContent}
+          handleSave={handleSave}
+        />
+      )}
       <Footer
         editorContent={editorContent}
         disabled={hasEditRequest}
