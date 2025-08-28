@@ -267,7 +267,7 @@ export default function LoanVerifyDetails() {
       case "Business":
         return (
           <BusinessVerificationDetails
-            verificationData={getVerificationByType("Business")}
+            verificationData={getCompleteVerificationData("Business")}
             onEdit={handleEdit}
             editLogsUpdated={editLogsUpdated}
             verificationId={getVerificationId("Business")}

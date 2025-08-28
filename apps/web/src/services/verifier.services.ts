@@ -88,3 +88,25 @@ export const patchFinalVerdict = async (
     payload
   );
 };
+
+export const submitFinancialAnalysis = async (
+  id: string,
+  payload: any
+) => {
+  return await postWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    payload,
+    { params: { department: 'PD' } }
+  );
+};
+
+export const updateFinancialAnalysis = async (
+  id: string,
+  payload: any
+) => {
+  return await patchWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    payload,
+    { params: { department: 'PD' } }
+  );
+};

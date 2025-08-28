@@ -640,18 +640,6 @@ export const BusinessVerificationDetails: React.FC<
         </Card>
       </section>
 
-      <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs
-          currentData={data}
-          changedData={changedData}
-          verificationId={verificationId}
-          fetchEditRequests={fetchEditRequests}
-          disabled={hasEditRequest}
-          admin={false}
-          verificationType={activeTab}
-        />
-      </section>
-
       {/* Financial Analysis Section - Only for PD department */}
       {currentDepartment === 'PD' && (
         <section style={{ marginBottom: 24 }}>
@@ -943,10 +931,72 @@ export const BusinessVerificationDetails: React.FC<
                 </Col>
               </Row>
             </Card>
+              <Col span={12}>
+                <div style={{ 
+                  padding: 16, 
+                  backgroundColor: '#f0f8ff', 
+                  border: '1px solid #d9d9d9', 
+                  borderRadius: 6,
+                  textAlign: 'center'
+                }}>
+                  <Text strong>Calculated Gross Profit: ₹{calculatedGrossProfit.toLocaleString()}</Text>
+                  {/* {(data?.financialAnalysis?.grossProfit || verificationData?.financialAnalysis?.grossProfit || (verificationData?.verifications && verificationData.verifications.length > 0 ? verificationData.verifications[0].financialAnalysis?.grossProfit : null)) && (
+                    // <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
+                    //   Saved: ₹{(data?.financialAnalysis?.grossProfit || verificationData?.financialAnalysis?.grossProfit || verificationData?.verifications[0].financialAnalysis?.grossProfit).toLocaleString()}
+                    // </div>
+                  )} */}
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ 
+                  padding: 16, 
+                  backgroundColor: '#f0f8ff', 
+                  border: '1px solid #d9d9d9', 
+                  borderRadius: 6,
+                  textAlign: 'center'
+                }}>
+                  <Text strong>Calculated Net Profit: ₹{calculatedNetProfit.toLocaleString()}</Text>
+                  {/* {(data?.financialAnalysis?.netProfit || verificationData?.financialAnalysis?.netProfit || (verificationData?.verifications && verificationData.verifications.length > 0 ? verificationData.verifications[0].financialAnalysis?.netProfit : null)) && (
+                    <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
+                      Saved: ₹{(data?.financialAnalysis?.netProfit || verificationData?.financialAnalysis?.netProfit || verificationData?.verifications[0].financialAnalysis?.netProfit).toLocaleString()}
+                    </div>
+                  )} */}
+                </div>
+              </Col>
+            </Row>
+
+
+
+                        {/* Submit Button */}
+            <Row style={{ marginTop: 16 }}>
+              <Col span={24} style={{ textAlign: 'center' }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  onClick={handleFinancialSubmit}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  Submit Financial Analysis
+                </Button>
+              </Col>
+            </Row>
             </Form>
           </Card>
         </section>
       )}
+
+      <section style={{ marginBottom: 24 }}>
+        <EditRequestLogs
+          currentData={data}
+          changedData={changedData}
+          verificationId={verificationId}
+          fetchEditRequests={fetchEditRequests}
+          disabled={hasEditRequest}
+          admin={false}
+          verificationType={activeTab}
+        />
+      </section>
 
       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
       {/* <section style={{marginBottom:24, textAlign:"center", padding:8}}> */}
@@ -971,27 +1021,6 @@ export const BusinessVerificationDetails: React.FC<
           setEditorContent={setEditorContent}
           handleSave={handleSave}
         />
-      )}
-
-      {/* Submit Financial Analysis Button - Only for PD department */}
-      {currentDepartment === 'PD' && (
-        <section style={{ marginBottom: 24 }}>
-          <Card>
-            <Row style={{ textAlign: 'center' }}>
-              <Col span={24}>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  onClick={handleFinancialSubmit}
-                  loading={loading}
-                  disabled={loading}
-                >
-                  Submit Financial Analysis
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </section>
       )}
       <Footer
         editorContent={editorContent}
