@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateFinancialAnalysisDto {
+  @ApiProperty({ description: 'Synopsis of the verification', required: false })
+  @IsOptional()
+  @IsString()
+  synopsis?: string;
   @ApiProperty({ description: 'Opening Stock amount', required: false })
   @IsOptional()
   @IsNumber()

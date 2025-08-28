@@ -2185,7 +2185,7 @@ export class LoanService {
     }
   }
 
-  async createFinancialAnalysis(loanId: number, financialAnalysisData: any) {
+  async createFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
     try {
       const verification = await this.prisma.verification.findFirst({
         where: {
@@ -2208,6 +2208,7 @@ export class LoanService {
         },
         data: {
           financialAnalysis: financialAnalysisData,
+          ...(synopsis && { synopsis }),
         },
       });
 
@@ -2230,7 +2231,7 @@ export class LoanService {
     }
   }
 
-  async updateFinancialAnalysis(loanId: number, financialAnalysisData: any) {
+  async updateFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
     try {
       const verification = await this.prisma.verification.findFirst({
         where: {
@@ -2247,12 +2248,20 @@ export class LoanService {
         throw new NotFoundException('Verification not found');
       }
 
+      // Merge existing financialAnalysis with new data to preserve unchanged fields
+      const existingFinancialAnalysis = verification.financialAnalysis as any || {};
+      const mergedFinancialAnalysis = {
+        ...existingFinancialAnalysis,
+        ...financialAnalysisData
+      };
+
       const updatedVerification = await this.prisma.verification.update({
         where: {
           id: verification.id,
         },
         data: {
-          financialAnalysis: financialAnalysisData,
+          financialAnalysis: mergedFinancialAnalysis,
+          ...(synopsis !== undefined && { synopsis }),
           updatedAt: new Date(),
         },
       });
@@ -2260,6 +2269,7 @@ export class LoanService {
       await this.loggingService.info('Financial analysis updated successfully', {
         loanId,
         verificationId: verification.id,
+        updatedFields: Object.keys(financialAnalysisData)
       });
 
       return updatedVerification;

@@ -214,6 +214,7 @@ model Verification {
   path                String? // Array of S3 paths for verification documents
   finalReportPath     String? // S3 path for final report
   applicantAddress    String?
+  synopsis            String?
   financialAnalysis   Json?
   verificationData    Json? // JSON field to store address/work data
   pictureSource       PictureSource? // Source of the uploaded picture

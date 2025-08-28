@@ -505,6 +505,7 @@ export class LoanController {
             loanId: { type: 'number' },
             type: { type: 'string', enum: Object.values(VerificationType) },
             financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
         }
@@ -523,9 +524,11 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() updateFinancialAnalysisDto: UpdateFinancialAnalysisDto
   ) {
+    const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
     const result = await this.loanService.updateFinancialAnalysis(
       Number(loanId),
-      updateFinancialAnalysisDto
+      financialAnalysisData,
+      synopsis
     );
     return {
       status: 200,
@@ -876,6 +879,7 @@ export class LoanController {
             loanId: { type: 'number' },
             type: { type: 'string', enum: Object.values(VerificationType) },
             financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
         }
@@ -894,9 +898,11 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() createFinancialAnalysisDto: CreateFinancialAnalysisDto
   ) {
+    const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
     const result = await this.loanService.createFinancialAnalysis(
       Number(loanId),
-      createFinancialAnalysisDto
+      financialAnalysisData,
+      synopsis
     );
     return {
       status: 201,
