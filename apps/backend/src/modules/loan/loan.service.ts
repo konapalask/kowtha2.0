@@ -419,7 +419,7 @@ export class LoanService {
                   mobile: true,
                   employeeCode: true,
                 }
-              }
+              },
             }
           }
         },
@@ -571,7 +571,7 @@ export class LoanService {
               mobile: true,
               employeeCode: true,
             }
-          }
+          },
         },
         orderBy: {
           createdAt: 'desc'
@@ -701,7 +701,7 @@ export class LoanService {
                   reason: true,
                   date: true,
                 }
-              }
+              },
             }
           }
         },
@@ -873,7 +873,7 @@ export class LoanService {
               bankName: true,
               loanType: true
             }
-          }
+          },
         },
         orderBy: {
           createdAt: 'desc'
@@ -1236,22 +1236,22 @@ export class LoanService {
         where: { id: loanId },
         include: {
           verifications: {
-            include: {
-              fieldExecutive: {
-                select: {
-                  id: true,
-                  name: true,
-                  mobile: true
-                }
-              },
-              verifier: {
-                select: {
-                  id: true,
-                  name: true,
-                  mobile: true
-                }
-              }
+                    include: {
+          fieldExecutive: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true
             }
+          },
+          verifier: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true
+            }
+          }
+        }
           },
         }
       });
@@ -1273,6 +1273,7 @@ export class LoanService {
           finalReportPath: verification.finalReportPath,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
+          financialAnalysis: verification.financialAnalysis,
           fieldExecutive: verification.fieldExecutive,
           createdAt: verification.createdAt,
           updatedAt: verification.updatedAt
@@ -2179,6 +2180,97 @@ export class LoanService {
         loanId,
         error: error.message,
         stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createFinancialAnalysis(loanId: number, financialAnalysisData: any) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          department: Department.PD,
+          type: VerificationType.Business,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Financial analysis creation failed - Verification not found', {
+          loanId,
+        });
+        throw new NotFoundException('Verification not found');
+      }
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          financialAnalysis: financialAnalysisData,
+        },
+      });
+
+      await this.loggingService.info('Financial analysis created successfully', {
+        loanId,
+        verificationId: verification.id,
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create financial analysis', {
+        loanId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async updateFinancialAnalysis(loanId: number, financialAnalysisData: any) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          department: Department.PD,
+          type: VerificationType.Business,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Financial analysis update failed - Verification not found', {
+          loanId,
+        });
+        throw new NotFoundException('Verification not found');
+      }
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          financialAnalysis: financialAnalysisData,
+          updatedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info('Financial analysis updated successfully', {
+        loanId,
+        verificationId: verification.id,
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update financial analysis', {
+        loanId,
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }
