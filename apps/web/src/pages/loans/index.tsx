@@ -236,7 +236,7 @@ export default function Loans() {
         dataIndex: "applicationNumber",
         key: "applicationNumber",
         fixed: "left",
-        width: 200,
+        width: 180,
         // align: "center",
       },
       {
@@ -325,7 +325,7 @@ export default function Loans() {
                 );
               },
               align: "center",
-              width: 200,
+              width: 150,
             },
             {
               title: "Status",
@@ -425,16 +425,16 @@ export default function Loans() {
                 (v: any) => v.type === "AddressOne"
               );
               return pav ? (
-                <span>
-                  {pav?.fieldExecutive?.name}
+                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <div>{pav?.fieldExecutive?.name}</div>
                   <Tag color="blue">{pav?.fieldExecutive?.employeeCode}</Tag>
-                </span>
+                </div>
               ) : (
                 "-"
               );
             },
             align: "center",
-            width: 200,
+            width: 150,
           },
           {
             title: "Status",
@@ -478,16 +478,16 @@ export default function Loans() {
                 (v: any) => v.type === "AddressTwo"
               );
               return cav ? (
-                <span>
-                  {cav?.fieldExecutive?.name}
+                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <div>{cav?.fieldExecutive?.name}</div>
                   <Tag color="blue">{cav?.fieldExecutive?.employeeCode}</Tag>
-                </span>
+                </div>
               ) : (
                 "-"
               );
             },
             align: "center",
-            width: 200,
+            width: 150,
           },
           {
             title: "Status",
@@ -531,16 +531,16 @@ export default function Loans() {
                 (v: any) => v.type === "Work"
               );
               return wv ? (
-                <span>
-                  {wv?.fieldExecutive?.name}
+                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <div>{wv?.fieldExecutive?.name}</div>
                   <Tag color="blue">{wv?.fieldExecutive?.employeeCode}</Tag>
-                </span>
+                </div>
               ) : (
                 "-"
               );
             },
             align: "center",
-            width: 200,
+            width: 150,
           },
           {
             title: "Status",
@@ -584,16 +584,16 @@ export default function Loans() {
                 (v: any) => v.type === "Business"
               );
               return business ? (
-                <span>
-                  {business?.fieldExecutive?.name}
+                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                  <div>{business?.fieldExecutive?.name}</div>
                   <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
-                </span>
+                </div>
               ) : (
                 "-"
               );
             },
             align: "center",
-            width: 200,
+            width: 150,
           },
           {
             title: "Status",
