@@ -12,6 +12,7 @@ import {
   Col,
   Popconfirm,
   Divider,
+  Tooltip,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -301,16 +302,30 @@ export default function Loans() {
                   (v: any) => v.type === "Business"
                 );
                 return business ? (
-                  <span>
-                    {business?.fieldExecutive?.name}
-                    <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
-                  </span>
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ marginBottom: "4px" }}>
+                      {business?.fieldExecutive?.name}
+                    </div>
+                    <Tooltip title={business?.fieldExecutive?.employeeCode}>
+                      <Tag 
+                        color="blue" 
+                        style={{ 
+                          maxWidth: "180px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {business?.fieldExecutive?.employeeCode}
+                      </Tag>
+                    </Tooltip>
+                  </div>
                 ) : (
                   "-"
                 );
               },
               align: "center",
-              width: 120,
+              width: 200,
             },
             {
               title: "Status",
@@ -419,7 +434,7 @@ export default function Loans() {
               );
             },
             align: "center",
-            width: 120,
+            width: 200,
           },
           {
             title: "Status",
@@ -472,7 +487,7 @@ export default function Loans() {
               );
             },
             align: "center",
-            width: 120,
+            width: 200,
           },
           {
             title: "Status",
@@ -525,7 +540,7 @@ export default function Loans() {
               );
             },
             align: "center",
-            width: 120,
+            width: 200,
           },
           {
             title: "Status",
@@ -578,7 +593,7 @@ export default function Loans() {
               );
             },
             align: "center",
-            width: 120,
+            width: 200,
           },
           {
             title: "Status",
@@ -731,7 +746,7 @@ export default function Loans() {
                 }
           }
           size="small"
-          scroll={{ x: 1500 }}
+          scroll={{ x: 1800 }}
           sticky
           bordered
         />
