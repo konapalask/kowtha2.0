@@ -948,6 +948,37 @@ export const BusinessVerificationDetails: React.FC<
         </section>
       )}
 
+      {/* Submit Financial Analysis Button - Only for PD department */}
+      {currentDepartment === 'PD' && (
+        <section style={{ marginBottom: 24 }}>
+          <Card>
+            <Row justify="end">
+              <Col>
+                <Button 
+                  type="primary" 
+                  size="small"
+                  onClick={handleFinancialSubmit}
+                  loading={loading}
+                  disabled={loading || !!verificationData?.financialAnalysis}
+                  style={{
+                    background: (loading || !!verificationData?.financialAnalysis) ? "#9ca3af" : "#1e40af",
+                    border: "none",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    boxShadow: (loading || !!verificationData?.financialAnalysis) ? "none" : "0 2px 8px rgba(30, 64, 175, 0.3)",
+                    color: "#ffffff"
+                  }}
+                >
+                  {loading ? "Submitting..." : (!!verificationData?.financialAnalysis ? "Financial Analysis Already Submitted" : "Submit Financial Analysis")}
+                </Button>
+              </Col>
+            </Row>
+          </Card>
+        </section>
+      )}
+
       {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
       {/* <section style={{marginBottom:24, textAlign:"center", padding:8}}> */}
       {/* <Button icon={<EyeOutlined />} onClick={()=>{
@@ -961,6 +992,9 @@ export const BusinessVerificationDetails: React.FC<
           editorContent={editorContent}
           setEditorContent={setEditorContent}
           handleSave={handleSave}
+          verificationData={verificationData}
+          currentDepartment={currentDepartment}
+          hasEditRequest={hasEditRequest}
         />
       ) : (
         <FinalVerdict
@@ -971,27 +1005,6 @@ export const BusinessVerificationDetails: React.FC<
           setEditorContent={setEditorContent}
           handleSave={handleSave}
         />
-      )}
-
-      {/* Submit Financial Analysis Button - Only for PD department */}
-      {currentDepartment === 'PD' && (
-        <section style={{ marginBottom: 24 }}>
-          <Card>
-            <Row style={{ textAlign: 'center' }}>
-              <Col span={24}>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  onClick={handleFinancialSubmit}
-                  loading={loading}
-                  disabled={loading}
-                >
-                  Submit Financial Analysis
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </section>
       )}
       <Footer
         editorContent={editorContent}

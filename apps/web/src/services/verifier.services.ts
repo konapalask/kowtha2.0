@@ -110,3 +110,14 @@ export const updateFinancialAnalysis = async (
     { params: { department: 'PD' } }
   );
 };
+
+export const updateSynopsis = async (
+  id: string,
+  synopsis: string
+) => {
+  return await patchWithDepartment(
+    `/loans/verification/${id}/financial-analysis`,
+    { synopsis },
+    { params: { department: 'PD' } }
+  );
+};

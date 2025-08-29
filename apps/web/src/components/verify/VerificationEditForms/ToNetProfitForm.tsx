@@ -300,6 +300,15 @@ const ToNetProfitForm: React.FC<{ form: any }> = ({ form }) => {
             onClick={handleSubmit}
             loading={loading}
             disabled={calculatedNetProfit === 0}
+            style={{
+              background: "linear-gradient(90deg, #4facfe 0%, rgba(7, 220, 231, 0.69) 100%)",
+              border: "none",
+              borderRadius: "8px",
+              height: "48px",
+              fontSize: "16px",
+              fontWeight: "600",
+              boxShadow: "0 4px 12px rgba(79, 172, 254, 0.4)"
+            }}
           >
             Submit Financial Analysis
           </Button>
