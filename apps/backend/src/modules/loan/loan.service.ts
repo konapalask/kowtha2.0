@@ -26,7 +26,8 @@ import { PDBusinessVerificationData } from './templates/PD/pd-business.interface
 import { adityabirlaTemplate } from './templates/PD/adityabirla.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, Department} from '@prisma/client';
+  AddressType, UserRole, ApprovedStatus, Department
+} from '@prisma/client';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
@@ -45,9 +46,9 @@ export class LoanService {
   async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
     });
-    
+
     const page = await browser.newPage();
     await page.setContent(htmlTemplate, {
       waitUntil: 'networkidle0'
@@ -70,7 +71,7 @@ export class LoanService {
     await browser.close();
     return pdfBuffer;
   }
-  
+
   async createLambdaLoan(data: CreateLambdaLoanDto) {
     try {
 
@@ -96,7 +97,7 @@ export class LoanService {
           applicantAddress: data.applicantAddress,
           applicationNumber: data.applicationNumber,
           applicantType: data.applicantType || 'Primary Applicant',
-        },  
+        },
         include: {
           office: true,
         },
@@ -389,7 +390,7 @@ export class LoanService {
       }
 
       const loans = await this.prisma.loan.findMany({
-        where: { 
+        where: {
           officeId,
           department: department
         },
@@ -457,7 +458,7 @@ export class LoanService {
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: { 
+        where: {
           fieldExecutiveId,
           department: department
         },
@@ -476,7 +477,7 @@ export class LoanService {
 
       const loanIds = verifications.map(v => v.loanId);
       const loans = await this.prisma.loan.findMany({
-        where: { 
+        where: {
           id: { in: loanIds },
           department: department
         },
@@ -540,7 +541,7 @@ export class LoanService {
       }
 
       const where: Prisma.VerificationWhereInput = {
-          department: department
+        department: department
       };
 
       const userRole = role.find((r: any) => r.department === department);
@@ -910,7 +911,7 @@ export class LoanService {
         data:
         {
           items: verifications,
-          meta: {           
+          meta: {
             total,
             page,
             limit,
@@ -1236,22 +1237,23 @@ export class LoanService {
         where: { id: loanId },
         include: {
           verifications: {
-                    include: {
-          fieldExecutive: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true
+            where: { department },
+            include: {
+              fieldExecutive: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
+              },
+              verifier: {
+                select: {
+                  id: true,
+                  name: true,
+                  mobile: true
+                }
+              },
             }
-          },
-          verifier: {
-            select: {
-              id: true,
-              name: true,
-              mobile: true
-            }
-          }
-        }
           },
         }
       });
@@ -1274,6 +1276,7 @@ export class LoanService {
           addressType: verification.addressType,
           verificationData: verification.verificationData,
           financialAnalysis: verification.financialAnalysis,
+          synopsis: verification.synopsis,
           fieldExecutive: verification.fieldExecutive,
           createdAt: verification.createdAt,
           updatedAt: verification.updatedAt
@@ -1320,18 +1323,18 @@ export class LoanService {
       for (const dto of createLoanDtos) {
         try {
           // Check if operations executive exists
-          if(dto.operationsExecutiveId){
+          if (dto.operationsExecutiveId) {
             const operationsExecutive = await this.prisma.user.findUnique({
-            where: { id: dto.operationsExecutiveId }
-          });
+              where: { id: dto.operationsExecutiveId }
+            });
 
-          if (!operationsExecutive) {
-            throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+            if (!operationsExecutive) {
+              throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+            }
           }
-        }
-        else{
-          dto.operationsExecutiveId = null;
-        }
+          else {
+            dto.operationsExecutiveId = null;
+          }
 
           // Check if field executive exists (if provided)
           if (dto.fieldExecutiveId) {
@@ -1343,7 +1346,7 @@ export class LoanService {
               throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
             }
           }
-          else{
+          else {
             dto.fieldExecutiveId = null;
           }
 
@@ -1723,7 +1726,7 @@ export class LoanService {
       // Launch a new browser instance
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
       });
 
       // Create a new page
@@ -1930,7 +1933,7 @@ export class LoanService {
         const loan = await this.prisma.loan.findUnique({
           where: { id: data.loanId },
         });
-        
+
         if (!loan) {
           throw new NotFoundException('Loan not found');
         }
@@ -2113,17 +2116,17 @@ export class LoanService {
         imagesData: imagesData,
         fieldExecutive: verification.fieldExecutive?.name || '',
       }
-      
-    const htmlTemplate = adityabirlaTemplate(verificationData, html_data);
 
-    const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
+      const htmlTemplate = adityabirlaTemplate(verificationData, html_data);
 
-    await this.loggingService.info('Verification PDF generated successfully', {
-      loanId,
-      applicationNumber: loan.applicationNumber,
-    });
+      const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
 
-    return pdfBuffer;
+      await this.loggingService.info('Verification PDF generated successfully', {
+        loanId,
+        applicationNumber: loan.applicationNumber,
+      });
+
+      return pdfBuffer;
     } catch (error) {
       await this.loggingService.error('Failed to generate verification PDF', {
         loanId,
