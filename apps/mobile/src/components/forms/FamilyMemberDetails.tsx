@@ -21,7 +21,7 @@ interface FamilyMemberDetailsFormData {
 }
 
 interface FamilyMemberDetailsProps {
-  onSubmit: (data: FamilyMember[]) => void;
+  onSubmit: any;
   initialData?: FamilyMember[];
   maxFamilyMembers?: number;
 }

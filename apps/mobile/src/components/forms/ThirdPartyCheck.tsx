@@ -263,6 +263,7 @@ const ThirdPartyCheck: React.FC<ThirdPartyCheckProps> = ({
                 tpcName: '',
                 mobileNumber: '',
                 relationship: '',
+                otherRelation: '',
                 feedbackStatus: '',
                 comments: '',
               })

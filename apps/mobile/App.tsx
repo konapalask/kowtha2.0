@@ -31,6 +31,7 @@ import {getItem} from './src/helpers/utility';
 import BusinessVerification from './src/screens/BusinessVerification';
 import {getPlaystoreVersion} from './src/services/auth';
 import DeviceInfo from 'react-native-device-info';
+import PDVerification from './src/screens/PDVerification';
 
 // Configure XMLHttpRequest
 
@@ -46,6 +47,10 @@ export type RootStackParamList = {
     verificationType: 'Work';
   };
   BusinessVerification: {
+    item: {name: string; applicationNumber: string};
+    verificationType: 'Business';
+  };
+  PDVerification: {
     item: {name: string; applicationNumber: string};
     verificationType: 'Business';
   };
@@ -202,6 +207,15 @@ const App = () => {
           <Stack.Screen
             name="BusinessVerification"
             component={BusinessVerification}
+            options={({route}) => ({
+              title: route.params?.item
+                ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
+                : 'Business Verification',
+            })}
+          />
+          <Stack.Screen
+            name="PDVerification"
+            component={PDVerification}
             options={({route}) => ({
               title: route.params?.item
                 ? `${route.params.item.name}, ${route.params.item.applicationNumber}`

@@ -4,8 +4,9 @@ export const getFieldData = async (
   page: number,
   status: string,
   applicationNumber?: string,
+  dept?: string,
 ) => {
-  let url = `/loans/field-executive/assigned?page=${page}&status=${status}`;
+  let url = `/loans/field-executive/assigned?page=${page}&status=${status}&department=${dept}`;
   if (applicationNumber) {
     url += `&applicationNumber=${encodeURIComponent(applicationNumber)}`;
   }
@@ -13,7 +14,7 @@ export const getFieldData = async (
 };
 
 export const getUserDetails = async () => {
-  return axiosInstance.get('/accounts/profile');
+  return axiosInstance.get(`/accounts/profile`);
 };
 
 export const submitVerification = async (data: any, id: string) => {

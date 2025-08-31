@@ -6,47 +6,6 @@ import {postAttendanceApi} from '../services/user.services';
 import dayjs from 'dayjs';
 import {getItem, setItem} from '../helpers/utility';
 
-const handleLoginTick = async (
-  setVisible: (val: boolean) => void,
-  setIsLoggedIn: any,
-) => {
-  try {
-    const payload = {
-      status: 'Available',
-      date: dayjs().format('YYYY-MM-DD'),
-    };
-    await postAttendanceApi(payload);
-
-    Toast.show({
-      type: 'success',
-      text1: 'Login Successful',
-      position: 'top',
-    });
-    await setItem('attendance', payload);
-    setIsLoggedIn(true);
-  } catch (error: any) {
-    console.log(error?.response?.data?.message);
-    if (
-      error?.response?.data?.message ===
-      'Attendance record already exists for this date'
-    ) {
-      const payload = {
-        status: 'Available',
-        date: dayjs().format('YYYY-MM-DD'),
-      };
-      await setItem('attendance', payload);
-      setIsLoggedIn(true);
-    }
-    Toast.show({
-      type: 'error',
-      text1: error?.response?.data?.message || 'Login unsuccessful',
-      position: 'top',
-    });
-  } finally {
-    setVisible(false);
-  }
-};
-
 const handleLoginCross = (setVisible: (val: boolean) => void) => {
   setVisible(false);
   // Toast.show({
@@ -61,6 +20,54 @@ const AttendanceCard: React.FC<{
   isLoggedIn: any;
   setIsLoggedIn: any;
 }> = ({setVisible, isLoggedIn, setIsLoggedIn}) => {
+  const [dept, setDept] = useState('');
+  useEffect(() => {
+    const getDept = async () => {
+      const details = await getItem('dept');
+      setDept(details);
+    };
+    getDept();
+  }, []);
+  const handleLoginTick = async (
+    setVisible: (val: boolean) => void,
+    setIsLoggedIn: any,
+  ) => {
+    try {
+      const payload = {
+        status: 'Available',
+        date: dayjs().format('YYYY-MM-DD'),
+      };
+      await postAttendanceApi(payload, dept);
+
+      Toast.show({
+        type: 'success',
+        text1: 'Login Successful',
+        position: 'top',
+      });
+      await setItem('attendance', payload);
+      setIsLoggedIn(true);
+    } catch (error: any) {
+      console.log(error?.response?.data?.message);
+      if (
+        error?.response?.data?.message ===
+        'Attendance record already exists for this date'
+      ) {
+        const payload = {
+          status: 'Available',
+          date: dayjs().format('YYYY-MM-DD'),
+        };
+        await setItem('attendance', payload);
+        setIsLoggedIn(true);
+      }
+      Toast.show({
+        type: 'error',
+        text1: error?.response?.data?.message || 'Login unsuccessful',
+        position: 'top',
+      });
+    } finally {
+      setVisible(false);
+    }
+  };
   // const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // useEffect(() => {
