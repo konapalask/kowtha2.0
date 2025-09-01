@@ -32,6 +32,7 @@ import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { baseTemplate } from './templates/FI/base.template';
+import { Worker } from 'worker_threads';
 
 
 @Injectable()
@@ -42,6 +43,21 @@ export class LoanService {
     private logger: Logger,
     private s3Service: S3Service,
   ) { }
+
+
+  async runWorker(data: any) {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker(path.resolve(__dirname, 'imageWorker.ts'), { workerData: data });
+      worker.on('message', (msg) => {
+        if (msg.success) resolve(msg.result);
+        else reject(new Error(msg.error));
+      });
+      worker.on('error', reject);
+      worker.on('exit', (code) => {
+        if (code !== 0) reject(new Error(`Worker stopped with code ${code}`));
+      });
+    });
+  }
 
   async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
     const browser = await puppeteer.launch({
@@ -687,6 +703,20 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
+                  departmentRoles: {
+                    where: {
+                      department: filters.department
+                    },
+                    select: {
+                      officeId: true,
+                      office: {
+                        select: {
+                          id: true,
+                          name: true,
+                        }
+                      }
+                    }
+                  }
                 }
               },
               verifier: {
@@ -971,32 +1001,14 @@ export class LoanService {
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: {
-            id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string;
-            latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean
-          }) => {
-            try {
-              const timeZone = 'Asia/Kolkata';
-              const zonedDate = toZonedTime(item.timestamp, timeZone);
-              const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
-
-              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
-                const processedUrl = await this.s3Service.processAndUploadImage(
-                  item.s3ImageUrl,
-                  parseFloat(item.latitude),
-                  parseFloat(item.longitude),
-                  istDate,
-                );
-              }
-            } catch (error) {
-              await this.loggingService.error('Failed to process image', {
-                loanId,
-                verificationType,
-                itemId: item.id,
-                error: error.message
-              });
-            }
-          })
+          verificationData.uploadedItems.map(item =>
+            this.runWorker({
+              s3ImageUrl: item.s3ImageUrl,
+              latitude: parseFloat(item.latitude),
+              longitude: parseFloat(item.longitude),
+              timestamp: item.timestamp
+            })
+          )
         );
       }
 

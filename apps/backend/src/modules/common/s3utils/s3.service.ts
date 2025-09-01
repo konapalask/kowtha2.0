@@ -317,4 +317,10 @@ export class S3Service {
       throw error;
     }
   }
+}
+
+// Export standalone function for worker threads
+export async function processAndUploadImage(s3ImageUrl: string, latitude: number, longitude: number, timestamp: string): Promise<string> {
+  const s3Service = new S3Service(new LoggingService());
+  return s3Service.processAndUploadImage(s3ImageUrl, latitude, longitude, timestamp);
 } 
