@@ -2032,6 +2032,88 @@ export class LoanService {
     }
   }
 
+  async reassignLoan(originalLoanId: number, department: Department) {
+    try {
+      return await this.prisma.$transaction(async (prisma) => {
+        const originalLoan = await prisma.loan.findUnique({
+          where: { id: originalLoanId, department },
+          include: {
+            verifications: true,
+          },
+        });
+
+        if (!originalLoan) {
+          throw new NotFoundException('Loan not found');
+        }
+
+        const newLoan = await prisma.loan.create({
+          data: {
+            applicationNumber: originalLoan.applicationNumber,
+            applicantName: originalLoan.applicantName,
+            applicantMobile: originalLoan.applicantMobile,
+            applicantAddress: originalLoan.applicantAddress,
+            applicantAddress1: originalLoan.applicantAddress1,
+            applicantAddress2: originalLoan.applicantAddress2,
+            applicantType: originalLoan.applicantType,
+            isAddressSame: originalLoan.isAddressSame,
+            loanType: originalLoan.loanType,
+            bankName: originalLoan.bankName,
+            loanAmount: originalLoan.loanAmount,
+            status: originalLoan.status,
+            department: originalLoan.department,
+            reassignCount: originalLoan.reassignCount + 1,
+            office: { connect: { id: originalLoan.officeId } },
+            ...(originalLoan.operationsExecutiveId && { operationsExecutive: { connect: { id: originalLoan.operationsExecutiveId } } }),
+          },
+        });
+
+        if (originalLoan.verifications && originalLoan.verifications.length > 0) {
+          for (const v of originalLoan.verifications) {
+            await prisma.verification.create({
+              data: {
+                loan: { connect: { id: newLoan.id } },
+                type: v.type,
+                addressType: v.addressType,
+                department: department,
+                ...(v.verifierId && { verifier: { connect: { id: v.verifierId } } }),
+                fieldExecutive: { connect: { id: v.fieldExecutiveId } },
+                status: VerificationStatus.Pending,
+                locationType: v.locationType,
+                isPostponed: false,
+                postponedDate: null,
+                postponedReason: null,
+                businessName: v.businessName,
+                currentOfficeName: null,
+                applicantAddress: v.applicantAddress,
+                verificationData: v.verificationData,
+              },
+            });
+          }
+        }
+
+        await this.loggingService.info('Loan reassigned by cloning with incremented reassignCount', {
+          originalLoanId,
+          newLoanId: newLoan.id,
+          previousReassignCount: originalLoan.reassignCount,
+          newReassignCount: newLoan.reassignCount,
+          verificationsCloned: originalLoan.verifications?.length || 0,
+        });
+
+        return newLoan;
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to reassign loan', {
+        originalLoanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
   // PD Verification PDF Generation
 
   async previewPDVerificationPDF(loanId: number): Promise<Buffer> {

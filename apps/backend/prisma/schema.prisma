@@ -181,11 +181,12 @@ model Loan {
   operationsExecutive     User?               @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
+  reassignCount           Int                 @default(0)
   applicantType           String?
   editRequests            EditRequest[]
   verifications           Verification[]
   pdEmailLogs             PDEmailLog[]
-  @@unique([applicationNumber, applicantType]) // New optional field
+  @@unique([applicationNumber, applicantType, department, reassignCount]) // New optional field
 }
 
 model Verification {

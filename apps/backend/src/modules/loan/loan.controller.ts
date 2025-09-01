@@ -8,7 +8,7 @@ import { VerifyLoanDto } from './dto/verify-loan.dto';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RolesGuard } from '../accounts/guards/roles.guard';
-import { Roles } from '../accounts/decorators/roles.decorator';
+import { Roles, All } from '../accounts/decorators/roles.decorator';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { createAssignmentDto } from './dto/assign-loan-executive';
@@ -36,7 +36,7 @@ export class LoanController {
   */
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.FieldExecutive, UserRole.Verifier)
+  @Roles(All)
   @ApiOperation({ summary: 'Get all loans with filters' })
   @ApiResponse({
     status: 200,
@@ -150,6 +150,33 @@ export class LoanController {
     return {
       status: 200,
       message: 'Verification assigned successfully',
+      data: result
+    };
+  }
+
+  @Post(':id/reassign')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Reassign a loan by cloning it and incrementing reassignCount by 1' })
+  @ApiResponse({
+    status: 201,
+    description: 'Loan reassigned successfully by cloning with verifications',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Loan reassigned successfully' },
+        data: { type: 'object' }
+      }
+    }
+  })
+  async reassignLoan(@Param('id') loanId: string, @Query('department') department: Department) {
+    if (department != Department.PD) {
+      throw new BadRequestException('Invalid department');
+    }
+    const result = await this.loanService.reassignLoan(Number(loanId), department);
+    return {
+      status: 201,
+      message: 'Loan reassigned successfully',
       data: result
     };
   }
