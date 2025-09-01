@@ -480,6 +480,7 @@ export default function OrganizationSettings() {
                   setLoading(true);
                   handleArchive(editingOffice?.id, true);
                   setIsModalVisible(false);
+                  // setIsBankModalVisible(false);
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
