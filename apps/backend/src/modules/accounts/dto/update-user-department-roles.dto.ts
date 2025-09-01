@@ -35,8 +35,7 @@ export class UpdateUserDepartmentRolesDto {
     description: 'Array of department roles to update for the user',
     type: [DepartmentRoleUpdateDto],
     example: [
-      { department: 'FI', role: 'OperationsExecutive', officeId: 1 },
-      { department: 'PD', role: 'PDVerifier', officeId: 1 }
+      { department: 'FI', role: 'OperationsExecutive', officeId: 1 }
     ]
   })
   @IsArray()

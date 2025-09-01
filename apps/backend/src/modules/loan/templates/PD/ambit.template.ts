@@ -1,6 +1,6 @@
 import { format, toZonedTime } from 'date-fns-tz';
 
-export const adityabirlaTemplate = () => {
+export const ambitTemplate = (verificationData1: any, html_data: any) => {
     const verificationData = {
         application_number: '1234567890',
         name_of_applicant: 'John Doe',

@@ -1,6 +1,6 @@
 import { format, toZonedTime } from 'date-fns-tz';
 
-export const cholaTemplate = () => {
+export const cholaTemplate = (verificationData1: any, html_data: any) => {
     const verificationData = {
         reportHeader: {
             programName: 'Liquid Income Program',
@@ -484,6 +484,7 @@ export const cholaTemplate = () => {
         </tr>
       </table>
     </div>
-     <div style="page-break-before: always;"></div>
-    `
+
+    <div style="page-break-before: always;"></div>
+  `
 }
