@@ -17,6 +17,8 @@ import { DeleteVerificationDto } from './dto/delete-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { CreateFinancialAnalysisDto } from './dto/create-financial-analysis.dto';
+import { UpdateFinancialAnalysisDto } from './dto/update-financial-analysis.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
             AddressType, ApprovedStatus, LocationType, Department } from '@prisma/client';
@@ -486,6 +488,56 @@ export class LoanController {
     };
   }
 
+  @Patch('verification/:id/financial-analysis')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Update financial analysis data for a verification' })
+  @ApiResponse({
+    status: 200,
+    description: 'Financial analysis updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Financial analysis updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification not found'
+  })
+  async updateFinancialAnalysis(
+    @Param('id') loanId: string,
+    @Body() updateFinancialAnalysisDto: UpdateFinancialAnalysisDto
+  ) {
+    const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
+    const result = await this.loanService.updateFinancialAnalysis(
+      Number(loanId),
+      financialAnalysisData,
+      synopsis
+    );
+    return {
+      status: 200,
+      message: 'Financial analysis updated successfully',
+      data: result
+    };
+  }
+
 
   /*
       The below API's are used by only Field Executive. His tasks include: Edit Verification Report, Submit Verification Data and Upload Proofs
@@ -806,6 +858,56 @@ export class LoanController {
     return {
       status: 201,
       message: 'Verification retry created successfully',
+      data: result
+    };
+  }
+
+  @Post('verification/:id/financial-analysis')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Create financial analysis data for a verification' })
+  @ApiResponse({
+    status: 201,
+    description: 'Financial analysis created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Financial analysis created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification not found'
+  })
+  async createFinancialAnalysis(
+    @Param('id') loanId: string,
+    @Body() createFinancialAnalysisDto: CreateFinancialAnalysisDto
+  ) {
+    const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
+    const result = await this.loanService.createFinancialAnalysis(
+      Number(loanId),
+      financialAnalysisData,
+      synopsis
+    );
+    return {
+      status: 201,
+      message: 'Financial analysis created successfully',
       data: result
     };
   }
