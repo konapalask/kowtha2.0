@@ -68,9 +68,37 @@ const Feedback: React.FC<FeedbackProps> = ({
   const [existingSynopsis, setExistingSynopsis] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
   
+  // Function to convert text to points format
+  const convertTextToPoints = (text: string): string => {
+    if (!text) return "<ul><li><br></li></ul>";
+    
+    const points = text
+      .split(/[•\-\*\.]/) 
+      .map(point => point.trim())
+      .filter(point => point.length > 0)
+      .map(point => `<li>${point}</li>`)
+      .join('');
+    
+    return `<ul>${points}</ul>`;
+  };
+
+  // Function to convert points back to text
+  const convertPointsToText = (html: string): string => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const liElements = doc.querySelectorAll("li");
+    
+    if (liElements.length === 0) return "";
+    
+    return Array.from(liElements)
+      .map(li => li.textContent?.trim())
+      .filter(text => text && text.length > 0)
+      .join('. ');
+  };
+  
   // Fetch and display existing synopsis data when component loads
   useEffect(() => {
-    // Try multiple ways to find the synopsis data
+  
     let foundSynopsis = null;
     
     if (verificationData && verificationData.verifications && verificationData.verifications.length > 0) {
@@ -81,7 +109,7 @@ const Feedback: React.FC<FeedbackProps> = ({
       }
     }
     
-    // Fallback: check if synopsis is directly in verificationData
+
     if (!foundSynopsis && verificationData && verificationData.synopsis) {
       foundSynopsis = verificationData.synopsis;
     }
@@ -96,8 +124,9 @@ const Feedback: React.FC<FeedbackProps> = ({
     
     if (foundSynopsis) {
       setExistingSynopsis(foundSynopsis);
-      // Update the editor content with existing synopsis
-      setEditorContent(`<ul><li>${foundSynopsis}</li></ul>`);
+      // Convert existing synopsis to points format
+      const pointsFormat = convertTextToPoints(foundSynopsis);
+      setEditorContent(pointsFormat);
     }
   }, [verificationData, setEditorContent]);
   
@@ -183,8 +212,7 @@ const Feedback: React.FC<FeedbackProps> = ({
     try {
       setSynopsisLoading(true);
       
-      // Extract synopsis content (remove HTML tags)
-      const synopsisText = editorContent.replace(/<[^>]*>/g, '').trim();
+      const synopsisText = convertPointsToText(editorContent);
       
       if (!synopsisText || synopsisText === '') {
         message.error('Please enter synopsis content before submitting');
@@ -266,7 +294,8 @@ const Feedback: React.FC<FeedbackProps> = ({
                 icon={<EditOutlined />}
                 onClick={() => {
                   setIsEditing(true);
-                  setEditorContent(`<ul><li>${existingSynopsis}</li></ul>`);
+                  const pointsFormat = convertTextToPoints(existingSynopsis);
+                  setEditorContent(pointsFormat);
                   // Focus the editor for better UX
                   setTimeout(() => {
                     const editor = document.querySelector('.ql-editor');
@@ -281,10 +310,6 @@ const Feedback: React.FC<FeedbackProps> = ({
           }
           bodyStyle={{ padding: 0 }}
         >
-
-          
-
-          
           <div
             style={{ 
               minHeight: "300px", 
@@ -305,7 +330,6 @@ const Feedback: React.FC<FeedbackProps> = ({
               formats={["list"]}
             />
             
-            {/* Feedback options moved to bottom */}
             {/* Submit Synopsis Button - Between synopsis and feedback */}
             <div style={{ 
               padding: "16px 24px", 
@@ -384,8 +408,6 @@ const Feedback: React.FC<FeedbackProps> = ({
           </div>
         </Card>
       </section>
-
-
     </>
   );
 };
