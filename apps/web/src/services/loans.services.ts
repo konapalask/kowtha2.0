@@ -11,19 +11,18 @@ export interface Verification {
 }
 
 export interface Loan {
+  id: number;
+  applicationNumber: string;
+  applicantName: string;
+  applicantMobile: string;
+  loanAmount: string;
+  loanType: string;
+  bankName: string;
+  applicantType: string;
+  status: string;
+  verifierId?: string;
+  verifications?: any[];
   [key: string]: any;
-  // id: number;
-  // applicationNumber: string;
-  // applicantName: string;
-  // applicantPhone: string;
-  // applicantAddress: string;
-  // loanType: string;
-  // bankName: string;
-  // status: string;
-  // assignee: string;
-  // uploadedAt: string;
-  // updatedAt: string;
-  // verifications: Verification[];
 }
 
 export interface VerifierLoan {
@@ -145,4 +144,8 @@ export const deleteFieldAssignmentApi = (
 
 export const deleteLoanApi = (id: number) => {
   return deleteWithDepartment(`/loans/${id}`);
+};
+
+export const reassignLoanApi = (loanId: number) => {
+  return postWithDepartment(`/loans/${loanId}/reassign`);
 };

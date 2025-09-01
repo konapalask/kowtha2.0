@@ -13,7 +13,7 @@ import {
   Row,
   Col,
 } from "antd";
-import { CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { CloseOutlined, DeleteOutlined, EditOutlined, ReloadOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
@@ -22,6 +22,7 @@ import {
   assignExecutivesApi,
   deleteFieldAssignmentApi,
   getLoansByIdApi,
+  reassignLoanApi,
 } from "@/services/loans.services";
 import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 import dayjs from "dayjs";
@@ -172,6 +173,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     }
   };
 
+  const handleReassign = async () => {
+    if (!loanDetails?.id) return;
+    
+    try {
+      setLoading(true);
+      console.log("Reassigning loan:", loanDetails.id);
+      await reassignLoanApi(loanDetails.id);
+      message.success("Loan reassigned successfully");
+      setRefresh(true);
+    } catch (error) {
+      console.error("Error reassigning loan:", error);
+      message.error("Failed to reassign loan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClose = () => {
     setIsDrawerVisible(false);
     form.resetFields();
@@ -216,48 +234,61 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     <div>
       <Drawer
         title={
-          <span>
-            {loanDetails?.id
-              ? `Loan Details - ${loanDetails.applicationNumber}`
-              : "New Loan"}{" "}
-            {loanDetails?.status && (
-              <Tag
-                color={
-                  loanDetails.status === "Pending"
-                    ? "orange"
-                    : loanDetails.status === "Approved"
-                      ? "green"
-                      : loanDetails.status === "Rejected"
-                        ? "red"
-                        : loanDetails.status === "FieldVerificationComplete"
-                          ? "green"
-                          : loanDetails.status === "FieldVerificationStarted"
-                            ? "blue"
-                            : "default"
-                }
-                style={{ marginLeft: 8 }}
-              >
-                {(() => {
-                  switch (loanDetails.status) {
-                    case "Pending":
-                      return "Unassigned";
-                    case "Assigned":
-                      return "Assigned";
-                    case "FieldVerificationStarted":
-                      return "Under FV";
-                    case "FieldVerificationComplete":
-                      return "FV Completed";
-                    case "Approved":
-                      return "Approved";
-                    case "Rejected":
-                      return "Rejected";
-                    default:
-                      return loanDetails.status;
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <span>
+              {loanDetails?.id
+                ? `Loan Details - ${loanDetails.applicationNumber}`
+                : "New Loan"}{" "}
+              {loanDetails?.status && (
+                <Tag
+                  color={
+                    loanDetails.status === "Pending"
+                      ? "orange"
+                      : loanDetails.status === "Approved"
+                        ? "green"
+                        : loanDetails.status === "Rejected"
+                          ? "red"
+                          : loanDetails.status === "FieldVerificationComplete"
+                            ? "green"
+                            : loanDetails.status === "FieldVerificationStarted"
+                              ? "blue"
+                              : "default"
                   }
-                })()}
-              </Tag>
+                  style={{ marginLeft: 8 }}
+                >
+                  {(() => {
+                    switch (loanDetails.status) {
+                      case "Pending":
+                        return "Unassigned";
+                      case "Assigned":
+                        return "Assigned";
+                      case "FieldVerificationStarted":
+                        return "Under FV";
+                      case "FieldVerificationComplete":
+                        return "FV Completed";
+                      case "Approved":
+                        return "Approved";
+                      case "Rejected":
+                        return "Rejected";
+                      default:
+                        return loanDetails.status;
+                    }
+                  })()}
+                </Tag>
+              )}
+            </span>
+            {loanDetails?.id && currentDepartment === 'PD' && (
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
+                onClick={handleReassign}
+                loading={loading}
+                style={{ marginLeft: 16 }}
+              >
+                Reassign
+              </Button>
             )}
-          </span>
+          </div>
         }
         placement="right"
         width="99%"
