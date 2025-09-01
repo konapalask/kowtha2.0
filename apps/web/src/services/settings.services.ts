@@ -18,6 +18,15 @@ export interface Office {
   //  }
 }
 
+export interface Bank {
+  id: number;
+  name: string;
+  logo: string | null;
+  parent: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const getOrganizationApi = () => {
   return getWithDepartment(`/accounts/organization`);
 };
@@ -30,6 +39,13 @@ export const getOfficesApi = () => {
   return getWithDepartment(`/accounts/offices`);
 };
 
+export const getBanksApi = () => {
+  return getWithDepartment(`/dashboard/banks`);
+};
+
+export const createBankApi = (values: { name: string; logo?: string | null; parent?: string | null; }) => {
+  return postWithDepartment(`/dashboard/banks`, values);
+};
 
 export const getOfficesByDepartmentApi = (department: string) => {
   return axiosInstance.get(`/accounts/offices`, { params: { department } });

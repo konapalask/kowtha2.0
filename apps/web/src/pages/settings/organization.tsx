@@ -20,10 +20,13 @@ import {
   createOfficeApi,
   getOfficesApi,
   getOrganizationApi,
+  getBanksApi,
+  createBankApi,
   Office,
+  Bank,
   updateOfficeApi,
 } from "@/services/settings.services";
-import { getUserDetails, getCurrentDepartmentRole } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartmentRole, getCurrentDepartment } from "@/utils/utility";
 
 const { TabPane } = Tabs;
 
@@ -44,16 +47,21 @@ interface Organization {
 export default function OrganizationSettings() {
   const userDetails = getUserDetails();
   const isAdmin = getCurrentDepartmentRole() === "Admin" ;
+  const currentDepartment = getCurrentDepartment();
+  const isFI = currentDepartment === "FI";
   const [form] = Form.useForm();
   const [officeForm] = Form.useForm();
+  const [bankForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [offices, setOffices] = useState<Office[]>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
   const [organization, setOrganization] = useState<Organization>({
     id: 1,
     name: "Loan Verification System",
     description: "Organization description",
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isBankModalVisible, setIsBankModalVisible] = useState(false);
   const [editingOffice, setEditingOffice] = useState<Office | null>(null);
 
   useEffect(() => {
@@ -83,6 +91,21 @@ export default function OrganizationSettings() {
   useEffect(() => {
     fetchOffices();
   }, []);
+
+
+  const fetchBanks = async () => {
+    try {
+      const result = await getBanksApi();
+      setBanks(result?.data?.data ?? []);
+    } catch (error) {
+      console.error("Fetch banks error:", error);
+    }
+  };
+  useEffect(() => {
+    if (isFI) {
+      fetchBanks();
+    }
+  }, [isFI]);
 
   const handleOrganizationUpdate = async (values: any) => {
     try {
@@ -122,6 +145,21 @@ export default function OrganizationSettings() {
     } catch (error) {
       console.error("Failed to save Branch:", error);
       message.error("Failed to save Branch");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateBank = async (values: any) => {
+    try {
+      setLoading(true);
+      await createBankApi(values);
+      message.success("Bank created successfully");
+      setIsBankModalVisible(false);
+      bankForm.resetFields();
+      fetchBanks();
+    } catch (error) {
+      message.error("Failed to create bank");
     } finally {
       setLoading(false);
     }
@@ -201,6 +239,37 @@ export default function OrganizationSettings() {
       : []),
   ];
 
+  const bankColumns: any[] = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      width: 170,
+    },
+    {
+      title: "Parent Company",
+      dataIndex: "parent",
+      key: "parent",
+      width: 170,
+    },
+    {
+      title: "Logo",
+      dataIndex: "logo",
+      key: "logo",
+      width: 170,
+      render: (logo: string | null) => 
+        logo ? (
+          <img 
+            src={logo} 
+            alt="Bank Logo" 
+            style={{ width: 50, height: 50, objectFit: "contain" }} 
+          />
+        ) : (
+          <span style={{ color: "#999" }}>No Logo</span>
+        ),
+    },
+  ];
+
   return (
     <DashboardLayout>
       <Tabs defaultActiveKey="1">
@@ -224,11 +293,6 @@ export default function OrganizationSettings() {
                         : Promise.resolve(),
                   },
                 ]}
-                // normalize={(value) =>
-                //   typeof value === "string"
-                //     ? value.trim().replace(/\s{2,}/g, " ")
-                //     : value
-                // }
               >
                 <Input
                   onBlur={(e) => {
@@ -290,6 +354,37 @@ export default function OrganizationSettings() {
             />
           </Card>
         </TabPane>
+
+                 {isFI && (
+          <TabPane tab="Banks" key="3">
+            <Card>
+              {isAdmin && (
+                <div style={{ marginBottom: 16 }} className="flex-end">
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setIsBankModalVisible(true);
+                    }}
+                  >
+                    Add Bank
+                  </Button>
+                </div>
+              )}
+
+              <Table
+                className="striped-table"
+                columns={bankColumns}
+                dataSource={banks}
+                rowKey="id"
+                loading={loading}
+                scroll={{ y: 400 }}
+                bordered
+                pagination={banks.length < 10 ? false : undefined}
+              />
+            </Card>
+          </TabPane>
+        )}
       </Tabs>
 
       <Modal
@@ -347,7 +442,7 @@ export default function OrganizationSettings() {
           >
             <Input
               onBlur={(e) => {
-                e.target.value = e.target.value.trim(); // or just .trim() to remove both ends
+                e.target.value = e.target.value.trim();
               }}
             />
           </Form.Item>
@@ -388,7 +483,6 @@ export default function OrganizationSettings() {
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  // message.success("Branch deleted");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
@@ -409,7 +503,6 @@ export default function OrganizationSettings() {
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
-                  // message.success("Branch deleted");
                 }}
                 onCancel={() => {}}
                 okText="Yes"
@@ -419,6 +512,60 @@ export default function OrganizationSettings() {
               </Popconfirm>
             </div>
           )}
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Add Bank"
+        open={isBankModalVisible}
+        centered
+        onCancel={() => {
+          setIsBankModalVisible(false);
+          bankForm.resetFields();
+        }}
+        footer={null}
+      >
+        <Form
+          form={bankForm}
+          layout="vertical"
+          onFinish={handleCreateBank}
+          initialValues={{ logo: undefined, parent: undefined }}
+        >
+          <Form.Item
+            name="name"
+            label="Bank Name"
+            rules={[{ required: true, message: "Please enter bank name" }]}
+          >
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim();
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item name="logo" label="Logo URL">
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="parent" label="Parent Company">
+            <Input />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Add Bank
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsBankModalVisible(false);
+                  bankForm.resetFields();
+                }}
+              >
+                Cancel
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Modal>
     </DashboardLayout>
