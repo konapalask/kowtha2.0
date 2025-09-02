@@ -104,7 +104,7 @@ export default function Loans() {
       setLoading(true);
       const result = await getLoansApi(page, limit, filters);
       const data = result.data.data;
-      setLoans(data?.items ?? []);
+      setLoans(data?.items ?? [null]);
       setPagination({
         current: data.meta.page,
         pageSize: data.meta.limit,
@@ -286,71 +286,66 @@ export default function Loans() {
       return [
         ...baseColumns,
         {
-          title: <Typography.Text>Business</Typography.Text>,
-          children: [
-            {
-              title: "Assignee",
-              key: "businessAssignee",
-              onFilter: (value: boolean | Key, record: Loan) => {
-                const business = record?.verifications?.find(
-                  (v: any) => v.type === "Business"
-                );
-                return business?.fieldExecutive?.employeeCode === value.toString();
-              },
-              render: (_: any, record: Loan) => {
-                const business = record?.verifications?.find(
-                  (v: any) => v.type === "Business"
-                );
-                return business ? (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ marginBottom: "4px" }}>
-                      {business?.fieldExecutive?.name}
-                    </div>
-                    <Tooltip title={business?.fieldExecutive?.employeeCode}>
-                      <Tag 
-                        color="blue" 
-                        style={{ 
-                          maxWidth: "180px",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap"
-                        }}
-                      >
-                        {business?.fieldExecutive?.employeeCode}
-                      </Tag>
-                    </Tooltip>
-                  </div>
-                ) : (
-                  "-"
-                );
-              },
-              align: "center",
-              width: 150,
-            },
-            {
-              title: "Status",
-              key: "businessStatus",
-              render: (_: any, record: Loan) => {
-                const business = record?.verifications?.find(
-                  (v: any) => v.type === "Business"
-                );
-                if (!business) return "-";
+          title: "Business Assignee",
+          key: "businessAssignee",
+          onFilter: (value: boolean | Key, record: Loan) => {
+            const business = record?.verifications?.find(
+              (v: any) => v.type === "Business"
+            );
+            return business?.fieldExecutive?.employeeCode === value.toString();
+          },
+          render: (_: any, record: Loan) => {
+            const business = record?.verifications?.find(
+              (v: any) => v.type === "Business"
+            );
+            return business ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ marginBottom: "4px" }}>
+                  {business?.fieldExecutive?.name}
+                </div>
+                <Tooltip title={business?.fieldExecutive?.employeeCode}>
+                  <Tag 
+                    color="blue" 
+                    style={{ 
+                      maxWidth: "180px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    {business?.fieldExecutive?.employeeCode}
+                  </Tag>
+                </Tooltip>
+              </div>
+            ) : (
+              "-"
+            );
+          },
+          align: "center",
+          width: 180,
+        },
+        {
+          title: "Business Status",
+          key: "businessStatus",
+          render: (_: any, record: Loan) => {
+            const business = record?.verifications?.find(
+              (v: any) => v.type === "Business"
+            );
+            if (!business) return "-";
 
-                const isPostponed =
-                  business.isPostponed === true && business.status === "Pending";
-                const status = isPostponed ? "Postponed" : business.status;
-                const color = isPostponed
-                  ? "red"
-                  : business.status === "Completed"
-                    ? "green"
-                    : "orange";
+            const isPostponed =
+              business.isPostponed === true && business.status === "Pending";
+            const status = isPostponed ? "Postponed" : business.status;
+            const color = isPostponed
+              ? "red"
+              : business.status === "Completed"
+                ? "green"
+                : "orange";
 
-                return <Tag color={color}>{status}</Tag>;
-              },
-              width: 100,
-              align: "center",
-            },
-          ],
+            return <Tag color={color}>{status}</Tag>;
+          },
+          width: 120,
+          align: "center",
         },
         ...(!(getCurrentDepartmentRole() === "Verifier")
           ? [
