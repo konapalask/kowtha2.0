@@ -12,7 +12,8 @@ import {
   Tabs,
   Popconfirm,
 } from "antd";
-import { PlusOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import axiosInstance from "@/config/axios.config";
 import { ColumnsType } from "antd/es/table";
@@ -22,6 +23,8 @@ import {
   getOrganizationApi,
   getBanksApi,
   createBankApi,
+  updateBankApi,
+  deleteBankApi,
   Office,
   Bank,
   updateOfficeApi,
@@ -63,6 +66,7 @@ export default function OrganizationSettings() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isBankModalVisible, setIsBankModalVisible] = useState(false);
   const [editingOffice, setEditingOffice] = useState<Office | null>(null);
+  const [editingBank, setEditingBank] = useState<Bank | null>(null);
 
   useEffect(() => {
     const fetchOrganization = async () => {
@@ -165,6 +169,49 @@ export default function OrganizationSettings() {
     }
   };
 
+  const handleBankSubmit = async (values: any) => {
+    try {
+      setLoading(true);
+
+      if (editingBank) {
+        await updateBankApi(editingBank.id, values);
+        fetchBanks();
+        message.success("Bank updated successfully");
+      } else {
+        await createBankApi(values);
+        fetchBanks();
+        message.success("Bank created successfully");
+      }
+
+      setIsBankModalVisible(false);
+      bankForm.resetFields();
+      setEditingBank(null);
+    } catch (error) {
+      message.error(`Failed to ${editingBank ? 'update' : 'create'} bank`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditBank = (bank: Bank) => {
+    setEditingBank(bank);
+    bankForm.setFieldsValue(bank);
+    setIsBankModalVisible(true);
+  };
+
+  const handleDeleteBank = async (id: number) => {
+    try {
+      setLoading(true);
+      await deleteBankApi(id);
+      fetchBanks();
+      message.success("Bank deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete bank");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEditOffice = (office: Office) => {
     setEditingOffice(office);
     officeForm.setFieldsValue(office);
@@ -252,22 +299,66 @@ export default function OrganizationSettings() {
       key: "parent",
       width: 170,
     },
-    {
-      title: "Logo",
-      dataIndex: "logo",
-      key: "logo",
-      width: 170,
-      render: (logo: string | null) => 
-        logo ? (
-          <img 
-            src={logo} 
-            alt="Bank Logo" 
-            style={{ width: 50, height: 50, objectFit: "contain" }} 
-          />
-        ) : (
-          <span style={{ color: "#999" }}>No Logo</span>
-        ),
+    // {
+    //   title: "Logo",
+    //   dataIndex: "logo",
+    //   key: "logo",
+    //   width: 170,
+    //   render: (logo: string | null) => 
+    //     logo ? (
+    //       <img 
+    //         src={logo} 
+    //         alt="Bank Logo" 
+    //         style={{ width: 50, height: 50, objectFit: "contain" }} 
+    //       />
+    //     ) : (
+    //       <span style={{ color: "#999" }}>No Logo</span>
+    //     ),
+    // },
+        {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 200,
+      render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm:ss"),
+      sorter: (a: Bank, b: Bank) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf(),
     },
+    ...(isAdmin
+      ? [
+          {
+            title: "Actions",
+            key: "actions",
+            align: "center",
+            render: (_: any, record: Bank) => (
+              <Space>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEditBank(record)}
+                >
+                  Edit
+                </Button>
+                <Popconfirm
+                  title="Are you sure you want to delete this bank?"
+                  onConfirm={() => handleDeleteBank(record.id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button
+                    type="link"
+                    danger
+                    icon={<DeleteOutlined />}
+                  >
+                    Delete
+                  </Button>
+                </Popconfirm>
+              </Space>
+            ),
+            width: 100,
+            fixed: "right",
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -360,15 +451,17 @@ export default function OrganizationSettings() {
             <Card>
               {isAdmin && (
                 <div style={{ marginBottom: 16 }} className="flex-end">
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => {
-                      setIsBankModalVisible(true);
-                    }}
-                  >
-                    Add Bank
-                  </Button>
+                                <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingBank(null);
+                  bankForm.resetFields();
+                  setIsBankModalVisible(true);
+                }}
+              >
+                Add Bank
+              </Button>
                 </div>
               )}
 
@@ -517,11 +610,12 @@ export default function OrganizationSettings() {
       </Modal>
 
       <Modal
-        title="Add Bank"
+        title={editingBank ? "Edit Bank" : "Add Bank"}
         open={isBankModalVisible}
         centered
         onCancel={() => {
           setIsBankModalVisible(false);
+          setEditingBank(null);
           bankForm.resetFields();
         }}
         footer={null}
@@ -529,13 +623,21 @@ export default function OrganizationSettings() {
         <Form
           form={bankForm}
           layout="vertical"
-          onFinish={handleCreateBank}
+          onFinish={handleBankSubmit}
           initialValues={{ logo: undefined, parent: undefined }}
         >
           <Form.Item
             name="name"
             label="Bank Name"
-            rules={[{ required: true, message: "Please enter bank name" }]}
+            rules={[
+              { required: true, message: "Please enter bank name" },
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+            ]}
           >
             <Input
               onBlur={(e) => {
@@ -544,22 +646,39 @@ export default function OrganizationSettings() {
             />
           </Form.Item>
 
-          <Form.Item name="logo" label="Logo URL">
+          {/* <Form.Item name="logo" label="Logo URL">
             <Input />
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item name="parent" label="Parent Company">
-            <Input />
+          <Form.Item 
+            name="parent" 
+            label="Parent Company"
+            rules={[
+              {
+                validator: (_, value) =>
+                  value && /^\s/.test(value)
+                    ? Promise.reject(new Error("Can't start with a space"))
+                    : Promise.resolve(),
+              },
+    
+            ]}
+          >
+            <Input
+              onBlur={(e) => {
+                e.target.value = e.target.value.trim();
+              }}
+            />
           </Form.Item>
 
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Add Bank
+                {editingBank ? "Update" : "Add"} Bank
               </Button>
               <Button
                 onClick={() => {
                   setIsBankModalVisible(false);
+                  setEditingBank(null);
                   bankForm.resetFields();
                 }}
               >

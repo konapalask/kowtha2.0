@@ -47,6 +47,14 @@ export const createBankApi = (values: { name: string; logo?: string | null; pare
   return postWithDepartment(`/dashboard/banks`, values);
 };
 
+export const updateBankApi = (id: number, values: { name: string; logo?: string | null; parent?: string | null; }) => {
+  return patchWithDepartment(`/dashboard/banks/${id}`, values);
+};
+
+export const deleteBankApi = (id: number) => {
+  return axiosInstance.delete(`/dashboard/banks/${id}?department=FI`);
+};
+
 export const getOfficesByDepartmentApi = (department: string) => {
   return axiosInstance.get(`/accounts/offices`, { params: { department } });
 };
