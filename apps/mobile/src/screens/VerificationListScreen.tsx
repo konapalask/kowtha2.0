@@ -78,7 +78,7 @@ const VerificationListScreen = () => {
         page,
         selectedFilter,
         appNumberFilter,
-        dept ?? currentDept,
+        dept ?? currentDept ?? 'FI',
       );
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
@@ -94,8 +94,6 @@ const VerificationListScreen = () => {
       setHasMore(page < totalPages);
       setPage(page);
     } catch (error) {
-      // if (testUser) {
-      // }
       if (!testUser) {
         console.error('Error fetching data:', error);
         Toast.show({
@@ -203,6 +201,7 @@ const VerificationListScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
+      fetchDept();
       fetchData(1, false, currentDept);
       checkAttendance();
     }, [currentDept]),
@@ -629,6 +628,7 @@ const VerificationListScreen = () => {
               setVisible={setShowAttendanceModal}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
+              dept={currentDept}
             />
           </View>
         </View>

@@ -19,15 +19,8 @@ const AttendanceCard: React.FC<{
   setVisible: (val: boolean) => void;
   isLoggedIn: any;
   setIsLoggedIn: any;
-}> = ({setVisible, isLoggedIn, setIsLoggedIn}) => {
-  const [dept, setDept] = useState('');
-  useEffect(() => {
-    const getDept = async () => {
-      const details = await getItem('dept');
-      setDept(details);
-    };
-    getDept();
-  }, []);
+  dept: string;
+}> = ({setVisible, isLoggedIn, setIsLoggedIn, dept}) => {
   const handleLoginTick = async (
     setVisible: (val: boolean) => void,
     setIsLoggedIn: any,
