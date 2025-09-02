@@ -150,7 +150,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
                   <TouchableOpacity
                     key={option}
                     style={styles.optionButton}
-                    onPress={() => {
+                    onPressIn={() => {
                       onChange(option);
                       sheetRef.current?.hide();
                     }}>

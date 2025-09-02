@@ -1,172 +1,261 @@
-import React, {useState, useEffect} from 'react';
+import React, {useRef} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
+  TextInput,
   ScrollView,
 } from 'react-native';
+import {useForm, Controller} from 'react-hook-form';
 import {colors} from '../../constants/colors';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 
-export type AdditionalDetailsItem = {
-  id: string;
-  value: string;
-  error?: string;
+export type ApplicantDetailsFormData = {
+  currentResidentialAddress: string;
+  assets: string;
+  purposeOfLoan: string;
+  personMet: string;
+  educationalQualification: string;
+  incomeDetails: string;
+  nameOfCoApplicant?: string; // Non-required field
+  maritalStatus: string;
+  houseSize: string;
+  workExperience: string;
+  purchase: string;
+  relationshipDuration: string;
 };
 
-type AdditionalDetailsProps = {
-  initialData?: AdditionalDetailsItem[];
-  onSubmit: (data: AdditionalDetailsItem[]) => void;
-  //   onValidationChange?: (isValid: boolean) => void;
+type ApplicantDetailsProps = {
+  formData: any;
+  onSubmit: any;
 };
 
-const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
-  initialData = [{id: Date.now().toString(), value: ''}],
+const MARITAL_STATUS_OPTIONS = [
+  'Single',
+  'Married',
+  'Divorced',
+  'Widowed',
+  'Separated',
+];
+
+const EDUCATION_QUALIFICATION_OPTIONS = [
+  'Below 10th',
+  '10th Pass',
+  '12th Pass',
+  'Diploma',
+  'Graduate',
+  'Post Graduate',
+  'Professional Degree',
+  'Others',
+];
+
+const PERSON_MET_OPTIONS = [
+  'Self',
+  'Spouse',
+  'Parent',
+  'Sibling',
+  'Relative',
+  'Friend',
+  'Employee',
+  'Others',
+];
+
+const RELATIONSHIP_DURATION_OPTIONS = [
+  'Less than 1 year',
+  '1-3 years',
+  '3-5 years',
+  '5-10 years',
+  'More than 10 years',
+];
+
+const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
+  formData,
   onSubmit,
-  //   onValidationChange,
 }) => {
-  const [items, setItems] = useState<AdditionalDetailsItem[]>(initialData);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const maritalStatusSheetRef = useRef<ActionSheetRef>(null);
+  const educationSheetRef = useRef<ActionSheetRef>(null);
+  const personMetSheetRef = useRef<ActionSheetRef>(null);
+  const relationshipDurationSheetRef = useRef<ActionSheetRef>(null);
 
-  // Validate all fields
-  const validateAllFields = (
-    itemsToValidate: AdditionalDetailsItem[],
-  ): boolean => {
-    return itemsToValidate.every(item => !validateField(item.value));
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: {errors},
+  } = useForm<ApplicantDetailsFormData>({
+    defaultValues: formData,
+  });
+
+  const handleFormSubmit = (data: ApplicantDetailsFormData) => {
+    onSubmit(data);
   };
 
-  const validateField = (value: string): string => {
-    if (!value.trim()) {
-      return 'This field is required';
-    }
-    return '';
-  };
-
-  // Update validation status when items change
-  //   useEffect(() => {
-  //     const isValid = validateAllFields(items);
-  //     onValidationChange?.(isValid);
-  //   }, [items, onValidationChange]);
-
-  const handleInputChange = (id: string, value: string) => {
-    const updatedItems = items.map(item =>
-      item.id === id ? {...item, value, error: validateField(value)} : item,
-    );
-    setItems(updatedItems);
-  };
-
-  const handleSubmit = () => {
-    setHasSubmitted(true);
-    const isValid = validateAllFields(items);
-
-    if (isValid) {
-      onSubmit(items);
-    } else {
-      // Add errors to all invalid fields
-      setItems(prevItems =>
-        prevItems.map(item => ({
-          ...item,
-          error: validateField(item.value),
-        })),
-      );
-    }
-  };
-
-  const addNewField = () => {
-    // Only allow adding if all current fields are valid
-    if (validateAllFields(items)) {
-      const newItem = {id: Date.now().toString(), value: ''};
-      setItems(prevItems => [...prevItems, newItem]);
-    }
-  };
-
-  const removeField = (id: string) => {
-    if (items.length > 1) {
-      const newItems = items.filter(item => item.id !== id);
-      setItems(newItems);
-
-      // If we've already submitted, re-validate after removal
-      if (hasSubmitted) {
-        const isValid = validateAllFields(newItems);
-        if (isValid) {
-          onSubmit(newItems);
-        }
-      }
-    }
-  };
-
-  const isAddButtonDisabled = items.some(
-    item => !item.value.trim() || validateField(item.value),
+  const renderSelectField = (
+    name: keyof ApplicantDetailsFormData,
+    label: string,
+    options: string[],
+    sheetRef: React.RefObject<ActionSheetRef>,
+    isRequired: boolean = true,
+  ) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>
+        {label} {!isRequired && '(Optional)'}
+      </Text>
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          required: isRequired ? `${label} is required` : false,
+        }}
+        render={({field: {onChange, value}}) => (
+          <>
+            <TouchableOpacity
+              style={[styles.selectInput, errors[name] && styles.inputError]}
+              onPress={() => sheetRef.current?.show()}>
+              <Text style={value ? styles.selectText : styles.placeholderText}>
+                {value || `Select ${label.toLowerCase()}`}
+              </Text>
+            </TouchableOpacity>
+            <ActionSheet ref={sheetRef}>
+              <View style={styles.actionSheetContainer}>
+                {options.map(option => (
+                  <TouchableOpacity
+                    key={option}
+                    style={styles.optionButton}
+                    onPress={() => {
+                      onChange(option);
+                      sheetRef.current?.hide();
+                    }}>
+                    <Text style={styles.optionText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ActionSheet>
+          </>
+        )}
+      />
+      {errors[name] && (
+        <Text style={styles.errorText}>{errors[name]?.message}</Text>
+      )}
+    </View>
   );
 
-  // Handle blur to validate individual field
-  const handleBlur = (id: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? {...item, error: validateField(item.value)} : item,
-      ),
-    );
-  };
+  const renderInputField = (
+    name: keyof ApplicantDetailsFormData,
+    label: string,
+    isRequired: boolean = true,
+    isNumeric: boolean = false,
+    multiline: boolean = false,
+  ) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>
+        {label} {!isRequired && '(Optional)'}
+      </Text>
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          required: isRequired ? `${label} is required` : false,
+          pattern: isNumeric
+            ? {
+                value: /^\d+$/,
+                message: 'Please enter numbers only',
+              }
+            : undefined,
+        }}
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={[
+              styles.input,
+              errors[name] && styles.inputError,
+              multiline && styles.multilineInput,
+            ]}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            placeholder={`Enter ${label.toLowerCase()}`}
+            placeholderTextColor={colors.text.secondary}
+            keyboardType={isNumeric ? 'numeric' : 'default'}
+            multiline={multiline}
+            numberOfLines={multiline ? 3 : 1}
+          />
+        )}
+      />
+      {errors[name] && (
+        <Text style={styles.errorText}>{errors[name]?.message}</Text>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {items.map((item, index) => (
-          <View key={item.id} style={styles.inputContainer}>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={[
-                  styles.input,
-                  item.error && styles.inputError,
-                  styles.detailInput,
-                ]}
-                value={item.value}
-                onChangeText={text => handleInputChange(item.id, text)}
-                onBlur={() => handleBlur(item.id)}
-                placeholder={`Additional detail #${index + 1}`}
-                placeholderTextColor={colors.text.secondary}
-                multiline
-                numberOfLines={3}
-              />
-              {items.length > 1 && (
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => removeField(item.id)}>
-                  <Icon name="remove-circle" size={24} color={colors.error} />
-                </TouchableOpacity>
-              )}
-            </View>
-            {item.error ? (
-              <Text style={styles.errorText}>{item.error}</Text>
-            ) : null}
-          </View>
-        ))}
+        {renderInputField(
+          'currentResidentialAddress',
+          'Current Residential Address',
+          true,
+          false,
+          true,
+        )}
+        {renderInputField('assets', 'Assets', true, false, true)}
+        {renderInputField(
+          'purposeOfLoan',
+          'Purpose of Loan',
+          true,
+          false,
+          true,
+        )}
 
-        <TouchableOpacity
-          style={[
-            styles.addButton,
-            isAddButtonDisabled && styles.addButtonDisabled,
-          ]}
-          onPress={addNewField}
-          disabled={isAddButtonDisabled}>
-          <Icon
-            name="add-circle"
-            size={24}
-            color={isAddButtonDisabled ? colors.text.disabled : colors.primary}
-          />
-          <Text
-            style={[
-              styles.addButtonText,
-              isAddButtonDisabled && styles.addButtonTextDisabled,
-            ]}>
-            Add Field
-          </Text>
-        </TouchableOpacity>
+        {renderSelectField(
+          'personMet',
+          'Person Met',
+          PERSON_MET_OPTIONS,
+          personMetSheetRef,
+        )}
+
+        {renderSelectField(
+          'educationalQualification',
+          'Educational Qualification',
+          EDUCATION_QUALIFICATION_OPTIONS,
+          educationSheetRef,
+        )}
+
+        {renderInputField('incomeDetails', 'Income Details', true, false, true)}
+
+        {renderInputField(
+          'nameOfCoApplicant',
+          'Name of Co-applicant',
+          false, // Not required
+        )}
+
+        {renderSelectField(
+          'maritalStatus',
+          'Marital Status',
+          MARITAL_STATUS_OPTIONS,
+          maritalStatusSheetRef,
+        )}
+
+        {renderInputField('houseSize', 'House Size')}
+        {renderInputField(
+          'workExperience',
+          'Work Experience (years)',
+          true,
+          true,
+        )}
+        {renderInputField('purchase', 'Purchase', true, true)}
+
+        {renderSelectField(
+          'relationshipDuration',
+          'Relationship Duration',
+          RELATIONSHIP_DURATION_OPTIONS,
+          relationshipDurationSheetRef,
+        )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={handleSubmit(handleFormSubmit)}>
         <Text style={styles.saveButtonText}>Save</Text>
       </TouchableOpacity>
     </View>
@@ -184,14 +273,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  detailInput: {
-    flex: 1,
-    minHeight: 100,
-    textAlignVertical: 'top',
+  label: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 4,
   },
   input: {
     backgroundColor: colors.background,
@@ -201,6 +286,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
   inputError: {
     borderColor: colors.error,
   },
@@ -208,33 +297,32 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 12,
     marginTop: 4,
-    marginLeft: 4,
   },
-  removeButton: {
-    marginLeft: 8,
-    padding: 8,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
+  selectInput: {
+    backgroundColor: colors.background,
     borderRadius: 8,
+    padding: 12,
     borderWidth: 1,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
-    marginTop: 8,
-  },
-  addButtonDisabled: {
     borderColor: colors.border,
+    justifyContent: 'center',
   },
-  addButtonText: {
-    color: colors.primary,
-    marginLeft: 8,
-    fontWeight: '500',
+  selectText: {
+    color: colors.text.primary,
   },
-  addButtonTextDisabled: {
-    color: colors.text.disabled,
+  placeholderText: {
+    color: colors.text.secondary,
+  },
+  actionSheetContainer: {
+    padding: 16,
+  },
+  optionButton: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  optionText: {
+    fontSize: 16,
+    color: colors.text.primary,
   },
   saveButton: {
     backgroundColor: '#fff',
@@ -252,4 +340,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AdditionalDetails;
+export default ApplicantDetails;

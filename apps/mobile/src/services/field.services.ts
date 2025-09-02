@@ -17,8 +17,15 @@ export const getUserDetails = async () => {
   return axiosInstance.get(`/accounts/profile`);
 };
 
-export const submitVerification = async (data: any, id: string) => {
-  return axiosInstance.patch(`/loans/${id}/submit-verification-report`, data);
+export const submitVerification = async (
+  data: any,
+  id: string,
+  department?: string,
+) => {
+  return axiosInstance.patch(
+    `/loans/${id}/submit-verification-report?department=${department ?? 'FI'}`,
+    data,
+  );
 };
 
 export const getPresignedUrl = async (id: string) => {

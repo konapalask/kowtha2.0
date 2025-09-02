@@ -9,9 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import {getItem, setItem} from '../helpers/utility';
+import {clearItem, getItem, setItem} from '../helpers/utility';
 // import {submitVerification} from '../services/verification.services';
 
 // Components
@@ -20,15 +24,25 @@ import CollapsibleSection from '../components/CollapsibleSection';
 import BasicDetails from '../components/pd-forms/BasicDetails';
 import BusinessDetails from '../components/pd-forms/BusinessDetails';
 import ApplicantDetails from '../components/pd-forms/ApplicantDetails';
-import AdditionalDetails, {
-  AdditionalDetailsItem,
-} from '../components/pd-forms/AdditionalDetails';
+import AdditionalDetails from '../components/pd-forms/AdditionalDetails';
 import ThirdPartyCheck, {
   ThirdPartyCheckFormData,
 } from '../components/forms/ThirdPartyCheck';
 import ExistingLoans from '../components/forms/ExistingLoans';
 import FamilyMemberDetails from '../components/forms/FamilyMemberDetails';
 import {submitVerification} from '../services/field.services';
+import PhotoCapture from '../components/forms/PhotoCapture';
+
+const sectionKeys = [
+  'basicDetails',
+  'businessDetails',
+  'applicantDetails',
+  'familyMemberDetails',
+  'thirdPartyCheck',
+  'existingLoans',
+  'additionalDetails',
+  'uploadedItems',
+];
 
 interface PDVerificationFormData {
   basicDetails: {
@@ -54,7 +68,7 @@ interface PDVerificationFormData {
     yearsInCurrentCity: string;
   };
   familyMemberDetails: any[];
-  thirdPartyCheck: ThirdPartyCheckFormData;
+  thirdPartyCheck: any;
   existingLoans: {
     loans: Array<{
       bankName: string;
@@ -64,21 +78,22 @@ interface PDVerificationFormData {
       tenure: string;
     }>;
   };
-  additionalDetails: AdditionalDetailsItem[];
-  additionalInfo: {
-    additionalRemarks: string;
-    specialMentions: string;
-  };
+  additionalDetails: any;
+  uploadedItems: any;
+  // additionalInfo: {
+  //   additionalRemarks: string;
+  //   specialMentions: string;
+  // };
 }
-
-const STORAGE_KEY = 'pdVerificationData';
 
 const PDVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {item} = route.params as {item: any};
+  console.log(item);
   const {userData} = route.params as {userData: any};
-  console.log(userData);
+  // console.log(userData);
+  const STORAGE_KEY = `${item?.id}_pd`;
 
   // State for expanded sections
   const [expandedSections, setExpandedSections] = useState<{
@@ -91,6 +106,7 @@ const PDVerification = () => {
     thirdPartyCheck: false,
     existingLoans: false,
     additionalDetails: false,
+    uploadedItems: false,
   });
 
   // State for tracking valid sections
@@ -102,6 +118,7 @@ const PDVerification = () => {
     thirdPartyCheck: false,
     existingLoans: false,
     additionalDetails: false,
+    uploadedItems: false,
   });
 
   // Toggle section expansion
@@ -116,16 +133,33 @@ const PDVerification = () => {
   const handleFormDataChange = useCallback(
     (section: keyof PDVerificationFormData, data: any) => {
       setFormData(prev => {
-        const newData = {
-          ...prev,
-          [section]: {
+        let newSection;
+
+        if (Array.isArray(data)) {
+          // Replace or append array
+          newSection = [...data];
+        } else {
+          // Keep object merge for non-array
+          newSection = {
             ...prev[section],
             ...data,
-          },
+          };
+        }
+
+        const newData = {
+          ...prev,
+          [section]: newSection,
         };
+
         saveData(newData);
         return newData;
       });
+
+      toggleSection(section);
+      setValidSections(prev => ({
+        ...prev,
+        [section]: true,
+      }));
     },
     [],
   );
@@ -136,17 +170,39 @@ const PDVerification = () => {
       const savedData = await getItem(STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        setFormData(parsedData);
+        setValidSections(
+          sectionKeys.reduce((acc, section) => {
+            if (section === 'thirdPartyCheck') {
+              acc[section] = parsedData[section]?.checks?.length > 0;
+            } else if (section === 'existingLoans') {
+              acc[section] = parsedData[section]?.loans?.length > 0;
+            } else if (section === 'additionalDetails') {
+              acc[section] = parsedData[section]?.details?.length > 0;
+            } else if (section === 'uploadedItems') {
+              acc[section] = parsedData[section]?.length > 0;
+            } else {
+              acc[section] = Object.keys(parsedData[section] ?? {})?.length > 0;
+            }
+            return acc;
+          }, {} as {[key: string]: boolean}),
+        );
       }
     } catch (error) {
       console.error('Error loading saved data:', error);
     }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadSavedData();
+    }, [loadSavedData]),
+  );
+
   // Save data to AsyncStorage
   const saveData = useCallback(async (data: PDVerificationFormData) => {
     try {
       await setItem(STORAGE_KEY, JSON.stringify(data));
+      console.log('success');
     } catch (error) {
       console.error('Error saving data:', error);
     }
@@ -155,16 +211,16 @@ const PDVerification = () => {
   // Handle form data changes
 
   // Handle family member details submission
-  const handleFamilyMemberDetailsSubmit = useCallback(
-    (data: PDVerificationFormData['familyMemberDetails']) => {
-      handleFormDataChange('familyMemberDetails', data);
-      setValidSections(prev => ({
-        ...prev,
-        familyMemberDetails: true,
-      }));
-    },
-    [handleFormDataChange],
-  );
+  // const handleFamilyMemberDetailsSubmit = useCallback(
+  //   (data: PDVerificationFormData['familyMemberDetails']) => {
+  //     handleFormDataChange('familyMemberDetails', data);
+  //     setValidSections(prev => ({
+  //       ...prev,
+  //       familyMemberDetails: true,
+  //     }));
+  //   },
+  //   [handleFormDataChange],
+  // );
 
   // Initial form data
   const initialFormData: PDVerificationFormData = {
@@ -192,16 +248,32 @@ const PDVerification = () => {
     },
     familyMemberDetails: [],
     thirdPartyCheck: {
-      checks: [],
+      checks: [
+        {
+          tpcName: '',
+          mobileNumber: '',
+          relationship: '',
+          // feedbackStatus: '',
+          comments: '',
+        },
+      ],
     },
     existingLoans: {
-      loans: [],
+      loans: [
+        {
+          bankName: '',
+          purpose: '',
+          loanAmount: '',
+          emi: '',
+          tenure: '',
+        },
+      ],
     },
-    additionalDetails: [],
-    additionalInfo: {
-      additionalRemarks: '',
-      specialMentions: '',
-    },
+    additionalDetails: [{id: Date.now().toString(), value: ''}],
+    uploadedItems: [],
+    // additionalInfo: {
+    //   additionalRemarks: [],
+    // },
   };
 
   const [formData, setFormData] =
@@ -218,19 +290,23 @@ const PDVerification = () => {
         return;
       }
 
-      const response: any = await submitVerification(
-        formData,
-        item?.applicationId,
-      );
+      const finalData = {
+        verificationType: 'Business',
+        findings: 'Business Verification Findings',
+        addressType: 'Business',
+        verificationData: formData,
+      };
 
-      if (response.success) {
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'PD Verification submitted successfully!',
-        });
-        navigation.goBack();
-      }
+      await submitVerification(finalData, item?.verificationId, 'PD');
+
+      await clearItem(`${item?.id}_pd`);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'PD Verification submitted successfully!',
+      });
+      navigation.goBack();
+      // }
     } catch (error) {
       console.error('Error submitting PD verification:', error);
       Toast.show({
@@ -273,7 +349,6 @@ const PDVerification = () => {
               formData={formData.businessDetails}
               onSubmit={(data: PDVerificationFormData['businessDetails']) => {
                 handleFormDataChange('businessDetails', data);
-                toggleSection('businessDetails');
               }}
               // onValidationChange={(isValid: boolean) =>
               //   setValidSections(prev => ({...prev, businessDetails: isValid}))
@@ -288,9 +363,9 @@ const PDVerification = () => {
             isValid={validSections.applicantDetails}>
             <ApplicantDetails
               formData={formData.applicantDetails}
-              onSubmit={(data: PDVerificationFormData['applicantDetails']) =>
-                handleFormDataChange('applicantDetails', data)
-              }
+              onSubmit={(data: PDVerificationFormData['applicantDetails']) => {
+                handleFormDataChange('applicantDetails', data);
+              }}
               // onValidationChange={(isValid: boolean) =>
               //   setValidSections(prev => ({...prev, applicantDetails: isValid}))
               // }
@@ -303,7 +378,11 @@ const PDVerification = () => {
             onToggle={() => toggleSection('familyMemberDetails')}
             isValid={validSections.familyMemberDetails}>
             <FamilyMemberDetails
-              onSubmit={handleFamilyMemberDetailsSubmit}
+              onSubmit={(
+                data: PDVerificationFormData['familyMemberDetails'],
+              ) => {
+                handleFormDataChange('familyMemberDetails', data);
+              }}
               initialData={formData.familyMemberDetails}
               maxFamilyMembers={formData.familyMemberDetails?.length || 0}
               // onValidationChange={(isValid: boolean) =>
@@ -347,35 +426,34 @@ const PDVerification = () => {
             isValid={validSections.additionalDetails}>
             <AdditionalDetails
               initialData={formData.additionalDetails}
-              onSubmit={data => {
-                setFormData(prev => ({
-                  ...prev,
-                  additionalDetails: data,
-                }));
-              }}
+              onSubmit={(data: PDVerificationFormData['additionalDetails']) =>
+                handleFormDataChange('additionalDetails', data)
+              }
+              // onValidationChange={(isValid: boolean) =>
+              //   setValidSections(prev => ({...prev, applicantDetails: isValid}))
+              // }
             />
           </CollapsibleSection>
-
-          {/* <CollapsibleSection
-          title="Additional Information"
-          isExpanded={expandedSections.additionalInfo}
-          onToggle={() => toggleSection('additionalInfo')}
-          isValid={validSections.additionalInfo}>
-          <AdditionalInfo
-            formData={formData.additionalInfo}
-            onFormChange={(data: any) =>
-              setFormData(prev => ({
-                ...prev,
-                additionalInfo: {...prev.additionalInfo, ...data},
-              }))
-            }
-            onValidationChange={(isValid: boolean) =>
-              setValidSections(prev => ({...prev, additionalInfo: isValid}))
-            }
-          />
-        </CollapsibleSection> */}
+          <CollapsibleSection
+            title="Photo Capture"
+            isExpanded={expandedSections.uploadedItems}
+            onToggle={() => toggleSection('uploadedItems')}
+            isValid={validSections.uploadedItems}>
+            <PhotoCapture
+              onUploadedItemsChange={(
+                data: PDVerificationFormData['uploadedItems'],
+              ) => {
+                handleFormDataChange('uploadedItems', data);
+              }}
+              initialItems={formData.uploadedItems}
+              loanId={item.loanId}
+            />
+          </CollapsibleSection>
         </ScrollView>
       </KeyboardAvoidingView>
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit Verification</Text>
+      </TouchableOpacity>
       {/* <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.cancelButton]}
@@ -417,10 +495,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   submitButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.button.primary.background,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
   },
   buttonText: {
     color: colors.white,
+    fontWeight: 'bold',
+  },
+  submitButtonText: {
+    color: colors.button.primary.text,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
