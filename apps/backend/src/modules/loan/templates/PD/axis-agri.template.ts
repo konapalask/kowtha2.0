@@ -788,5 +788,5 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
         <br><br>
         ADITYA BIRLA CAPITAL (Aditya Birla Housing Finance Ltd., will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, our efficient services will not be liable in any case.
     </div>
-    `
+  `
 }

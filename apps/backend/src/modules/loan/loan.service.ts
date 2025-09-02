@@ -999,18 +999,18 @@ export class LoanService {
         throw new Error('Verification not found or not assigned to this field executive');
       }
       // Process all images in verificationData if it exists
-      if (verificationData?.uploadedItems) {
-        await Promise.all(
-          verificationData.uploadedItems.map(item =>
-            this.runWorker({
-              s3ImageUrl: item.s3ImageUrl,
-              latitude: parseFloat(item.latitude),
-              longitude: parseFloat(item.longitude),
-              timestamp: item.timestamp
-            })
-          )
-        );
-      }
+      // if (verificationData?.uploadedItems) {
+      //   await Promise.all(
+      //     verificationData.uploadedItems.map(item =>
+      //       this.runWorker({
+      //         s3ImageUrl: item.s3ImageUrl,
+      //         latitude: parseFloat(item.latitude),
+      //         longitude: parseFloat(item.longitude),
+      //         timestamp: item.timestamp
+      //       })
+      //     )
+      //   );
+      // }
 
       // Update verification status
       const updatedVerification = await this.prisma.verification.update({
