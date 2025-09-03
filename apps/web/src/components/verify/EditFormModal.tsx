@@ -265,7 +265,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         const mappedKey = formKeyMapping[formKey] || formKey;
         
         // For PD department, handle data structure differently
-        let finalData;
+        let finalData: Record<string, any>;
         if (currentDepartment === 'PD') {
           if (formKey === "businessBasicDetails") {
             finalData = {
