@@ -69,6 +69,20 @@ export default function OrganizationSettings() {
   const [editingBank, setEditingBank] = useState<Bank | null>(null);
 
   useEffect(() => {
+    if (isModalVisible) {
+      if (editingOffice) {
+        officeForm.setFieldsValue({
+          name: editingOffice.name,
+          location: editingOffice.location,
+          address: editingOffice.address,
+        });
+      } else {
+        officeForm.resetFields();
+      }
+    }
+  }, [isModalVisible, editingOffice, officeForm]);
+
+  useEffect(() => {
     const fetchOrganization = async () => {
       try {
         const result = await getOrganizationApi();
@@ -493,11 +507,6 @@ export default function OrganizationSettings() {
         <Form
           form={officeForm}
           layout="vertical"
-          initialValues={{
-            name: editingOffice?.name,
-            location: editingOffice?.location,
-            address: editingOffice?.address,
-          }}
           onFinish={handleOfficeSubmit}
         >
           <Form.Item
@@ -565,7 +574,7 @@ export default function OrganizationSettings() {
             </Space>
           </Form.Item>
 
-          {!editingOffice?.archived && (
+          {editingOffice && !editingOffice?.archived && (
             <div style={{ marginTop: 8 }}>
               <Popconfirm
                 title="Are you sure you want to archive this office?"
@@ -573,7 +582,6 @@ export default function OrganizationSettings() {
                   setLoading(true);
                   handleArchive(editingOffice?.id, true);
                   setIsModalVisible(false);
-                  // setIsBankModalVisible(false);
                   setEditingOffice(null);
                   officeForm.resetFields();
                   setLoading(false);
@@ -586,10 +594,10 @@ export default function OrganizationSettings() {
               </Popconfirm>
             </div>
           )}
-          {editingOffice?.archived && (
+          {editingOffice && editingOffice?.archived && (
             <div style={{ marginTop: 8 }}>
               <Popconfirm
-                title="Are you sure you want to archive this office?"
+                title="Are you sure you want to unarchive this office?"
                 onConfirm={async () => {
                   setLoading(true);
                   handleArchive(editingOffice?.id, false);
