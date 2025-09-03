@@ -123,7 +123,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                   <TouchableOpacity
                     key={option}
                     style={styles.optionButton}
-                    onPress={() => {
+                    onPressIn={() => {
                       onChange(option);
                       sheetRef.current?.hide();
                     }}>
