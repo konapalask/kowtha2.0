@@ -10,6 +10,7 @@ import {
   Animated,
   ActivityIndicator,
   Linking,
+  Pressable,
   // Pressable,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
@@ -22,6 +23,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AttendanceCard from '../components/AttendanceCard';
 import {getItem, setItem} from '../helpers/utility';
 import dayjs from 'dayjs';
+import DeptModal from '../components/DeptModal';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -63,19 +65,21 @@ const VerificationListScreen = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const disabled = !isLoggedIn;
   const [testUser, setTestUser] = useState(false);
+  const [currentDept, setCurrentDept] = useState('FI');
+  const [openDeptModal, setOpenDeptModal] = useState(false);
   // const disabled = false;
   // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
 
-  const fetchData = async (page = 1, shouldAppend = false) => {
+  const fetchData = async (page = 1, shouldAppend = false, dept?: string) => {
     try {
       setLoading(true);
       const response = await getFieldData(
         page,
         selectedFilter,
         appNumberFilter,
+        dept ?? currentDept ?? 'FI',
       );
-      console.log(response?.data);
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
         date: dayjs().format('YYYY-MM-DD'),
@@ -90,8 +94,6 @@ const VerificationListScreen = () => {
       setHasMore(page < totalPages);
       setPage(page);
     } catch (error) {
-      // if (testUser) {
-      // }
       if (!testUser) {
         console.error('Error fetching data:', error);
         Toast.show({
@@ -103,6 +105,22 @@ const VerificationListScreen = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateCurrentDept = (dept: string) => {
+    setCurrentDept(dept);
+    setOpenDeptModal(false);
+    // fetchData(1, false, dept);
+  };
+
+  const fetchDept = async () => {
+    try {
+      const dept = await getItem('dept');
+      updateCurrentDept(dept ?? 'FI');
+    } catch (error) {
+      console.error('Error fetching dept:', error);
+      updateCurrentDept('FI');
     }
   };
 
@@ -154,6 +172,7 @@ const VerificationListScreen = () => {
       }
     };
     checkTestUserAndSetData();
+    fetchDept();
   }, []);
 
   const checkAttendance = async () => {
@@ -182,9 +201,10 @@ const VerificationListScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchData(1, false);
+      fetchDept();
+      fetchData(1, false, currentDept);
       checkAttendance();
-    }, []),
+    }, [currentDept]),
   );
 
   useEffect(() => {
@@ -273,28 +293,28 @@ const VerificationListScreen = () => {
   //   { label: "Guarantor", value: "Guarantor" },
   // ];
 
-  const getApplicantTypeColor = (type: string) => {
-    switch (type) {
-      case 'Primary Applicant':
-        return '#2563EB';
-      case 'Co-applicant 1':
-        return '#10B981';
-      case 'Co-applicant 2':
-        return '#10B981';
-      case 'Co-applicant 3':
-        return '#10B981';
-      case 'Co-applicant 4':
-        return '#10B981';
-      case 'Co-applicant 5':
-        return '#10B981';
-      case 'Co-applicant 6':
-        return '#10B981';
-      case 'Guarantor':
-        return '#A16207';
-      default:
-        return '#666';
-    }
-  };
+  // const getApplicantTypeColor = (type: string) => {
+  //   switch (type) {
+  //     case 'Primary Applicant':
+  //       return '#2563EB';
+  //     case 'Co-applicant 1':
+  //       return '#10B981';
+  //     case 'Co-applicant 2':
+  //       return '#10B981';
+  //     case 'Co-applicant 3':
+  //       return '#10B981';
+  //     case 'Co-applicant 4':
+  //       return '#10B981';
+  //     case 'Co-applicant 5':
+  //       return '#10B981';
+  //     case 'Co-applicant 6':
+  //       return '#10B981';
+  //     case 'Guarantor':
+  //       return '#A16207';
+  //     default:
+  //       return '#666';
+  //   }
+  // };
 
   const getVerificationTypeColor = (type: string) => {
     switch (type) {
@@ -416,11 +436,16 @@ const VerificationListScreen = () => {
             userData: item,
           });
         } else if (item?.type === 'Business') {
-          navigation.navigate('BusinessVerification' as any, {
-            item: baseNavPayload,
-            verificationType: 'Business',
-            userData: item,
-          });
+          navigation.navigate(
+            currentDept === 'FI'
+              ? 'BusinessVerification'
+              : ('PDVerification' as any),
+            {
+              item: baseNavPayload,
+              verificationType: 'Business',
+              userData: item,
+            },
+          );
         } else {
           navigation.navigate('VerificationItemScreen' as any, {
             item: baseNavPayload,
@@ -494,7 +519,6 @@ const VerificationListScreen = () => {
             ]}
           />
         </View>
-        {/* <Animated.View style={[styles.detailsRow,{item.verification.status==="Pending"?"orange":"green",opacity}]} /> */}
       </View>
       <View style={styles.detailsRow}>
         <View
@@ -508,24 +532,29 @@ const VerificationListScreen = () => {
             {item?.loan?.applicationNumber}
           </Text>
         </View>
-        <View style={styles.verticalDivider} />
-        {item?.loan?.loanAmount && (
-          <Text style={styles.details}>
-            ₹{formattedLoanAmount(`${item?.loan?.loanAmount}`)}
-          </Text>
+        {!!item?.loan?.loanAmount && (
+          <View>
+            <View style={styles.verticalDivider} />
+            <Text style={styles.details}>
+              ₹{formattedLoanAmount(item?.loan?.loanAmount)}
+            </Text>
+
+            <View style={styles.verticalDivider} />
+          </View>
         )}
-        <View style={styles.verticalDivider} />
-        <View
-          style={[
-            styles.verificationTypeTag,
-            {
-              backgroundColor: getVerificationTypeColor(item?.type),
-            },
-          ]}>
-          <Text style={styles.verificationTypeText}>
-            {getVerificationTypeLabel(item?.type)}
-          </Text>
-        </View>
+        {currentDept === 'FI' && (
+          <View
+            style={[
+              styles.verificationTypeTag,
+              {
+                backgroundColor: getVerificationTypeColor(item?.type),
+              },
+            ]}>
+            <Text style={styles.verificationTypeText}>
+              {getVerificationTypeLabel(item?.type)}
+            </Text>
+          </View>
+        )}
       </View>
       <View style={styles.detailsRow}>
         <Text style={styles.details}>{item?.loan?.applicantType}</Text>
@@ -533,11 +562,6 @@ const VerificationListScreen = () => {
           <TouchableOpacity
             onPress={() => {
               callNumber(item?.loan?.applicantMobile);
-              // Handle mobile number press (e.g., initiate call)
-              // console.log(
-              //   'Mobile number pressed:',
-              //   item?.loan?.applicantMobile,
-              // );
             }}>
             <Text style={[styles.details, styles.mobileText]}>
               +91-{item?.loan?.applicantMobile}
@@ -545,7 +569,7 @@ const VerificationListScreen = () => {
           </TouchableOpacity>
         )}
       </View>
-      {item?.loan?.loanType && (
+      {item?.loan?.loanType && currentDept === 'FI' && (
         <Text style={[styles.details, styles.addressText]}>
           {item?.loan?.loanType}
         </Text>
@@ -578,13 +602,11 @@ const VerificationListScreen = () => {
               return;
             }
             handleGetStarted(item);
-            // Handle get started navigation here
-            // navigation.navigate('VerificationItem', { item, verificationType: item.type });
-          }}
-          // disabled={!isLoggedIn}
-        >
+          }}>
           <View style={styles.getStartedButtonAlignment}>
-            <Text style={styles.getStartedButtonText}>Proceed</Text>
+            <Text style={styles.getStartedButtonText}>
+              {currentDept === 'FI' ? 'Proceed' : 'Start'}
+            </Text>
             <Icon
               name="arrow-forward"
               size={16}
@@ -597,30 +619,17 @@ const VerificationListScreen = () => {
     </View>
   );
 
-  // const handleCloseAttendanceModal = () => {
-  //   setShowAttendanceModal(false);
-  // };
-
   return (
     <View style={styles.container}>
-      {/* {showAttendanceModal && !isLoggedIn && ( */}
       {showAttendanceModal && !isLoggedIn && validTime() && (
         <View style={styles.attendanceModalOverlay}>
-          {/* <Pressable
-            style={styles.attendanceModalBackground}
-            onPress={handleCloseAttendanceModal}
-          /> */}
           <View style={styles.attendanceModalContent}>
             <AttendanceCard
               setVisible={setShowAttendanceModal}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
+              dept={currentDept}
             />
-            {/* <TouchableOpacity
-              onPress={handleCloseAttendanceModal}
-              style={styles.closeAttendanceModalBtn}>
-              <Icon name="close" size={28} color="#666" />
-            </TouchableOpacity> */}
           </View>
         </View>
       )}
@@ -628,11 +637,24 @@ const VerificationListScreen = () => {
         <Text style={styles.headerTitle}>Verification List</Text>
         <View
           style={{
-            flex: 1,
-            alignItems: 'flex-end',
+            flexDirection: 'row',
+            alignItems: 'center',
             elevation: 1000,
             zIndex: 1000,
           }}>
+          <Pressable
+            onPress={() => {
+              setOpenDeptModal(true);
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text>{currentDept}</Text>
+              <Icon name="repeat" size={24} color="#666" />
+            </View>
+          </Pressable>
           <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         </View>
       </View>
@@ -678,6 +700,14 @@ const VerificationListScreen = () => {
               </View>
             ) : null
           }
+        />
+      )}
+      {openDeptModal && (
+        <DeptModal
+          currentDept={currentDept}
+          setCurrentDept={updateCurrentDept}
+          openDeptModal={openDeptModal}
+          setOpenDeptModal={setOpenDeptModal}
         />
       )}
     </View>
