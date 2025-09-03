@@ -1,34 +1,107 @@
 import React from "react";
 import { Form, Input, Select, Col } from "antd";
 
-const personMetOptions = [
-  "Applicant",
-  "Co-Applicant",
-  "Family",
-  "Guarantor",
-  "Others",
-];
-
 const yesNoOptions = ["Yes", "No"];
 
 export type BusinessBasicDetailsFormData = {
+  applicationNumber: string;
   applicantName: string;
-  personMet: string;
-  personMetName?: string;
-  personMetRelation?: string;
-  businessAddress: string;
-  isAddressSame: string;
-  addressCorrection?: string;
+  businessName: string;
+  loanAmount: string;
+  mobileNumber: string;
+  address: string;
+  bankName: string;
 };
 
-const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
-  // Watch values for conditional rendering
-  const personMet = Form.useWatch("personMet", form);
-  const isAddressSame = Form.useWatch("isAddressSame", form);
-  const isBusinessNameSame = Form.useWatch("isBusinessNameSame", form);
-  const isApplicantAvailable = Form.useWatch("isApplicantAvailable", form);
-  const availablePersonRelation = Form.useWatch("availablePersonRelation", form);
+const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ form, currentDepartment }) => {
+  // For PD department, show different fields
+  if (currentDepartment === 'PD') {
+    return (
+      <>
+        <Col span={8}>
+          <Form.Item
+            name="applicationNumber"
+            label="Application Number"
+            rules={[
+              { required: true, message: "Application number is required" },
+            ]}
+          >
+            <Input disabled style={{ color: "#000" }} />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="applicantName"
+            label="Name of the Applicant"
+            rules={[
+              { required: true, message: "Name of the applicant is required" },
+            ]}
+          >
+            <Input disabled style={{ color: "#000" }} />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="businessName"
+            label="Name of the Business"
+            rules={[
+              { required: true, message: "Business name is required" },
+            ]}
+          >
+            <Input placeholder="Enter business name" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="loanAmount"
+            label="Loan Amount"
+            rules={[
+              { required: true, message: "Loan amount is required" },
+            ]}
+          >
+            <Input placeholder="Enter loan amount" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="mobileNumber"
+            label="Mobile Number"
+            rules={[
+              { required: true, message: "Mobile number is required" },
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Mobile number must be 10 digits",
+              },
+            ]}
+          >
+            <Input placeholder="Enter mobile number" maxLength={10} />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="bankName"
+            label="Bank Name"
+            rules={[
+              { required: true, message: "Bank name is required" },
+            ]}
+          >
+            <Input placeholder="Enter bank name" />
+          </Form.Item>
+        </Col>
+        <Col span={24}>
+          <Form.Item
+            name="address"
+            label="Business Address"
+            rules={[{ required: true, message: "Business address is required" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter business address" />
+          </Form.Item>
+        </Col>
+      </>
+    );
+  }
 
+  // Original implementation for other departments
   return (
     <>
       <Col span={8}>
@@ -42,7 +115,6 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           <Input style={{ color: "#000" }} disabled />
         </Form.Item>
       </Col>
-      {/* PAN Number */}
       <Col span={8}>
         <Form.Item
           label="PAN Number"
@@ -67,16 +139,14 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           />
         </Form.Item>
       </Col>
-
-      {/* Aadhar Number */}
       <Col span={8}>
         <Form.Item
           label="Aadhar Number"
           name="aadhar"
           rules={[
-            { required: true, message: "Aadhar is required" },
+            { required: true, message: "Aadhar number is required" },
             {
-              pattern: /^\d{12}$/,
+              pattern: /^[0-9]{12}$/,
               message: "Aadhar must be 12 digits",
             },
           ]}
@@ -84,23 +154,23 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           <Input
             maxLength={12}
             onChange={(e) => {
-              const numeric = e.target.value.replace(/\D/g, "");
-              form.setFieldsValue({ aadhar: numeric });
+              const formatted = e.target.value.replace(/[^0-9]/g, "");
+              form.setFieldsValue({ aadhar: formatted });
             }}
             placeholder="Enter Aadhar number"
           />
         </Form.Item>
       </Col>
-
-      {/*
       <Col span={8}>
         <Form.Item
-          name="personMet"
-          label="Person Met"
-          rules={[{ required: true, message: "Please select who was met" }]}
+          name="isApplicantAvailable"
+          label="Is Applicant Available?"
+          rules={[
+            { required: true, message: "Please specify if applicant is available" },
+          ]}
         >
-          <Select placeholder="Select Person Met">
-            {personMetOptions.map((option) => (
+          <Select placeholder="Select Yes/No">
+            {yesNoOptions.map((option) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
@@ -108,64 +178,17 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
-
-      {personMet && personMet !== "Applicant" && (
-        <Col span={8}>
-          <Form.Item
-            name="personMetName"
-            label="Name of Person Met"
-            rules={[
-              {
-                required: true,
-                message: "Please enter the name of the person met",
-              },
-            ]}
-          >
-            <Input placeholder="Enter name of person met" />
-          </Form.Item>
-        </Col>
-      )}
-      */}
-
-      {personMet === "Others" && (
-        <Col span={8}>
-          <Form.Item
-            name="personMetRelation"
-            label="Specify Relationship to Applicant"
-            rules={[
-              {
-                required: true,
-                message: "Please specify the relationship to the applicant",
-              },
-            ]}
-          >
-            <Input placeholder="Specify relationship" />
-          </Form.Item>
-        </Col>
-      )}
-
-      {/* Is Applicant Available */}
-      <Col span={8}>
-        <Form.Item
-          name="isApplicantAvailable"
-          label="Is Applicant Available"
-          rules={[{ required: true, message: "Please select if applicant is available" }]}
-        >
-          <Select placeholder="Select">
-            <Select.Option value="Yes">Yes</Select.Option>
-            <Select.Option value="No">No</Select.Option>
-          </Select>
-        </Form.Item>
-      </Col>
-      {isApplicantAvailable === "No" && (
+      {Form.useWatch("isApplicantAvailable", form) === "No" && (
         <>
           <Col span={8}>
             <Form.Item
               name="availablePersonName"
               label="Name of the person met"
-              rules={[{ required: true, message: "Please enter the name of the person met" }]}
+              rules={[
+                { required: true, message: "Please enter the name of person met" },
+              ]}
             >
-              <Input placeholder="Enter name of the person met" />
+              <Input placeholder="Enter name of person met" />
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -174,29 +197,32 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
               label="Contact Number"
               rules={[
                 { required: true, message: "Please enter contact number" },
-                { pattern: /^\d{10}$/, message: "Please enter a valid 10-digit mobile number" },
+                {
+                  pattern: /^[0-9]{10}$/,
+                  message: "Mobile number must be 10 digits",
+                },
               ]}
             >
-              <Input maxLength={10} placeholder="Enter contact number" />
+              <Input placeholder="Enter contact number" maxLength={10} />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item
               name="availablePersonRelation"
-              label="Relation to Applicant"
-              rules={[{ required: true, message: "Please select relation" }]}
+              label="Relation to the applicant"
+              rules={[
+                { required: true, message: "Please select relation to applicant" },
+              ]}
             >
               <Select placeholder="Select relation">
-                <Select.Option value="Spouse">Spouse</Select.Option>
-                <Select.Option value="Parent">Parent</Select.Option>
-                <Select.Option value="Sibling">Sibling</Select.Option>
-                <Select.Option value="Relative">Relative</Select.Option>
-                <Select.Option value="Neighbor">Neighbor</Select.Option>
+                <Select.Option value="Co Applicant">Co Applicant</Select.Option>
+                <Select.Option value="Family">Family</Select.Option>
+                <Select.Option value="Colleague">Colleague</Select.Option>
                 <Select.Option value="Others">Others</Select.Option>
               </Select>
             </Form.Item>
           </Col>
-          {availablePersonRelation === "Others" && (
+          {Form.useWatch("availablePersonRelation", form) === "Others" && (
             <Col span={8}>
               <Form.Item
                 name="availablePersonRelationOther"
@@ -209,12 +235,10 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           )}
         </>
       )}
-
       <Col span={8}>
         <Form.Item
           name="businessName"
           label="Business Name"
-          // rules={[{ required: true, message: "Please enter business name" }]}
         >
           <Input
             disabled
@@ -223,7 +247,6 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           />
         </Form.Item>
       </Col>
-
       <Col span={8}>
         <Form.Item
           name="isBusinessNameSame"
@@ -244,8 +267,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
-
-      {isBusinessNameSame === "No" && (
+      {Form.useWatch("isBusinessNameSame", form) === "No" && (
         <Col span={24}>
           <Form.Item
             name="correctedBusinessName"
@@ -261,7 +283,6 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           </Form.Item>
         </Col>
       )}
-
       <Col span={8}>
         <Form.Item
           name="businessProfile"
@@ -273,7 +294,6 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           <Input placeholder="Enter Nature of Business" />
         </Form.Item>
       </Col>
-
       <Col span={24}>
         <Form.Item
           name="businessAddress"
@@ -288,7 +308,6 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           />
         </Form.Item>
       </Col>
-
       <Col span={8}>
         <Form.Item
           name="isAddressSame"
@@ -309,8 +328,7 @@ const BusinessBasicDetails: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
-
-      {isAddressSame === "No" && (
+      {Form.useWatch("isAddressSame", form) === "No" && (
         <Col span={24}>
           <Form.Item
             name="addressCorrection"

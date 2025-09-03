@@ -7,12 +7,14 @@ const BusinessBasicDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
+  currentDepartment?: string;
 }> = ({
   data,
   extra,
   logs = false,
   changedFields = [],
   isCurrentVersion = false,
+  currentDepartment,
 }) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
@@ -22,6 +24,66 @@ const BusinessBasicDetailsDescription: React.FC<{
     };
   };
 
+  // For PD department, show different fields
+  if (currentDepartment === 'PD') {
+    return (
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Basic Details"
+            bordered
+            column={logs ? 1 : 2}
+            extra={extra}
+          >
+            <Descriptions.Item
+              label="Application Number"
+              contentStyle={getItemStyle("applicationNumber")}
+            >
+              {data?.basicDetails?.applicationNumber}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Name of the Applicant"
+              contentStyle={getItemStyle("applicantName")}
+            >
+              {data?.basicDetails?.applicantName}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Name of the Business"
+              contentStyle={getItemStyle("businessName")}
+            >
+              {data?.basicDetails?.businessName}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Loan Amount"
+              contentStyle={getItemStyle("loanAmount")}
+            >
+              {data?.basicDetails?.loanAmount}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Mobile Number"
+              contentStyle={getItemStyle("mobileNumber")}
+            >
+              {data?.basicDetails?.mobileNumber}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Business Address"
+              contentStyle={getItemStyle("address")}
+            >
+              {data?.basicDetails?.address}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Bank Name"
+              contentStyle={getItemStyle("bankName")}
+            >
+              {data?.basicDetails?.bankName}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+    );
+  }
+
+  // Original implementation for other departments
   return (
     <section style={{ marginBottom: 24 }}>
       <Card>
@@ -49,30 +111,6 @@ const BusinessBasicDetailsDescription: React.FC<{
           >
             {data?.basicDetails?.aadhar}
           </Descriptions.Item>
-          {/* <Descriptions.Item
-            label="Person Met"
-            contentStyle={getItemStyle("personMet")}
-          >
-            {data?.basicDetails?.personMet}
-          </Descriptions.Item>
-          {data?.basicDetails?.personMet !== "Applicant" && (
-            <>
-              <Descriptions.Item
-                label="Person Met Name"
-                contentStyle={getItemStyle("personMetName")}
-              >
-                {data?.basicDetails?.personMetName}
-              </Descriptions.Item>
-              {data?.basicDetails?.personMet === "Others" && (
-                <Descriptions.Item
-                  label="Relationship to Applicant"
-                  contentStyle={getItemStyle("personMetRelation")}
-                >
-                  {data?.basicDetails?.personMetRelation}
-                </Descriptions.Item>
-              )}
-            </>
-          )} */}
           <Descriptions.Item
             label="Business Name"
             contentStyle={getItemStyle("businessName")}

@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FormSelector } from "./VerificationEditForms";
 import { updateFinancialAnalysis } from "@/services/verifier.services";
+import { useDepartmentChange } from "@/utils/utility";
 import _ from "lodash";
 
 const formKeyMapping: Record<string, string> = {
@@ -12,6 +13,9 @@ const formKeyMapping: Record<string, string> = {
   workBasicDetails: "basicDetails",
   toGrossProfit: "toGrossProfit",
   toNetProfit: "toNetProfit",
+  // PD department specific mappings
+  applicantDetails: "applicantDetails",
+  familyDetails: "familyMemberDetails",
 };
 
 interface ExtendedEditFormModalProps extends EditFormModalProps {
@@ -32,6 +36,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
+  const currentDepartment = useDepartmentChange();
   // const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
@@ -75,12 +80,38 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           };
           form.setFieldsValue(formValues);
         }
+      } else if (currentDepartment === 'PD') {
+        // Handle PD department data structure
+        if (formKey === "applicantDetails") {
+          const applicantData = currentVerification?.verificationData?.applicantDetails;
+          if (applicantData) {
+            form.setFieldsValue(applicantData);
+          }
+        } else if (formKey === "familyDetails") {
+          const familyData = currentVerification?.verificationData?.familyMemberDetails;
+          if (familyData) {
+            form.setFieldsValue({ familyMemberDetails: familyData });
+          }
+        } else if (formKey === "businessBasicDetails") {
+          const basicData = currentVerification?.verificationData?.basicDetails;
+          if (basicData) {
+            form.setFieldsValue(basicData);
+          }
+        } else if (formKey === "businessDetails") {
+          const businessData = currentVerification?.verificationData?.businessDetails;
+          if (businessData) {
+            form.setFieldsValue(businessData);
+          }
+        } else {
+          // Handle other PD forms normally
+          form.setFieldsValue(currentVerification?.verificationData || {});
+        }
       } else {
         // Handle other forms normally
         form.setFieldsValue(currentVerification?.verificationData || {});
       }
     }
-  }, [visible, initialValues, form, formKey, currentTab]);
+  }, [visible, initialValues, form, formKey, currentTab, currentDepartment]);
 
   const getInitialValues = async () => {
     const currentVerification = initialValues?.verifications?.find(
@@ -90,6 +121,22 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
     // Handle financial analysis data differently
     if (formKey === "financialAnalysis") {
       return currentVerification?.financialAnalysis;
+    }
+    
+    // For PD department, handle data structure differently
+    if (currentDepartment === 'PD') {
+      if (formKey === "applicantDetails") {
+        return currentVerification?.verificationData?.applicantDetails;
+      }
+      if (formKey === "familyDetails") {
+        return { familyMemberDetails: currentVerification?.verificationData?.familyMemberDetails || [] };
+      }
+      if (formKey === "businessBasicDetails") {
+        return currentVerification?.verificationData?.basicDetails;
+      }
+      if (formKey === "businessDetails") {
+        return currentVerification?.verificationData?.businessDetails;
+      }
     }
     
     // Handle other forms normally
@@ -216,9 +263,36 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
         // Handle other forms normally
         const mappedKey = formKeyMapping[formKey] || formKey;
-        const finalData = {
-          [mappedKey]: formValues,
-        };
+        
+        // For PD department, handle data structure differently
+        let finalData;
+        if (currentDepartment === 'PD') {
+          if (formKey === "businessBasicDetails") {
+            finalData = {
+              basicDetails: formValues,
+            };
+          } else if (formKey === "businessDetails") {
+            finalData = {
+              businessDetails: formValues,
+            };
+          } else if (formKey === "applicantDetails") {
+            finalData = {
+              applicantDetails: formValues,
+            };
+          } else if (formKey === "familyDetails") {
+            finalData = {
+              familyMemberDetails: formValues.familyMemberDetails || [],
+            };
+          } else {
+            finalData = {
+              [mappedKey]: formValues,
+            };
+          }
+        } else {
+          finalData = {
+            [mappedKey]: formValues,
+          };
+        }
 
         const request = indexedDB.open("editLogs", 1);
 
@@ -397,6 +471,24 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
                 // For financial analysis, we'll set initial values in useEffect
                 // since the data structure is different
               }
+            : currentDepartment === 'PD' && formKey === "familyDetails"
+            ? {
+                familyMemberDetails: initialValues?.verifications?.find(
+                  (v: any) => v.addressType === currentTab
+                )?.verificationData?.familyMemberDetails || [],
+              }
+            : currentDepartment === 'PD' && formKey === "applicantDetails"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.applicantDetails
+            : currentDepartment === 'PD' && formKey === "businessBasicDetails"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.basicDetails
+            : currentDepartment === 'PD' && formKey === "businessDetails"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.businessDetails
             : initialValues?.verifications?.find(
                 (v: any) => v.addressType === currentTab
               )?.verificationData?.[formKeyMapping[formKey] || formKey]
@@ -410,11 +502,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             formKey={formKey}
             currentTab={currentTab}
             getMaritalStatus={getMaritalStatus}
-            // initialValues={
-            //   initialValues?.verifications?.find(
-            //     (v: any) => v.addressType === currentTab
-            //   )?.verificationData?.[formKeyMapping[formKey] || formKey]
-            // }
+            currentDepartment={currentDepartment}
           />
         </Row>
       </Form>

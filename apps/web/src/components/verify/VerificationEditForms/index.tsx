@@ -9,6 +9,7 @@ import OfficeVerificationForm from "./OfficeVerificationForm";
 import WorkBasicDetails from "./WorkBasicDetails";
 import BusinessBasicDetails from "./BusinessBasicDetails";
 import BusinessDetails from "./BusinessDetails";
+import ApplicantDetails from "./ApplicantDetails";
 import BusinessMiscellaneous from "./BusinessMiscellaneous";
 import ColleagueReferencesDetails from "./ColleagueReferencesDetails";
 import PastEmploymentDetails from "./PastEmploymentDetails";
@@ -16,6 +17,7 @@ import ExistingLoansDetails from "./ExistingLoansDetails";
 import FamilyMemberForm from "./FamilyMemberForm";
 import ToGrossProfitForm from "./ToGrossProfitForm";
 import ToNetProfitForm from "./ToNetProfitForm";
+import FamilyDetails from "./FamilyDetails";
 import FinancialAnalysisForm from "./FinancialAnalysisForm";
 
 interface FormSelectorProps {
@@ -23,6 +25,7 @@ interface FormSelectorProps {
   formKey: string;
   currentTab: any;
   getMaritalStatus: any;
+  currentDepartment?: string;
 }
 
 export const FormSelector: React.FC<FormSelectorProps> = ({
@@ -30,6 +33,7 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
   formKey,
   currentTab,
   getMaritalStatus,
+  currentDepartment,
 }) => {
   switch (formKey) {
     case "basicDetails":
@@ -60,9 +64,13 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
     case "existingLoans":
       return <ExistingLoansDetails form={form} />;
     case "businessBasicDetails":
-      return <BusinessBasicDetails form={form} />;
+      return <BusinessBasicDetails form={form} currentDepartment={currentDepartment} />;
     case "businessDetails":
-      return <BusinessDetails form={form} />;
+      return <BusinessDetails form={form} currentDepartment={currentDepartment} />;
+    case "applicantDetails":
+      return <ApplicantDetails form={form} />;
+    case "familyDetails":
+      return <FamilyDetails form={form} />;
     case "miscellaneous":
       return <BusinessMiscellaneous form={form} />;
     case "familyMemberDetails":

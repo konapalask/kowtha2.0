@@ -7,12 +7,14 @@ const BusinessDetailsDescription: React.FC<{
   logs: boolean;
   changedFields?: string[];
   isCurrentVersion?: boolean;
+  currentDepartment?: string;
 }> = ({
   data,
   extra,
   logs = false,
   changedFields = [],
   isCurrentVersion = false,
+  currentDepartment,
 }) => {
   const getItemStyle = (fieldName: string) => {
     if (!changedFields.includes(fieldName)) return {};
@@ -22,6 +24,90 @@ const BusinessDetailsDescription: React.FC<{
     };
   };
 
+  // For PD department, show different fields
+  if (currentDepartment === 'PD') {
+    return (
+      <section style={{ marginBottom: 24 }}>
+        <Card>
+          <Descriptions
+            title="Business Details"
+            bordered
+            column={logs ? 1 : 2}
+            extra={extra}
+          >
+            <Descriptions.Item
+              label="Type of Business"
+              contentStyle={getItemStyle("businessType")}
+            >
+              {data?.businessDetails?.businessType}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="No. of Employees (Declared / Observed)"
+              contentStyle={getItemStyle("employeesDeclared")}
+            >
+              {data?.businessDetails?.employeesDeclared} / {data?.businessDetails?.employeesObserved}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Constitution of Business"
+              contentStyle={getItemStyle("constitutionOfBusiness")}
+            >
+              {data?.businessDetails?.constitutionOfBusiness}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Nature of Business"
+              contentStyle={getItemStyle("natureOfBusiness")}
+            >
+              {data?.businessDetails?.natureOfBusiness}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Business Activity Observed"
+              contentStyle={getItemStyle("businessActivityObserved")}
+            >
+              {data?.businessDetails?.businessActivityObserved}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Stock Observed"
+              contentStyle={getItemStyle("stockObserved")}
+            >
+              {data?.businessDetails?.stockObserved}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Business Start Year"
+              contentStyle={getItemStyle("businessStartYear")}
+            >
+              {data?.businessDetails?.businessStartYear}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Occupied Since (years)"
+              contentStyle={getItemStyle("occupiedSince")}
+            >
+              {data?.businessDetails?.occupiedSince}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Net Margin"
+              contentStyle={getItemStyle("netMargin")}
+            >
+              {data?.businessDetails?.netMargin}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Business Premises Size (in sq. ft.)"
+              contentStyle={getItemStyle("businessPremisesSize")}
+            >
+              {data?.businessDetails?.businessPremisesSize}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Raw Material Supplier"
+              contentStyle={getItemStyle("rawMaterialSupplier")}
+            >
+              {data?.businessDetails?.rawMaterialSupplier}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </section>
+    );
+  }
+
+  // Original implementation for other departments
   return (
     <section style={{ marginBottom: 24 }}>
       <Card>
@@ -57,28 +143,6 @@ const BusinessDetailsDescription: React.FC<{
               {data?.businessDetails?.constitutionOther}
             </Descriptions.Item>
           )}
-          {/* <Descriptions.Item 
-            label="Key Manager Relationship"
-            contentStyle={getItemStyle('keyManagerRelation')}
-          >
-            {data?.businessDetails?.keyManagerRelation}
-          </Descriptions.Item>
-          {data?.businessDetails?.keyManagerRelation === "Others" && (
-            <Descriptions.Item 
-              label="Other Relationship"
-              contentStyle={getItemStyle('keyManagerRelationOther')}
-            >
-              {data?.businessDetails?.keyManagerRelationOther}
-            </Descriptions.Item>
-          )}
-          {data?.businessDetails?.keyManagerRelation !== "Applicant" && (
-            <Descriptions.Item 
-              label="Key Manager Name"
-              contentStyle={getItemStyle('keyManager')}
-            >
-              {data?.businessDetails?.keyManager}
-            </Descriptions.Item>
-          )} */}
           <Descriptions.Item
             label="Business Start Year"
             contentStyle={getItemStyle("businessStartYear")}

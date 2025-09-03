@@ -18,6 +18,8 @@ import { useRouter } from "next/router";
 import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
 import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
+import ApplicantDetailsDescription from "./Descriptions/ApplicantDetailsDescription";
+import FamilyDetailsDescription from "./Descriptions/FamilyDetailsDescription";
 
 // import PdfPreview from "./PdfPreview";
 import FinalVerdict from "./FinalVerdict";
@@ -361,7 +363,9 @@ export const BusinessVerificationDetails: React.FC<
   // Check if there are pending edit requests for key sections (Basic Details, Business Details, or Business Miscellaneous Details)
   const hasPendingEditRequestForKeySections = () => {
     if (!hasEditRequest) return false;
-    const keySections = ['businessBasicDetails', 'businessDetails', 'miscellaneous'];
+    const keySections = currentDepartment === 'PD' 
+      ? ['businessBasicDetails', 'businessDetails', 'applicantDetails', 'familyDetails']
+      : ['businessBasicDetails', 'businessDetails', 'miscellaneous'];
     return Object.keys(changedData).some(key => keySections.includes(key));
   };
 
@@ -435,6 +439,7 @@ export const BusinessVerificationDetails: React.FC<
         data={data}
         extra={getButton("businessBasicDetails")}
         logs={false}
+        currentDepartment={currentDepartment}
       />
 
       {/* Business Details Section */}
@@ -442,14 +447,35 @@ export const BusinessVerificationDetails: React.FC<
         data={data}
         extra={getButton("businessDetails")}
         logs={false}
+        currentDepartment={currentDepartment}
       />
 
-      {/* Business Miscellaneous Section */}
-      <BusinessMiscellaneousDescription
-        data={data}
-        extra={getButton("miscellaneous")}
-        logs={false}
-      />
+      {/* Applicant Details Section - Only for PD department */}
+      {currentDepartment === 'PD' && (
+        <ApplicantDetailsDescription
+          data={data}
+          extra={getButton("applicantDetails")}
+          logs={false}
+        />
+      )}
+
+      {/* Family Details Section - Only for PD department */}
+      {currentDepartment === 'PD' && (
+        <FamilyDetailsDescription
+          data={data}
+          extra={getButton("familyDetails")}
+          logs={false}
+        />
+      )}
+
+      {/* Business Miscellaneous Section - Only for non-PD departments */}
+      {currentDepartment !== 'PD' && (
+        <BusinessMiscellaneousDescription
+          data={data}
+          extra={getButton("miscellaneous")}
+          logs={false}
+        />
+      )}
 
       {/* Existing Loans Section */}
       <section style={{ marginBottom: 24 }}>
