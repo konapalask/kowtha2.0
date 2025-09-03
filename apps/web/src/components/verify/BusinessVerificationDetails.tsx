@@ -470,11 +470,11 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* Business Miscellaneous Section - Only for non-PD departments */}
       {currentDepartment !== 'PD' && (
-        <BusinessMiscellaneousDescription
-          data={data}
-          extra={getButton("miscellaneous")}
-          logs={false}
-        />
+      <BusinessMiscellaneousDescription
+        data={data}
+        extra={getButton("miscellaneous")}
+        logs={false}
+      />
       )}
 
       {/* Existing Loans Section */}
@@ -675,6 +675,7 @@ export const BusinessVerificationDetails: React.FC<
           disabled={hasEditRequest}
           admin={false}
           verificationType={activeTab}
+          currentDepartment={currentDepartment}
         />
       </section>
 

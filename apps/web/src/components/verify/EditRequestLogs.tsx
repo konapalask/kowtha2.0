@@ -76,6 +76,7 @@ interface EditRequestLogsProps {
   disabled: boolean;
   verificationType: string;
   admin: boolean;
+  currentDepartment?: string;
 }
 
 // Helper to get changed keys for a section
@@ -129,6 +130,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     disabled,
     verificationType,
     admin,
+    currentDepartment,
   } = _props;
   // console.log("currentData", currentData);
   // console.log("changedData", changedData);
@@ -321,6 +323,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                   logs={true}
                   changedFields={changedKeys}
                   isCurrentVersion={true}
+                  currentDepartment={currentDepartment}
                 />
               </Col>
               <Col span={12}>
@@ -350,6 +353,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
                   logs={true}
                   changedFields={changedKeys}
                   isCurrentVersion={false}
+                  currentDepartment={currentDepartment}
                 />
                 {/* {changedKeys.length > 0 && (
                   <div style={{ color: "#52c41a", fontSize: 12, marginTop: 4 }}>
