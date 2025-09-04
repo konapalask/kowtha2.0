@@ -19,6 +19,7 @@ import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetails
 import WorkEmploymentDetailsDescription from "./Descriptions/WorkEmploymentDetailsDescription";
 import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
+import ApplicantDetailsDescription from "./Descriptions/ApplicantDetailsDescription";
 import { useRouter } from "next/router";
 import { useTabContext } from "@/pages/verify/[id]";
 import { getUserDetails, isEmpty, getCurrentDepartmentRole } from "@/utils/utility";
@@ -44,6 +45,7 @@ const getLabels = {
   businessDetails: "Business Details",
   miscellaneous: "Business Miscellaneous Details",
   familyMemberDetails: "Family Member Details",
+  applicantDetails: "Applicant Details",
 };
 
 const getDescriptions = (activeTab: string) => ({
@@ -66,6 +68,7 @@ const getDescriptions = (activeTab: string) => ({
   businessDetails: BusinessDetailsDescription,
   miscellaneous: BusinessMiscellaneousDescription,
   familyMemberDetails: FamilyMemberDetailsDescription,
+  applicantDetails: ApplicantDetailsDescription,
 });
 
 interface EditRequestLogsProps {
@@ -79,15 +82,15 @@ interface EditRequestLogsProps {
   currentDepartment?: string;
 }
 
-// Helper to get changed keys for a section
+
 const getChangedKeys = (currentSection: any, editSection: any) => {
   if (!currentSection || !editSection) return [];
 
   return Object.keys({ ...currentSection, ...editSection }).filter((key) => {
-    // Skip if both values are undefined or null
+
     if (!currentSection[key] && !editSection[key]) return false;
 
-    // If one value exists and the other doesn't, it's a change
+
     if (!currentSection[key] || !editSection[key]) return true;
 
     // For arrays, compare length and contents
@@ -113,6 +116,23 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
   });
 };
 
+const mergeDataWithChanges = (currentData: any, changedData: any) => {
+  if (!currentData || !changedData) return currentData;
+  
+  const mergedData = { ...currentData };
+  
+  Object.keys(changedData).forEach(sectionKey => {
+    if (changedData[sectionKey] && typeof changedData[sectionKey] === 'object') {
+      mergedData[sectionKey] = {
+        ...mergedData[sectionKey],
+        ...changedData[sectionKey]
+      };
+    }
+  });
+  
+  return mergedData;
+};
+
 const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
   // console.log(router);
@@ -132,11 +152,6 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     admin,
     currentDepartment,
   } = _props;
-  // console.log("currentData", currentData);
-  // console.log("changedData", changedData);
-  // console.log(isEmpty(changedData));
-  // console.log(pathname);
-  // console.log(["edit-requests"].includes(pathname));
 
   if (isEmpty(changedData) && !disabled) {
     return (
@@ -231,7 +246,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   };
 
   const descriptions = admin
-    ? getDescriptions(verificationType)
+    ? getDescriptions(verificationType || "Business")
     : getDescriptions(activeTab);
 
   return (
@@ -313,6 +328,32 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
 
           const changedKeys = getChangedKeys(currentSection, editSection);
           if (changedKeys.length === 0) return null; // Don't show sections with no changes
+
+          
+          if (sectionKey === 'existingLoans') {
+            return (
+              <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
+                <Col span={12}>
+                  <SectionDescription
+                    data={{ loans: currentSection }}
+                    extra={null}
+                    logs={true}
+                    changedFields={changedKeys}
+                    changedData={{ loans: editSection }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <SectionDescription
+                    data={{ loans: editSection }}
+                    extra={null}
+                    logs={true}
+                    changedFields={changedKeys}
+                    changedData={{ loans: currentSection }}
+                  />
+                </Col>
+              </Row>
+            );
+          }
 
           return (
             <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
