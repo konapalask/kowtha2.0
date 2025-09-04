@@ -23,7 +23,7 @@ import { VerificationData } from './templates/FI/address.interface';
 import { WorkVerificationData } from './templates/FI/work.interface';
 import { BusinessVerificationData } from './templates/FI/business.interface';
 import { PDBusinessVerificationData } from './templates/PD/pd-business.interface';
-import { adityabirlaTemplate } from './templates/PD/adityabirla.template';
+import { axisagriTemplate } from './templates/PD/axis-agri.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department
@@ -47,7 +47,7 @@ export class LoanService {
 
   async runWorker(data: any) {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(path.resolve(__dirname, 'imageWorker.ts'), { workerData: data });
+      const worker = new Worker(path.resolve(__dirname, 'imageWorker.js'), { workerData: data });
       worker.on('message', (msg) => {
         if (msg.success) resolve(msg.result);
         else reject(new Error(msg.error));
@@ -999,18 +999,18 @@ export class LoanService {
         throw new Error('Verification not found or not assigned to this field executive');
       }
       // Process all images in verificationData if it exists
-      // if (verificationData?.uploadedItems) {
-      //   await Promise.all(
-      //     verificationData.uploadedItems.map(item =>
-      //       this.runWorker({
-      //         s3ImageUrl: item.s3ImageUrl,
-      //         latitude: parseFloat(item.latitude),
-      //         longitude: parseFloat(item.longitude),
-      //         timestamp: item.timestamp
-      //       })
-      //     )
-      //   );
-      // }
+      if (verificationData?.uploadedItems) {
+        await Promise.all(
+          verificationData.uploadedItems.map((item: any) =>
+            this.runWorker({
+              s3ImageUrl: item.s3ImageUrl,
+              latitude: parseFloat(item.latitude),
+              longitude: parseFloat(item.longitude),
+              timestamp: item.timestamp
+            })
+          )
+        );
+      }
 
       // Update verification status
       const updatedVerification = await this.prisma.verification.update({
@@ -2211,7 +2211,7 @@ export class LoanService {
         fieldExecutive: verification.fieldExecutive?.name || '',
       }
 
-      const htmlTemplate = adityabirlaTemplate(verificationData, html_data);
+      const htmlTemplate = axisagriTemplate(verificationData, html_data);
 
       const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
 

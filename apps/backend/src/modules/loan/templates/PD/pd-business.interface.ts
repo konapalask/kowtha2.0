@@ -5,6 +5,7 @@ export interface PDBusinessVerificationData {
       businessName: string;
       applicantName: string;
       applicantNumber: string;
+      applicationNumber: string;
       businessAddress: string;
       bankName: string;
     };

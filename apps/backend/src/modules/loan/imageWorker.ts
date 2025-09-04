@@ -1,5 +1,5 @@
 import { parentPort, workerData } from 'worker_threads';
-import { processAndUploadImage } from './s3.service';
+import { processAndUploadImage } from '../common/s3utils/s3.service';
 
 (async () => {
   try {

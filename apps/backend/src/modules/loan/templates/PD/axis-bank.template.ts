@@ -267,7 +267,7 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
               opacity: 0.15;
             }
             .var-value {
-              font-weight: normal;
+              font-weight: bold;
             }
         </style>
       </head>
@@ -284,65 +284,49 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
         </div>
       </div>
 
-        <div class="report-title">Personal Discussion Sheet(PD)</div>
-        <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
-              <tr>
-                <td colspan="6" class="section-header">Reference Number - ${verificationData.basicDetails.applicationNumber}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
+      <div class="report-title">Personal Discussion Report</div>
+        
     
       <div class="align-wrapper">
         <table class="section-table">
           <tr>
-            <th>Name of the Firm</th>
-              <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Constitution</th>
+            <th>Application ID</th>
             <td colspan="2"><span class="var-value">${verificationData.businessDetails.constitution || ''}</span></td>
-            <th>Incorporation Date</th>
+            <th>PD Date</th>
             <td colspan="2"><span class="var-value">${verificationData.businessDetails.incorporationDate || ''}</span></td>
           </tr>
           <tr>
-            <th>Address of the Firm</th>
+            <th>Product (HL / LAP / Asha HL)</th>
             <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessAddress || ''}</span></td>
           </tr>
           <tr>
-            <th>Date & Time of PD</th>
-            <td colspan="2"><span class="var-value">${html_data?.date_of_visit || ''}</span></td>
-            <th>Place of PD</th>
-            <td colspan="2"><span class="var-value">${html_data?.place_of_pd || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name of Person Met</th>
-            <td colspan="2"><span class="var-value">${verificationData.applicantDetails.personMet || ''}</span></td>
-            <th>Designation</th>
-            <td colspan="2"><span class="var-value">${html_data?.designation || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name of PD Officer</th>
+            <th>Loan Amount</th>
             <td colspan="5"><span class="var-value">${html_data?.pd_officer || ''}</span></td>
           </tr>
-          <tr><td colspan="6" class="section-header">BUSINESS PROFILE</td></tr>
           <tr>
-            <th>Type fo Industry</th>
+            <th>Customer Name</th>
             <td colspan="5"><span class="var-value">${html_data?.type_of_industry || ''}</span></td>
           </tr>
           <tr>
-            <th>Nature of Business</th>
+            <th>PD address: - (Residence/Office/Factory/Godown)</th>
             <td colspan="5"><span class="var-value">${html_data?.type_of_industry || ''}</span></td>
           </tr>
           <tr>
-            <th>Business Governance & Operations</th>
+            <th>Contact Number</th>
             <td colspan="5"><span class="var-value">${html_data?.type_of_industry || ''}</span></td>
           </tr>
           <tr>
-            <th>Business Line Experience</th>
+            <th>Person Met</th>
             <td colspan="5"><span class="var-value">${html_data?.type_of_industry || ''}</span></td>
+          </tr>
+          <tr><td colspan="6" class="section-header">BORROWER DETAILS</td></tr>
+          <tr>
+            <th>Total Family Members</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessActivity || ''}</span></td>
+          </tr>
+          <tr>
+            <th>No. of Earning Members</th>
+            <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessStartYear} years</span></td>
           </tr>
         </table>
       </div>
@@ -351,44 +335,46 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
 
     <div class="align-wrapper">
       <table class="section-table">
+        <tr><td colspan="6" class="section-header">Business Place and Vintade Details</td></tr>
+
         <tr>
-          <th>Shareholding Details</th>
+          <th>Name of the Firm</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessActivity || ''}</span></td>
         </tr>
         <tr>
-          <th>Business Locality</th>
+          <th>Constitution (proprietorship / Partnership / Company / LLP)</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.typeOfBusiness || ''}</span></td>
         </tr>
         <tr>
-          <th>Business Premise setup / Ownership / Nameplate / Staff etc.</th>
+          <th>Who started the business?(self / acquired / second gen)</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
         </tr>
         <tr>
-          <th>Financial Brief</th>
+          <th>Ownership of business place (self-owned / rented)</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessStartYear || ''}</span></td>
         </tr>
         <tr>
-          <th>End use of the Loan & Loan amount Required</th>
+          <th>Years in current Office</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.occupiedSince || ''}</span></td>
         </tr>
         <tr>
-          <th>Other Businesses owned & Other Incomes</th>
+          <th>Years in current City</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.numberOfEmployees || ''}</span></td>
         </tr>
         <tr>
-          <th>Business License Information</th>
+          <th>Years in current Business</th>
           <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Documents Provided</th>
+          <th>Previous Employment Details</th>
           <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Banking & Working Capital Limit Information</th>
+          <th>Residence same as Office</th>
           <td colspan="5"><span class="var-value">Applicant manages all the business activities</span></td>
         </tr>
         <tr>
-          <th>Is it a Takeover</th>
+          <th>Office Setup Details</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessStartYear} years</span></td>
         </tr>
     </table>
@@ -397,44 +383,41 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
 
     <div class="align-wrapper">
       <table class="section-table">
+        <tr><td colspan="6" class="section-header">Business/Financial Profile</td></tr>
         <tr>
-          <th>Current Account Details</th>
+          <th>Nature of  business Trading / manufacturing /services / others: please specify)</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Collateral Security Details</th>
+          <th>Product / services offered.</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Existing Banking Relations with Axis if any</th>
+          <th>Business Model & background of business</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Major Suppliers & Clients</th>
+          <th>Other details business observed during the visit</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Stocks/Raw material related observations</th>
+          <th>Top 3 clients (customers) (Average debtor days)</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>COVID-19 Impact & Recovery period Or any other Business Risks</th>
+          <th>Top 3 clients (suppliers) (Average creditor days)</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Family Background & Net-worth</th>
+          <th>Any other business or alternate source of income such as rentals, commission etc. (Provide details)</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Business Succession Plan</th>
+          <th>Any other observations / remarks during visit</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
         <tr>
-          <th>Qualification of Proprietor / Partners / Directors</th>
-          <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
-        </tr>
-        <tr>
-          <th>Lease land Verification</th>
+          <th>Details of neighbor check /Third party check done and status</th>
           <td colspan="5"><span class="var-value">${verificationData.applicantDetails.currentAddress || ''}</span></td>
         </tr>
       </table>
@@ -444,19 +427,72 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
 
     <div class="align-wrapper">
       <table class="section-table">
+        <tr><td colspan="6" class="section-header">Common Points applicable for all cases</td></tr>
         <tr>
-          <th>Remarks & Observations</th>
+          <th>Turnover and Margin</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessActivity || ''}</span></td>
         </tr>
         <tr>
-          <th>PD Final Status</th>
+          <th>Sales fluctuations (Seasonal business)</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.typeOfBusiness || ''}</span></td>
         </tr>
         <tr>
-          <th>PD Vendor Name & Address</th>
+          <th>Customer Identity established during PD</th>
           <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
         </tr>
-    </table>
+        <tr>
+          <th>Chartered A/c details</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Details of existing loans confirmed during PD</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Loans taken from family, friends business associates etc</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Details of Working capital (OD/CC) if any</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>End Use of proposed Loan in detail.(Basis purpose of loan, in case cash out enduse must be detailed)</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Banking details</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Banking performance </th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Details of collateral</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Status of PD (Positive, Negative, Credit Manager visit needed) </th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Business Succession Plan</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>PD Officer Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>PD Officer Signature</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Agency Name & Sea</th>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails.netMargin || ''}</span></td>
+        </tr>
+      </table>
     </div>
   `
 }
