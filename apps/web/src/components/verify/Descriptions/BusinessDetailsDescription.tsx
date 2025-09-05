@@ -35,12 +35,12 @@ const BusinessDetailsDescription: React.FC<{
             column={logs ? 1 : 2}
             extra={extra}
           >
-            <Descriptions.Item
+            {/* <Descriptions.Item
               label="Type of Business"
               contentStyle={getItemStyle("businessType")}
             >
               {data?.businessDetails?.businessType}
-            </Descriptions.Item>
+            </Descriptions.Item> */}
             <Descriptions.Item
               label="No. of Employees (Declared / Observed)"
               contentStyle={getItemStyle("employeesDeclared")}
@@ -84,7 +84,7 @@ const BusinessDetailsDescription: React.FC<{
               {data?.businessDetails?.occupiedSince}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Net Margin"
+              label="Net Margin (%)"
               contentStyle={getItemStyle("netMargin")}
             >
               {data?.businessDetails?.netMargin}

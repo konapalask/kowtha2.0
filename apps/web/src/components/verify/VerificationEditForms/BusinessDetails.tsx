@@ -2,6 +2,7 @@ import React from "react";
 import { Form, Input, Select, Col } from "antd";
 
 const yesNoOptions = ["Yes", "No"];
+
 const constitutionOptions = [
   "Proprietorship",
   "Partnership",
@@ -9,6 +10,34 @@ const constitutionOptions = [
   "Public Limited",
   "Society",
   "Trust",
+  "Others",
+];
+
+
+const pdConstitutionOptions = [
+  "Proprietorship",
+  "Partnership",
+  "Private Limited",
+  "LLP (Limited Liability Partnership)",
+  "Others",
+];
+
+
+const natureOfBusinessOptions = [
+  "Manufacturer",
+  "Trader",
+  "Service Provider",
+  "Distributor",
+  "Retailer",
+  "Others",
+];
+
+const businessActivityObservedOptions = [
+  "Retail",
+  "Wholesale",
+  "Manufacturing",
+  "Service",
+  "Trading",
   "Others",
 ];
 
@@ -34,15 +63,6 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
       <>
         <Col span={8}>
           <Form.Item
-            name="businessType"
-            label="Type of Business"
-            rules={[{ required: true, message: "Business type is required" }]}
-          >
-            <Input placeholder="Enter business type" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
             name="employeesDeclared"
             label="No. of Employees (Declared)"
             rules={[{ required: true, message: "Number of employees declared is required" }]}
@@ -66,7 +86,7 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
             rules={[{ required: true, message: "Constitution of business is required" }]}
           >
             <Select placeholder="Select constitution">
-              {constitutionOptions.map((option) => (
+              {pdConstitutionOptions.map((option) => (
                 <Select.Option key={option} value={option}>
                   {option}
                 </Select.Option>
@@ -80,7 +100,13 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
             label="Nature of Business"
             rules={[{ required: true, message: "Nature of business is required" }]}
           >
-            <Input placeholder="Enter nature of business" />
+            <Select placeholder="Select nature of business">
+              {natureOfBusinessOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={8}>
@@ -89,7 +115,13 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
             label="Business Activity Observed"
             rules={[{ required: true, message: "Business activity observed is required" }]}
           >
-            <Input placeholder="Enter business activity observed" />
+            <Select placeholder="Select business activity">
+              {businessActivityObservedOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={8}>
@@ -122,7 +154,7 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
         <Col span={8}>
           <Form.Item
             name="netMargin"
-            label="Net Margin"
+            label="Net Margin (%)"
             rules={[{ required: true, message: "Net margin is required" }]}
           >
             <Input placeholder="Enter net margin" />
