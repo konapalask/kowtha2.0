@@ -286,7 +286,6 @@ export const axisagriTemplate = (verificationData1: any, html_data: any) => {
 
       <div class="report-title">Personal Discussion Sheet</div>
         
-    
       <div class="align-wrapper">
         <table class="section-table">
           <tr>
