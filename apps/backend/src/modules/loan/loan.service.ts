@@ -107,7 +107,7 @@ export class LoanService {
           loanType: 'Business',
           status: 'Unassigned',
           bankName: data.bankName,
-          loanAmount: data.loanAmount,
+          loanAmount: Number(data.loanAmount),
           applicantName: data.applicantName,
           applicantMobile: data.applicantMobile,
           office: { connect: { id: office.id } },
