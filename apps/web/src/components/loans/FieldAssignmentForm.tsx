@@ -20,7 +20,7 @@ import {
 import { getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
-import { getCurrentDepartmentOfficeId } from "@/utils/utility";
+import { getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -61,6 +61,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
   const [fieldExecutivesLoading, setFieldExecutivesLoading] = useState(false);
   
   const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
+  const currentDepartment = getCurrentDepartment();
   const remoteOffices = offices?.filter(
     (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
   );
@@ -314,7 +315,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
               }
             : {
                 assignmentMethod: "Local",
-                address: "",
+                address: currentDepartment === 'PD' && selectedLoan?.applicantAddress ? selectedLoan.applicantAddress : "",
               }
         }
         onFinish={(values) =>
