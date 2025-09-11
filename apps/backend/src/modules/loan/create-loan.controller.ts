@@ -1,12 +1,9 @@
-import { Controller, Post, Body, Headers, UnauthorizedException, Res, Logger } from "@nestjs/common";
+import * as crypto from 'crypto';
+import { Response } from "express";
 import { LoanService } from "./loan.service";
 import { CreateLambdaLoanDto } from "./dto/create-lamba-loan.dto";
 import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
-import * as crypto from 'crypto';
-import * as puppeteer from 'puppeteer';
-import { cholaTemplate } from "./templates/PD/chola.template";
-import { adityabirlaTemplate } from "./templates/PD/adityabirla.template";
-import { Response } from "express";
+import { Controller, Post, Body, Headers, UnauthorizedException, Res, Logger } from "@nestjs/common";
 
 
 const algorithm = 'aes-256-cbc';
@@ -32,26 +29,19 @@ export class CreateLoanController {
 
   @Post()
   async createLambaLoan(@Headers('apiKey') apiKey: string, @Body() encryptedData: any) {
-    this.logger.log('Starting createLambaLoan request');
     this.logger.debug(`API Key received: ${apiKey ? 'Present' : 'Missing'}`);
     this.logger.debug(`Encrypted data received: ${JSON.stringify(encryptedData)}`);
 
     if (apiKey !== process.env.LAMBDA_API_KEY) {
-      this.logger.warn('Invalid API key provided');
       throw new UnauthorizedException('Invalid API key');
     }
     
-    this.logger.log('API key validation successful');
     
     try {
-      this.logger.log('Starting data decryption');
       const decryptedData = decrypt(encryptedData);
-      this.logger.log('Data decryption successful');
       this.logger.debug(`Decrypted data: ${JSON.stringify(decryptedData)}`);
       
-      this.logger.log('Calling createLambdaLoan service');
       const result = await this.createLoanService.createLambdaLoan(decryptedData as CreateLambdaLoanDto);
-      this.logger.log('createLambdaLoan service completed successfully');
       
       return result;
     } catch (error) {
@@ -63,8 +53,6 @@ export class CreateLoanController {
 
   @Post('pd-email-log')
   async createPDEmailLog( @Body() encryptedData: any, @Headers('apiKey') apiKey: string, @Res() res: Response) {
-    this.logger.log('Starting createPDEmailLog request');
-    this.logger.debug(`API Key received: ${apiKey ? 'Present' : 'Missing'}`);
     this.logger.debug(`Encrypted data received: ${JSON.stringify(encryptedData)}`);
 
     if (apiKey !== process.env.LAMBDA_API_KEY) {
@@ -75,21 +63,13 @@ export class CreateLoanController {
     this.logger.log('API key validation successful for PD email log');
     
     try {
-      this.logger.log('Starting data decryption for PD email log');
       const decryptedData = decrypt(encryptedData);
-      this.logger.log('Data decryption successful for PD email log');
-      this.logger.debug(`Decrypted data: ${JSON.stringify(decryptedData)}`);
       
       const loanData = decryptedData.parsedData;
-      this.logger.debug(`Extracted loan data: ${JSON.stringify(loanData)}`);
 
-      this.logger.log('Calling createLambdaLoan service for PD email log');
       const loan = await this.createLoanService.createLambdaLoan(decryptedData as CreateLambdaLoanDto);
-      this.logger.log('createLambdaLoan service completed successfully for PD email log');
       
-      this.logger.log('Calling createPDEmailLog service');
       const result = await this.createLoanService.createPDEmailLog(loanData as CreatePDEmailLogDto);
-      this.logger.log('createPDEmailLog service completed successfully');
       
       return result;
     } catch (error) {
