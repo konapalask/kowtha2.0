@@ -22,8 +22,8 @@ import { businessTemplate } from './templates/FI/business.template';
 import { VerificationData } from './templates/FI/address.interface';
 import { WorkVerificationData } from './templates/FI/work.interface';
 import { BusinessVerificationData } from './templates/FI/business.interface';
-import { PDBusinessVerificationData } from './templates/PD/pd-business.interface';
-import { axisagriTemplate } from './templates/PD/axis-agri.template';
+import { PDBusinessVerificationData } from './templates/PD/interface/pd-business.interface';
+import { axisFinanceUBLTemplate } from './templates/PD/axis-finance-ubl.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department
@@ -2212,7 +2212,7 @@ export class LoanService {
         fieldExecutive: verification.fieldExecutive?.name || '',
       }
 
-      const htmlTemplate = axisagriTemplate(verificationData, html_data);
+      const htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
 
       const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
 
