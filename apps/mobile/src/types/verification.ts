@@ -124,6 +124,105 @@ export interface FamilyMember {
   stayingWithApplicant: string;
 }
 
+// PD Form Data Interfaces
+export interface AxisFinanceUBLBasicDetailsFormData {
+  applicantName: string;
+  nameOfConcern: string;
+  constitution: string;
+  initiatedAddress: string;
+  visitedAddress: string;
+  phoneNo: string;
+  appointmentFixed: string;
+  structureOfLoan: string;
+  noOfVisit: string;
+  personMet: string;
+  nameOfPersonMet: string;
+  aboutApplicant: string;
+  residentialDetails: string;
+  coApplicantDetails: string;
+}
+
+export interface Shareholder {
+  name: string;
+  shareholdingPercentage: string;
+  relationshipWithApplicant: string;
+  designation: string;
+  comingIntoLoanStructure: string;
+  functionalOfPartnerDirector: string;
+}
+
+export interface SupplierCreditor {
+  numberOfFixedSuppliers: string;
+  creditPeriod: string;
+  cashChequeProportions: string;
+  supplier1Name: string;
+  supplier1Phone: string;
+  supplier1Location: string;
+  supplier1Review: string;
+  supplier2Name: string;
+  supplier2Phone: string;
+  supplier2Location: string;
+  supplier2Review: string;
+  supplier3Name: string;
+  supplier3Phone: string;
+  supplier3Location: string;
+  supplier3Review: string;
+}
+
+export interface ClientDebtor {
+  numberOfFixedCustomers: string;
+  creditPeriod: string;
+  cashChequeProportions: string;
+  customer1Name: string;
+  customer1Phone: string;
+  customer1Location: string;
+  customer1Review: string;
+  customer2Name: string;
+  customer2Phone: string;
+  customer2Location: string;
+  customer2Review: string;
+  customer3Name: string;
+  customer3Phone: string;
+  customer3Location: string;
+  customer3Review: string;
+  averageStockMaintenance: string;
+  turnover: string;
+  netMargins: string;
+}
+
+export interface Employee {
+  numberOfEmployees: string;
+  salaryPerMonthPerEmployee: string;
+  statusOfEmployee: string;
+  numberOfLabours: string;
+  wagesPerMonthPerDay: string;
+  statusOfLabour: string;
+  remarks: string;
+  workingHoursStart: string;
+  workingHoursEnd: string;
+  otherMajorExpenditure: string;
+}
+
+export interface Asset {
+  address: string;
+  areaMeasured: string;
+  purchaseCost: string;
+  purchaseYear: string;
+  marketValue: string;
+  ownerName: string;
+  mortgaged: string;
+}
+
+export interface PDFormData {
+  axisFinanceUBLBasicDetails: AxisFinanceUBLBasicDetailsFormData;
+  familyMemberDetails: FamilyMember[];
+  shareholdingDetails: Shareholder[];
+  suppliersCreditors: SupplierCreditor[];
+  clientsDebtors: ClientDebtor[];
+  salariesWages: Employee[];
+  assetDetails: Asset[];
+}
+
 export interface VerificationFormData {
   basicDetails: BasicDetailsFormData;
   addressVerification: AddressVerificationFormData;
