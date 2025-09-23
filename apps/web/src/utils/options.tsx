@@ -120,6 +120,11 @@ export const bankOptions = [
   },
   { value: "HERO HOUSING FINANCIAL LTD", label: "HERO HOUSING FINANCIAL LTD" },
   { value: "GODREJ CAPITAL", label: "GODREJ CAPITAL" },
+  {
+    value: "NIPUN PROJECTS AND FINANCE PVT LTD",
+    label: "NIPUN PROJECTS AND FINANCE PVT LTD",
+  },
+  { value: "MUTHOOT FINANCE LIMITED", label: "MUTHOOT FINANCE LIMITED" },
 ];
 
 export const applicantTypeOptions = [

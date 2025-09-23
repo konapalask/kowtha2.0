@@ -2,14 +2,14 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { GetAttendanceDto } from './dto/get-attendance.dto';
-import { AttendanceStatus, UserRole } from '@prisma/client';
+import { AttendanceStatus, Department, UserRole } from '@prisma/client';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAttendance(userId: number, createAttendanceDto: CreateAttendanceDto) {
+  async createAttendance(userId: number, department: Department, createAttendanceDto: CreateAttendanceDto) {
     const { status = AttendanceStatus.Available, date } = createAttendanceDto;
     
     const attendanceDate = new Date(date);
@@ -21,21 +21,30 @@ export class AttendanceService {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId
+      },
+      include: {
+        departmentRoles: true
       }
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    if (user.role !== UserRole.FieldExecutive) {
-      throw new BadRequestException('Only field executives can record attendance');
+    if (department === Department.FI) {
+      if (!user.departmentRoles.find(role => role.role === UserRole.FieldExecutive && role.department === Department.FI)) {
+        throw new BadRequestException('Only field executives can record attendance');
+      }
+    } else if (department === Department.PD) {
+      if (!user.departmentRoles.find(role => role.role === UserRole.FieldExecutive && role.department === Department.PD)) {
+        throw new BadRequestException('Only PD field executives can record attendance');
+      }
     }
 
     // Check if attendance record already exists for this user and date
     const existingAttendance = await this.prisma.attendance.findFirst({
       where: {
         userId,
+        department,
         date: {
           gte: new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate()),
           lt: new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate() + 1)
@@ -50,6 +59,7 @@ export class AttendanceService {
     const attendance = await this.prisma.attendance.create({
       data: {
         userId,
+        department,
         date: attendanceDate,
         status
       },
@@ -59,7 +69,6 @@ export class AttendanceService {
             id: true,
             name: true,
             mobile: true,
-            role: true
           }
         }
       }
@@ -69,7 +78,7 @@ export class AttendanceService {
   }
 
   async getAttendance(filters: GetAttendanceDto, currentUserId: number, currentUserRole: UserRole) {
-    const { startDate, endDate, status, userId } = filters;
+    const { startDate, endDate, status, userId, department } = filters;
     
     // Set default date range to one month from today if not provided
     const today = new Date();
@@ -98,14 +107,20 @@ export class AttendanceService {
     // Get all field executives
     const fieldExecutives = await this.prisma.user.findMany({
       where: {
-        role: UserRole.FieldExecutive,
-        status: 'Active'
+        // role: UserRole.FieldExecutive,
+        status: 'Active',
+        departmentRoles: {
+          some: {
+            department: department,
+            role: UserRole.FieldExecutive
+          }
+        }
       },
       select: {
         id: true,
         name: true,
         mobile: true,
-        role: true,
+        // role: true,
         employeeCode: true
       }
     });

@@ -1,4 +1,8 @@
 buildscript {
+    project.ext.react = [
+    nodeExecutableAndArgs: ["/home/jayakrishna/.nvm/versions/node/v23.6.0/bin/node"]
+]
+
     ext {
         buildToolsVersion = "35.0.0"
         minSdkVersion = 24

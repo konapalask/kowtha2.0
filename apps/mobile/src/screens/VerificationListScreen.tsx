@@ -9,6 +9,8 @@ import {
   TextInput,
   Animated,
   ActivityIndicator,
+  Linking,
+  Pressable,
   // Pressable,
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
@@ -21,6 +23,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AttendanceCard from '../components/AttendanceCard';
 import {getItem, setItem} from '../helpers/utility';
 import dayjs from 'dayjs';
+import DeptModal from '../components/DeptModal';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -62,21 +65,21 @@ const VerificationListScreen = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const disabled = !isLoggedIn;
   const [testUser, setTestUser] = useState(false);
+  const [currentDept, setCurrentDept] = useState('FI');
+  const [openDeptModal, setOpenDeptModal] = useState(false);
   // const disabled = false;
-  console.log(isLoggedIn, 'lllllllllllllllllllllllll');
   // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
 
-  const fetchData = async (page = 1, shouldAppend = false) => {
+  const fetchData = async (page = 1, shouldAppend = false, dept?: string) => {
     try {
       setLoading(true);
       const response = await getFieldData(
         page,
         selectedFilter,
         appNumberFilter,
+        dept ?? currentDept ?? 'FI',
       );
-      // console.log(response);
-      console.log(response?.data?.isAvailableToday ? 'Available' : null);
       await setItem('attendance', {
         status: response?.data?.isAvailableToday ? 'Available' : null,
         date: dayjs().format('YYYY-MM-DD'),
@@ -91,8 +94,6 @@ const VerificationListScreen = () => {
       setHasMore(page < totalPages);
       setPage(page);
     } catch (error) {
-      // if (testUser) {
-      // }
       if (!testUser) {
         console.error('Error fetching data:', error);
         Toast.show({
@@ -104,6 +105,22 @@ const VerificationListScreen = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateCurrentDept = (dept: string) => {
+    setCurrentDept(dept);
+    setOpenDeptModal(false);
+    // fetchData(1, false, dept);
+  };
+
+  const fetchDept = async () => {
+    try {
+      const dept = await getItem('dept');
+      updateCurrentDept(dept ?? 'FI');
+    } catch (error) {
+      console.error('Error fetching dept:', error);
+      updateCurrentDept('FI');
     }
   };
 
@@ -155,15 +172,14 @@ const VerificationListScreen = () => {
       }
     };
     checkTestUserAndSetData();
+    fetchDept();
   }, []);
 
   const checkAttendance = async () => {
     try {
       const details = await getItem('attendance');
-      console.log(details);
       const currentTime = dayjs();
       const isToday = details?.date === currentTime.format('YYYY-MM-DD');
-      console.log(isToday && details?.status === 'Available');
       isToday && details?.status === 'Available'
         ? setIsLoggedIn(true)
         : setIsLoggedIn(false);
@@ -185,9 +201,10 @@ const VerificationListScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchData(1, false);
+      fetchDept();
+      fetchData(1, false, currentDept);
       checkAttendance();
-    }, []),
+    }, [currentDept]),
   );
 
   useEffect(() => {
@@ -265,6 +282,40 @@ const VerificationListScreen = () => {
     }
   };
 
+  // export const applicantTypeOptions = [
+  //   { label: "Primary Applicant", value: "Primary Applicant" },
+  //   { label: "Co-applicant 1 ", value: "Co-applicant 1" },
+  //   { label: "Co-applicant 2 ", value: "Co-applicant 2" },
+  //   { label: "Co-applicant 3 ", value: "Co-applicant 3" },
+  //   { label: "Co-applicant 4 ", value: "Co-applicant 4" },
+  //   { label: "Co-applicant 5 ", value: "Co-applicant 5" },
+  //   { label: "Co-applicant 6 ", value: "Co-applicant 6" },
+  //   { label: "Guarantor", value: "Guarantor" },
+  // ];
+
+  // const getApplicantTypeColor = (type: string) => {
+  //   switch (type) {
+  //     case 'Primary Applicant':
+  //       return '#2563EB';
+  //     case 'Co-applicant 1':
+  //       return '#10B981';
+  //     case 'Co-applicant 2':
+  //       return '#10B981';
+  //     case 'Co-applicant 3':
+  //       return '#10B981';
+  //     case 'Co-applicant 4':
+  //       return '#10B981';
+  //     case 'Co-applicant 5':
+  //       return '#10B981';
+  //     case 'Co-applicant 6':
+  //       return '#10B981';
+  //     case 'Guarantor':
+  //       return '#A16207';
+  //     default:
+  //       return '#666';
+  //   }
+  // };
+
   const getVerificationTypeColor = (type: string) => {
     switch (type) {
       case 'AddressTwo':
@@ -287,6 +338,14 @@ const VerificationListScreen = () => {
       default:
         return type;
     }
+  };
+
+  const formattedLoanAmount = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return num.toLocaleString('en-IN', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+    });
   };
 
   const renderFilterOptions = () => (
@@ -357,65 +416,77 @@ const VerificationListScreen = () => {
     </View>
   );
 
-  const renderItem = ({item}: {item: any}) => (
-    <TouchableOpacity
-      // disabled={disabled}
-      style={styles.card}
-      onPress={() => {
-        if (!disabled) {
-          if (item?.status === 'Pending') {
-            const baseNavPayload = {
-              name: item?.loan?.applicantName,
-              applicationNumber: item?.loan?.applicationNumber || '',
-              id: item?.id,
-              verificationId: item?.loanId,
-              address: item?.applicantAddress,
-              businessName: item?.businessName,
-              currentOfficeName: item?.currentOfficeName,
-            };
-            if (item?.type === 'Work') {
-              navigation.navigate('WorkVerification' as any, {
-                item: baseNavPayload,
-                verificationType: 'Work',
-                userData: item,
-              });
-            } else if (item?.type === 'Business') {
-              navigation.navigate('BusinessVerification' as any, {
-                item: baseNavPayload,
-                verificationType: 'Business',
-                userData: item,
-              });
-            } else {
-              navigation.navigate('VerificationItemScreen' as any, {
-                item: baseNavPayload,
-                verificationType: item?.type,
-                // item?.type === 'AddressOne'
-                //   ? 'CurrentAddress'
-                //   : 'PermanentAddress',
-                userData: item,
-              });
-            }
-          } else {
-            Toast.show({
-              type: 'info',
-              text1: `${getVerificationTypeLabel(
-                item?.type,
-              )} verification is completed`,
-              text2: `for application ${item?.applicationNumber || 'N/A'}.`,
-              position: 'top',
-              visibilityTime: 3000,
-            });
-          }
+  const handleGetStarted = (item: any) => {
+    // onPress={() => {
+    if (!disabled) {
+      if (item?.status === 'Pending') {
+        const baseNavPayload = {
+          name: item?.loan?.applicantName,
+          applicationNumber: item?.loan?.applicationNumber || '',
+          id: item?.id,
+          verificationId: item?.loanId,
+          address: item?.applicantAddress,
+          businessName: item?.businessName,
+          currentOfficeName: item?.currentOfficeName,
+        };
+        if (item?.type === 'Work') {
+          navigation.navigate('WorkVerification' as any, {
+            item: baseNavPayload,
+            verificationType: 'Work',
+            userData: item,
+          });
+        } else if (item?.type === 'Business') {
+          navigation.navigate(
+            currentDept === 'FI'
+              ? 'BusinessVerification'
+              : ('PDVerification' as any),
+            {
+              item: baseNavPayload,
+              verificationType: 'Business',
+              userData: item,
+            },
+          );
         } else {
-          Toast.show({
-            type: 'info',
-            text1: 'Please sign in your attendance',
-            // text2: `for application ${item?.applicationNumber || 'N/A'}.`,
-            position: 'top',
-            visibilityTime: 3000,
+          navigation.navigate('VerificationItemScreen' as any, {
+            item: baseNavPayload,
+            verificationType: item?.type,
+            // item?.type === 'AddressOne'
+            //   ? 'CurrentAddress'
+            //   : 'PermanentAddress',
+            userData: item,
           });
         }
-      }}>
+      } else {
+        Toast.show({
+          type: 'info',
+          text1: `${getVerificationTypeLabel(
+            item?.type,
+          )} verification is completed`,
+          // text2: `for application ${item?.applicationNumber || 'N/A'}.`,
+          position: 'top',
+          visibilityTime: 3000,
+        });
+      }
+    } else {
+      Toast.show({
+        type: 'info',
+        text1: 'Please sign in your attendance',
+        // text2: `for application ${item?.applicationNumber || 'N/A'}.`,
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+    // }}
+  };
+
+  const callNumber = (phone: string) => {
+    Linking.openURL(`tel:${phone}`);
+  };
+
+  const renderItem = ({item}: {item: any}) => (
+    <View
+      // disabled={disabled}
+      style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item?.loan.applicantName}</Text>
 
@@ -448,54 +519,117 @@ const VerificationListScreen = () => {
             ]}
           />
         </View>
-        {/* <Animated.View style={[styles.detailsRow,{item.verification.status==="Pending"?"orange":"green",opacity}]} /> */}
       </View>
       <View style={styles.detailsRow}>
-        <Text style={styles.details}>{item?.loan?.applicationNumber}</Text>
         <View
           style={[
             styles.verificationTypeTag,
             {
-              backgroundColor: getVerificationTypeColor(item?.type),
+              backgroundColor: '#64748B',
             },
           ]}>
           <Text style={styles.verificationTypeText}>
-            {getVerificationTypeLabel(item?.type)}
+            {item?.loan?.applicationNumber}
           </Text>
         </View>
+        {!!item?.loan?.loanAmount && (
+          <View>
+            <View style={styles.verticalDivider} />
+            <Text style={styles.details}>
+              ₹{formattedLoanAmount(item?.loan?.loanAmount)}
+            </Text>
+
+            <View style={styles.verticalDivider} />
+          </View>
+        )}
+        {currentDept === 'FI' && (
+          <View
+            style={[
+              styles.verificationTypeTag,
+              {
+                backgroundColor: getVerificationTypeColor(item?.type),
+              },
+            ]}>
+            <Text style={styles.verificationTypeText}>
+              {getVerificationTypeLabel(item?.type)}
+            </Text>
+          </View>
+        )}
       </View>
-      {item?.applicantAddress && (
+      <View style={styles.detailsRow}>
+        <Text style={styles.details}>{item?.loan?.applicantType}</Text>
+        {item?.loan?.applicantMobile && (
+          <TouchableOpacity
+            onPress={() => {
+              callNumber(item?.loan?.applicantMobile);
+            }}>
+            <Text style={[styles.details, styles.mobileText]}>
+              +91-{item?.loan?.applicantMobile}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      {item?.loan?.loanType && currentDept === 'FI' && (
         <Text style={[styles.details, styles.addressText]}>
+          {item?.loan?.loanType}
+        </Text>
+      )}
+      {item?.loan?.bankName && (
+        <Text style={[styles.details, styles.addressText]}>
+          {item?.loan?.bankName}
+        </Text>
+      )}
+      {item?.applicantAddress && (
+        <Text style={[styles.details, styles.addressText, {marginBottom: 12}]}>
           {item?.applicantAddress}
         </Text>
       )}
-    </TouchableOpacity>
+      {item?.status === 'Pending' && (
+        <TouchableOpacity
+          style={[
+            styles.getStartedButton,
+            !isLoggedIn && styles.disabledButton,
+          ]}
+          onPress={async () => {
+            if (!isLoggedIn) {
+              setShowAttendanceModal(true);
+              Toast.show({
+                type: 'error',
+                text1: 'Please sign in your attendance',
+                position: 'top',
+                visibilityTime: 3000,
+              });
+              return;
+            }
+            handleGetStarted(item);
+          }}>
+          <View style={styles.getStartedButtonAlignment}>
+            <Text style={styles.getStartedButtonText}>
+              {currentDept === 'FI' ? 'Proceed' : 'Start'}
+            </Text>
+            <Icon
+              name="arrow-forward"
+              size={16}
+              color="orange" // or any color that fits your style
+              style={{marginLeft: 6}}
+            />
+          </View>
+        </TouchableOpacity>
+      )}
+    </View>
   );
-
-  // const handleCloseAttendanceModal = () => {
-  //   setShowAttendanceModal(false);
-  // };
 
   return (
     <View style={styles.container}>
-      {/* {showAttendanceModal && !isLoggedIn && ( */}
       {showAttendanceModal && !isLoggedIn && validTime() && (
         <View style={styles.attendanceModalOverlay}>
-          {/* <Pressable
-            style={styles.attendanceModalBackground}
-            onPress={handleCloseAttendanceModal}
-          /> */}
           <View style={styles.attendanceModalContent}>
             <AttendanceCard
               setVisible={setShowAttendanceModal}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
+              dept={currentDept}
             />
-            {/* <TouchableOpacity
-              onPress={handleCloseAttendanceModal}
-              style={styles.closeAttendanceModalBtn}>
-              <Icon name="close" size={28} color="#666" />
-            </TouchableOpacity> */}
           </View>
         </View>
       )}
@@ -503,11 +637,24 @@ const VerificationListScreen = () => {
         <Text style={styles.headerTitle}>Verification List</Text>
         <View
           style={{
-            flex: 1,
-            alignItems: 'flex-end',
+            flexDirection: 'row',
+            alignItems: 'center',
             elevation: 1000,
             zIndex: 1000,
           }}>
+          <Pressable
+            onPress={() => {
+              setOpenDeptModal(true);
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text>{currentDept}</Text>
+              <Icon name="repeat" size={24} color="#666" />
+            </View>
+          </Pressable>
           <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         </View>
       </View>
@@ -553,6 +700,14 @@ const VerificationListScreen = () => {
               </View>
             ) : null
           }
+        />
+      )}
+      {openDeptModal && (
+        <DeptModal
+          currentDept={currentDept}
+          setCurrentDept={updateCurrentDept}
+          openDeptModal={openDeptModal}
+          setOpenDeptModal={setOpenDeptModal}
         />
       )}
     </View>
@@ -615,6 +770,27 @@ const styles = StyleSheet.create({
   details: {
     fontSize: 14,
     color: '#666',
+  },
+  mobileText: {
+    color: '#1E90FF',
+    textDecorationLine: 'underline',
+  },
+  getStartedButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignItems: 'center',
+    // borderColor: 'orange',
+    // borderWidth: 1,
+    // marginTop: 8,
+  },
+  getStartedButtonText: {
+    color: 'orange',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
   tagContainer: {
     alignItems: 'flex-end',
@@ -811,6 +987,17 @@ const styles = StyleSheet.create({
     right: 8,
     padding: 8,
     zIndex: 10,
+  },
+  verticalDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: '#E5E7EB', // Tailwind's gray-200
+    marginHorizontal: 1,
+  },
+  getStartedButtonAlignment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

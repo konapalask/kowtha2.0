@@ -1,5 +1,6 @@
-import { IsOptional, IsString, Matches } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Department } from '@prisma/client';
 
 export class GetMetricsDto {
   @ApiProperty({
@@ -25,4 +26,11 @@ export class GetMetricsDto {
     message: 'toDate must be in YYYY-MM-DD format'
   })
   toDate?: string;
+
+  @ApiProperty({
+    description: 'Department to filter metrics for specific department',
+    required: true
+  })
+  @IsEnum(Department)
+  department: Department;
 } 

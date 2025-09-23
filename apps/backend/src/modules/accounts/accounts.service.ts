@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
 import * as crypto from 'crypto';
 import { LoggingService } from '../common/logging/logging.service';
-import { EditRequestStatus, EditRequestType, UserRole } from '@prisma/client';
+import { EditRequestStatus, EditRequestType, UserRole, Department } from '@prisma/client';
 import { ListUsersDto } from './dto/list-users.dto';
 import axios from 'axios';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,6 +12,10 @@ import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
 import { ListAllUsersDto } from './dto/list-all-users.dto';
+import { CreateDepartmentRoleDto } from './dto/create-department-role.dto';
+import { UpdateDepartmentRoleDto } from './dto/update-department-role.dto';
+import { UpdateUserDepartmentRolesDto } from './dto/update-user-department-roles.dto';
+import { getUserWithDepartmentRoles } from '../common/types/request.types';
 // import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -23,8 +27,8 @@ export class AccountsService {
     // private configService: ConfigService,
   ) {}
 
-  private generateTokens(userId: number, mobile: string, role: UserRole) {
-    const payload = { sub: userId, mobile, role };
+  private generateTokens(userId: number) {
+    const payload = { id: userId };
     
     // Generate access token (expires in 24 hours)
     const accessToken = this.jwtService.sign(payload, {
@@ -92,15 +96,20 @@ export class AccountsService {
 
   async generateOTP(mobile: string, isMobile: Boolean): Promise<{ message: string }> {
     try {
+
       const user = await this.prisma.user.findUnique({
-        where: { mobile: mobile, status: 'Active' }
+        where: { mobile, status: 'Active' },
       });
 
-      if (!user || !user.role) {
+      if (!user) {
         throw new NotFoundException('Please use a valid number');
       }
 
-      if (isMobile && !([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)) {
+      const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
+
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
+
+      if (isMobile && !hasRole) {
         throw new BadRequestException('Access denied: You are not authorized to login');
       }
 
@@ -118,7 +127,9 @@ export class AccountsService {
       });
 
       // Send OTP via Fast2SMS
-      await this.sendOTPViaSMS(mobile, otp);
+      if(process.env.NODE_ENV === 'production'){
+        await this.sendOTPViaSMS(mobile, otp);
+      }
 
       await this.loggingService.info('OTP generated and sent successfully', { 
         mobile, 
@@ -138,9 +149,12 @@ export class AccountsService {
 
   async verifyOTP(mobile: string, otp: string, deviceId?: string): Promise<{ accessToken: string; refreshToken: string; message: string }> {
     try {
+
       const user = await this.prisma.user.findUnique({
-        where: { mobile, status: 'Active' }
+        where: { mobile, status: 'Active' },
       });
+
+      const userRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
       await this.loggingService.info('User found', {
         user: user,
@@ -153,22 +167,23 @@ export class AccountsService {
         throw new NotFoundException('Access denied: User not found with this mobile number');
       }
 
+      const hasRole = userRoles.departmentRoles.some(r => r.role === UserRole.FieldExecutive);
 
-      if((user.role === UserRole.FieldExecutive || user.role === UserRole.PDFieldExecutive) && !deviceId){
+      if(hasRole && !deviceId){
         throw new UnauthorizedException('Access denied: Please contact administrator');
       }
       
       if(deviceId){
 
-        if(!([UserRole.FieldExecutive, UserRole.PDFieldExecutive] as UserRole[]).includes(user.role)){
+        if(!hasRole){
           throw new UnauthorizedException('Access denied: You are not Authorized to login');
         }
 
         let updateUser = null;
 
-        if(!user.deviceId){
+        if(!userRoles.deviceId){
           updateUser  = await this.prisma.user.update({
-            where: { id: user.id },
+            where: { id: userRoles.id },
             data: { deviceId }
           });
           await this.loggingService.info('Device ID updated successfully', {
@@ -176,15 +191,13 @@ export class AccountsService {
           });
         }
 
-        const newUser = await this.prisma.user.findUnique({
-          where: { mobile, status: 'Active' }
-        });
+        const newUserRoles = await getUserWithDepartmentRoles(this.prisma, user.id);
 
-        if(deviceId !== newUser.deviceId){
+        if(deviceId !== newUserRoles.deviceId){
           const checkEditRequest = await this.prisma.editRequest.findFirst({
             where: {
               requester: {
-                id: user.id
+                id: userRoles.id
               },
               type: EditRequestType.Login,
               status: EditRequestStatus.Pending
@@ -198,23 +211,22 @@ export class AccountsService {
             const editRequest = await this.prisma.editRequest.create({
               data: {
                 requester: {
-                  connect: { id: user.id }
+                  connect: { id: userRoles.id }
                 },
                 changes: {
-                  oldDeviceId: user.deviceId,
                   newDeviceId: deviceId,
-                  userName: user.name,
-                  mobile: user.mobile,
-                  employeeCode: user.employeeCode,
-                  role: user.role,
-                  officeId: user.officeId,
+                  mobile: userRoles.mobile,
+                  userName: userRoles.name,
+                  officeId: userRoles.departmentRoles?.find(dr => dr.officeId)?.officeId || null,
+                  oldDeviceId: userRoles.deviceId,
+                  employeeCode: userRoles.employeeCode,
                 },
                 type: EditRequestType.Login,
                 status: EditRequestStatus.Pending
               }
             });
             await this.loggingService.info('Device change request created', {
-              userId: user.id,
+              userId: userRoles.id,
               deviceId,
               oldDeviceId: user.deviceId,
               status: 'Pending',
@@ -236,7 +248,7 @@ export class AccountsService {
       });
 
       if ( process.env.DEV_OTP && otp === process.env.DEV_OTP) {
-        const tokens = this.generateTokens(user.id, user.mobile, user.role);
+        const tokens = this.generateTokens(user.id);
       
       return { ...tokens, message: "OTP verified successfully" };
       }
@@ -262,7 +274,7 @@ export class AccountsService {
       });
 
       // Generate both tokens
-      const tokens = this.generateTokens(user.id, user.mobile, user.role);
+      const tokens = this.generateTokens(user.id);
       
       return { ...tokens, message: "OTP verified successfully" };
     } catch (error) {
@@ -280,9 +292,7 @@ export class AccountsService {
 
   async validateUser(id: number): Promise<any> {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id },
-      });
+      const user = await getUserWithDepartmentRoles(this.prisma, id);
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -293,7 +303,20 @@ export class AccountsService {
       }
 
       await this.loggingService.debug('User validated successfully', { userId: id });
-      return user;
+      
+      // Get officeId from the first department role that has an office
+      
+      return {
+        id: user.id,
+        mobile: user.mobile,
+        employeeCode: user.employeeCode,
+        name: user.name,
+        email: user.email,
+        defaultDepartment: user.defaultDepartment,
+        status: user.status,
+        locality: user.locality,
+        departmentRoles: user.departmentRoles,
+      };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -312,13 +335,30 @@ export class AccountsService {
       const where: any = {
         status: filters?.status || 'Active'
       };
-      
+
       if (filters?.role) {
-        where.role = filters.role;
+        where.departmentRoles = {
+          some: {
+            ...(filters.department && { department: filters.department }),
+            ...(filters.role && { role: filters.role })
+          }
+        };
+      } else {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
       }
       
       if (filters?.officeId) {
-        where.officeId = Number(filters.officeId);
+        where.departmentRoles = {
+          ...where.departmentRoles,
+          some: {
+            ...where.departmentRoles?.some,
+            officeId: Number(filters.officeId)
+          }
+        };
       }
 
       if (filters?.locality) {
@@ -328,21 +368,17 @@ export class AccountsService {
         };
       }
 
+      console.log(where);
+      
+
       const users = await this.prisma.user.findMany({
         where,
         select: {
           id: true,
           name: true,
           mobile: true,
-          role: true,
           employeeCode: true,
           status: true,
-          office: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
           createdAt: true,
           _count: {
             select: {
@@ -354,6 +390,13 @@ export class AccountsService {
             }
           },
           locality: true,
+          departmentRoles: {
+            select: {
+              department: true,
+              role: true,
+              officeId: true
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
@@ -376,10 +419,27 @@ export class AccountsService {
             }
           }
         });
+
+        // Transform department roles based on filter
+        let departmentRole = null;
+        if (filters?.department) {
+          // If department filter is applied, find the specific department role
+          const filteredDepartmentRole = user.departmentRoles.find(dr => dr.department === filters.department);
+          if (filteredDepartmentRole) {
+            departmentRole = {
+              department: filteredDepartmentRole.department,
+              role: filteredDepartmentRole.role
+            };
+          }
+        }
+
         return {
           ...user,
           pendingVerifications: user._count.verifications,
           availabletoday: !!attendance,
+          department: departmentRole?.department, // Single object instead of array
+          role: departmentRole?.role, // Single object instead of array
+          departmentRoles: undefined, // Remove the array
           _count: undefined // Remove the _count field
         };
       }));
@@ -405,10 +465,24 @@ export class AccountsService {
   async listAllUsers(filters?: ListAllUsersDto): Promise<PaginatedResponse<any>> {
     try {
       const where: any = {};
-      
+
       if (filters?.role) {
-        where.role = filters.role;
+        if (filters?.role) {
+          where.departmentRoles = {
+            some: {
+              role: filters.role,
+              department: filters.department
+            }
+          };
+        }
       }
+      else {
+        where.departmentRoles = {
+          some: {
+            department: filters.department
+          }
+        };
+      }      
       
       if (filters?.employeeCode) {
         where.employeeCode = {
@@ -445,12 +519,12 @@ export class AccountsService {
           mobile: true,
           email: true,
           employeeCode: true,
-          role: true,
           status: true,
-          office: {
+          departmentRoles: {
             select: {
-              id: true,
-              name: true
+              department: true,
+              role: true,
+              officeId: true
             }
           },
           createdAt: true,
@@ -496,25 +570,24 @@ export class AccountsService {
       
       // Get the user from the database
       const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub }
+        where: { id: payload.id }
       });
 
       if (!user) {
         await this.loggingService.warn('Token refresh failed - User not found', { 
-          userId: payload.sub 
+          userId: payload.id 
         });
         throw new UnauthorizedException('Invalid refresh token');
       }
 
       // Generate new access token
       const accessToken = this.jwtService.sign(
-        { sub: user.id, mobile: user.mobile, role: user.role },
+        { id: user.id },
         { expiresIn: '24h' }
       );
 
       await this.loggingService.info('Token refreshed successfully', { 
         userId: user.id,
-        role: user.role 
       });
 
       return { accessToken };
@@ -530,15 +603,40 @@ export class AccountsService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, department: Department) {
     try {
+
       // Check if user with same mobile already exists
       const existingUser = await this.prisma.user.findUnique({
         where: { mobile: createUserDto.mobile }
       });
 
       if (existingUser) {
-        throw new ConflictException('User with this mobile number already exists');
+        const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: existingUser.id,
+              department: department
+            }
+          }
+        });
+  
+        if (existingDepartmentRole) {
+          throw new ConflictException('User with this mobile number already exists');
+        } else {
+          const createDepartmentRole = await this.prisma.departmentRole.create({
+            data: {
+              userId: existingUser.id,
+              department: department,
+              role: createUserDto.departmentRoles.find(dr => dr.department === department)?.role as UserRole,
+              officeId: createUserDto.departmentRoles.find(dr => dr.department === department)?.officeId as number
+            }
+          });
+          return {
+            message: 'User created successfully',
+            data: createDepartmentRole
+          }
+        }
       }
 
       // Check if email is provided and already exists
@@ -563,27 +661,54 @@ export class AccountsService {
         }
       }
 
-      // Check if office exists
-      const office = await this.prisma.office.findUnique({
-        where: { id: createUserDto.officeId },
-      });
-
-      if (!office) {
-        throw new NotFoundException('Office not found');
+      // Validate department roles
+      if (!createUserDto.departmentRoles || createUserDto.departmentRoles.length === 0) {
+        throw new BadRequestException('At least one department role is required');
       }
 
-      // Create user
-      const user = await this.prisma.user.create({
-        data: createUserDto,
+      // Check for duplicate department roles
+      const departments = createUserDto.departmentRoles.map(dr => dr.department);
+      const uniqueDepartments = new Set(departments);
+      if (departments.length !== uniqueDepartments.size) {
+        throw new BadRequestException('Duplicate department roles are not allowed');
+      }
+
+      // Use transaction to create user and department roles atomically
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // Extract department roles from DTO
+        const { departmentRoles, ...userData } = createUserDto;
+
+        
+        // Create user
+        const user = await prisma.user.create({data: userData});
+ 
+        // Create department roles
+        const createdDepartmentRoles = await Promise.all(
+          departmentRoles.map(async (deptRole) => {
+            return await prisma.departmentRole.create({
+              data: {
+                userId: user.id,
+                role: deptRole.role,
+                officeId: deptRole.officeId,
+                department: deptRole.department,
+              },
+            });
+          })
+        );
+
+        // Return user with department roles
+        return {
+          ...user,
+          departmentRoles: createdDepartmentRoles,
+        };
       });
 
-      await this.loggingService.info('User created successfully', {
-        userId: user.id,
-        role: user.role,
-        officeId: user.officeId,
+      await this.loggingService.info('User created successfully with department roles', {
+        userId: result.id,
+        departmentRolesCount: result.departmentRoles.length,
       });
 
-      return user;
+      return result;
     } catch (error) {
       await this.loggingService.error('Failed to create user', {
         userData: createUserDto,
@@ -626,10 +751,13 @@ export class AccountsService {
         }
       }
 
-      // Check if employee code is being updated and already exists
-      if (updateUserDto.employeeCode && updateUserDto.employeeCode !== user.employeeCode) {
+      // Check if employee code is provided and already exists
+      if (updateUserDto.employeeCode) {
         const existingEmployeeCode = await this.prisma.user.findFirst({
-          where: { employeeCode: updateUserDto.employeeCode },
+          where: { 
+            employeeCode: updateUserDto.employeeCode,
+            id: { not: userId }
+          },
         });
 
         if (existingEmployeeCode) {
@@ -637,14 +765,19 @@ export class AccountsService {
         }
       }
 
-      // Check if office exists if being updated
-      if (updateUserDto.officeId) {
-        const office = await this.prisma.office.findUnique({
-          where: { id: updateUserDto.officeId },
+      // Check if defaultDepartment is being updated and if the role in that department is FieldExecutive
+      if (updateUserDto.defaultDepartment) {
+        const departmentRole = await this.prisma.departmentRole.findUnique({
+          where: {
+            userId_department: {
+              userId: userId,
+              department: updateUserDto.defaultDepartment,
+            },
+          },
         });
 
-        if (!office) {
-          throw new NotFoundException('Office not found');
+        if (departmentRole && departmentRole.role === UserRole.FieldExecutive) {
+          throw new BadRequestException('Cannot set default department to a department where user has FieldExecutive role');
         }
       }
 
@@ -671,7 +804,7 @@ export class AccountsService {
     }
   }
 
-  async createOffice(createOfficeDto: CreateOfficeDto) {
+  async createOffice(createOfficeDto: CreateOfficeDto, department: Department) {
     try {
       // Check if office with same name already exists
       const existingOffice = await this.prisma.office.findFirst({
@@ -682,8 +815,15 @@ export class AccountsService {
         throw new BadRequestException('Office with this name already exists');
       }
 
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
+
       const office = await this.prisma.office.create({
-        data: createOfficeDto,
+        data: {
+          ...createOfficeDto,
+          department: department,
+        },
       });
 
       await this.loggingService.info('Office created successfully', {
@@ -757,25 +897,33 @@ export class AccountsService {
     }
   }
 
-  async listOffices() {
+  async listOffices(department: Department) {
     try {
+
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
+
       const offices = await this.prisma.office.findMany({
-        orderBy: {
-          name: 'asc',
+        where: {
+          department: department,
         },
         include: {
           _count: {
             select: {
-              users: true
+              departmentRoles: true
             }
           }
+        },
+        orderBy: {
+          name: 'asc',
         }
       });
 
-      // Transform the data to include employees count
-      const officesWithEmployeeCount = offices.map(office => ({
+      // Transform the data to include number of employees
+      const result = offices.map(office => ({
         ...office,
-        employees: office._count.users,
+        numberofEmployees: office._count.departmentRoles,
         _count: undefined // Remove the _count field
       }));
 
@@ -783,7 +931,7 @@ export class AccountsService {
         count: offices.length,
       });
 
-      return officesWithEmployeeCount;
+      return result;
     } catch (error) {
       await this.loggingService.error('Failed to list offices', {
         error: error.message,
@@ -821,17 +969,19 @@ export class AccountsService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        include: { office: true },
+        // include: { office: true },
       });
 
-      if (!user || !user.office) {
-        await this.loggingService.warn('Organization not found for user', { userId });
-        return null;
-      }
+      // if (!user || !user.office) {
+      //   await this.loggingService.warn('Organization not found for user', { userId });
+      //   return null;
+      // }
 
-      const org = await this.prisma.organization.findUnique({
-        where: { id: user.office.organizationId },
-      });
+      // const org = await this.prisma.organization.findUnique({
+      //   where: { id: user.office.organizationId },
+      // });
+
+      const org = null;
 
       await this.loggingService.debug('Retrieved organization for user', { 
         userId,
@@ -866,6 +1016,282 @@ export class AccountsService {
         data,
         error: error.message,
         stack: error.stack 
+      });
+      throw error;
+    }
+  }
+
+  // Create department role for a user
+  async createDepartmentRole(department: Department, createDepartmentRoleDto: CreateDepartmentRoleDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: createDepartmentRoleDto.userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role already exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: createDepartmentRoleDto.userId,
+            department: department,
+          },
+        },
+      });
+
+      if (existingDepartmentRole) {
+        throw new ConflictException(`Department role already exists for user ${createDepartmentRoleDto.userId} in department ${department}`);
+      }
+
+      // Create the department role
+      const departmentRole = await this.prisma.departmentRole.create({
+        data: {
+          userId: createDepartmentRoleDto.userId,
+          department: department,
+          role: createDepartmentRoleDto.role,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role created successfully', {
+        userId: createDepartmentRoleDto.userId,
+        department,
+        role: createDepartmentRoleDto.role,
+        departmentRoleId: departmentRole.id,
+      });
+
+      return departmentRole;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create department role', {
+        userId: createDepartmentRoleDto.userId,
+        department,
+        role: createDepartmentRoleDto.role,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Update department role for a user
+  async updateDepartmentRole(userId: number, department: Department, updateDepartmentRoleDto: UpdateDepartmentRoleDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      if (!existingDepartmentRole) {
+        throw new NotFoundException(`Department role not found for user ${userId} in department ${department}`);
+      }
+
+      // Update the department role
+      const departmentRole = await this.prisma.departmentRole.update({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+        data: {
+          role: updateDepartmentRoleDto.role,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              mobile: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role updated successfully', {
+        userId: userId,
+        department,
+        role: updateDepartmentRoleDto.role,
+        departmentRoleId: departmentRole.id,
+      });
+
+      return departmentRole;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update department role', {
+        userId: userId,
+        department,
+        role: updateDepartmentRoleDto.role,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Update multiple department roles for a user
+  async updateUserDepartmentRoles(userId: number, updateUserDepartmentRolesDto: UpdateUserDepartmentRolesDto) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Validate department roles
+      if (!updateUserDepartmentRolesDto.departmentRoles || updateUserDepartmentRolesDto.departmentRoles.length === 0) {
+        throw new BadRequestException('At least one department role is required');
+      }
+
+      // Check for duplicate departments
+      const departments = updateUserDepartmentRolesDto.departmentRoles.map(dr => dr.department);
+      const uniqueDepartments = new Set(departments);
+      if (departments.length !== uniqueDepartments.size) {
+        throw new BadRequestException('Duplicate departments are not allowed');
+      }
+
+      // Use transaction to update department roles atomically
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // Delete existing department roles for this user
+        await prisma.departmentRole.deleteMany({
+          where: { userId },
+        });
+
+        // Create new department roles
+        const createdDepartmentRoles = await Promise.all(
+          updateUserDepartmentRolesDto.departmentRoles.map(async (deptRole) => {
+            return await prisma.departmentRole.create({
+              data: {
+                userId: userId,
+                department: deptRole.department,
+                role: deptRole.role,
+                officeId: deptRole.officeId,
+              },
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    mobile: true,
+                    email: true,
+                  },
+                },
+              },
+            });
+          })
+        );
+
+        return createdDepartmentRoles;
+      });
+
+      await this.loggingService.info('User department roles updated successfully', {
+        userId: userId,
+        departmentRolesCount: result.length,
+        departments: result.map(dr => dr.department),
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update user department roles', {
+        userId: userId,
+        departmentRoles: updateUserDepartmentRolesDto.departmentRoles,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // Delete department role for a user
+  async deleteDepartmentRole(userId: number, department: Department) {
+    try {
+      // Check if user exists
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if department role exists for this user and department
+      const existingDepartmentRole = await this.prisma.departmentRole.findUnique({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      if (!existingDepartmentRole) {
+        throw new NotFoundException(`Department role not found for user ${userId} in department ${department}`);
+      }
+
+      // Delete the department role
+      await this.prisma.departmentRole.delete({
+        where: {
+          userId_department: {
+            userId: userId,
+            department: department,
+          },
+        },
+      });
+
+      await this.loggingService.info('Department role deleted successfully', {
+        userId,
+        department,
+        departmentRoleId: existingDepartmentRole.id,
+      });
+
+      return { message: 'Department role deleted successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to delete department role', {
+        userId,
+        department,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }

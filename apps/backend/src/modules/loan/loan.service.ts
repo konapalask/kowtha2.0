@@ -2,33 +2,37 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 import { Buffer } from 'buffer'; // Import the Buffer type
-import { Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
+import { Logger } from '@nestjs/common';
+import { format, toZonedTime } from 'date-fns-tz';
 import { GetLoansDto } from './dto/get-loans.dto';
 import { EditLoanDto } from './dto/edit-loan.dto';
 import { PrismaService } from '../../prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { S3Service } from '../common/s3utils/s3.service';
+import { workTemplate } from './templates/FI/work.template';
 import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { LoggingService } from '../common/logging/logging.service';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
+import { addressTemplate } from './templates/FI/address.template';
 import { createAssignmentDto } from './dto/assign-loan-executive';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { EditVerificationDto } from './dto/edit-verification.dto';
+import { LoggingService } from '../common/logging/logging.service';
+import { businessTemplate } from './templates/FI/business.template';
+import { VerificationData } from './templates/FI/address.interface';
+import { WorkVerificationData } from './templates/FI/work.interface';
+import { BusinessVerificationData } from './templates/FI/business.interface';
+import { PDBusinessVerificationData } from './templates/PD/interface/pd-business.interface';
+import { axisFinanceUBLTemplate } from './templates/PD/axis-finance-ubl.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, LocationType
+  AddressType, UserRole, ApprovedStatus, Department
 } from '@prisma/client';
-import { businessTemplate } from './templates/business.template';
-import { BusinessVerificationData } from './templates/business.interface';
-import { WorkVerificationData } from './templates/work.interface';
-import { workTemplate } from './templates/work.template';
-import { VerificationData } from './templates/address.interface';
-import { addressTemplate } from './templates/address.template';
-import { contains } from 'class-validator';
-import { format, toZonedTime } from 'date-fns-tz';
-
+import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
+import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { baseTemplate } from './templates/FI/base.template';
+import { Worker } from 'worker_threads';
 
 
 @Injectable()
@@ -40,7 +44,94 @@ export class LoanService {
     private s3Service: S3Service,
   ) { }
 
-  async createLoan(data: CreateLoanDto, officeId: number) {
+
+  async runWorker(data: any) {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker(path.resolve(__dirname, 'imageWorker.js'), { workerData: data });
+      worker.on('message', (msg) => {
+        if (msg.success) resolve(msg.result);
+        else reject(new Error(msg.error));
+      });
+      worker.on('error', reject);
+      worker.on('exit', (code) => {
+        if (code !== 0) reject(new Error(`Worker stopped with code ${code}`));
+      });
+    });
+  }
+
+  async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(htmlTemplate, {
+      waitUntil: 'networkidle0'
+    });
+
+    const pdfArray = await page.pdf({
+      format: 'a4',
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      },
+      printBackground: true,
+      preferCSSPageSize: true
+    });
+    const pdfBuffer: Buffer = Buffer.from(pdfArray);
+
+    // Close the browser
+    await browser.close();
+    return pdfBuffer;
+  }
+
+  async createLambdaLoan(data: CreateLambdaLoanDto) {
+    try {
+
+      const office = await this.prisma.office.findFirst({
+        where: {
+          department: 'PD',
+        },
+      });
+
+      if (!office) {
+        throw new NotFoundException('Office not found');
+      }
+
+      const loan = await this.prisma.loan.create({
+        data: {
+          department: 'PD',
+          loanType: 'Business',
+          status: 'Unassigned',
+          bankName: data.bankName,
+          loanAmount: Number(data.loanAmount),
+          applicantName: data.applicantName,
+          applicantMobile: data.applicantMobile,
+          office: { connect: { id: office.id } },
+          applicantAddress: data.applicantAddress,
+          applicationNumber: data.applicationNumber,
+          applicantType: data.applicantType || 'Primary Applicant',
+        },
+        include: {
+          office: true,
+        },
+      });
+      return loan;
+    }
+    catch (error) {
+      await this.loggingService.error('Failed to create lambo loan', {
+        data,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createLoan(data: CreateLoanDto, officeId: number, department: Department) {
     try {
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
@@ -133,98 +224,10 @@ export class LoanService {
     }
   }
 
-  async importLoans(file: Express.Multer.File, operationsExecutiveId: number, officeId: number) {
-    try {
-      if (!file) {
-        throw new BadRequestException('No file uploaded');
-      }
-
-      // Read the Excel file
-      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(worksheet);
-
-      if (!data.length) {
-        throw new BadRequestException('Excel file is empty');
-      }
-
-      const results = [];
-      const errors = [];
-
-      // Process each row
-      for (const row of data) {
-        try {
-          const loanData: CreateLoanDto = {
-            applicantName: row['NAME OF THE APPLICANT'],
-            applicantType: row['APPLICANT TYPE'] || 'Primary Applicant',
-            applicantMobile: row['CONTACT NUMBER'].toString(),
-            applicantAddress: row['FULL ADDRESS'],
-            applicantAddress1: row['ADDRESS LINE 1'] || null,
-            applicantAddress2: row['ADDRESS LINE 2'] || null,
-            isAddressSame: row['IS_ADDRESS_SAME'] === 'YES' || false,
-            applicationNumber: row['APPLICATION ID'],
-            loanType: 'Personal', // Default to Personal if not specified
-            bankName: 'Default Bank', // Default bank if not specified
-            loanAmount: 100,
-            operationsExecutiveId: operationsExecutiveId,
-            status: LoanStatus.Unassigned,
-            verifierId: 9,
-          };
-
-          // Validate required fields
-          if (!loanData.applicantName || !loanData.applicantMobile) {
-            throw new Error('Missing required fields: Applicant Name or Contact Number');
-          }
-
-          if (!loanData.applicationNumber) {
-            throw new Error('Missing required field: APPLICATION ID');
-          }
-
-          const loan = await this.createLoan(loanData, officeId);
-          results.push({
-            row: row['__rowNum__'] + 1,
-            loanId: loan.id,
-            status: 'success'
-          });
-        } catch (error) {
-          errors.push({
-            row: row['__rowNum__'] + 1,
-            error: error.message
-          });
-        }
-      }
-
-      await this.loggingService.info('Loans import completed', {
-        operationsExecutiveId,
-        fileName: file.originalname,
-        totalProcessed: data.length,
-        successful: results.length,
-        failed: errors.length
-      });
-
-      return {
-        message: 'Loans import completed',
-        totalProcessed: data.length,
-        successful: results.length,
-        failed: errors.length,
-        results,
-        errors
-      };
-    } catch (error) {
-      await this.loggingService.error('Failed to import loans', {
-        operationsExecutiveId,
-        fileName: file.originalname,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
   // Assign a field executive to a verification for a loan
   async assignVerification(
     loanId: number,
-    createData: createAssignmentDto
+    createData: createAssignmentDto,
   ) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
@@ -254,6 +257,7 @@ export class LoanService {
             locationType: createData.locationType || null,
             businessName: createData.businessName || null,
             currentOfficeName: createData.currentOfficeName || null,
+            department: loan.department
           }
         });
 
@@ -392,7 +396,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByOffice(officeId: number) {
+  async getLoansByOffice(officeId: number, department: Department) {
     try {
       const office = await this.prisma.office.findUnique({
         where: { id: officeId }
@@ -403,7 +407,10 @@ export class LoanService {
       }
 
       const loans = await this.prisma.loan.findMany({
-        where: { officeId },
+        where: {
+          officeId,
+          department: department
+        },
         include: {
           operationsExecutive: {
             select: {
@@ -411,7 +418,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
             }
           },
           verifications: {
@@ -422,7 +428,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
                 }
               },
               verifier: {
@@ -431,9 +436,8 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
                 }
-              }
+              },
             }
           }
         },
@@ -444,6 +448,7 @@ export class LoanService {
 
       await this.loggingService.info('Retrieved loans by office', {
         officeId,
+        department,
         count: loans.length
       });
 
@@ -451,6 +456,7 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to get loans by office', {
         officeId,
+        department,
         error: error.message,
         stack: error.stack
       });
@@ -458,7 +464,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByFieldExecutive(fieldExecutiveId: number) {
+  async getLoansByFieldExecutive(fieldExecutiveId: number, department: Department) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
         where: { id: fieldExecutiveId }
@@ -469,7 +475,10 @@ export class LoanService {
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: { fieldExecutiveId },
+        where: {
+          fieldExecutiveId,
+          department: department
+        },
         include: {
           loan: {
             select: {
@@ -485,7 +494,10 @@ export class LoanService {
 
       const loanIds = verifications.map(v => v.loanId);
       const loans = await this.prisma.loan.findMany({
-        where: { id: { in: loanIds } },
+        where: {
+          id: { in: loanIds },
+          department: department
+        },
         include: {
           operationsExecutive: {
             select: {
@@ -493,7 +505,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
             }
           },
           verifications: {
@@ -504,7 +515,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
                 }
               },
               verifier: {
@@ -521,6 +531,7 @@ export class LoanService {
 
       await this.loggingService.debug('Retrieved loans by field executive', {
         fieldExecutiveId,
+        department,
         count: loans.length
       });
 
@@ -528,6 +539,7 @@ export class LoanService {
     } catch (error) {
       await this.loggingService.error('Failed to get loans by field executive', {
         fieldExecutiveId,
+        department,
         error: error.message,
         stack: error.stack
       });
@@ -535,7 +547,7 @@ export class LoanService {
     }
   }
 
-  async getLoansByVerifier(verifierId: number, role: UserRole) {
+  async getLoansByVerifier(verifierId: number, department: Department, role: any) {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId }
@@ -545,18 +557,18 @@ export class LoanService {
         throw new NotFoundException('Verifier not found');
       }
 
-      let whereCondition: Prisma.VerificationWhereInput = {};
+      const where: Prisma.VerificationWhereInput = {
+        department: department
+      };
 
-      if (role === UserRole.Admin) {
-        // For Admin, get all verifications
-        whereCondition = {};
-      } else if (role === UserRole.Verifier) {
-        // For Verifier, get only verifications assigned to them
-        whereCondition = { verifierId };
+      const userRole = role.find((r: any) => r.department === department);
+
+      if (userRole.role === UserRole.Verifier) {
+        where.verifierId = verifierId;
       }
 
       const verifications = await this.prisma.verification.findMany({
-        where: whereCondition,
+        where: where,
         include: {
           loan: {
             include: {
@@ -566,7 +578,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
                 }
               }
             }
@@ -577,9 +588,8 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
             }
-          }
+          },
         },
         orderBy: {
           createdAt: 'desc'
@@ -617,13 +627,11 @@ export class LoanService {
     }
   }
 
-  async getLoans(officeId: number, role: UserRole, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+  async getLoans(officeId: number, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
     try {
-      const where: Prisma.LoanWhereInput = {};
-
-      if (role === UserRole.OperationsExecutive) {
-        where.officeId = officeId;
-      }
+      const where: Prisma.LoanWhereInput = {
+        department: filters.department
+      };
 
       if (filters?.status) {
         where.status = filters.status;
@@ -686,7 +694,6 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-              role: true
             }
           },
           verifications: {
@@ -697,11 +704,18 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true,
-                  office: {
+                  departmentRoles: {
+                    where: {
+                      department: filters.department
+                    },
                     select: {
-                      id: true,
-                      name: true
+                      officeId: true,
+                      office: {
+                        select: {
+                          id: true,
+                          name: true,
+                        }
+                      }
                     }
                   }
                 }
@@ -712,7 +726,6 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                  role: true
                 }
               },
               verificationRetries: {
@@ -720,7 +733,7 @@ export class LoanService {
                   reason: true,
                   date: true,
                 }
-              }
+              },
             }
           }
         },
@@ -768,7 +781,6 @@ export class LoanService {
         await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
         throw new NotFoundException('Loan not found');
       }
-      console.log(updateData.verificationType);
 
       // // If field executive is provided, address is mandatory
       if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
@@ -791,7 +803,7 @@ export class LoanService {
             ...(updateData.verifierId && { verifierId: updateData.verifierId }),
             ...(updateData.fieldExecutiveId && { fieldExecutiveId: updateData.fieldExecutiveId }),
             ...(updateData.currentOfficeName && { currentOfficeName: updateData.currentOfficeName }),
-            status: 'Pending', // Reset status when assignment is updated
+            status: 'Pending' // Reset status when assignment is updated
           },
         });
 
@@ -836,6 +848,7 @@ export class LoanService {
 
       const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
+        department: filters.department,
         // Exclude verifications that have retries not for today
         OR: [
           {
@@ -892,7 +905,7 @@ export class LoanService {
               bankName: true,
               loanType: true
             }
-          }
+          },
         },
         orderBy: {
           createdAt: 'desc'
@@ -900,7 +913,7 @@ export class LoanService {
         skip,
         take: Number(limit)
       });
-      console.log(verifications[0].loan.applicantMobile, "verifications");
+      // console.log(verifications[0].loan.applicantMobile, "verifications");
 
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -989,32 +1002,14 @@ export class LoanService {
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
-          verificationData.uploadedItems.map(async (item: {
-            id: string; uri: string; type: string; timestamp: string; s3ImageUrl: string;
-            latitude?: string; longitude?: string; isCamera?: boolean; isOverlayNeeded?: boolean
-          }) => {
-            try {
-              const timeZone = 'Asia/Kolkata';
-              const zonedDate = toZonedTime(item.timestamp, timeZone);
-              const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
-
-              if (item.s3ImageUrl && item.isCamera && item.isOverlayNeeded) {
-                const processedUrl = await this.s3Service.processAndUploadImage(
-                  item.s3ImageUrl,
-                  parseFloat(item.latitude),
-                  parseFloat(item.longitude),
-                  istDate,
-                );
-              }
-            } catch (error) {
-              await this.loggingService.error('Failed to process image', {
-                loanId,
-                verificationType,
-                itemId: item.id,
-                error: error.message
-              });
-            }
-          })
+          verificationData.uploadedItems.map((item: any) =>
+            this.runWorker({
+              s3ImageUrl: item.s3ImageUrl,
+              latitude: parseFloat(item.latitude),
+              longitude: parseFloat(item.longitude),
+              timestamp: item.timestamp
+            })
+          )
         );
       }
 
@@ -1249,12 +1244,13 @@ export class LoanService {
     }
   }
 
-  async getVerificationData(loanId: number) {
+  async getVerificationData(loanId: number, department: Department) {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
         include: {
           verifications: {
+            where: { department },
             include: {
               fieldExecutive: {
                 select: {
@@ -1269,7 +1265,7 @@ export class LoanService {
                   name: true,
                   mobile: true
                 }
-              }
+              },
             }
           },
         }
@@ -1292,6 +1288,8 @@ export class LoanService {
           finalReportPath: verification.finalReportPath,
           addressType: verification.addressType,
           verificationData: verification.verificationData,
+          financialAnalysis: verification.financialAnalysis,
+          synopsis: verification.synopsis,
           fieldExecutive: verification.fieldExecutive,
           createdAt: verification.createdAt,
           updatedAt: verification.updatedAt
@@ -1322,7 +1320,7 @@ export class LoanService {
     }
   }
 
-  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number) {
+  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number, department: Department) {
     try {
       const results = {
         successful: [],
@@ -1331,16 +1329,24 @@ export class LoanService {
         successfulCount: 0,
         failedCount: 0
       };
+      if (!department) {
+        throw new BadRequestException('Department is required');
+      }
 
       for (const dto of createLoanDtos) {
         try {
           // Check if operations executive exists
-          const operationsExecutive = await this.prisma.user.findUnique({
-            where: { id: dto.operationsExecutiveId }
-          });
+          if (dto.operationsExecutiveId) {
+            const operationsExecutive = await this.prisma.user.findUnique({
+              where: { id: dto.operationsExecutiveId }
+            });
 
-          if (!operationsExecutive) {
-            throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+            if (!operationsExecutive) {
+              throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+            }
+          }
+          else {
+            dto.operationsExecutiveId = null;
           }
 
           // Check if field executive exists (if provided)
@@ -1353,6 +1359,9 @@ export class LoanService {
               throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
             }
           }
+          else {
+            dto.fieldExecutiveId = null;
+          }
 
           const { operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
 
@@ -1362,9 +1371,10 @@ export class LoanService {
           const loanData = {
             ...rest,
             applicationNumber,
+            department,
             status: dto.status || 'Unassigned',
             office: { connect: { id: officeId } },
-            operationsExecutive: { connect: { id: operationsExecutiveId } },
+            ...(operationsExecutiveId && { operationsExecutive: { connect: { id: operationsExecutiveId } } }),
             ...(fieldExecutiveId && {
               fieldExecutive: { connect: { id: fieldExecutiveId } }
             })
@@ -1634,7 +1644,7 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true, office: { select: { address: true, location: true, name: true } } } }
+              fieldExecutive: { select: { name: true } }
             }
           },
         }
@@ -1652,11 +1662,11 @@ export class LoanService {
 
       const status = verification?.approvedStatus || '';
 
-      let address = verification.fieldExecutive?.office?.address || '' +
-        ', ' + verification.fieldExecutive?.office?.location || '' +
-        ', ' + verification.fieldExecutive?.office?.name || '';
-
-      address = address.toLocaleLowerCase();
+      // let address = verification.fieldExecutive?.office?.address || '' +
+      //   ', ' + verification.fieldExecutive?.office?.location || '' +
+      //   ', ' + verification.fieldExecutive?.office?.name || '';
+      let address = '';
+      // address = address.toLocaleLowerCase();
 
       // Get the verification data
       let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
@@ -1729,7 +1739,7 @@ export class LoanService {
       // Launch a new browser instance
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN','--intl.accept_languages=en-IN']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
       });
 
       // Create a new page
@@ -1784,189 +1794,7 @@ export class LoanService {
       mailId = 'tsfi@cakowtha.co.in';
     }
 
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              color: #222;
-              position: relative;
-              min-height: 60vh;
-            }
-            .header {
-              text-align: left;
-              padding: 24px 40px 8px 40px;
-              border-bottom: 2px solid #2c3e50;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-            }
-            .header .firm {
-              font-size: 28px;
-              font-weight: bold;
-              color: #1a237e;
-              letter-spacing: 1px;
-            }
-            .header .subtitle {
-              color: #1976d2;
-              font-style: italic;
-              font-size: 18px;
-              margin-bottom: 8px;
-            }
-            .header .address {
-              font-size: 14px;
-              margin-bottom: 4px;
-            }
-            .header .contact {
-              font-size: 14px;
-              text-align: right;
-            }
-            .logo {
-              display: block;
-              width: 220px;
-              filter: contrast(200%) brightness(80%) saturate(150%);
-              background: white;
-              image-rendering: auto;
-              margin-left: 0; /* aligns to left */
-              margin-bottom: 20px;
-            }
-            .report-title {
-              text-align: center;
-              font-size: 20px;
-              font-weight: bold;
-              margin: 24px 0 0 0;
-              letter-spacing: 1px;
-              text-decoration: underline;
-            }
-            .align-wrapper {
-              width: 90%;
-              margin: 0 auto;
-            }
-            .branch-box {
-              width: 100%;
-              margin: 18px 0 0 0;
-              border: 2px solid #888;
-              border-radius: 4px;
-              background: #f8f9fa;
-            }
-            .branch-table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            .branch-table td {
-              border: none;
-              padding: 10px 16px;
-              font-size: 16px;
-            }
-            .branch-label {
-              font-weight: bold;
-              width: 160px;
-            }
-            .branch-value {
-              font-size: 18px;
-              font-weight: bold;
-              color: #222;
-            }
-            .branch-note {
-              background: #ffe0b2;
-              color: #b26a00;
-              font-size: 13px;
-              text-align: center;
-              border-radius: 3px;
-              font-weight: bold;
-            }
-            .section-table {
-              width: 100%;
-              margin: 24px 0 0 0;
-              border-collapse: collapse;
-              font-size: 15px;
-            }
-            .section-header {
-              background: #f5f5f5;
-              font-weight: bold;
-              font-size: 16px;
-              text-align: center;
-              border: 1px solid #888;
-              padding: 8px;
-              letter-spacing: 1px;
-            }
-            .section-table th, .section-table td {
-              border: 1px solid #888;
-              padding: 8px 10px;
-              vertical-align: top;
-            }
-            .section-table th {
-              background: #f5f5f5;
-              font-weight: bold;
-              text-align: center; 
-              width: 220px;
-            }
-            .highlight {
-              font-weight: bold;
-              color: #1a237e;
-            }
-            .tick {
-              font-weight: bold;
-              color: #388e3c;
-              font-size: 18px;
-            }
-            .pdf-footer {
-              position: fixed;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              text-align: center;
-              color: #7f8c8d;
-              font-size: 12px;
-              border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: transparent;
-              z-index: 1000;
-            }
-            .logo {
-              margin-top: 24px;
-              text-align: center;
-              opacity: 0.15;
-            }
-            .var-value {
-              font-weight: bold;
-            }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div>
-            <div class="firm">KOWTHA & CO.</div>
-            <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address">${address}</div>
-          </div>
-          <div class="contact">
-            Mobile no: 8332037517<br>
-            Mail ID: ${mailId}
-          </div>
-        </div>
-
-        <div class="report-title">DUE DILIGENCE REPORT</div>
-
-        <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
-              <tr>
-                <td class="branch-label">Application Number</td>
-                <td class="branch-value" style="border-right: 1px solid #000;">${loan.applicationNumber}</td>
-                <td class="branch-label">Bank Name</td>
-                <td class="branch-value">${loan.bankName}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-    `;
+    return baseTemplate(address, mailId, loan);
   }
 
   async updateVerificationApproval(
@@ -2111,6 +1939,60 @@ export class LoanService {
     }
   }
 
+  async createPDEmailLog(data: CreatePDEmailLogDto) {
+    try {
+      // If loanId is provided, verify the loan exists
+      if (data.loanId) {
+        const loan = await this.prisma.loan.findUnique({
+          where: { id: data.loanId },
+        });
+
+        if (!loan) {
+          throw new NotFoundException('Loan not found');
+        }
+      }
+
+      const pdEmailLog = await this.prisma.pDEmailLog.create({
+        data: {
+          messageID: data.messageID,
+          fromEmail: data.fromEmail,
+          toEmail: data.toEmail,
+          ccEmail: data.ccEmail,
+          bccEmail: data.bccEmail,
+          subject: data.subject,
+          body: data.body,
+          attachments: data.attachments,
+          receivedAt: data.receivedAt ? new Date(data.receivedAt) : null,
+          parsedData: data.parsedData,
+          s3Path: data.s3Path,
+          ...(data.loanId && { loan: { connect: { id: data.loanId } } }),
+        },
+        include: {
+          loan: true,
+        },
+      });
+
+      await this.loggingService.info('PD Email Log created successfully', {
+        pdEmailLogId: pdEmailLog.id,
+        messageID: pdEmailLog.messageID,
+        subject: pdEmailLog.subject,
+        loanId: pdEmailLog.loanId,
+      });
+
+      return pdEmailLog;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create PD Email Log', {
+        data,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
   async deleteLoan(loanId: number) {
     try {
       // Start a transaction to delete all related entities
@@ -2158,6 +2040,345 @@ export class LoanService {
         loanId,
         error: error.message,
         stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async reassignLoan(originalLoanId: number, department: Department) {
+    try {
+      return await this.prisma.$transaction(async (prisma) => {
+        const originalLoan = await prisma.loan.findUnique({
+          where: { id: originalLoanId, department },
+          include: {
+            verifications: true,
+          },
+        });
+
+        if (!originalLoan) {
+          throw new NotFoundException('Loan not found');
+        }
+
+        const newLoan = await prisma.loan.create({
+          data: {
+            applicationNumber: originalLoan.applicationNumber,
+            applicantName: originalLoan.applicantName,
+            applicantMobile: originalLoan.applicantMobile,
+            applicantAddress: originalLoan.applicantAddress,
+            applicantAddress1: originalLoan.applicantAddress1,
+            applicantAddress2: originalLoan.applicantAddress2,
+            applicantType: originalLoan.applicantType,
+            isAddressSame: originalLoan.isAddressSame,
+            loanType: originalLoan.loanType,
+            bankName: originalLoan.bankName,
+            loanAmount: originalLoan.loanAmount,
+            status: originalLoan.status,
+            department: originalLoan.department,
+            reassignCount: originalLoan.reassignCount + 1,
+            office: { connect: { id: originalLoan.officeId } },
+            ...(originalLoan.operationsExecutiveId && { operationsExecutive: { connect: { id: originalLoan.operationsExecutiveId } } }),
+          },
+        });
+
+        if (originalLoan.verifications && originalLoan.verifications.length > 0) {
+          for (const v of originalLoan.verifications) {
+            await prisma.verification.create({
+              data: {
+                loan: { connect: { id: newLoan.id } },
+                type: v.type,
+                addressType: v.addressType,
+                department: department,
+                ...(v.verifierId && { verifier: { connect: { id: v.verifierId } } }),
+                fieldExecutive: { connect: { id: v.fieldExecutiveId } },
+                status: VerificationStatus.Pending,
+                locationType: v.locationType,
+                isPostponed: false,
+                postponedDate: null,
+                postponedReason: null,
+                businessName: v.businessName,
+                currentOfficeName: null,
+                applicantAddress: v.applicantAddress,
+                verificationData: v.verificationData,
+              },
+            });
+          }
+        }
+
+        await this.loggingService.info('Loan reassigned by cloning with incremented reassignCount', {
+          originalLoanId,
+          newLoanId: newLoan.id,
+          previousReassignCount: originalLoan.reassignCount,
+          newReassignCount: newLoan.reassignCount,
+          verificationsCloned: originalLoan.verifications?.length || 0,
+        });
+
+        return newLoan;
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to reassign loan', {
+        originalLoanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  // PD Verification PDF Generation
+
+  async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
+    try {
+      // Fetch loan details with verification data
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId, department: Department.PD },
+        select: {
+          applicationNumber: true,
+          applicantName: true,
+          applicantMobile: true,
+          applicantAddress: true,
+          loanType: true,
+          bankName: true,
+          loanAmount: true,
+          status: true,
+          office: { select: { name: true, address: true } },
+          operationsExecutive: { select: { name: true } },
+          verifications: {
+            where: { type: VerificationType.Business },
+            select: {
+              type: true,
+              status: true,
+              approvedStatus: true,
+              updatedAt: true,
+              verificationData: true,
+              path: true,
+              finalReportPath: true,
+              fieldExecutive: { select: { name: true } }
+            }
+          },
+        }
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      if (loan.verifications.length === 0) {
+        throw new NotFoundException(`Verification for address type Business not found`);
+      }
+
+      const verification = loan.verifications[0];
+
+      const status = verification?.approvedStatus || '';
+
+      // Get the verification data
+      let verificationData = verification.verificationData as PDBusinessVerificationData;
+
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+      // Get uploaded items for this verification only
+      const uploadedItems = verificationData?.uploadedItems || [];
+
+      // Generate presigned URLs for images
+      const imageUrls = await Promise.all(
+        uploadedItems.map(async (item) => {
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+          } catch (error) {
+            await this.loggingService.error('Failed to generate presigned URL for image', {
+              s3ImageUrl: item.s3ImageUrl,
+              error: error.message
+            });
+            return null;
+          }
+        })
+      );
+
+      // Filter out any failed URL generations
+      const validImageUrls = imageUrls.filter(url => url !== null);
+
+      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
+
+      const html_data = {
+        bankName: loan.bankName,
+        path: verification.path,
+        status: status,
+        imageDataUri: imageDataUri,
+        imagesData: imagesData,
+        fieldExecutive: verification.fieldExecutive?.name || '',
+      }
+
+      const htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
+
+      const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
+
+      await this.loggingService.info('Verification PDF generated successfully', {
+        loanId,
+        applicationNumber: loan.applicationNumber,
+      });
+
+      return pdfBuffer;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate verification PDF', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async generatePDFinalReportPDF(loanId: number) {
+    try {
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId },
+        include: {
+          verifications: {
+            where: { addressType: 'Business' },
+            select: {
+              id: true,
+              type: true,
+              status: true,
+              approvedStatus: true,
+              updatedAt: true,
+              verificationData: true,
+              path: true,
+              finalReportPath: true,
+              fieldExecutive: { select: { name: true } }
+            }
+          }
+        }
+      });
+
+      if (!loan) {
+        throw new NotFoundException('Loan not found');
+      }
+
+      const verification = loan.verifications[0];
+
+      if (!verification) {
+        throw new NotFoundException(`Verification for address type Business not found`);
+      }
+
+      const finalReportPath = verification.finalReportPath;
+
+      if (!finalReportPath) {
+        throw new NotFoundException('Final report path not found');
+      }
+
+      const finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+
+      return finalReportPdfUrl;
+    } catch (error) {
+      await this.loggingService.error('Failed to generate Final Report PDF', {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async createFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          department: Department.PD,
+          type: VerificationType.Business,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Financial analysis creation failed - Verification not found', {
+          loanId,
+        });
+        throw new NotFoundException('Verification not found');
+      }
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          financialAnalysis: financialAnalysisData,
+          ...(synopsis && { synopsis }),
+        },
+      });
+
+      await this.loggingService.info('Financial analysis created successfully', {
+        loanId,
+        verificationId: verification.id,
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to create financial analysis', {
+        loanId,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async updateFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          department: Department.PD,
+          type: VerificationType.Business,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn('Financial analysis update failed - Verification not found', {
+          loanId,
+        });
+        throw new NotFoundException('Verification not found');
+      }
+
+      // Merge existing financialAnalysis with new data to preserve unchanged fields
+      const existingFinancialAnalysis = verification.financialAnalysis as any || {};
+      const mergedFinancialAnalysis = {
+        ...existingFinancialAnalysis,
+        ...financialAnalysisData
+      };
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          financialAnalysis: mergedFinancialAnalysis,
+          ...(synopsis !== undefined && { synopsis }),
+          updatedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info('Financial analysis updated successfully', {
+        loanId,
+        verificationId: verification.id,
+        updatedFields: Object.keys(financialAnalysisData)
+      });
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error('Failed to update financial analysis', {
+        loanId,
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }

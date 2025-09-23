@@ -8,7 +8,7 @@ import { VerifyLoanDto } from './dto/verify-loan.dto';
 import { JwtAuthGuard } from '../accounts/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RolesGuard } from '../accounts/guards/roles.guard';
-import { Roles } from '../accounts/decorators/roles.decorator';
+import { Roles, All } from '../accounts/decorators/roles.decorator';
 import { EditVerificationDto } from './dto/edit-verification.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { createAssignmentDto } from './dto/assign-loan-executive';
@@ -17,9 +17,11 @@ import { DeleteVerificationDto } from './dto/delete-verification.dto';
 import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
 import { CreateVerificationRetryDto } from './dto/create-verification-retry.dto';
 import { UpdateVerificationStatusDto } from './dto/update-verification-status.dto';
+import { CreateFinancialAnalysisDto } from './dto/create-financial-analysis.dto';
+import { UpdateFinancialAnalysisDto } from './dto/update-financial-analysis.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { VerificationType, LoanStatus, UserRole, VerificationStatus, 
-            AddressType, ApprovedStatus, LocationType } from '@prisma/client';
+            AddressType, ApprovedStatus, LocationType, Department } from '@prisma/client';
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 
@@ -33,28 +35,12 @@ export class LoanController {
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
   */
 
-  @Get('office/:officeId')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: 'Get loans by office' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns a list of loans for the specified office'
-  })
-  async getLoansByOffice(@Param('officeId') officeId: number) {
-    const result = await this.loanService.getLoansByOffice(officeId);
-    return {
-      status: 200,
-      message: 'Office loans fetched successfully',
-      data: result
-    };
-  }
-
   @Get()
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
-  @ApiOperation({ summary: 'Get all loans with optional status filter' })
+  @Roles(All)
+  @ApiOperation({ summary: 'Get all loans with filters' })
   @ApiResponse({
     status: 200,
-    description: 'Returns a paginated list of loans matching the filter criteria',
+    description: 'Loans fetched successfully',
     schema: {
       type: 'object',
       properties: {
@@ -63,81 +49,24 @@ export class LoanController {
         data: {
           type: 'object',
           properties: {
-            items: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'number' },
-                  applicationNumber: { type: 'string' },
-                  applicantName: { type: 'string' },
-                  applicantMobile: { type: 'string' },
-                  loanType: { type: 'string' },
-                  bankName: { type: 'string' },
-                  loanAmount: { type: 'number' },
-                  status: { type: 'string', enum: Object.values(LoanStatus) },
-                  operationsExecutive: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' },
-                      mobile: { type: 'string' },
-                      employeeCode: { type: 'string' },
-                      role: { type: 'string' }
-                    }
-                  },
-                  verifier: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'number' },
-                      name: { type: 'string' },
-                      mobile: { type: 'string' },
-                      employeeCode: { type: 'string' },
-                      role: { type: 'string' }
-                    }
-                  },
-                  verifications: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'number' },
-                        type: { type: 'string' },
-                        status: { type: 'string' },
-                        fieldExecutive: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'number' },
-                            name: { type: 'string' },
-                            mobile: { type: 'string' },
-                            employeeCode: { type: 'string' },
-                            role: { type: 'string' }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  createdAt: { type: 'string', format: 'date-time' },
-                  updatedAt: { type: 'string', format: 'date-time' }
-                }
-              }
-            },
-            meta: {
-              type: 'object',
-              properties: {
-                total: { type: 'number' },
-                page: { type: 'number' },
-                limit: { type: 'number' },
-                totalPages: { type: 'number' }
-              }
-            }
+            items: { type: 'array', items: { type: 'object' } },
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' }
           }
         }
       }
     }
   })
   async getLoans(@Query() filters: GetLoansDto, @Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoans(req.user.officeId, req.user.role as UserRole,filters);
+    // Get the role for the specific department from the user's department roles    
+    
+    if (!req.user.officeId) {
+      throw new BadRequestException('User does not have an assigned office');
+    }
+    
+    const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
       status: 200,
       message: 'Loans fetched successfully',
@@ -169,8 +98,15 @@ export class LoanController {
       }
     }
   })
-  async createLoan(@Body() createLoanDtos: CreateLoanDto[], @Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId);
+  async createLoan(@Body() createLoanDtos: CreateLoanDto[], 
+                   @Request() req: AuthenticatedRequest,
+                   @Query('department') department: Department) 
+  {
+    if (!req.user.officeId) {
+      throw new BadRequestException('User does not have an assigned office');
+    }
+    
+    const result = await this.loanService.createLoans(createLoanDtos, req.user.officeId, department);
     return {
       status: 201,
       message: 'Loans created successfully',
@@ -178,79 +114,6 @@ export class LoanController {
     };
   }
 
-  @Post('import')
-  @Roles(UserRole.OperationsExecutive)
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Operations Executive will Import loans from Excel file' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'Excel file containing loan data'
-        }
-      }
-    }
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Loans have been successfully imported from Excel file',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'Loans imported successfully' },
-        data: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-            totalProcessed: { type: 'number' },
-            successful: { type: 'number' },
-            failed: { type: 'number' },
-            results: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  row: { type: 'number' },
-                  loanId: { type: 'number' },
-                  status: { type: 'string' }
-                }
-              }
-            },
-            errors: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  row: { type: 'number' },
-                  error: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  })
-  async importLoans(
-    @UploadedFile() file: Express.Multer.File,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-
-    const result = await this.loanService.importLoans(file, req.user.sub, req.user.officeId);
-    return {
-      status: 200,
-      message: 'Loans imported successfully',
-      data: result
-    };
-  }
 
   @Post(':id/assign-loan-executive')
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
@@ -280,18 +143,40 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() createAssignmentDto: createAssignmentDto,
   ) {
-    const loan = parseInt(loanId, 10);
-    if (isNaN(loan)) {
-      throw new BadRequestException('Invalid loan ID');
-    }
-
     const result = await this.loanService.assignVerification(
-      loan,
+      Number(loanId),
       createAssignmentDto
     );
     return {
       status: 200,
       message: 'Verification assigned successfully',
+      data: result
+    };
+  }
+
+  @Post(':id/reassign')
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Reassign a loan by cloning it and incrementing reassignCount by 1' })
+  @ApiResponse({
+    status: 201,
+    description: 'Loan reassigned successfully by cloning with verifications',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Loan reassigned successfully' },
+        data: { type: 'object' }
+      }
+    }
+  })
+  async reassignLoan(@Param('id') loanId: string, @Query('department') department: Department) {
+    if (department != Department.PD) {
+      throw new BadRequestException('Invalid department');
+    }
+    const result = await this.loanService.reassignLoan(Number(loanId), department);
+    return {
+      status: 201,
+      message: 'Loan reassigned successfully',
       data: result
     };
   }
@@ -324,13 +209,8 @@ export class LoanController {
     @Param('id') loanId: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
   ) {
-    const loan = parseInt(loanId, 10);
-    if (isNaN(loan)) {
-      throw new BadRequestException('Invalid loan ID');
-    }
-
     const result = await this.loanService.updateVerificationAssignment(
-      loan,
+      Number(loanId),
       updateAssignmentDto
     );
     return {
@@ -391,8 +271,8 @@ export class LoanController {
     status: 200,
     description: 'Returns a list of loans assigned to the same verifier calling this API'
   })
-  async getLoansByVerifier(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByVerifier(req.user.sub, req.user.role as UserRole);
+  async getLoansByVerifier(@Request() req: AuthenticatedRequest, @Query('department') department: string) {
+    const result = await this.loanService.getLoansByVerifier(req.user.id, department as Department, req.user.role);
     return {
       status: 200,
       message: 'Verifier loans fetched successfully',
@@ -409,11 +289,18 @@ export class LoanController {
   async generatePDFPreview(
     @Param('id') id: string,
     @Query('type') type: AddressType,
-    @Query('status') status: string,
+    @Query('department') department: Department,
     @Res() res: Response,
   ) {
     try {
-      const pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
+      let pdfBuffer = null;
+
+      if(department === Department.FI) {
+        pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
+      }
+      else if(department === Department.PD) {
+        pdfBuffer = await this.loanService.previewPDVerificationPDF(Number(id))
+      }
 
       res.set({
         'Content-Type': 'application/pdf',
@@ -515,14 +402,14 @@ export class LoanController {
       }
     }
   })
-  async getVerificationData(@Param('id') loanId: string) {
-    const result = await this.loanService.getVerificationData(Number(loanId));
+  async getVerificationData(@Param('id') loanId: string, @Query('department') department: Department) {
+    const result = await this.loanService.getVerificationData(Number(loanId), department);
     return {
       status: 200,
-      message: 'Verification data retrieved successfully',
       data: result
     };
   }
+
 
   @Post(':id/verify')
   @Roles(UserRole.Admin, UserRole.Verifier)
@@ -538,7 +425,7 @@ export class LoanController {
   ) {
     const result = await this.loanService.verifyLoan(
       Number(loanId),
-      req.user.sub,
+      req.user.id,
       verifyLoanDto.status,
       verifyLoanDto.approvedStatus,
       verifyLoanDto.comments,
@@ -593,6 +480,7 @@ export class LoanController {
     };
   }
 
+  
   @Patch(':id/verification/:type/approve')
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({ summary: 'Approve or change status and path for a verification (Admin/Verifier only)' })
@@ -627,6 +515,56 @@ export class LoanController {
     };
   }
 
+  @Patch('verification/:id/financial-analysis')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Update financial analysis data for a verification' })
+  @ApiResponse({
+    status: 200,
+    description: 'Financial analysis updated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'Financial analysis updated successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification not found'
+  })
+  async updateFinancialAnalysis(
+    @Param('id') loanId: string,
+    @Body() updateFinancialAnalysisDto: UpdateFinancialAnalysisDto
+  ) {
+    const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
+    const result = await this.loanService.updateFinancialAnalysis(
+      Number(loanId),
+      financialAnalysisData,
+      synopsis
+    );
+    return {
+      status: 200,
+      message: 'Financial analysis updated successfully',
+      data: result
+    };
+  }
+
 
   /*
       The below API's are used by only Field Executive. His tasks include: Edit Verification Report, Submit Verification Data and Upload Proofs
@@ -639,8 +577,8 @@ export class LoanController {
     status: 200,
     description: 'Returns a list of loans assigned to the same field executive calling this API'
   })
-  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest) {
-    const result = await this.loanService.getLoansByFieldExecutive(req.user.sub);
+  async getLoansByFieldExecutive(@Request() req: AuthenticatedRequest, @Query('department') department: string) {
+    const result = await this.loanService.getLoansByFieldExecutive(req.user.id, department as Department);
     return {
       status: 200,
       message: 'Field executive loans fetched successfully',
@@ -709,7 +647,7 @@ export class LoanController {
     @Request() req: AuthenticatedRequest,
     @Query() filters: FieldExecutiveAssignedDto
   ) {
-    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.sub, filters);
+    const result = await this.loanService.getAssignedLoansWithVerifications(req.user.id, filters);
     return {
       status: 200,
       isAvailableToday: result.isAvailableToday,
@@ -760,7 +698,7 @@ export class LoanController {
     const result = await this.loanService.editVerificationReport(
       Number(loanId),
       body.verificationType,
-      req.user.sub,
+      req.user.id,
       body.findings,
       body.verificationData,
       body.addressType,
@@ -804,7 +742,7 @@ export class LoanController {
     const result = await this.loanService.updateVerificationStatus(
       Number(loanId),
       updateStatusDto.type,
-      req.user.sub,
+      req.user.id,
       updateStatusDto.status,
     );
     return {
@@ -940,13 +878,63 @@ export class LoanController {
   ) {
     // If the user is a field executive, ensure they can only create retries for themselves
     if (req.user.role === UserRole.FieldExecutive) {
-      createVerificationRetryDto.fieldExecutiveId = req.user.sub;
+      createVerificationRetryDto.fieldExecutiveId = req.user.id;
     }
 
     const result = await this.loanService.createVerificationRetry(createVerificationRetryDto);
     return {
       status: 201,
       message: 'Verification retry created successfully',
+      data: result
+    };
+  }
+
+  @Post('verification/:id/financial-analysis')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Create financial analysis data for a verification' })
+  @ApiResponse({
+    status: 201,
+    description: 'Financial analysis created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'number', example: 201 },
+        message: { type: 'string', example: 'Financial analysis created successfully' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            loanId: { type: 'number' },
+            type: { type: 'string', enum: Object.values(VerificationType) },
+            financialAnalysis: { type: 'object' },
+            synopsis: { type: 'string' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data provided'
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Verification not found'
+  })
+  async createFinancialAnalysis(
+    @Param('id') loanId: string,
+    @Body() createFinancialAnalysisDto: CreateFinancialAnalysisDto
+  ) {
+    const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
+    const result = await this.loanService.createFinancialAnalysis(
+      Number(loanId),
+      financialAnalysisData,
+      synopsis
+    );
+    return {
+      status: 201,
+      message: 'Financial analysis created successfully',
       data: result
     };
   }
