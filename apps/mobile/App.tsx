@@ -31,9 +31,7 @@ import {getItem} from './src/helpers/utility';
 import BusinessVerification from './src/screens/BusinessVerification';
 import {getPlaystoreVersion} from './src/services/auth';
 import DeviceInfo from 'react-native-device-info';
-import PDVerification from './src/screens/PDVerification';
-
-// Configure XMLHttpRequest
+import PD from './src/screens/PD';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -82,12 +80,10 @@ const App = () => {
   }>({show: false});
 
   useEffect(() => {
-    // Subscribe to network state updates
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected);
     });
 
-    // Check authentication state
     const checkAuth = async () => {
       try {
         const accessToken = await getItem('accessToken');
@@ -103,7 +99,6 @@ const App = () => {
 
     checkAuth();
 
-    // Cleanup subscription
     return () => {
       unsubscribe();
     };
@@ -119,7 +114,6 @@ const App = () => {
           setForceUpdate({show: true, playStoreUrl});
         }
       } catch (e) {
-        // Optionally handle error
         console.log('Error checking latest deployment', e);
       }
     };
@@ -215,11 +209,15 @@ const App = () => {
           />
           <Stack.Screen
             name="PDVerification"
-            component={PDVerification}
+            component={PD}
             options={({route}) => ({
+              headerShown: false,
               title: route.params?.item
                 ? `${route.params.item.name}, ${route.params.item.applicationNumber}`
-                : 'Business Verification',
+                : 'PD Verification',
+              // headerStyle: {
+              //   height: 0,
+              // },
             })}
           />
         </Stack.Navigator>

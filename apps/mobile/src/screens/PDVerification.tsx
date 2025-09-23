@@ -170,6 +170,7 @@ const PDVerification = () => {
       const savedData = await getItem(STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
+        setFormData(parsedData);
         setValidSections(
           sectionKeys.reduce((acc, section) => {
             if (section === 'thirdPartyCheck') {
@@ -269,7 +270,7 @@ const PDVerification = () => {
         },
       ],
     },
-    additionalDetails: [{id: Date.now().toString(), value: ''}],
+    additionalDetails: {details: [{value: ''}]},
     uploadedItems: [],
     // additionalInfo: {
     //   additionalRemarks: [],
