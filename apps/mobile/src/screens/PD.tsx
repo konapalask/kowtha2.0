@@ -16,6 +16,12 @@ import {
   BankFormConfig,
   BankFormSection,
 } from '../components/pd-forms/bankFormConfigs';
+import {UploadedItem} from '../types/verification';
+import {submitVerification} from '../services/field.services';
+import {clearItem} from '../helpers/utility';
+import Toast from 'react-native-toast-message';
+import Investigable from '../components/forms/Investigable';
+import CollapsibleSection from '../components/CollapsibleSection';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -41,13 +47,12 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   });
 
   // State for section expansion
-  const [expandedSections, setExpandedSections] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [expandedSections, setExpandedSections] = useState<any>({});
   const [formData, setFormData] = useState<any>({});
-  const [sectionData, setSectionData] = useState<{
-    [key: string]: any;
-  }>({});
+  const [sectionData, setSectionData] = useState<any>({});
+  const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
+  const [investigable, setInvestigable] = useState<boolean | null>(null);
+  // console.log('sectionData', sectionData);
 
   // Load saved form data on component mount
   useEffect(() => {
@@ -67,6 +72,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const parsedData = JSON.parse(savedData);
         setFormData(parsedData);
         setSectionData(parsedData.sectionData || {});
+        setUploadedItems(parsedData.uploadedItems || []);
+        setInvestigable(parsedData.investigable ?? null);
       }
     } catch (error) {
       console.error('Error loading form data:', error);
@@ -78,6 +85,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       const dataToSave = {
         ...data,
         sectionData,
+        uploadedItems,
+        investigable,
         timestamp: new Date().toISOString(),
       };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
@@ -88,14 +97,19 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev: any) => ({
       ...prev,
       [sectionId]: !prev[sectionId],
     }));
   };
 
   const isSectionValid = (sectionId: string): boolean => {
-    // For now, we'll consider a section valid if it has data
+    // Special handling for photoCapture section
+    if (sectionId === 'photoCapture') {
+      return uploadedItems.length > 0;
+    }
+
+    // For other sections, consider a section valid if it has data
     // This can be enhanced with specific validation logic per section
     return (
       sectionData[sectionId] !== undefined && sectionData[sectionId] !== null
@@ -103,30 +117,64 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const handleSectionDataChange = (sectionId: string, data: any) => {
-    setSectionData((prev: any) => ({
-      ...prev,
+    const updatedSectionData = {
+      ...sectionData,
       [sectionId]: data,
-    }));
+    };
+    setSectionData(updatedSectionData);
+    saveFormData(updatedSectionData);
+  };
+
+  const handleUploadedItemsChange = async (items: UploadedItem[]) => {
+    setUploadedItems(items);
+    await saveFormData({...sectionData, uploadedItems: items});
   };
 
   const onSubmit = async (data: any) => {
     try {
       // Merge all section data
-      const mergedData = {
-        ...data,
-        ...formData,
-        sectionData,
+      // const mergedData = {
+      //   ...data,
+      //   ...formData,
+      //   sectionData,
+      // };
+      // await saveFormData(mergedData);
+      const finalData = {
+        verificationType: 'Business',
+        findings: 'Business Verification Findings',
+        addressType: 'Business',
+        verificationData: sectionData,
       };
-      await saveFormData(mergedData);
-      Alert.alert('Success', 'Form data saved successfully!');
+
+      await submitVerification(finalData, item?.verificationId, 'PD');
+
+      await clearItem(`${item?.id}_pd`);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'PD Verification submitted successfully!',
+      });
+      navigation.goBack();
+      // }
+
+      // Alert.alert('Success', 'Form data saved successfully!');
     } catch (error) {
-      Alert.alert('Error', 'Failed to save form data');
+      // Alert.alert('Error', 'Failed to save form data');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to save form data',
+      });
     }
   };
 
   const onError = (errors: any) => {
     console.log('Form validation errors:', errors);
-    Alert.alert('Validation Error', 'Please fill all required fields');
+    Toast.show({
+      type: 'error',
+      text1: 'Validation Error',
+      text2: 'Please fill all required fields',
+    });
   };
 
   if (!formConfig) {
@@ -162,48 +210,80 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.formContainer}>
-          {formConfig.sections.map(section => {
-            const SectionComponent = section.component;
-            const isExpanded = expandedSections[section.id] || false;
+        <CollapsibleSection
+          title="Applicant asked to postpone?"
+          onToggle={() => toggleSection('investigable')}
+          isExpanded={expandedSections.investigable}
+          isValid={investigable ?? false}>
+          <Investigable
+            item={item}
+            isInvestigable={investigable}
+            setIsInvestigable={setInvestigable}
+            onYes={() =>
+              setExpandedSections((prev: any) => ({
+                ...prev,
+                investigable: false,
+              }))
+            }
+          />
+        </CollapsibleSection>
 
-            return (
-              <View key={section.id} style={styles.sectionContainer}>
-                <TouchableOpacity
-                  style={styles.sectionHeader}
-                  onPress={() => toggleSection(section.id)}>
-                  <Text style={styles.sectionTitle}>{section.label}</Text>
-                  <Text style={styles.sectionIndicator}>
-                    {isExpanded ? '▼' : '▶'}
-                  </Text>
-                  {isSectionValid(section.id) && (
-                    <View style={styles.validIndicator} />
-                  )}
-                </TouchableOpacity>
+        {investigable && (
+          <>
+            <View style={styles.formContainer}>
+              {formConfig.sections.map(section => {
+                const SectionComponent = section.component;
+                const isExpanded = expandedSections[section.id] || false;
 
-                {isExpanded && (
-                  <View style={styles.sectionContent}>
-                    <SectionComponent
-                      onSubmit={(data: any) =>
-                        handleSectionDataChange(section.id, data)
-                      }
-                      initialData={sectionData[section.id]}
-                    />
+                return (
+                  <View key={section.id} style={styles.sectionContainer}>
+                    <TouchableOpacity
+                      style={styles.sectionHeader}
+                      onPress={() => toggleSection(section.id)}>
+                      <Text style={styles.sectionTitle}>{section.label}</Text>
+                      <Text style={styles.sectionIndicator}>
+                        {isExpanded ? '▼' : '▶'}
+                      </Text>
+                      {isSectionValid(section.id) && (
+                        <View style={styles.validIndicator} />
+                      )}
+                    </TouchableOpacity>
+
+                    {isExpanded && (
+                      <View style={styles.sectionContent}>
+                        {section.id === 'photoCapture' ? (
+                          <SectionComponent
+                            onUploadedItemsChange={handleUploadedItemsChange}
+                            initialItems={uploadedItems}
+                            loanId={item?.id || item?.verificationId}
+                          />
+                        ) : (
+                          <SectionComponent
+                            onSubmit={(data: any) =>
+                              handleSectionDataChange(section.id, data)
+                            }
+                            initialData={sectionData[section.id]}
+                          />
+                        )}
+                      </View>
+                    )}
                   </View>
-                )}
-              </View>
-            );
-          })}
-        </View>
-      </ScrollView>
+                );
+              })}
+            </View>
 
-      <View style={styles.buttonContainer}>
-        <Text
-          style={styles.saveButton}
-          onPress={handleSubmit(onSubmit, onError)}>
-          Save Form Data
-        </Text>
-      </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit(onSubmit, onError)}>
+                <Text style={styles.submitButtonText}>
+                  Submit PD Verification
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -279,12 +359,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#ddd',
   },
-  saveButton: {
+  submitButton: {
     backgroundColor: '#007AFF',
-    color: '#fff',
     padding: 16,
     borderRadius: 8,
-    textAlign: 'center',
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },

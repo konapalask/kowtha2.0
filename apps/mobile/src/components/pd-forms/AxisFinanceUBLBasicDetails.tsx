@@ -98,6 +98,10 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
   const personMet = watch('personMet');
 
+  const onFormSubmit = (data: AxisFinanceUBLBasicDetailsFormData) => {
+    onSubmit(data);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>Basic Information</Text>
@@ -237,7 +241,7 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <TouchableOpacity
         style={styles.submitButton}
-        onPress={handleSubmit(onSubmit)}>
+        onPress={handleSubmit(onFormSubmit)}>
         <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
     </ScrollView>

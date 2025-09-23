@@ -29,57 +29,57 @@ export const bankFormConfigs: BankFormConfig[] = [
     bankName: 'Axis Finance',
     sections: [
       {
-        id: 'basic_details',
+        id: 'basicDetails',
         label: 'Basic Details',
         component: AxisFinanceUBLBasicDetails,
       },
       {
-        id: 'family_details',
+        id: 'familyDetails',
         label: 'Family Details',
         component: FamilyMemberDetails,
       },
       {
-        id: 'shareholding_details',
+        id: 'shareholdingDetails',
         label: 'Shareholding Details',
         component: ShareholdingDetails,
       },
       {
-        id: 'suppliers_creditors',
+        id: 'suppliersCreditors',
         label: 'Suppliers/Creditors',
         component: SuppliersCreditors,
       },
       {
-        id: 'clients_debtors',
+        id: 'clientsDebtors',
         label: 'Clients/Debtors',
         component: ClientsDebtors,
       },
       {
-        id: 'salaries_wages',
+        id: 'salariesWages',
         label: 'Salaries & Wages',
         component: SalariesWages,
       },
       {
-        id: 'asset_details',
+        id: 'assetDetails',
         label: 'Asset Details',
         component: AssetDetails,
       },
       {
-        id: 'Existing Loans',
+        id: 'existingLoans',
         label: 'Existing Loans',
         component: ExistingLoans,
       },
       {
-        id: 'third_party_check',
+        id: 'thirdPartyCheck',
         label: 'Third Party Check',
         component: ThirdPartyCheck,
       },
       {
-        id: 'additional_details',
+        id: 'additionalDetails',
         label: 'Additional Details',
         component: AdditionalDetails,
       },
       {
-        id: 'photo_capture',
+        id: 'photoCapture',
         label: 'Photo Capture',
         component: PhotoCapture,
       },
