@@ -108,12 +108,12 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <View style={styles.readonlyField}>
         <Text style={styles.fieldLabel}>Applicant Name *</Text>
-        <Text style={styles.readonlyText}>John Doe</Text>
+        <Text style={styles.readonlyText}>{initialData?.applicantName}</Text>
       </View>
 
       <View style={styles.readonlyField}>
         <Text style={styles.fieldLabel}>Name of Concern *</Text>
-        <Text style={styles.readonlyText}>ABC Enterprises</Text>
+        <Text style={styles.readonlyText}>{initialData?.nameOfConcern}</Text>
       </View>
 
       <SelectFormItem
@@ -129,7 +129,7 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <View style={styles.readonlyField}>
         <Text style={styles.fieldLabel}>Initiated Address *</Text>
-        <Text style={styles.readonlyText}>123 Main Street, City, State</Text>
+        <Text style={styles.readonlyText}>{initialData?.initiatedAddress}</Text>
       </View>
 
       <TextAreaFormItem
@@ -145,7 +145,7 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <View style={styles.readonlyField}>
         <Text style={styles.fieldLabel}>Phone No *</Text>
-        <Text style={styles.readonlyText}>+91 9876543210</Text>
+        <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
       </View>
 
       <SelectFormItem
