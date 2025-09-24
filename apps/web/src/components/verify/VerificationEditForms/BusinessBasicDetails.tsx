@@ -18,83 +18,43 @@ const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string }> 
   if (currentDepartment === 'PD') {
     return (
       <>
-        <Col span={8}>
-          <Form.Item
-            name="applicationNumber"
-            label="Application Number"
-            rules={[
-              { required: true, message: "Application number is required" },
-            ]}
-          >
-            <Input disabled style={{ color: "#000" }} />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
+        <Col span={12}>
           <Form.Item
             name="applicantName"
-            label="Name of the Applicant"
-            rules={[
-              { required: true, message: "Name of the applicant is required" },
-            ]}
+            label="Applicant Name"
+            rules={[{ required: true, message: "Applicant name is required" }]}
           >
             <Input disabled style={{ color: "#000" }} />
           </Form.Item>
         </Col>
-        <Col span={8}>
+        <Col span={12}>
           <Form.Item
-            name="businessName"
-            label="Name of the Business"
-            rules={[
-              { required: true, message: "Business name is required" },
-            ]}
+            name="nameOfConcern"
+            label="Name of Concern"
+            rules={[{ required: true, message: "Name of concern is required" }]}
           >
-            <Input placeholder="Enter business name" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="loanAmount"
-            label="Loan Amount"
-            rules={[
-              { required: true, message: "Loan amount is required" },
-            ]}
-          >
-            <Input placeholder="Enter loan amount" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="mobileNumber"
-            label="Mobile Number"
-            rules={[
-              { required: true, message: "Mobile number is required" },
-              {
-                pattern: /^[0-9]{10}$/,
-                message: "Mobile number must be 10 digits",
-              },
-            ]}
-          >
-            <Input placeholder="Enter mobile number" maxLength={10} />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="bankName"
-            label="Bank Name"
-            rules={[
-              { required: true, message: "Bank name is required" },
-            ]}
-          >
-            <Input placeholder="Enter bank name" />
+            <Input placeholder="Enter name of concern" />
           </Form.Item>
         </Col>
         <Col span={24}>
           <Form.Item
-            name="address"
-            label="Business Address"
-            rules={[{ required: true, message: "Business address is required" }]}
+            name="initiatedAddress"
+            label="Initiated Address"
+            rules={[{ required: true, message: "Initiated address is required" }]}
           >
-            <Input.TextArea rows={3} placeholder="Enter business address" />
+            <Input.TextArea rows={3} placeholder="Enter initiated address" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="phoneNo"
+            label="Phone No"
+            rules={[
+              { required: true, message: "Phone number is required" },
+              { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
+            ]}
+          >
+            <Input placeholder="Enter phone number" maxLength={10} />
           </Form.Item>
         </Col>
       </>

@@ -36,46 +36,28 @@ const BusinessBasicDetailsDescription: React.FC<{
             extra={extra}
           >
             <Descriptions.Item
-              label="Application Number"
-              contentStyle={getItemStyle("applicationNumber")}
-            >
-              {data?.basicDetails?.applicationNumber}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label="Name of the Applicant"
+              label="Applicant Name"
               contentStyle={getItemStyle("applicantName")}
             >
-              {data?.basicDetails?.applicantName}
+              {data?.basicDetails?.applicantName || "-"}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Name of the Business"
-              contentStyle={getItemStyle("businessName")}
+              label="Name of Concern"
+              contentStyle={getItemStyle("nameOfConcern")}
             >
-              {data?.basicDetails?.businessName}
+              {data?.basicDetails?.nameOfConcern || "-"}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Loan Amount"
-              contentStyle={getItemStyle("loanAmount")}
+              label="Initiated Address"
+              contentStyle={getItemStyle("initiatedAddress")}
             >
-              {data?.basicDetails?.loanAmount}
+              {data?.basicDetails?.initiatedAddress || "-"}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Mobile Number"
-              contentStyle={getItemStyle("mobileNumber")}
+              label="Phone No"
+              contentStyle={getItemStyle("phoneNo")}
             >
-              {data?.basicDetails?.mobileNumber}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label="Business Address"
-              contentStyle={getItemStyle("address")}
-            >
-              {data?.basicDetails?.address}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label="Bank Name"
-              contentStyle={getItemStyle("bankName")}
-            >
-              {data?.basicDetails?.bankName}
+              {data?.basicDetails?.phoneNo || "-"}
             </Descriptions.Item>
           </Descriptions>
         </Card>
