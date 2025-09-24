@@ -102,6 +102,32 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           if (businessData) {
             form.setFieldsValue(businessData);
           }
+        } else if (formKey === "shareholdingDetails") {
+          const shareData = currentVerification?.verificationData?.shareholdingDetails;
+          if (shareData) {
+            // Form expects { shareholders: [...] }
+            form.setFieldsValue(shareData);
+          }
+        } else if (formKey === "suppliersCreditors") {
+          const supData = currentVerification?.verificationData?.suppliersCreditors;
+          if (supData) {
+            form.setFieldsValue({ suppliersCreditors: supData });
+          }
+        } else if (formKey === "clientsDebtors") {
+          const cliData = currentVerification?.verificationData?.clientsDebtors;
+          if (cliData) {
+            form.setFieldsValue({ clientsDebtors: cliData });
+          }
+        } else if (formKey === "salariesWages") {
+          const salData = currentVerification?.verificationData?.salariesWages;
+          if (salData) {
+            form.setFieldsValue({ salariesWages: salData });
+          }
+        } else if (formKey === "assetDetails") {
+          const assetData = currentVerification?.verificationData?.assetDetails;
+          if (assetData) {
+            form.setFieldsValue({ assetDetails: assetData });
+          }
         } else {
           // Handle other PD forms normally
           form.setFieldsValue(currentVerification?.verificationData || {});
@@ -136,6 +162,21 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       }
       if (formKey === "businessDetails") {
         return currentVerification?.verificationData?.businessDetails;
+      }
+      if (formKey === "shareholdingDetails") {
+        return currentVerification?.verificationData?.shareholdingDetails;
+      }
+      if (formKey === "suppliersCreditors") {
+        return { suppliersCreditors: currentVerification?.verificationData?.suppliersCreditors };
+      }
+      if (formKey === "clientsDebtors") {
+        return { clientsDebtors: currentVerification?.verificationData?.clientsDebtors };
+      }
+      if (formKey === "salariesWages") {
+        return { salariesWages: currentVerification?.verificationData?.salariesWages };
+      }
+      if (formKey === "assetDetails") {
+        return { assetDetails: currentVerification?.verificationData?.assetDetails };
       }
     }
     
@@ -489,6 +530,26 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             ? initialValues?.verifications?.find(
                 (v: any) => v.addressType === currentTab
               )?.verificationData?.businessDetails
+            : currentDepartment === 'PD' && formKey === "shareholdingDetails"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.shareholdingDetails
+            : currentDepartment === 'PD' && formKey === "suppliersCreditors"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.suppliersCreditors
+            : currentDepartment === 'PD' && formKey === "clientsDebtors"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.clientsDebtors
+            : currentDepartment === 'PD' && formKey === "salariesWages"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.salariesWages
+            : currentDepartment === 'PD' && formKey === "assetDetails"
+            ? initialValues?.verifications?.find(
+                (v: any) => v.addressType === currentTab
+              )?.verificationData?.assetDetails
             : initialValues?.verifications?.find(
                 (v: any) => v.addressType === currentTab
               )?.verificationData?.[formKeyMapping[formKey] || formKey]

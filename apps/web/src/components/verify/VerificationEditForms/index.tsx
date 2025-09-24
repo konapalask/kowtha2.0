@@ -19,6 +19,11 @@ import ToGrossProfitForm from "./ToGrossProfitForm";
 import ToNetProfitForm from "./ToNetProfitForm";
 import FamilyDetails from "./FamilyDetails";
 import FinancialAnalysisForm from "./FinancialAnalysisForm";
+import ShareholdingDetailsForm from "./ShareholdingDetailsForm";
+import SuppliersCreditorsForm from "./SuppliersCreditorsForm";
+import ClientsDebtorsForm from "./ClientsDebtorsForm";
+import SalariesWagesForm from "./SalariesWagesForm";
+import AssetDetailsForm from "./AssetDetailsForm";
 
 interface FormSelectorProps {
   form: any;
@@ -75,6 +80,16 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       return <BusinessMiscellaneous form={form} />;
     case "familyMemberDetails":
       return <FamilyMemberForm form={form} />;
+    case "shareholdingDetails":
+      return <ShareholdingDetailsForm form={form} />;
+    case "suppliersCreditors":
+      return <SuppliersCreditorsForm form={form} />;
+    case "clientsDebtors":
+      return <ClientsDebtorsForm form={form} />;
+    case "salariesWages":
+      return <SalariesWagesForm form={form} />;
+    case "assetDetails":
+      return <AssetDetailsForm form={form} />;
     case "toGrossProfit":
       return <ToGrossProfitForm form={form} />;
     case "toNetProfit":

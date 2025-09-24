@@ -347,7 +347,14 @@ export const BusinessVerificationDetails: React.FC<
   if (!verificationData) return null;
 
   // Extract the form data from verificationData.verificationData for other sections
-  const data = verificationData?.verificationData || {};
+  const data = (verificationData?.verificationData ?? verificationData ?? {}) as any;
+  // Coalesce PD section objects in case of different shapes
+  const coalesce = (a: any, b: any) => (a !== undefined && a !== null ? a : b);
+  const unwrapKey = (obj: any, key: string) => (obj && typeof obj === 'object' && obj[key] ? obj[key] : obj);
+  const salariesWagesData = unwrapKey(coalesce(data?.salariesWages, verificationData?.verificationData?.salariesWages), 'salariesWages');
+  const clientsDebtorsData = unwrapKey(coalesce(data?.clientsDebtors, verificationData?.verificationData?.clientsDebtors), 'clientsDebtors');
+  const suppliersCreditorsData = coalesce(data?.suppliersCreditors, verificationData?.verificationData?.suppliersCreditors);
+  const assetDetailsData = coalesce(data?.assetDetails, verificationData?.verificationData?.assetDetails);
 
   const handleEditorChange = (content: string) => {
     // const liMatch = content.match(/<li>/g);
@@ -434,7 +441,9 @@ export const BusinessVerificationDetails: React.FC<
 
   return (
     <>
-      {/* Basic Details Section */}
+      {currentDepartment === 'PD' ? (
+        <>
+          {/* PD: Axis Finance order */}
       <BusinessBasicDetailsDescription
         data={data}
         extra={getButton("businessBasicDetails")}
@@ -442,33 +451,411 @@ export const BusinessVerificationDetails: React.FC<
         currentDepartment={currentDepartment}
       />
 
-      {/* Business Details Section */}
-      <BusinessDetailsDescription
-        data={data}
-        extra={getButton("businessDetails")}
+          {/* Family Details */}
+          <FamilyDetailsDescription
+            data={{
+              ...data,
+              familyMemberDetails:
+                data?.familyMemberDetails || data?.familyDetails || [],
+            }}
+            extra={getButton("familyDetails")}
         logs={false}
-        currentDepartment={currentDepartment}
-      />
+          />
 
-      {/* Applicant Details Section - Only for PD department */}
-      {currentDepartment === 'PD' && (
-        <ApplicantDetailsDescription
+          {/* Shareholding Details */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Shareholding Details" extra={getButton("shareholdingDetails")}>
+              <Table
+                className="striped-table"
+                dataSource={data?.shareholdingDetails?.shareholders || []}
+                columns={[
+                  { title: "Name", dataIndex: "name", key: "name" },
+                  {
+                    title: "Shareholding %",
+                    dataIndex: "shareholdingPercentage",
+                    key: "shareholdingPercentage",
+                  },
+                  {
+                    title: "Relation with Applicant",
+                    dataIndex: "relationshipWithApplicant",
+                    key: "relationshipWithApplicant",
+                  },
+                  { title: "Designation", dataIndex: "designation", key: "designation" },
+                  {
+                    title: "Coming into Loan Structure",
+                    dataIndex: "comingIntoLoanStructure",
+                    key: "comingIntoLoanStructure",
+                  },
+                  {
+                    title: "Functional of Partner/Director",
+                    dataIndex: "functionalOfPartnerDirector",
+                    key: "functionalOfPartnerDirector",
+                  },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No shareholders added yet" }}
+                bordered
+              />
+            </Card>
+          </section>
+
+          {/* Suppliers/Creditors */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Suppliers/Creditors" extra={getButton("suppliersCreditors")}>
+              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
+                <Descriptions.Item label="No. of Fixed Suppliers">
+                  {suppliersCreditorsData?.numberOfFixedSuppliers}
+                </Descriptions.Item>
+                <Descriptions.Item label="Credit Period">
+                  {suppliersCreditorsData?.creditPeriod}
+                </Descriptions.Item>
+                <Descriptions.Item label="Cash-Cheque Proportions">
+                  {suppliersCreditorsData?.cashChequeProportions}
+                </Descriptions.Item>
+              </Descriptions>
+              <Table
+                className="striped-table"
+                dataSource={
+                  (suppliersCreditorsData?.suppliers &&
+                    suppliersCreditorsData?.suppliers?.length
+                      ? suppliersCreditorsData?.suppliers
+                      : [
+                          {
+                            name: suppliersCreditorsData?.supplier1Name,
+                            phone: suppliersCreditorsData?.supplier1Phone,
+                            location: suppliersCreditorsData?.supplier1Location,
+                            review: suppliersCreditorsData?.supplier1Review,
+                          },
+                          {
+                            name: suppliersCreditorsData?.supplier2Name,
+                            phone: suppliersCreditorsData?.supplier2Phone,
+                            location: suppliersCreditorsData?.supplier2Location,
+                            review: suppliersCreditorsData?.supplier2Review,
+                          },
+                          {
+                            name: suppliersCreditorsData?.supplier3Name,
+                            phone: suppliersCreditorsData?.supplier3Phone,
+                            location: suppliersCreditorsData?.supplier3Location,
+                            review: suppliersCreditorsData?.supplier3Review,
+                          },
+                        ].filter((s: any) => s && (s.name || s.phone || s.location || s.review))) || []
+                }
+                columns={[
+                  { title: "Name", dataIndex: "name", key: "name" },
+                  { title: "Phone", dataIndex: "phone", key: "phone" },
+                  { title: "Location", dataIndex: "location", key: "location" },
+                  { title: "Review", dataIndex: "review", key: "review" },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No suppliers added yet" }}
+                bordered
+              />
+            </Card>
+          </section>
+
+          {/* Clients/Debtors */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Clients/Debtors" extra={getButton("clientsDebtors")}>
+              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
+                <Descriptions.Item label="No. of Fixed Customers">
+                  {clientsDebtorsData?.numberOfFixedCustomers}
+                </Descriptions.Item>
+                <Descriptions.Item label="Credit Period">
+                  {clientsDebtorsData?.creditPeriod}
+                </Descriptions.Item>
+                <Descriptions.Item label="Cash-Cheque Proportions">
+                  {clientsDebtorsData?.cashChequeProportions}
+                </Descriptions.Item>
+                <Descriptions.Item label="Average Stock Maintenance">
+                  {clientsDebtorsData?.averageStockMaintenance}
+                </Descriptions.Item>
+                <Descriptions.Item label="Turnover">
+                  {clientsDebtorsData?.turnover}
+                </Descriptions.Item>
+                <Descriptions.Item label="Net Margins">
+                  {clientsDebtorsData?.netMargins}
+                </Descriptions.Item>
+              </Descriptions>
+              <Table
+                className="striped-table"
+                dataSource={[
+                  {
+                    name: clientsDebtorsData?.customer1Name,
+                    phone: clientsDebtorsData?.customer1Phone,
+                    location: clientsDebtorsData?.customer1Location,
+                    review: clientsDebtorsData?.customer1Review,
+                  },
+                  {
+                    name: clientsDebtorsData?.customer2Name,
+                    phone: clientsDebtorsData?.customer2Phone,
+                    location: clientsDebtorsData?.customer2Location,
+                    review: clientsDebtorsData?.customer2Review,
+                  },
+                  {
+                    name: clientsDebtorsData?.customer3Name,
+                    phone: clientsDebtorsData?.customer3Phone,
+                    location: clientsDebtorsData?.customer3Location,
+                    review: clientsDebtorsData?.customer3Review,
+                  },
+                ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))}
+                columns={[
+                  { title: "Name", dataIndex: "name", key: "name" },
+                  { title: "Phone", dataIndex: "phone", key: "phone" },
+                  { title: "Location", dataIndex: "location", key: "location" },
+                  { title: "Review", dataIndex: "review", key: "review" },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No customers added yet" }}
+                bordered
+              />
+            </Card>
+          </section>
+
+          {/* Salaries & Wages */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
+              <Descriptions bordered column={2}>
+                <Descriptions.Item label="No. of Employees">
+                  {salariesWagesData?.numberOfEmployees}
+                </Descriptions.Item>
+                <Descriptions.Item label="Salary/Employee/Month">
+                  {salariesWagesData?.salaryPerMonthPerEmployee}
+                </Descriptions.Item>
+                <Descriptions.Item label="Status of Employee">
+                  {salariesWagesData?.statusOfEmployee}
+                </Descriptions.Item>
+                <Descriptions.Item label="No. of Labours">
+                  {salariesWagesData?.numberOfLabours}
+                </Descriptions.Item>
+                <Descriptions.Item label="Wages per month/day">
+                  {salariesWagesData?.wagesPerMonthPerDay}
+                </Descriptions.Item>
+                <Descriptions.Item label="Status of Labour">
+                  {salariesWagesData?.statusOfLabour}
+                </Descriptions.Item>
+                <Descriptions.Item label="Working Hours Start">
+                  {salariesWagesData?.workingHoursStart}
+                </Descriptions.Item>
+                <Descriptions.Item label="Working Hours End">
+                  {salariesWagesData?.workingHoursEnd}
+                </Descriptions.Item>
+                <Descriptions.Item label="Other Major Expenditure">
+                  {salariesWagesData?.otherMajorExpenditure}
+                </Descriptions.Item>
+                <Descriptions.Item label="Remarks">
+                  {salariesWagesData?.remarks}
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          </section>
+
+          {/* Asset Details */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Asset Details" extra={getButton("assetDetails")}>
+              <Table
+                className="striped-table"
+                dataSource={assetDetailsData?.assets || []}
+                columns={[
+                  { title: "Address", dataIndex: "address", key: "address" },
+                  { title: "Mortgaged", dataIndex: "mortgaged", key: "mortgaged" },
+                  { title: "Owner Name", dataIndex: "ownerName", key: "ownerName" },
+                  { title: "Market Value", dataIndex: "marketValue", key: "marketValue" },
+                  { title: "Area Measured", dataIndex: "areaMeasured", key: "areaMeasured" },
+                  { title: "Purchase Cost", dataIndex: "purchaseCost", key: "purchaseCost" },
+                  { title: "Purchase Year", dataIndex: "purchaseYear", key: "purchaseYear" },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No assets added yet" }}
+                bordered
+                style={{ marginBottom: 12 }}
+              />
+              <Descriptions bordered column={2}>
+                <Descriptions.Item label="Status">
+                  {assetDetailsData?.status}
+                </Descriptions.Item>
+                <Descriptions.Item label="Remarks">
+                  {assetDetailsData?.remarks}
+                </Descriptions.Item>
+                <Descriptions.Item label="Vehicles">
+                  {assetDetailsData?.vehicles}
+                </Descriptions.Item>
+                <Descriptions.Item label="Other Income">
+                  {assetDetailsData?.otherIncome}
+                </Descriptions.Item>
+                <Descriptions.Item label="Observations">
+                  {assetDetailsData?.observations}
+                </Descriptions.Item>
+                <Descriptions.Item label="Site Coordinates">
+                  {assetDetailsData?.siteCoordinates}
+                </Descriptions.Item>
+                <Descriptions.Item label="Life Insurance/Mediclaim">
+                  {assetDetailsData?.lifeInsuranceMediclaim}
+                </Descriptions.Item>
+                <Descriptions.Item label="Capital Invested in Business">
+                  {assetDetailsData?.capitalInvestedBusiness}
+                </Descriptions.Item>
+                <Descriptions.Item label="Liquid/Moveable/Monetary Items">
+                  {assetDetailsData?.liquidMoveableMonetaryItems}
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          </section>
+
+          {/* Existing Loans */}
+          <section style={{ marginBottom: 24 }}>
+            <Card
+              title="Existing Loans"
+              extra={
+                <Button
+                  style={{ border: "none" }}
+                  icon={<EditOutlined />}
+                  onClick={() => onEdit("existingLoans")}
+                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
+                />
+              }
+            >
+              <Table
+                className="striped-table"
+                dataSource={data?.existingLoans?.loans || []}
+                columns={[
+                  { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
+                  { title: "Purpose", dataIndex: "purpose", key: "purpose" },
+                  { title: "Loan Amount", dataIndex: "loanAmount", key: "loanAmount" },
+                  { title: "EMI", dataIndex: "emi", key: "emi" },
+                  { title: "Tenure", dataIndex: "tenure", key: "tenure" },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No existing loans added yet" }}
+                bordered
+              />
+            </Card>
+          </section>
+
+          {/* Third Party Check */}
+          <section style={{ marginBottom: 24 }}>
+            <Card
+              title="Third Party Check"
+              extra={
+                <Button
+                  style={{ border: "none" }}
+                  icon={<EditOutlined />}
+                  onClick={() => onEdit("thirdPartyCheck")}
+                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
+                />
+              }
+            >
+              <Table
+                className="striped-table"
+                dataSource={data?.thirdPartyCheck?.checks || []}
+                columns={[
+                  { title: "TPC Name", dataIndex: "tpcName", key: "tpcName" },
+                  { title: "Mobile", dataIndex: "mobileNumber", key: "mobileNumber" },
+                  {
+                    title: "Relationship",
+                    dataIndex: "relationship",
+                    key: "relationship",
+                    render: (text: string, record: any) =>
+                      text === "Other" && (record.otherRelation || record.relationshipOther)
+                        ? `Other - ${(record.otherRelation || record.relationshipOther)}`
+                        : text,
+                  },
+                  { title: "Feedback Status", dataIndex: "feedbackStatus", key: "feedbackStatus" },
+                  { title: "Comments", dataIndex: "comments", key: "comments" },
+                ]}
+                pagination={false}
+                locale={{ emptyText: "No references added yet" }}
+                bordered
+              />
+            </Card>
+          </section>
+
+          {/* Additional Details */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Additional Details">
+              {(data?.additionalDetails?.details || []).length > 0 ? (
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {data?.additionalDetails?.details?.map((d: any, idx: number) => (
+                    <li key={idx}>{d?.value}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ color: "#6b7280" }}>No additional details added</div>
+              )}
+            </Card>
+          </section>
+
+          {/* Photo Capture */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Photo Capture">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gap: "16px",
+                }}
+              >
+                {data?.uploadedItems?.map((item: any, idx: number) => (
+                  <div key={item.id} style={{ position: "relative" }}>
+                    <Image
+                      src={imageUrls[item.id] || ""}
+                      alt={`Photo ${idx + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        objectFit: "cover",
+                        borderRadius: "4px",
+                      }}
+                    />
+                    <Button
+                      type="text"
+                      danger
+                      icon={<CloseCircleOutlined />}
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        background: "rgba(255, 255, 255, 0.8)",
+                        borderRadius: "50%",
+                        padding: 4,
+                      }}
+                      disabled={hasEditRequest}
+                      onClick={() => handleDeleteClick(item.id)}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        background: "rgba(0, 0, 0, 0.6)",
+                        color: "white",
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </section>
+        </>
+      ) : (
+        <>
+          {/* Original order for non-PD */}
+          <BusinessBasicDetailsDescription
           data={data}
-          extra={getButton("applicantDetails")}
+            extra={getButton("businessBasicDetails")}
           logs={false}
-        />
-      )}
-
-      {/* Family Details Section - Only for PD department */}
-      {currentDepartment === 'PD' && (
-        <FamilyDetailsDescription
-          data={data}
-          extra={getButton("familyDetails")}
-          logs={false}
-        />
-      )}
-
-      {/* Business Miscellaneous Section - Only for non-PD departments */}
+            currentDepartment={currentDepartment}
+          />
+          <BusinessDetailsDescription
+            data={data}
+            extra={getButton("businessDetails")}
+            logs={false}
+            currentDepartment={currentDepartment}
+          />
       {currentDepartment !== 'PD' && (
       <BusinessMiscellaneousDescription
         data={data}
@@ -476,14 +863,12 @@ export const BusinessVerificationDetails: React.FC<
         logs={false}
       />
       )}
-
-      {/* Existing Loans Section */}
+          {/* Existing Loans */}
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Existing Loans"
           extra={
             <Button
-              // type="primary"
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("existingLoans")}
@@ -495,43 +880,11 @@ export const BusinessVerificationDetails: React.FC<
             className="striped-table"
             dataSource={data?.existingLoans?.loans || []}
             columns={[
-              {
-                title: "Bank Name",
-                dataIndex: "bankName",
-                key: "bankName",
-              },
-              {
-                title: "Purpose",
-                dataIndex: "purpose",
-                key: "purpose",
-              },
-              {
-                title: "Loan Amount",
-                dataIndex: "loanAmount",
-                key: "loanAmount",
-              },
-              {
-                title: "EMI",
-                dataIndex: "emi",
-                key: "emi",
-              },
-              {
-                title: "Tenure",
-                dataIndex: "tenure",
-                key: "tenure",
-              },
-              // {
-              //   title: "Actions",
-              //   key: "actions",
-              //   render: () => (
-              //     <Button
-              //       type="text"
-              //       icon={<EditOutlined />}
-              //       onClick={() => onEdit("existingLoans")}
-              //       disabled={hasEditRequest}
-              //     />
-              //   ),
-              // },
+                  { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
+                  { title: "Purpose", dataIndex: "purpose", key: "purpose" },
+                  { title: "Loan Amount", dataIndex: "loanAmount", key: "loanAmount" },
+                  { title: "EMI", dataIndex: "emi", key: "emi" },
+                  { title: "Tenure", dataIndex: "tenure", key: "tenure" },
             ]}
             pagination={false}
             locale={{ emptyText: "No existing loans added yet" }}
@@ -539,13 +892,12 @@ export const BusinessVerificationDetails: React.FC<
           />
         </Card>
       </section>
-
+          {/* Third Party Check */}
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Third Party Check"
           extra={
             <Button
-              // type="primary"
               style={{ border: "none" }}
               icon={<EditOutlined />}
               onClick={() => onEdit("thirdPartyCheck")}
@@ -557,48 +909,19 @@ export const BusinessVerificationDetails: React.FC<
             className="striped-table"
             dataSource={data?.thirdPartyCheck?.checks || []}
             columns={[
-              {
-                title: "TPC Name",
-                dataIndex: "tpcName",
-                key: "tpcName",
-              },
-              {
-                title: "Mobile",
-                dataIndex: "mobileNumber",
-                key: "mobileNumber",
-              },
+                  { title: "TPC Name", dataIndex: "tpcName", key: "tpcName" },
+                  { title: "Mobile", dataIndex: "mobileNumber", key: "mobileNumber" },
               {
                 title: "Relationship",
                 dataIndex: "relationship",
                 key: "relationship",
                 render: (text: string, record: any) =>
-                  text === "Other" && record.relationshipOther
-                    ? `Other - ${record.relationshipOther}`
+                      text === "Other" && (record.otherRelation || record.relationshipOther)
+                        ? `Other - ${(record.otherRelation || record.relationshipOther)}`
                     : text,
               },
-              {
-                title: "Feedback Status",
-                dataIndex: "feedbackStatus",
-                key: "feedbackStatus",
-              },
-              {
-                title: "Comments",
-                dataIndex: "comments",
-                key: "comments",
-              },
-
-              // {
-              //   title: "Actions",
-              //   key: "actions",
-              //   render: (_, record) => (
-              //     <Button
-              //       type="text"
-              //       icon={<EditOutlined />}
-              //       onClick={() => onEdit("colleagueReferences")}
-              //       disabled={hasEditRequest}
-              //     />
-              //   ),
-              // },
+                  { title: "Feedback Status", dataIndex: "feedbackStatus", key: "feedbackStatus" },
+                  { title: "Comments", dataIndex: "comments", key: "comments" },
             ]}
             pagination={false}
             locale={{ emptyText: "No references added yet" }}
@@ -606,8 +929,7 @@ export const BusinessVerificationDetails: React.FC<
           />
         </Card>
       </section>
-
-      {/* Photo Capture Section */}
+          {/* Photo Capture */}
       <section style={{ marginBottom: 24 }}>
         <Card title="Photo Capture">
           <div
@@ -628,7 +950,6 @@ export const BusinessVerificationDetails: React.FC<
                     objectFit: "cover",
                     borderRadius: "4px",
                   }}
-                  // preview={false}
                 />
                 <Button
                   type="text"
@@ -657,14 +978,15 @@ export const BusinessVerificationDetails: React.FC<
                     fontSize: "12px",
                   }}
                 >
-                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo{" "}
-                  {idx + 1}
+                      {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
                 </div>
               </div>
             ))}
           </div>
         </Card>
       </section>
+        </>
+      )}
 
       <section style={{ marginBottom: 24 }}>
         <EditRequestLogs
@@ -765,7 +1087,6 @@ export const BusinessVerificationDetails: React.FC<
                     </Col>
                   </Row>
                 </Col>
-                
                 {/* Right side - All "By" fields */}
                 <Col span={12}>
                   <Row gutter={[8, 8]}>
@@ -800,7 +1121,6 @@ export const BusinessVerificationDetails: React.FC<
                 </Col>
               </Row>
             </Card>
-
             {/* Net Profit Section */}
             <Card title={`To Net Profit - ₹${calculatedNetProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
               <Row gutter={[16, 8]}>
@@ -944,7 +1264,6 @@ export const BusinessVerificationDetails: React.FC<
                     </Col>
                   </Row>
                 </Col>
-                
                 {/* Right side - All "By" fields */}
                 <Col span={12}>
                   <Row gutter={[8, 8]}>
@@ -1042,78 +1361,6 @@ export const BusinessVerificationDetails: React.FC<
         setOpen={setOpen}
         verificationType="Business"
       />
-      {/* </section> */}
-      {/* </Card> */}
-
-      {/* <Modal
-        open={open}
-        onCancel={() => {
-          setOpen(false);
-          // if (pdfPreviewUrl) {
-          //   window.URL.revokeObjectURL(pdfPreviewUrl);
-          // }
-          // setPdfPreviewUrl(null);
-        }}
-        cancelButtonProps={{
-          style: {
-            display: "none",
-          },
-        }}
-        footer={null}
-        width={900}
-        title={
-          verdict === "Positive"
-            ? "Positive Loan Verification"
-            : "Negative Loan Verification"
-        }
-        destroyOnClose
-        closeIcon={!verdict}
-        maskClosable={false}
-      >
-        <PdfPreview
-          id={id as string}
-          status={verdict}
-          setLoading={setLoading}
-        />
-        {verdict && (
-          <Button
-            type="primary"
-            onClick={() => {
-              router.push("/verify");
-            }}
-            loading={loading}
-          >
-            Confirm
-          </Button>
-        )}
-      </Modal> */}
-
-      {/* Final Observations Section */}
-      {/* <section style={{ marginBottom: 24 }}>
-        <Card title="Final Observations">
-          <div style={{ height: "400px", marginBottom: "20px", background: "#fff" }}>
-            <ReactQuill
-              readOnly={hasEditRequest}
-              theme="snow"
-              value={editorContent}
-              onChange={handleEditorChange}
-              style={{ height: '300px' }}
-              modules={{
-                toolbar: [
-                  [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                  ["bold", "italic", "underline", "strike"],
-                  [{ list: "ordered" }, { list: "bullet" }],
-                  [{ color: [] }, { background: [] }],
-                  ["link"],
-                  ["clean"],
-                ],
-              }}
-              placeholder=" Enter final observations here..."
-            />
-          </div>
-        </Card>
-      </section>
-      <Footer editorContent={editorContent} disabled={hasEditRequest} /> */}
     </>
   );
 };
