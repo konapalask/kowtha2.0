@@ -277,6 +277,8 @@ export default function LoanVerifyDetails() {
             fetchVerificationData={fetchVerificationData}
             editRequests={editRequests}
             currentDepartment={currentDepartment}
+            applicationNumber={verificationData?.applicationNumber}
+            loanId={verificationData?.loanId}
           />
         );
     }

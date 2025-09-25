@@ -41,6 +41,8 @@ interface BusinessVerificationDetailsProps {
   fetchVerificationData: any;
   editRequests?: any[];
   currentDepartment?: string;
+  applicationNumber?: string;
+  loanId?: number;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -56,6 +58,8 @@ export const BusinessVerificationDetails: React.FC<
   fetchVerificationData,
   editRequests = [],
   currentDepartment,
+  applicationNumber,
+  loanId,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -445,7 +449,12 @@ export const BusinessVerificationDetails: React.FC<
         <>
           {/* PD: Axis Finance order */}
       <BusinessBasicDetailsDescription
-        data={data}
+        data={{
+          ...data,
+          bankName: verificationData?.bankName,
+          applicationNumber: applicationNumber,
+          loanId: loanId
+        }}
         extra={getButton("businessBasicDetails")}
         logs={false}
         currentDepartment={currentDepartment}
@@ -539,51 +548,60 @@ export const BusinessVerificationDetails: React.FC<
             <Card title="Clients/Debtors" extra={getButton("clientsDebtors")}>
               <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
                 <Descriptions.Item label="No. of Fixed Customers">
-                  {clientsDebtorsData?.numberOfFixedCustomers}
+                  {clientsDebtorsData?.clientsDebtors?.numberOfFixedCustomers || clientsDebtorsData?.numberOfFixedCustomers || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Credit Period">
-                  {clientsDebtorsData?.creditPeriod}
+                  {clientsDebtorsData?.clientsDebtors?.creditPeriod || clientsDebtorsData?.creditPeriod || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Cash-Cheque Proportions">
-                  {clientsDebtorsData?.cashChequeProportions}
+                  {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Average Stock Maintenance">
-                  {clientsDebtorsData?.averageStockMaintenance}
+                  {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Turnover">
-                  {clientsDebtorsData?.turnover}
+                  {clientsDebtorsData?.clientsDebtors?.turnover || clientsDebtorsData?.turnover || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Net Margins">
-                  {clientsDebtorsData?.netMargins}
+                  {clientsDebtorsData?.clientsDebtors?.netMargins || clientsDebtorsData?.netMargins || "-"}
                 </Descriptions.Item>
               </Descriptions>
               <Table
                 className="striped-table"
-                dataSource={[
-                  {
-                    name: clientsDebtorsData?.customer1Name,
-                    phone: clientsDebtorsData?.customer1Phone,
-                    location: clientsDebtorsData?.customer1Location,
-                    review: clientsDebtorsData?.customer1Review,
-                  },
-                  {
-                    name: clientsDebtorsData?.customer2Name,
-                    phone: clientsDebtorsData?.customer2Phone,
-                    location: clientsDebtorsData?.customer2Location,
-                    review: clientsDebtorsData?.customer2Review,
-                  },
-                  {
-                    name: clientsDebtorsData?.customer3Name,
-                    phone: clientsDebtorsData?.customer3Phone,
-                    location: clientsDebtorsData?.customer3Location,
-                    review: clientsDebtorsData?.customer3Review,
-                  },
-                ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))}
+                dataSource={
+                  clientsDebtorsData?.clientsDebtors?.customers || 
+                  clientsDebtorsData?.customers || 
+                  [
+                    {
+                      name: clientsDebtorsData?.clientsDebtors?.customer1Name || clientsDebtorsData?.customer1Name,
+                      phone: clientsDebtorsData?.clientsDebtors?.customer1Phone || clientsDebtorsData?.customer1Phone,
+                      location: clientsDebtorsData?.clientsDebtors?.customer1Location || clientsDebtorsData?.customer1Location,
+                      review: clientsDebtorsData?.clientsDebtors?.customer1Review || clientsDebtorsData?.customer1Review,
+                    },
+                    {
+                      name: clientsDebtorsData?.clientsDebtors?.customer2Name || clientsDebtorsData?.customer2Name,
+                      phone: clientsDebtorsData?.clientsDebtors?.customer2Phone || clientsDebtorsData?.customer2Phone,
+                      location: clientsDebtorsData?.clientsDebtors?.customer2Location || clientsDebtorsData?.customer2Location,
+                      review: clientsDebtorsData?.clientsDebtors?.customer2Review || clientsDebtorsData?.customer2Review,
+                    },
+                    {
+                      name: clientsDebtorsData?.clientsDebtors?.customer3Name || clientsDebtorsData?.customer3Name,
+                      phone: clientsDebtorsData?.clientsDebtors?.customer3Phone || clientsDebtorsData?.customer3Phone,
+                      location: clientsDebtorsData?.clientsDebtors?.customer3Location || clientsDebtorsData?.customer3Location,
+                      review: clientsDebtorsData?.clientsDebtors?.customer3Review || clientsDebtorsData?.customer3Review,
+                    },
+                  ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))
+                }
                 columns={[
                   { title: "Name", dataIndex: "name", key: "name" },
                   { title: "Phone", dataIndex: "phone", key: "phone" },
                   { title: "Location", dataIndex: "location", key: "location" },
-                  { title: "Review", dataIndex: "review", key: "review" },
+                  { 
+                    title: "Review", 
+                    dataIndex: "review", 
+                    key: "review",
+                    render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
+                  },
                 ]}
                 pagination={false}
                 locale={{ emptyText: "No customers added yet" }}

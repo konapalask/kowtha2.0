@@ -55,6 +55,16 @@ const FamilyDetailsDescription: React.FC<{
                 key: "age",
               },
               {
+                title: "Mobile Number",
+                dataIndex: "mobileNumber",
+                key: "mobileNumber",
+              },
+              {
+                title: "Staying with Applicant",
+                dataIndex: "stayingWithApplicant",
+                key: "stayingWithApplicant",
+              },
+              {
                 title: "Occupation",
                 dataIndex: "employmentType",
                 key: "employmentType",
@@ -77,6 +87,8 @@ const FamilyDetailsDescription: React.FC<{
             <Descriptions.Item label="Name">-</Descriptions.Item>
             <Descriptions.Item label="Relation">-</Descriptions.Item>
             <Descriptions.Item label="Age">-</Descriptions.Item>
+            <Descriptions.Item label="Mobile Number">-</Descriptions.Item>
+            <Descriptions.Item label="Staying with Applicant">-</Descriptions.Item>
             <Descriptions.Item label="Occupation">-</Descriptions.Item>
             <Descriptions.Item label="Education">-</Descriptions.Item>
           </Descriptions>

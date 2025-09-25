@@ -55,6 +55,18 @@ const BusinessBasicDetailsDescription: React.FC<{
             extra={extra}
           >
             <Descriptions.Item
+              label="Application Number"
+              contentStyle={getItemStyle("applicationNumber")}
+            >
+              {formatDisplayValue(data?.applicationNumber, "applicationNumber")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Bank Name"
+              contentStyle={getItemStyle("bankName")}
+            >
+              {formatDisplayValue(data?.bankName, "bankName")}
+            </Descriptions.Item>
+            <Descriptions.Item
               label="Phone No"
               contentStyle={getItemStyle("phoneNo")}
             >
@@ -72,6 +84,14 @@ const BusinessBasicDetailsDescription: React.FC<{
             >
               {formatDisplayValue(data?.basicDetails?.personMet, "personMet")}
             </Descriptions.Item>
+            {data?.basicDetails?.personMet === "other" && data?.basicDetails?.nameOfPersonMet && (
+              <Descriptions.Item
+                label="Name of Person Met"
+                contentStyle={getItemStyle("nameOfPersonMet")}
+              >
+                {formatDisplayValue(data?.basicDetails?.nameOfPersonMet, "nameOfPersonMet")}
+              </Descriptions.Item>
+            )}
             <Descriptions.Item
               label="Constitution"
               contentStyle={getItemStyle("constitution")}
@@ -165,6 +185,18 @@ const BusinessBasicDetailsDescription: React.FC<{
             contentStyle={getItemStyle("aadhar")}
           >
             {data?.basicDetails?.aadhar}
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="Purpose of Loan"
+            contentStyle={getItemStyle("purposeOfLoan")}
+          >
+            {data?.basicDetails?.purposeOfLoan}
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="Loan Amount"
+            contentStyle={getItemStyle("loanAmount")}
+          >
+            {data?.basicDetails?.loanAmount}
           </Descriptions.Item>
           <Descriptions.Item
             label="Business Name"
