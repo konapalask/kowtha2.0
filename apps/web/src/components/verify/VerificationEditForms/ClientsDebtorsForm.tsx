@@ -24,8 +24,9 @@ const ClientsDebtorsForm: React.FC<{ form: any }> = ({ form }) => {
         </Col>
       </Row>
 
+      <h4 style={{ marginTop: 24, marginBottom: 8 }}>Business Metrics</h4>
       <Row gutter={[16, 16]}>
-        <Col span={12}>
+        <Col span={6}>
           <Form.Item name={["clientsDebtors", "averageStockMaintenance"]} label="Average Stock Maintenance" rules={[{ required: true, message: "Please enter average stock maintenance" }]}>
             <Input placeholder="Enter number" type="number" />
           </Form.Item>

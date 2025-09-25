@@ -556,6 +556,9 @@ export const BusinessVerificationDetails: React.FC<
                 <Descriptions.Item label="Cash-Cheque Proportions">
                   {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
                 </Descriptions.Item>
+              </Descriptions>
+              <Typography.Text strong style={{ display: 'block', margin: '8px 0' }}>Business Metrics</Typography.Text>
+              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
                 <Descriptions.Item label="Average Stock Maintenance">
                   {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
                 </Descriptions.Item>
