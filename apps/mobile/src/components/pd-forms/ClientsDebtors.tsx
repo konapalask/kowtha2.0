@@ -6,48 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import {useForm} from 'react-hook-form';
+import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Toast from 'react-native-toast-message';
 
-interface ClientDebtor {
-  numberOfFixedCustomers: string;
-  creditPeriod: string;
-  cashChequeProportions: string;
-  customer1Name: string;
-  customer1Phone: string;
-  customer1Location: string;
-  customer1Review: string;
-  customer2Name: string;
-  customer2Phone: string;
-  customer2Location: string;
-  customer2Review: string;
-  customer3Name: string;
-  customer3Phone: string;
-  customer3Location: string;
-  customer3Review: string;
-  averageStockMaintenance: string;
-  turnover: string;
-  netMargins: string;
+interface Customer {
+  name: string;
+  phone: string;
+  location: string;
+  review: string;
 }
 
 interface ClientsDebtorsFormData {
   numberOfFixedCustomers: string;
   creditPeriod: string;
   cashChequeProportions: string;
-  customer1Name: string;
-  customer1Phone: string;
-  customer1Location: string;
-  customer1Review: string;
-  customer2Name: string;
-  customer2Phone: string;
-  customer2Location: string;
-  customer2Review: string;
-  customer3Name: string;
-  customer3Phone: string;
-  customer3Location: string;
-  customer3Review: string;
+  customers: Customer[];
   averageStockMaintenance: string;
   turnover: string;
   netMargins: string;
@@ -56,6 +33,7 @@ interface ClientsDebtorsFormData {
 interface ClientsDebtorsProps {
   onSubmit: (data: ClientsDebtorsFormData) => void;
   initialData?: ClientsDebtorsFormData;
+  maxCustomers?: number;
 }
 
 const REVIEW_OPTIONS = [
@@ -65,37 +43,127 @@ const REVIEW_OPTIONS = [
 
 const ClientsDebtors: React.FC<ClientsDebtorsProps> = ({
   onSubmit,
-  initialData,
+  initialData = {customers: []},
+  maxCustomers,
 }) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
+    watch,
   } = useForm<ClientsDebtorsFormData>({
-    defaultValues: initialData || {
-      numberOfFixedCustomers: '',
-      creditPeriod: '',
-      cashChequeProportions: '',
-      customer1Name: '',
-      customer1Phone: '',
-      customer1Location: '',
-      customer1Review: '',
-      customer2Name: '',
-      customer2Phone: '',
-      customer2Location: '',
-      customer2Review: '',
-      customer3Name: '',
-      customer3Phone: '',
-      customer3Location: '',
-      customer3Review: '',
-      averageStockMaintenance: '',
-      turnover: '',
-      netMargins: '',
+    defaultValues: {
+      numberOfFixedCustomers: initialData?.numberOfFixedCustomers || '',
+      creditPeriod: initialData?.creditPeriod || '',
+      cashChequeProportions: initialData?.cashChequeProportions || '',
+      customers:
+        initialData?.customers?.length > 0
+          ? initialData?.customers
+          : [createEmptyCustomer()],
+      averageStockMaintenance: initialData?.averageStockMaintenance || '',
+      turnover: initialData?.turnover || '',
+      netMargins: initialData?.netMargins || '',
     },
   });
 
+  const {fields, append, remove} = useFieldArray({
+    control,
+    name: 'customers',
+  });
+
+  function createEmptyCustomer(): Customer {
+    return {
+      name: '',
+      phone: '',
+      location: '',
+      review: '',
+    };
+  }
+
+  const handleAddCustomer = () => {
+    if (maxCustomers && fields.length >= maxCustomers) {
+      Toast.show({
+        type: 'error',
+        text1: 'Maximum Limit Reached',
+        text2: `Cannot add more than ${maxCustomers} customers`,
+        position: 'bottom',
+      });
+      return;
+    }
+    append(createEmptyCustomer());
+  };
+
   const onFormSubmit = (data: ClientsDebtorsFormData) => {
     onSubmit(data);
+  };
+
+  const renderCustomerFields = (index: number) => {
+    return (
+      <View key={index} style={styles.customerContainer}>
+        <View style={styles.customerHeader}>
+          <Text style={styles.customerTitle}>Customer {index + 1}</Text>
+          {index > 0 && (
+            <TouchableOpacity
+              onPress={() => remove(index)}
+              style={styles.removeButton}>
+              <Icon name="delete" size={24} color={colors.error} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <InputFormItem
+          data={{
+            title: 'Name',
+            key: `customers.${index}.name`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter customer name',
+          }}
+        />
+
+        <InputFormItem
+          data={{
+            title: 'Phone Number',
+            key: `customers.${index}.phone`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter phone number',
+            keyboardType: 'phone-pad',
+            rules: {
+              validate: (value: string) => {
+                if (value.length !== 10)
+                  return 'Phone number must be 10 digits';
+                return true;
+              },
+            },
+          }}
+        />
+
+        <InputFormItem
+          data={{
+            title: 'Location',
+            key: `customers.${index}.location`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter location',
+          }}
+        />
+
+        <SelectFormItem
+          data={{
+            title: 'Review',
+            key: `customers.${index}.review`,
+            control,
+            errors,
+            required: true,
+            options: REVIEW_OPTIONS,
+          }}
+        />
+      </View>
+    );
   };
 
   return (
@@ -137,157 +205,30 @@ const ClientsDebtors: React.FC<ClientsDebtorsProps> = ({
         }}
       />
 
-      <Text style={styles.sectionTitle}>Top 3 Customers</Text>
+      <Text style={styles.sectionTitle}>Customers</Text>
 
-      {/* Customer 1 */}
-      <View style={styles.customerContainer}>
-        <Text style={styles.customerTitle}>Customer 1</Text>
+      {fields.map((field, index) => renderCustomerFields(index))}
 
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'customer1Name',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter customer name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'customer1Phone',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'customer1Location',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'customer1Review',
-            control,
-            errors,
-            required: true,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
-
-      {/* Customer 2 */}
-      <View style={styles.customerContainer}>
-        <Text style={styles.customerTitle}>Customer 2</Text>
-
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'customer2Name',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter customer name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'customer2Phone',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'customer2Location',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'customer2Review',
-            control,
-            errors,
-            required: false,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
-
-      {/* Customer 3 */}
-      <View style={styles.customerContainer}>
-        <Text style={styles.customerTitle}>Customer 3</Text>
-
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'customer3Name',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter customer name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'customer3Phone',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'customer3Location',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'customer3Review',
-            control,
-            errors,
-            required: false,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
+      <TouchableOpacity
+        style={[
+          styles.addButton,
+          maxCustomers && fields.length >= maxCustomers
+            ? styles.disabledButton
+            : null,
+        ]}
+        onPress={handleAddCustomer}
+        disabled={maxCustomers ? fields.length >= maxCustomers : false}>
+        <Text
+          style={[
+            styles.addButtonText,
+            maxCustomers && fields.length >= maxCustomers
+              ? styles.disabledButtonText
+              : null,
+          ]}>
+          Add Customer{' '}
+          {maxCustomers ? `(${fields.length}/${maxCustomers})` : ''}
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.sectionTitle}>Business Metrics</Text>
 
@@ -357,11 +298,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  customerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   customerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 16,
+  },
+  removeButton: {
+    padding: 4,
+  },
+  addButton: {
+    backgroundColor: colors.button.secondary.background,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+    marginHorizontal: 16,
+  },
+  addButtonText: {
+    color: colors.button.secondary.text,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#E0E0E0',
+    opacity: 0.7,
+  },
+  disabledButtonText: {
+    color: '#9E9E9E',
   },
   submitButton: {
     backgroundColor: colors.button.primary.background,

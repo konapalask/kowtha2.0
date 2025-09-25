@@ -31,8 +31,8 @@ export const SelectFormItem = ({data}) => {
               </Text>
             </TouchableOpacity>
 
-            <ActionSheet ref={actionSheetRef}>
-              <View style={styles.sheetContainer}>
+            <ActionSheet ref={actionSheetRef} gestureEnabled={true}>
+              <View style={[styles.sheetContainer, {paddingBottom: 50}]}>
                 {data?.options?.map(item => (
                   <TouchableOpacity
                     key={item.id}

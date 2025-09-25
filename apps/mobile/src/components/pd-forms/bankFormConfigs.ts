@@ -18,6 +18,7 @@ export interface BankFormSection {
   id: string;
   label: string;
   component: React.ComponentType<any>;
+  required: boolean;
 }
 
 export interface BankFormConfig {
@@ -35,56 +36,67 @@ export const bankFormConfigs: BankFormConfig[] = [
         id: 'basicDetails',
         label: 'Basic Details',
         component: AxisFinanceUBLBasicDetails,
+        required: true,
       },
       {
         id: 'familyDetails',
         label: 'Family Details',
         component: FamilyMemberDetails,
+        required: true,
       },
       {
         id: 'shareholdingDetails',
         label: 'Shareholding Details',
         component: ShareholdingDetails,
+        required: true,
       },
       {
         id: 'suppliersCreditors',
         label: 'Suppliers/Creditors',
         component: SuppliersCreditors,
+        required: true,
       },
       {
         id: 'clientsDebtors',
         label: 'Clients/Debtors',
         component: ClientsDebtors,
+        required: true,
       },
       {
         id: 'salariesWages',
         label: 'Salaries & Wages',
         component: SalariesWages,
+        required: true,
       },
       {
         id: 'assetDetails',
         label: 'Asset Details',
         component: AssetDetails,
+        required: true,
       },
       {
         id: 'existingLoans',
         label: 'Existing Loans',
         component: ExistingLoans,
+        required: true,
       },
       {
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         component: ThirdPartyCheck,
+        required: true,
       },
       {
         id: 'additionalDetails',
         label: 'Additional Details',
         component: AdditionalDetails,
+        required: true,
       },
       {
         id: 'photoCapture',
         label: 'Photo Capture',
         component: PhotoCapture,
+        required: true,
       },
     ],
   },

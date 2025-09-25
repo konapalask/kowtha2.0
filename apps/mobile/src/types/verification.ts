@@ -151,22 +151,18 @@ export interface Shareholder {
   functionalOfPartnerDirector: string;
 }
 
+export interface Supplier {
+  name: string;
+  phone: string;
+  location: string;
+  review: string;
+}
+
 export interface SupplierCreditor {
   numberOfFixedSuppliers: string;
   creditPeriod: string;
   cashChequeProportions: string;
-  supplier1Name: string;
-  supplier1Phone: string;
-  supplier1Location: string;
-  supplier1Review: string;
-  supplier2Name: string;
-  supplier2Phone: string;
-  supplier2Location: string;
-  supplier2Review: string;
-  supplier3Name: string;
-  supplier3Phone: string;
-  supplier3Location: string;
-  supplier3Review: string;
+  suppliers: Supplier[];
 }
 
 export interface ClientDebtor {
