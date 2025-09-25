@@ -23,27 +23,31 @@ export function InputFormItem({data}) {
           },
           ...data?.rules,
         }}
-        render={({field: {onChange, value}}) => (
-          <TextInput
-            style={[
-              styles.input,
-              isDisabled && styles.disabledInput,
-              data.errors?.[data.key] && styles.errorBorder,
-              {fontSize: data?.name ? 20 : 14},
-            ]}
-            placeholder={data?.placeholder}
-            value={value}
-            onChangeText={onChange}
-            editable={!isDisabled}
-            keyboardType={data?.keyboardType || 'default'}
-            secureTextEntry={data?.type === 'password'}
-          />
+        render={({field: {onChange, value}, fieldState: {error}}) => (
+          <>
+            <TextInput
+              style={[
+                styles.input,
+                isDisabled && styles.disabledInput,
+                error && styles.errorBorder,
+                {fontSize: data?.name ? 20 : 14},
+              ]}
+              placeholder={data?.placeholder}
+              value={value}
+              onChangeText={onChange}
+              editable={!isDisabled}
+              keyboardType={data?.keyboardType || 'default'}
+              secureTextEntry={data?.type === 'password'}
+            />
+            {error && <Text style={styles.errorText}>{error.message}</Text>}
+          </>
         )}
       />
 
-      {data.errors?.[data.key] && (
+      {/* {error && <Text style={styles.errorText}>{error?.message}</Text>} */}
+      {/* {data.errors?.[data.key] && (
         <Text style={styles.errorText}>{data.errors[data.key]?.message}</Text>
-      )}
+      )} */}
     </View>
   );
 }

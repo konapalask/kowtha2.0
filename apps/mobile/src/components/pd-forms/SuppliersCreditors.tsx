@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,50 +6,31 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import {useForm} from 'react-hook-form';
+import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Toast from 'react-native-toast-message';
 
-interface SupplierCreditor {
-  numberOfFixedSuppliers: string;
-  creditPeriod: string;
-  cashChequeProportions: string;
-  supplier1Name: string;
-  supplier1Phone: string;
-  supplier1Location: string;
-  supplier1Review: string;
-  supplier2Name: string;
-  supplier2Phone: string;
-  supplier2Location: string;
-  supplier2Review: string;
-  supplier3Name: string;
-  supplier3Phone: string;
-  supplier3Location: string;
-  supplier3Review: string;
+interface Supplier {
+  name: string;
+  phone: string;
+  location: string;
+  review: string;
 }
 
 interface SuppliersCreditorsFormData {
   numberOfFixedSuppliers: string;
   creditPeriod: string;
   cashChequeProportions: string;
-  supplier1Name: string;
-  supplier1Phone: string;
-  supplier1Location: string;
-  supplier1Review: string;
-  supplier2Name: string;
-  supplier2Phone: string;
-  supplier2Location: string;
-  supplier2Review: string;
-  supplier3Name: string;
-  supplier3Phone: string;
-  supplier3Location: string;
-  supplier3Review: string;
+  suppliers: Supplier[];
 }
 
 interface SuppliersCreditorsProps {
   onSubmit: (data: SuppliersCreditorsFormData) => void;
   initialData?: SuppliersCreditorsFormData;
+  maxSuppliers?: number;
 }
 
 const REVIEW_OPTIONS = [
@@ -59,34 +40,124 @@ const REVIEW_OPTIONS = [
 
 const SuppliersCreditors: React.FC<SuppliersCreditorsProps> = ({
   onSubmit,
-  initialData,
+  initialData = {suppliers: []},
+  maxSuppliers,
 }) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
+    watch,
   } = useForm<SuppliersCreditorsFormData>({
-    defaultValues: initialData || {
-      numberOfFixedSuppliers: '',
-      creditPeriod: '',
-      cashChequeProportions: '',
-      supplier1Name: '',
-      supplier1Phone: '',
-      supplier1Location: '',
-      supplier1Review: '',
-      supplier2Name: '',
-      supplier2Phone: '',
-      supplier2Location: '',
-      supplier2Review: '',
-      supplier3Name: '',
-      supplier3Phone: '',
-      supplier3Location: '',
-      supplier3Review: '',
+    defaultValues: {
+      numberOfFixedSuppliers: initialData?.numberOfFixedSuppliers || '',
+      creditPeriod: initialData?.creditPeriod || '',
+      cashChequeProportions: initialData?.cashChequeProportions || '',
+      suppliers:
+        initialData?.suppliers?.length > 0
+          ? initialData?.suppliers
+          : [createEmptySupplier()],
     },
   });
 
+  const {fields, append, remove} = useFieldArray({
+    control,
+    name: 'suppliers',
+  });
+
+  function createEmptySupplier(): Supplier {
+    return {
+      name: '',
+      phone: '',
+      location: '',
+      review: '',
+    };
+  }
+
+  const handleAddSupplier = () => {
+    if (maxSuppliers && fields.length >= maxSuppliers) {
+      Toast.show({
+        type: 'error',
+        text1: 'Maximum Limit Reached',
+        text2: `Cannot add more than ${maxSuppliers} suppliers`,
+        position: 'bottom',
+      });
+      return;
+    }
+    append(createEmptySupplier());
+  };
+
   const onFormSubmit = (data: SuppliersCreditorsFormData) => {
     onSubmit(data);
+  };
+
+  const renderSupplierFields = (index: number) => {
+    return (
+      <View key={index} style={styles.supplierContainer}>
+        <View style={styles.supplierHeader}>
+          <Text style={styles.supplierTitle}>Supplier {index + 1}</Text>
+          {index > 0 && (
+            <TouchableOpacity
+              onPress={() => remove(index)}
+              style={styles.removeButton}>
+              <Icon name="delete" size={24} color={colors.error} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <InputFormItem
+          data={{
+            title: 'Name',
+            key: `suppliers.${index}.name`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter supplier name',
+          }}
+        />
+
+        <InputFormItem
+          data={{
+            title: 'Phone Number',
+            key: `suppliers.${index}.phone`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter phone number',
+            keyboardType: 'phone-pad',
+            rules: {
+              validate: (value: string) => {
+                if (value.length !== 10)
+                  return 'Phone number must be 10 digits';
+                return true;
+              },
+            },
+          }}
+        />
+
+        <InputFormItem
+          data={{
+            title: 'Location',
+            key: `suppliers.${index}.location`,
+            control,
+            errors,
+            required: true,
+            placeholder: 'Enter location',
+          }}
+        />
+
+        <SelectFormItem
+          data={{
+            title: 'Review',
+            key: `suppliers.${index}.review`,
+            control,
+            errors,
+            required: true,
+            options: REVIEW_OPTIONS,
+          }}
+        />
+      </View>
+    );
   };
 
   return (
@@ -128,157 +199,30 @@ const SuppliersCreditors: React.FC<SuppliersCreditorsProps> = ({
         }}
       />
 
-      <Text style={styles.sectionTitle}>Top 3 Suppliers</Text>
+      <Text style={styles.sectionTitle}>Suppliers</Text>
 
-      {/* Supplier 1 */}
-      <View style={styles.supplierContainer}>
-        <Text style={styles.supplierTitle}>Supplier 1</Text>
+      {fields.map((field, index) => renderSupplierFields(index))}
 
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'supplier1Name',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter supplier name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'supplier1Phone',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'supplier1Location',
-            control,
-            errors,
-            required: true,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'supplier1Review',
-            control,
-            errors,
-            required: true,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
-
-      {/* Supplier 2 */}
-      <View style={styles.supplierContainer}>
-        <Text style={styles.supplierTitle}>Supplier 2</Text>
-
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'supplier2Name',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter supplier name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'supplier2Phone',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'supplier2Location',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'supplier2Review',
-            control,
-            errors,
-            required: false,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
-
-      {/* Supplier 3 */}
-      <View style={styles.supplierContainer}>
-        <Text style={styles.supplierTitle}>Supplier 3</Text>
-
-        <InputFormItem
-          data={{
-            title: 'Name',
-            key: 'supplier3Name',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter supplier name',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Phone Number',
-            key: 'supplier3Phone',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter phone number',
-            keyboardType: 'phone-pad',
-          }}
-        />
-
-        <InputFormItem
-          data={{
-            title: 'Location',
-            key: 'supplier3Location',
-            control,
-            errors,
-            required: false,
-            placeholder: 'Enter location',
-          }}
-        />
-
-        <SelectFormItem
-          data={{
-            title: 'Review',
-            key: 'supplier3Review',
-            control,
-            errors,
-            required: false,
-            options: REVIEW_OPTIONS,
-          }}
-        />
-      </View>
+      <TouchableOpacity
+        style={[
+          styles.addButton,
+          maxSuppliers && fields.length >= maxSuppliers
+            ? styles.disabledButton
+            : null,
+        ]}
+        onPress={handleAddSupplier}
+        disabled={maxSuppliers ? fields.length >= maxSuppliers : false}>
+        <Text
+          style={[
+            styles.addButtonText,
+            maxSuppliers && fields.length >= maxSuppliers
+              ? styles.disabledButtonText
+              : null,
+          ]}>
+          Add Supplier{' '}
+          {maxSuppliers ? `(${fields.length}/${maxSuppliers})` : ''}
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.submitButton}
@@ -310,11 +254,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  supplierHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   supplierTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
-    marginBottom: 16,
+  },
+  removeButton: {
+    padding: 4,
+  },
+  addButton: {
+    backgroundColor: colors.button.secondary.background,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+    marginHorizontal: 16,
+  },
+  addButtonText: {
+    color: colors.button.secondary.text,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   submitButton: {
     backgroundColor: colors.button.primary.background,
@@ -329,6 +294,13 @@ const styles = StyleSheet.create({
     color: colors.button.primary.text,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#E0E0E0',
+    opacity: 0.7,
+  },
+  disabledButtonText: {
+    color: '#9E9E9E',
   },
 });
 

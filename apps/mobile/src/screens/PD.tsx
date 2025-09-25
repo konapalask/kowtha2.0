@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   Text,
@@ -22,19 +22,20 @@ import {clearItem} from '../helpers/utility';
 import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
   const {userData} = route.params as {userData: any};
   const STORAGE_KEY = `${item?.id}_pd`;
 
-  // Get bank name from item or userData
+  // console.log('item', item);
+  console.log('userData', userData);
+
   const bankName = item?.bankName || userData?.bankName || 'Axis Finance';
 
-  // Get form configuration for the bank
   const formConfig = getFormConfigByBank(bankName);
 
-  // Initialize form with react-hook-form
   const {
     control,
     handleSubmit,
@@ -46,32 +47,43 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     defaultValues: {},
   });
 
-  // State for section expansion
-  const [expandedSections, setExpandedSections] = useState<any>({});
-  const [formData, setFormData] = useState<any>({});
-  const [sectionData, setSectionData] = useState<any>({});
+  const [expandedSections, setExpandedSections] = useState<any>({
+    investigable: true,
+  });
+  // const [formData, setFormData] = useState<any>({});
+  const [sectionData, setSectionData] = useState<any>({
+    basicDetails: {
+      applicantName: userData?.loan?.applicantName || '',
+      nameOfConcern: userData?.businessName || '',
+      initiatedAddress: userData?.applicantAddress || '',
+      phoneNo: userData?.loan?.applicantMobile || '',
+    },
+  });
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
 
-  // Load saved form data on component mount
-  useEffect(() => {
+  useLayoutEffect(() => {
     loadFormData();
   }, []);
 
   // Watch form values to update formData
-  const watchedValues = watch();
-  useEffect(() => {
-    setFormData(watchedValues);
-  }, []);
+  // const watchedValues = watch();
+  // useEffect(() => {
+  //   setFormData(watchedValues);
+  // }, []);
 
   const loadFormData = async () => {
     try {
       const savedData = await AsyncStorage.getItem(STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        setFormData(parsedData);
-        setSectionData(parsedData.sectionData || {});
+        console.log('parsedData', parsedData);
+        // setFormData(parsedData);
+        setSectionData((prev: any) => ({
+          ...prev,
+          ...parsedData,
+        }));
         setUploadedItems(parsedData.uploadedItems || []);
         setInvestigable(parsedData.investigable ?? null);
       }
@@ -82,15 +94,17 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const saveFormData = async (data: any) => {
     try {
+      // console.log('data obtained', data);
       const dataToSave = {
         ...data,
         sectionData,
-        uploadedItems,
+        // uploadedItems,
         investigable,
         timestamp: new Date().toISOString(),
       };
+      // console.log('dataToSave', dataToSave);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-      console.log('Form data saved successfully');
+      // console.log('Form data saved successfully');
     } catch (error) {
       console.error('Error saving form data:', error);
     }
@@ -104,16 +118,22 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const isSectionValid = (sectionId: string): boolean => {
-    // Special handling for photoCapture section
     if (sectionId === 'photoCapture') {
       return uploadedItems.length > 0;
     }
 
-    // For other sections, consider a section valid if it has data
-    // This can be enhanced with specific validation logic per section
-    return (
-      sectionData[sectionId] !== undefined && sectionData[sectionId] !== null
-    );
+    const sectionDataExists =
+      sectionData[sectionId] !== undefined && sectionData[sectionId] !== null;
+    if (!sectionDataExists) {
+      return false;
+    }
+
+    const sectionContent = sectionData[sectionId];
+    if (typeof sectionContent === 'object' && sectionContent !== null) {
+      return Object.keys(sectionContent).length > 0;
+    }
+
+    return true;
   };
 
   const handleSectionDataChange = (sectionId: string, data: any) => {
@@ -123,22 +143,73 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     };
     setSectionData(updatedSectionData);
     saveFormData(updatedSectionData);
+    setExpandedSections((prev: any) => ({
+      ...prev,
+      [sectionId]: false,
+    }));
   };
 
   const handleUploadedItemsChange = async (items: UploadedItem[]) => {
+    console.log(items);
     setUploadedItems(items);
     await saveFormData({...sectionData, uploadedItems: items});
   };
 
   const onSubmit = async (data: any) => {
     try {
-      // Merge all section data
-      // const mergedData = {
-      //   ...data,
-      //   ...formData,
-      //   sectionData,
-      // };
-      // await saveFormData(mergedData);
+      if (!formConfig) {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Form configuration not found',
+        });
+        return;
+      }
+
+      const requiredSections = formConfig.sections.filter(
+        section => section.required,
+      );
+      const missingRequiredSections = requiredSections.filter(section => {
+        if (section.id === 'photoCapture') {
+          return uploadedItems.length === 0;
+        }
+
+        const sectionDataExists =
+          sectionData[section.id] !== undefined &&
+          sectionData[section.id] !== null;
+        if (!sectionDataExists) {
+          return true;
+        }
+
+        const sectionContent = sectionData[section.id];
+        if (typeof sectionContent === 'object' && sectionContent !== null) {
+          return Object.keys(sectionContent).length === 0;
+        }
+
+        return false;
+      });
+
+      if (missingRequiredSections.length > 0) {
+        const missingSectionNames = missingRequiredSections
+          .map(section => section.label)
+          .join(', ');
+        Toast.show({
+          type: 'error',
+          text1: 'Validation Error',
+          text2: `Please complete required sections: ${missingSectionNames}`,
+        });
+        return;
+      }
+
+      if (Object.keys(errors).length > 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Please fill all required fields',
+        });
+        return;
+      }
+
       const finalData = {
         verificationType: 'Business',
         findings: 'Business Verification Findings',
@@ -148,7 +219,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       await submitVerification(finalData, item?.verificationId, 'PD');
 
-      await clearItem(`${item?.id}_pd`);
+      await clearItem(STORAGE_KEY);
       Toast.show({
         type: 'success',
         text1: 'Success',
@@ -241,12 +312,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       style={styles.sectionHeader}
                       onPress={() => toggleSection(section.id)}>
                       <Text style={styles.sectionTitle}>{section.label}</Text>
+                      {isSectionValid(section.id) && (
+                        // <View style={styles.validIndicator} />
+                        <Icon name="check" size={18} color="#34C759" />
+                      )}
                       <Text style={styles.sectionIndicator}>
                         {isExpanded ? '▼' : '▶'}
                       </Text>
-                      {isSectionValid(section.id) && (
+                      {/* {isSectionValid(section.id) && (
                         <View style={styles.validIndicator} />
-                      )}
+                      )} */}
                     </TouchableOpacity>
 
                     {isExpanded && (
@@ -320,9 +395,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    flex: 1,
+    marginRight: 8,
+    // flex: 1,
   },
   sectionIndicator: {
+    flex: 1,
+    textAlign: 'right',
     fontSize: 14,
     color: '#666',
     marginRight: 8,

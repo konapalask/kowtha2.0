@@ -28,7 +28,7 @@ interface ShareholdingDetailsFormData {
 
 interface ShareholdingDetailsProps {
   onSubmit: (data: ShareholdingDetailsFormData) => void;
-  initialData?: Shareholder[];
+  initialData?: ShareholdingDetailsFormData;
   maxShareholders?: number;
 }
 
@@ -53,9 +53,10 @@ const YES_NO_OPTIONS = [
 
 const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
   onSubmit,
-  initialData = [],
+  initialData = {shareholders: []},
   maxShareholders,
 }) => {
+  // console.log('initialData', initialData);
   const {
     control,
     handleSubmit,
@@ -64,7 +65,9 @@ const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
   } = useForm<ShareholdingDetailsFormData>({
     defaultValues: {
       shareholders:
-        initialData.length > 0 ? initialData : [createEmptyShareholder()],
+        initialData?.shareholders?.length > 0
+          ? initialData?.shareholders
+          : [createEmptyShareholder()],
     },
   });
 
@@ -270,16 +273,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButton: {
-    backgroundColor: colors.button.primary.background,
-    padding: 16,
+    borderColor: colors.button.primary.background,
+    borderWidth: 1,
+    padding: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 8,
     marginHorizontal: 16,
+    marginBottom: 16,
+    height: 40,
   },
   submitButtonText: {
-    color: colors.button.primary.text,
+    color: colors.button.secondary.text,
     fontSize: 16,
     fontWeight: 'bold',
   },
