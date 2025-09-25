@@ -1,101 +1,154 @@
 import React from "react";
-import { Form, Input, Select, Col, Button, Row, Popconfirm } from "antd";
+import { Form, Input, Select, Button, Row, Col, Popconfirm } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const statusOptions = ["positive", "negative"];
 
+const AssetRow: React.FC<{
+  field: any;
+  idx: any;
+  remove: any;
+  fieldsLength: any;
+  form: any;
+}> = ({ field, idx, remove, fieldsLength, form }) => {
+  return (
+    <Row
+      gutter={8}
+      key={String(field.key)}
+      style={{ marginBottom: 0, backgroundColor: "#efefef", padding: 8 }}
+    >
+      <Col span={4}>
+        <Form.Item
+          {...field}
+          name={[field.name, "address"]}
+          fieldKey={[String(field.fieldKey), "address"]}
+          label={idx === 0 ? "Address" : ""}
+          rules={[{ required: true, message: "Please enter address" }]}
+        >
+          <Input placeholder="Enter address" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "areaMeasured"]}
+          fieldKey={[String(field.fieldKey), "areaMeasured"]}
+          label={idx === 0 ? "Area (sq.ft)" : ""}
+          rules={[{ required: true, message: "Please enter area" }]}
+        >
+          <Input placeholder="Enter area" type="number" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "purchaseCost"]}
+          fieldKey={[String(field.fieldKey), "purchaseCost"]}
+          label={idx === 0 ? "Purchase Cost (lac)" : ""}
+          rules={[{ required: true, message: "Please enter cost" }]}
+        >
+          <Input placeholder="Enter cost" type="number" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "purchaseYear"]}
+          fieldKey={[String(field.fieldKey), "purchaseYear"]}
+          label={idx === 0 ? "Purchase Year" : ""}
+          rules={[{ required: true, message: "Please enter year" }]}
+        >
+          <Input placeholder="Enter year" type="number" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "marketValue"]}
+          fieldKey={[String(field.fieldKey), "marketValue"]}
+          label={idx === 0 ? "Market Value (lac)" : ""}
+          rules={[{ required: true, message: "Please enter value" }]}
+        >
+          <Input placeholder="Enter value" type="number" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "ownerName"]}
+          fieldKey={[String(field.fieldKey), "ownerName"]}
+          label={idx === 0 ? "Owner Name" : ""}
+          rules={[{ required: true, message: "Please enter owner name" }]}
+        >
+          <Input placeholder="Enter owner name" />
+        </Form.Item>
+      </Col>
+      <Col span={3}>
+        <Form.Item
+          {...field}
+          name={[field.name, "mortgaged"]}
+          fieldKey={[String(field.fieldKey), "mortgaged"]}
+          label={idx === 0 ? "Mortgaged" : ""}
+          rules={[{ required: true, message: "Please select option" }]}
+        >
+          <Select placeholder="Select option">
+            <Select.Option value="yes">Yes</Select.Option>
+            <Select.Option value="no">No</Select.Option>
+          </Select>
+        </Form.Item>
+      </Col>
+      <Col span={2}>
+        <Popconfirm
+          title="Are you sure you want to remove this asset?"
+          onConfirm={() => remove(field.name)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            style={{ marginTop: idx === 0 ? 30 : 0 }}
+          />
+        </Popconfirm>
+      </Col>
+    </Row>
+  );
+};
+
 const AssetDetailsForm: React.FC<{ form: any }> = ({ form }) => {
-  const assets = Form.useWatch("assetDetails.assets", form) || [];
-
-  const addAsset = () => {
-    const currentAssets = form.getFieldValue("assetDetails.assets") || [];
-    form.setFieldValue("assetDetails.assets", [
-      ...currentAssets,
-      {
-        address: "",
-        areaMeasured: "",
-        purchaseCost: "",
-        purchaseYear: "",
-        marketValue: "",
-        ownerName: "",
-        mortgaged: "",
-      },
-    ]);
-  };
-
-  const removeAsset = (index: number) => {
-    const currentAssets = form.getFieldValue("assetDetails.assets") || [];
-    const newAssets = currentAssets.filter((_: any, i: number) => i !== index);
-    form.setFieldValue("assetDetails.assets", newAssets);
-  };
-
   return (
     <div>
-      <Row gutter={[16, 16]}>
-        <Col span={24}>
-          <Button type="dashed" onClick={addAsset} block icon={<PlusOutlined />} style={{ marginBottom: 16 }}>
-            Add Asset
-          </Button>
-        </Col>
-      </Row>
+      {/* Individual assets list */}
+      <Form.List name={["assetDetails", "assets"]}>
+        {(fields, { add, remove }) => (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {fields.map((field, idx) => (
+              <AssetRow
+                key={field.key}
+                field={field}
+                idx={idx}
+                remove={remove}
+                fieldsLength={fields.length}
+                form={form}
+              />
+            ))}
+            <Form.Item>
+              <Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+                style={{ width: "100%", marginTop: 8 }}
+              >
+                Add Another
+              </Button>
+            </Form.Item>
+          </div>
+        )}
+      </Form.List>
 
-      {assets.map((_: any, index: number) => (
-        <div key={index} style={{ marginBottom: 24, padding: 16, border: "1px solid #d9d9d9", borderRadius: 6 }}>
-          <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-            <Col>
-              <h4 style={{ margin: 0 }}>Asset {index + 1}</h4>
-            </Col>
-            <Col>
-              <Popconfirm title="Are you sure you want to remove this asset?" onConfirm={() => removeAsset(index)} okText="Yes" cancelText="No">
-                <Button type="text" danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Col>
-          </Row>
-
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "address"]} label="Address" rules={[{ required: true, message: "Please enter address" }]}>
-                <Input placeholder="Enter address" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "areaMeasured"]} label="Area Measured (in sq.ft)" rules={[{ required: true, message: "Please enter area" }]}>
-                <Input placeholder="Enter area in sq.ft" type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "purchaseCost"]} label="Purchase Cost (in lac)" rules={[{ required: true, message: "Please enter cost" }]}>
-                <Input placeholder="Enter cost in lac" type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "purchaseYear"]} label="Purchase Year" rules={[{ required: true, message: "Please enter year" }]}>
-                <Input placeholder="Enter year" type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "marketValue"]} label="Market Value (in lac)" rules={[{ required: true, message: "Please enter value" }]}>
-                <Input placeholder="Enter value in lac" type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "ownerName"]} label="Owner Name" rules={[{ required: true, message: "Please enter owner name" }]}>
-                <Input placeholder="Enter owner name" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name={["assetDetails", "assets", index, "mortgaged"]} label="Mortgaged" rules={[{ required: true, message: "Please select option" }]}>
-                <Select placeholder="Select option">
-                  <Select.Option value="yes">Yes</Select.Option>
-                  <Select.Option value="no">No</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-      ))}
-
-      <Row gutter={[16, 16]}>
+      {/* Additional asset details */}
+      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col span={12}>
           <Form.Item name={["assetDetails", "status"]} label="Status">
             <Select placeholder="Select status" allowClear>

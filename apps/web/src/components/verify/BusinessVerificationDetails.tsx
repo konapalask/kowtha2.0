@@ -504,47 +504,28 @@ export const BusinessVerificationDetails: React.FC<
             <Card title="Suppliers/Creditors" extra={getButton("suppliersCreditors")}>
               <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
                 <Descriptions.Item label="No. of Fixed Suppliers">
-                  {suppliersCreditorsData?.numberOfFixedSuppliers}
+                  {suppliersCreditorsData?.suppliersCreditors?.numberOfFixedSuppliers || suppliersCreditorsData?.numberOfFixedSuppliers || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Credit Period">
-                  {suppliersCreditorsData?.creditPeriod}
+                  {suppliersCreditorsData?.suppliersCreditors?.creditPeriod || suppliersCreditorsData?.creditPeriod || "-"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Cash-Cheque Proportions">
-                  {suppliersCreditorsData?.cashChequeProportions}
+                  {suppliersCreditorsData?.suppliersCreditors?.cashChequeProportions || suppliersCreditorsData?.cashChequeProportions || "-"}
                 </Descriptions.Item>
               </Descriptions>
               <Table
                 className="striped-table"
-                dataSource={
-                  (suppliersCreditorsData?.suppliers &&
-                    suppliersCreditorsData?.suppliers?.length
-                      ? suppliersCreditorsData?.suppliers
-                      : [
-                          {
-                            name: suppliersCreditorsData?.supplier1Name,
-                            phone: suppliersCreditorsData?.supplier1Phone,
-                            location: suppliersCreditorsData?.supplier1Location,
-                            review: suppliersCreditorsData?.supplier1Review,
-                          },
-                          {
-                            name: suppliersCreditorsData?.supplier2Name,
-                            phone: suppliersCreditorsData?.supplier2Phone,
-                            location: suppliersCreditorsData?.supplier2Location,
-                            review: suppliersCreditorsData?.supplier2Review,
-                          },
-                          {
-                            name: suppliersCreditorsData?.supplier3Name,
-                            phone: suppliersCreditorsData?.supplier3Phone,
-                            location: suppliersCreditorsData?.supplier3Location,
-                            review: suppliersCreditorsData?.supplier3Review,
-                          },
-                        ].filter((s: any) => s && (s.name || s.phone || s.location || s.review))) || []
-                }
+                dataSource={suppliersCreditorsData?.suppliersCreditors?.suppliers || suppliersCreditorsData?.suppliers || []}
                 columns={[
                   { title: "Name", dataIndex: "name", key: "name" },
                   { title: "Phone", dataIndex: "phone", key: "phone" },
                   { title: "Location", dataIndex: "location", key: "location" },
-                  { title: "Review", dataIndex: "review", key: "review" },
+                  { 
+                    title: "Review", 
+                    dataIndex: "review", 
+                    key: "review",
+                    render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
+                  },
                 ]}
                 pagination={false}
                 locale={{ emptyText: "No suppliers added yet" }}
