@@ -3,6 +3,32 @@ import { Form, Input, Select, Col } from "antd";
 
 const yesNoOptions = ["Yes", "No"];
 
+// Add options for the new fields
+const constitutionOptions = [
+  "private_limited",
+  "public_limited", 
+  "partnership",
+  "sole_proprietorship",
+  "llp",
+  "other"
+];
+
+const structureOfLoanOptions = [
+  "term_loan",
+  "working_capital",
+  "overdraft",
+  "cash_credit",
+  "other"
+];
+
+const personMetOptions = [
+  "applicant",
+  "co_applicant",
+  "family_member",
+  "employee",
+  "other"
+];
+
 export type BusinessBasicDetailsFormData = {
   applicationNumber: string;
   applicantName: string;
@@ -18,6 +44,57 @@ const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string }> 
   if (currentDepartment === 'PD') {
     return (
       <>
+        <Col span={12}>
+          <Form.Item
+            name="phoneNo"
+            label="Phone No"
+            rules={[
+              { required: true, message: "Phone number is required" },
+              { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
+            ]}
+          >
+            <Input placeholder="Enter phone number" maxLength={10} />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="noOfVisit"
+            label="No. of Visit"
+            rules={[{ required: true, message: "Number of visits is required" }]}
+          >
+            <Input placeholder="Enter number of visits" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="personMet"
+            label="Person Met"
+            rules={[{ required: true, message: "Person met is required" }]}
+          >
+            <Select placeholder="Select person met">
+              {personMetOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="constitution"
+            label="Constitution"
+            rules={[{ required: true, message: "Constitution is required" }]}
+          >
+            <Select placeholder="Select constitution">
+              {constitutionOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
         <Col span={12}>
           <Form.Item
             name="applicantName"
@@ -38,23 +115,77 @@ const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string }> 
         </Col>
         <Col span={24}>
           <Form.Item
-            name="initiatedAddress"
-            label="Initiated Address"
-            rules={[{ required: true, message: "Initiated address is required" }]}
+            name="aboutApplicant"
+            label="About Applicant"
+            rules={[{ required: true, message: "About applicant is required" }]}
           >
-            <Input.TextArea rows={3} placeholder="Enter initiated address" />
+            <Input.TextArea rows={3} placeholder="Enter details about applicant" />
           </Form.Item>
         </Col>
         <Col span={12}>
           <Form.Item
-            name="phoneNo"
-            label="Phone No"
-            rules={[
-              { required: true, message: "Phone number is required" },
-              { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
-            ]}
+            name="visitedAddress"
+            label="Visited Address"
+            rules={[{ required: true, message: "Visited address is required" }]}
           >
-            <Input placeholder="Enter phone number" maxLength={10} />
+            <Input placeholder="Enter visited address" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="structureOfLoan"
+            label="Structure of Loan"
+            rules={[{ required: true, message: "Structure of loan is required" }]}
+          >
+            <Select placeholder="Select structure of loan">
+              {structureOfLoanOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="appointmentFixed"
+            label="Appointment Fixed"
+            rules={[{ required: true, message: "Appointment fixed is required" }]}
+          >
+            <Select placeholder="Select Yes/No">
+              {yesNoOptions.map((option) => (
+                <Select.Option key={option} value={option.toLowerCase()}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="initiatedAddress"
+            label="Initiated Address"
+            rules={[{ required: true, message: "Initiated address is required" }]}
+          >
+            <Input placeholder="Enter initiated address" />
+          </Form.Item>
+        </Col>
+        <Col span={24}>
+          <Form.Item
+            name="coApplicantDetails"
+            label="Co-Applicant Details"
+            rules={[{ required: true, message: "Co-applicant details is required" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter co-applicant details" />
+          </Form.Item>
+        </Col>
+        <Col span={24}>
+          <Form.Item
+            name="residentialDetails"
+            label="Residential Details"
+            rules={[{ required: true, message: "Residential details is required" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter residential details" />
           </Form.Item>
         </Col>
       </>

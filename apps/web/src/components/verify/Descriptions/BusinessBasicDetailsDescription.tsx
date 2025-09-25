@@ -24,6 +24,25 @@ const BusinessBasicDetailsDescription: React.FC<{
     };
   };
 
+  // Helper function to format display values
+  const formatDisplayValue = (value: any, fieldName: string) => {
+    if (!value) return "-";
+    
+    // Format specific fields
+    switch (fieldName) {
+      case "personMet":
+        return value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+      case "constitution":
+        return value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+      case "structureOfLoan":
+        return value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+      case "appointmentFixed":
+        return value.charAt(0).toUpperCase() + value.slice(1);
+      default:
+        return value;
+    }
+  };
+
   // For PD department, show different fields
   if (currentDepartment === 'PD') {
     return (
@@ -36,28 +55,82 @@ const BusinessBasicDetailsDescription: React.FC<{
             extra={extra}
           >
             <Descriptions.Item
+              label="Phone No"
+              contentStyle={getItemStyle("phoneNo")}
+            >
+              {formatDisplayValue(data?.basicDetails?.phoneNo, "phoneNo")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="No. of Visit"
+              contentStyle={getItemStyle("noOfVisit")}
+            >
+              {formatDisplayValue(data?.basicDetails?.noOfVisit, "noOfVisit")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Person Met"
+              contentStyle={getItemStyle("personMet")}
+            >
+              {formatDisplayValue(data?.basicDetails?.personMet, "personMet")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Constitution"
+              contentStyle={getItemStyle("constitution")}
+            >
+              {formatDisplayValue(data?.basicDetails?.constitution, "constitution")}
+            </Descriptions.Item>
+            <Descriptions.Item
               label="Applicant Name"
               contentStyle={getItemStyle("applicantName")}
             >
-              {data?.basicDetails?.applicantName || "-"}
+              {formatDisplayValue(data?.basicDetails?.applicantName, "applicantName")}
             </Descriptions.Item>
             <Descriptions.Item
               label="Name of Concern"
               contentStyle={getItemStyle("nameOfConcern")}
             >
-              {data?.basicDetails?.nameOfConcern || "-"}
+              {formatDisplayValue(data?.basicDetails?.nameOfConcern, "nameOfConcern")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="About Applicant"
+              contentStyle={getItemStyle("aboutApplicant")}
+            >
+              {formatDisplayValue(data?.basicDetails?.aboutApplicant, "aboutApplicant")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Visited Address"
+              contentStyle={getItemStyle("visitedAddress")}
+            >
+              {formatDisplayValue(data?.basicDetails?.visitedAddress, "visitedAddress")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Structure of Loan"
+              contentStyle={getItemStyle("structureOfLoan")}
+            >
+              {formatDisplayValue(data?.basicDetails?.structureOfLoan, "structureOfLoan")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Appointment Fixed"
+              contentStyle={getItemStyle("appointmentFixed")}
+            >
+              {formatDisplayValue(data?.basicDetails?.appointmentFixed, "appointmentFixed")}
             </Descriptions.Item>
             <Descriptions.Item
               label="Initiated Address"
               contentStyle={getItemStyle("initiatedAddress")}
             >
-              {data?.basicDetails?.initiatedAddress || "-"}
+              {formatDisplayValue(data?.basicDetails?.initiatedAddress, "initiatedAddress")}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Phone No"
-              contentStyle={getItemStyle("phoneNo")}
+              label="Co-Applicant Details"
+              contentStyle={getItemStyle("coApplicantDetails")}
             >
-              {data?.basicDetails?.phoneNo || "-"}
+              {formatDisplayValue(data?.basicDetails?.coApplicantDetails, "coApplicantDetails")}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Residential Details"
+              contentStyle={getItemStyle("residentialDetails")}
+            >
+              {formatDisplayValue(data?.basicDetails?.residentialDetails, "residentialDetails")}
             </Descriptions.Item>
           </Descriptions>
         </Card>
