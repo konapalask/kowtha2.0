@@ -10,7 +10,10 @@ import SuppliersCreditors from './SuppliersCreditors';
 import AdditionalDetails from './AdditionalDetails';
 import ExistingLoans from '../forms/ExistingLoans';
 import ThirdPartyCheck from '../forms/ThirdPartyCheck';
-
+import ArkaFincapBasicDetails from './ArkaFincap';
+import BusinessDetails from './BusinessDetails';
+import DocumentsObserved from './DocumentsObserved';
+import FinanceDetails from './FinanceDetails';
 export interface BankFormSection {
   id: string;
   label: string;
@@ -77,6 +80,52 @@ export const bankFormConfigs: BankFormConfig[] = [
         id: 'additionalDetails',
         label: 'Additional Details',
         component: AdditionalDetails,
+      },
+      {
+        id: 'photoCapture',
+        label: 'Photo Capture',
+        component: PhotoCapture,
+      },
+    ],
+  },
+  {
+    id: 2,
+    bankName: 'Arka Fincap',
+    sections: [
+      {
+        id: 'basicDetails',
+        label: 'Basic Details',
+        component: ArkaFincapBasicDetails,
+      },
+      {
+        id: 'familyDetails',
+        label: 'Family Details',
+        component: FamilyMemberDetails,
+      },
+      {
+        id: 'businessDetails',
+        label: 'Business Details',
+        component: BusinessDetails,
+      },
+      {
+        id: 'suppliersCreditors',
+        label: 'Suppliers/Creditors',
+        component: SuppliersCreditors,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        component: DocumentsObserved,
+      },
+      {
+        id: 'salariesWages',
+        label: 'Salaries & Wages',
+        component: SalariesWages,
+      },
+      {
+        id: 'financeDetails',
+        label: 'Finance Details',
+        component: FinanceDetails,
       },
       {
         id: 'photoCapture',
