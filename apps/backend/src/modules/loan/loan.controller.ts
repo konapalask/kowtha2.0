@@ -24,12 +24,13 @@ import { VerificationType, LoanStatus, UserRole, VerificationStatus,
             AddressType, ApprovedStatus, LocationType, Department } from '@prisma/client';
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
+import { PDTemplateService } from './templates/pd-templates.service';
 
 @ApiTags('loans')
 @Controller('loans')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LoanController {
-  constructor(private loanService: LoanService) { }
+  constructor(private loanService: LoanService, private pdTemplateService: PDTemplateService) { }
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -299,7 +300,8 @@ export class LoanController {
         pdfBuffer = await this.loanService.generateVerificationPDF(Number(id), type)
       }
       else if(department === Department.PD) {
-        pdfBuffer = await this.loanService.previewPDVerificationPDF(Number(id))
+        console.log('Preview PD Verification PDF');
+        pdfBuffer = await this.pdTemplateService.previewPDVerificationPDF(Number(id))
       }
 
       res.set({

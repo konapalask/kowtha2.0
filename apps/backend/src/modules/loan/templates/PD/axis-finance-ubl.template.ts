@@ -8,12 +8,9 @@ import { pdBaseTemplate } from './pd-base.tempate';
 
 export const axisFinanceUBLTemplate = (verificationData: AxisFinanceUBLInterface, html_data: any) => {
 
-  const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-  const imageBase64 = fs.readFileSync(imagePath, 'base64');
-  const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
   html_data = {
     ...html_data,
-    imageDataUri: imageDataUri
+    imageDataUri: html_data.imageDataUri
   }
 
   return `
