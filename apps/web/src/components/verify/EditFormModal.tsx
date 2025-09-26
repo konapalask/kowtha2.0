@@ -88,7 +88,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             form.setFieldsValue(applicantData);
           }
         } else if (formKey === "familyDetails") {
-          const familyData = currentVerification?.verificationData?.familyDetails || currentVerification?.verificationData?.familyMemberDetails;
+          const familyData = currentVerification?.verificationData?.familyMemberDetails || currentVerification?.verificationData?.familyDetails;
           if (familyData) {
             form.setFieldsValue({ familyMemberDetails: familyData });
           }
@@ -170,7 +170,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         return currentVerification?.verificationData?.applicantDetails;
       }
       if (formKey === "familyDetails") {
-        return { familyMemberDetails: (currentVerification?.verificationData?.familyDetails || currentVerification?.verificationData?.familyMemberDetails || []) };
+        return { familyMemberDetails: (currentVerification?.verificationData?.familyMemberDetails || currentVerification?.verificationData?.familyDetails || []) };
       }
       if (formKey === "businessBasicDetails") {
         return currentVerification?.verificationData?.basicDetails;
