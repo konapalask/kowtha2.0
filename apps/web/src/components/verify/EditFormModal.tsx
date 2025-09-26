@@ -116,7 +116,22 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         } else if (formKey === "clientsDebtors") {
           const cliData = currentVerification?.verificationData?.clientsDebtors;
           if (cliData) {
-            form.setFieldsValue({ clientsDebtors: cliData });
+            const customers = Array.isArray(cliData.customers) ? cliData.customers : [];
+            const mappedCustomers = {
+              customer1Name: customers[0]?.name,
+              customer1Phone: customers[0]?.phone,
+              customer1Location: customers[0]?.location,
+              customer1Review: customers[0]?.review,
+              customer2Name: customers[1]?.name,
+              customer2Phone: customers[1]?.phone,
+              customer2Location: customers[1]?.location,
+              customer2Review: customers[1]?.review,
+              customer3Name: customers[2]?.name,
+              customer3Phone: customers[2]?.phone,
+              customer3Location: customers[2]?.location,
+              customer3Review: customers[2]?.review,
+            };
+            form.setFieldsValue({ clientsDebtors: { ...cliData, ...mappedCustomers } });
           }
         } else if (formKey === "salariesWages") {
           const salData = currentVerification?.verificationData?.salariesWages;
