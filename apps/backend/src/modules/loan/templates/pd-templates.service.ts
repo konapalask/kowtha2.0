@@ -30,8 +30,7 @@ export class PDTemplateService {
         if (bankName) {
             let verificationData = verification as AxisFinanceUBLInterface;
 
-            // const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-            const imagePath = path.resolve('/Users/jeeva/Downloads/new_sign.jpg');
+            const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
             const imageBase64 = fs.readFileSync(imagePath, 'base64');
             const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
             const status = verification?.approvedStatus || '';
