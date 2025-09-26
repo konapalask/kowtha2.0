@@ -8,10 +8,13 @@ import { pdBaseTemplate } from './pd-base.tempate';
 
 export const axisFinanceUBLTemplate = (verificationData: AxisFinanceUBLInterface, html_data: any) => {
 
-  html_data = {
-    ...html_data,
-    imageDataUri: html_data.imageDataUri
-  }
+  const recommendationStyles: Record<string, string> = {
+    positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+    negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+    credit_refer: '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
+  };
+
+  const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
 
   return `
     ${pdBaseTemplate()}
@@ -346,25 +349,20 @@ export const axisFinanceUBLTemplate = (verificationData: AxisFinanceUBLInterface
       <table class="section-table">
         <tr><td colspan="7" class="section-header">Existing EMI's/Loans</td></tr>
         <tr>
-          <th>Name</th>
-          <th>Type of Loan</th>
-          <th>Sanctioned Amount</th>
-          <th>Outstanding Balance</th>
+          <th>Bank Name</th>
+          <th>Purpose</th>
+          <th>Loan Amount</th>
           <th>EMI</th>
-          <th>EMI Paid Bank</th>
-          <th>Secured Against</th>
+          <th>Tenure</th>
         </tr>
-        ${Array.isArray(verificationData.existingLoans) && verificationData.existingLoans.length > 0
-          ? verificationData.existingLoans.map(loan => `
+        ${Array.isArray(verificationData.existingLoans.loans) && verificationData.existingLoans.loans.length > 0
+          ? verificationData.existingLoans.loans.map(loan => `
             <tr>
               <td><span class="var-value">${loan.bankName || ''}</span></td>
               <td><span class="var-value">${loan.purpose || ''}</span></td>
               <td><span class="var-value">${loan.tenure || ''}</span></td>
-              <td><span class="var-value">${loan.sanctionedAmount || ''}</span></td>
-              <td><span class="var-value">${loan.outstandingBalance || ''}</span></td>
+              <td><span class="var-value">${loan.loanAmount || ''}</span></td>
               <td><span class="var-value">${loan.emi || ''}</span></td>
-              <td><span class="var-value">${loan.bankName || ''}</span></td>
-              <td><span class="var-value">${loan.securedAgainst || ''}</span></td>
             </tr>
           `).join('')
           : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'}
@@ -402,20 +400,18 @@ export const axisFinanceUBLTemplate = (verificationData: AxisFinanceUBLInterface
         <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
         <tr>
           <th>Individual/Business Name</th>
-          <th>Address</th>
-          <th>Contact Number</th>
-          <th>Knowing Since</th>
-          <th>Feedback On Borrower</th>
-          <th>Feedback On Business</th>
+          <th>Mobile Number</th>
+          <th>Relationship</th>
+          <th>Comments</th>
+          <th>Feedback Status</th>
         </tr>
-          ${Array.isArray(verificationData.thirdPartyCheck) && verificationData.thirdPartyCheck.length > 0
-            ? verificationData.thirdPartyCheck.map(tpc => `
+          ${Array.isArray(verificationData.thirdPartyCheck.checks) && verificationData.thirdPartyCheck.checks.length > 0
+            ? verificationData.thirdPartyCheck.checks.map(tpc => `
               <tr>
                 <td><span class="var-value">${tpc.tpcName || ''}</span></td>
-                <td><span class="var-value">${tpc.comments || ''}</span></td>
                 <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
                 <td><span class="var-value">${tpc.relationship || ''}</span></td>
-                <td><span class="var-value">${tpc.otherRelation || ''}</span></td>
+                <td><span class="var-value">${tpc.comments || ''}</span></td>
                 <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
               </tr>
             `).join('')
