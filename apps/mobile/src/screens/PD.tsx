@@ -32,7 +32,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('item', item);
   // console.log('userData', userData);
 
-  const bankName = item?.bankName || userData?.bankName || 'Axis Finance';
+  const bankName = userData?.loan?.bankName;
 
   const formConfig = getFormConfigByBank(bankName);
 
@@ -227,7 +227,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         text1: 'Success',
         text2: 'PD Verification submitted successfully!',
       });
-      // navigation.goBack();
+      navigation.goBack();
       // }
 
       // Alert.alert('Success', 'Form data saved successfully!');

@@ -11,9 +11,11 @@ import AdditionalDetails from './AdditionalDetails';
 import ExistingLoans from '../forms/ExistingLoans';
 import ThirdPartyCheck from '../forms/ThirdPartyCheck';
 import ArkaFincapBasicDetails from './ArkaFincap';
-import BusinessDetails from './BusinessDetails';
+import ArkaFincapBusinessDetails from './ArkaFincapBusinessDetails';
 import DocumentsObserved from './DocumentsObserved';
 import FinanceDetails from './FinanceDetails';
+import ArkaFincapBankingDetails from './ArkaFincapBankingDetails';
+import AxisFinanceUBLBankingDetails from './AxisFinanceUBLBankingDetails';
 export interface BankFormSection {
   id: string;
   label: string;
@@ -30,7 +32,7 @@ export interface BankFormConfig {
 export const bankFormConfigs: BankFormConfig[] = [
   {
     id: 1,
-    bankName: 'Axis Finance',
+    bankName: 'Axis finance UBL',
     sections: [
       {
         id: 'basicDetails',
@@ -48,6 +50,12 @@ export const bankFormConfigs: BankFormConfig[] = [
         id: 'shareholdingDetails',
         label: 'Shareholding Details',
         component: ShareholdingDetails,
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        component: DocumentsObserved,
         required: true,
       },
       {
@@ -81,6 +89,12 @@ export const bankFormConfigs: BankFormConfig[] = [
         required: true,
       },
       {
+        id: 'bankingDetails',
+        label: 'Banking Details',
+        component: AxisFinanceUBLBankingDetails,
+        required: true,
+      },
+      {
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         component: ThirdPartyCheck,
@@ -108,41 +122,73 @@ export const bankFormConfigs: BankFormConfig[] = [
         id: 'basicDetails',
         label: 'Basic Details',
         component: ArkaFincapBasicDetails,
+        required: true,
       },
       {
         id: 'familyDetails',
         label: 'Family Details',
         component: FamilyMemberDetails,
+        required: true,
+      },
+      {
+        id: 'bankingDetails',
+        label: 'Banking Details',
+        component: ArkaFincapBankingDetails,
+        required: true,
+      },
+      {
+        id: 'existingLoans',
+        label: 'Existing Loans',
+        component: ExistingLoans,
+        required: true,
       },
       {
         id: 'businessDetails',
         label: 'Business Details',
-        component: BusinessDetails,
-      },
-      {
-        id: 'suppliersCreditors',
-        label: 'Suppliers/Creditors',
-        component: SuppliersCreditors,
-      },
-      {
-        id: 'documentsObserved',
-        label: 'Documents Observed',
-        component: DocumentsObserved,
+        component: ArkaFincapBusinessDetails,
+        required: true,
       },
       {
         id: 'salariesWages',
         label: 'Salaries & Wages',
         component: SalariesWages,
+        required: true,
+      },
+      {
+        id: 'suppliersCreditors',
+        label: 'Suppliers/Creditors',
+        component: SuppliersCreditors,
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        component: DocumentsObserved,
+        required: true,
       },
       {
         id: 'financeDetails',
         label: 'Finance Details',
         component: FinanceDetails,
+        required: true,
+      },
+      {
+        id: 'thirdPartyCheck',
+        label: 'Third Party Check',
+        component: ThirdPartyCheck,
+        required: true,
+      },
+      {
+        id: 'additionalDetails',
+        label: 'Additional Details',
+        component: AdditionalDetails,
+        required: true,
       },
       {
         id: 'photoCapture',
         label: 'Photo Capture',
         component: PhotoCapture,
+        required: true,
       },
     ],
   },
