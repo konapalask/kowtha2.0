@@ -465,7 +465,9 @@ export const BusinessVerificationDetails: React.FC<
             data={{
               ...data,
               familyMemberDetails:
-                data?.familyDetails || data?.familyMemberDetails || [],
+                currentDepartment === 'PD' 
+                  ? data?.familyMemberDetails || []
+                  : data?.familyDetails || data?.familyMemberDetails || [],
             }}
             extra={getButton("familyDetails")}
         logs={false}
