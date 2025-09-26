@@ -1,15 +1,15 @@
-import React, {useRef} from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  TextInput,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import {useForm, Controller} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {colors} from '../../constants/colors';
-import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
+import {InputFormItem} from '../../lib/InputFormItem';
+import {SelectFormItem} from '../../lib/SelectFormItem';
 
 export type BusinessDetailsFormData = {
   yearBusinessStarted: string;
@@ -32,283 +32,209 @@ type BusinessDetailsProps = {
 };
 
 const TYPE_OF_BUSINESS_OPTIONS = [
-  'Proprietorship',
-  'Partnership',
-  'Private Limited',
-  'LLP',
-  'Others',
+  {id: 'proprietorship', name: 'Proprietorship'},
+  {id: 'partnership', name: 'Partnership'},
+  {id: 'private_limited', name: 'Private Limited'},
+  {id: 'llp', name: 'LLP'},
+  {id: 'others', name: 'Others'},
 ];
 
 const NATURE_OF_BUSINESS_OPTIONS = [
-  'Manufacturer',
-  'Trader',
-  'Service Provider',
-  'Distributor',
-  'Retailer',
-  'Others',
+  {id: 'manufacturer', name: 'Manufacturer'},
+  {id: 'trader', name: 'Trader'},
+  {id: 'service_provider', name: 'Service Provider'},
+  {id: 'distributor', name: 'Distributor'},
+  {id: 'retailer', name: 'Retailer'},
+  {id: 'others', name: 'Others'},
 ];
 
-const STOCK_SOURCE_OPTIONS = ['Suppliers', 'Farmers'];
+const STOCK_SOURCE_OPTIONS = [
+  {id: 'suppliers', name: 'Suppliers'},
+  {id: 'farmers', name: 'Farmers'},
+];
 
-const STOCK_HANDLING_OPTIONS = ['Premises', 'Direct delivery'];
+const STOCK_HANDLING_OPTIONS = [
+  {id: 'premises', name: 'Premises'},
+  {id: 'direct_delivery', name: 'Direct delivery'},
+];
 
 const BUSINESS_PREMISES_OWNERSHIP_OPTIONS = [
-  'Owned',
-  'Rented',
-  'Leased',
-  'Shared',
+  {id: 'owned', name: 'Owned'},
+  {id: 'rented', name: 'Rented'},
+  {id: 'leased', name: 'Leased'},
+  {id: 'shared', name: 'Shared'},
 ];
 
-const MAJOR_TRANSACTION_MODE_OPTIONS = ['Cash', 'Bank'];
+const MAJOR_TRANSACTION_MODE_OPTIONS = [
+  {id: 'cash', name: 'Cash'},
+  {id: 'bank', name: 'Bank'},
+];
 
 const ArkaFincapBusinessDetails: React.FC<BusinessDetailsProps> = ({
   formData,
   onSubmit,
 }) => {
-  const typeOfBusinessSheetRef = useRef<ActionSheetRef>(null);
-  const natureOfBusinessSheetRef = useRef<ActionSheetRef>(null);
-  const stockSourceSheetRef = useRef<ActionSheetRef>(null);
-  const stockHandlingSheetRef = useRef<ActionSheetRef>(null);
-  const businessPremisesOwnershipSheetRef = useRef<ActionSheetRef>(null);
-  const majorTransactionModeSheetRef = useRef<ActionSheetRef>(null);
-
   const {
     control,
     handleSubmit,
-    setValue,
     formState: {errors},
-    watch,
   } = useForm<BusinessDetailsFormData>({
     defaultValues: formData,
   });
 
-  const handleFormSubmit = (data: BusinessDetailsFormData) => {
+  const onFormSubmit = (data: BusinessDetailsFormData) => {
     onSubmit(data);
   };
 
-  const renderNumericInput = (
-    name: keyof BusinessDetailsFormData,
-    label: string,
-  ) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <Controller
-        control={control}
-        name={name}
-        rules={{
-          required: `${label} is required`,
-          pattern: {
-            value: /^\d+$/,
-            message: 'Please enter numbers only',
-          },
-        }}
-        render={({field: {onChange, onBlur, value}}) => (
-          <TextInput
-            style={[styles.input, errors[name] && styles.inputError]}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            keyboardType="numeric"
-            placeholder={`Enter ${label.toLowerCase()}`}
-            placeholderTextColor={colors.text.secondary}
-          />
-        )}
-      />
-      {errors[name] && (
-        <Text style={styles.errorText}>{errors[name]?.message}</Text>
-      )}
-    </View>
-  );
-
-  const renderSelectField = (
-    name: keyof BusinessDetailsFormData,
-    label: string,
-    options: string[],
-    sheetRef: React.RefObject<ActionSheetRef | null>,
-  ) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <Controller
-        control={control}
-        name={name}
-        rules={{
-          required: `${label} is required`,
-        }}
-        render={({field: {onChange, value}}) => (
-          <>
-            <TouchableOpacity
-              style={[styles.selectInput, errors[name] && styles.inputError]}
-              onPress={() => sheetRef.current?.show()}>
-              <Text style={value ? styles.selectText : styles.placeholderText}>
-                {value || `Select ${label.toLowerCase()}`}
-              </Text>
-            </TouchableOpacity>
-            <ActionSheet ref={sheetRef}>
-              <View style={styles.actionSheetContainer}>
-                {options.map(option => (
-                  <TouchableOpacity
-                    key={option}
-                    style={styles.optionButton}
-                    onPressIn={() => {
-                      onChange(option);
-                      sheetRef.current?.hide();
-                    }}>
-                    <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ActionSheet>
-          </>
-        )}
-      />
-      {errors[name] && (
-        <Text style={styles.errorText}>{errors[name]?.message}</Text>
-      )}
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {renderNumericInput('yearBusinessStarted', 'Year Business Started')}
+    <ScrollView style={styles.container}>
+      <InputFormItem
+        data={{
+          title: 'Year Business Started',
+          key: 'yearBusinessStarted',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter year business started',
+          keyboardType: 'numeric',
+        }}
+      />
 
-        {renderSelectField(
-          'typeOfBusiness',
-          'Type of Business',
-          TYPE_OF_BUSINESS_OPTIONS,
-          typeOfBusinessSheetRef,
-        )}
+      <SelectFormItem
+        data={{
+          title: 'Type of Business',
+          key: 'typeOfBusiness',
+          control,
+          errors,
+          required: true,
+          options: TYPE_OF_BUSINESS_OPTIONS,
+        }}
+      />
 
-        <View style={styles.readonlyField}>
-          <Text style={styles.label}>Business Name *</Text>
-          <Text style={styles.readonlyText}>
-            {formData?.businessName || 'N/A'}
-          </Text>
-        </View>
+      <View style={styles.readonlyField}>
+        <Text style={styles.fieldLabel}>Business Name *</Text>
+        <Text style={styles.readonlyText}>
+          {formData?.businessName || 'N/A'}
+        </Text>
+      </View>
 
-        {renderSelectField(
-          'natureOfBusiness',
-          'Nature of Business',
-          NATURE_OF_BUSINESS_OPTIONS,
-          natureOfBusinessSheetRef,
-        )}
+      <SelectFormItem
+        data={{
+          title: 'Nature of Business',
+          key: 'natureOfBusiness',
+          control,
+          errors,
+          required: true,
+          options: NATURE_OF_BUSINESS_OPTIONS,
+        }}
+      />
 
-        {renderSelectField(
-          'stockSource',
-          'Stock Source',
-          STOCK_SOURCE_OPTIONS,
-          stockSourceSheetRef,
-        )}
+      <SelectFormItem
+        data={{
+          title: 'Stock Source',
+          key: 'stockSource',
+          control,
+          errors,
+          required: true,
+          options: STOCK_SOURCE_OPTIONS,
+        }}
+      />
 
-        {renderSelectField(
-          'stockHandling',
-          'Stock Handling',
-          STOCK_HANDLING_OPTIONS,
-          stockHandlingSheetRef,
-        )}
+      <SelectFormItem
+        data={{
+          title: 'Stock Handling',
+          key: 'stockHandling',
+          control,
+          errors,
+          required: true,
+          options: STOCK_HANDLING_OPTIONS,
+        }}
+      />
 
-        {renderNumericInput('salesVolume', 'Sales Volume')}
-        {renderNumericInput('profitPerUnit', 'Profit Per Unit')}
+      <InputFormItem
+        data={{
+          title: 'Sales Volume',
+          key: 'salesVolume',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter sales volume',
+          keyboardType: 'numeric',
+        }}
+      />
 
-        {renderSelectField(
-          'businessPremisesOwnership',
-          'Business Premises Ownership',
-          BUSINESS_PREMISES_OWNERSHIP_OPTIONS,
-          businessPremisesOwnershipSheetRef,
-        )}
+      <InputFormItem
+        data={{
+          title: 'Profit Per Unit',
+          key: 'profitPerUnit',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter profit per unit',
+          keyboardType: 'numeric',
+        }}
+      />
 
-        {renderNumericInput('numberOfWorkers', 'Number of Workers')}
-        {renderNumericInput('wageExpenses', 'Wage Expenses')}
+      <SelectFormItem
+        data={{
+          title: 'Business Premises Ownership',
+          key: 'businessPremisesOwnership',
+          control,
+          errors,
+          required: true,
+          options: BUSINESS_PREMISES_OWNERSHIP_OPTIONS,
+        }}
+      />
 
-        {renderSelectField(
-          'majorTransactionMode',
-          'Major Transaction Mode',
-          MAJOR_TRANSACTION_MODE_OPTIONS,
-          majorTransactionModeSheetRef,
-        )}
-      </ScrollView>
+      <InputFormItem
+        data={{
+          title: 'Number of Workers',
+          key: 'numberOfWorkers',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter number of workers',
+          keyboardType: 'numeric',
+        }}
+      />
+
+      <InputFormItem
+        data={{
+          title: 'Wage Expenses',
+          key: 'wageExpenses',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter wage expenses',
+          keyboardType: 'numeric',
+        }}
+      />
+
+      <SelectFormItem
+        data={{
+          title: 'Major Transaction Mode',
+          key: 'majorTransactionMode',
+          control,
+          errors,
+          required: true,
+          options: MAJOR_TRANSACTION_MODE_OPTIONS,
+        }}
+      />
 
       <TouchableOpacity
-        style={styles.saveButton}
-        onPress={handleSubmit(handleFormSubmit)}>
-        <Text style={styles.saveButtonText}>Save</Text>
+        style={styles.submitButton}
+        onPress={handleSubmit(onFormSubmit)}>
+        <Text style={styles.submitButtonText}>Save</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
-  },
-  scrollView: {
     padding: 16,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: colors.text.primary,
-    marginBottom: 4,
-  },
-  input: {
     backgroundColor: colors.background,
-    borderRadius: 8,
-    padding: 12,
-    color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  inputError: {
-    borderColor: colors.error,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  selectInput: {
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    height: 48,
-  },
-  selectText: {
-    color: colors.text.primary,
-  },
-  placeholderText: {
-    color: colors.text.secondary,
-  },
-  actionSheetContainer: {
-    padding: 16,
-  },
-  optionButton: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  optionText: {
-    fontSize: 16,
-    color: colors.text.primary,
-  },
-  saveButton: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    margin: 16,
-    alignItems: 'center',
-    borderColor: colors.primary,
-    borderWidth: 1,
-  },
-  saveButtonText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   readonlyField: {
     marginBottom: 16,
@@ -318,10 +244,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  fieldLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: colors.text.primary,
+  },
   readonlyText: {
     fontSize: 16,
     color: colors.text.secondary,
     fontStyle: 'italic',
+  },
+  submitButton: {
+    backgroundColor: colors.button.primary.background,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  submitButtonText: {
+    color: colors.button.primary.text,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

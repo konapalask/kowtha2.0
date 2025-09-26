@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,82 +9,87 @@ import {
 import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {SelectFormItem} from '../../lib/SelectFormItem';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 
-interface Document {
-  documentCategory: string;
-  documentName: string;
-  documentType: string;
-  remarks: string;
+interface Customer {
+  name: string;
+  phone: string;
+  location: string;
+  review: string;
 }
 
-interface DocumentsObservedFormData {
-  documents: Document[];
+interface ClientsDebtorsFormData {
+  customers: Customer[];
 }
 
-interface DocumentsObservedProps {
-  onSubmit: (data: DocumentsObservedFormData) => void;
-  initialData?: DocumentsObservedFormData;
-  maxDocuments?: number;
+interface ClientsDebtorsProps {
+  onSubmit: (data: ClientsDebtorsFormData) => void;
+  initialData?: ClientsDebtorsFormData;
+  maxCustomers?: number;
 }
 
-const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
+const REVIEW_OPTIONS = [
+  {id: 'positive', name: 'Positive'},
+  {id: 'negative', name: 'Negative'},
+];
+
+const ClientsDebtors: React.FC<ClientsDebtorsProps> = ({
   onSubmit,
-  initialData = {documents: []},
-  maxDocuments,
+  initialData = {customers: []},
+  maxCustomers,
 }) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
     watch,
-  } = useForm<DocumentsObservedFormData>({
+  } = useForm<ClientsDebtorsFormData>({
     defaultValues: {
-      documents:
-        initialData?.documents?.length > 0
-          ? initialData?.documents
-          : [createEmptyDocument()],
+      customers:
+        initialData?.customers?.length > 0
+          ? initialData?.customers
+          : [createEmptyCustomer()],
     },
   });
 
   const {fields, append, remove} = useFieldArray({
     control,
-    name: 'documents',
+    name: 'customers',
   });
 
-  function createEmptyDocument(): Document {
+  function createEmptyCustomer(): Customer {
     return {
-      documentCategory: '',
-      documentName: '',
-      documentType: '',
-      remarks: '',
+      name: '',
+      phone: '',
+      location: '',
+      review: '',
     };
   }
 
-  const handleAddDocument = () => {
-    if (maxDocuments && fields.length >= maxDocuments) {
+  const handleAddCustomer = () => {
+    if (maxCustomers && fields.length >= maxCustomers) {
       Toast.show({
         type: 'error',
         text1: 'Maximum Limit Reached',
-        text2: `Cannot add more than ${maxDocuments} documents`,
+        text2: `Cannot add more than ${maxCustomers} customers`,
         position: 'bottom',
       });
       return;
     }
-    append(createEmptyDocument());
+    append(createEmptyCustomer());
   };
 
-  const onFormSubmit = (data: DocumentsObservedFormData) => {
+  const onFormSubmit = (data: ClientsDebtorsFormData) => {
     onSubmit(data);
   };
 
-  const renderDocumentFields = (index: number) => {
+  const renderCustomerFields = (index: number) => {
     return (
-      <View key={index} style={styles.documentContainer}>
-        <View style={styles.documentHeader}>
-          <Text style={styles.documentTitle}>Document {index + 1}</Text>
+      <View key={index} style={styles.customerContainer}>
+        <View style={styles.customerHeader}>
+          <Text style={styles.customerTitle}>Customer {index + 1}</Text>
           {index > 0 && (
             <TouchableOpacity
               onPress={() => remove(index)}
@@ -96,45 +101,53 @@ const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
 
         <InputFormItem
           data={{
-            title: 'Document Category',
-            key: `documents.${index}.documentCategory`,
+            title: 'Name',
+            key: `customers.${index}.name`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document category',
+            placeholder: 'Enter customer name',
           }}
         />
 
         <InputFormItem
           data={{
-            title: 'Document Name',
-            key: `documents.${index}.documentName`,
+            title: 'Phone Number',
+            key: `customers.${index}.phone`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document name',
+            placeholder: 'Enter phone number',
+            keyboardType: 'phone-pad',
+            rules: {
+              validate: (value: string) => {
+                if (value.length !== 10)
+                  return 'Phone number must be 10 digits';
+                return true;
+              },
+            },
           }}
         />
 
         <InputFormItem
           data={{
-            title: 'Document Type',
-            key: `documents.${index}.documentType`,
+            title: 'Location',
+            key: `customers.${index}.location`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document type',
+            placeholder: 'Enter location',
           }}
         />
 
-        <TextAreaFormItem
+        <SelectFormItem
           data={{
-            title: 'Remarks',
-            key: `documents.${index}.remarks`,
+            title: 'Review',
+            key: `customers.${index}.review`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter remarks about the document...',
+            options: REVIEW_OPTIONS,
           }}
         />
       </View>
@@ -143,28 +156,28 @@ const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Documents Observed</Text>
+      <Text style={styles.sectionTitle}>Customers</Text>
 
-      {fields.map((field, index) => renderDocumentFields(index))}
+      {fields.map((field, index) => renderCustomerFields(index))}
 
       <TouchableOpacity
         style={[
           styles.addButton,
-          maxDocuments && fields.length >= maxDocuments
+          maxCustomers && fields.length >= maxCustomers
             ? styles.disabledButton
             : null,
         ]}
-        onPress={handleAddDocument}
-        disabled={maxDocuments ? fields.length >= maxDocuments : false}>
+        onPress={handleAddCustomer}
+        disabled={maxCustomers ? fields.length >= maxCustomers : false}>
         <Text
           style={[
             styles.addButtonText,
-            maxDocuments && fields.length >= maxDocuments
+            maxCustomers && fields.length >= maxCustomers
               ? styles.disabledButtonText
               : null,
           ]}>
-          Add Document{' '}
-          {maxDocuments ? `(${fields.length}/${maxDocuments})` : ''}
+          Add Customer{' '}
+          {maxCustomers ? `(${fields.length}/${maxCustomers})` : ''}
         </Text>
       </TouchableOpacity>
 
@@ -190,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: colors.text.primary,
   },
-  documentContainer: {
+  customerContainer: {
     marginBottom: 24,
     padding: 16,
     backgroundColor: colors.background,
@@ -198,13 +211,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  documentHeader: {
+  customerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  documentTitle: {
+  customerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
@@ -225,6 +238,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  disabledButton: {
+    backgroundColor: '#E0E0E0',
+    opacity: 0.7,
+  },
+  disabledButtonText: {
+    color: '#9E9E9E',
+  },
   submitButton: {
     backgroundColor: colors.button.primary.background,
     padding: 16,
@@ -239,13 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  disabledButton: {
-    backgroundColor: '#E0E0E0',
-    opacity: 0.7,
-  },
-  disabledButtonText: {
-    color: '#9E9E9E',
-  },
 });
 
-export default DocumentsObserved;
+export default ClientsDebtors;
