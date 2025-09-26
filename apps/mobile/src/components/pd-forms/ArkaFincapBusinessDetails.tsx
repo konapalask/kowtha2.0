@@ -12,17 +12,18 @@ import {colors} from '../../constants/colors';
 import ActionSheet, {ActionSheetRef} from 'react-native-actions-sheet';
 
 export type BusinessDetailsFormData = {
-  employeesDeclared: string;
-  employeesObserved: string;
-  constitutionOfBusiness: string;
+  yearBusinessStarted: string;
+  typeOfBusiness: string;
+  businessName: string;
   natureOfBusiness: string;
-  businessActivityObserved: string;
-  stockObserved: string;
-  businessStartYear: string;
-  occupiedSince: string;
-  netMargin: string;
-  businessPremisesSize: string;
-  rawMaterialSupplier: string;
+  stockSource: string;
+  stockHandling: string;
+  salesVolume: string;
+  profitPerUnit: string;
+  businessPremisesOwnership: string;
+  numberOfWorkers: string;
+  wageExpenses: string;
+  majorTransactionMode: string;
 };
 
 type BusinessDetailsProps = {
@@ -30,29 +31,12 @@ type BusinessDetailsProps = {
   onSubmit: any;
 };
 
-const CONSTITUTION_OPTIONS = [
+const TYPE_OF_BUSINESS_OPTIONS = [
   'Proprietorship',
   'Partnership',
   'Private Limited',
   'LLP',
   'Others',
-];
-
-const BUSINESS_ACTIVITY_OPTIONS = [
-  'Retail',
-  'Wholesale',
-  'Manufacturing',
-  'Service',
-  'Trading',
-  'Others',
-];
-
-const PREMISES_SIZE_OPTIONS = [
-  'Less than 100 sq.ft',
-  '100-500 sq.ft',
-  '500-1000 sq.ft',
-  '1000-2000 sq.ft',
-  'More than 2000 sq.ft',
 ];
 
 const NATURE_OF_BUSINESS_OPTIONS = [
@@ -64,14 +48,29 @@ const NATURE_OF_BUSINESS_OPTIONS = [
   'Others',
 ];
 
-const BusinessDetails: React.FC<BusinessDetailsProps> = ({
+const STOCK_SOURCE_OPTIONS = ['Suppliers', 'Farmers'];
+
+const STOCK_HANDLING_OPTIONS = ['Premises', 'Direct delivery'];
+
+const BUSINESS_PREMISES_OWNERSHIP_OPTIONS = [
+  'Owned',
+  'Rented',
+  'Leased',
+  'Shared',
+];
+
+const MAJOR_TRANSACTION_MODE_OPTIONS = ['Cash', 'Bank'];
+
+const ArkaFincapBusinessDetails: React.FC<BusinessDetailsProps> = ({
   formData,
   onSubmit,
 }) => {
-  const constitutionSheetRef = useRef<ActionSheetRef>(null);
-  const businessActivitySheetRef = useRef<ActionSheetRef>(null);
-  const premisesSizeSheetRef = useRef<ActionSheetRef>(null);
+  const typeOfBusinessSheetRef = useRef<ActionSheetRef>(null);
   const natureOfBusinessSheetRef = useRef<ActionSheetRef>(null);
+  const stockSourceSheetRef = useRef<ActionSheetRef>(null);
+  const stockHandlingSheetRef = useRef<ActionSheetRef>(null);
+  const businessPremisesOwnershipSheetRef = useRef<ActionSheetRef>(null);
+  const majorTransactionModeSheetRef = useRef<ActionSheetRef>(null);
 
   const {
     control,
@@ -125,7 +124,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
     name: keyof BusinessDetailsFormData,
     label: string,
     options: string[],
-    sheetRef: React.RefObject<ActionSheetRef>,
+    sheetRef: React.RefObject<ActionSheetRef | null>,
   ) => (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
@@ -171,21 +170,21 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {renderNumericInput(
-          'employeesDeclared',
-          'Number of Employees (Declared)',
-        )}
-        {renderNumericInput(
-          'employeesObserved',
-          'Number of Employees (Observed)',
-        )}
+        {renderNumericInput('yearBusinessStarted', 'Year Business Started')}
 
         {renderSelectField(
-          'constitutionOfBusiness',
-          'Constitution of Business',
-          CONSTITUTION_OPTIONS,
-          constitutionSheetRef,
+          'typeOfBusiness',
+          'Type of Business',
+          TYPE_OF_BUSINESS_OPTIONS,
+          typeOfBusinessSheetRef,
         )}
+
+        <View style={styles.readonlyField}>
+          <Text style={styles.label}>Business Name *</Text>
+          <Text style={styles.readonlyText}>
+            {formData?.businessName || 'N/A'}
+          </Text>
+        </View>
 
         {renderSelectField(
           'natureOfBusiness',
@@ -195,52 +194,38 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({
         )}
 
         {renderSelectField(
-          'businessActivityObserved',
-          'Business Activity Observed',
-          BUSINESS_ACTIVITY_OPTIONS,
-          businessActivitySheetRef,
+          'stockSource',
+          'Stock Source',
+          STOCK_SOURCE_OPTIONS,
+          stockSourceSheetRef,
         )}
-
-        {renderNumericInput('stockObserved', 'Stock Observed (₹)')}
-        {renderNumericInput('businessStartYear', 'Business Start Year')}
-        {renderNumericInput('occupiedSince', 'Occupied Since (Year)')}
-        {renderNumericInput('netMargin', 'Net Margin (%)')}
 
         {renderSelectField(
-          'businessPremisesSize',
-          'Business Premises Size',
-          PREMISES_SIZE_OPTIONS,
-          premisesSizeSheetRef,
+          'stockHandling',
+          'Stock Handling',
+          STOCK_HANDLING_OPTIONS,
+          stockHandlingSheetRef,
         )}
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Raw Material Supplier</Text>
-          <Controller
-            control={control}
-            name="rawMaterialSupplier"
-            rules={{
-              required: 'Raw Material Supplier is required',
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                style={[
-                  styles.input,
-                  errors.rawMaterialSupplier && styles.inputError,
-                ]}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="Enter raw material supplier"
-                placeholderTextColor={colors.text.secondary}
-              />
-            )}
-          />
-          {errors.rawMaterialSupplier && (
-            <Text style={styles.errorText}>
-              {errors.rawMaterialSupplier.message}
-            </Text>
-          )}
-        </View>
+        {renderNumericInput('salesVolume', 'Sales Volume')}
+        {renderNumericInput('profitPerUnit', 'Profit Per Unit')}
+
+        {renderSelectField(
+          'businessPremisesOwnership',
+          'Business Premises Ownership',
+          BUSINESS_PREMISES_OWNERSHIP_OPTIONS,
+          businessPremisesOwnershipSheetRef,
+        )}
+
+        {renderNumericInput('numberOfWorkers', 'Number of Workers')}
+        {renderNumericInput('wageExpenses', 'Wage Expenses')}
+
+        {renderSelectField(
+          'majorTransactionMode',
+          'Major Transaction Mode',
+          MAJOR_TRANSACTION_MODE_OPTIONS,
+          majorTransactionModeSheetRef,
+        )}
       </ScrollView>
 
       <TouchableOpacity
@@ -265,7 +250,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   input: {
@@ -325,6 +310,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  readonlyField: {
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  readonlyText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
+  },
 });
 
-export default BusinessDetails;
+export default ArkaFincapBusinessDetails;

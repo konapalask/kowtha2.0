@@ -22,7 +22,7 @@ import {clearItem, getItem, setItem} from '../helpers/utility';
 import {colors} from '../constants/colors';
 import CollapsibleSection from '../components/CollapsibleSection';
 import BasicDetails from '../components/pd-forms/BasicDetails';
-import BusinessDetails from '../components/pd-forms/BusinessDetails';
+import BusinessDetails from '../components/pd-forms/ArkaFincapBusinessDetails';
 import ApplicantDetails from '../components/pd-forms/ApplicantDetails';
 import AdditionalDetails from '../components/pd-forms/AdditionalDetails';
 import ThirdPartyCheck, {

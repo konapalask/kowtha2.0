@@ -30,9 +30,9 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const STORAGE_KEY = `${item?.id}_pd`;
 
   // console.log('item', item);
-  console.log('userData', userData);
+  // console.log('userData', userData);
 
-  const bankName = item?.bankName || userData?.bankName || 'Axis Finance';
+  const bankName = userData?.loan?.bankName;
 
   const formConfig = getFormConfigByBank(bankName);
 
@@ -78,7 +78,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       const savedData = await AsyncStorage.getItem(STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        console.log('parsedData', parsedData);
+        // console.log('parsedData', parsedData);
         // setFormData(parsedData);
         setSectionData((prev: any) => ({
           ...prev,
@@ -119,7 +119,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const isSectionValid = (sectionId: string): boolean => {
     if (sectionId === 'photoCapture') {
-      return uploadedItems.length > 0;
+      return sectionData?.uploadedItems?.length > 0;
     }
 
     const sectionDataExists =
@@ -150,8 +150,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const handleUploadedItemsChange = async (items: UploadedItem[]) => {
-    console.log(items);
-    setUploadedItems(items);
+    // console.log('items', items);
+    // setUploadedItems(items);
     await saveFormData({...sectionData, uploadedItems: items});
   };
 
@@ -171,7 +171,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       );
       const missingRequiredSections = requiredSections.filter(section => {
         if (section.id === 'photoCapture') {
-          return uploadedItems.length === 0;
+          return sectionData?.uploadedItems?.length === 0;
         }
 
         const sectionDataExists =
@@ -216,6 +216,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         addressType: 'Business',
         verificationData: sectionData,
       };
+
+      // console.log('finalData', finalData);
 
       await submitVerification(finalData, item?.verificationId, 'PD');
 
@@ -329,7 +331,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                         {section.id === 'photoCapture' ? (
                           <SectionComponent
                             onUploadedItemsChange={handleUploadedItemsChange}
-                            initialItems={uploadedItems}
+                            initialItems={sectionData?.uploadedItems ?? []}
                             loanId={item?.id || item?.verificationId}
                           />
                         ) : (

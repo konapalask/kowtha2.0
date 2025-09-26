@@ -10,6 +10,7 @@ import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
+import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 
@@ -23,6 +24,7 @@ interface Shareholder {
 }
 
 interface ShareholdingDetailsFormData {
+  aboutTheBusiness: string;
   shareholders: Shareholder[];
 }
 
@@ -64,6 +66,7 @@ const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
     watch,
   } = useForm<ShareholdingDetailsFormData>({
     defaultValues: {
+      aboutTheBusiness: initialData?.aboutTheBusiness || '',
       shareholders:
         initialData?.shareholders?.length > 0
           ? initialData?.shareholders
@@ -222,6 +225,20 @@ const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
         </Text>
       </TouchableOpacity>
 
+      {/* <Text style={styles.sectionTitle}>About the Business</Text> */}
+
+      <TextAreaFormItem
+        data={{
+          title: 'About the Business',
+          key: 'aboutTheBusiness',
+          control,
+          errors,
+          required: true,
+          placeholder:
+            'Describe the business, its nature, operations, and key activities...',
+        }}
+      />
+
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onFormSubmit)}>
@@ -236,6 +253,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: colors.background,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 16,
+    color: colors.text.primary,
   },
   shareholderContainer: {
     marginBottom: 24,
