@@ -9,7 +9,8 @@ export const SelectFormItem = ({data}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
-        {data.title} {data?.required !== false ? '*' : ''}
+        {data.title}{' '}
+        {data?.required !== false && <Text style={styles.required}>*</Text>}
       </Text>
 
       <Controller
@@ -20,19 +21,19 @@ export const SelectFormItem = ({data}) => {
           required: {value: data?.required !== false, message: 'Required'},
           ...data?.rules,
         }}
-        render={({field: {onChange, value}}) => (
+        render={({field: {onChange, value}, fieldState: {error}}) => (
           <>
             <TouchableOpacity
-              style={styles.selector}
+              style={[styles.selector, error && styles.errorBorder]}
               onPress={() => actionSheetRef.current?.show()}>
-              <Text style={{color: value ? '#000' : '#999'}}>
+              <Text style={[{color: value ? '#000' : '#999', fontSize: 14}]}>
                 {data?.options?.find(opt => opt.id === value)?.name ||
                   'Select an option'}
               </Text>
             </TouchableOpacity>
 
-            <ActionSheet ref={actionSheetRef}>
-              <View style={styles.sheetContainer}>
+            <ActionSheet ref={actionSheetRef} gestureEnabled={true}>
+              <View style={[styles.sheetContainer, {paddingBottom: 50}]}>
                 {data?.options?.map(item => (
                   <TouchableOpacity
                     key={item.id}
@@ -46,13 +47,10 @@ export const SelectFormItem = ({data}) => {
                 ))}
               </View>
             </ActionSheet>
+            {error && <Text style={styles.errorText}>{error.message}</Text>}
           </>
         )}
       />
-
-      {data.errors?.[data.key] && (
-        <Text style={styles.error}>{data.errors[data.key]?.message}</Text>
-      )}
     </View>
   );
 };
@@ -60,6 +58,7 @@ export const SelectFormItem = ({data}) => {
 const styles = StyleSheet.create({
   container: {marginVertical: 8},
   label: {color: '#000', fontSize: 14, marginBottom: 4},
+  required: {color: 'red'},
   selector: {
     backgroundColor: 'white',
     borderWidth: 1,
@@ -67,7 +66,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 12,
   },
-  error: {color: 'red', fontSize: 12, marginTop: 4},
+  errorBorder: {
+    borderColor: 'red',
+  },
+  errorText: {color: 'red', fontSize: 12, marginTop: 4, marginBottom: 4},
   sheetContainer: {padding: 12},
   sheetItem: {paddingVertical: 12},
   sheetText: {fontSize: 16},

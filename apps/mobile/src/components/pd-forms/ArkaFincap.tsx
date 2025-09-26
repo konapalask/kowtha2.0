@@ -12,37 +12,29 @@ import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
 import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
 
-interface AxisFinanceUBLBasicDetailsFormData {
+interface ArkaFincapBasicDetailsFormData {
+  applicationNumber: string;
   applicantName: string;
+  coApplicantName: string;
+  phoneNo: string;
   nameOfConcern: string;
-  constitution: string;
   initiatedAddress: string;
   visitedAddress: string;
-  phoneNo: string;
-  appointmentFixed: string;
-  structureOfLoan: string;
-  noOfVisit: string;
+  residentialDetails: string;
+  dateOfVisit: string;
   personMet: string;
   nameOfPersonMet: string;
+  loanAmount: string;
+  purposeOfLoan: string;
+  typeofCollateral: string;
+  collateralDetails: string;
   aboutApplicant: string;
-  residentialDetails: string;
-  coApplicantDetails: string;
 }
 
-interface AxisFinanceUBLBasicDetailsProps {
-  onSubmit: (data: AxisFinanceUBLBasicDetailsFormData) => void;
-  initialData?: AxisFinanceUBLBasicDetailsFormData;
+interface ArkaFincapBasicDetailsProps {
+  onSubmit: (data: ArkaFincapBasicDetailsFormData) => void;
+  initialData?: ArkaFincapBasicDetailsFormData;
 }
-
-const CONSTITUTION_OPTIONS = [
-  {id: 'sole_proprietorship', name: 'Sole Proprietorship'},
-  {id: 'partnership', name: 'Partnership'},
-  {id: 'private_limited', name: 'Private Limited'},
-  {id: 'public_limited', name: 'Public Limited'},
-  {id: 'llp', name: 'Limited Liability Partnership'},
-  {id: 'huf', name: 'Hindu Undivided Family'},
-  {id: 'other', name: 'Other'},
-];
 
 const YES_NO_OPTIONS = [
   {id: 'yes', name: 'Yes'},
@@ -68,7 +60,7 @@ const PERSON_MET_OPTIONS = [
   {id: 'other', name: 'Other'},
 ];
 
-const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
+const ArkaFincapBasicDetails: React.FC<ArkaFincapBasicDetailsProps> = ({
   onSubmit,
   initialData,
 }) => {
@@ -77,28 +69,28 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
     handleSubmit,
     formState: {errors},
     watch,
-  } = useForm<AxisFinanceUBLBasicDetailsFormData>({
+  } = useForm<ArkaFincapBasicDetailsFormData>({
     defaultValues: initialData || {
       applicantName: '',
       nameOfConcern: '',
-      constitution: '',
       initiatedAddress: '',
       visitedAddress: '',
       phoneNo: '',
-      appointmentFixed: '',
-      structureOfLoan: '',
-      noOfVisit: '',
+      dateOfVisit: '',
       personMet: '',
       nameOfPersonMet: '',
+      loanAmount: '',
+      purposeOfLoan: '',
       aboutApplicant: '',
       residentialDetails: '',
-      coApplicantDetails: '',
+      typeofCollateral: '',
+      collateralDetails: '',
     },
   });
 
   const personMet = watch('personMet');
 
-  const onFormSubmit = (data: AxisFinanceUBLBasicDetailsFormData) => {
+  const onFormSubmit = (data: ArkaFincapBasicDetailsFormData) => {
     onSubmit(data);
   };
 
@@ -116,20 +108,19 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
         <Text style={styles.readonlyText}>{initialData?.nameOfConcern}</Text>
       </View>
 
-      <SelectFormItem
-        data={{
-          title: 'Constitution',
-          key: 'constitution',
-          control,
-          errors,
-          required: true,
-          options: CONSTITUTION_OPTIONS,
-        }}
-      />
-
       <View style={styles.readonlyField}>
         <Text style={styles.fieldLabel}>Initiated Address *</Text>
         <Text style={styles.readonlyText}>{initialData?.initiatedAddress}</Text>
+      </View>
+
+      <View style={styles.readonlyField}>
+        <Text style={styles.fieldLabel}>Phone No *</Text>
+        <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
+      </View>
+
+      <View style={styles.readonlyField}>
+        <Text style={styles.fieldLabel}>Phone No *</Text>
+        <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
       </View>
 
       <TextAreaFormItem
@@ -143,15 +134,10 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
         }}
       />
 
-      <View style={styles.readonlyField}>
-        <Text style={styles.fieldLabel}>Phone No *</Text>
-        <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
-      </View>
-
       <SelectFormItem
         data={{
-          title: 'Appointment Fixed',
-          key: 'appointmentFixed',
+          title: 'Date of Visit',
+          key: 'dateOfVisit',
           control,
           errors,
           required: true,
@@ -161,8 +147,8 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <SelectFormItem
         data={{
-          title: 'Structure of Loan',
-          key: 'structureOfLoan',
+          title: 'Loan Amount',
+          key: 'loanAmount',
           control,
           errors,
           required: true,
@@ -172,13 +158,23 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <InputFormItem
         data={{
-          title: 'No of Visit',
-          key: 'noOfVisit',
+          title: 'Purpose of Loan',
+          key: 'purposeOfLoan',
           control,
           errors,
           required: true,
-          placeholder: 'Enter number of visits',
-          keyboardType: 'numeric',
+          placeholder: 'Enter purpose of loan',
+        }}
+      />
+
+      <InputFormItem
+        data={{
+          title: 'Type of Collateral',
+          key: 'typeofCollateral',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter type of collateral',
         }}
       />
 
@@ -230,12 +226,12 @@ const AxisFinanceUBLBasicDetails: React.FC<AxisFinanceUBLBasicDetailsProps> = ({
 
       <TextAreaFormItem
         data={{
-          title: 'Co-applicant Details',
-          key: 'coApplicantDetails',
+          title: 'Collateral Details',
+          key: 'collateralDetails',
           control,
           errors,
           required: false,
-          placeholder: 'Enter co-applicant details',
+          placeholder: 'Enter collateral details',
         }}
       />
 
@@ -295,4 +291,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AxisFinanceUBLBasicDetails;
+export default ArkaFincapBasicDetails;

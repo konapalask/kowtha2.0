@@ -23,7 +23,6 @@ import { VerificationData } from './templates/FI/address.interface';
 import { WorkVerificationData } from './templates/FI/work.interface';
 import { BusinessVerificationData } from './templates/FI/business.interface';
 import { PDBusinessVerificationData } from './templates/PD/interface/pd-business.interface';
-import { axisFinanceUBLTemplate } from './templates/PD/axis-finance-ubl.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department
@@ -33,6 +32,7 @@ import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { baseTemplate } from './templates/FI/base.template';
 import { Worker } from 'worker_threads';
+import { AxisFinanceUBLInterface } from './templates/PD/interface/axis-finance-ubl.interface';
 
 
 @Injectable()
@@ -1284,6 +1284,7 @@ export class LoanService {
           type: verification.type,
           path: verification.path,
           status: verification.status,
+          bankName: loan.bankName,
           approvedStatus: verification.approvedStatus,
           finalReportPath: verification.finalReportPath,
           addressType: verification.addressType,
@@ -2129,108 +2130,7 @@ export class LoanService {
 
   // PD Verification PDF Generation
 
-  async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
-    try {
-      // Fetch loan details with verification data
-      const loan = await this.prisma.loan.findUnique({
-        where: { id: loanId, department: Department.PD },
-        select: {
-          applicationNumber: true,
-          applicantName: true,
-          applicantMobile: true,
-          applicantAddress: true,
-          loanType: true,
-          bankName: true,
-          loanAmount: true,
-          status: true,
-          office: { select: { name: true, address: true } },
-          operationsExecutive: { select: { name: true } },
-          verifications: {
-            where: { type: VerificationType.Business },
-            select: {
-              type: true,
-              status: true,
-              approvedStatus: true,
-              updatedAt: true,
-              verificationData: true,
-              path: true,
-              finalReportPath: true,
-              fieldExecutive: { select: { name: true } }
-            }
-          },
-        }
-      });
-
-      if (!loan) {
-        throw new NotFoundException('Loan not found');
-      }
-
-      if (loan.verifications.length === 0) {
-        throw new NotFoundException(`Verification for address type Business not found`);
-      }
-
-      const verification = loan.verifications[0];
-
-      const status = verification?.approvedStatus || '';
-
-      // Get the verification data
-      let verificationData = verification.verificationData as PDBusinessVerificationData;
-
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-      const imageBase64 = fs.readFileSync(imagePath, 'base64');
-      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
-
-      // Get uploaded items for this verification only
-      const uploadedItems = verificationData?.uploadedItems || [];
-
-      // Generate presigned URLs for images
-      const imageUrls = await Promise.all(
-        uploadedItems.map(async (item) => {
-          try {
-            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
-          } catch (error) {
-            await this.loggingService.error('Failed to generate presigned URL for image', {
-              s3ImageUrl: item.s3ImageUrl,
-              error: error.message
-            });
-            return null;
-          }
-        })
-      );
-
-      // Filter out any failed URL generations
-      const validImageUrls = imageUrls.filter(url => url !== null);
-
-      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
-
-      const html_data = {
-        bankName: loan.bankName,
-        path: verification.path,
-        status: status,
-        imageDataUri: imageDataUri,
-        imagesData: imagesData,
-        fieldExecutive: verification.fieldExecutive?.name || '',
-      }
-
-      const htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
-
-      const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
-
-      await this.loggingService.info('Verification PDF generated successfully', {
-        loanId,
-        applicationNumber: loan.applicationNumber,
-      });
-
-      return pdfBuffer;
-    } catch (error) {
-      await this.loggingService.error('Failed to generate verification PDF', {
-        loanId,
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
-    }
-  }
+  
 
   async generatePDFinalReportPDF(loanId: number) {
     try {

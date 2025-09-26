@@ -182,6 +182,26 @@ export const axisFinanceUBLSample = {
         "openSinceYear": "2005"
       }
     ],
+    "existingLoans": [
+      {
+        "bankName": "HDFC Bank",
+        "typeofLoan": "Karol Bagh",
+        "sanctionedAmount": "Current",
+        "O/Sbalance": "580000",
+        "emi": "20000",
+        "emiPaidBank": "HDFC Bank",
+        "securedAgainst": "Factory Building"
+      },
+      {
+        "bankName": "ICICI Bank",
+        "typeofLoan": "Airport",
+        "sanctionedAmount": "Current",
+        "O/Sbalance": "480000",
+        "emi": "24000",
+        "emiPaidBank": "ICICI Bank",
+        "securedAgainst": "Factory Building"
+      }
+    ],
     "endUseOfLoan": {
       "loanAmount": "₹50 Lakhs",
       "detailedEndUse": "Expansion of factory and purchase of new machines"
@@ -194,7 +214,7 @@ export const axisFinanceUBLSample = {
         "knowingSince": "8 years",
         "feedbackOnBorrower": "Good repayment track record",
         "feedbackOnBusiness": "Business is consistent with good reputation",
-        "observation": "Trusted borrower"
+        "observation": "Third party verification confirms positive feedback"
       }
     ],
     "otherIncome": "₹5 Lakhs annually from rental property",

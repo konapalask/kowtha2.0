@@ -163,7 +163,6 @@ export const pdBaseTemplate = () => {
               padding: 8px 0 6px 0;
               background-color: transparent;
               z-index: 1000;
-              height: 100%;
             }
             .logo {
               margin-top: 24px;

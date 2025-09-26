@@ -10,7 +10,6 @@ import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 
@@ -24,13 +23,12 @@ interface Shareholder {
 }
 
 interface ShareholdingDetailsFormData {
-  aboutTheBusiness: string;
   shareholders: Shareholder[];
 }
 
 interface ShareholdingDetailsProps {
   onSubmit: (data: ShareholdingDetailsFormData) => void;
-  initialData?: ShareholdingDetailsFormData;
+  initialData?: Shareholder[];
   maxShareholders?: number;
 }
 
@@ -53,12 +51,11 @@ const YES_NO_OPTIONS = [
   {id: 'no', name: 'No'},
 ];
 
-const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
+const FinanceDetails: React.FC<ShareholdingDetailsProps> = ({
   onSubmit,
-  initialData = {shareholders: []},
+  initialData = [],
   maxShareholders,
 }) => {
-  // console.log('initialData', initialData);
   const {
     control,
     handleSubmit,
@@ -66,11 +63,8 @@ const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
     watch,
   } = useForm<ShareholdingDetailsFormData>({
     defaultValues: {
-      aboutTheBusiness: initialData?.aboutTheBusiness || '',
       shareholders:
-        initialData?.shareholders?.length > 0
-          ? initialData?.shareholders
-          : [createEmptyShareholder()],
+        initialData.length > 0 ? initialData : [createEmptyShareholder()],
     },
   });
 
@@ -225,20 +219,6 @@ const ShareholdingDetails: React.FC<ShareholdingDetailsProps> = ({
         </Text>
       </TouchableOpacity>
 
-      {/* <Text style={styles.sectionTitle}>About the Business</Text> */}
-
-      <TextAreaFormItem
-        data={{
-          title: 'About the Business',
-          key: 'aboutTheBusiness',
-          control,
-          errors,
-          required: true,
-          placeholder:
-            'Describe the business, its nature, operations, and key activities...',
-        }}
-      />
-
       <TouchableOpacity
         style={styles.submitButton}
         onPress={handleSubmit(onFormSubmit)}>
@@ -253,13 +233,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: colors.background,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 16,
-    color: colors.text.primary,
   },
   shareholderContainer: {
     marginBottom: 24,
@@ -297,18 +270,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButton: {
-    borderColor: colors.button.primary.background,
-    borderWidth: 1,
-    padding: 8,
+    backgroundColor: colors.button.primary.background,
+    padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 20,
+    marginBottom: 20,
     marginHorizontal: 16,
-    marginBottom: 16,
-    height: 40,
   },
   submitButtonText: {
-    color: colors.button.secondary.text,
+    color: colors.button.primary.text,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -321,4 +292,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShareholdingDetails;
+export default FinanceDetails;

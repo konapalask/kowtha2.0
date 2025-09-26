@@ -1,18 +1,22 @@
 import { format, toZonedTime } from 'date-fns-tz';
 import { category } from 'google-play-scraper';
-import { AxisFinanceUBLVerificationDataData } from './interface/axis-finance-ubl.interface';
-import { axisFinanceUBLSample } from './sample_data/axis-finance-ubl.sample';
+import * as path from 'path';
+import * as fs from 'fs';
+import { AxisFinanceUBLInterface } from './interface/axis-finance-ubl.interface';
 import { pdBaseTemplate } from './pd-base.tempate';
 
-// About applicant should be points list
 
+export const axisFinanceUBLTemplate = (verificationData: AxisFinanceUBLInterface, html_data: any) => {
 
-export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) => {
-    verificationData = axisFinanceUBLSample as AxisFinanceUBLVerificationDataData;
-    return `
+  html_data = {
+    ...html_data,
+    imageDataUri: html_data.imageDataUri
+  }
+
+  return `
     ${pdBaseTemplate()}
 
-      <div class="report-title">Personal Discussion Sheet</div>
+      <div class="report-title">PERSONAL DISCUSSION SHEET</div>
     
       <div class="align-wrapper">
         <table class="section-table">
@@ -23,10 +27,10 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           <th>Ref No/Application No</th>
         </tr>
         <tr style="text-align: center;">
-          <td><span class="var-value">${verificationData.reportDetails.region || ''}</span></td>
-          <td><span class="var-value">${verificationData.reportDetails.location || ''}</span></td>
-          <td><span class="var-value">${verificationData.reportDetails.branch || ''}</span></td>
-          <td><span class="var-value">${verificationData.reportDetails.referenceNo || ''}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails.region || ''}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails.location || ''}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails.branch || ''}</span></td>
+          <td><span class="var-value">${html_data.applicationNumber || ''}</span></td>
         </tr>
         </table>
       </div>
@@ -35,63 +39,63 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         <table class="section-table">
           <tr>
             <th>Name of the Customer</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.applicantName || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.applicantName || ''}</span></td>
           </tr>
           <tr>
             <th>Date of Report</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.dateOfReport || ''}</span></td>
+            <td colspan="5"><span class="var-value">${html_data.dateOfReport || ''}</span></td>
           </tr>
           <tr>
             <th>Name of Concern</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.concernName || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.nameOfConcern || ''}</span></td>
           </tr>
           <tr>
             <th>Constitution</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.constitution || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.constitution || ''}</span></td>
           </tr>
           <tr>
             <th>Initiated Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.initiatedAddress || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.initiatedAddress || ''}</span></td>
           </tr>
           <tr>
             <th>Visited Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.visitedAddress || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.visitedAddress || ''}</span></td>
           </tr>
           <tr>
           <th>Phone No</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.phoneNumber || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.phoneNo || ''}</span></td>
           </tr>
           <tr>
             <th>Appointment Fixed</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.appointmentFixed || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.appointmentFixed || ''}</span></td>
           </tr>
           <tr>
             <th>Structure of Loan</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.structureOfLoan || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.structureOfLoan || ''}</span></td>
           </tr>
           <tr>
             <th>No of Visit</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.numberOfVisits || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.noOfVisit || ''}</span></td>
           </tr>
           <tr>
             <th>Person Met</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.personMet || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.personMet || ''}</span></td>
           </tr>
           <tr>
             <th>Visited By</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.visitedBy || ''}</span></td>
+            <td colspan="5"><span class="var-value">${html_data.pd_officer || ''}</span></td>
           </tr>
           <tr>
             <th>About Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.aboutApplicant || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ''}</span></td>
           </tr>
           <tr>
             <th>Residential Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.residentialDetails || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.residentialDetails || ''}</span></td>
           </tr>
           <tr>
             <th>Co-Applicant Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.reportDetails.coApplicantDetails || ''}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails.coApplicantDetails || ''}</span></td>
           </tr>
         </table>
       </div>
@@ -107,32 +111,32 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           <th>Age</th>
           <th>Qualification</th>
           <th>Occupation</th>
-          <th>Income Per Month</th>
-          <th>Dependent</th>
+          <th>Staying With Applicant</th>
+          <th>Mobile Number</th>
         </tr>
-        ${Array.isArray(verificationData.shareholdingDetails) && verificationData.shareholdingDetails.length > 0
-          ? verificationData.shareholdingDetails.map(shareholder => `
+        ${Array.isArray(verificationData.familyDetails) && verificationData.familyDetails.length > 0
+          ? verificationData.familyDetails.map(familyMember => `
             <tr>
-              <td><span class="var-value">${shareholder.shareholderName || ''}</span></td>
-              <td><span class="var-value">${shareholder.shareholdingPercentage || ''}%</span></td>
-              <td><span class="var-value">${shareholder.relationWithApplicant || ''}</span></td>
-              <td><span class="var-value">${shareholder.designation || ''}</span></td>
-              <td><span class="var-value">${shareholder.includedInLoanStructure || ''}</span></td>
-              <td><span class="var-value">${shareholder.functionOfPartnerOrDirector || ''}</span></td>
-              <td><span class="var-value">${shareholder.functionOfPartnerOrDirector || ''}</span></td>
+              <td><span class="var-value">${familyMember.name || ''}</span></td>
+              <td><span class="var-value">${familyMember.relation || ''}</span></td>
+              <td><span class="var-value">${familyMember.age || ''}</span></td>
+              <td><span class="var-value">${familyMember.educationalQualification || ''}</span></td>
+              <td><span class="var-value">${familyMember.employmentType || ''}</span></td>
+              <td><span class="var-value">${familyMember.stayingWithApplicant || ''}</span></td>
+              <td><span class="var-value">${familyMember.mobileNumber || ''}</span></td>
             </tr>
           `).join('')
-          : '<tr><td colspan="6" style="text-align: center;">No shareholding details available</td></tr>'}
+          : '<tr><td colspan="6" style="text-align: center;">No family members details available</td></tr>'}
         <tr>
           <th>About the Business</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.aboutBusiness || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ''}</span></td>
         </tr>
         <tr>
           <th>Documents Observed</th>
           <td colspan="6">
-            ${Array.isArray(verificationData.businessDetails.documentsObserved) && verificationData.businessDetails.documentsObserved.length > 0
-              ? verificationData.businessDetails.documentsObserved.map(doc => `
-                <span class="var-value">${doc.documentName || ''} (${doc.category || ''}) - ${doc.remarks || ''}</span><br>
+            ${Array.isArray(verificationData.uploadedItems) && verificationData.uploadedItems.length > 0
+              ? verificationData.uploadedItems.map(doc => `
+                <span class="var-value">${doc.uri || ''} (${doc.type || ''}) - ${doc.timestamp || ''}</span><br>
               `).join('')
               : '<span class="var-value">No documents observed</span>'}
           </td>
@@ -154,25 +158,25 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         ${Array.isArray(verificationData.shareholdingDetails) && verificationData.shareholdingDetails.length > 0
           ? verificationData.shareholdingDetails.map(shareholder => `
             <tr>
-              <td><span class="var-value">${shareholder.shareholderName || ''}</span></td>
+              <td><span class="var-value">${shareholder.name || ''}</span></td>
               <td><span class="var-value">${shareholder.shareholdingPercentage || ''}%</span></td>
-              <td><span class="var-value">${shareholder.relationWithApplicant || ''}</span></td>
+              <td><span class="var-value">${shareholder.relationshipWithApplicant || ''}</span></td>
               <td><span class="var-value">${shareholder.designation || ''}</span></td>
-              <td><span class="var-value">${shareholder.includedInLoanStructure || ''}</span></td>
+              <td><span class="var-value">${shareholder.comingIntoLoanStructure || ''}</span></td>
               <td><span class="var-value">${shareholder.functionOfPartnerOrDirector || ''}</span></td>
             </tr>
           `).join('')
           : '<tr><td colspan="6" style="text-align: center;">No shareholding details available</td></tr>'}
         <tr>
           <th>About the Business</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.aboutBusiness || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ''}</span></td>
         </tr>
         <tr>
           <th>Documents Observed</th>
           <td colspan="5">
-            ${Array.isArray(verificationData.businessDetails.documentsObserved) && verificationData.businessDetails.documentsObserved.length > 0
-              ? verificationData.businessDetails.documentsObserved.map(doc => `
-                <span class="var-value">${doc.documentName || ''} (${doc.category || ''}) - ${doc.remarks || ''}</span><br>
+            ${Array.isArray(verificationData.uploadedItems) && verificationData.uploadedItems.length > 0
+              ? verificationData.uploadedItems.map(doc => `
+                <span class="var-value">${doc.uri || ''} (${doc.type || ''}) - ${doc.timestamp || ''}</span><br>
               `).join('')
               : '<span class="var-value">No documents observed</span>'}
           </td>
@@ -186,22 +190,22 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         <tr><td colspan="6" class="section-header">Suppliers/Creditors</td></tr>
         <tr>
           <th>No of Fixed Suppliers</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.suppliers.numberOfFixedSuppliers || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.numberOfFixedSuppliers || ''}</span></td>
         </tr>
         <tr>
           <th>Credit Period</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.suppliers.creditPeriod || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.creditPeriod || ''}</span></td>
         </tr>
         <tr>
           <th>Cash-Cheque Proportion</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.suppliers.cashChequeProportion || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.cashChequeProportions || ''}</span></td>
         </tr>
         <tr>
           <th>Top 3 Suppliers</th>
           <td colspan="5">
-            ${Array.isArray(verificationData.businessDetails.suppliers.topSuppliers) && verificationData.businessDetails.suppliers.topSuppliers.length > 0
-              ? verificationData.businessDetails.suppliers.topSuppliers.map(supplier => `
-                <span class="var-value">${supplier.name || ''} - ${supplier.contactDetails || ''} (${supplier.location || ''}) - ${supplier.referenceCheck || ''}</span><br>
+            ${Array.isArray(verificationData.suppliersCreditors.suppliers) && verificationData.suppliersCreditors.suppliers.length > 0
+              ? verificationData.suppliersCreditors.suppliers.map(supplier => `
+                <span class="var-value">${supplier.name || ''} - ${supplier.phone || ''} (${supplier.location || ''}) - ${supplier.review || ''}</span><br>
               `).join('')
               : '<span class="var-value">No suppliers listed</span>'}
           </td>
@@ -209,33 +213,33 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         <tr><td colspan="6" class="section-header">Clients/Debtors</td></tr>
         <tr>
           <th>No of Fixed Customers</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.clients.numberOfFixedCustomers || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.numberOfFixedCustomers || ''}</span></td>
         </tr>
         <tr>
           <th>Credit Period</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.clients.creditPeriod || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.creditPeriod || ''}</span></td>
         </tr>
         <tr>
           <th>Cash-Cheque Proportion</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.clients.cashChequeProportion || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.cashChequeProportions || ''}</span></td>
         </tr>
         <tr>
           <th>Top 3 Customers</th>
           <td colspan="5">
-            ${Array.isArray(verificationData.businessDetails.clients.topCustomers) && verificationData.businessDetails.clients.topCustomers.length > 0
-              ? verificationData.businessDetails.clients.topCustomers.map(customer => `
-                <span class="var-value">${customer.name || ''} - ${customer.contactDetails || ''} (${customer.location || ''}) - ${customer.referenceCheck || ''}</span><br>
+            ${Array.isArray(verificationData.clientsDebtors.customers) && verificationData.clientsDebtors.customers.length > 0
+              ? verificationData.clientsDebtors.customers.map(customer => `
+                <span class="var-value">${customer.name || ''} - ${customer.phone || ''} (${customer.location || ''}) - ${customer.review || ''}</span><br>
               `).join('')
               : '<span class="var-value">No customers listed</span>'}
           </td>
         </tr>
         <tr>
           <th>Average Stock Maintainance</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.averageStockMaintained || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.averageStockMaintenance || ''}</span></td>
         </tr>
         <tr>
           <th>Turnover & Margins</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.turnoverAndMargins || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.turnover || ''}</span></td>
         </tr>
       </table>
     </div>
@@ -248,39 +252,39 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         <tr><td colspan="7" class="section-header">Salaries & Wages</td></tr>
         <tr>
           <th>No of Employees</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.numberOfEmployees || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.numberOfEmployees || ''}</span></td>
         </tr>
         <tr>
           <th>Salary Per month per employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.salaryPerEmployee || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.salaryPerMonthPerEmployee || ''}</span></td>
         </tr>
         <tr>
           <th>Status of Employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.statusOfEmployees || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.statusOfEmployee || ''}</span></td>
         </tr>
         <tr>
           <th>No. of Labours</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.numberOfLabours || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.numberOfLabours || ''}</span></td>
         </tr>
         <tr>
           <th>Wages per month/per day</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.wages || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.wagesPerMonthPerDay || ''}</span></td>
         </tr>
         <tr>
           <th>Status of Labour</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.salariesAndWages.statusOfLabour || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.statusOfLabour || ''}</span></td>
         </tr>
         <tr>
           <th>Remarks</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.remarks || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.remarks || ''}</span></td>
         </tr>
         <tr>
           <th>Working Hours</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.workingHours || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.workingHoursEnd || ''}</span></td>
         </tr>
         <tr>
           <th>Other Major Expenditure</th>
-          <td colspan="6"><span class="var-value">${verificationData.businessDetails.otherMajorExpenses || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages.otherMajorExpenditure || ''}</span></td>
         </tr>
         <tr><td colspan="7" class="section-header">Asset Details</td></tr>
         <tr><td colspan="7" class="section-header">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure</td></tr>
@@ -293,11 +297,11 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           <th>Owner Name</th>
           <th>Mortgaged</th>
         </tr>
-        ${Array.isArray(verificationData.assetDetails.immovableProperties) && verificationData.assetDetails.immovableProperties.length > 0
-          ? verificationData.assetDetails.immovableProperties.map(property => `
+        ${Array.isArray(verificationData.assetDetails.assets) && verificationData.assetDetails.assets.length > 0
+          ? verificationData.assetDetails.assets.map(property => `
             <tr>
               <td><span class="var-value">${property.address || ''}</span></td>
-              <td><span class="var-value">${property.areaMeasurements || ''}</span></td>
+              <td><span class="var-value">${property.areaMeasured || ''}</span></td>
               <td><span class="var-value">${property.purchaseCost || ''}</span></td>
               <td><span class="var-value">${property.purchaseYear || ''}</span></td>
               <td><span class="var-value">${property.marketValue || ''}</span></td>
@@ -315,75 +319,150 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
       <table class="section-table">
         <tr>
           <th>Any Liquid, Moveable & Monetary items such as Cash,Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds,Securities </th>
-          <td colspan="5"><span class="var-value">${verificationData.assetDetails.movableAssets.liquidMonetaryItems || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.liquidMoveableMonetaryItems || ''}</span></td>
         </tr>
         <tr>
           <th>Life Insurance, Mediclaim, Property/Asset Insurance(Premium & Sum Assured) </th>
-          <td colspan="5"><span class="var-value">${verificationData.assetDetails.movableAssets.insuranceDetails || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.lifeInsuranceMediclaim || ''}</span></td>
         </tr>
         <tr>
           <th>Capital invested in any business, Loans & Advances given</th>
-          <td colspan="5"><span class="var-value">${verificationData.assetDetails.movableAssets.capitalInvested || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.capitalInvestedBusiness || ''}</span></td>
         </tr>
         <tr>
           <th>Car, Bike and any other vehicle (Company Name and Model)</th>
-          <td colspan="5">
-            ${Array.isArray(verificationData.assetDetails.movableAssets.vehicles) && verificationData.assetDetails.movableAssets.vehicles.length > 0
-              ? verificationData.assetDetails.movableAssets.vehicles.map(vehicle => `
+          <td colspan="6">
+            ${Array.isArray(verificationData.assetDetails.vehicles) && verificationData.assetDetails.vehicles.length > 0
+              ? verificationData.assetDetails.vehicles.map(vehicle => `
                 <span class="var-value">${vehicle.companyName || ''} ${vehicle.model || ''}</span><br>
               `).join('')
               : '<span class="var-value">No vehicles listed</span>'}
           </td>
         </tr>
+        </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Existing EMI's/Loans</td></tr>
         <tr>
-          <th>Existing EMI's/Loans</th>
-          <td colspan="5">
-            ${Array.isArray(verificationData.loanDetails) && verificationData.loanDetails.length > 0
-              ? verificationData.loanDetails.map(loan => `
-                <span class="var-value">${loan.bankOrNBFC || ''} - ${loan.typeOfLoan || ''} - ${loan.sanctionedAmount || ''} (Outstanding: ${loan.outstandingBalance || ''}, EMI: ${loan.emi || ''})</span><br>
-              `).join('')
-              : '<span class="var-value">No existing loans</span>'}
-          </td>
+          <th>Name</th>
+          <th>Type of Loan</th>
+          <th>Sanctioned Amount</th>
+          <th>Outstanding Balance</th>
+          <th>EMI</th>
+          <th>EMI Paid Bank</th>
+          <th>Secured Against</th>
         </tr>
+        ${Array.isArray(verificationData.existingLoans) && verificationData.existingLoans.length > 0
+          ? verificationData.existingLoans.map(loan => `
+            <tr>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.purpose || ''}</span></td>
+              <td><span class="var-value">${loan.tenure || ''}</span></td>
+              <td><span class="var-value">${loan.sanctionedAmount || ''}</span></td>
+              <td><span class="var-value">${loan.outstandingBalance || ''}</span></td>
+              <td><span class="var-value">${loan.emi || ''}</span></td>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.securedAgainst || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'}
+        </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Bank Details</td></tr>
         <tr>
-          <th>TPCs</th>
-          <td colspan="5">
-            ${Array.isArray(verificationData.thirdPartyCheck) && verificationData.thirdPartyCheck.length > 0
-              ? verificationData.thirdPartyCheck.map(tpc => `
-                <span class="var-value">${tpc.individualOrBusinessName || ''} - ${tpc.contactNumber || ''} (${tpc.knowingSince || ''}) - ${tpc.feedbackOnBorrower || ''}</span><br>
-              `).join('')
-              : '<span class="var-value">No TPCs conducted</span>'}
-          </td>
+          <th>Name</th>
+          <th>Branch Name</th>
+          <th>Account Type</th>
+          <th>Open Since Year</th>
         </tr>
+        ${Array.isArray(verificationData.existingLoans) && verificationData.existingLoans.length > 0
+          ? verificationData.existingLoans.map(loan => `
+            <tr>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.purpose || ''}</span></td>
+              <td><span class="var-value">${loan.tenure || ''}</span></td>
+              <td><span class="var-value">${loan.sanctionedAmount || ''}</span></td>
+              <td><span class="var-value">${loan.outstandingBalance || ''}</span></td>
+              <td><span class="var-value">${loan.emi || ''}</span></td>
+              <td><span class="var-value">${loan.bankName || ''}</span></td>
+              <td><span class="var-value">${loan.securedAgainst || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="7" style="text-align: center;">No bank details available</td></tr>'}
+        </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
+        <tr>
+          <th>Individual/Business Name</th>
+          <th>Address</th>
+          <th>Contact Number</th>
+          <th>Knowing Since</th>
+          <th>Feedback On Borrower</th>
+          <th>Feedback On Business</th>
+        </tr>
+          ${Array.isArray(verificationData.thirdPartyCheck) && verificationData.thirdPartyCheck.length > 0
+            ? verificationData.thirdPartyCheck.map(tpc => `
+              <tr>
+                <td><span class="var-value">${tpc.tpcName || ''}</span></td>
+                <td><span class="var-value">${tpc.comments || ''}</span></td>
+                <td><span class="var-value">${tpc.mobileNumber || ''}</span></td>
+                <td><span class="var-value">${tpc.relationship || ''}</span></td>
+                <td><span class="var-value">${tpc.otherRelation || ''}</span></td>
+                <td><span class="var-value">${tpc.feedbackStatus || ''}</span></td>
+              </tr>
+            `).join('')
+            : '<tr><td colspan="6" style="text-align: center;">No third party checks details available</td></tr>'}
+
+      </table>
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
         <tr>
           <th>Observations</th>
-          <td colspan="5"><span class="var-value">${verificationData.finalRemarks || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.observations || ''}</span></td>
         </tr>
         <tr>
           <th>Other Income: (Income from other than initiated business)</th>
-          <td colspan="5"><span class="var-value">${verificationData.otherIncome || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.otherIncome || ''}</span></td>
         </tr>
         <tr>
           <th>Site Coordinates</th>
-          <td colspan="5"><span class="var-value">${verificationData.siteCoordinates || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.siteCoordinates || ''}</span></td>
         </tr>
         <tr>
           <th>Remarks</th>
-          <td colspan="5"><span class="var-value">${verificationData.finalRemarks || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.remarks || ''}</span></td>
         </tr>
         <tr>
           <th>Status</th>
-          <td colspan="5"><span class="var-value">${verificationData.status || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.assetDetails.status || ''}</span></td>
         </tr>
         <tr>
           <th>AFL Verifier's Name & Emp Code</th>
-          <td colspan="5"><span class="var-value">${verificationData.aflVerifier.name || ''} - ${verificationData.aflVerifier.employeeCode || ''}</span></td>
+          <td colspan="6"><span class="var-value"> - </span></td>
         </tr>
         <tr>
           <th>AFL Verifier's Signature</th>
-          <td colspan="5"><span class="var-value">${verificationData.aflVerifier.signature || ''}</span></td>
+          <td colspan="6"><span class="var-value"> - </span></td>
         </tr>
     </table>
     </div>
+    <br>
+    <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
+    <footer class="pdf-footer">
+      <span style="color:rgb(8, 136, 36);">${"Bank of India"}</span><br>
+      Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+    </footer>
   `
 }

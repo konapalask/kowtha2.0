@@ -1,154 +1,127 @@
-export interface AxisFinanceUBLVerificationDataData {
-  reportDetails?: {
+export interface AxisFinanceUBLInterface {
+  assetDetails: {
+    assets: {
+      address: string;
+      mortgaged: string;
+      ownerName: string;
+      marketValue: string;
+      areaMeasured: string;
+      purchaseCost: string;
+      purchaseYear: string;
+    }[];
+    status: string;
+    remarks: string;
+    vehicles: string;
+    otherIncome: string;
+    observations: string;
+    siteCoordinates: string;
+    lifeInsuranceMediclaim: string;
+    capitalInvestedBusiness: string;
+    liquidMoveableMonetaryItems: string;
+  };
+  basicDetails: {
+    phoneNo: string;
+    noOfVisit: string;
+    personMet: string;
     region: string;
     location: string;
     branch: string;
-    referenceNo: string; // Ref No/Application No
-    applicantName: string;
-    dateOfReport: string;
-    concernName: string;
     constitution: string;
-    initiatedAddress: string;
+    applicantName: string;
+    nameOfConcern: string;
+    aboutApplicant: string;
     visitedAddress: string;
-    phoneNumber: string;
-    appointmentFixed: string;
     structureOfLoan: string;
-    numberOfVisits: string;
-    personMet: string;
-    visitedBy: string;
-    aboutApplicant: string; // descriptive section
-    residentialDetails: string;
+    appointmentFixed: string;
+    initiatedAddress: string;
     coApplicantDetails: string;
-    familyDetails: string;
+    residentialDetails: string;
   };
-
-  familyMembers?: Array<{
-    name: string;
-    relationWithApplicant: string;
+  existingLoans: {
+    loans: {
+      emi: string;
+      tenure: string;
+      purpose: string;
+      bankName: string;
+      loanAmount: string;
+    }[];
+  };
+  familyDetails: {
     age: string;
-    qualification: string;
-    occupation: string;
-    incomePerMonth: string;
-    dependent: string;
-  }>;
-
-  shareholdingDetails?: Array<{
-    shareholderName: string;
-    relationWithApplicant: string;
-    designation: string;
-    shareholdingPercentage: string;
-    includedInLoanStructure: string;
-    functionOfPartnerOrDirector: string;
-  }>;
-
-  businessDetails?: {
-    aboutBusiness: string;
-    documentsObserved?: Array<{
-      category: string;
-      documentName: string;
-      documentType: string;
-      remarks: string;
-    }>;
-    suppliers?: {
-      numberOfFixedSuppliers: string;
-      creditPeriod: string;
-      cashChequeProportion: string;
-      topSuppliers?: Array<{
-        name: string;
-        contactDetails: string;
-        location: string;
-        referenceCheck: string;
-      }>;
-    };
-    clients?: {
-      numberOfFixedCustomers: string;
-      creditPeriod: string;
-      cashChequeProportion: string;
-      topCustomers?: Array<{
-        name: string;
-        contactDetails: string;
-        location: string;
-        referenceCheck: string;
-      }>;
-    };
-    averageStockMaintained: string;
-    turnoverAndMargins: string;
-    expenditure: string;
-    salariesAndWages?: {
-      numberOfEmployees: string;
-      salaryPerEmployee: string;
-      statusOfEmployees: string;
-      numberOfLabours: string;
-      wages: string;
-      statusOfLabour: string;
-    };
-    remarks: string;
-    workingHours: string;
-    otherMajorExpenses: string;
-  };
-
-  assetDetails?: {
-    immovableProperties?: Array<{
-      address: string;
-      areaMeasurements: string;
-      purchaseCost: string;
-      purchaseYear: string;
-      marketValue: string;
-      ownerName: string;
-      mortgaged: string;
-    }>;
-    movableAssets?: {
-      liquidMonetaryItems: string; // cash, gold, FD, MF, shares, bonds, etc.
-      insuranceDetails: string; // Life, Mediclaim, Property insurance
-      capitalInvested: string; // in business, loans & advances
-      vehicles?: Array<{
-        companyName: string;
-        model: string;
-      }>;
-    };
-    note: string; // amounts mentioned are approx
-  };
-
-  loanDetails?: Array<{
-    bankOrNBFC: string;
-    typeOfLoan: string;
-    sanctionedAmount: string;
-    outstandingBalance: string;
-    emi: string;
-    emiPaidBank: string;
-    securedAgainst: string;
-  }>;
-
-  bankDetails?: Array<{
-    bankName: string;
-    branchName: string;
-    accountType: string;
-    openSinceYear: string;
-  }>;
-
-  endUseOfLoan?: {
-    loanAmount: string;
-    detailedEndUse: string;
-  };
-
-  thirdPartyCheck?: Array<{
-    individualOrBusinessName: string;
-    address: string;
-    contactNumber: string;
-    knowingSince: string;
-    feedbackOnBorrower: string;
-    feedbackOnBusiness: string;
-    observation: string;
-  }>;
-
-  otherIncome?: string; // income apart from business
-  siteCoordinates?: string;
-  finalRemarks?: string;
-  status?: string; // Credit Refer / Positive / Negative
-
-  aflVerifier?: {
     name: string;
-    employeeCode: string;
-    signature: string;
+    relation: string;
+    mobileNumber: string;
+    otherRelation: string;
+    employmentType: string;
+    stayingWithApplicant: string;
+    educationalQualification: string;
+  }[];
+  salariesWages: {
+    remarks: string;
+    statusOfLabour: string;
+    numberOfLabours: string;
+    workingHoursEnd: string;
+    statusOfEmployee: string;
+    numberOfEmployees: string;
+    workingHoursStart: string;
+    wagesPerMonthPerDay: string;
+    otherMajorExpenditure: string;
+    salaryPerMonthPerEmployee: string;
   };
+  clientsDebtors: {
+    turnover: string;
+    customers: {
+      name: string;
+      phone: string;
+      review: string;
+      location: string;
+    }[];
+    netMargins: string;
+    creditPeriod: string;
+    cashChequeProportions: string;
+    numberOfFixedCustomers: string;
+    averageStockMaintenance: string;
+  };
+  thirdPartyCheck: {
+    checks: {
+      tpcName: string;
+      comments: string;
+      mobileNumber: string;
+      relationship: string;
+      otherRelation: string;
+      feedbackStatus: string;
+    }[];
+  };
+  additionalDetails: {
+    details: {
+      value: string;
+    }[];
+  };
+  suppliersCreditors: {
+    suppliers: {
+      name: string;
+      phone: string;
+      review: string;
+      location: string;
+    }[];
+    creditPeriod: string;
+    cashChequeProportions: string;
+    numberOfFixedSuppliers: string;
+  };
+  shareholdingDetails: {
+    shareholders: {
+      name: string;
+      designation: string;
+      shareholdingPercentage: string;
+      comingIntoLoanStructure: string;
+      relationshipWithApplicant: string;
+      functionalOfPartnerDirector: string;
+    }[];
+  };
+  uploadedItems: {
+    id: string;
+    uri: string;
+    type: string;
+    timestamp: string;
+  }[];
 }
