@@ -23,7 +23,6 @@ import { VerificationData } from './templates/FI/address.interface';
 import { WorkVerificationData } from './templates/FI/work.interface';
 import { BusinessVerificationData } from './templates/FI/business.interface';
 import { PDBusinessVerificationData } from './templates/PD/interface/pd-business.interface';
-import { axisFinanceUBLTemplate } from './templates/PD/axis-finance-ubl.template';
 import {
   Prisma, LoanStatus, VerificationType, VerificationStatus,
   AddressType, UserRole, ApprovedStatus, Department
@@ -33,6 +32,7 @@ import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { baseTemplate } from './templates/FI/base.template';
 import { Worker } from 'worker_threads';
+import { AxisFinanceUBLInterface } from './templates/PD/interface/axis-finance-ubl.interface';
 
 
 @Injectable()
@@ -2174,19 +2174,22 @@ export class LoanService {
 
       const status = verification?.approvedStatus || '';
 
-      // Get the verification data
-      let verificationData = verification.verificationData as PDBusinessVerificationData;
+      const bankName = loan.bankName;
+      
+      let verificationData: any;
 
       const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
       const imageBase64 = fs.readFileSync(imagePath, 'base64');
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+      verificationData = InterfaceMapping(bankName, verification.verificationData);
 
       // Get uploaded items for this verification only
       const uploadedItems = verificationData?.uploadedItems || [];
 
       // Generate presigned URLs for images
       const imageUrls = await Promise.all(
-        uploadedItems.map(async (item) => {
+        uploadedItems.map(async (item: any) => {
           try {
             return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
           } catch (error) {
@@ -2202,18 +2205,25 @@ export class LoanService {
       // Filter out any failed URL generations
       const validImageUrls = imageUrls.filter(url => url !== null);
 
-      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
+      const fieldExecutive = verification.fieldExecutive?.name || '';
+
+      const imagesData = await this.formatImages(validImageUrls, bankName, fieldExecutive);
 
       const html_data = {
-        bankName: loan.bankName,
+        bankName: bankName,
+        applicationNumber: loan.applicationNumber,
         path: verification.path,
         status: status,
         imageDataUri: imageDataUri,
         imagesData: imagesData,
-        fieldExecutive: verification.fieldExecutive?.name || '',
+        fieldExecutive: fieldExecutive,
       }
 
-      const htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
+      // Generate HTML template using the appropriate template function
+      const htmlTemplate = templateFunction(verificationData, html_data);
+
+
+
 
       const pdfBuffer = await this.PDFBufferGeneration(htmlTemplate);
 
