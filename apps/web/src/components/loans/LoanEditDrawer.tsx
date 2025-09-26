@@ -13,7 +13,7 @@ import {
   Row,
   Col,
 } from "antd";
-import { CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { CloseOutlined, DeleteOutlined, EditOutlined, ReloadOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { bankOptions, loanTypeOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
@@ -22,8 +22,9 @@ import {
   assignExecutivesApi,
   deleteFieldAssignmentApi,
   getLoansByIdApi,
+  reassignLoanApi,
 } from "@/services/loans.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment } from "@/utils/utility";
 import dayjs from "dayjs";
 
 interface LoanDetails {
@@ -80,6 +81,26 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
+  const [currentDepartment, setCurrentDepartment] = useState(getCurrentDepartment());
+  console.log('LoanEditDrawer - Current department:', currentDepartment);
+  
+  // Watch for department changes
+  useEffect(() => {
+    const checkDepartment = () => {
+      const dept = getCurrentDepartment();
+      if (dept !== currentDepartment) {
+        setCurrentDepartment(dept);
+      }
+    };
+    
+    // Check immediately
+    checkDepartment();
+    
+    // Set up interval to check for changes
+    const interval = setInterval(checkDepartment, 1000);
+    
+    return () => clearInterval(interval);
+  }, [currentDepartment]);
   const [selectedLoan, setSelectedLoan] = useState<string | null>(loanId);
   // const [address1Disabled, setAddress1Disabled] = useState<boolean>(false);
   // const [address2Disabled, setAddress2Disabled] = useState<boolean>(false);
@@ -88,12 +109,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   const [loanDetails, setLoanDetails] = useState<LoanDetails | null>(null);
   const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
     Record<string, boolean>
-  >({
-    Address1: false,
-    Address2: false,
-    Work: false,
-    Business: false,
-  });
+  >(
+    currentDepartment === 'PD' 
+      ? { Business: false }
+      : {
+          Address1: false,
+          Address2: false,
+          Work: false,
+          Business: false,
+        }
+  );
 
   useEffect(() => {
     if (loanId) {
@@ -148,6 +173,23 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     }
   };
 
+  const handleReassign = async () => {
+    if (!loanDetails?.id) return;
+    
+    try {
+      setLoading(true);
+      console.log("Reassigning loan:", loanDetails.id);
+      await reassignLoanApi(loanDetails.id);
+      message.success("Loan reassigned successfully");
+      setRefresh(true);
+    } catch (error) {
+      console.error("Error reassigning loan:", error);
+      message.error("Failed to reassign loan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClose = () => {
     setIsDrawerVisible(false);
     form.resetFields();
@@ -155,12 +197,16 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     setSelectedLoan(null);
     setEditLoanInfo(false);
     setLoanDetails(null);
-    setFieldExecutiveEdit({
-      Address1: false,
-      Address2: false,
-      Work: false,
-      Business: false,
-    });
+    setFieldExecutiveEdit(
+      currentDepartment === 'PD' 
+        ? { Business: false }
+        : {
+            Address1: false,
+            Address2: false,
+            Work: false,
+            Business: false,
+          }
+    );
     fetchLoans(); 
   };
 
@@ -188,48 +234,61 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     <div>
       <Drawer
         title={
-          <span>
-            {loanDetails?.id
-              ? `Loan Details - ${loanDetails.applicationNumber}`
-              : "New Loan"}{" "}
-            {loanDetails?.status && (
-              <Tag
-                color={
-                  loanDetails.status === "Pending"
-                    ? "orange"
-                    : loanDetails.status === "Approved"
-                      ? "green"
-                      : loanDetails.status === "Rejected"
-                        ? "red"
-                        : loanDetails.status === "FieldVerificationComplete"
-                          ? "green"
-                          : loanDetails.status === "FieldVerificationStarted"
-                            ? "blue"
-                            : "default"
-                }
-                style={{ marginLeft: 8 }}
-              >
-                {(() => {
-                  switch (loanDetails.status) {
-                    case "Pending":
-                      return "Unassigned";
-                    case "Assigned":
-                      return "Assigned";
-                    case "FieldVerificationStarted":
-                      return "Under FV";
-                    case "FieldVerificationComplete":
-                      return "FV Completed";
-                    case "Approved":
-                      return "Approved";
-                    case "Rejected":
-                      return "Rejected";
-                    default:
-                      return loanDetails.status;
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <span>
+              {loanDetails?.id
+                ? `Loan Details - ${loanDetails.applicationNumber}`
+                : "New Loan"}{" "}
+              {loanDetails?.status && (
+                <Tag
+                  color={
+                    loanDetails.status === "Pending"
+                      ? "orange"
+                      : loanDetails.status === "Approved"
+                        ? "green"
+                        : loanDetails.status === "Rejected"
+                          ? "red"
+                          : loanDetails.status === "FieldVerificationComplete"
+                            ? "green"
+                            : loanDetails.status === "FieldVerificationStarted"
+                              ? "blue"
+                              : "default"
                   }
-                })()}
-              </Tag>
+                  style={{ marginLeft: 8 }}
+                >
+                  {(() => {
+                    switch (loanDetails.status) {
+                      case "Pending":
+                        return "Unassigned";
+                      case "Assigned":
+                        return "Assigned";
+                      case "FieldVerificationStarted":
+                        return "Under FV";
+                      case "FieldVerificationComplete":
+                        return "FV Completed";
+                      case "Approved":
+                        return "Approved";
+                      case "Rejected":
+                        return "Rejected";
+                      default:
+                        return loanDetails.status;
+                    }
+                  })()}
+                </Tag>
+              )}
+            </span>
+            {loanDetails?.id && currentDepartment === 'PD' && (
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
+                onClick={handleReassign}
+                loading={loading}
+                style={{ marginLeft: 16 }}
+              >
+                Reassign
+              </Button>
             )}
-          </span>
+          </div>
         }
         placement="right"
         width="99%"
@@ -339,12 +398,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
             {loanDetails?.id && (
               <>
                 <Row style={{ display: "flex" }} gutter={[8, 8]}>
-                  {[
-                    { type: "AddressOne", label: "Address 1" },
-                    { type: "AddressTwo", label: "Address 2" },
-                    { type: "Work", label: "Work" },
-                    { type: "Business", label: "Business" },
-                  ].map(({ type, label }) => {
+                  {(currentDepartment === 'PD' 
+                    ? [{ type: "Business", label: "Business" }]
+                    : [
+                        { type: "AddressOne", label: "Address 1" },
+                        { type: "AddressTwo", label: "Address 2" },
+                        { type: "Work", label: "Work" },
+                        { type: "Business", label: "Business" },
+                      ]
+                  ).map(({ type, label }) => {
                     const verification = loanDetails?.verifications?.find(
                       (v: any) => v.type === type
                     );

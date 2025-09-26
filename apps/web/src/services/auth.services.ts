@@ -1,4 +1,5 @@
 import axiosInstance from "../config/axios.config";
+import { getWithDepartment } from "./api.services";
 
 interface GenerateOtpPayload {
   mobile: string;
@@ -45,5 +46,18 @@ export const verifyOtpApi = (payload: VerifyOtpPayload) => {
 };
 
 export const getUserDetailsApi = () => {
-  return axiosInstance.get<any>("/accounts/profile");
+  return getWithDepartment("/accounts/profile");
+};
+
+export const updateUserDepartmentApi = (userId: number, department: string) => {
+  if (!department || department.trim() === '') {
+    throw new Error('Department parameter is required');
+  }
+  
+  const encodedDepartment = encodeURIComponent(department.trim());
+  console.log('Making API call with department:', encodedDepartment);
+  
+  return axiosInstance.patch(`/accounts/users/${userId}?department=${encodedDepartment}`, {
+    defaultDepartment: department,
+  });
 };

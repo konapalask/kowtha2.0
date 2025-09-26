@@ -15,11 +15,13 @@ import {
   generateOtpApi,
   verifyOtpApi,
   getUserDetailsApi,
+  updateUserDepartmentApi,
 } from "@/services/auth.services";
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
-import { getUserDetails, isEmpty, setUserDetails } from "@/utils/utility";
+import { getUserDetails, isEmpty, setUserDetails, getCurrentDepartmentRole, getDefaultDepartmentRole, getFirstAvailableNavigationOption } from "@/utils/utility";
+import SelectDepartmentModal from "@/components/SelectDepartmentModal";
 // import { useUser } from "@/components/layout/UserContextProvider";
 
 const { Title, Text } = Typography;
@@ -31,6 +33,9 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   // const { userDetails, setUserDetails } = useContext(UserContext);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
+  const [userDetailsTemp, setUserDetailsTemp] = useState<any>(null);
   const userDetails = getUserDetails();
 
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function Login() {
     if (Object.keys(userDetails).length > 0 && !isNavigating) {
       setIsNavigating(true);
       router
-        .push(userDetails?.role === "Verifier" ? "/loans" : "/dashboard")
+        .push(getFirstAvailableNavigationOption(getDefaultDepartmentRole() || ""))
         .catch((error) => {
           console.error("Navigation error:", error);
           setIsNavigating(false);
@@ -139,8 +144,98 @@ export default function Login() {
         if (!userDetailsResponse?.data) {
           throw new Error("No user details received");
         }
-        setUserDetails(userDetailsResponse.data);
-        // Navigation will happen automatically through the useEffect
+
+      
+        const userData = {
+          ...userDetailsResponse.data,
+          id: userDetailsResponse.data.id || userDetailsResponse.data.sub,
+          mobile: userDetailsResponse.data.mobile || "",
+          role: userDetailsResponse.data.role || "User",
+          officeId: userDetailsResponse.data.officeId || null,
+          employeeCode: userDetailsResponse.data.employeeCode || "",
+          name: userDetailsResponse.data.name || "",
+          email: userDetailsResponse.data.email || "",
+          defaultDepartment: userDetailsResponse.data.defaultDepartment || "",
+          status: userDetailsResponse.data.status || "Active",
+          locality: userDetailsResponse.data.locality || "",
+          departmentRoles: userDetailsResponse.data.departmentRoles || []
+        };
+
+        // Check if user has a default department
+        if (!userData.defaultDepartment) {
+          const departmentRoles = userData.departmentRoles || [];
+          if (!Array.isArray(departmentRoles) || departmentRoles.length === 0) {
+            message.error("Invalid department configuration. Please contact administrator.");
+            setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            return;
+          }
+          if (departmentRoles.length === 1) {
+            const singleDepartment = departmentRoles[0].department;
+            
+            // Validate department object structure
+            if (!singleDepartment || typeof singleDepartment !== 'string') {
+              console.log("Invalid department structure:", departmentRoles[0]);
+              message.error("Invalid department configuration. Please contact administrator.");
+              // Clear tokens since login cannot proceed
+              setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              return;
+            }
+            
+            try {
+              await updateUserDepartmentApi(userData.id, singleDepartment);
+              const updatedUserDetails = {
+                ...userData,
+                defaultDepartment: singleDepartment,
+              };
+
+              setUserDetails(updatedUserDetails);
+              message.success(`Default department set to ${singleDepartment}`);
+              
+              // Small delay to ensure state is updated before navigation
+              setTimeout(() => {
+                // The useEffect will handle navigation automatically
+              }, 100);
+            } catch (error) {
+              console.error("Error setting default department:", error);
+              message.error("Failed to set default department");
+              // Fallback to showing modal if API call fails
+              setUserDetailsTemp(userData);
+              setUserDepartmentRoles(departmentRoles);
+              setShowDepartmentModal(true);
+            }
+          } else if (departmentRoles.length > 1) {
+            console.log(`User has ${departmentRoles.length} departments, showing selection modal`);
+            // Validate all department objects have required structure
+            const validDepartments = departmentRoles.filter(dept => 
+              dept && dept.department && typeof dept.department === 'string' && 
+              dept.role && typeof dept.role === 'string'
+            );
+            
+            if (validDepartments.length !== departmentRoles.length) {
+              console.log("Some departments have invalid structure:", departmentRoles);
+              message.error("Invalid department configuration. Please contact administrator.");
+              setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+              return;
+            }
+            
+            // User has multiple departments, show selection modal
+            setUserDetailsTemp(userData);
+            setUserDepartmentRoles(departmentRoles);
+            setShowDepartmentModal(true);
+          } else {
+            console.log("User has no departments assigned");
+            // User has no departments, handle appropriately
+            message.error("No departments assigned to user. Please contact administrator.");
+            // Clear tokens since login cannot proceed
+            setCookie(ACCESS_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+            setCookie(REFRESH_TOKEN, '', `.${process.env.NEXT_PUBLIC_DOMAIN}`, "/");
+          }
+        } else {
+          setUserDetails(userData);
+        }
       } catch (error) {
         console.error("Error fetching user details:", error);
         message.error("Failed to fetch user details");
@@ -166,6 +261,27 @@ export default function Login() {
   const handleBack = () => {
     form.resetFields();
     setOtpSent(false);
+  };
+
+  const handleDepartmentSelect = async (department: string) => {
+    try {
+      // Update user with selected default department using PATCH API
+      await updateUserDepartmentApi(userDetailsTemp.id, department);
+
+      // Update user details with the new default department
+      const updatedUserDetails = {
+        ...userDetailsTemp,
+        defaultDepartment: department,
+      };
+
+      // Update localStorage with the new user details
+      setUserDetails(updatedUserDetails);
+      setShowDepartmentModal(false);
+      message.success("Default department updated successfully");
+    } catch (error) {
+      console.error("Error updating default department:", error);
+      message.error("Failed to update default department");
+    }
   };
 
   // const handleResend = () =>{
@@ -329,6 +445,12 @@ export default function Login() {
           </Form>
         </Space>
       </Card>
+      <SelectDepartmentModal
+        visible={showDepartmentModal}
+        departmentRoles={userDepartmentRoles}
+        onSelect={handleDepartmentSelect}
+        onCancel={() => setShowDepartmentModal(false)}
+      />
     </div>
   );
 }

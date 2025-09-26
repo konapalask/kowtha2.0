@@ -15,10 +15,10 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
-import { bankOptions, loanTypeOptions, applicantTypeOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
 
 interface BulkImportProps {
   isBulkImportDrawerVisible: boolean;
@@ -41,6 +41,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
 }) => {
   const userDetails = getUserDetails();
   const [fieldExecutives, setFieldExecutives] = useState<any[]>([]);
+  const currentDepartment = getCurrentDepartment();
 
   useEffect(() => {
     const fetchFieldExecutives = async () => {
@@ -76,7 +77,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
       // Transform the form values into the required format
       const loansData = values.loans.map((loan: any) => ({
         ...loan,
-        officeId: userDetails?.officeId,
+        officeId: getCurrentDepartmentOfficeId() || userDetails?.officeId,
         operationsExecutiveId: userDetails?.sub,
       }));
       console.log(loansData);
@@ -261,7 +262,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           <Select
                             showSearch
                             placeholder="Select bank"
-                            options={bankOptions}
+                            options={currentDepartment === 'PD' ? pdBankOptions : bankOptions}
                             filterOption={(input, option) =>
                               (option?.label ?? "")
                                 .toLowerCase()

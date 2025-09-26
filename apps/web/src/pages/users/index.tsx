@@ -11,6 +11,10 @@ import {
   message,
   Popconfirm,
   Tag,
+  Checkbox,
+  Row,
+  Col,
+  FormInstance,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -19,23 +23,36 @@ import {
   createUserApi,
   getUsersApi,
   updateUserApi,
+  updateUserDepartmentRolesApi, 
   UserFilters,
 } from "@/services/users.services";
-import { getOfficesApi } from "@/services/settings.services";
+import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails } from "@/utils/utility";
+import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange, getCurrentDepartmentRole, useDepartmentChange } from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
 
 interface User {
   id: number;
-  firstName: string;
-  lastName: string;
+  name: string;
   mobile: string;
+  email: string;
+  employeeCode: string;
+  locality: string;
+  deviceId?: string;
+  defaultDepartment?: string;
+  officeId?: number; // Made optional since it's not in API response
   status: "Active" | "Inactive";
   role: string;
-  office?: any;
+  office?: {
+    id: number;
+    name: string;
+    location?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  departmentRoles: any[];
 }
 
 interface Office {
@@ -48,19 +65,116 @@ const DashboardLayout = dynamic(
   { ssr: false }
 );
 
-const FiRoleOptions = [
+const RoleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
   { label: "Verifier", value: "Verifier" },
-  { label: "Field Executive", value: "FieldExecutive" },
+  { label: "Field Executive", value: "FieldExecutive" }
 ];
 
-const PdRoleOptions = [
-  { label: "PD-Admin", value: "PD-Admin" },
-  { label: "PD-Operations Executive", value: "PD-OperationsExecutive" },
-  { label: "PD-Verifier", value: "PD-Verifer" },
-  { label: "PD-Field Executive", value: "PD-FieldExecutive" },
+// import { Form, Checkbox, Select, Row, Col } from "antd";
+// import { useState } from "react";
+
+const FIroleOptions = [
+  { label: "Admin", value: "Admin" },
+  { label: "Operations Executive", value: "OperationsExecutive" },
+  { label: "Verifier", value: "Verifier" },
+  { label: "Field Executive", value: "FieldExecutive" }
 ];
+
+const PDroleOptions = [
+  { label: "Admin", value: "Admin" },
+  { label: "Operations Executive", value: "OperationsExecutive" },
+  { label: "Verifier", value: "Verifier" },
+  { label: "Field Executive", value: "FieldExecutive" }
+];
+
+const departments = ["FI", "PD"];
+
+const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { form: FormInstance, editingUser: User | null, fiOffices: any[], pdOffices: any[] }) => {
+  // Get current department roles directly from form
+  const getCurrentDepartments = () => {
+    const currentRoles = form.getFieldValue("departmentRoles") || [];
+    return currentRoles.map((r: any) => r.department);
+  };
+
+  const handleCheck = (checked: boolean, dept: string) => {
+    const current = form.getFieldValue("departmentRoles") || [];
+    if (checked) {
+      form.setFieldsValue({
+        departmentRoles: [...current, { department: dept, role: undefined, officeId: undefined }],
+      });
+    } else {
+      const updated = current.filter((item: any) => item.department !== dept);
+      form.setFieldsValue({ departmentRoles: updated });
+    }
+  };
+
+  return (
+    <div>
+      {departments.map((dept, index) => {
+        const currentDepartments = getCurrentDepartments();
+        const isChecked = currentDepartments.includes(dept);
+
+        return (
+          <Row key={dept} align="middle" gutter={16} style={{ marginBottom: 12 }}>
+            <Col>
+              <Checkbox
+                checked={isChecked}
+                onChange={(e) => handleCheck(e.target.checked, dept)}
+              >
+                {dept}
+              </Checkbox>
+            </Col>
+            <Col flex={1}>
+              {isChecked && (
+                <>
+                  <Form.Item
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "role"]}
+                    noStyle
+                  >
+                    <Select
+                      options={dept === "FI" ? FIroleOptions : PDroleOptions}
+                      placeholder={`Select role for ${dept}`}
+                      style={{ width: 200 }}
+                    />
+                  </Form.Item>
+                  {/* Branch per department */}
+                  <Form.Item
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "officeId"]}
+                    rules={[{ required: true, message: `Select branch for ${dept}` }]}
+                    style={{ display: "inline-block", marginLeft: 12 }}
+                  >
+                    <Select
+                      options={dept === "FI" ? fiOffices : pdOffices}
+                      placeholder={`Select ${dept} branch`}
+                      style={{ width: 240 }}
+                      onChange={(val) => {
+                        // Keep root officeId in sync for backend
+                        const rootOfficeId = form.getFieldValue("officeId");
+                        if (!rootOfficeId) {
+                          form.setFieldsValue({ officeId: val });
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name={["departmentRoles", currentDepartments.indexOf(dept), "department"]}
+                    initialValue={dept}
+                    hidden
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
+            </Col>
+          </Row>
+        );
+      })}
+    </div>
+  );
+};
+
 
 export default function Users() {
   const [form] = Form.useForm();
@@ -69,7 +183,11 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const userDetails = getUserDetails();
+  const currentDepartment = useDepartmentChange();
   const [offices, setOffices] = useState<Office[]>([]);
+  const [fiOffices, setFiOffices] = useState<any[]>([]);
+  const [pdOffices, setPdOffices] = useState<any[]>([]);
+  const [officeMap, setOfficeMap] = useState<{[key: number]: string}>({});
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -103,22 +221,47 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers(1, pagination.pageSize, filters);
-  }, []);
+  }, [currentDepartment]); 
 
   useEffect(() => {
     getOfficesApi()
       .then((res) => {
-        const options =
+        const all =
           res?.data?.data?.map((item: any) => ({
             label: `${item.name} - ${item.location}`,
-            value: item.id,
+            value: Number(item.id),
           })) ?? [];
-        setOffices(options);
+        setOffices(all);
+        const officeNameMap: {[key: number]: string} = {};
+        res?.data?.data?.forEach((item: any) => {
+          officeNameMap[item.id] = item.name;
+        });
+        setOfficeMap(officeNameMap);
       })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+      .catch((err) => console.log(err));
+    getOfficesByDepartmentApi('FI')
+      .then((res) => {
+        const fi =
+          res?.data?.data?.map((item: any) => ({
+            label: `${item.name} - ${item.location}`,
+            value: Number(item.id),
+          })) ?? [];
+        setFiOffices(fi);
+      })
+      .catch((err) => console.log(err));
+
+    getOfficesByDepartmentApi('PD')
+      .then((res) => {
+        const pd =
+          res?.data?.data?.map((item: any) => ({
+            label: `${item.name} - ${item.location}`,
+            value: Number(item.id),
+          })) ?? [];
+        setPdOffices(pd);
+      })
+      .catch((err) => console.log(err));
+  }, [currentDepartment]); 
+
 
   const handleSubmit = async (values: any) => {
     try {
@@ -130,8 +273,34 @@ export default function Users() {
         }
       });
 
+      // Ensure departmentRoles is always an array
+      if (!trimmedValues.departmentRoles || !Array.isArray(trimmedValues.departmentRoles)) {
+        trimmedValues.departmentRoles = [];
+      }
+
+      console.log('Submitting user data:', trimmedValues);
+
       if (editingUser) {
-        const response = await updateUserApi(editingUser?.id, trimmedValues);
+        // Split PATCH: main fields, then departmentRoles
+        const { departmentRoles, ...mainFields } = trimmedValues;
+        await updateUserApi(editingUser?.id, mainFields);
+        await updateUserDepartmentRolesApi(editingUser?.id, departmentRoles);
+        
+        // Check if the current user is editing their own profile
+        if (editingUser.id === userDetails?.sub || editingUser.id === userDetails?.id) {
+          const updatedUserDetails = {
+            ...userDetails,
+            ...mainFields,
+            departmentRoles: departmentRoles
+          };
+          
+          setUserDetails(updatedUserDetails);
+          // Notify other components about the user details change
+          setTimeout(() => {
+            notifyUserDetailsChange();
+          }, 100);
+        }
+        
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
@@ -143,6 +312,7 @@ export default function Users() {
       form.resetFields();
       setEditingUser(null);
     } catch (error: any) {
+      console.error('Error submitting user:', error);
       message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
@@ -150,10 +320,20 @@ export default function Users() {
   };
 
   const handleEdit = (user: User) => {
+    // console.log('Editing user data:', user);
+    // console.log('User office data:', user.office);
+    // console.log('User officeId:', user.officeId);
+    
     setEditingUser(user);
     form.setFieldsValue({
-      ...user,
-      officeId: user?.office?.id,
+      name: user.name,
+      mobile: user.mobile,
+      email: user.email,
+      employeeCode: user.employeeCode,
+      role: user.role,
+      locality: user.locality,
+      officeId: user.office?.id || user.officeId, 
+      departmentRoles: user.departmentRoles,
     });
     setIsModalVisible(true);
   };
@@ -207,39 +387,82 @@ export default function Users() {
       key: "mobile",
       width: 60,
     },
-    // {
-    //   title: "Email",
-    //   dataIndex: "email",
-    //   key: "email",
-    //   width: 200,
-    // },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 120,
+    },
     {
       title: "Role",
       dataIndex: "role",
       key: "role",
       width: 80,
-      render: (role: string) => (
-        <Tag
-          color={
-            role === "Admin"
-              ? "geekblue"
-              : role === "OperationsExecutive"
-                ? "gold"
-                : role === "FieldExecutive"
-                  ? "green"
-                  : "volcano"
+      render: (_: string, record: User) => {
+        let deptRole = record.role;
+        if (currentDepartment && Array.isArray(record.departmentRoles)) {
+          const found = record.departmentRoles.find((dr: any) => dr.department === currentDepartment);
+          if (found && found.role) {
+            deptRole = found.role;
           }
-        >
-          {role}
-        </Tag>
-      ),
+        }
+        const getRoleColor = (role: string) => {
+          switch (role) {
+            case "Admin":
+            case "PDAdmin":
+              return "geekblue";
+            case "OperationsExecutive":
+            case "PDOperationsExecutive":
+              return "gold";
+            case "FieldExecutive":
+            case "PDFieldExecutive":
+              return "green";
+            case "Verifier":
+            case "PDVerifier":
+              return "volcano";
+            default:
+              return "default";
+          }
+        };
+        const getRoleLabel = (role: string) => {
+          const allOptions = [...RoleOptions, ...FIroleOptions, ...PDroleOptions];
+          const roleOption = allOptions.find(option => option.value === role);
+          return roleOption ? roleOption.label : role;
+        };
+        return (
+          <Tag color={getRoleColor(deptRole)}>
+            {getRoleLabel(deptRole)}
+          </Tag>
+        );
+      },
     },
     {
       title: "Branch",
       dataIndex: "office",
       key: "office",
       width: 50,
-      render: (office: any) => office?.name,
+      render: (office: any, record: User) => {
+        if (office?.name) {
+          return office.name;
+        }
+        
+        if (record.departmentRoles && Array.isArray(record.departmentRoles)) {
+          const branchNames = record.departmentRoles
+            .map((deptRole: any) => {
+              if (deptRole.officeId && officeMap[deptRole.officeId]) {
+                return officeMap[deptRole.officeId];
+              }
+              return null;
+            })
+            .filter((name: string | null) => name !== null);
+          
+          if (branchNames.length > 0) {
+            return branchNames.join(', ');
+          }
+        }
+        
+        return '-';
+      },
     },
     {
       title: "Status",
@@ -252,9 +475,9 @@ export default function Users() {
         ) : (
           <Tag color="red">Inactive</Tag>
         ),
-      ...(userDetails?.role !== "Admin" && { fixed: "right" }),
+      ...(getCurrentDepartmentRole() !== "Admin" && getCurrentDepartmentRole() !== "PDAdmin" && { fixed: "right" }),
     },
-    ...(userDetails?.role === "Admin"
+          ...(getCurrentDepartmentRole() === "Admin" 
       ? [
           {
             title: "Actions",
@@ -280,7 +503,7 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
-        {userDetails?.role === "Admin" && (
+        {(getCurrentDepartmentRole() === "Admin" ) && (
           <div
             style={{
               marginBottom: 16,
@@ -298,6 +521,7 @@ export default function Users() {
               onClick={() => {
                 setEditingUser(null);
                 form.resetFields();
+                form.setFieldsValue({ departmentRoles: [] });
                 setIsModalVisible(true);
               }}
             >
@@ -337,6 +561,7 @@ export default function Users() {
           setIsModalVisible(false);
           setEditingUser(null);
           form.resetFields();
+          form.setFieldsValue({ departmentRoles: [] });
         }}
         footer={null}
       >
@@ -344,6 +569,13 @@ export default function Users() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          // onFinishFailed={(errorInfo) => {
+          //   console.log('Form validation failed:', errorInfo);
+          // }}
+          initialValues={{
+            departmentRoles: [],
+            status: "Active"
+          }}
           style={{ gap: 8, display: "flex", flexDirection: "column" }}
         >
           <Form.Item
@@ -372,12 +604,11 @@ export default function Users() {
             label="Mobile Number"
             rules={[
               { required: true, message: "Please enter mobile number" },
-              { max: 10, message: "Cannot be more than 10 characters" },
-              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
-              {
-                pattern: /^[0-9]+$/,
-                message: "Please enter a valid mobile number",
+              { 
+                pattern: /^[0-9]{10}$/, 
+                message: "Mobile number must be exactly 10 digits" 
               },
+              { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
             ]}
             style={{ marginBottom: 8 }}
           >
@@ -424,12 +655,25 @@ export default function Users() {
             />
           </Form.Item>
           <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Please select role" }]}
+            name="departmentRoles"
+            label="Department & Role"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value || !Array.isArray(value) || value.length === 0) {
+                    return Promise.reject('Please select at least one department and role');
+                  }
+                  const hasAllRoles = value.every((item: any) => item.department && item.role);
+                  if (!hasAllRoles) {
+                    return Promise.reject('Please select roles for all departments');
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
             style={{ marginBottom: 8 }}
           >
-            <Select options={FiRoleOptions} />
+            <DepartmentRoleSelector form={form} editingUser={editingUser} fiOffices={fiOffices} pdOffices={pdOffices} />
           </Form.Item>
           <Form.Item
             name="locality"
@@ -452,14 +696,7 @@ export default function Users() {
           >
             <Input maxLength={30} />
           </Form.Item>
-          <Form.Item
-            name="officeId"
-            label="Branch"
-            rules={[{ required: true, message: "Please select branch" }]}
-            style={{ marginBottom: 8 }}
-          >
-            <Select options={offices} placeholder="Select branch" />
-          </Form.Item>
+          {/* Removed global Branch field. Branch is now selected per department above. */}
           {editingUser && editingUser.status === "Active" && (
             <Form.Item style={{ marginBottom: 8 }}>
               <Popconfirm
@@ -504,6 +741,7 @@ export default function Users() {
                   setIsModalVisible(false);
                   setEditingUser(null);
                   form.resetFields();
+                  form.setFieldsValue({ departmentRoles: [] });
                 }}
               >
                 Cancel

@@ -15,6 +15,7 @@ import { TabContextType } from "@/utils/verifierInterface";
 import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
 import { LeftOutlined } from "@ant-design/icons";
 import PdfPreview from "@/components/verify/PdfPreview";
+import { useDepartmentChange } from "@/utils/utility";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -42,6 +43,7 @@ export default function LoanVerifyDetails() {
   const [editLogsUpdated, setEditLogsUpdated] = useState(0);
   const [editRequests, setEditRequests] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+  const currentDepartment = useDepartmentChange();
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
@@ -70,14 +72,27 @@ export default function LoanVerifyDetails() {
   };
 
   const fetchEditRequests = async () => {
-    getEditRequestsApi("Pending", id as string)
-      .then((res) => {
-        // console.log(res.data);
-        setEditRequests(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    if (currentDepartment === 'PD') {
+      // For PD department, call the API with department parameter
+      getEditRequestsApi("Pending", id as string)
+        .then((res) => {
+          // console.log(res.data);
+          setEditRequests(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      // For other departments (like FI), use the existing logic
+      getEditRequestsApi("Pending", id as string)
+        .then((res) => {
+          // console.log(res.data);
+          setEditRequests(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -86,7 +101,7 @@ export default function LoanVerifyDetails() {
 
       fetchVerificationData();
     }
-  }, [id]);
+  }, [id, currentDepartment]);
 
   // Add this useEffect for IndexedDB initialization
   useEffect(() => {
@@ -252,7 +267,7 @@ export default function LoanVerifyDetails() {
       case "Business":
         return (
           <BusinessVerificationDetails
-            verificationData={getVerificationByType("Business")}
+            verificationData={getCompleteVerificationData("Business")}
             onEdit={handleEdit}
             editLogsUpdated={editLogsUpdated}
             verificationId={getVerificationId("Business")}
@@ -261,6 +276,9 @@ export default function LoanVerifyDetails() {
             completeVerificationData={getCompleteVerificationData("Business")}
             fetchVerificationData={fetchVerificationData}
             editRequests={editRequests}
+            currentDepartment={currentDepartment}
+            applicationNumber={verificationData?.applicationNumber}
+            loanId={verificationData?.loanId}
           />
         );
     }

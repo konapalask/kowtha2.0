@@ -9,15 +9,18 @@ import {
   Col,
   Typography,
   Tag,
+  Badge,
 } from "antd";
 // import { UserOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   assignExecutivesApi,
   updateExecutivesApi,
 } from "@/services/loans.services";
+import { getFieldExecutivesByOfficeIdApi } from "@/services/users.services";
 import styles from "./FieldAssignmentForm.module.css";
 import { UserOutlined } from "@ant-design/icons";
+import { getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
 
 interface FieldAssignmentFormProps {
   verification: any;
@@ -54,6 +57,170 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [localLoading, setLocalLoading] = useState(false);
+  const [localFieldExecutives, setLocalFieldExecutives] = useState<any[]>([]);
+  const [fieldExecutivesLoading, setFieldExecutivesLoading] = useState(false);
+  
+  const currentDepartmentOfficeId = getCurrentDepartmentOfficeId();
+  const currentDepartment = getCurrentDepartment();
+  const remoteOffices = offices?.filter(
+    (option: any) => Number(option?.value) !== Number(currentDepartmentOfficeId)
+  );
+
+ 
+  const getAssignmentMethod = (verification: any) => {
+    if (!verification?.fieldExecutive?.departmentRoles) {
+      return "Local";
+    }
+    
+    const fieldExecutiveOfficeId = verification.fieldExecutive.departmentRoles.find(
+      (role: any) => role.officeId
+    )?.officeId;
+    
+    // Compare with current user's office ID
+    if (fieldExecutiveOfficeId && currentDepartmentOfficeId) {
+      return Number(fieldExecutiveOfficeId) === Number(currentDepartmentOfficeId) ? "Local" : "Remote";
+    }
+    
+    return "Local";
+  };
+
+  const getOfficeId = (verification: any) => {
+    if (!verification?.fieldExecutive?.departmentRoles) {
+      return null;
+    }
+    
+    const fieldExecutiveOfficeId = verification.fieldExecutive.departmentRoles.find(
+      (role: any) => role.officeId
+    )?.officeId;
+    
+    return fieldExecutiveOfficeId || null;
+  };
+
+  const fetchFieldExecutivesForOffice = async (officeId: string) => {
+    try {
+      setFieldExecutivesLoading(true);
+      const result = await getFieldExecutivesByOfficeIdApi(officeId);
+      const options = result?.data?.data?.map((item: any) => ({
+        label: (
+          <Row gutter={[0, 5]} style={{ width: "100%" }}>
+            <Col xs={24} sm={24} md={1} xl={1}>
+              <Badge
+                dot
+                status={item?.availabletoday ? "success" : "error"}
+              />
+            </Col>
+
+            <Col
+              xs={24}
+              sm={12}
+              md={8}
+              xl={10}
+              style={{ wordWrap: "break-word" }}
+            >
+              <Typography.Text>
+                {item?.name}
+              </Typography.Text>
+            </Col>
+
+            <Col xs={24} sm={6} md={6} xl={9}>
+              <Tag color="blue">{item?.employeeCode}</Tag>
+            </Col>
+
+            <Col xs={24} sm={6} md={9} xl={4}>
+              <Tag color="blue">P: {item?.pendingVerifications}</Tag>
+            </Col>
+          </Row>
+        ),
+        value: item?.id,
+      })) ?? [];
+      
+   
+      if (verification?.fieldExecutive) {
+        const currentFieldExecutive = verification.fieldExecutive;
+        const isAlreadyIncluded = options.some((option: any) => option.value === currentFieldExecutive.id);
+        
+        if (!isAlreadyIncluded) {
+          options.unshift({
+            label: (
+              <Row gutter={[0, 5]} style={{ width: "100%" }}>
+                <Col xs={24} sm={24} md={1} xl={1}>
+                  <Badge
+                    dot
+                    status={currentFieldExecutive?.availabletoday ? "success" : "error"}
+                  />
+                </Col>
+
+                <Col
+                  xs={24}
+                  sm={12}
+                  md={8}
+                  xl={10}
+                  style={{ wordWrap: "break-word" }}
+                >
+                  <Typography.Text>
+                    {currentFieldExecutive.name}
+                  </Typography.Text>
+                </Col>
+
+                <Col xs={24} sm={6} md={6} xl={9}>
+                  <Tag color="blue">{currentFieldExecutive.employeeCode}</Tag>
+                </Col>
+
+                <Col xs={24} sm={6} md={9} xl={4}>
+                  <Tag color="blue">P: {currentFieldExecutive?.pendingVerifications || 0}</Tag>
+                </Col>
+              </Row>
+            ),
+            value: currentFieldExecutive.id,
+          });
+        }
+      }
+      
+      setLocalFieldExecutives(options);
+    } catch (error) {
+      console.error("Error fetching field executives:", error);
+      setLocalFieldExecutives([]);
+    } finally {
+      setFieldExecutivesLoading(false);
+    }
+  };
+
+ 
+  useEffect(() => {
+    if (verification) { 
+      const fieldExecutiveOfficeId = verification.fieldExecutive?.departmentRoles?.find(
+        (role: any) => role.officeId
+      )?.officeId;
+      
+      if (fieldExecutiveOfficeId) {
+        fetchFieldExecutivesForOffice(fieldExecutiveOfficeId.toString());
+      } else {
+        // Fallback to current office
+        const currentOfficeId = getCurrentDepartmentOfficeId();
+        if (currentOfficeId) {
+          fetchFieldExecutivesForOffice(currentOfficeId.toString());
+        }
+      }
+    } else {
+      const currentOfficeId = getCurrentDepartmentOfficeId();
+      if (currentOfficeId) {
+        fetchFieldExecutivesForOffice(currentOfficeId.toString());
+      }
+    }
+  }, [verification]);
+
+  useEffect(() => {
+    if (verification) {
+      const assignmentMethod = getAssignmentMethod(verification);
+      if (assignmentMethod === "Remote") {
+        const officeId = getOfficeId(verification);
+        if (officeId) {
+          fetchFieldExecutivesForOffice(officeId.toString());
+        }
+      }
+    }
+  }, [verification]);
+
   const getVerificationType = (type: string) => {
     switch (type) {
       case "Address1":
@@ -119,7 +286,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
         );
       }
       fetchLoans();
-      setCurrentOffice(userDetails?.officeId);
+              setCurrentOffice(currentDepartmentOfficeId?.toString() || "");
       setFieldExecutiveEdit((prev: any) => ({ ...prev, [type]: false }));
       fetchExecutives();
     } catch (error) {
@@ -129,12 +296,6 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
       setLocalLoading(false);
     }
   };
-
-  const remoteOffices = offices?.filter(
-    (option: any) => option?.value !== userDetails?.officeId
-  );
-
-  // console.log(verification);
 
   return (
     <div>
@@ -146,19 +307,15 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
             ? {
                 businessName: verification?.businessName,
                 currentOfficeName: verification?.currentOfficeName,
-                assignmentMethod:
-                  verification?.office &&
-                  verification?.office !== userDetails?.officeId
-                    ? "Remote"
-                    : "Local",
-                office: verification?.office,
+                assignmentMethod: getAssignmentMethod(verification),
+                office: getAssignmentMethod(verification) === "Remote" ? getOfficeId(verification) : null,
                 fieldExecutiveId: verification?.fieldExecutiveId,
                 address: verification?.applicantAddress || "",
                 verifierId: verification?.verifierId,
               }
             : {
                 assignmentMethod: "Local",
-                address: "",
+                address: currentDepartment === 'PD' && selectedLoan?.applicantAddress ? selectedLoan.applicantAddress : "",
               }
         }
         onFinish={(values) =>
@@ -247,7 +404,8 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                     className={styles.customRadioGroup}
                     onChange={(e) => {
                       if (e.target.value === "Local") {
-                        setCurrentOffice(userDetails?.officeId || "");
+                        setCurrentOffice(currentDepartmentOfficeId?.toString() || "");
+                        fetchFieldExecutivesForOffice(currentDepartmentOfficeId?.toString() || "");
                       }
                       form.setFieldValue("fieldExecutiveId", null);
                       form.setFieldValue("office", null);
@@ -273,6 +431,7 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                       onChange={(value) => {
                         setCurrentOffice(value);
                         form.setFieldValue("fieldExecutiveId", null);
+                        fetchFieldExecutivesForOffice(value);
                       }}
                       options={remoteOffices}
                     />
@@ -321,14 +480,15 @@ const FieldAssignmentForm: React.FC<FieldAssignmentFormProps> = ({
                       </Tag>
                     </div>
                   ),
-                  value: verification?.fieldExecutive?.employeeCode,
+                  value: verification?.fieldExecutive?.id,
                 } : undefined}
                 hidden={!address || (assignmentMethod === "Remote" && !office)}
               >
                 <Select
                   placeholder="Select a Field Executive"
-                  options={fieldExecutives}
+                  options={localFieldExecutives}
                   showSearch
+                  loading={fieldExecutivesLoading}
                   filterOption={(input, option) =>
                     (option?.label?.toString().toLowerCase() || '').includes(input.toLowerCase())
                   }

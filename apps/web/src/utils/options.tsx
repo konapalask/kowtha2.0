@@ -127,6 +127,24 @@ export const bankOptions = [
   { value: "MUTHOOT FINANCE LIMITED", label: "MUTHOOT FINANCE LIMITED" },
 ];
 
+export const pdBankOptions = [
+  { value: "Axis finance UBL", label: "Axis finance UBL" },
+  { value: "Arka Fincap", label: "Arka Fincap" },
+  { value: "Hero Housing Salaried", label: "Hero Housing Salaried" },
+  { value: "Hero Housing Self employed.", label: "Hero Housing Self employed." },
+  { value: "Chola", label: "Chola" },
+  { value: "DCB", label: "DCB" },
+  { value: "Hero Fincorp", label: "Hero Fincorp" },
+  { value: "ICIC", label: "ICIC" },
+  { value: "IDFC HL & ML", label: "IDFC HL & ML" },
+  { value: "IDFC PL", label: "IDFC PL" },
+  { value: "IIFL", label: "IIFL" },
+  { value: "Niwas Salaried", label: "Niwas Salaried" },
+  { value: "Niwas Self employed", label: "Niwas Self employed" },
+  { value: "Axis Bank", label: "Axis Bank" },
+  { value: "Yes bank", label: "Yes bank" },
+];
+
 export const applicantTypeOptions = [
   { label: "Primary Applicant", value: "Primary Applicant" },
   { label: "Co-applicant 1 ", value: "Co-applicant 1" },

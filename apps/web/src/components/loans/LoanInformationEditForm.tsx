@@ -14,9 +14,10 @@ import { createLoanApi, updateLoanApi } from "@/services/loans.services";
 import {
   applicantTypeOptions,
   bankOptions,
+  pdBankOptions,
   loanTypeOptions,
 } from "@/utils/options";
-import { getUserDetails, isEmpty } from "@/utils/utility";
+import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
 // import { useWatch } from "antd/es/form/Form";
 interface LoanInfoFormProps {
   form: any;
@@ -38,6 +39,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   fetchLoanDetails,
 }) => {
   const userDetails = getUserDetails();
+  const currentDepartment = getCurrentDepartment();
   // console.log(selectedLoan);
   // console.log(form.getFieldsValue());
 
@@ -289,7 +291,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <Select
                 showSearch
                 placeholder="Select bank"
-                options={bankOptions}
+                options={currentDepartment === 'PD' ? pdBankOptions : bankOptions}
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()

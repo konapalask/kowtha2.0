@@ -2,41 +2,187 @@ import React from "react";
 import { Form, Input, Select, Col } from "antd";
 
 const yesNoOptions = ["Yes", "No"];
+
 const constitutionOptions = [
   "Proprietorship",
   "Partnership",
-  "PVT Ltd",
-  "Ltd",
+  "Private Limited",
+  "Public Limited",
   "Society",
   "Trust",
   "Others",
 ];
-const relationshipOptions = [
-  "Applicant",
-  "Co-Applicant",
-  "Guarantor",
-  "Family",
+
+
+const pdConstitutionOptions = [
+  "Proprietorship",
+  "Partnership",
+  "Private Limited",
+  "LLP (Limited Liability Partnership)",
+  "Others",
+];
+
+
+const natureOfBusinessOptions = [
+  "Manufacturer",
+  "Trader",
+  "Service Provider",
+  "Distributor",
+  "Retailer",
+  "Others",
+];
+
+const businessActivityObservedOptions = [
+  "Retail",
+  "Wholesale",
+  "Manufacturing",
+  "Service",
+  "Trading",
   "Others",
 ];
 
 export type BusinessDetailsFormData = {
-  nameBoardSeen: string;
-  nameBoardMatched: string;
-  constitution: string;
-  constitutionOther?: string;
-  keyManagerRelation: string;
-  keyManagerRelationOther?: string;
-  keyManager?: string;
+  businessType: string;
+  employeesDeclared: string;
+  employeesObserved: string;
+  constitutionOfBusiness: string;
+  natureOfBusiness: string;
+  businessActivityObserved: string;
+  stockObserved: string;
   businessStartYear: string;
-  totalExperience: string;
-  isAddressTraceable: string;
+  occupiedSince: string;
+  netMargin: string;
+  businessPremisesSize: string;
+  rawMaterialSupplier: string;
 };
 
-const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
-  // Watch values for conditional rendering
-  const constitution = Form.useWatch("constitution", form);
-  const keyManagerRelation = Form.useWatch("keyManagerRelation", form);
+const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ form, currentDepartment }) => {
+  // For PD department, show different fields
+  if (currentDepartment === 'PD') {
+    return (
+      <>
+        <Col span={8}>
+          <Form.Item
+            name="employeesDeclared"
+            label="No. of Employees (Declared)"
+            rules={[{ required: true, message: "Number of employees declared is required" }]}
+          >
+            <Input placeholder="Enter number of employees declared" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="employeesObserved"
+            label="No. of Employees (Observed)"
+            rules={[{ required: true, message: "Number of employees observed is required" }]}
+          >
+            <Input placeholder="Enter number of employees observed" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="constitutionOfBusiness"
+            label="Constitution of Business"
+            rules={[{ required: true, message: "Constitution of business is required" }]}
+          >
+            <Select placeholder="Select constitution">
+              {pdConstitutionOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="natureOfBusiness"
+            label="Nature of Business"
+            rules={[{ required: true, message: "Nature of business is required" }]}
+          >
+            <Select placeholder="Select nature of business">
+              {natureOfBusinessOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="businessActivityObserved"
+            label="Business Activity Observed"
+            rules={[{ required: true, message: "Business activity observed is required" }]}
+          >
+            <Select placeholder="Select business activity">
+              {businessActivityObservedOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="stockObserved"
+            label="Stock Observed"
+            rules={[{ required: true, message: "Stock observed is required" }]}
+          >
+            <Input placeholder="Enter stock observed" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="businessStartYear"
+            label="Business Start Year"
+            rules={[{ required: true, message: "Business start year is required" }]}
+          >
+            <Input placeholder="Enter business start year" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="occupiedSince"
+            label="Occupied Since (years)"
+            rules={[{ required: true, message: "Occupied since is required" }]}
+          >
+            <Input placeholder="Enter years occupied" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="netMargin"
+            label="Net Margin (%)"
+            rules={[{ required: true, message: "Net margin is required" }]}
+          >
+            <Input placeholder="Enter net margin" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="businessPremisesSize"
+            label="Business Premises Size (in sq. ft.)"
+            rules={[{ required: true, message: "Business premises size is required" }]}
+          >
+            <Input placeholder="Enter premises size" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="rawMaterialSupplier"
+            label="Raw Material Supplier"
+            rules={[{ required: true, message: "Raw material supplier is required" }]}
+          >
+            <Input placeholder="Enter raw material supplier" />
+          </Form.Item>
+        </Col>
+      </>
+    );
+  }
 
+  // Original implementation for other departments
   return (
     <>
       <Col span={8}>
@@ -87,87 +233,35 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
         </Form.Item>
       </Col>
 
-      {constitution === "Others" && (
+      {Form.useWatch("constitution", form) === "Others" && (
         <Col span={8}>
           <Form.Item
             name="constitutionOther"
-            label="Specify Constitution"
-            rules={[{ required: true, message: "Please specify constitution" }]}
+            label="Other Constitution"
+            rules={[{ required: true, message: "Please specify other constitution" }]}
           >
-            <Input placeholder="Specify constitution" />
+            <Input placeholder="Specify other constitution" />
           </Form.Item>
         </Col>
       )}
-
-      {/* <Col span={8}>
-        <Form.Item
-          name="keyManagerRelation"
-          label="Key manager relationship to the applicant"
-          rules={[{ required: true, message: "Required" }]}
-        >
-          <Select placeholder="Select relationship">
-            {relationshipOptions.map((option) => (
-              <Select.Option key={option} value={option}>
-                {option}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
-
-      {keyManagerRelation === "Others" && (
-        <Col span={8}>
-          <Form.Item
-            name="keyManagerRelationOther"
-            label="Specify Relationship"
-            rules={[{ required: true, message: "Please specify relationship" }]}
-          >
-            <Input placeholder="Specify relationship" />
-          </Form.Item>
-        </Col>
-      )}
-
-      {keyManagerRelation && keyManagerRelation !== "Applicant" && (
-        <Col span={8}>
-          <Form.Item
-            name="keyManager"
-            label="Key manager person of the Business"
-            rules={[{ required: true, message: "Required" }]}
-          >
-            <Input placeholder="Enter key manager name" />
-          </Form.Item>
-        </Col>
-      )} */}
 
       <Col span={8}>
         <Form.Item
           name="businessStartYear"
-          label="Business started in the year"
-          rules={[
-            { required: true, message: "Required" },
-            {
-              pattern: /^\d{4}$/,
-              message: "Please enter a valid year (YYYY)",
-            },
-          ]}
+          label="Business Start Year"
+          rules={[{ required: true, message: "Required" }]}
         >
-          <Input placeholder="YYYY" maxLength={4} />
+          <Input placeholder="Enter business start year" />
         </Form.Item>
       </Col>
 
       <Col span={8}>
         <Form.Item
           name="totalExperience"
-          label="Total experience in the field (years)"
-          rules={[
-            { required: true, message: "Required" },
-            {
-              pattern: /^\d+$/,
-              message: "Please enter a valid number",
-            },
-          ]}
+          label="Total Experience (Years)"
+          rules={[{ required: true, message: "Required" }]}
         >
-          <Input type="number" placeholder="Enter total experience" />
+          <Input placeholder="Enter total experience" />
         </Form.Item>
       </Col>
 
@@ -190,7 +284,7 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
       <Col span={8}>
         <Form.Item
           name="isAddressTraceable"
-          label="Is Business address traceable?"
+          label="Is Address Traceable"
           rules={[{ required: true, message: "Required" }]}
         >
           <Select placeholder="Select Yes/No">
@@ -202,14 +296,14 @@ const BusinessDetails: React.FC<{ form: any }> = ({ form }) => {
           </Select>
         </Form.Item>
       </Col>
+
       <Col span={8}>
         <Form.Item
           name="geoTag"
-          label="Geotag"
+          label="Geo Tag"
           rules={[{ required: true, message: "Required" }]}
-          // hidden
         >
-          <Input disabled />
+          <Input placeholder="Enter geo tag" />
         </Form.Item>
       </Col>
     </>
