@@ -76,6 +76,7 @@ export const bankConfigs: BankConfigs = {
     customSections: ['bankingDetails', 'businessDetails', 'documentsObserved', 'financeDetails']
   },
 
+  // bankConfigs.ts - Update Axis Finance configuration
   'Axis Finance': {
     name: 'Axis Finance',
     sectionOrder: [
@@ -85,7 +86,7 @@ export const bankConfigs: BankConfigs = {
       'documentsObserved',   // 4. Documents Observed
       'suppliersCreditors',  // 5. Suppliers/Creditors
       'clientsDebtors',      // 6. Clients/Debtors
-      'salariesWages',       // 7. Salaries & Wages
+      'salariesWages',       // 7. Salaries & Wages (MAIN HEADING)
       'assetDetails',        // 8. Asset Details
       'existingLoans',       // 9. Existing Loans
       'bankingDetails',      // 10. Banking Details
@@ -95,6 +96,7 @@ export const bankConfigs: BankConfigs = {
     ],
     apiResponseTransformer: (rawData: any) => {
       // Transform Axis Finance specific API response structure
+      const salariesWagesData = rawData?.salariesWages || {};
       return {
         basicDetails: rawData?.basicDetails || {},
         familyDetails: rawData?.familyDetails || rawData?.familyMemberDetails || [],
@@ -102,7 +104,23 @@ export const bankConfigs: BankConfigs = {
         documentsObserved: rawData?.documentsObserved || {},
         suppliersCreditors: rawData?.suppliersCreditors || {},
         clientsDebtors: rawData?.clientsDebtors || {},
-        salariesWages: rawData?.salariesWages || {},
+        // Keep salariesWages as main section but structure it for subsections
+        salariesWages: {
+          employeeInformation: {
+            numberOfEmployees: salariesWagesData?.numberOfEmployees,
+            salaryPerMonthPerEmployee: salariesWagesData?.salaryPerMonthPerEmployee,
+            statusOfEmployee: salariesWagesData?.statusOfEmployee
+          },
+          labourInformation: {
+            numberOfLabours: salariesWagesData?.numberOfLabours,
+            wagesPerMonthPerDay: salariesWagesData?.wagesPerMonthPerDay,
+            statusOfLabour: salariesWagesData?.statusOfLabour,
+            workingHoursStart: salariesWagesData?.workingHoursStart,
+            workingHoursEnd: salariesWagesData?.workingHoursEnd,
+            otherMajorExpenditure: salariesWagesData?.otherMajorExpenditure,
+            remarks: salariesWagesData?.remarks
+          }
+        },
         assetDetails: rawData?.assetDetails || {},
         existingLoans: rawData?.existingLoans || {},
         bankingDetails: rawData?.bankingDetails || rawData?.applicantDetails || {},

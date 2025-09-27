@@ -729,44 +729,102 @@ export const BusinessVerificationDetails: React.FC<
         );
 
       case 'salariesWages':
-        return (
-          <section key="salariesWages" style={{ marginBottom: 24 }}>
-            <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
-              <Descriptions bordered column={2}>
-                <Descriptions.Item label="No. of Employees">
-                  {salariesWagesData?.numberOfEmployees || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Salary/Employee/Month">
-                  {salariesWagesData?.salaryPerMonthPerEmployee || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Status of Employee">
-                  {salariesWagesData?.statusOfEmployee || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="No. of Labours">
-                  {salariesWagesData?.numberOfLabours || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Wages per month/day">
-                  {salariesWagesData?.wagesPerMonthPerDay || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Status of Labour">
-                  {salariesWagesData?.statusOfLabour || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Working Hours Start">
-                  {salariesWagesData?.workingHoursStart || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Working Hours End">
-                  {salariesWagesData?.workingHoursEnd || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Other Major Expenditure">
-                  {salariesWagesData?.otherMajorExpenditure || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Remarks">
-                  {salariesWagesData?.remarks || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-        );
+        // Check if it's Axis Finance to show subsections
+        if (isAxisFinance(bankName)) {
+          return (
+            <section key="salariesWages" style={{ marginBottom: 24 }}>
+              <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
+                {/* Employee Information Subsection */}
+                <div style={{ marginBottom: 24 }}>
+                  <Typography.Title level={5} style={{ marginBottom: 12 }}>
+                    Employee Information
+                  </Typography.Title>
+                  <Descriptions bordered column={3} size="small">
+                    <Descriptions.Item label="No. of Employees">
+                      {data?.salariesWages?.employeeInformation?.numberOfEmployees || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Salary per month per employee">
+                      {data?.salariesWages?.employeeInformation?.salaryPerMonthPerEmployee || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status of Employee">
+                      {data?.salariesWages?.employeeInformation?.statusOfEmployee || "-"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </div>
+
+                {/* Labour Information Subsection */}
+                <div>
+                  <Typography.Title level={5} style={{ marginBottom: 12 }}>
+                    Labour Information
+                  </Typography.Title>
+                  <Descriptions bordered column={2} size="small">
+                    <Descriptions.Item label="No. of Labours">
+                      {data?.salariesWages?.labourInformation?.numberOfLabours || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Wages per month/per day">
+                      {data?.salariesWages?.labourInformation?.wagesPerMonthPerDay || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status of Labour">
+                      {data?.salariesWages?.labourInformation?.statusOfLabour || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Working Hours Start">
+                      {data?.salariesWages?.labourInformation?.workingHoursStart || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Working Hours End">
+                      {data?.salariesWages?.labourInformation?.workingHoursEnd || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Other Major Expenditure">
+                      {data?.salariesWages?.labourInformation?.otherMajorExpenditure || "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Remarks" span={2}>
+                      {data?.salariesWages?.labourInformation?.remarks || "-"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </div>
+              </Card>
+            </section>
+          );
+        } else {
+          // Original layout for other banks (Arka Fincap, etc.)
+          return (
+            <section key="salariesWages" style={{ marginBottom: 24 }}>
+              <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
+                <Descriptions bordered column={2}>
+                  <Descriptions.Item label="No. of Employees">
+                    {salariesWagesData?.numberOfEmployees || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Salary/Employee/Month">
+                    {salariesWagesData?.salaryPerMonthPerEmployee || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Status of Employee">
+                    {salariesWagesData?.statusOfEmployee || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="No. of Labours">
+                    {salariesWagesData?.numberOfLabours || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Wages per month/day">
+                    {salariesWagesData?.wagesPerMonthPerDay || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Status of Labour">
+                    {salariesWagesData?.statusOfLabour || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Working Hours Start">
+                    {salariesWagesData?.workingHoursStart || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Working Hours End">
+                    {salariesWagesData?.workingHoursEnd || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Other Major Expenditure">
+                    {salariesWagesData?.otherMajorExpenditure || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Remarks">
+                    {salariesWagesData?.remarks || "-"}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </section>
+          );
+        }
 
       case 'assetDetails':
         return (
