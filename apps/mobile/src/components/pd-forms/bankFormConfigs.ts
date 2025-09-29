@@ -16,6 +16,30 @@ import DocumentsObserved from './DocumentsObserved';
 import FinanceDetails from './FinanceDetails';
 import ArkaFincapBankingDetails from './ArkaFincapBankingDetails';
 import AxisFinanceUBLBankingDetails from './AxisFinanceUBLBankingDetails';
+import AxisBasicDetails from './AxisBasicDetails';
+import AxisBusinessDetails from './AxisBusinessDetails';
+import AxisBankBusinessProfile from './AxisBankBusinessProfile';
+import AxisMiscelleanousDetails from './AxisMiscelleanousDetails';
+import AxisSuppliersCreditors from './AxisSuppliersCreditors';
+import AxisClientsDebtors from './AxisClientsDebtors';
+import AxisCommonPoints from './AxisCommonPoints';
+import WorkingCapitalDetails from './WorkingCapitalDetails';
+import AxisBankPerformance from './AxisBankPerformance';
+import TataUBLOfficeAddress from './TataUBLOfficeAddress';
+import TataUBLProposedLoanDetails from './TataUBLProposedLoanDetails';
+import TataUBLBasicDetails from './TataUBLBasicDetails';
+import TataUBLResidentialAddress from './TataUBLResidentialAddress';
+import TataUBLBusinessDetails from './TataUBLBusinessDetails';
+import TataUBLEmployeeDetails from './TataUBLEmployeeDetails';
+import TataUBLBankDetails from './TataUBLBankDetails';
+import TataUBLSalesProfit from './TataUBLSalesProfit';
+import TataUBLCustomerDetails from './TataUBLCustomerDetails';
+import TataUBLSupplierDetails from './TataUBLSupplierDetails';
+import TataUBLMiscelleanousDetails from './TataUBLMiscelleanousDetails';
+import TataUBLExistingLoans from './TataUBLExistingLoans';
+import TataUBLAdditionalBusinessDetails from './TataUBLAdditionalBusinessDetails';
+import TataUBLSiteVisitObservations from './TataUBLSiteVisitObservations';
+import TataUBLValueAddedInfo from './TataUBLValueAddedInfo';
 export interface BankFormSection {
   id: string;
   label: string;
@@ -176,6 +200,228 @@ export const bankFormConfigs: BankFormConfig[] = [
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         component: ThirdPartyCheck,
+        required: true,
+      },
+      {
+        id: 'additionalDetails',
+        label: 'Additional Details',
+        component: AdditionalDetails,
+        required: true,
+      },
+      {
+        id: 'photoCapture',
+        label: 'Photo Capture',
+        component: PhotoCapture,
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 3,
+    bankName: 'Axis Bank',
+    sections: [
+      {
+        id: 'basicDetails',
+        label: 'Basic Details',
+        component: AxisBasicDetails,
+        required: true,
+      },
+      {
+        id: 'familyDetails',
+        label: 'Family Details',
+        component: FamilyMemberDetails,
+        required: true,
+      },
+      {
+        id: 'businessDetails',
+        label: 'Business Details',
+        component: AxisBusinessDetails,
+        required: true,
+      },
+      {
+        id: 'businessProfile',
+        label: 'Business Profile',
+        component: AxisBankBusinessProfile,
+        required: true,
+      },
+      {
+        id: 'miscelleanousDetails',
+        label: 'Miscelleanous Details',
+        component: AxisMiscelleanousDetails,
+        required: true,
+      },
+      {
+        id: 'suppliersCreditors',
+        label: 'Suppliers/Creditors',
+        component: AxisSuppliersCreditors,
+        required: true,
+      },
+      {
+        id: 'clientsDebtors',
+        label: 'Clients/Debtors',
+        component: AxisClientsDebtors,
+        required: true,
+      },
+      {
+        id: 'thirdPartyCheck',
+        label: 'Third Party Check',
+        component: ThirdPartyCheck,
+        required: true,
+      },
+      {
+        id: 'commonPoints',
+        label: 'Common Points',
+        component: AxisCommonPoints,
+        required: true,
+      },
+      {
+        id: 'existingLoans',
+        label: 'Existing Loans',
+        component: ExistingLoans,
+        required: true,
+      },
+      {
+        id: 'workingCapitalDetails',
+        label: 'Working Capital Details',
+        component: WorkingCapitalDetails,
+        required: true,
+      },
+      {
+        id: 'bankingDetails',
+        label: 'Banking Details',
+        component: ArkaFincapBankingDetails,
+        required: true,
+      },
+      {
+        id: 'performance',
+        label: 'Performance',
+        component: AxisBankPerformance,
+        required: true,
+      },
+      {
+        id: 'additionalDetails',
+        label: 'Additional Details',
+        component: AdditionalDetails,
+        required: true,
+      },
+      {
+        id: 'photoCapture',
+        label: 'Photo Capture',
+        component: PhotoCapture,
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 4,
+    bankName: 'Tata Ubl',
+    sections: [
+      {
+        id: 'basicDetails',
+        label: 'Basic Details',
+        component: TataUBLBasicDetails,
+        required: true,
+      },
+      {
+        id: 'proposedLoanDetails',
+        label: 'Proposed Loan Details',
+        component: TataUBLProposedLoanDetails,
+        required: true,
+      },
+      {
+        id: 'officeAddress',
+        label: ' Office Address',
+        component: TataUBLOfficeAddress,
+        required: true,
+      },
+      {
+        id: 'residentialAddress',
+        label: 'Residential Address',
+        component: TataUBLResidentialAddress,
+        required: true,
+      },
+      {
+        id: 'familyDetails',
+        label: 'Family Details',
+        component: FamilyMemberDetails,
+        required: true,
+      },
+      {
+        id: 'businessDetails',
+        label: 'Business Details',
+        component: TataUBLBusinessDetails,
+        required: true,
+      },
+      {
+        id: 'employeeDetails',
+        label: 'Employee Details',
+        component: TataUBLEmployeeDetails,
+        required: true,
+      },
+      {
+        id: 'bankDetails',
+        label: 'Bank Details',
+        component: TataUBLBankDetails,
+        required: true,
+      },
+      {
+        id: 'salesAndProfitDetails',
+        label: 'Sales & Profit Details',
+        component: TataUBLSalesProfit,
+        required: true,
+      },
+      {
+        id: 'customersDetails',
+        label: 'Customers Details',
+        component: TataUBLCustomerDetails,
+        required: true,
+      },
+      {
+        id: 'supplierDetails',
+        label: 'Supplier Details',
+        component: TataUBLSupplierDetails,
+        required: true,
+      },
+      {
+        id: 'additionalBusinessDetails',
+        label: 'Additional Business Details',
+        component: TataUBLAdditionalBusinessDetails,
+        required: true,
+      },
+      {
+        id: 'existingLoans',
+        label: 'Existing Loans',
+        component: TataUBLExistingLoans,
+        required: true,
+      },
+      {
+        id: 'miscelleanousDetails',
+        label: 'Miscelleanous Details',
+        component: TataUBLMiscelleanousDetails,
+        required: true,
+      },
+      {
+        id: 'valueAddedDetails',
+        label: 'Value Added Details',
+        component: TataUBLValueAddedInfo,
+        required: true,
+      },
+      {
+        id: 'siteVisitDetails',
+        label: 'Site Visit Details',
+        component: TataUBLSiteVisitObservations,
+        required: true,
+      },
+      {
+        id: 'thirdPartyCheck',
+        label: 'Third Party Check',
+        component: ThirdPartyCheck,
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        component: DocumentsObserved,
         required: true,
       },
       {
