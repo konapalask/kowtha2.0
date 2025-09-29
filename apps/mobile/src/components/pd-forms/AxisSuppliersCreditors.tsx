@@ -9,82 +9,87 @@ import {
 import {useForm, useFieldArray} from 'react-hook-form';
 import {colors} from '../../constants/colors';
 import {InputFormItem} from '../../lib/InputFormItem';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {SelectFormItem} from '../../lib/SelectFormItem';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 
-interface Document {
-  documentCategory: string;
-  documentName: string;
-  documentType: string;
-  remarks: string;
+interface Supplier {
+  name: string;
+  phone: string;
+  location: string;
+  review: string;
 }
 
-interface DocumentsObservedFormData {
-  documents: Document[];
+interface SuppliersCreditorsFormData {
+  suppliers: Supplier[];
 }
 
-interface DocumentsObservedProps {
-  onSubmit: (data: DocumentsObservedFormData) => void;
-  initialData?: DocumentsObservedFormData;
-  maxDocuments?: number;
+interface SuppliersCreditorsProps {
+  onSubmit: (data: SuppliersCreditorsFormData) => void;
+  initialData?: SuppliersCreditorsFormData;
+  maxSuppliers?: number;
 }
 
-const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
+const REVIEW_OPTIONS = [
+  {id: 'positive', name: 'Positive'},
+  {id: 'negative', name: 'Negative'},
+];
+
+const SuppliersCreditors: React.FC<SuppliersCreditorsProps> = ({
   onSubmit,
-  initialData = {documents: []},
-  maxDocuments,
+  initialData = {suppliers: []},
+  maxSuppliers,
 }) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
     watch,
-  } = useForm<DocumentsObservedFormData>({
+  } = useForm<SuppliersCreditorsFormData>({
     defaultValues: {
-      documents:
-        initialData?.documents?.length > 0
-          ? initialData?.documents
-          : [createEmptyDocument()],
+      suppliers:
+        initialData?.suppliers?.length > 0
+          ? initialData?.suppliers
+          : [createEmptySupplier()],
     },
   });
 
   const {fields, append, remove} = useFieldArray({
     control,
-    name: 'documents',
+    name: 'suppliers',
   });
 
-  function createEmptyDocument(): Document {
+  function createEmptySupplier(): Supplier {
     return {
-      documentCategory: '',
-      documentName: '',
-      documentType: '',
-      remarks: '',
+      name: '',
+      phone: '',
+      location: '',
+      review: '',
     };
   }
 
-  const handleAddDocument = () => {
-    if (maxDocuments && fields.length >= maxDocuments) {
+  const handleAddSupplier = () => {
+    if (maxSuppliers && fields.length >= maxSuppliers) {
       Toast.show({
         type: 'error',
         text1: 'Maximum Limit Reached',
-        text2: `Cannot add more than ${maxDocuments} documents`,
+        text2: `Cannot add more than ${maxSuppliers} suppliers`,
         position: 'bottom',
       });
       return;
     }
-    append(createEmptyDocument());
+    append(createEmptySupplier());
   };
 
-  const onFormSubmit = (data: DocumentsObservedFormData) => {
+  const onFormSubmit = (data: SuppliersCreditorsFormData) => {
     onSubmit(data);
   };
 
-  const renderDocumentFields = (index: number) => {
+  const renderSupplierFields = (index: number) => {
     return (
-      <View key={index} style={styles.documentContainer}>
-        <View style={styles.documentHeader}>
-          <Text style={styles.documentTitle}>Document {index + 1}</Text>
+      <View key={index} style={styles.supplierContainer}>
+        <View style={styles.supplierHeader}>
+          <Text style={styles.supplierTitle}>Supplier {index + 1}</Text>
           {index > 0 && (
             <TouchableOpacity
               onPress={() => remove(index)}
@@ -96,45 +101,53 @@ const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
 
         <InputFormItem
           data={{
-            title: 'Document Category',
-            key: `documents.${index}.documentCategory`,
+            title: 'Name',
+            key: `suppliers.${index}.name`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document category',
+            placeholder: 'Enter supplier name',
           }}
         />
 
         <InputFormItem
           data={{
-            title: 'Document Name',
-            key: `documents.${index}.documentName`,
+            title: 'Phone Number',
+            key: `suppliers.${index}.phone`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document name',
+            placeholder: 'Enter phone number',
+            keyboardType: 'phone-pad',
+            rules: {
+              validate: (value: string) => {
+                if (value.length !== 10)
+                  return 'Phone number must be 10 digits';
+                return true;
+              },
+            },
           }}
         />
 
         <InputFormItem
           data={{
-            title: 'Document Type',
-            key: `documents.${index}.documentType`,
+            title: 'Location',
+            key: `suppliers.${index}.location`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter document type',
+            placeholder: 'Enter location',
           }}
         />
 
-        <TextAreaFormItem
+        <SelectFormItem
           data={{
-            title: 'Remarks',
-            key: `documents.${index}.remarks`,
+            title: 'Review',
+            key: `suppliers.${index}.review`,
             control,
             errors,
             required: true,
-            placeholder: 'Enter remarks about the document...',
+            options: REVIEW_OPTIONS,
           }}
         />
       </View>
@@ -143,28 +156,28 @@ const DocumentsObserved: React.FC<DocumentsObservedProps> = ({
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Documents Observed</Text>
+      <Text style={styles.sectionTitle}>Suppliers</Text>
 
-      {fields.map((field, index) => renderDocumentFields(index))}
+      {fields.map((field, index) => renderSupplierFields(index))}
 
       <TouchableOpacity
         style={[
           styles.addButton,
-          maxDocuments && fields.length >= maxDocuments
+          maxSuppliers && fields.length >= maxSuppliers
             ? styles.disabledButton
             : null,
         ]}
-        onPress={handleAddDocument}
-        disabled={maxDocuments ? fields.length >= maxDocuments : false}>
+        onPress={handleAddSupplier}
+        disabled={maxSuppliers ? fields.length >= maxSuppliers : false}>
         <Text
           style={[
             styles.addButtonText,
-            maxDocuments && fields.length >= maxDocuments
+            maxSuppliers && fields.length >= maxSuppliers
               ? styles.disabledButtonText
               : null,
           ]}>
-          Add Document{' '}
-          {maxDocuments ? `(${fields.length}/${maxDocuments})` : ''}
+          Add Supplier{' '}
+          {maxSuppliers ? `(${fields.length}/${maxSuppliers})` : ''}
         </Text>
       </TouchableOpacity>
 
@@ -190,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: colors.text.primary,
   },
-  documentContainer: {
+  supplierContainer: {
     marginBottom: 24,
     padding: 16,
     backgroundColor: colors.background,
@@ -198,13 +211,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  documentHeader: {
+  supplierHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  documentTitle: {
+  supplierTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
@@ -248,4 +261,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DocumentsObserved;
+export default SuppliersCreditors;

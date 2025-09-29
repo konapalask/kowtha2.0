@@ -118,11 +118,6 @@ const ArkaFincapBasicDetails: React.FC<ArkaFincapBasicDetailsProps> = ({
         <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
       </View>
 
-      <View style={styles.readonlyField}>
-        <Text style={styles.fieldLabel}>Phone No *</Text>
-        <Text style={styles.readonlyText}>{initialData?.phoneNo}</Text>
-      </View>
-
       <TextAreaFormItem
         data={{
           title: 'Visited Address',
