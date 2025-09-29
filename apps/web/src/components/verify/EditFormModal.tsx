@@ -184,6 +184,9 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (formKey === "businessDetails") {
         return currentVerification?.verificationData?.businessDetails;
       }
+      if (formKey === "bankingDetails") {
+        return currentVerification?.verificationData?.bankingDetails;
+      }
       if (formKey === "shareholdingDetails") {
         return currentVerification?.verificationData?.shareholdingDetails;
       }

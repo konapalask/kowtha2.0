@@ -915,21 +915,36 @@ export const BusinessVerificationDetails: React.FC<
       case 'bankingDetails':
         return (
           <section key="bankingDetails" style={{ marginBottom: 24 }}>
-            <Card title="Banking Details" extra={getButton("applicantDetails")}>
+            <Card title="Banking Details" extra={getButton("bankingDetails")}>
+              {/* Bank Accounts Table */}
               <Table
                 className="striped-table"
                 dataSource={data?.bankingDetails?.bankAccounts || []}
                 columns={[
                   { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
-                  { title: "Branch Name", dataIndex: "branchName", key: "branchName" },
-                  { title: "Account Type", dataIndex: "accountType", key: "accountType" },
-                  { title: "Open Since", dataIndex: "openSince", key: "openSince" },
-                  { title: "End Use of Loan", dataIndex: "endUseOfLoan", key: "endUseOfLoan" },
+                  { title: "Account", dataIndex: "account", key: "account" },
+                  { title: "Account Type", dataIndex: "type", key: "type" },
+                  { title: "Average Balance", dataIndex: "averageBalance", key: "averageBalance" },
+                  { title: "Years Maintained", dataIndex: "numberOfYearsMaintained", key: "numberOfYearsMaintained" },
                 ]}
                 pagination={false}
                 locale={{ emptyText: "No banking details added yet" }}
                 bordered
               />
+              
+              {/* Additional Banking Details */}
+              <Row style={{ marginTop: 24 }} gutter={[16, 16]}>
+                <Col span={12}>
+                  <Card size="small" title="LIC/Mutual Funds">
+                    <Typography.Text>{data?.bankingDetails?.licMutualFunds || "Not specified"}</Typography.Text>
+                  </Card>
+                </Col>
+                <Col span={12}>
+                  <Card size="small" title="Assets">
+                    <Typography.Text>{data?.bankingDetails?.assets || "Not specified"}</Typography.Text>
+                  </Card>
+                </Col>
+              </Row>
             </Card>
           </section>
         );
