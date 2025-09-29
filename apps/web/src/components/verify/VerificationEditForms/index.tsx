@@ -34,6 +34,7 @@ interface FormSelectorProps {
   currentTab: any;
   getMaritalStatus: any;
   currentDepartment?: string;
+  bankName?: string;
 }
 
 export const FormSelector: React.FC<FormSelectorProps> = ({
@@ -42,6 +43,7 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
   currentTab,
   getMaritalStatus,
   currentDepartment,
+  bankName,
 }) => {
   switch (formKey) {
     case "basicDetails":
@@ -72,7 +74,7 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
     case "existingLoans":
       return <ExistingLoansDetails form={form} />;
     case "businessBasicDetails":
-      return <BusinessBasicDetails form={form} currentDepartment={currentDepartment} />;
+      return <BusinessBasicDetails form={form} currentDepartment={currentDepartment} bankName={bankName} />;
     case "businessDetails":
       return <BusinessDetails form={form} currentDepartment={currentDepartment} />;
     case "applicantDetails":

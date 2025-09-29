@@ -39,157 +39,306 @@ export type BusinessBasicDetailsFormData = {
   bankName: string;
 };
 
-const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ form, currentDepartment }) => {
-  // For PD department, show different fields
+const BusinessBasicDetails: React.FC<{ form: any; currentDepartment?: string; bankName?: string }> = ({ form, currentDepartment, bankName }) => {
+  // For PD department, show different fields based on bank
   if (currentDepartment === 'PD') {
-    return (
-      <>
-        <Col span={12}>
-          <Form.Item
-            name="phoneNo"
-            label="Phone No"
-            rules={[
-              { required: true, message: "Phone number is required" },
-              { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
-            ]}
-          >
-            <Input placeholder="Enter phone number" maxLength={10} />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="noOfVisit"
-            label="No. of Visit"
-            rules={[{ required: true, message: "Number of visits is required" }]}
-          >
-            <Input placeholder="Enter number of visits" />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="personMet"
-            label="Person Met"
-            rules={[{ required: true, message: "Person met is required" }]}
-          >
-            <Select placeholder="Select person met">
-              {personMetOptions.map((option) => (
-                <Select.Option key={option} value={option}>
-                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="constitution"
-            label="Constitution"
-            rules={[{ required: true, message: "Constitution is required" }]}
-          >
-            <Select placeholder="Select constitution">
-              {constitutionOptions.map((option) => (
-                <Select.Option key={option} value={option}>
-                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="applicantName"
-            label="Applicant Name"
-            rules={[{ required: true, message: "Applicant name is required" }]}
-          >
-            <Input disabled style={{ color: "#000" }} />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="nameOfConcern"
-            label="Name of Concern"
-            rules={[{ required: true, message: "Name of concern is required" }]}
-          >
-            <Input placeholder="Enter name of concern" />
-          </Form.Item>
-        </Col>
-        <Col span={24}>
-          <Form.Item
-            name="aboutApplicant"
-            label="About Applicant"
-            rules={[{ required: true, message: "About applicant is required" }]}
-          >
-            <Input.TextArea rows={3} placeholder="Enter details about applicant" />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="visitedAddress"
-            label="Visited Address"
-            rules={[{ required: true, message: "Visited address is required" }]}
-          >
-            <Input placeholder="Enter visited address" />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="structureOfLoan"
-            label="Structure of Loan"
-            rules={[{ required: true, message: "Structure of loan is required" }]}
-          >
-            <Select placeholder="Select structure of loan">
-              {structureOfLoanOptions.map((option) => (
-                <Select.Option key={option} value={option}>
-                  {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="appointmentFixed"
-            label="Appointment Fixed"
-            rules={[{ required: true, message: "Appointment fixed is required" }]}
-          >
-            <Select placeholder="Select Yes/No">
-              {yesNoOptions.map((option) => (
-                <Select.Option key={option} value={option.toLowerCase()}>
-                  {option}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="initiatedAddress"
-            label="Initiated Address"
-            rules={[{ required: true, message: "Initiated address is required" }]}
-          >
-            <Input placeholder="Enter initiated address" />
-          </Form.Item>
-        </Col>
-        <Col span={24}>
-          <Form.Item
-            name="coApplicantDetails"
-            label="Co-Applicant Details"
-            rules={[{ required: true, message: "Co-applicant details is required" }]}
-          >
-            <Input.TextArea rows={3} placeholder="Enter co-applicant details" />
-          </Form.Item>
-        </Col>
-        <Col span={24}>
-          <Form.Item
-            name="residentialDetails"
-            label="Residential Details"
-            rules={[{ required: true, message: "Residential details is required" }]}
-          >
-            <Input.TextArea rows={3} placeholder="Enter residential details" />
-          </Form.Item>
-        </Col>
-      </>
-    );
+    // Check if it's Arka Fincap to show specific fields only
+    const isArkaFincap = bankName?.toLowerCase().includes('arka');
+    
+    if (isArkaFincap) {
+      return (
+        <>
+          <Col span={12}>
+            <Form.Item
+              name="applicantName"
+              label="Applicant Name"
+              rules={[{ required: true, message: "Applicant name is required" }]}
+            >
+              <Input placeholder="Enter applicant name" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="phoneNo"
+              label="Phone No"
+              rules={[
+                { required: true, message: "Phone number is required" },
+                { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
+              ]}
+            >
+              <Input placeholder="Enter phone number" maxLength={10} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="nameOfConcern"
+              label="Name of Concern"
+              rules={[{ required: true, message: "Name of concern is required" }]}
+            >
+              <Input placeholder="Enter name of concern" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="personMet"
+              label="Person Met"
+              rules={[{ required: true, message: "Person met is required" }]}
+            >
+              <Select placeholder="Select person met">
+                {personMetOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="loanAmount"
+              label="Loan Amount"
+              rules={[{ required: true, message: "Loan amount is required" }]}
+            >
+              <Select placeholder="Select loan structure">
+                {structureOfLoanOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="dateOfVisit"
+              label="Date of Visit"
+              rules={[{ required: true, message: "Date of visit is required" }]}
+            >
+              <Select placeholder="Select Yes/No">
+                {yesNoOptions.map((option) => (
+                  <Select.Option key={option} value={option.toLowerCase()}>
+                    {option}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="purposeOfLoan"
+              label="Purpose of Loan"
+              rules={[{ required: true, message: "Purpose of loan is required" }]}
+            >
+              <Input placeholder="Enter purpose of loan" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="aboutApplicant"
+              label="About Applicant"
+              rules={[{ required: true, message: "About applicant is required" }]}
+            >
+              <Input placeholder="Enter details about applicant" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="visitedAddress"
+              label="Visited Address"
+              rules={[{ required: true, message: "Visited address is required" }]}
+            >
+              <Input placeholder="Enter visited address" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="initiatedAddress"
+              label="Initiated Address"
+              rules={[{ required: true, message: "Initiated address is required" }]}
+            >
+              <Input placeholder="Enter initiated address" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="typeofCollateral"
+              label="Type of Collateral"
+              rules={[{ required: true, message: "Type of collateral is required" }]}
+            >
+              <Input placeholder="Enter type of collateral" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="collateralDetails"
+              label="Collateral Details"
+              rules={[{ required: true, message: "Collateral details is required" }]}
+            >
+              <Input placeholder="Enter collateral details" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="residentialDetails"
+              label="Residential Details"
+              rules={[{ required: true, message: "Residential details is required" }]}
+            >
+              <Input placeholder="Enter residential details" />
+            </Form.Item>
+          </Col>
+        </>
+      );
+    } else {
+      // Original PD form for other banks
+      return (
+        <>
+          <Col span={12}>
+            <Form.Item
+              name="phoneNo"
+              label="Phone No"
+              rules={[
+                { required: true, message: "Phone number is required" },
+                { pattern: /^[0-9]{10}$/, message: "Phone number must be 10 digits" },
+              ]}
+            >
+              <Input placeholder="Enter phone number" maxLength={10} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="noOfVisit"
+              label="No. of Visit"
+              rules={[{ required: true, message: "Number of visits is required" }]}
+            >
+              <Input placeholder="Enter number of visits" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="personMet"
+              label="Person Met"
+              rules={[{ required: true, message: "Person met is required" }]}
+            >
+              <Select placeholder="Select person met">
+                {personMetOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="constitution"
+              label="Constitution"
+              rules={[{ required: true, message: "Constitution is required" }]}
+            >
+              <Select placeholder="Select constitution">
+                {constitutionOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="applicantName"
+              label="Applicant Name"
+              rules={[{ required: true, message: "Applicant name is required" }]}
+            >
+              <Input disabled style={{ color: "#000" }} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="nameOfConcern"
+              label="Name of Concern"
+              rules={[{ required: true, message: "Name of concern is required" }]}
+            >
+              <Input placeholder="Enter name of concern" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="aboutApplicant"
+              label="About Applicant"
+              rules={[{ required: true, message: "About applicant is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter details about applicant" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="visitedAddress"
+              label="Visited Address"
+              rules={[{ required: true, message: "Visited address is required" }]}
+            >
+              <Input placeholder="Enter visited address" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="structureOfLoan"
+              label="Structure of Loan"
+              rules={[{ required: true, message: "Structure of loan is required" }]}
+            >
+              <Select placeholder="Select structure of loan">
+                {structureOfLoanOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="appointmentFixed"
+              label="Appointment Fixed"
+              rules={[{ required: true, message: "Appointment fixed is required" }]}
+            >
+              <Select placeholder="Select Yes/No">
+                {yesNoOptions.map((option) => (
+                  <Select.Option key={option} value={option.toLowerCase()}>
+                    {option}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="initiatedAddress"
+              label="Initiated Address"
+              rules={[{ required: true, message: "Initiated address is required" }]}
+            >
+              <Input placeholder="Enter initiated address" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="coApplicantDetails"
+              label="Co-Applicant Details"
+              rules={[{ required: true, message: "Co-applicant details is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter co-applicant details" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="residentialDetails"
+              label="Residential Details"
+              rules={[{ required: true, message: "Residential details is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter residential details" />
+            </Form.Item>
+          </Col>
+        </>
+      );
+    }
   }
 
   // Original implementation for other departments

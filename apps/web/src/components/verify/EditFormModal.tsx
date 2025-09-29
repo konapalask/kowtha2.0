@@ -597,6 +597,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             currentTab={currentTab}
             getMaritalStatus={getMaritalStatus}
             currentDepartment={currentDepartment}
+            bankName={initialValues?.verifications?.find((v: any) => v.addressType === currentTab)?.bankName}
           />
         </Row>
       </Form>
