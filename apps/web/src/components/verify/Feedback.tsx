@@ -124,9 +124,10 @@ const Feedback: React.FC<FeedbackProps> = ({
     
     if (foundSynopsis) {
       setExistingSynopsis(foundSynopsis);
-      // Convert existing synopsis to points format
-      const pointsFormat = convertTextToPoints(foundSynopsis);
-      setEditorContent(pointsFormat);
+      // If backend already has UL HTML, use it directly; else convert plain text to UL
+      const isHtmlList = /<\s*ul[^>]*>/i.test(foundSynopsis);
+      const contentToSet = isHtmlList ? foundSynopsis : convertTextToPoints(foundSynopsis);
+      setEditorContent(contentToSet);
     }
   }, [verificationData, setEditorContent]);
   
@@ -212,9 +213,10 @@ const Feedback: React.FC<FeedbackProps> = ({
     try {
       setSynopsisLoading(true);
       
-      const synopsisText = convertPointsToText(editorContent);
+      // Validate the content has actual list text
+      const synopsisPlain = convertPointsToText(editorContent);
       
-      if (!synopsisText || synopsisText === '') {
+      if (!synopsisPlain || synopsisPlain === '') {
         message.error('Please enter synopsis content before submitting');
         return;
       }
@@ -254,23 +256,23 @@ const Feedback: React.FC<FeedbackProps> = ({
         commissionReceived: financialData.commissionReceived || 0,
         netProfit: financialData.netProfit || 0,
         grossProfit: financialData.grossProfit || 0,
-        synopsis: synopsisText
+        synopsis: editorContent
       };
 
       console.log('Submitting synopsis with payload:', payload);
       
       if (isEditing) {
         // Update existing synopsis using PATCH
-        await updateSynopsis(id as string, synopsisText);
+        await updateSynopsis(id as string, editorContent);
         message.success('Synopsis updated successfully!');
         setIsEditing(false);
         // Update the existing synopsis state with new content
-        setExistingSynopsis(synopsisText);
+        setExistingSynopsis(editorContent);
       } else {
         // Submit new synopsis with financial data
         await submitFinancialAnalysis(id as string, payload);
         message.success('Synopsis submitted successfully!');
-        setExistingSynopsis(synopsisText);
+        setExistingSynopsis(editorContent);
       }
       
     } catch (error) {
@@ -294,8 +296,10 @@ const Feedback: React.FC<FeedbackProps> = ({
                 icon={<EditOutlined />}
                 onClick={() => {
                   setIsEditing(true);
-                  const pointsFormat = convertTextToPoints(existingSynopsis);
-                  setEditorContent(pointsFormat);
+                  // If existing synopsis is UL HTML, use as-is; else convert text to UL
+                  const isHtmlList = /<\s*ul[^>]*>/i.test(existingSynopsis);
+                  const contentToSet = isHtmlList ? existingSynopsis : convertTextToPoints(existingSynopsis);
+                  setEditorContent(contentToSet);
                   // Focus the editor for better UX
                   setTimeout(() => {
                     const editor = document.querySelector('.ql-editor');

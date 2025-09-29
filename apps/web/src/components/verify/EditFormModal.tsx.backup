@@ -138,13 +138,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           if (salData) {
             form.setFieldsValue({ salariesWages: salData });
           }
-        } else if (formKey === "documentsObserved") {
-          const docData = currentVerification?.verificationData?.documentsObserved;
-          if (docData) {
-            form.setFieldsValue({ documentsObserved: docData });
-          }
-      }
-      if (formKey === "assetDetails") {
+        } else if (formKey === "assetDetails") {
           const assetData = currentVerification?.verificationData?.assetDetails;
           if (assetData) {
             form.setFieldsValue({ assetDetails: assetData });
@@ -184,9 +178,6 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (formKey === "businessDetails") {
         return currentVerification?.verificationData?.businessDetails;
       }
-      if (formKey === "bankingDetails") {
-        return currentVerification?.verificationData?.bankingDetails;
-      }
       if (formKey === "shareholdingDetails") {
         return currentVerification?.verificationData?.shareholdingDetails;
       }
@@ -197,10 +188,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         return { clientsDebtors: currentVerification?.verificationData?.clientsDebtors };
       }
       if (formKey === "salariesWages") {
-        return { documentsObserved: currentVerification?.verificationData?.documentsObserved };
-      }
-      if (formKey === "documentsObserved") {
-        return { documentsObserved: currentVerification?.verificationData?.documentsObserved };
+        return { salariesWages: currentVerification?.verificationData?.salariesWages };
       }
       if (formKey === "assetDetails") {
         return { assetDetails: currentVerification?.verificationData?.assetDetails };
