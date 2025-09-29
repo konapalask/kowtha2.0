@@ -5,8 +5,9 @@ const statusOptions = ["permanent", "contractual"];
 
 const SalariesWagesForm: React.FC<{ form: any; bankName?: string }> = ({ form, bankName }) => {
   const isAxisFinance = bankName?.toLowerCase().includes('axis');
+  const isArkaFincap = bankName?.toLowerCase().includes('arka');
 
-  if (isAxisFinance) {
+  if (isAxisFinance || isArkaFincap) {
     return (
       <div>
         {/* Employee Information Section */}

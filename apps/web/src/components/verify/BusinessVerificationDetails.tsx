@@ -729,8 +729,7 @@ export const BusinessVerificationDetails: React.FC<
         );
 
       case 'salariesWages':
-        // Check if it's Axis Finance to show subsections
-        if (isAxisFinance(bankName)) {
+        if (isAxisFinance(bankName) || isArkaFincap(bankName)) {
           return (
             <section key="salariesWages" style={{ marginBottom: 24 }}>
               <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
@@ -966,76 +965,115 @@ export const BusinessVerificationDetails: React.FC<
         );
 
       case 'financeDetails':
-        return (
-          <section key="financeDetails" style={{ marginBottom: 24 }}>
-            <Card title="Finance Details" extra={getButton("clientsDebtors")}>
-              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                <Descriptions.Item label="No. of Fixed Customers">
-                  {clientsDebtorsData?.clientsDebtors?.numberOfFixedCustomers || clientsDebtorsData?.numberOfFixedCustomers || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Credit Period">
-                  {clientsDebtorsData?.clientsDebtors?.creditPeriod || clientsDebtorsData?.creditPeriod || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Cash-Cheque Proportions">
-                  {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-              <Typography.Text strong style={{ display: 'block', margin: '8px 0' }}>Business Metrics</Typography.Text>
-              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                <Descriptions.Item label="Average Stock Maintenance">
-                  {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Turnover">
-                  {clientsDebtorsData?.clientsDebtors?.turnover || clientsDebtorsData?.turnover || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Net Margins">
-                  {clientsDebtorsData?.clientsDebtors?.netMargins || clientsDebtorsData?.netMargins || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-              <Table
-                className="striped-table"
-                dataSource={
-                  clientsDebtorsData?.clientsDebtors?.customers || 
-                  clientsDebtorsData?.customers || 
-                  [
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer1Name || clientsDebtorsData?.customer1Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer1Phone || clientsDebtorsData?.customer1Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer1Location || clientsDebtorsData?.customer1Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer1Review || clientsDebtorsData?.customer1Review,
+        // Check if it's Arka Fincap to show shareholders information
+        if (isArkaFincap(bankName)) {
+          return (
+            <section key="financeDetails" style={{ marginBottom: 24 }}>
+              <Card title="Finance Details" extra={getButton("financeDetails")}>
+                <Typography.Text strong style={{ display: 'block', margin: '0 0 16px 0' }}>
+                  Shareholders Information
+                </Typography.Text>
+                <Table
+                  className="striped-table"
+                  dataSource={data?.financeDetails?.shareholders || []}
+                  columns={[
+                    { title: "Name", dataIndex: "name", key: "name" },
+                    { title: "Designation", dataIndex: "designation", key: "designation" },
+                    { 
+                      title: "Shareholding %", 
+                      dataIndex: "shareholdingPercentage", 
+                      key: "shareholdingPercentage",
+                      render: (value: string) => value ? `${value}%` : "-"
                     },
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer2Name || clientsDebtorsData?.customer2Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer2Phone || clientsDebtorsData?.customer2Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer2Location || clientsDebtorsData?.customer2Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer2Review || clientsDebtorsData?.customer2Review,
+                    { 
+                      title: "Coming into Loan Structure", 
+                      dataIndex: "comingIntoLoanStructure", 
+                      key: "comingIntoLoanStructure",
+                      render: (value: string) => value ? value.charAt(0).toUpperCase() + value.slice(1) : "-"
                     },
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer3Name || clientsDebtorsData?.customer3Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer3Phone || clientsDebtorsData?.customer3Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer3Location || clientsDebtorsData?.customer3Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer3Review || clientsDebtorsData?.customer3Review,
+                    { title: "Relationship with Applicant", dataIndex: "relationshipWithApplicant", key: "relationshipWithApplicant" },
+                    { title: "Functional Role", dataIndex: "functionalOfPartnerDirector", key: "functionalOfPartnerDirector" },
+                  ]}
+                  pagination={false}
+                  locale={{ emptyText: "No shareholders added yet" }}
+                  bordered
+                />
+              </Card>
+            </section>
+          );
+        } else {
+          // Original layout for other banks (Axis Finance, etc.)
+          return (
+            <section key="financeDetails" style={{ marginBottom: 24 }}>
+              <Card title="Finance Details" extra={getButton("clientsDebtors")}>
+                <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
+                  <Descriptions.Item label="No. of Fixed Customers">
+                    {clientsDebtorsData?.clientsDebtors?.numberOfFixedCustomers || clientsDebtorsData?.numberOfFixedCustomers || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Credit Period">
+                    {clientsDebtorsData?.clientsDebtors?.creditPeriod || clientsDebtorsData?.creditPeriod || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Cash-Cheque Proportions">
+                    {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
+                  </Descriptions.Item>
+                </Descriptions>
+                <Typography.Text strong style={{ display: 'block', margin: '8px 0' }}>Business Metrics</Typography.Text>
+                <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
+                  <Descriptions.Item label="Average Stock Maintenance">
+                    {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Turnover">
+                    {clientsDebtorsData?.clientsDebtors?.turnover || clientsDebtorsData?.turnover || "-"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Net Margins">
+                    {clientsDebtorsData?.clientsDebtors?.netMargins || clientsDebtorsData?.netMargins || "-"}
+                  </Descriptions.Item>
+                </Descriptions>
+                <Table
+                  className="striped-table"
+                  dataSource={
+                    clientsDebtorsData?.clientsDebtors?.customers || 
+                    clientsDebtorsData?.customers || 
+                    [
+                      {
+                        name: clientsDebtorsData?.clientsDebtors?.customer1Name || clientsDebtorsData?.customer1Name,
+                        phone: clientsDebtorsData?.clientsDebtors?.customer1Phone || clientsDebtorsData?.customer1Phone,
+                        location: clientsDebtorsData?.clientsDebtors?.customer1Location || clientsDebtorsData?.customer1Location,
+                        review: clientsDebtorsData?.clientsDebtors?.customer1Review || clientsDebtorsData?.customer1Review,
+                      },
+                      {
+                        name: clientsDebtorsData?.clientsDebtors?.customer2Name || clientsDebtorsData?.customer2Name,
+                        phone: clientsDebtorsData?.clientsDebtors?.customer2Phone || clientsDebtorsData?.customer2Phone,
+                        location: clientsDebtorsData?.clientsDebtors?.customer2Location || clientsDebtorsData?.customer2Location,
+                        review: clientsDebtorsData?.clientsDebtors?.customer2Review || clientsDebtorsData?.customer2Review,
+                      },
+                      {
+                        name: clientsDebtorsData?.clientsDebtors?.customer3Name || clientsDebtorsData?.customer3Name,
+                        phone: clientsDebtorsData?.clientsDebtors?.customer3Phone || clientsDebtorsData?.customer3Phone,
+                        location: clientsDebtorsData?.clientsDebtors?.customer3Location || clientsDebtorsData?.customer3Location,
+                        review: clientsDebtorsData?.clientsDebtors?.customer3Review || clientsDebtorsData?.customer3Review,
+                      },
+                    ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))
+                  }
+                  columns={[
+                    { title: "Name", dataIndex: "name", key: "name" },
+                    { title: "Phone", dataIndex: "phone", key: "phone" },
+                    { title: "Location", dataIndex: "location", key: "location" },
+                    { 
+                      title: "Review", 
+                      dataIndex: "review", 
+                      key: "review",
+                      render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
                     },
-                  ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))
-                }
-                columns={[
-                  { title: "Name", dataIndex: "name", key: "name" },
-                  { title: "Phone", dataIndex: "phone", key: "phone" },
-                  { title: "Location", dataIndex: "location", key: "location" },
-                  { 
-                    title: "Review", 
-                    dataIndex: "review", 
-                    key: "review",
-                    render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
-                  },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No customers added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        );
+                  ]}
+                  pagination={false}
+                  locale={{ emptyText: "No customers added yet" }}
+                  bordered
+                />
+              </Card>
+            </section>
+          );
+        }
 
       case 'thirdPartyCheck':
         return (
@@ -1078,40 +1116,21 @@ export const BusinessVerificationDetails: React.FC<
         );
 
       case 'additionalDetails':
-        // Render differently based on bank type
-        if (isAxisFinance(bankName)) {
-          // For Axis Finance - render as simple list
-          return (
-            <section key="additionalDetails" style={{ marginBottom: 24 }}>
-              <Card title="Additional Details">
-                {(data?.additionalDetails?.details || []).length > 0 ? (
-                  <ul style={{ margin: 0, paddingLeft: 18 }}>
-                    {data?.additionalDetails?.details?.map((d: any, idx: number) => (
-                      <li key={idx}>{d?.value}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div style={{ color: "#6b7280" }}>No additional details added</div>
-                )}
-              </Card>
-            </section>
-          );
-        } else {
-          // For ARKA FINCAP - render as BusinessMiscellaneousDescription
-          return (
-            <BusinessMiscellaneousDescription
-              key="additionalDetails"
-              data={{
-                ...data,
-                bankName: verificationData?.bankName,
-                applicationNumber: applicationNumber,
-                loanId: loanId
-              }}
-              extra={getButton("miscellaneous")}
-              logs={false}
-            />
-          );
-        }
+        return (
+          <section key="additionalDetails" style={{ marginBottom: 24 }}>
+            <Card title="Additional Details" extra={getButton("additionalDetails")}>
+              {(data?.additionalDetails?.details || []).length > 0 ? (
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {data?.additionalDetails?.details?.map((d: any, idx: number) => (
+                    <li key={idx}>{d?.value}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ color: "#6b7280" }}>No additional details added</div>
+              )}
+            </Card>
+          </section>
+        );
 
       case 'photoCapture':
         return (

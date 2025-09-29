@@ -53,7 +53,22 @@ export const bankConfigs: BankConfigs = {
           loans: rawData?.existingLoans?.loans || []
         },
         businessDetails: rawData?.businessDetails || {},
-        salariesWages: rawData?.salariesWages || {},
+        salariesWages: {
+          employeeInformation: {
+            numberOfEmployees: rawData?.salariesWages?.numberOfEmployees,
+            salaryPerMonthPerEmployee: rawData?.salariesWages?.salaryPerMonthPerEmployee,
+            statusOfEmployee: rawData?.salariesWages?.statusOfEmployee
+          },
+          labourInformation: {
+            numberOfLabours: rawData?.salariesWages?.numberOfLabours,
+            wagesPerMonthPerDay: rawData?.salariesWages?.wagesPerMonthPerDay,
+            statusOfLabour: rawData?.salariesWages?.statusOfLabour,
+            workingHoursStart: rawData?.salariesWages?.workingHoursStart,
+            workingHoursEnd: rawData?.salariesWages?.workingHoursEnd,
+            otherMajorExpenditure: rawData?.salariesWages?.otherMajorExpenditure,
+            remarks: rawData?.salariesWages?.remarks
+          }
+        },
         suppliersCreditors: rawData?.suppliersCreditors || {},
         documentsObserved: rawData?.documentsObserved || {},
         financeDetails: rawData?.clientsDebtors || rawData?.financeDetails || {},
