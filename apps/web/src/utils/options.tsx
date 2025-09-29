@@ -137,7 +137,7 @@ export const pdBankOptions = [
   { value: "ICICI", label: "ICICI" },
   { value: "IDFC HL & ML", label: "IDFC HL & ML" },
   { value: "Chola", label: "Chola" },
-  { value: "Axis ubl above 10 lakhs", label: "Axis ubl above 10 lakhs" },
+  { value: "Axis Finance ubl", label: "Axis Finance ubl" },
   { value: "Hero Fincorp", label: "Hero Fincorp" },
   { value: "IDFC PL", label: "IDFC PL" },
   { value: "Indiashelter - self employed", label: "Indiashelter - self employed" },

@@ -154,6 +154,69 @@ export const bankConfigs: BankConfigs = {
     customSections: ['shareholdingDetails', 'documentsObserved', 'assetDetails', 'bankingDetails']
   },
 
+  // Axis Finance UBL configuration (same as Axis Finance)
+  'Axis Finance ubl': {
+    name: 'Axis Finance ubl',
+    sectionOrder: [
+      'basicDetails',        // 1. Basic Details
+      'familyDetails',       // 2. Family Details
+      'shareholdingDetails', // 3. Shareholding Details
+      'documentsObserved',   // 4. Documents Observed
+      'suppliersCreditors',  // 5. Suppliers/Creditors
+      'clientsDebtors',      // 6. Clients/Debtors
+      'salariesWages',       // 7. Salaries & Wages (MAIN HEADING)
+      'assetDetails',        // 8. Asset Details
+      'existingLoans',       // 9. Existing Loans
+      'bankingDetails',      // 10. Banking Details
+      'thirdPartyCheck',     // 11. Third Party Check
+      'additionalDetails',   // 12. Additional Details
+      'photoCapture'         // 13. Photo Capture
+    ],
+    apiResponseTransformer: (rawData: any) => {
+      // Transform Axis UBL above 10 lakhs specific API response structure (same as Axis Finance)
+      const salariesWagesData = rawData?.salariesWages || {};
+      return {
+        basicDetails: rawData?.basicDetails || {},
+        familyDetails: rawData?.familyDetails || rawData?.familyMemberDetails || [],
+        shareholdingDetails: rawData?.shareholdingDetails || {},
+        documentsObserved: rawData?.documentsObserved || {},
+        suppliersCreditors: rawData?.suppliersCreditors || {},
+        clientsDebtors: rawData?.clientsDebtors || {},
+        // Keep salariesWages as main section but structure it for subsections
+        salariesWages: {
+          employeeInformation: {
+            numberOfEmployees: salariesWagesData?.numberOfEmployees,
+            salaryPerMonthPerEmployee: salariesWagesData?.salaryPerMonthPerEmployee,
+            statusOfEmployee: salariesWagesData?.statusOfEmployee
+          },
+          labourInformation: {
+            numberOfLabours: salariesWagesData?.numberOfLabours,
+            wagesPerMonthPerDay: salariesWagesData?.wagesPerMonthPerDay,
+            statusOfLabour: salariesWagesData?.statusOfLabour,
+            workingHoursStart: salariesWagesData?.workingHoursStart,
+            workingHoursEnd: salariesWagesData?.workingHoursEnd,
+            otherMajorExpenditure: salariesWagesData?.otherMajorExpenditure,
+            remarks: salariesWagesData?.remarks
+          }
+        },
+        assetDetails: rawData?.assetDetails || {},
+        existingLoans: rawData?.existingLoans || {},
+        bankingDetails: rawData?.bankingDetails || rawData?.applicantDetails || {},
+        thirdPartyCheck: rawData?.thirdPartyCheck || {},
+        additionalDetails: rawData?.additionalDetails || rawData?.miscellaneous || {},
+        uploadedItems: rawData?.uploadedItems || []
+      };
+    },
+    fieldMappings: {
+      // Map Axis UBL above 10 lakhs API fields to display fields
+      'applicantName': 'Applicant Name',
+      'bankName': 'Bank Name',
+      'phoneNo': 'Phone No'
+    },
+    hiddenSections: ['businessDetails', 'financeDetails'],
+    customSections: ['shareholdingDetails', 'documentsObserved', 'assetDetails', 'bankingDetails']
+  },
+
   // Add more banks as needed
   'HDFC Bank': {
     name: 'HDFC Bank',
@@ -204,6 +267,9 @@ export const normalizeBankName = (bankName: string): string => {
   if (lowerName.includes('arka') && lowerName.includes('fincap')) {
     return 'Arka Fincap';
   }
+  if (lowerName.includes('axis') && lowerName.includes('finance') && lowerName.includes('ubl')) {
+    return 'Axis Finance ubl';
+  }
   if (lowerName.includes('axis')) {
     return 'Axis Finance';
   }
@@ -226,6 +292,10 @@ export const isArkaFincap = (bankName: string): boolean => {
 
 export const isAxisFinance = (bankName: string): boolean => {
   return normalizeBankName(bankName) === 'Axis Finance';
+};
+
+export const isAxisFinanceUbl = (bankName: string): boolean => {
+  return normalizeBankName(bankName) === 'Axis Finance ubl';
 };
 
 export const shouldShowSection = (bankName: string, sectionName: string): boolean => {
