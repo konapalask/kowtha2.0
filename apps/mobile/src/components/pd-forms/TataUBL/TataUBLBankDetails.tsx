@@ -7,69 +7,71 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {colors} from '../../../constants/colors';
+import {InputFormItem} from '../../../lib/InputFormItem';
 
-export type TataUBLAdditionalBusinessDetailsFormData = {
-  otherBusinessIncomeDetails: string;
-  assets: string;
-  liabilities: string;
+export type TataUBLBankDetailsFormData = {
+  primaryBanker: string;
+  natureOfAccount: string;
+  avgBalance: string;
 };
 
-type TataUBLAdditionalBusinessDetailsProps = {
-  formData: TataUBLAdditionalBusinessDetailsFormData;
-  onSubmit: (data: TataUBLAdditionalBusinessDetailsFormData) => void;
+type TataUBLBankDetailsProps = {
+  formData: TataUBLBankDetailsFormData;
+  onSubmit: (data: TataUBLBankDetailsFormData) => void;
 };
 
-const TataUBLAdditionalBusinessDetails: React.FC<
-  TataUBLAdditionalBusinessDetailsProps
-> = ({formData, onSubmit}) => {
+const TataUBLBankDetails: React.FC<TataUBLBankDetailsProps> = ({
+  formData,
+  onSubmit,
+}) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm<TataUBLAdditionalBusinessDetailsFormData>({
+  } = useForm<TataUBLBankDetailsFormData>({
     defaultValues: formData,
   });
 
-  const onFormSubmit = (data: TataUBLAdditionalBusinessDetailsFormData) => {
+  const onFormSubmit = (data: TataUBLBankDetailsFormData) => {
     onSubmit(data);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Additional Business Details</Text>
+      <Text style={styles.sectionTitle}>Bank Details</Text>
 
-      <TextAreaFormItem
+      <InputFormItem
         data={{
-          title: 'Other Business / Income Details (if any)',
-          key: 'otherBusinessIncomeDetails',
+          title: 'Primary Banker',
+          key: 'primaryBanker',
           control,
           errors,
           required: true,
-          placeholder: 'Enter any other business or income details',
+          placeholder: 'Enter primary banker name',
         }}
       />
 
-      <TextAreaFormItem
+      <InputFormItem
         data={{
-          title: 'Assets',
-          key: 'assets',
+          title: 'Nature of the Account',
+          key: 'natureOfAccount',
           control,
           errors,
           required: true,
-          placeholder: 'Enter details about assets',
+          placeholder: 'Enter nature of the account',
         }}
       />
 
-      <TextAreaFormItem
+      <InputFormItem
         data={{
-          title: 'Liabilities',
-          key: 'liabilities',
+          title: 'Avg. Balance',
+          key: 'avgBalance',
           control,
           errors,
           required: true,
-          placeholder: 'Enter details about liabilities',
+          placeholder: 'Enter average balance amount',
+          keyboardType: 'numeric',
         }}
       />
 
@@ -110,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TataUBLAdditionalBusinessDetails;
+export default TataUBLBankDetails;

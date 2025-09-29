@@ -7,58 +7,69 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {colors} from '../../../constants/colors';
+import {TextAreaFormItem} from '../../../lib/TextAreaFormItem';
 
-export type TataUBLBusinessDetailsFormData = {
-  currentBusinessDetails: string;
-  stockAsOnDate: string;
+export type TataUBLAdditionalBusinessDetailsFormData = {
+  otherBusinessIncomeDetails: string;
+  assets: string;
+  liabilities: string;
 };
 
-type TataUBLBusinessDetailsProps = {
-  formData: TataUBLBusinessDetailsFormData;
-  onSubmit: (data: TataUBLBusinessDetailsFormData) => void;
+type TataUBLAdditionalBusinessDetailsProps = {
+  formData: TataUBLAdditionalBusinessDetailsFormData;
+  onSubmit: (data: TataUBLAdditionalBusinessDetailsFormData) => void;
 };
 
-const TataUBLBusinessDetails: React.FC<TataUBLBusinessDetailsProps> = ({
-  formData,
-  onSubmit,
-}) => {
+const TataUBLAdditionalBusinessDetails: React.FC<
+  TataUBLAdditionalBusinessDetailsProps
+> = ({formData, onSubmit}) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm<TataUBLBusinessDetailsFormData>({
+  } = useForm<TataUBLAdditionalBusinessDetailsFormData>({
     defaultValues: formData,
   });
 
-  const onFormSubmit = (data: TataUBLBusinessDetailsFormData) => {
+  const onFormSubmit = (data: TataUBLAdditionalBusinessDetailsFormData) => {
     onSubmit(data);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Business Details</Text>
+      <Text style={styles.sectionTitle}>Additional Business Details</Text>
 
       <TextAreaFormItem
         data={{
-          title: 'Current Business Details',
-          key: 'currentBusinessDetails',
+          title: 'Other Business / Income Details (if any)',
+          key: 'otherBusinessIncomeDetails',
           control,
           errors,
           required: true,
-          placeholder: 'Enter current business details',
+          placeholder: 'Enter any other business or income details',
         }}
       />
 
       <TextAreaFormItem
         data={{
-          title: 'Stock as on Date',
-          key: 'stockAsOnDate',
+          title: 'Assets',
+          key: 'assets',
           control,
           errors,
           required: true,
-          placeholder: 'Enter stock details as on current date',
+          placeholder: 'Enter details about assets',
+        }}
+      />
+
+      <TextAreaFormItem
+        data={{
+          title: 'Liabilities',
+          key: 'liabilities',
+          control,
+          errors,
+          required: true,
+          placeholder: 'Enter details about liabilities',
         }}
       />
 
@@ -99,4 +110,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TataUBLBusinessDetails;
+export default TataUBLAdditionalBusinessDetails;

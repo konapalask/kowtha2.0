@@ -23,6 +23,8 @@ import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import SchemaSection from '../components/pd-forms/SchemaSection';
+import { loadMobilePDFormsSchema, resolveAxisUBLVariant } from '../components/pd-forms/schema/pdSchema';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -33,6 +35,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('userData', userData);
 
   const bankName = userData?.loan?.bankName;
+  const isAxisFinance = (bankName || '').toLowerCase().includes('axis');
+  const [schemaForm, setSchemaForm] = useState<any>(null);
 
   const formConfig = getFormConfigByBank(bankName);
 
@@ -66,6 +70,23 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   useLayoutEffect(() => {
     loadFormData();
   }, []);
+
+  useEffect(() => {
+    // Load schema for Axis UBL pilot
+    const loadSchema = async () => {
+      try {
+        if (isAxisFinance) {
+          const schema = await loadMobilePDFormsSchema();
+          const formId = resolveAxisUBLVariant();
+          const form = schema.forms.find(f => f.id === formId);
+          setSchemaForm(form || null);
+        }
+      } catch (e) {
+        setSchemaForm(null);
+      }
+    };
+    loadSchema();
+  }, [isAxisFinance]);
 
   // Watch form values to update formData
   // const watchedValues = watch();
@@ -304,7 +325,35 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         {investigable && (
           <>
             <View style={styles.formContainer}>
-              {formConfig.sections.map(section => {
+              {/* Axis UBL schema-driven pilot: if schemaForm is available, render from schema; else use existing config */}
+              {(isAxisFinance && schemaForm?.sections?.length ? schemaForm.sections.map((sec: any) => {
+                const isExpanded = expandedSections[sec.id] || false;
+                return (
+                  <View key={sec.id} style={styles.sectionContainer}>
+                    <TouchableOpacity
+                      style={styles.sectionHeader}
+                      onPress={() => toggleSection(sec.id)}>
+                      <Text style={styles.sectionTitle}>{sec.label}</Text>
+                      {isSectionValid(sec.id) && (
+                        <Icon name="check" size={18} color="#34C759" />
+                      )}
+                      <Text style={styles.sectionIndicator}>
+                        {isExpanded ? '▼' : '▶'}
+                      </Text>
+                    </TouchableOpacity>
+                    {isExpanded && (
+                      <View style={styles.sectionContent}>
+                        <SchemaSection
+                          title={sec.label}
+                          fields={sec.fields}
+                          initialData={sectionData[sec.id]}
+                          onSubmit={(data: any) => handleSectionDataChange(sec.id, data)}
+                        />
+                      </View>
+                    )}
+                  </View>
+                );
+              }) : formConfig.sections.map(section => {
                 const SectionComponent = section.component;
                 const isExpanded = expandedSections[section.id] || false;
 

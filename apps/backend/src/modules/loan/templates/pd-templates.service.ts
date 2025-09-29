@@ -11,6 +11,7 @@ import {
 import { axisFinanceUBLTemplate } from './PD/axis-finance-ubl.template';
 import { LoggingService } from 'src/modules/common/logging/logging.service';
 import { AxisFinanceUBLInterface } from './PD/interface/axis-finance-ubl.interface';
+import { mapAxisUBL } from './PD/mappers/axis-finance-ubl.mapper';
 
 @Injectable()
 export class PDTemplateService {
@@ -28,7 +29,8 @@ export class PDTemplateService {
 
     async InterfaceMapping(bankName: string, verification: any, loan: any): Promise<any> {
         if (bankName) {
-            let verificationData = verification as AxisFinanceUBLInterface;
+            // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
+            let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
 
             const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
             const imageBase64 = fs.readFileSync(imagePath, 'base64');

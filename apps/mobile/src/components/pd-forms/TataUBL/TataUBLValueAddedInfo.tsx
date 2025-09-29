@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {InputFormItem} from '../../lib/InputFormItem';
-import {SelectFormItem} from '../../lib/SelectFormItem';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {colors} from '../../../constants/colors';
+import {InputFormItem} from '../../../lib/InputFormItem';
+import {SelectFormItem} from '../../../lib/SelectFormItem';
+import {TextAreaFormItem} from '../../../lib/TextAreaFormItem';
 
 export type TataValueAddedInfoFormData = {
   customerBehaviour: string;
