@@ -27,6 +27,22 @@ import AssetDetailsForm from "./AssetDetailsForm";
 import DocumentsObservedForm from "./DocumentsObservedForm";
 import BankingDetailsForm from "./BankingDetailsForm";
 import AdditionalDetailsForm from "./AdditionalDetailsForm";
+import {
+  TataUBLBasicDetailsEdit,
+  TataUBLProposedLoanDetailsEdit,
+  TataUBLOfficeAddressEdit,
+  TataUBLResidentialAddressEdit,
+  TataUBLBusinessDetailsEdit,
+  TataUBLEmployeeDetailsEdit,
+  TataUBLBankDetailsEdit,
+  TataUBLSalesAndProfitDetailsEdit,
+  TataUBLCustomersDetailsEdit,
+  TataUBLSupplierDetailsEdit,
+  TataUBLAdditionalBusinessDetailsEdit,
+  TataUBLMiscellaneousDetailsEdit,
+  TataUBLValueAddedDetailsEdit,
+  TataUBLSiteVisitDetailsEdit,
+} from "./TataUBLEditForms";
 
 interface FormSelectorProps {
   form: any;
@@ -47,6 +63,10 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
 }) => {
   switch (formKey) {
     case "basicDetails":
+      // Check if this is Tata UBL
+      if (bankName === "Tata Ubl") {
+        return <TataUBLBasicDetailsEdit form={form} />;
+      }
       return <BasicDetailsForm form={form} />;
     case "addressVerification":
       return <AddressVerificationForm form={form} />;
@@ -76,6 +96,10 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
     case "businessBasicDetails":
       return <BusinessBasicDetails form={form} currentDepartment={currentDepartment} bankName={bankName} />;
     case "businessDetails":
+      // Check if this is Tata UBL
+      if (bankName === "Tata Ubl") {
+        return <TataUBLBusinessDetailsEdit form={form} />;
+      }
       return <BusinessDetails form={form} currentDepartment={currentDepartment} />;
     case "applicantDetails":
       return <ApplicantDetails form={form} currentDepartment={currentDepartment} />;
@@ -109,6 +133,67 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       return <ToNetProfitForm form={form} />;
     case "financialAnalysis":
       return <FinancialAnalysisForm form={form} />;
+    // Tata UBL specific forms
+    case "proposedLoanDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLProposedLoanDetailsEdit form={form} />;
+      }
+      return null;
+    case "officeAddress":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLOfficeAddressEdit form={form} />;
+      }
+      return null;
+    case "residentialAddress":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLResidentialAddressEdit form={form} />;
+      }
+      return null;
+    case "employeeDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLEmployeeDetailsEdit form={form} />;
+      }
+      return null;
+    case "bankDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLBankDetailsEdit form={form} />;
+      }
+      return null;
+    case "salesAndProfitDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLSalesAndProfitDetailsEdit form={form} />;
+      }
+      return null;
+    case "customersDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLCustomersDetailsEdit form={form} />;
+      }
+      return null;
+    case "supplierDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLSupplierDetailsEdit form={form} />;
+      }
+      return null;
+    case "additionalBusinessDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLAdditionalBusinessDetailsEdit form={form} />;
+      }
+      return null;
+    case "miscelleanousDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLMiscellaneousDetailsEdit form={form} />;
+      }
+      return null;
+    case "valueAddedDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLValueAddedDetailsEdit form={form} />;
+      }
+      return null;
+    case "siteVisitDetails":
+      if (bankName === "Tata Ubl") {
+        return <TataUBLSiteVisitDetailsEdit form={form} />;
+      }
+      return null;
     default:
       return null;
   }

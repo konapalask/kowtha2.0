@@ -13,6 +13,7 @@ import { WorkVerificationDetails } from "@/components/verify/WorkVerificationDet
 import { EditFormModal } from "@/components/verify/EditFormModal";
 import { TabContextType } from "@/utils/verifierInterface";
 import { BusinessVerificationDetails } from "@/components/verify/BusinessVerificationDetails";
+import { TataUBLVerificationDetails } from "@/components/verify/TataUBLVerificationDetails";
 import { LeftOutlined } from "@ant-design/icons";
 import PdfPreview from "@/components/verify/PdfPreview";
 import { useDepartmentChange } from "@/utils/utility";
@@ -265,6 +266,29 @@ export default function LoanVerifyDetails() {
           />
         );
       case "Business":
+        // Check if this is Tata UBL bank
+        const businessVerification = getCompleteVerificationData("Business");
+        const bankName = businessVerification?.bankName;
+        
+        if (bankName === "Tata Ubl") {
+          return (
+            <TataUBLVerificationDetails
+              verificationData={businessVerification?.verificationData}
+              onEdit={handleEdit}
+              editLogsUpdated={editLogsUpdated}
+              verificationId={getVerificationId("Business")}
+              fetchEditRequests={fetchEditRequests}
+              hasEditRequest={hasEditRequest("Business")}
+              completeVerificationData={getCompleteVerificationData("Business")}
+              fetchVerificationData={fetchVerificationData}
+              editRequests={editRequests}
+              currentDepartment={currentDepartment}
+              applicationNumber={verificationData?.applicationNumber}
+              loanId={verificationData?.loanId}
+            />
+          );
+        }
+        
         return (
           <BusinessVerificationDetails
             verificationData={getCompleteVerificationData("Business")}

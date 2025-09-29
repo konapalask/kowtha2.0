@@ -143,6 +143,87 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           if (docData) {
             form.setFieldsValue({ documentsObserved: docData });
           }
+        // Tata UBL specific form handling
+        } else if (formKey === "basicDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const basicData = currentVerification?.verificationData?.basicDetails;
+          if (basicData) {
+            form.setFieldsValue({ basicDetails: basicData });
+          }
+        } else if (formKey === "proposedLoanDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const loanData = currentVerification?.verificationData?.proposedLoanDetails;
+          if (loanData) {
+            form.setFieldsValue({ proposedLoanDetails: loanData });
+          }
+        } else if (formKey === "officeAddress" && currentVerification?.bankName === "Tata Ubl") {
+          const officeData = currentVerification?.verificationData?.officeAddress;
+          if (officeData) {
+            form.setFieldsValue({ officeAddress: officeData });
+          }
+        } else if (formKey === "residentialAddress" && currentVerification?.bankName === "Tata Ubl") {
+          const resData = currentVerification?.verificationData?.residentialAddress;
+          if (resData) {
+            form.setFieldsValue({ residentialAddress: resData });
+          }
+        } else if (formKey === "employeeDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const empData = currentVerification?.verificationData?.employeeDetails;
+          if (empData) {
+            form.setFieldsValue({ employeeDetails: empData });
+          }
+        } else if (formKey === "bankDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const bankData = currentVerification?.verificationData?.bankDetails;
+          if (bankData) {
+            form.setFieldsValue({ bankDetails: bankData });
+          }
+        } else if (formKey === "salesAndProfitDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const salesData = currentVerification?.verificationData?.salesAndProfitDetails;
+          if (salesData) {
+            form.setFieldsValue({ salesAndProfitDetails: salesData });
+          }
+        } else if (formKey === "customersDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const custData = currentVerification?.verificationData?.customersDetails;
+          if (custData) {
+            form.setFieldsValue({ customersDetails: custData });
+          }
+        } else if (formKey === "supplierDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const suppData = currentVerification?.verificationData?.supplierDetails;
+          if (suppData) {
+            form.setFieldsValue({ supplierDetails: suppData });
+          }
+        } else if (formKey === "additionalBusinessDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const addBizData = currentVerification?.verificationData?.additionalBusinessDetails;
+          if (addBizData) {
+            form.setFieldsValue({ additionalBusinessDetails: addBizData });
+          }
+        } else if (formKey === "existingLoans" && currentVerification?.bankName === "Tata Ubl") {
+          const loanData = currentVerification?.verificationData?.existingLoans;
+          if (loanData) {
+            form.setFieldsValue({ existingLoans: loanData });
+          }
+        } else if (formKey === "miscelleanousDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const miscData = currentVerification?.verificationData?.miscelleanousDetails;
+          if (miscData) {
+            form.setFieldsValue({ miscelleanousDetails: miscData });
+          }
+        } else if (formKey === "valueAddedDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const valueData = currentVerification?.verificationData?.valueAddedDetails;
+          if (valueData) {
+            form.setFieldsValue({ valueAddedDetails: valueData });
+          }
+        } else if (formKey === "siteVisitDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const siteData = currentVerification?.verificationData?.siteVisitDetails;
+          if (siteData) {
+            form.setFieldsValue({ siteVisitDetails: siteData });
+          }
+        } else if (formKey === "thirdPartyCheck" && currentVerification?.bankName === "Tata Ubl") {
+          const tpcData = currentVerification?.verificationData?.thirdPartyCheck;
+          if (tpcData) {
+            form.setFieldsValue({ thirdPartyCheck: tpcData });
+          }
+        } else if (formKey === "additionalDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const addData = currentVerification?.verificationData?.additionalDetails;
+          if (addData) {
+            form.setFieldsValue({ additionalDetails: addData });
+          }
       }
       if (formKey === "assetDetails") {
           const assetData = currentVerification?.verificationData?.assetDetails;
