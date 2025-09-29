@@ -35,23 +35,11 @@ const BusinessDetailsDescription: React.FC<{
             column={logs ? 1 : 2}
             extra={extra}
           >
-            {/* <Descriptions.Item
+            <Descriptions.Item
               label="Type of Business"
-              contentStyle={getItemStyle("businessType")}
+              contentStyle={getItemStyle("typeOfBusiness")}
             >
-              {data?.businessDetails?.businessType}
-            </Descriptions.Item> */}
-            <Descriptions.Item
-              label="No. of Employees (Declared / Observed)"
-              contentStyle={getItemStyle("employeesDeclared")}
-            >
-              {data?.businessDetails?.employeesDeclared} / {data?.businessDetails?.employeesObserved}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label="Constitution of Business"
-              contentStyle={getItemStyle("constitutionOfBusiness")}
-            >
-              {data?.businessDetails?.constitutionOfBusiness}
+              {data?.businessDetails?.typeOfBusiness}
             </Descriptions.Item>
             <Descriptions.Item
               label="Nature of Business"
@@ -60,46 +48,58 @@ const BusinessDetailsDescription: React.FC<{
               {data?.businessDetails?.natureOfBusiness}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Business Activity Observed"
-              contentStyle={getItemStyle("businessActivityObserved")}
+              label="Year Business Started"
+              contentStyle={getItemStyle("yearBusinessStarted")}
             >
-              {data?.businessDetails?.businessActivityObserved}
+              {data?.businessDetails?.yearBusinessStarted}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Stock Observed"
-              contentStyle={getItemStyle("stockObserved")}
+              label="Number of Workers"
+              contentStyle={getItemStyle("numberOfWorkers")}
             >
-              {data?.businessDetails?.stockObserved}
+              {data?.businessDetails?.numberOfWorkers}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Business Start Year"
-              contentStyle={getItemStyle("businessStartYear")}
+              label="Sales Volume"
+              contentStyle={getItemStyle("salesVolume")}
             >
-              {data?.businessDetails?.businessStartYear}
+              {data?.businessDetails?.salesVolume}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Occupied Since (years)"
-              contentStyle={getItemStyle("occupiedSince")}
+              label="Profit Per Unit"
+              contentStyle={getItemStyle("profitPerUnit")}
             >
-              {data?.businessDetails?.occupiedSince}
+              {data?.businessDetails?.profitPerUnit}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Net Margin (%)"
-              contentStyle={getItemStyle("netMargin")}
+              label="Stock Source"
+              contentStyle={getItemStyle("stockSource")}
             >
-              {data?.businessDetails?.netMargin}
+              {data?.businessDetails?.stockSource}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Business Premises Size (in sq. ft.)"
-              contentStyle={getItemStyle("businessPremisesSize")}
+              label="Stock Handling"
+              contentStyle={getItemStyle("stockHandling")}
             >
-              {data?.businessDetails?.businessPremisesSize}
+              {data?.businessDetails?.stockHandling}
             </Descriptions.Item>
             <Descriptions.Item
-              label="Raw Material Supplier"
-              contentStyle={getItemStyle("rawMaterialSupplier")}
+              label="Major Transaction Mode"
+              contentStyle={getItemStyle("majorTransactionMode")}
             >
-              {data?.businessDetails?.rawMaterialSupplier}
+              {data?.businessDetails?.majorTransactionMode}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Business Premises Ownership"
+              contentStyle={getItemStyle("businessPremisesOwnership")}
+            >
+              {data?.businessDetails?.businessPremisesOwnership}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label="Wage Expenses"
+              contentStyle={getItemStyle("wageExpenses")}
+            >
+              {data?.businessDetails?.wageExpenses}
             </Descriptions.Item>
           </Descriptions>
         </Card>

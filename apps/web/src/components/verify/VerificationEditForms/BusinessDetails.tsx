@@ -41,52 +41,84 @@ const businessActivityObservedOptions = [
   "Others",
 ];
 
+// New options for Arka Fincap fields
+const typeOfBusinessOptions = [
+  "Proprietorship",
+  "Partnership",
+  "Private Limited",
+  "LLP",
+  "Others",
+];
+
+const stockSourceOptions = [
+  "Suppliers",
+  "Manufacturers",
+  "Wholesalers",
+  "Direct Import",
+  "Others",
+];
+
+const stockHandlingOptions = [
+  "Premises",
+  "Warehouse",
+  "Godown",
+  "Others",
+];
+
+const transactionModeOptions = [
+  "Cash",
+  "Cheque",
+  "Online Transfer",
+  "Mixed",
+  "Others",
+];
+
+const premisesOwnershipOptions = [
+  "Owned",
+  "Rented",
+  "Leased",
+  "Others",
+];
+
 export type BusinessDetailsFormData = {
-  businessType: string;
-  employeesDeclared: string;
-  employeesObserved: string;
-  constitutionOfBusiness: string;
+  typeOfBusiness: string;
   natureOfBusiness: string;
-  businessActivityObserved: string;
-  stockObserved: string;
-  businessStartYear: string;
-  occupiedSince: string;
-  netMargin: string;
-  businessPremisesSize: string;
-  rawMaterialSupplier: string;
+  yearBusinessStarted: string;
+  numberOfWorkers: string;
+  salesVolume: string;
+  profitPerUnit: string;
+  stockSource: string;
+  stockHandling: string;
+  majorTransactionMode: string;
+  businessPremisesOwnership: string;
+  wageExpenses: string;
+  // Legacy fields for other departments
+  businessType?: string;
+  employeesDeclared?: string;
+  employeesObserved?: string;
+  constitutionOfBusiness?: string;
+  businessActivityObserved?: string;
+  stockObserved?: string;
+  businessStartYear?: string;
+  occupiedSince?: string;
+  netMargin?: string;
+  businessPremisesSize?: string;
+  rawMaterialSupplier?: string;
 };
 
 const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ form, currentDepartment }) => {
-  // For PD department, show different fields
+  // For PD department, show Arka Fincap specific fields
   if (currentDepartment === 'PD') {
     return (
       <>
         <Col span={8}>
           <Form.Item
-            name="employeesDeclared"
-            label="No. of Employees (Declared)"
-            rules={[{ required: true, message: "Number of employees declared is required" }]}
+            name="typeOfBusiness"
+            label="Type of Business"
+            rules={[{ required: true, message: "Type of business is required" }]}
           >
-            <Input placeholder="Enter number of employees declared" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="employeesObserved"
-            label="No. of Employees (Observed)"
-            rules={[{ required: true, message: "Number of employees observed is required" }]}
-          >
-            <Input placeholder="Enter number of employees observed" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="constitutionOfBusiness"
-            label="Constitution of Business"
-            rules={[{ required: true, message: "Constitution of business is required" }]}
-          >
-            <Select placeholder="Select constitution">
-              {pdConstitutionOptions.map((option) => (
+            <Select placeholder="Select type of business">
+              {typeOfBusinessOptions.map((option) => (
                 <Select.Option key={option} value={option}>
                   {option}
                 </Select.Option>
@@ -111,12 +143,48 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
         </Col>
         <Col span={8}>
           <Form.Item
-            name="businessActivityObserved"
-            label="Business Activity Observed"
-            rules={[{ required: true, message: "Business activity observed is required" }]}
+            name="yearBusinessStarted"
+            label="Year Business Started"
+            rules={[{ required: true, message: "Year business started is required" }]}
           >
-            <Select placeholder="Select business activity">
-              {businessActivityObservedOptions.map((option) => (
+            <Input placeholder="Enter year business started" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="numberOfWorkers"
+            label="Number of Workers"
+            rules={[{ required: true, message: "Number of workers is required" }]}
+          >
+            <Input placeholder="Enter number of workers" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="salesVolume"
+            label="Sales Volume"
+            rules={[{ required: true, message: "Sales volume is required" }]}
+          >
+            <Input placeholder="Enter sales volume" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="profitPerUnit"
+            label="Profit Per Unit"
+            rules={[{ required: true, message: "Profit per unit is required" }]}
+          >
+            <Input placeholder="Enter profit per unit" />
+          </Form.Item>
+        </Col>
+        <Col span={8}>
+          <Form.Item
+            name="stockSource"
+            label="Stock Source"
+            rules={[{ required: true, message: "Stock source is required" }]}
+          >
+            <Select placeholder="Select stock source">
+              {stockSourceOptions.map((option) => (
                 <Select.Option key={option} value={option}>
                   {option}
                 </Select.Option>
@@ -126,56 +194,56 @@ const BusinessDetails: React.FC<{ form: any; currentDepartment?: string }> = ({ 
         </Col>
         <Col span={8}>
           <Form.Item
-            name="stockObserved"
-            label="Stock Observed"
-            rules={[{ required: true, message: "Stock observed is required" }]}
+            name="stockHandling"
+            label="Stock Handling"
+            rules={[{ required: true, message: "Stock handling is required" }]}
           >
-            <Input placeholder="Enter stock observed" />
+            <Select placeholder="Select stock handling">
+              {stockHandlingOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item
-            name="businessStartYear"
-            label="Business Start Year"
-            rules={[{ required: true, message: "Business start year is required" }]}
+            name="majorTransactionMode"
+            label="Major Transaction Mode"
+            rules={[{ required: true, message: "Major transaction mode is required" }]}
           >
-            <Input placeholder="Enter business start year" />
+            <Select placeholder="Select transaction mode">
+              {transactionModeOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item
-            name="occupiedSince"
-            label="Occupied Since (years)"
-            rules={[{ required: true, message: "Occupied since is required" }]}
+            name="businessPremisesOwnership"
+            label="Business Premises Ownership"
+            rules={[{ required: true, message: "Business premises ownership is required" }]}
           >
-            <Input placeholder="Enter years occupied" />
+            <Select placeholder="Select premises ownership">
+              {premisesOwnershipOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item
-            name="netMargin"
-            label="Net Margin (%)"
-            rules={[{ required: true, message: "Net margin is required" }]}
+            name="wageExpenses"
+            label="Wage Expenses"
+            rules={[{ required: true, message: "Wage expenses is required" }]}
           >
-            <Input placeholder="Enter net margin" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="businessPremisesSize"
-            label="Business Premises Size (in sq. ft.)"
-            rules={[{ required: true, message: "Business premises size is required" }]}
-          >
-            <Input placeholder="Enter premises size" />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name="rawMaterialSupplier"
-            label="Raw Material Supplier"
-            rules={[{ required: true, message: "Raw material supplier is required" }]}
-          >
-            <Input placeholder="Enter raw material supplier" />
+            <Input placeholder="Enter wage expenses" />
           </Form.Item>
         </Col>
       </>
