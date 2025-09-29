@@ -24,6 +24,8 @@ import SuppliersCreditorsForm from "./SuppliersCreditorsForm";
 import ClientsDebtorsForm from "./ClientsDebtorsForm";
 import SalariesWagesForm from "./SalariesWagesForm";
 import AssetDetailsForm from "./AssetDetailsForm";
+import DocumentsObservedForm from "./DocumentsObservedForm";
+import BankingDetailsForm from "./BankingDetailsForm";
 
 interface FormSelectorProps {
   form: any;
@@ -88,8 +90,12 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       return <ClientsDebtorsForm form={form} />;
     case "salariesWages":
       return <SalariesWagesForm form={form} />;
+    case "documentsObserved":
+      return <DocumentsObservedForm form={form} />;
     case "assetDetails":
       return <AssetDetailsForm form={form} />;
+    case "bankingDetails":
+      return <BankingDetailsForm form={form} />;
     case "toGrossProfit":
       return <ToGrossProfitForm form={form} />;
     case "toNetProfit":
