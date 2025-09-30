@@ -43,6 +43,15 @@ import {
   TataUBLValueAddedDetailsEdit,
   TataUBLSiteVisitDetailsEdit,
 } from "./TataUBLEditForms";
+// Axis Bank specific forms
+import AxisBankBasicDetailsForm from "./AxisBankBasicDetailsForm";
+import AxisBankBusinessDetailsForm from "./AxisBankBusinessDetailsForm";
+import AxisBankBusinessProfileForm from "./AxisBankBusinessProfileForm";
+import AxisBankMiscellaneousDetailsForm from "./AxisBankMiscellaneousDetailsForm";
+import AxisBankCommonPointsForm from "./AxisBankCommonPointsForm";
+import AxisBankWorkingCapitalDetailsForm from "./AxisBankWorkingCapitalDetailsForm";
+import AxisBankPerformanceForm from "./AxisBankPerformanceForm";
+import SynopsisForm from "./SynopsisForm";
 
 interface FormSelectorProps {
   form: any;
@@ -66,6 +75,10 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       // Check if this is Tata UBL
       if (bankName === "Tata Ubl") {
         return <TataUBLBasicDetailsEdit form={form} />;
+      }
+      // Check if this is Axis Bank
+      if (bankName === "Axis Bank") {
+        return <AxisBankBasicDetailsForm form={form} />;
       }
       return <BasicDetailsForm form={form} />;
     case "addressVerification":
@@ -99,6 +112,10 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
       // Check if this is Tata UBL
       if (bankName === "Tata Ubl") {
         return <TataUBLBusinessDetailsEdit form={form} />;
+      }
+      // Check if this is Axis Bank
+      if (bankName === "Axis Bank") {
+        return <AxisBankBusinessDetailsForm form={form} />;
       }
       return <BusinessDetails form={form} currentDepartment={currentDepartment} />;
     case "applicantDetails":
@@ -194,6 +211,34 @@ export const FormSelector: React.FC<FormSelectorProps> = ({
         return <TataUBLSiteVisitDetailsEdit form={form} />;
       }
       return null;
+    // Axis Bank specific forms
+    case "businessProfile":
+      if (bankName === "Axis Bank") {
+        return <AxisBankBusinessProfileForm form={form} />;
+      }
+      return null;
+    case "miscelleanousDetails":
+      if (bankName === "Axis Bank") {
+        return <AxisBankMiscellaneousDetailsForm form={form} />;
+      }
+      return null;
+    case "commonPoints":
+      if (bankName === "Axis Bank") {
+        return <AxisBankCommonPointsForm form={form} />;
+      }
+      return null;
+    case "workingCapitalDetails":
+      if (bankName === "Axis Bank") {
+        return <AxisBankWorkingCapitalDetailsForm form={form} />;
+      }
+      return null;
+    case "performance":
+      if (bankName === "Axis Bank") {
+        return <AxisBankPerformanceForm form={form} />;
+      }
+      return null;
+    case "synopsis":
+      return <SynopsisForm form={form} />;
     default:
       return null;
   }

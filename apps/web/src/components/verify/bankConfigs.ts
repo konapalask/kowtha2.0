@@ -217,6 +217,60 @@ export const bankConfigs: BankConfigs = {
     customSections: ['shareholdingDetails', 'documentsObserved', 'assetDetails', 'bankingDetails']
   },
 
+  // Axis Bank configuration (matching mobile app order)
+  'Axis Bank': {
+    name: 'Axis Bank',
+    sectionOrder: [
+      'basicDetails',           // 1. Basic Details
+      'familyDetails',          // 2. Family Details  
+      'businessDetails',        // 3. Business Details
+      'businessProfile',        // 4. Business Profile
+      'miscelleanousDetails',   // 5. Miscellaneous Details
+      'suppliersCreditors',     // 6. Suppliers/Creditors
+      'clientsDebtors',         // 7. Clients/Debtors
+      'thirdPartyCheck',        // 8. Third Party Check
+      'commonPoints',           // 9. Common Points
+      'existingLoans',          // 10. Existing Loans
+      'workingCapitalDetails',  // 11. Working Capital Details
+      'bankingDetails',         // 12. Banking Details
+      'performance',            // 13. Performance
+      'additionalDetails',      // 14. Additional Details
+      'financialAnalysis',      // 15. Financial Analysis
+      'synopsis',               // 16. Synopsis
+      'photoCapture'            // 17. Photo Capture
+    ],
+    apiResponseTransformer: (rawData: any) => {
+      // Transform Axis Bank specific API response structure
+      return {
+        basicDetails: rawData?.basicDetails || {},
+        familyDetails: rawData?.familyDetails || [],
+        businessDetails: rawData?.businessDetails || {},
+        businessProfile: rawData?.businessProfile || {},
+        miscelleanousDetails: rawData?.miscelleanousDetails || {},
+        suppliersCreditors: rawData?.suppliersCreditors || {},
+        clientsDebtors: rawData?.clientsDebtors || {},
+        thirdPartyCheck: rawData?.thirdPartyCheck || {},
+        commonPoints: rawData?.commonPoints || {},
+        existingLoans: rawData?.existingLoans || {},
+        workingCapitalDetails: rawData?.workingCapitalDetails || {},
+        bankingDetails: rawData?.bankingDetails || {},
+        performance: rawData?.performance || {},
+        additionalDetails: rawData?.additionalDetails || {},
+        financialAnalysis: rawData?.financialAnalysis || {},
+        synopsis: rawData?.synopsis || {},
+        uploadedItems: rawData?.uploadedItems || []
+      };
+    },
+    fieldMappings: {
+      // Map Axis Bank API fields to display fields
+      'applicantName': 'Applicant Name',
+      'bankName': 'Bank Name',
+      'phoneNo': 'Phone No'
+    },
+    hiddenSections: [],
+          customSections: ['basicDetails', 'businessDetails', 'businessProfile', 'miscelleanousDetails', 'commonPoints', 'workingCapitalDetails', 'performance', 'financialAnalysis', 'synopsis']
+  },
+
   // Add more banks as needed
   'HDFC Bank': {
     name: 'HDFC Bank',
@@ -270,6 +324,9 @@ export const normalizeBankName = (bankName: string): string => {
   if (lowerName.includes('axis') && lowerName.includes('finance') && lowerName.includes('ubl')) {
     return 'Axis Finance ubl';
   }
+  if (lowerName.includes('axis') && lowerName.includes('bank')) {
+    return 'Axis Bank';
+  }
   if (lowerName.includes('axis')) {
     return 'Axis Finance';
   }
@@ -296,6 +353,10 @@ export const isAxisFinance = (bankName: string): boolean => {
 
 export const isAxisFinanceUbl = (bankName: string): boolean => {
   return normalizeBankName(bankName) === 'Axis Finance ubl';
+};
+
+export const isAxisBank = (bankName: string): boolean => {
+  return normalizeBankName(bankName) === 'Axis Bank';
 };
 
 export const shouldShowSection = (bankName: string, sectionName: string): boolean => {
