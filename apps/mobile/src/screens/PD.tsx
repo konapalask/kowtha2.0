@@ -24,7 +24,10 @@ import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SchemaSection from '../components/pd-forms/SchemaSection';
-import { loadMobilePDFormsSchema, resolveAxisUBLVariant } from '../components/pd-forms/schema/pdSchema';
+import {
+  loadMobilePDFormsSchema,
+  resolveAxisUBLVariant,
+} from '../components/pd-forms/schema/pdSchema';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -34,9 +37,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('item', item);
   // console.log('userData', userData);
 
-  const bankName = userData?.loan?.bankName;
+  const bankName = 'Axis Finance UBL';
   const isAxisFinance = (bankName || '').toLowerCase().includes('axis');
+  console.log('isAxisFinance', isAxisFinance);
   const [schemaForm, setSchemaForm] = useState<any>(null);
+  console.log('schemaForm', schemaForm);
 
   const formConfig = getFormConfigByBank(bankName);
 
@@ -326,76 +331,84 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           <>
             <View style={styles.formContainer}>
               {/* Axis UBL schema-driven pilot: if schemaForm is available, render from schema; else use existing config */}
-              {(isAxisFinance && schemaForm?.sections?.length ? schemaForm.sections.map((sec: any) => {
-                const isExpanded = expandedSections[sec.id] || false;
-                return (
-                  <View key={sec.id} style={styles.sectionContainer}>
-                    <TouchableOpacity
-                      style={styles.sectionHeader}
-                      onPress={() => toggleSection(sec.id)}>
-                      <Text style={styles.sectionTitle}>{sec.label}</Text>
-                      {isSectionValid(sec.id) && (
-                        <Icon name="check" size={18} color="#34C759" />
-                      )}
-                      <Text style={styles.sectionIndicator}>
-                        {isExpanded ? '▼' : '▶'}
-                      </Text>
-                    </TouchableOpacity>
-                    {isExpanded && (
-                      <View style={styles.sectionContent}>
-                        <SchemaSection
-                          title={sec.label}
-                          fields={sec.fields}
-                          initialData={sectionData[sec.id]}
-                          onSubmit={(data: any) => handleSectionDataChange(sec.id, data)}
-                        />
-                      </View>
-                    )}
-                  </View>
-                );
-              }) : formConfig.sections.map(section => {
-                const SectionComponent = section.component;
-                const isExpanded = expandedSections[section.id] || false;
-
-                return (
-                  <View key={section.id} style={styles.sectionContainer}>
-                    <TouchableOpacity
-                      style={styles.sectionHeader}
-                      onPress={() => toggleSection(section.id)}>
-                      <Text style={styles.sectionTitle}>{section.label}</Text>
-                      {isSectionValid(section.id) && (
-                        // <View style={styles.validIndicator} />
-                        <Icon name="check" size={18} color="#34C759" />
-                      )}
-                      <Text style={styles.sectionIndicator}>
-                        {isExpanded ? '▼' : '▶'}
-                      </Text>
-                      {/* {isSectionValid(section.id) && (
-                        <View style={styles.validIndicator} />
-                      )} */}
-                    </TouchableOpacity>
-
-                    {isExpanded && (
-                      <View style={styles.sectionContent}>
-                        {section.id === 'photoCapture' ? (
-                          <SectionComponent
-                            onUploadedItemsChange={handleUploadedItemsChange}
-                            initialItems={sectionData?.uploadedItems ?? []}
-                            loanId={item?.id || item?.verificationId}
-                          />
-                        ) : (
-                          <SectionComponent
-                            onSubmit={(data: any) =>
-                              handleSectionDataChange(section.id, data)
-                            }
-                            initialData={sectionData[section.id]}
-                          />
+              {isAxisFinance && schemaForm?.sections?.length
+                ? schemaForm.sections.map((sec: any) => {
+                    const isExpanded = expandedSections[sec.id] || false;
+                    return (
+                      <View key={sec.id} style={styles.sectionContainer}>
+                        <TouchableOpacity
+                          style={styles.sectionHeader}
+                          onPress={() => toggleSection(sec.id)}>
+                          <Text style={styles.sectionTitle}>{sec.label}</Text>
+                          {isSectionValid(sec.id) && (
+                            <Icon name="check" size={18} color="#34C759" />
+                          )}
+                          <Text style={styles.sectionIndicator}>
+                            {isExpanded ? '▼' : '▶'}
+                          </Text>
+                        </TouchableOpacity>
+                        {isExpanded && (
+                          <View style={styles.sectionContent}>
+                            <SchemaSection
+                              title={sec.label}
+                              fields={sec.fields}
+                              initialData={sectionData[sec.id]}
+                              onSubmit={(data: any) =>
+                                handleSectionDataChange(sec.id, data)
+                              }
+                            />
+                          </View>
                         )}
                       </View>
-                    )}
-                  </View>
-                );
-              })}
+                    );
+                  })
+                : formConfig.sections.map(section => {
+                    const SectionComponent = section.component;
+                    const isExpanded = expandedSections[section.id] || false;
+
+                    return (
+                      <View key={section.id} style={styles.sectionContainer}>
+                        <TouchableOpacity
+                          style={styles.sectionHeader}
+                          onPress={() => toggleSection(section.id)}>
+                          <Text style={styles.sectionTitle}>
+                            {section.label}
+                          </Text>
+                          {isSectionValid(section.id) && (
+                            // <View style={styles.validIndicator} />
+                            <Icon name="check" size={18} color="#34C759" />
+                          )}
+                          <Text style={styles.sectionIndicator}>
+                            {isExpanded ? '▼' : '▶'}
+                          </Text>
+                          {/* {isSectionValid(section.id) && (
+                        <View style={styles.validIndicator} />
+                      )} */}
+                        </TouchableOpacity>
+
+                        {isExpanded && (
+                          <View style={styles.sectionContent}>
+                            {section.id === 'photoCapture' ? (
+                              <SectionComponent
+                                onUploadedItemsChange={
+                                  handleUploadedItemsChange
+                                }
+                                initialItems={sectionData?.uploadedItems ?? []}
+                                loanId={item?.id || item?.verificationId}
+                              />
+                            ) : (
+                              <SectionComponent
+                                onSubmit={(data: any) =>
+                                  handleSectionDataChange(section.id, data)
+                                }
+                                initialData={sectionData[section.id]}
+                              />
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
             </View>
 
             <View style={styles.buttonContainer}>

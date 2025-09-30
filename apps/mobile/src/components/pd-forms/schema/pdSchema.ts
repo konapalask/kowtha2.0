@@ -30,18 +30,45 @@ let cachedSchema: MobileGeneratedSchema | null = null;
 
 export async function loadMobilePDFormsSchema(): Promise<MobileGeneratedSchema> {
   if (cachedSchema) return cachedSchema;
-  // In React Native, we don't have direct FS access to monorepo path; for pilot, expect schema to be bundled at runtime via remote fetch or inline import.
-  // KISS: for now, return a minimal placeholder; PD.tsx will fallback to existing components if not available.
-  return {
-    version: '1.0',
-    generated_at: '',
-    source_file: '',
-    forms: [],
-  };
+
+  try {
+    // Option 1: Read from file system using RNFS (React Native compatible)
+    const schemaPath =
+      RNFS.MainBundlePath + '/../packages/shared/pd_forms.generated.json';
+    const schemaContent = await RNFS.readFile(schemaPath, 'utf8');
+    const schema = JSON.parse(schemaContent) as MobileGeneratedSchema;
+    cachedSchema = schema;
+    return schema;
+  } catch (error) {
+    console.warn(
+      'Failed to load schema from file system, trying remote fetch:',
+      error,
+    );
+
+    try {
+      // Option 2: Fetch from backend API (fallback)
+      const response = await fetch('/api/pd-schema');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const schema = (await response.json()) as MobileGeneratedSchema;
+      cachedSchema = schema;
+      return schema;
+    } catch (fetchError) {
+      console.error('Failed to fetch schema from backend:', fetchError);
+
+      // Option 3: Return minimal placeholder (current behavior)
+      console.warn('Falling back to empty schema - using existing components');
+      return {
+        version: '1.0',
+        generated_at: '',
+        source_file: '',
+        forms: [],
+      };
+    }
+  }
 }
 
 export function resolveAxisUBLVariant(): string {
   return 'axis_finance_ubl_above_10l';
 }
-
-
