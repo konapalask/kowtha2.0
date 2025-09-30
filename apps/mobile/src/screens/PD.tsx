@@ -28,6 +28,8 @@ import {
   loadMobilePDFormsSchema,
   resolveAxisUBLVariant,
 } from '../components/pd-forms/schema/pdSchema';
+import {formSchema} from '../../forms';
+import PhotoCapture from '../components/forms/PhotoCapture';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -41,7 +43,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const isAxisFinance = (bankName || '').toLowerCase().includes('axis');
   console.log('isAxisFinance', isAxisFinance);
   const [schemaForm, setSchemaForm] = useState<any>(null);
-  console.log('schemaForm', schemaForm);
+  console.log('schemaForm', schemaForm?.sections);
 
   const formConfig = getFormConfigByBank(bankName);
 
@@ -68,6 +70,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       phoneNo: userData?.loan?.applicantMobile || '',
     },
   });
+  console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
@@ -84,10 +87,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           const schema = await loadMobilePDFormsSchema();
           const formId = resolveAxisUBLVariant();
           const form = schema.forms.find(f => f.id === formId);
-          setSchemaForm(form || null);
+          setSchemaForm(formSchema[0]); // Use the first form from formSchema
         }
       } catch (e) {
-        setSchemaForm(null);
+        setSchemaForm(formSchema[0]); // Fallback to formSchema
       }
     };
     loadSchema();
@@ -169,10 +172,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     };
     setSectionData(updatedSectionData);
     saveFormData(updatedSectionData);
-    setExpandedSections((prev: any) => ({
-      ...prev,
-      [sectionId]: false,
-    }));
+    // Removed auto-collapse - sections stay open while editing
   };
 
   const handleUploadedItemsChange = async (items: UploadedItem[]) => {
@@ -348,16 +348,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                           </Text>
                         </TouchableOpacity>
                         {isExpanded && (
-                          <View style={styles.sectionContent}>
-                            <SchemaSection
-                              title={sec.label}
-                              fields={sec.fields}
-                              initialData={sectionData[sec.id]}
-                              onSubmit={(data: any) =>
-                                handleSectionDataChange(sec.id, data)
-                              }
-                            />
-                          </View>
+                          <>
+                            <View style={styles.sectionContent}>
+                              <SchemaSection
+                                title={sec.label}
+                                schema={sec.schema}
+                                initialData={sectionData[sec.id]}
+                                onSubmit={(data: any) =>
+                                  handleSectionDataChange(sec.id, data)
+                                }
+                              />
+                            </View>
+                            <View style={styles.sectionContent}>
+                              {/* {section.id === 'photoCapture' ? ( */}
+                              <PhotoCapture
+                                onUploadedItemsChange={
+                                  handleUploadedItemsChange
+                                }
+                                initialItems={sectionData?.uploadedItems ?? []}
+                                loanId={item?.id || item?.verificationId}
+                              />
+                              {/* ) : ( */}
+                              {/* <SectionComponent
+                                  onSubmit={(data: any) =>
+                                    handleSectionDataChange(section.id, data)
+                                  }
+                                  initialData={sectionData[section.id]}
+                                />
+                              )} */}
+                            </View>
+                          </>
                         )}
                       </View>
                     );
