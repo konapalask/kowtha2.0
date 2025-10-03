@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+import {colors} from '../../../constants/colors';
+import {TextAreaFormItem} from '../../../lib/TextAreaFormItem';
 
 export type TataUBLMiscelleanousDetailsFormData = {
   endUseOfProposedLoan: string;

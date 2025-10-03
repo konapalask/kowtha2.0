@@ -7,82 +7,82 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm, useFieldArray} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {InputFormItem} from '../../lib/InputFormItem';
+import {colors} from '../../../constants/colors';
+import {InputFormItem} from '../../../lib/InputFormItem';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 
-interface Supplier {
-  supplierName: string;
+interface Customer {
+  customerName: string;
   percentageOfTotalSales: string;
-  creditorDays: string;
+  debtorDays: string;
   relationshipSinceYears: string;
 }
 
-interface TataUBLSupplierDetailsFormData {
-  totalCreditorsAsOnDate: string;
-  totalSuppliers: string;
-  suppliers: Supplier[];
+interface TataUBLCustomerDetailsFormData {
+  totalDebtorsAsOnDate: string;
+  totalCustomers: string;
+  customers: Customer[];
 }
 
-interface TataUBLSupplierDetailsProps {
-  onSubmit: (data: TataUBLSupplierDetailsFormData) => void;
-  initialData?: TataUBLSupplierDetailsFormData;
-  maxSuppliers?: number;
+interface TataUBLCustomerDetailsProps {
+  onSubmit: (data: TataUBLCustomerDetailsFormData) => void;
+  initialData?: TataUBLCustomerDetailsFormData;
+  maxCustomers?: number;
 }
 
-const TataUBLSupplierDetails: React.FC<TataUBLSupplierDetailsProps> = ({
+const TataUBLCustomerDetails: React.FC<TataUBLCustomerDetailsProps> = ({
   onSubmit,
-  initialData = {suppliers: []},
-  maxSuppliers,
+  initialData = {customers: []},
+  maxCustomers,
 }) => {
   const {
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm<TataUBLSupplierDetailsFormData>({
+  } = useForm<TataUBLCustomerDetailsFormData>({
     defaultValues: {
-      totalCreditorsAsOnDate: '',
-      totalSuppliers: '',
-      suppliers: initialData.suppliers || [],
+      totalDebtorsAsOnDate: '',
+      totalCustomers: '',
+      customers: initialData.customers || [],
     },
   });
 
   const {fields, append, remove} = useFieldArray({
     control,
-    name: 'suppliers',
+    name: 'customers',
   });
 
-  const createEmptySupplier = (): Supplier => ({
-    supplierName: '',
+  const createEmptyCustomer = (): Customer => ({
+    customerName: '',
     percentageOfTotalSales: '',
-    creditorDays: '',
+    debtorDays: '',
     relationshipSinceYears: '',
   });
 
-  const handleAddSupplier = () => {
-    if (maxSuppliers && fields.length >= maxSuppliers) {
+  const handleAddCustomer = () => {
+    if (maxCustomers && fields.length >= maxCustomers) {
       Toast.show({
         type: 'info',
-        text1: 'Maximum suppliers reached',
-        text2: `You can add maximum ${maxSuppliers} suppliers`,
+        text1: 'Maximum customers reached',
+        text2: `You can add maximum ${maxCustomers} customers`,
       });
       return;
     }
-    append(createEmptySupplier());
+    append(createEmptyCustomer());
   };
 
-  const onFormSubmit = (data: TataUBLSupplierDetailsFormData) => {
+  const onFormSubmit = (data: TataUBLCustomerDetailsFormData) => {
     onSubmit(data);
   };
 
-  const renderSupplierFields = (
-    supplier: Supplier & {id: string},
+  const renderCustomerFields = (
+    customer: Customer & {id: string},
     index: number,
   ) => (
-    <View key={supplier.id} style={styles.supplierContainer}>
-      <View style={styles.supplierHeader}>
-        <Text style={styles.supplierTitle}>Supplier {index + 1}</Text>
+    <View key={customer.id} style={styles.customerContainer}>
+      <View style={styles.customerHeader}>
+        <Text style={styles.customerTitle}>Customer {index + 1}</Text>
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => remove(index)}>
@@ -92,19 +92,19 @@ const TataUBLSupplierDetails: React.FC<TataUBLSupplierDetailsProps> = ({
 
       <InputFormItem
         data={{
-          title: 'Name of the Supplier',
-          key: `suppliers.${index}.supplierName`,
+          title: 'Name of Customer',
+          key: `customers.${index}.customerName`,
           control,
           errors,
           required: true,
-          placeholder: 'Enter supplier name',
+          placeholder: 'Enter customer name',
         }}
       />
 
       <InputFormItem
         data={{
           title: '% of Total Sales',
-          key: `suppliers.${index}.percentageOfTotalSales`,
+          key: `customers.${index}.percentageOfTotalSales`,
           control,
           errors,
           required: true,
@@ -115,12 +115,12 @@ const TataUBLSupplierDetails: React.FC<TataUBLSupplierDetailsProps> = ({
 
       <InputFormItem
         data={{
-          title: 'Creditor Days',
-          key: `suppliers.${index}.creditorDays`,
+          title: 'Debtor Days',
+          key: `customers.${index}.debtorDays`,
           control,
           errors,
           required: true,
-          placeholder: 'Enter creditor days',
+          placeholder: 'Enter debtor days',
           keyboardType: 'numeric',
         }}
       />
@@ -128,7 +128,7 @@ const TataUBLSupplierDetails: React.FC<TataUBLSupplierDetailsProps> = ({
       <InputFormItem
         data={{
           title: 'Relationship Since (yrs)',
-          key: `suppliers.${index}.relationshipSinceYears`,
+          key: `customers.${index}.relationshipSinceYears`,
           control,
           errors,
           required: true,
@@ -141,39 +141,39 @@ const TataUBLSupplierDetails: React.FC<TataUBLSupplierDetailsProps> = ({
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Supplier Details</Text>
+      <Text style={styles.sectionTitle}>Customer Details</Text>
 
       <InputFormItem
         data={{
-          title: 'Total Creditors as on Date',
-          key: 'totalCreditorsAsOnDate',
+          title: 'Total Debtors as on Date',
+          key: 'totalDebtorsAsOnDate',
           control,
           errors,
           required: true,
-          placeholder: 'Enter total creditors amount',
+          placeholder: 'Enter total debtors amount',
           keyboardType: 'numeric',
         }}
       />
 
       <InputFormItem
         data={{
-          title: 'Total Creditors',
-          key: 'totalSuppliers',
+          title: 'Total Customers',
+          key: 'totalCustomers',
           control,
           errors,
           required: true,
-          placeholder: 'Enter total number of suppliers',
+          placeholder: 'Enter total number of customers',
           keyboardType: 'numeric',
         }}
       />
 
-      <Text style={styles.supplierSectionTitle}>Supplier Information</Text>
+      <Text style={styles.customerSectionTitle}>Customer Information</Text>
 
-      {fields.map((supplier, index) => renderSupplierFields(supplier, index))}
+      {fields.map((customer, index) => renderCustomerFields(customer, index))}
 
-      <TouchableOpacity style={styles.addButton} onPress={handleAddSupplier}>
+      <TouchableOpacity style={styles.addButton} onPress={handleAddCustomer}>
         <Icon name="plus" size={20} color={colors.secondary} />
-        <Text style={styles.addButtonText}>Add Supplier</Text>
+        <Text style={styles.addButtonText}>Add Customer</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -198,26 +198,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: colors.text.primary,
   },
-  supplierSectionTitle: {
+  customerSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 12,
     color: colors.text.primary,
   },
-  supplierContainer: {
+  customerContainer: {
     backgroundColor: colors.secondary + '10',
     padding: 12,
     borderRadius: 8,
     marginVertical: 8,
   },
-  supplierHeader: {
+  customerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
   },
-  supplierTitle: {
+  customerTitle: {
     fontSize: 14,
     fontWeight: 'bold',
     color: colors.text.primary,
@@ -255,4 +255,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TataUBLSupplierDetails;
+export default TataUBLCustomerDetails;

@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {useForm, Controller, useFieldArray} from 'react-hook-form';
-import {colors} from '../../constants/colors';
+import {colors} from '../../../constants/colors';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
