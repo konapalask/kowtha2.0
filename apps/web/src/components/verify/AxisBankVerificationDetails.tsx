@@ -5,6 +5,7 @@ import {
 import { Button, Card, Image, Table, Row, Col, Descriptions, Typography, Form } from "antd";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Feedback from "./Feedback";
 // Removed unused description component imports - using custom displays instead
 
 // Import bank configuration system
@@ -51,20 +52,28 @@ export const AxisBankVerificationDetails: React.FC<
   const sectionOrder = getSectionOrder(bankName);
   const data = transformApiResponse(bankName, verificationData);
 
+  // State for Feedback component (Synopsis + Feedback)
+  const [verdict, setVerdict] = useState<boolean | null | string>(null);
+  const [editorContent, setEditorContent] = useState<string>("");
+
   const handleEdit = (formKey: string) => {
     onEdit(formKey);
   };
 
   const getButton = (key: string) => (
     <Button
-      type="primary"
+      style={{ border: "none", background: "transparent" }}
       icon={<EditOutlined />}
       onClick={() => handleEdit(key)}
-      style={{ marginLeft: 8 }}
-    >
-      Edit
-    </Button>
+      disabled={hasEditRequest}
+    />
   );
+
+  // Helper function to format values by replacing underscores with spaces
+  const formatValue = (value: any): string => {
+    if (!value || value === 'N/A') return 'N/A';
+    return String(value).replace(/_/g, ' ');
+  };
 
   const renderSection = (sectionId: string) => {
     switch (sectionId) {
@@ -77,26 +86,26 @@ export const AxisBankVerificationDetails: React.FC<
                   {applicationNumber || 'N/A'}
                 </Descriptions.Item>
                 <Descriptions.Item label="Product">
-                  {data?.basicDetails?.product || 'N/A'}
+                  {formatValue(data?.basicDetails?.product)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Loan Amount">
-                  {data?.basicDetails?.loanAmount || 'N/A'}
+                  {formatValue(data?.basicDetails?.loanAmount)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Customer Name">
-                  {data?.basicDetails?.applicantName || 'N/A'}
+                  {formatValue(data?.basicDetails?.applicantName)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Address" span={2}>
-                  {data?.basicDetails?.initiatedAddress || 'N/A'}
+                  {formatValue(data?.basicDetails?.initiatedAddress)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Contact Number">
-                  {data?.basicDetails?.contactNumber || 'N/A'}
+                  {formatValue(data?.basicDetails?.contactNumber)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Person Met">
-                  {data?.basicDetails?.personMet || 'N/A'}
+                  {formatValue(data?.basicDetails?.personMet)}
                 </Descriptions.Item>
                 {data?.basicDetails?.personMet && data?.basicDetails?.personMet !== 'applicant' && (
                   <Descriptions.Item label="Relationship with Borrower" span={2}>
-                    {data?.basicDetails?.relationshipWithBorrower || 'N/A'}
+                    {formatValue(data?.basicDetails?.relationshipWithBorrower)}
                   </Descriptions.Item>
                 )}
               </Descriptions>
@@ -136,28 +145,28 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Business Details" extra={getButton("businessDetails")}>
               <Descriptions bordered column={2}>
                 <Descriptions.Item label="Name of the Firm">
-                  {data?.businessDetails?.nameOfFirm || 'N/A'}
+                  {formatValue(data?.businessDetails?.nameOfFirm)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Constitution">
-                  {data?.businessDetails?.constitution || 'N/A'}
+                  {formatValue(data?.businessDetails?.constitution)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Who Started the Business">
-                  {data?.businessDetails?.whoStartedBusiness || 'N/A'}
+                  {formatValue(data?.businessDetails?.whoStartedBusiness)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ownership of Business Place">
-                  {data?.businessDetails?.ownershipOfBusinessPlace || 'N/A'}
+                  {formatValue(data?.businessDetails?.ownershipOfBusinessPlace)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Years in Current Office">
-                  {data?.businessDetails?.yearsInCurrentOffice || 'N/A'}
+                  {formatValue(data?.businessDetails?.yearsInCurrentOffice)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Years in Current City">
-                  {data?.businessDetails?.yearsInCurrentCity || 'N/A'}
+                  {formatValue(data?.businessDetails?.yearsInCurrentCity)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Previous Employment">
-                  {data?.businessDetails?.prevEmployment || 'N/A'}
+                  {formatValue(data?.businessDetails?.prevEmployment)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Is Residence Cum Office?">
-                  {data?.businessDetails?.isResidenceCumOffice || 'N/A'}
+                  {formatValue(data?.businessDetails?.isResidenceCumOffice)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -170,13 +179,13 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Business Profile" extra={getButton("businessProfile")}>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Nature of Business">
-                  {data?.businessProfile?.natureOfBusiness || 'N/A'}
+                  {formatValue(data?.businessProfile?.natureOfBusiness)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Product/Services Offered">
-                  {data?.businessProfile?.productServicesOffered || 'N/A'}
+                  {formatValue(data?.businessProfile?.productServicesOffered)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Business Model and Background">
-                  {data?.businessProfile?.businessModelAndBackground || 'N/A'}
+                  {formatValue(data?.businessProfile?.businessModelAndBackground)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -189,25 +198,25 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Miscellaneous Details" extra={getButton("miscelleanousDetails")}>
               <Descriptions bordered column={2}>
                 <Descriptions.Item label="Business Name Board Seen">
-                  {data?.miscelleanousDetails?.businessNameBoardSeen || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.businessNameBoardSeen)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Business Activity Seen">
-                  {data?.miscelleanousDetails?.businessActivitySeen || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.businessActivitySeen)}
                 </Descriptions.Item>
                 <Descriptions.Item label="No of Employees Seen">
-                  {data?.miscelleanousDetails?.noOfEmployeesSeen || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.noOfEmployeesSeen)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Stock Seen">
-                  {data?.miscelleanousDetails?.stockSeen || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.stockSeen)}
                 </Descriptions.Item>
                 <Descriptions.Item label="No of Machines Seen">
-                  {data?.miscelleanousDetails?.noOfMachinesSeen || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.noOfMachinesSeen)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Any Other Business or Alternative Income Source" span={2}>
-                  {data?.miscelleanousDetails?.anyOtherBusinessOrAlternativeIncomeSource || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.anyOtherBusinessOrAlternativeIncomeSource)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Any Other Observations or Remarks During Visit" span={2}>
-                  {data?.miscelleanousDetails?.anyOtherObservationsOrRemarksDuringVisit || 'N/A'}
+                  {formatValue(data?.miscelleanousDetails?.anyOtherObservationsOrRemarksDuringVisit)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -290,19 +299,19 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Common Points" extra={getButton("commonPoints")}>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Turnover and Margin">
-                  {data?.commonPoints?.turnoverAndMargin || 'N/A'}
+                  {formatValue(data?.commonPoints?.turnoverAndMargin)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Sales Fluctuations">
-                  {data?.commonPoints?.salesFluctuations || 'N/A'}
+                  {formatValue(data?.commonPoints?.salesFluctuations)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Customer Identity Established During PD">
-                  {data?.commonPoints?.customerIdentityEstablishedDuringPD || 'N/A'}
+                  {formatValue(data?.commonPoints?.customerIdentityEstablishedDuringPD)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Chartered AC Details">
-                  {data?.commonPoints?.charteredAcDetails || 'N/A'}
+                  {formatValue(data?.commonPoints?.charteredAcDetails)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Loans Taken from Family, Friends, Business Associates, etc">
-                  {data?.commonPoints?.loansTakenFromFamilyFriendsBusinessAssociates || 'N/A'}
+                  {formatValue(data?.commonPoints?.loansTakenFromFamilyFriendsBusinessAssociates)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -339,22 +348,22 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Working Capital Details" extra={getButton("workingCapitalDetails")}>
               <Descriptions bordered column={2}>
                 <Descriptions.Item label="Bank Name">
-                  {data?.workingCapitalDetails?.bankName || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.bankName)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Limit">
-                  {data?.workingCapitalDetails?.limit || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.limit)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Utilization" span={2}>
-                  {data?.workingCapitalDetails?.utilization || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.utilization)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Collateral" span={2}>
-                  {data?.workingCapitalDetails?.collateral || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.collateral)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Linked Loans (if any)" span={2}>
-                  {data?.workingCapitalDetails?.linkedLoansIfAny || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.linkedLoansIfAny)}
                 </Descriptions.Item>
                 <Descriptions.Item label="End of Proposed Loans" span={2}>
-                  {data?.workingCapitalDetails?.endOfProposedLoans || 'N/A'}
+                  {formatValue(data?.workingCapitalDetails?.endOfProposedLoans)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -368,10 +377,10 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Banking Details" extra={getButton("bankingDetails")}>
               <Descriptions bordered column={2}>
                 <Descriptions.Item label="Assets">
-                  {data?.bankingDetails?.assets || 'N/A'}
+                  {formatValue(data?.bankingDetails?.assets)}
                 </Descriptions.Item>
                 <Descriptions.Item label="LIC/Mutual Funds">
-                  {data?.bankingDetails?.licMutualFunds || 'N/A'}
+                  {formatValue(data?.bankingDetails?.licMutualFunds)}
                 </Descriptions.Item>
               </Descriptions>
               {bankAccounts.length > 0 && (
@@ -400,10 +409,10 @@ export const AxisBankVerificationDetails: React.FC<
             <Card title="Performance" extra={getButton("performance")}>
               <Descriptions bordered column={1}>
                 <Descriptions.Item label="Any Cheque Bounces">
-                  {data?.performance?.anyChequeBounces || 'N/A'}
+                  {formatValue(data?.performance?.anyChequeBounces)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Details of Collateral">
-                  {data?.performance?.detailsOfCollateral || 'N/A'}
+                  {formatValue(data?.performance?.detailsOfCollateral)}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
@@ -438,158 +447,170 @@ export const AxisBankVerificationDetails: React.FC<
         };
         
         const toGrossTotal = (
-          parseFloat(financialData?.toOpeningStock || '0') +
-          parseFloat(financialData?.toPurchase || '0') +
-          parseFloat(financialData?.toCostOfServices || '0') +
-          parseFloat(financialData?.toWages || '0') +
-          parseFloat(financialData?.toHamaliCharges || '0') +
-          parseFloat(financialData?.toManufacturingExpenses || '0') +
-          parseFloat(financialData?.toPackingCharges || '0')
+          parseFloat(financialData?.openingStock || financialData?.toOpeningStock || '0') +
+          parseFloat(financialData?.purchase || financialData?.toPurchase || '0') +
+          parseFloat(financialData?.costOfServices || financialData?.toCostOfServices || '0') +
+          parseFloat(financialData?.wages || financialData?.toWages || '0') +
+          parseFloat(financialData?.hamaliCharges || financialData?.toHamaliCharges || '0') +
+          parseFloat(financialData?.manufacturingExpenses || financialData?.toManufacturingExpenses || '0') +
+          parseFloat(financialData?.packingCharges || financialData?.toPackingCharges || '0')
         );
         
         const byGrossTotal = (
-          parseFloat(financialData?.bySales || '0') +
-          parseFloat(financialData?.byServices || '0') +
-          parseFloat(financialData?.byClosingStock || '0')
+          parseFloat(financialData?.sales || financialData?.bySales || '0') +
+          parseFloat(financialData?.services || financialData?.byServices || '0') +
+          parseFloat(financialData?.closingStock || financialData?.byClosingStock || '0')
         );
         
         const grossProfit = byGrossTotal - toGrossTotal;
         
         const toNetTotal = (
-          parseFloat(financialData?.toSalaries || '0') +
-          parseFloat(financialData?.toRent || '0') +
-          parseFloat(financialData?.toElectricityCharges || '0') +
-          parseFloat(financialData?.toPrintingStationery || '0') +
-          parseFloat(financialData?.toTelephoneCharges || '0') +
-          parseFloat(financialData?.toPostageTelegram || '0') +
-          parseFloat(financialData?.toOfficeMaintenance || '0') +
-          parseFloat(financialData?.toRepairsMaintenance || '0') +
-          parseFloat(financialData?.toSadarExpenses || '0') +
-          parseFloat(financialData?.toAuditFee || '0') +
-          parseFloat(financialData?.toAdvertisement || '0') +
-          parseFloat(financialData?.toBankCharges || '0') +
-          parseFloat(financialData?.toInsurance || '0') +
-          parseFloat(financialData?.toDepreciation || '0') +
-          parseFloat(financialData?.toInterestOnLoan || '0')
+          parseFloat(financialData?.salaries || financialData?.toSalaries || '0') +
+          parseFloat(financialData?.rent || financialData?.toRent || '0') +
+          parseFloat(financialData?.electricityCharges || financialData?.toElectricityCharges || '0') +
+          parseFloat(financialData?.printingStationery || financialData?.toPrintingStationery || '0') +
+          parseFloat(financialData?.telephoneCharges || financialData?.toTelephoneCharges || '0') +
+          parseFloat(financialData?.postageTelegram || financialData?.toPostageTelegram || '0') +
+          parseFloat(financialData?.officeMaintenance || financialData?.toOfficeMaintenance || '0') +
+          parseFloat(financialData?.repairsMaintenance || financialData?.toRepairsMaintenance || '0') +
+          parseFloat(financialData?.sadarExpenses || financialData?.toSadarExpenses || '0') +
+          parseFloat(financialData?.auditFee || financialData?.toAuditFee || '0') +
+          parseFloat(financialData?.advertisement || financialData?.toAdvertisement || '0') +
+          parseFloat(financialData?.bankCharges || financialData?.toBankCharges || '0') +
+          parseFloat(financialData?.insurance || financialData?.toInsurance || '0') +
+          parseFloat(financialData?.depreciation || financialData?.toDepreciation || '0') +
+          parseFloat(financialData?.interestOnLoan || financialData?.toInterestOnLoan || '0')
         );
         
         const byNetTotal = (
-          parseFloat(financialData?.byRentReceived || '0') +
-          parseFloat(financialData?.byCommissionReceived || '0')
+          parseFloat(financialData?.rentReceived || financialData?.byRentReceived || '0') +
+          parseFloat(financialData?.commissionReceived || financialData?.byCommissionReceived || '0')
         );
         
         const netProfit = grossProfit - toNetTotal + byNetTotal;
         
         return (
           <section key="financialAnalysis" style={{ marginBottom: 24 }}>
-            <Card title="Financial Analysis" extra={getButton("financialAnalysis")}>
+            <Card 
+              title="Financial Analysis"
+              extra={getButton("financialAnalysis")}
+            >
               {/* Gross Profit Section */}
-              <Card 
-                title={`Gross Profit Calculation - ₹${grossProfit.toLocaleString()}`} 
-                size="small" 
-                style={{ marginBottom: 16, backgroundColor: grossProfit >= 0 ? '#f6ffed' : '#fff2f0' }}
-              >
-                <Row gutter={[16, 16]}>
+              <Card title={`To Gross Profit - ₹${grossProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
+                <Row gutter={[16, 8]}>
+                  {/* Left side - All "To" fields */}
                   <Col span={12}>
-                    <Card size="small" title={`To (Expenses) - ₹${toGrossTotal.toLocaleString()}`} bordered={false} style={{ backgroundColor: '#fafafa' }}>
-                      <Descriptions size="small" column={1} bordered>
-                        <Descriptions.Item label="Opening Stock">₹{parseFloat(financialData?.toOpeningStock || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Purchase">₹{parseFloat(financialData?.toPurchase || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Cost of Services">₹{parseFloat(financialData?.toCostOfServices || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Wages">₹{parseFloat(financialData?.toWages || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Hamali Charges">₹{parseFloat(financialData?.toHamaliCharges || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Manufacturing Expenses">₹{parseFloat(financialData?.toManufacturingExpenses || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Packing Charges">₹{parseFloat(financialData?.toPackingCharges || '0').toLocaleString()}</Descriptions.Item>
-                      </Descriptions>
-                    </Card>
+                       <Descriptions bordered column={1} size="small">
+                         <Descriptions.Item label="To Opening Stock">
+                           {formatValue(financialData?.openingStock || financialData?.toOpeningStock)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Purchase">
+                           {formatValue(financialData?.purchase || financialData?.toPurchase)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Cost of Services">
+                           {formatValue(financialData?.costOfServices || financialData?.toCostOfServices)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Wages">
+                           {formatValue(financialData?.wages || financialData?.toWages)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Hamali Charges">
+                           {formatValue(financialData?.hamaliCharges || financialData?.toHamaliCharges)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Manufacturing Expenses">
+                           {formatValue(financialData?.manufacturingExpenses || financialData?.toManufacturingExpenses)}
+                         </Descriptions.Item>
+                         <Descriptions.Item label="To Packing Charges">
+                           {formatValue(financialData?.packingCharges || financialData?.toPackingCharges)}
+                         </Descriptions.Item>
+                       </Descriptions>
                   </Col>
+                  {/* Right side - All "By" fields */}
                   <Col span={12}>
-                    <Card size="small" title={`By (Income) - ₹${byGrossTotal.toLocaleString()}`} bordered={false} style={{ backgroundColor: '#f6ffed' }}>
-                      <Descriptions size="small" column={1} bordered>
-                        <Descriptions.Item label="Sales">₹{parseFloat(financialData?.bySales || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Services">₹{parseFloat(financialData?.byServices || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Closing Stock">₹{parseFloat(financialData?.byClosingStock || '0').toLocaleString()}</Descriptions.Item>
-                      </Descriptions>
-                    </Card>
+                    <Descriptions bordered column={1} size="small">
+                      <Descriptions.Item label="By Sales">
+                        {formatValue(financialData?.sales || financialData?.bySales)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="By Services">
+                        {formatValue(financialData?.services || financialData?.byServices)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="By Closing Stock">
+                        {formatValue(financialData?.closingStock || financialData?.byClosingStock)}
+                      </Descriptions.Item>
+                    </Descriptions>
                   </Col>
                 </Row>
               </Card>
-              
+
               {/* Net Profit Section */}
-              <Card 
-                title={`Net Profit Calculation - ₹${netProfit.toLocaleString()}`} 
-                size="small" 
-                style={{ backgroundColor: netProfit >= 0 ? '#f6ffed' : '#fff2f0' }}
-              >
-                <Row gutter={[16, 16]}>
+              <Card title={`To Net Profit - ₹${netProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
+                <Row gutter={[16, 8]}>
+                  {/* Left side - Operating expenses */}
                   <Col span={12}>
-                    <Card size="small" title={`To (Operating Expenses) - ₹${toNetTotal.toLocaleString()}`} bordered={false} style={{ backgroundColor: '#fafafa' }}>
-                      <Descriptions size="small" column={1} bordered>
-                        <Descriptions.Item label="Salaries">₹{parseFloat(financialData?.toSalaries || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Rent">₹{parseFloat(financialData?.toRent || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Electricity Charges">₹{parseFloat(financialData?.toElectricityCharges || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Printing & Stationery">₹{parseFloat(financialData?.toPrintingStationery || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Telephone Charges">₹{parseFloat(financialData?.toTelephoneCharges || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Postage & Telegram">₹{parseFloat(financialData?.toPostageTelegram || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Office Maintenance">₹{parseFloat(financialData?.toOfficeMaintenance || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Repairs & Maintenance">₹{parseFloat(financialData?.toRepairsMaintenance || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Sadar Expenses">₹{parseFloat(financialData?.toSadarExpenses || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Audit Fee">₹{parseFloat(financialData?.toAuditFee || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Advertisement">₹{parseFloat(financialData?.toAdvertisement || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Bank Charges">₹{parseFloat(financialData?.toBankCharges || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Insurance">₹{parseFloat(financialData?.toInsurance || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Depreciation">₹{parseFloat(financialData?.toDepreciation || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Interest on Loan">₹{parseFloat(financialData?.toInterestOnLoan || '0').toLocaleString()}</Descriptions.Item>
-                      </Descriptions>
-                    </Card>
+                    <Descriptions bordered column={1} size="small">
+                      <Descriptions.Item label="To Salaries">
+                        {formatValue(financialData?.salaries || financialData?.toSalaries)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Rent">
+                        {formatValue(financialData?.rent || financialData?.toRent)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Electricity Charges">
+                        {formatValue(financialData?.electricityCharges || financialData?.toElectricityCharges)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Printing & Stationery">
+                        {formatValue(financialData?.printingStationery || financialData?.toPrintingStationery)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Telephone Charges">
+                        {formatValue(financialData?.telephoneCharges || financialData?.toTelephoneCharges)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Postage & Telegram">
+                        {formatValue(financialData?.postageTelegram || financialData?.toPostageTelegram)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Office Maintenance">
+                        {formatValue(financialData?.officeMaintenance || financialData?.toOfficeMaintenance)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Repairs & Maintenance">
+                        {formatValue(financialData?.repairsMaintenance || financialData?.toRepairsMaintenance)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Sadar Expenses">
+                        {formatValue(financialData?.sadarExpenses || financialData?.toSadarExpenses)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Audit Fee">
+                        {formatValue(financialData?.auditFee || financialData?.toAuditFee)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Advertisement">
+                        {formatValue(financialData?.advertisement || financialData?.toAdvertisement)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Bank Charges">
+                        {formatValue(financialData?.bankCharges || financialData?.toBankCharges)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Insurance">
+                        {formatValue(financialData?.insurance || financialData?.toInsurance)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Depreciation">
+                        {formatValue(financialData?.depreciation || financialData?.toDepreciation)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="To Interest on Loan">
+                        {formatValue(financialData?.interestOnLoan || financialData?.toInterestOnLoan)}
+                      </Descriptions.Item>
+                    </Descriptions>
                   </Col>
+                  {/* Right side - Other income */}
                   <Col span={12}>
-                    <Card size="small" title={`By (Other Income) - ₹${byNetTotal.toLocaleString()}`} bordered={false} style={{ backgroundColor: '#f6ffed' }}>
-                      <Descriptions size="small" column={1} bordered>
-                        <Descriptions.Item label="Rent Received">₹{parseFloat(financialData?.byRentReceived || '0').toLocaleString()}</Descriptions.Item>
-                        <Descriptions.Item label="Commission Received">₹{parseFloat(financialData?.byCommissionReceived || '0').toLocaleString()}</Descriptions.Item>
-                      </Descriptions>
-                    </Card>
+                    <Descriptions bordered column={1} size="small">
+                      <Descriptions.Item label="By Rent Received">
+                        {formatValue(financialData?.rentReceived || financialData?.byRentReceived)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="By Commission Received">
+                        {formatValue(financialData?.commissionReceived || financialData?.byCommissionReceived)}
+                      </Descriptions.Item>
+                    </Descriptions>
                   </Col>
                 </Row>
-              </Card>
-              
-              {/* Summary */}
-              <Card size="small" title="Financial Summary" style={{ marginTop: 16, backgroundColor: '#f0f2f5' }}>
-                <Descriptions bordered column={3}>
-                  <Descriptions.Item label="Gross Profit" span={1}>
-                    <Typography.Text strong style={{ color: grossProfit >= 0 ? '#52c41a' : '#ff4d4f' }}>
-                      ₹{grossProfit.toLocaleString()}
-                    </Typography.Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Net Profit" span={1}>
-                    <Typography.Text strong style={{ color: netProfit >= 0 ? '#52c41a' : '#ff4d4f' }}>
-                      ₹{netProfit.toLocaleString()}
-                    </Typography.Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Profit Margin" span={1}>
-                    <Typography.Text strong>
-                      {byGrossTotal > 0 ? ((netProfit / byGrossTotal) * 100).toFixed(2) : '0.00'}%
-                    </Typography.Text>
-                  </Descriptions.Item>
-                </Descriptions>
               </Card>
             </Card>
           </section>
         );
 
-      case 'synopsis':
-        return (
-          <section key="synopsis" style={{ marginBottom: 24 }}>
-            <Card title="Synopsis" extra={getButton("synopsis")}>
-              <Descriptions bordered column={1}>
-                <Descriptions.Item label="Synopsis">
-                  {data?.synopsis?.synopsis || 'N/A'}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-        );
 
       case 'photoCapture':
         const images = data?.uploadedItems || [];
@@ -597,20 +618,46 @@ export const AxisBankVerificationDetails: React.FC<
           <section key="photoCapture" style={{ marginBottom: 24 }}>
             <Card title="Photo Capture">
               {images.length > 0 ? (
-                <Row gutter={[16, 16]}>
-                  {images.map((item: any, index: number) => (
-                                         <Col key={index} span={6}>
-                       <Image
-                         width="100%"
-                         src={item.path}
-                         alt={`Photo ${index + 1}`}
-                         style={{ borderRadius: 8 }}
-                       />
-                     </Col>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  {images.map((item: any, idx: number) => (
+                    <div key={item.id || idx} style={{ position: "relative" }}>
+                      <Image
+                        src={item.path || item.url || ""}
+                        alt={`Photo ${idx + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                      {item.type && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "rgba(0, 0, 0, 0.6)",
+                            color: "white",
+                            padding: "4px 8px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </Row>
+                </div>
               ) : (
-                <Typography.Text type="secondary">No photos available</Typography.Text>
+                <Typography.Text type="secondary">No photos uploaded</Typography.Text>
               )}
             </Card>
           </section>
@@ -630,6 +677,23 @@ export const AxisBankVerificationDetails: React.FC<
         }
         return null;
       })}
+
+      {/* Synopsis Section with Feedback */}
+      <section style={{ marginBottom: 24 }}>
+        <Card title="Synopsis">
+          <Feedback
+            disabled={!!data?.synopsis?.synopsis}
+            verdict={verdict}
+            setVerdict={setVerdict}
+            editorContent={editorContent}
+            setEditorContent={setEditorContent}
+            handleSave={() => {}}
+            verificationData={verificationData}
+            currentDepartment={currentDepartment}
+            hasEditRequest={hasEditRequest}
+          />
+        </Card>
+      </section>
 
       {/* Footer placeholder - can be added later with correct props */}
     </div>

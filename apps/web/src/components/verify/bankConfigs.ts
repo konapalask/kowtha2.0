@@ -236,8 +236,7 @@ export const bankConfigs: BankConfigs = {
       'performance',            // 13. Performance
       'additionalDetails',      // 14. Additional Details
       'financialAnalysis',      // 15. Financial Analysis
-      'synopsis',               // 16. Synopsis
-      'photoCapture'            // 17. Photo Capture
+      'photoCapture'            // 16. Photo Capture
     ],
     apiResponseTransformer: (rawData: any) => {
       // Transform Axis Bank specific API response structure
