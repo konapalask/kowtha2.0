@@ -24,11 +24,7 @@ import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SchemaSection from '../components/pd-forms/SchemaSection';
-import {
-  loadMobilePDFormsSchema,
-  resolveAxisUBLVariant,
-} from '../components/pd-forms/schema/pdSchema';
-import {formSchema} from '../../forms';
+import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
@@ -39,13 +35,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('item', item);
   // console.log('userData', userData);
 
-  const bankName = 'Axis Finance UBL';
-  const isAxisFinance = (bankName || '').toLowerCase().includes('axis');
-  console.log('isAxisFinance', isAxisFinance);
+  const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
-  console.log('schemaForm', schemaForm?.sections);
 
-  const formConfig = getFormConfigByBank(bankName);
+  const formConfig = schemaForm || getFormConfigByBank(bankName);
 
   const {
     control,
@@ -70,31 +63,35 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       phoneNo: userData?.loan?.applicantMobile || '',
     },
   });
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  // console.log('sectionData', sectionData);
+  console.log('sectionData', sectionData);
 
   useLayoutEffect(() => {
     loadFormData();
   }, []);
 
   useEffect(() => {
-    // Load schema for Axis UBL pilot
+    // Load schema based on bank name
     const loadSchema = async () => {
+      if (!bankName) {
+        console.warn('No bank name provided');
+        return;
+      }
+
       try {
-        if (isAxisFinance) {
-          const schema = await loadMobilePDFormsSchema();
-          const formId = resolveAxisUBLVariant();
-          const form = schema.forms.find(f => f.id === formId);
-          setSchemaForm(formSchema[0]); // Use the first form from formSchema
+        const schema = await loadMobilePDFormsSchema(bankName);
+        if (schema) {
+          setSchemaForm(schema);
         }
       } catch (e) {
-        setSchemaForm(formSchema[0]); // Fallback to formSchema
+        console.error('Error loading schema:', e);
+        // Fallback is handled in pdSchema.ts by returning from forms.js
       }
     };
     loadSchema();
-  }, [isAxisFinance]);
+  }, [bankName]);
 
   // Watch form values to update formData
   // const watchedValues = watch();
@@ -126,7 +123,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       // console.log('data obtained', data);
       const dataToSave = {
         ...data,
-        sectionData,
+        // sectionData,
         // uploadedItems,
         investigable,
         timestamp: new Date().toISOString(),
@@ -140,10 +137,13 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev: any) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
+    setExpandedSections((prev: any) => {
+      const isCurrentlyExpanded = prev[sectionId];
+      return {
+        investigable: prev.investigable,
+        [sectionId]: !isCurrentlyExpanded,
+      };
+    });
   };
 
   const isSectionValid = (sectionId: string): boolean => {
@@ -193,31 +193,33 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       }
 
       const requiredSections = formConfig.sections.filter(
-        section => section.required,
+        (section: any) => section.required,
       );
-      const missingRequiredSections = requiredSections.filter(section => {
-        if (section.id === 'photoCapture') {
-          return sectionData?.uploadedItems?.length === 0;
-        }
+      const missingRequiredSections = requiredSections.filter(
+        (section: any) => {
+          if (section.id === 'photoCapture') {
+            return sectionData?.uploadedItems?.length === 0;
+          }
 
-        const sectionDataExists =
-          sectionData[section.id] !== undefined &&
-          sectionData[section.id] !== null;
-        if (!sectionDataExists) {
-          return true;
-        }
+          const sectionDataExists =
+            sectionData[section.id] !== undefined &&
+            sectionData[section.id] !== null;
+          if (!sectionDataExists) {
+            return true;
+          }
 
-        const sectionContent = sectionData[section.id];
-        if (typeof sectionContent === 'object' && sectionContent !== null) {
-          return Object.keys(sectionContent).length === 0;
-        }
+          const sectionContent = sectionData[section.id];
+          if (typeof sectionContent === 'object' && sectionContent !== null) {
+            return Object.keys(sectionContent).length === 0;
+          }
 
-        return false;
-      });
+          return false;
+        },
+      );
 
       if (missingRequiredSections.length > 0) {
         const missingSectionNames = missingRequiredSections
-          .map(section => section.label)
+          .map((section: any) => section.label)
           .join(', ');
         Toast.show({
           type: 'error',
@@ -330,8 +332,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         {investigable && (
           <>
             <View style={styles.formContainer}>
-              {/* Axis UBL schema-driven pilot: if schemaForm is available, render from schema; else use existing config */}
-              {isAxisFinance && schemaForm?.sections?.length
+              {/* Schema-driven forms: if schemaForm is available, render from schema; else use existing config */}
+              {schemaForm?.sections?.length
                 ? schemaForm.sections.map((sec: any) => {
                     const isExpanded = expandedSections[sec.id] || false;
                     return (
@@ -348,41 +350,21 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                           </Text>
                         </TouchableOpacity>
                         {isExpanded && (
-                          <>
-                            <View style={styles.sectionContent}>
-                              <SchemaSection
-                                title={sec.label}
-                                schema={sec.schema}
-                                initialData={sectionData[sec.id]}
-                                onSubmit={(data: any) =>
-                                  handleSectionDataChange(sec.id, data)
-                                }
-                              />
-                            </View>
-                            <View style={styles.sectionContent}>
-                              {/* {section.id === 'photoCapture' ? ( */}
-                              <PhotoCapture
-                                onUploadedItemsChange={
-                                  handleUploadedItemsChange
-                                }
-                                initialItems={sectionData?.uploadedItems ?? []}
-                                loanId={item?.id || item?.verificationId}
-                              />
-                              {/* ) : ( */}
-                              {/* <SectionComponent
-                                  onSubmit={(data: any) =>
-                                    handleSectionDataChange(section.id, data)
-                                  }
-                                  initialData={sectionData[section.id]}
-                                />
-                              )} */}
-                            </View>
-                          </>
+                          <View style={styles.sectionContent}>
+                            <SchemaSection
+                              title={sec.label}
+                              schema={sec.schema}
+                              initialData={sectionData[sec.id]}
+                              onSubmit={(data: any) =>
+                                handleSectionDataChange(sec.id, data)
+                              }
+                            />
+                          </View>
                         )}
                       </View>
                     );
                   })
-                : formConfig.sections.map(section => {
+                : formConfig.sections.map((section: any) => {
                     const SectionComponent = section.component;
                     const isExpanded = expandedSections[section.id] || false;
 
@@ -415,6 +397,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                                 }
                                 initialItems={sectionData?.uploadedItems ?? []}
                                 loanId={item?.id || item?.verificationId}
+                                pd={true}
                               />
                             ) : (
                               <SectionComponent
@@ -429,6 +412,30 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       </View>
                     );
                   })}
+
+              {/* Photo Capture Section - Common for all forms */}
+              <View style={styles.sectionContainer}>
+                <TouchableOpacity
+                  style={styles.sectionHeader}
+                  onPress={() => toggleSection('photoCapture')}>
+                  <Text style={styles.sectionTitle}>Photo Capture</Text>
+                  {isSectionValid('photoCapture') && (
+                    <Icon name="check" size={18} color="#34C759" />
+                  )}
+                  <Text style={styles.sectionIndicator}>
+                    {expandedSections.photoCapture ? '▼' : '▶'}
+                  </Text>
+                </TouchableOpacity>
+                {expandedSections.photoCapture && (
+                  <View style={styles.sectionContent}>
+                    <PhotoCapture
+                      onUploadedItemsChange={handleUploadedItemsChange}
+                      initialItems={sectionData?.uploadedItems ?? []}
+                      loanId={item?.id || item?.verificationId}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
 
             <View style={styles.buttonContainer}>

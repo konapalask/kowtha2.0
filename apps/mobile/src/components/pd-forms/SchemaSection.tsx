@@ -137,7 +137,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             value={value ?? ''}
             onChangeText={text => handleChange(fieldId, text)}
             placeholder={property.title}
-            editable={!property.readOnly}
+            // editable={!property.readOnly}
+            editable={true}
             multiline={property.title.toLowerCase().includes('about')}
             numberOfLines={
               property.title.toLowerCase().includes('about') ? 4 : 1
@@ -182,12 +183,27 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         );
       default:
         return (
+          // <TextInput
+          //   style={[styles.input, property.readOnly && styles.readOnlyInput]}
+          //   value={value ?? ''}
+          //   onChangeText={text => handleChange(fieldId, text)}
+          //   placeholder={property.title}
+          //   editable={!property.readOnly}
+          // />
           <TextInput
             style={[styles.input, property.readOnly && styles.readOnlyInput]}
             value={value ?? ''}
             onChangeText={text => handleChange(fieldId, text)}
             placeholder={property.title}
-            editable={!property.readOnly}
+            // editable={!property.readOnly}
+            editable={true}
+            multiline={property.title.toLowerCase().includes('about')}
+            numberOfLines={
+              property.title.toLowerCase().includes('about') ? 4 : 1
+            }
+            textAlignVertical={
+              property.title.toLowerCase().includes('about') ? 'top' : 'center'
+            }
           />
         );
     }

@@ -1,4 +1,6 @@
 import * as RNFS from 'react-native-fs';
+// @ts-ignore - forms.js doesn't have TypeScript definitions
+import {formSchema, getFormConfigByBank} from '../../../../forms';
 
 export interface MobileFieldDefinition {
   id: string;
@@ -26,10 +28,12 @@ export interface MobileGeneratedSchema {
   forms: MobileFormDefinition[];
 }
 
-let cachedSchema: MobileGeneratedSchema | null = null;
+let cachedSchema: Record<string, any> = {};
 
-export async function loadMobilePDFormsSchema(): Promise<MobileGeneratedSchema> {
-  if (cachedSchema) return cachedSchema;
+export async function loadMobilePDFormsSchema(
+  bankName: string,
+): Promise<any | null> {
+  if (cachedSchema[bankName]) return cachedSchema[bankName];
 
   try {
     // Option 1: Read from file system using RNFS (React Native compatible)
@@ -37,8 +41,18 @@ export async function loadMobilePDFormsSchema(): Promise<MobileGeneratedSchema> 
       RNFS.MainBundlePath + '/../packages/shared/pd_forms.generated.json';
     const schemaContent = await RNFS.readFile(schemaPath, 'utf8');
     const schema = JSON.parse(schemaContent) as MobileGeneratedSchema;
-    cachedSchema = schema;
-    return schema;
+
+    // Find the specific bank form from the schema
+    const bankForm = schema.forms.find(
+      f => f.name.toLowerCase() === bankName.toLowerCase(),
+    );
+
+    if (bankForm) {
+      cachedSchema[bankName] = bankForm;
+      return bankForm;
+    }
+
+    throw new Error(`Bank form not found for: ${bankName}`);
   } catch (error) {
     console.warn(
       'Failed to load schema from file system, trying remote fetch:',
@@ -47,28 +61,28 @@ export async function loadMobilePDFormsSchema(): Promise<MobileGeneratedSchema> 
 
     try {
       // Option 2: Fetch from backend API (fallback)
-      const response = await fetch('/api/pd-schema');
+      const response = await fetch(
+        `/api/pd-schema/${encodeURIComponent(bankName)}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      const schema = (await response.json()) as MobileGeneratedSchema;
-      cachedSchema = schema;
+      const schema = await response.json();
+      cachedSchema[bankName] = schema;
       return schema;
     } catch (fetchError) {
       console.error('Failed to fetch schema from backend:', fetchError);
 
-      // Option 3: Return minimal placeholder (current behavior)
-      console.warn('Falling back to empty schema - using existing components');
-      return {
-        version: '1.0',
-        generated_at: '',
-        source_file: '',
-        forms: [],
-      };
+      // Option 3: Fallback to local formSchema from forms.js
+      console.warn('Falling back to local formSchema for bank:', bankName);
+      const localForm = getFormConfigByBank(bankName);
+
+      if (localForm) {
+        cachedSchema[bankName] = localForm;
+        return localForm;
+      }
+
+      return null;
     }
   }
-}
-
-export function resolveAxisUBLVariant(): string {
-  return 'axis_finance_ubl_above_10l';
 }
