@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {InputFormItem} from '../../lib/InputFormItem';
+import {colors} from '../../../constants/colors';
+import {InputFormItem} from '../../../lib/InputFormItem';
 
 export type TataUBLEmployeeDetailsFormData = {
   currentEmployees: string;

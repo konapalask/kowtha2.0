@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
+import {colors} from '../../../constants/colors';
 
 export type TataBasicDetailsFormData = {
   nameOfApplicant: string;

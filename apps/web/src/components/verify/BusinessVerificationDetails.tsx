@@ -39,6 +39,7 @@ import {
   isArkaFincap,
   isAxisFinance 
 } from "./bankConfigs";
+import { isAxisSchemaShaped, adaptAxisSchemaToLegacy } from "@/utils/pdAxisSchemaAdapter";
 
 interface BusinessVerificationDetailsProps {
   verificationData: any;
@@ -366,7 +367,13 @@ export const BusinessVerificationDetails: React.FC<
   
   // Transform the raw API response using bank-specific transformer
   const rawApiData = verificationData?.verificationData || verificationData;
-  const transformedData = transformApiResponse(bankName, rawApiData);
+  const transformedData = (() => {
+    // If Axis schema-shaped payload is present (snake_case sections), adapt to legacy view shape for pilot
+    if (bankName?.toLowerCase().includes('axis') && isAxisSchemaShaped(rawApiData)) {
+      return adaptAxisSchemaToLegacy(rawApiData);
+    }
+    return transformApiResponse(bankName, rawApiData);
+  })();
 
   // Extract the form data using transformed data
   const data = transformedData;

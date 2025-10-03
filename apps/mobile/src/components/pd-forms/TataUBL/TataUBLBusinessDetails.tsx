@@ -7,21 +7,20 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {InputFormItem} from '../../lib/InputFormItem';
+import {colors} from '../../../constants/colors';
+import {TextAreaFormItem} from '../../../lib/TextAreaFormItem';
 
-export type TataUBLBankDetailsFormData = {
-  primaryBanker: string;
-  natureOfAccount: string;
-  avgBalance: string;
+export type TataUBLBusinessDetailsFormData = {
+  currentBusinessDetails: string;
+  stockAsOnDate: string;
 };
 
-type TataUBLBankDetailsProps = {
-  formData: TataUBLBankDetailsFormData;
-  onSubmit: (data: TataUBLBankDetailsFormData) => void;
+type TataUBLBusinessDetailsProps = {
+  formData: TataUBLBusinessDetailsFormData;
+  onSubmit: (data: TataUBLBusinessDetailsFormData) => void;
 };
 
-const TataUBLBankDetails: React.FC<TataUBLBankDetailsProps> = ({
+const TataUBLBusinessDetails: React.FC<TataUBLBusinessDetailsProps> = ({
   formData,
   onSubmit,
 }) => {
@@ -29,49 +28,37 @@ const TataUBLBankDetails: React.FC<TataUBLBankDetailsProps> = ({
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm<TataUBLBankDetailsFormData>({
+  } = useForm<TataUBLBusinessDetailsFormData>({
     defaultValues: formData,
   });
 
-  const onFormSubmit = (data: TataUBLBankDetailsFormData) => {
+  const onFormSubmit = (data: TataUBLBusinessDetailsFormData) => {
     onSubmit(data);
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Bank Details</Text>
+      <Text style={styles.sectionTitle}>Business Details</Text>
 
-      <InputFormItem
+      <TextAreaFormItem
         data={{
-          title: 'Primary Banker',
-          key: 'primaryBanker',
+          title: 'Current Business Details',
+          key: 'currentBusinessDetails',
           control,
           errors,
           required: true,
-          placeholder: 'Enter primary banker name',
+          placeholder: 'Enter current business details',
         }}
       />
 
-      <InputFormItem
+      <TextAreaFormItem
         data={{
-          title: 'Nature of the Account',
-          key: 'natureOfAccount',
+          title: 'Stock as on Date',
+          key: 'stockAsOnDate',
           control,
           errors,
           required: true,
-          placeholder: 'Enter nature of the account',
-        }}
-      />
-
-      <InputFormItem
-        data={{
-          title: 'Avg. Balance',
-          key: 'avgBalance',
-          control,
-          errors,
-          required: true,
-          placeholder: 'Enter average balance amount',
-          keyboardType: 'numeric',
+          placeholder: 'Enter stock details as on current date',
         }}
       />
 
@@ -112,4 +99,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TataUBLBankDetails;
+export default TataUBLBusinessDetails;

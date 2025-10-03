@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
-import {colors} from '../../constants/colors';
-import {InputFormItem} from '../../lib/InputFormItem';
-import {SelectFormItem} from '../../lib/SelectFormItem';
+import {colors} from '../../../constants/colors';
+import {InputFormItem} from '../../../lib/InputFormItem';
+import {SelectFormItem} from '../../../lib/SelectFormItem';
 
 export type TataUBLOfficeAddressFormData = {
   address: string;
