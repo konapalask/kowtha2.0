@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Button, Row, Col, Space, Card, message } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Button, Row, Col, Space, Card, message, Table } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { WebSectionDefinition, WebFieldDefinition } from '@/types/webSchema';
 
@@ -49,55 +49,72 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
   };
 
   const renderArrayField = (field: WebFieldDefinition) => {
+    // Render array items in a table layout similar to FI edit modals
     return (
       <Form.List name={field.id}>
-        {(fields, { add, remove }) => (
-          <div>
-            {fields.map((formField, index) => (
-              <Card 
-                key={formField.key} 
-                size="small" 
-                style={{ marginBottom: 12 }}
-                title={`${field.label} ${index + 1}`}
-                extra={
-                  fields.length > 1 && (
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      onClick={() => remove(formField.name)}
-                    />
-                  )
-                }
+        {(fields, { add, remove }) => {
+          // Build row data for the table; carry the name path for each row
+          const dataSource = fields.map((f, idx) => ({ key: f.key, index: idx, namePath: f.name }));
+
+          // Build columns from array item fields
+          const columns = (field.arrayItemFields || []).map((itemField) => ({
+            title: itemField.label,
+            dataIndex: itemField.id,
+            key: itemField.id,
+            render: (_: any, row: any) => (
+              <Form.Item
+                name={[row.namePath, itemField.id]}
+                style={{ marginBottom: 0 }}
+                rules={itemField.required ? [{ required: true, message: `${itemField.label} is required` }] : []}
               >
-                <Row gutter={[16, 16]}>
-                  {field.arrayItemFields?.map((itemField) => (
-                    <Col span={12} key={itemField.id}>
-                      <Form.Item
-                        name={[formField.name, itemField.id]}
-                        label={itemField.label}
-                        rules={[
-                          { required: itemField.required, message: `${itemField.label} is required` }
-                        ]}
-                      >
-                        {renderFieldInput(itemField)}
-                      </Form.Item>
-                    </Col>
-                  ))}
-                </Row>
-              </Card>
-            ))}
-            <Button
-              type="dashed"
-              onClick={() => add()}
-              icon={<PlusOutlined />}
-              style={{ width: '100%' }}
-            >
-              Add {field.label}
-            </Button>
-          </div>
-        )}
+                {renderFieldInput(itemField)}
+              </Form.Item>
+            ),
+          }));
+
+          // Action column for row removal
+          columns.push({
+            title: '',
+            dataIndex: '__actions',
+            key: 'actions',
+            // Provide two-arg compatible function and derive index from row.key
+            render: (_: any, row: any) => {
+              const index = dataSource.findIndex(r => r.key === row.key);
+              if (fields.length <= 1 || index < 0) {
+                return <span />;
+              }
+              return (
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={() => remove(fields[index].name)}
+                />
+              );
+            },
+          });
+
+          return (
+            <Card size="small" title={field.label} style={{ marginBottom: 12 }}>
+              <Table
+                dataSource={dataSource}
+                columns={columns as any}
+                pagination={false}
+                bordered
+                size="middle"
+              />
+              <Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+                style={{ width: '100%', marginTop: 8 }}
+              >
+                Add {field.label}
+              </Button>
+            </Card>
+          );
+        }}
       </Form.List>
     );
   };

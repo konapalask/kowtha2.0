@@ -486,37 +486,77 @@ export const BusinessVerificationDetails: React.FC<
       setLoading(true);
       const values = await financialForm.validateFields();
 
+      // Recalculate Gross and Net Profit at submit time to avoid stale zero values
+      const openingStockVal = parseFloat(values.toOpeningStock) || 0;
+      const purchaseVal = parseFloat(values.toPurchase) || 0;
+      const costOfServicesVal = parseFloat(values.toCostOfServices) || 0;
+      const wagesVal = parseFloat(values.toWages) || 0;
+      const hamaliChargesVal = parseFloat(values.toHamaliCharges) || 0;
+      const manufacturingExpensesVal = parseFloat(values.toManufacturingExpenses) || 0;
+      const packingChargesVal = parseFloat(values.toPackingCharges) || 0;
+      const salesVal = parseFloat(values.bySales) || 0;
+      const servicesVal = parseFloat(values.byServices) || 0;
+      const closingStockVal = parseFloat(values.byClosingStock) || 0;
+
+      const salariesVal = parseFloat(values.toSalaries) || 0;
+      const rentVal = parseFloat(values.toRent) || 0;
+      const electricityChargesVal = parseFloat(values.toElectricityCharges) || 0;
+      const printingStationeryVal = parseFloat(values.toPrintingStationery) || 0;
+      const telephoneChargesVal = parseFloat(values.toTelephoneCharges) || 0;
+      const postageTelegramVal = parseFloat(values.toPostageTelegram) || 0;
+      const officeMaintenanceVal = parseFloat(values.toOfficeMaintenance) || 0;
+      const repairsMaintenanceVal = parseFloat(values.toRepairsMaintenance) || 0;
+      const sadarExpensesVal = parseFloat(values.toSadarExpenses) || 0;
+      const auditFeeVal = parseFloat(values.toAuditFee) || 0;
+      const advertisementVal = parseFloat(values.toAdvertisement) || 0;
+      const bankChargesVal = parseFloat(values.toBankCharges) || 0;
+      const insuranceVal = parseFloat(values.toInsurance) || 0;
+      const depreciationVal = parseFloat(values.toDepreciation) || 0;
+      const interestOnLoanVal = parseFloat(values.toInterestOnLoan) || 0;
+      const rentReceivedVal = parseFloat(values.byRentReceived) || 0;
+      const commissionReceivedVal = parseFloat(values.byCommissionReceived) || 0;
+
+      const computedGrossProfit = (salesVal + servicesVal + closingStockVal) -
+        (openingStockVal + purchaseVal + costOfServicesVal + wagesVal + hamaliChargesVal + manufacturingExpensesVal + packingChargesVal);
+
+      const indirectExpensesVal = salariesVal + rentVal + electricityChargesVal + printingStationeryVal + telephoneChargesVal +
+        postageTelegramVal + officeMaintenanceVal + repairsMaintenanceVal + sadarExpensesVal + auditFeeVal + advertisementVal +
+        bankChargesVal + insuranceVal + depreciationVal + interestOnLoanVal;
+
+      const otherIncomesVal = rentReceivedVal + commissionReceivedVal;
+      const computedNetProfit = computedGrossProfit + otherIncomesVal - indirectExpensesVal;
+
       // Prepare the complete financial analysis data
       const financialData = {
-        openingStock: parseFloat(values.toOpeningStock) || 0,
-        purchase: parseFloat(values.toPurchase) || 0,
-        costOfServices: parseFloat(values.toCostOfServices) || 0,
-        wages: parseFloat(values.toWages) || 0,
-        hamaliCharges: parseFloat(values.toHamaliCharges) || 0,
-        manufacturingExpenses: parseFloat(values.toManufacturingExpenses) || 0,
-        packingCharges: parseFloat(values.toPackingCharges) || 0,
-        sales: parseFloat(values.bySales) || 0,
-        services: parseFloat(values.byServices) || 0,
-        closingStock: parseFloat(values.byClosingStock) || 0,
-        salaries: parseFloat(values.toSalaries) || 0,
-        rent: parseFloat(values.toRent) || 0,
-        electricityCharges: parseFloat(values.toElectricityCharges) || 0,
-        printingStationery: parseFloat(values.toPrintingStationery) || 0,
-        telephoneCharges: parseFloat(values.toTelephoneCharges) || 0,
-        postageTelegram: parseFloat(values.toPostageTelegram) || 0,
-        officeMaintenance: parseFloat(values.toOfficeMaintenance) || 0,
-        repairsMaintenance: parseFloat(values.toRepairsMaintenance) || 0,
-        sadarExpenses: parseFloat(values.toSadarExpenses) || 0,
-        auditFee: parseFloat(values.toAuditFee) || 0,
-        advertisement: parseFloat(values.toAdvertisement) || 0,
-        bankCharges: parseFloat(values.toBankCharges) || 0,
-        insurance: parseFloat(values.toInsurance) || 0,
-        depreciation: parseFloat(values.toDepreciation) || 0,
-        interestOnLoan: parseFloat(values.toInterestOnLoan) || 0,
-        rentReceived: parseFloat(values.byRentReceived) || 0,
-        commissionReceived: parseFloat(values.byCommissionReceived) || 0,
-        grossProfit: calculatedGrossProfit,
-        netProfit: calculatedNetProfit
+        openingStock: openingStockVal,
+        purchase: purchaseVal,
+        costOfServices: costOfServicesVal,
+        wages: wagesVal,
+        hamaliCharges: hamaliChargesVal,
+        manufacturingExpenses: manufacturingExpensesVal,
+        packingCharges: packingChargesVal,
+        sales: salesVal,
+        services: servicesVal,
+        closingStock: closingStockVal,
+        salaries: salariesVal,
+        rent: rentVal,
+        electricityCharges: electricityChargesVal,
+        printingStationery: printingStationeryVal,
+        telephoneCharges: telephoneChargesVal,
+        postageTelegram: postageTelegramVal,
+        officeMaintenance: officeMaintenanceVal,
+        repairsMaintenance: repairsMaintenanceVal,
+        sadarExpenses: sadarExpensesVal,
+        auditFee: auditFeeVal,
+        advertisement: advertisementVal,
+        bankCharges: bankChargesVal,
+        insurance: insuranceVal,
+        depreciation: depreciationVal,
+        interestOnLoan: interestOnLoanVal,
+        rentReceived: rentReceivedVal,
+        commissionReceived: commissionReceivedVal,
+        grossProfit: computedGrossProfit,
+        netProfit: computedNetProfit
       };
 
       console.log('Submitting financial data:', financialData);
@@ -636,20 +676,7 @@ export const BusinessVerificationDetails: React.FC<
 
   return (
     <div>
-      {/* Dynamic Form Status */}
-      {verificationData && schemaForm && !formLoading && (
-        <Card style={{ marginBottom: 16 }}>
-          <Row justify="space-between" align="middle">
-            <Col>
-              <Space>
-                <span style={{ fontWeight: 'bold', color: '#52c41a' }}>✓ Dynamic Forms Enabled</span>
-                <span>|</span>
-                <span>Bank: {schemaForm.name}</span>
-              </Space>
-            </Col>
-          </Row>
-        </Card>
-      )}
+      {/* Dynamic Form Status removed as requested */}
       
       {/* Loading Indicator */}
       {formLoading && (

@@ -392,10 +392,7 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
 
   return (
     <div>
-      <Card style={{ marginBottom: 24 }}>
-        <Title level={3}>{schema.name}</Title>
-        <Text type="secondary">Complete all required sections to submit the verification</Text>
-      </Card>
+      {/* Header card removed as requested */}
 
       <Form 
         form={form} 
