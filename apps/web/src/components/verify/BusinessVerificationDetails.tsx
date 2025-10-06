@@ -2,26 +2,15 @@ import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
 import {
   CloseCircleOutlined,
-  // CloseCircleOutlined,
   EditOutlined,
-  // EyeOutlined,
-  // PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Image, message, Modal, Table, Row, Col, Descriptions, Form, Input, Typography } from "antd";
-// import dynamic from "next/dynamic";
+import { Button, Card, Image, message, Modal, Table, Row, Col, Descriptions, Form, Input, Typography, Space } from "antd";
 import React, { useEffect, useState } from "react";
-// const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import { useRouter } from "next/router";
-import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
-import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
-import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
-import ApplicantDetailsDescription from "./Descriptions/ApplicantDetailsDescription";
-import FamilyDetailsDescription from "./Descriptions/FamilyDetailsDescription";
 
-// import PdfPreview from "./PdfPreview";
 import FinalVerdict from "./FinalVerdict";
 import Feedback from "./Feedback";
 import {
@@ -30,16 +19,18 @@ import {
   submitFinancialAnalysis,
 } from "@/services/verifier.services";
 
-// Import bank configuration system
-import { 
-  getBankConfig, 
-  transformApiResponse, 
-  shouldShowSection, 
-  getSectionOrder,
-  isArkaFincap,
-  isAxisFinance 
-} from "./bankConfigs";
-import { isAxisSchemaShaped, adaptAxisSchemaToLegacy } from "@/utils/pdAxisSchemaAdapter";
+// Import new dynamic form system
+import { EnhancedDynamicFormRenderer } from "@/components/forms/EnhancedDynamicFormRenderer";
+import { getMobileSchemaByBank, getSupportedBanks } from "@/utils/mobileSchemaLoader";
+import { WebFormDefinition, WebFormData } from "@/types/webSchema";
+import { DynamicEditModal } from "@/components/verify/DynamicEditModal";
+
+// Import legacy description components for FI-only banks
+import BusinessBasicDetailsDescription from "./Descriptions/BusinessBasicDetailsDescription";
+import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescription";
+import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
+import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
+import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 
 interface BusinessVerificationDetailsProps {
   verificationData: any;
@@ -92,7 +83,18 @@ export const BusinessVerificationDetails: React.FC<
   const [calculatedGrossProfit, setCalculatedGrossProfit] = useState<number>(0);
   const [calculatedNetProfit, setCalculatedNetProfit] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  // const [loading, setLoading] = useState<boolean>(false);
+  
+  // New dynamic form states
+  const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
+  const [useNewApproach, setUseNewApproach] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
+  const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
+  
+  // Dynamic edit modal states
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [currentEditSection, setCurrentEditSection] = useState<string>('');
+  const [currentSectionSchema, setCurrentSectionSchema] = useState<any>(null);
+  const [localEditLogsUpdated, setLocalEditLogsUpdated] = useState(0);
 
   const handleSave = async () => {
     patchFinalVerdict(id as string, "Business", {
@@ -155,6 +157,7 @@ export const BusinessVerificationDetails: React.FC<
           const existingLogs = event.target.result || {};
           const { id, timestamp, ...rest } = existingLogs;
           setChangedData(rest);
+          console.log('Loaded edit logs from IndexedDB:', rest);
         };
 
         getRequest.onerror = (event: any) => {
@@ -169,7 +172,181 @@ export const BusinessVerificationDetails: React.FC<
         db.close();
       }
     };
-  }, [id, activeTab, editLogsUpdated]);
+  }, [id, activeTab, editLogsUpdated, localEditLogsUpdated]);
+
+  // Load dynamic form schema based on bank name (ONLY FOR PD/BUSINESS VERIFICATION)
+  useEffect(() => {
+    const loadDynamicSchema = async () => {
+      try {
+        setFormLoading(true);
+        
+        // Get bank name from verification data
+        const bankName = verificationData?.bankName || 
+                        verificationData?.loan?.bankName || 
+                        '';
+        
+        // Skip if no bank name
+        if (!bankName) {
+          console.log('No bank name found, skipping dynamic schema');
+          setUseNewApproach(false);
+          setFormLoading(false);
+          return;
+        }
+        
+        console.log('Loading PD schema for bank:', bankName);
+        
+        // Check if bank is supported by new approach (has PD forms)
+        const supportedBanks = getSupportedBanks();
+        const isSupported = supportedBanks.some(bank => 
+          bank.toLowerCase() === bankName.toLowerCase()
+        );
+        
+        if (isSupported) {
+          const schema = getMobileSchemaByBank(bankName);
+          if (schema) {
+            setSchemaForm(schema);
+            setUseNewApproach(true);
+            
+            // Initialize form data from existing verification data
+            // Extract the actual form data from verificationData.verificationData
+            const formData = verificationData?.verificationData || verificationData || {};
+            setDynamicFormData(formData);
+            
+            console.log('✓ PD dynamic schema loaded successfully:', schema.name);
+            console.log('✓ Form data initialized');
+          } else {
+            console.log(`Bank "${bankName}" does not have PD forms configured`);
+            setUseNewApproach(false);
+          }
+        } else {
+          console.log(`Bank "${bankName}" does not have PD forms - this is normal for FI-only banks`);
+          setUseNewApproach(false);
+        }
+      } catch (error) {
+        console.error('Error loading dynamic schema:', error);
+        setUseNewApproach(false);
+      } finally {
+        setFormLoading(false);
+      }
+    };
+    
+    if (verificationData) {
+      loadDynamicSchema();
+    }
+  }, [verificationData]);
+
+  // Handle dynamic form data changes
+  const handleDynamicFormDataChange = (sectionId: string, data: any) => {
+    setDynamicFormData(prev => ({
+      ...prev,
+      [sectionId]: data,
+    }));
+  };
+
+  // Handle edit button click for dynamic sections
+  const handleDynamicSectionEdit = (sectionId: string) => {
+    if (!schemaForm) return;
+    
+    // Find the section schema
+    const sectionSchema = schemaForm.sections.find(s => s.id === sectionId);
+    if (!sectionSchema) return;
+    
+    setCurrentEditSection(sectionId);
+    setCurrentSectionSchema(sectionSchema);
+    setEditModalVisible(true);
+  };
+
+  // Save dynamic section edits to IndexedDB
+  const handleSaveDynamicEdit = async (sectionId: string, data: any) => {
+    return new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("editLogs", 1);
+
+      request.onerror = () => {
+        message.error("Failed to save changes: Database error");
+        reject(new Error("Database error"));
+      };
+
+      request.onsuccess = (event: any) => {
+        const db = event.target.result;
+
+        try {
+          const transaction = db.transaction("logs", "readwrite");
+          const store = transaction.objectStore("logs");
+
+          const getRequest = store.get(`${id}_${activeTab}`);
+
+          getRequest.onsuccess = () => {
+            const existingData = getRequest.result || {};
+
+            const logEntry = {
+              id: `${id}_${activeTab}`,
+              ...existingData,
+              [sectionId]: data,
+              timestamp: new Date().toISOString(),
+            };
+
+            const putRequest = store.put(logEntry);
+
+            putRequest.onsuccess = () => {
+              setEditModalVisible(false);
+              setLocalEditLogsUpdated(prev => prev + 1); // Trigger refresh of edit logs
+              fetchVerificationData();
+              resolve();
+            };
+
+            putRequest.onerror = () => {
+              console.error("Error saving log:", putRequest.error);
+              message.error("Failed to save edit log");
+              reject(new Error("Failed to save edit log"));
+            };
+          };
+
+          getRequest.onerror = () => {
+            console.error("Error fetching existing log:", getRequest.error);
+            reject(new Error("Error fetching existing log"));
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+          };
+
+          transaction.onerror = () => {
+            console.error("Transaction error:", transaction.error);
+            reject(new Error("Transaction error"));
+          };
+        } catch (error) {
+          console.error("Error in transaction:", error);
+          db.close();
+          reject(error);
+        }
+      };
+    });
+  };
+
+  // Handle dynamic form submission
+  const handleDynamicFormSubmit = async (formData: WebFormData) => {
+    try {
+      setLoading(true);
+      
+      const finalData = {
+        verificationType: 'Business',
+        findings: 'Business Verification Findings',
+        addressType: 'Business',
+        verificationData: formData,
+      };
+
+      // Submit verification data
+      await verifierEditApi(id as string, "Business", finalData);
+      
+      message.success('Verification data updated successfully');
+      fetchVerificationData();
+    } catch (error) {
+      console.error('Error submitting dynamic form:', error);
+      message.error('Failed to update verification data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Watch financial form values for automatic calculation
   const financialFormValues = Form.useWatch([], financialForm);
@@ -361,30 +538,30 @@ export const BusinessVerificationDetails: React.FC<
 
   if (!verificationData) return null;
 
-  // Get bank configuration and transform API response based on bank
+  // Get bank name
   const bankName = verificationData?.bankName || 'Axis Finance';
-  const bankConfig = getBankConfig(bankName);
   
-  // Transform the raw API response using bank-specific transformer
+  // Extract the form data directly  
   const rawApiData = verificationData?.verificationData || verificationData;
-  const transformedData = (() => {
-    // If Axis schema-shaped payload is present (snake_case sections), adapt to legacy view shape for pilot
-    if (bankName?.toLowerCase().includes('axis') && isAxisSchemaShaped(rawApiData)) {
-      return adaptAxisSchemaToLegacy(rawApiData);
-    }
-    return transformApiResponse(bankName, rawApiData);
-  })();
-
-  // Extract the form data using transformed data
-  const data = transformedData;
+  const data = rawApiData;
   
-  // Coalesce PD section objects in case of different shapes (keeping for backward compatibility)
-  const coalesce = (a: any, b: any) => (a !== undefined && a !== null ? a : b);
-  const unwrapKey = (obj: any, key: string) => (obj && typeof obj === 'object' && obj[key] ? obj[key] : obj);
-  const salariesWagesData = unwrapKey(coalesce(data?.salariesWages, transformedData?.salariesWages), 'salariesWages');
-  const clientsDebtorsData = unwrapKey(coalesce(data?.clientsDebtors, transformedData?.financeDetails), 'clientsDebtors');
-  const suppliersCreditorsData = coalesce(data?.suppliersCreditors, transformedData?.suppliersCreditors);
-  const assetDetailsData = coalesce(data?.assetDetails, transformedData?.assetDetails);
+  // For legacy FI components, wrap the data correctly
+  // The description components expect data with nested structure like data.basicDetails
+  const legacyFormattedData = {
+    basicDetails: data?.basicDetails,
+    businessDetails: data?.businessDetails,
+    miscellaneous: data?.miscellaneous,
+    existingLoans: data?.existingLoans,
+    uploadedItems: data?.uploadedItems,
+    // ExistingLoansDescription expects data.loans.loans structure
+    loans: {
+      loans: data?.existingLoans?.loans || []
+    },
+    // ThirdPartyCheckDescription expects data.thirdPartyCheck.checks structure
+    thirdPartyCheck: {
+      checks: data?.thirdPartyCheck?.checks || []
+    }
+  };
 
   const handleEditorChange = (content: string) => {
     // const liMatch = content.match(/<li>/g);
@@ -405,18 +582,6 @@ export const BusinessVerificationDetails: React.FC<
       : ['businessBasicDetails', 'businessDetails', 'miscellaneous'];
     return Object.keys(changedData).some(key => keySections.includes(key));
   };
-
-  // Determine if Existing Loans and Third Party Check edit buttons should be disabled
-  const shouldDisableExistingLoansAndThirdPartyCheck = hasEditRequest || hasPendingEditRequestForKeySections();
-
-  const getButton = (formKey: string) => (
-    <Button
-      type="text"
-      icon={<EditOutlined />}
-      onClick={() => onEdit(formKey)}
-      disabled={hasEditRequest}
-    />
-  );
 
   const handlePhotoRemoval = async (pid: any) => {
     // const updatedItems = data.uploadedItems.filter(
@@ -469,679 +634,133 @@ export const BusinessVerificationDetails: React.FC<
     }
   });
 
-  // Dynamic section renderer based on bank configuration
-  const renderSection = (sectionId: string) => {
-    switch (sectionId) {
-      case 'basicDetails':
-        return (
+  return (
+    <div>
+      {/* Dynamic Form Status */}
+      {verificationData && schemaForm && !formLoading && (
+        <Card style={{ marginBottom: 16 }}>
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Space>
+                <span style={{ fontWeight: 'bold', color: '#52c41a' }}>✓ Dynamic Forms Enabled</span>
+                <span>|</span>
+                <span>Bank: {schemaForm.name}</span>
+              </Space>
+            </Col>
+          </Row>
+        </Card>
+      )}
+      
+      {/* Loading Indicator */}
+      {formLoading && (
+        <Card style={{ marginBottom: 16, textAlign: 'center' }}>
+          <Space>
+            <span>Loading dynamic form schema...</span>
+          </Space>
+        </Card>
+      )}
+
+      {/* New Dynamic Form Approach */}
+      {useNewApproach && schemaForm && !formLoading && (
+        <div style={{ marginBottom: 24 }}>
+          <EnhancedDynamicFormRenderer
+            schema={schemaForm}
+            initialData={dynamicFormData}
+            onSubmit={handleDynamicFormSubmit}
+            onDataChange={handleDynamicFormDataChange}
+            readOnly={!!verificationData?.approvedStatus || hasEditRequest}
+            showValidation={true}
+            autoSave={true}
+            onEdit={handleDynamicSectionEdit}
+            hasEditRequest={hasEditRequest}
+          />
+        </div>
+      )}
+
+      {/* Dynamic Edit Modal */}
+      {editModalVisible && currentSectionSchema && (
+        <DynamicEditModal
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          sectionSchema={currentSectionSchema}
+          initialData={dynamicFormData[currentEditSection] || {}}
+          onSave={handleSaveDynamicEdit}
+          sectionId={currentEditSection}
+        />
+      )}
+
+      {/* Legacy FI-style Business Data Display (for banks without PD forms) */}
+      {!useNewApproach && !formLoading && verificationData && (
+        <div style={{ marginBottom: 24 }}>
           <BusinessBasicDetailsDescription
-            key="basicDetails"
-            data={{
-              ...data,
-              bankName: verificationData?.bankName,
-              applicationNumber: applicationNumber,
-              loanId: loanId
-            }}
-            extra={getButton("businessBasicDetails")}
+            data={legacyFormattedData}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("basicDetails")}
+                disabled={hasEditRequest}
+              />
+            }
             logs={false}
             currentDepartment={currentDepartment}
           />
-        );
 
-      case 'familyDetails':
-        return (
-          <section key="familyDetails" style={{ marginBottom: 24 }}>
-            <Card title="Family Details" extra={getButton("familyDetails")}>
-              <Table
-                className="striped-table"
-                dataSource={
-                  currentDepartment === 'PD' 
-                    ? data?.familyMemberDetails || data?.familyDetails || []
-                    : data?.familyDetails || data?.familyMemberDetails || []
-                }
-                columns={[
-                  { title: "Name", dataIndex: "name", key: "name" },
-                  { title: "Relation", dataIndex: "relation", key: "relation", 
-                    render: (text: string, record: any) =>
-                      text === "Other" && record.otherRelation
-                        ? `Other - ${record.otherRelation}`
-                        : text
-                  },
-                  { title: "Age", dataIndex: "age", key: "age" },
-                  { title: "Mobile Number", dataIndex: "mobileNumber", key: "mobileNumber" },
-                  { title: "Staying with Applicant", dataIndex: "stayingWithApplicant", key: "stayingWithApplicant" },
-                  { title: "Employment Type", dataIndex: "employmentType", key: "employmentType" },
-                  { title: "Educational Qualification", dataIndex: "educationalQualification", key: "educationalQualification" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No family members added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        );
-
-      case 'shareholdingDetails':
-        if (!shouldShowSection(bankName, 'shareholdingDetails')) return null;
-        return (
-          <section key="shareholdingDetails" style={{ marginBottom: 24 }}>
-            <Card title="Shareholding Details" extra={getButton("shareholdingDetails")}>
-              <Table
-                className="striped-table"
-                dataSource={(() => {
-                  // Handle different data structures for shareholding details
-                  if (Array.isArray(data?.shareholdingDetails?.shareholders)) {
-                    return data.shareholdingDetails.shareholders;
-                  }
-                  if (Array.isArray(data?.shareholdingDetails)) {
-                    return data.shareholdingDetails;
-                  }
-                  // If shareholdingDetails is an object with shareholders key but shareholders is not an array
-                  if (data?.shareholdingDetails && typeof data.shareholdingDetails === 'object' && data.shareholdingDetails.shareholders) {
-                    console.warn('Shareholding details has unexpected structure:', data.shareholdingDetails);
-                    return [];
-                  }
-                  return [];
-                })()}
-                columns={[
-                  { title: "Name", dataIndex: "name", key: "name" },
-                  {
-                    title: "Shareholding %",
-                    dataIndex: "shareholdingPercentage",
-                    key: "shareholdingPercentage",
-                  },
-                  {
-                    title: "Relation with Applicant",
-                    dataIndex: "relationshipWithApplicant",
-                    key: "relationshipWithApplicant",
-                  },
-                  { title: "Designation", dataIndex: "designation", key: "designation" },
-                  {
-                    title: "Coming into Loan Structure",
-                    dataIndex: "comingIntoLoanStructure",
-                    key: "comingIntoLoanStructure",
-                  },
-                  {
-                    title: "Functional of Partner/Director",
-                    dataIndex: "functionalOfPartnerDirector",
-                    key: "functionalOfPartnerDirector",
-                  },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No shareholders added yet" }}
-                bordered
-                style={{ marginBottom: data?.shareholdingDetails?.aboutTheBusiness ? 16 : 0 }}
-              />
-              {/* About the Business section */}
-              {data?.shareholdingDetails?.aboutTheBusiness && (
-                <Descriptions bordered column={1}>
-                  <Descriptions.Item label="About the Business">
-                    {data.shareholdingDetails.aboutTheBusiness}
-                  </Descriptions.Item>
-                </Descriptions>
-              )}
-            </Card>
-          </section>
-        );
-
-      case 'documentsObserved':
-        return (
-          <section key="documentsObserved" style={{ marginBottom: 24 }}>
-            <Card title="Documents Observed" extra={getButton("documentsObserved")}>
-              <Table
-                className="striped-table"
-                dataSource={(() => {
-                  // Handle different data structures for documents observed
-                  if (Array.isArray(data?.documentsObserved?.documents)) {
-                    return data.documentsObserved.documents;
-                  }
-                  if (Array.isArray(data?.documentsObserved)) {
-                    return data.documentsObserved;
-                  }
-                  // If documentsObserved is a string or other format, return empty array
-                  return [];
-                })()}
-                columns={[
-                  { title: "Document Name", dataIndex: "documentName", key: "documentName" },
-                  { title: "Document Type", dataIndex: "documentType", key: "documentType" },
-                  { title: "Document Category", dataIndex: "documentCategory", key: "documentCategory" },
-                  { title: "Remarks", dataIndex: "remarks", key: "remarks" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No documents observed yet" }}
-                bordered
-              />
-              {/* Fallback for legacy string format */}
-              {!Array.isArray(data?.documentsObserved?.documents) && 
-               !Array.isArray(data?.documentsObserved) && 
-               (typeof data?.documentsObserved === 'string' || data?.documentsObserved?.documents) && (
-                <div style={{ marginTop: 16, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 6 }}>
-                  <Typography.Text strong>Legacy Format:</Typography.Text>
-                  <div style={{ marginTop: 8 }}>
-                    {data?.documentsObserved?.documents || data?.documentsObserved || "-"}
-                  </div>
-                </div>
-              )}
-            </Card>
-          </section>
-        );
-
-      case 'suppliersCreditors':
-        return (
-          <section key="suppliersCreditors" style={{ marginBottom: 24 }}>
-            <Card title="Suppliers/Creditors" extra={getButton("suppliersCreditors")}>
-              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                <Descriptions.Item label="No. of Fixed Suppliers">
-                  {suppliersCreditorsData?.suppliersCreditors?.numberOfFixedSuppliers || suppliersCreditorsData?.numberOfFixedSuppliers || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Credit Period">
-                  {suppliersCreditorsData?.suppliersCreditors?.creditPeriod || suppliersCreditorsData?.creditPeriod || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Cash-Cheque Proportions">
-                  {suppliersCreditorsData?.suppliersCreditors?.cashChequeProportions || suppliersCreditorsData?.cashChequeProportions || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-              <Table
-                className="striped-table"
-                dataSource={suppliersCreditorsData?.suppliersCreditors?.suppliers || suppliersCreditorsData?.suppliers || []}
-                columns={[
-                  { title: "Name", dataIndex: "name", key: "name" },
-                  { title: "Phone", dataIndex: "phone", key: "phone" },
-                  { title: "Location", dataIndex: "location", key: "location" },
-                  { 
-                    title: "Review", 
-                    dataIndex: "review", 
-                    key: "review",
-                    render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
-                  },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No suppliers added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        );
-
-      case 'clientsDebtors':
-        return (
-          <section key="clientsDebtors" style={{ marginBottom: 24 }}>
-            <Card title="Clients/Debtors" extra={getButton("clientsDebtors")}>
-              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                <Descriptions.Item label="No. of Fixed Customers">
-                  {clientsDebtorsData?.clientsDebtors?.numberOfFixedCustomers || clientsDebtorsData?.numberOfFixedCustomers || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Credit Period">
-                  {clientsDebtorsData?.clientsDebtors?.creditPeriod || clientsDebtorsData?.creditPeriod || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Cash-Cheque Proportions">
-                  {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-              <Typography.Text strong style={{ display: 'block', margin: '8px 0' }}>Business Metrics</Typography.Text>
-              <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                <Descriptions.Item label="Average Stock Maintenance">
-                  {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Turnover">
-                  {clientsDebtorsData?.clientsDebtors?.turnover || clientsDebtorsData?.turnover || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Net Margins">
-                  {clientsDebtorsData?.clientsDebtors?.netMargins || clientsDebtorsData?.netMargins || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-              <Table
-                className="striped-table"
-                dataSource={
-                  clientsDebtorsData?.clientsDebtors?.customers || 
-                  clientsDebtorsData?.customers || 
-                  [
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer1Name || clientsDebtorsData?.customer1Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer1Phone || clientsDebtorsData?.customer1Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer1Location || clientsDebtorsData?.customer1Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer1Review || clientsDebtorsData?.customer1Review,
-                    },
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer2Name || clientsDebtorsData?.customer2Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer2Phone || clientsDebtorsData?.customer2Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer2Location || clientsDebtorsData?.customer2Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer2Review || clientsDebtorsData?.customer2Review,
-                    },
-                    {
-                      name: clientsDebtorsData?.clientsDebtors?.customer3Name || clientsDebtorsData?.customer3Name,
-                      phone: clientsDebtorsData?.clientsDebtors?.customer3Phone || clientsDebtorsData?.customer3Phone,
-                      location: clientsDebtorsData?.clientsDebtors?.customer3Location || clientsDebtorsData?.customer3Location,
-                      review: clientsDebtorsData?.clientsDebtors?.customer3Review || clientsDebtorsData?.customer3Review,
-                    },
-                  ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))
-                }
-                columns={[
-                  { title: "Name", dataIndex: "name", key: "name" },
-                  { title: "Phone", dataIndex: "phone", key: "phone" },
-                  { title: "Location", dataIndex: "location", key: "location" },
-                  { 
-                    title: "Review", 
-                    dataIndex: "review", 
-                    key: "review",
-                    render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
-                  },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No customers added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        );
-
-      case 'salariesWages':
-        if (isAxisFinance(bankName) || isArkaFincap(bankName)) {
-          return (
-            <section key="salariesWages" style={{ marginBottom: 24 }}>
-              <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
-                {/* Employee Information Subsection */}
-                <div style={{ marginBottom: 24 }}>
-                  <Typography.Title level={5} style={{ marginBottom: 12 }}>
-                    Employee Information
-                  </Typography.Title>
-                  <Descriptions bordered column={3} size="small">
-                    <Descriptions.Item label="No. of Employees">
-                      {data?.salariesWages?.employeeInformation?.numberOfEmployees || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Salary per month per employee">
-                      {data?.salariesWages?.employeeInformation?.salaryPerMonthPerEmployee || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Status of Employee">
-                      {data?.salariesWages?.employeeInformation?.statusOfEmployee || "-"}
-                    </Descriptions.Item>
-                  </Descriptions>
-                </div>
-
-                {/* Labour Information Subsection */}
-                <div>
-                  <Typography.Title level={5} style={{ marginBottom: 12 }}>
-                    Labour Information
-                  </Typography.Title>
-                  <Descriptions bordered column={2} size="small">
-                    <Descriptions.Item label="No. of Labours">
-                      {data?.salariesWages?.labourInformation?.numberOfLabours || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Wages per month/per day">
-                      {data?.salariesWages?.labourInformation?.wagesPerMonthPerDay || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Status of Labour">
-                      {data?.salariesWages?.labourInformation?.statusOfLabour || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Working Hours Start">
-                      {data?.salariesWages?.labourInformation?.workingHoursStart || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Working Hours End">
-                      {data?.salariesWages?.labourInformation?.workingHoursEnd || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Other Major Expenditure">
-                      {data?.salariesWages?.labourInformation?.otherMajorExpenditure || "-"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Remarks" span={2}>
-                      {data?.salariesWages?.labourInformation?.remarks || "-"}
-                    </Descriptions.Item>
-                  </Descriptions>
-                </div>
-              </Card>
-            </section>
-          );
-        } else {
-          // Original layout for other banks (Arka Fincap, etc.)
-          return (
-            <section key="salariesWages" style={{ marginBottom: 24 }}>
-              <Card title="Salaries & Wages" extra={getButton("salariesWages")}>
-                <Descriptions bordered column={2}>
-                  <Descriptions.Item label="No. of Employees">
-                    {salariesWagesData?.numberOfEmployees || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Salary/Employee/Month">
-                    {salariesWagesData?.salaryPerMonthPerEmployee || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Status of Employee">
-                    {salariesWagesData?.statusOfEmployee || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="No. of Labours">
-                    {salariesWagesData?.numberOfLabours || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Wages per month/day">
-                    {salariesWagesData?.wagesPerMonthPerDay || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Status of Labour">
-                    {salariesWagesData?.statusOfLabour || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Working Hours Start">
-                    {salariesWagesData?.workingHoursStart || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Working Hours End">
-                    {salariesWagesData?.workingHoursEnd || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Other Major Expenditure">
-                    {salariesWagesData?.otherMajorExpenditure || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Remarks">
-                    {salariesWagesData?.remarks || "-"}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </section>
-          );
-        }
-
-      case 'assetDetails':
-        return (
-          <section key="assetDetails" style={{ marginBottom: 24 }}>
-            <Card title="Asset Details" extra={getButton("assetDetails")}>
-              <Table
-                className="striped-table"
-                dataSource={assetDetailsData?.assets || []}
-                columns={[
-                  { title: "Address", dataIndex: "address", key: "address" },
-                  { title: "Mortgaged", dataIndex: "mortgaged", key: "mortgaged" },
-                  { title: "Owner Name", dataIndex: "ownerName", key: "ownerName" },
-                  { title: "Market Value", dataIndex: "marketValue", key: "marketValue" },
-                  { title: "Area Measured", dataIndex: "areaMeasured", key: "areaMeasured" },
-                  { title: "Purchase Cost", dataIndex: "purchaseCost", key: "purchaseCost" },
-                  { title: "Purchase Year", dataIndex: "purchaseYear", key: "purchaseYear" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No assets added yet" }}
-                bordered
-                style={{ marginBottom: 12 }}
-              />
-              <Descriptions bordered column={2}>
-                <Descriptions.Item label="Status">
-                  {assetDetailsData?.status || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Remarks">
-                  {assetDetailsData?.remarks || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Vehicles">
-                  {assetDetailsData?.vehicles || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Other Income">
-                  {assetDetailsData?.otherIncome || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Observations">
-                  {assetDetailsData?.observations || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Site Coordinates">
-                  {assetDetailsData?.siteCoordinates || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Life Insurance/Mediclaim">
-                  {assetDetailsData?.lifeInsuranceMediclaim || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Capital Invested in Business">
-                  {assetDetailsData?.capitalInvestedBusiness || "-"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Liquid/Moveable/Monetary Items">
-                  {assetDetailsData?.liquidMoveableMonetaryItems || "-"}
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </section>
-        );
-
-      case 'existingLoans':
-        return (
-          <section key="existingLoans" style={{ marginBottom: 24 }}>
-            <Card
-              title="Existing Loans"
-              extra={
-                <Button
-                  style={{ border: "none" }}
-                  icon={<EditOutlined />}
-                  onClick={() => onEdit("existingLoans")}
-                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
-                />
-              }
-            >
-              <Table
-                className="striped-table"
-                dataSource={data?.existingLoans?.loans || []}
-                columns={[
-                  { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
-                  { title: "Purpose", dataIndex: "purpose", key: "purpose" },
-                  { title: "Loan Amount", dataIndex: "loanAmount", key: "loanAmount" },
-                  { title: "EMI", dataIndex: "emi", key: "emi" },
-                  { title: "Tenure", dataIndex: "tenure", key: "tenure" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No existing loans added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        );
-
-      case 'bankingDetails':
-        return (
-          <section key="bankingDetails" style={{ marginBottom: 24 }}>
-            <Card title="Banking Details" extra={getButton("bankingDetails")}>
-              {/* Bank Accounts Table */}
-              <Table
-                className="striped-table"
-                dataSource={data?.bankingDetails?.bankAccounts || []}
-                columns={[
-                  { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
-                  { title: "Account", dataIndex: "account", key: "account" },
-                  { title: "Account Type", dataIndex: "type", key: "type" },
-                  { title: "Average Balance", dataIndex: "averageBalance", key: "averageBalance" },
-                  { title: "Years Maintained", dataIndex: "numberOfYearsMaintained", key: "numberOfYearsMaintained" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No banking details added yet" }}
-                bordered
-              />
-              
-              {/* Additional Banking Details */}
-              <Row style={{ marginTop: 24 }} gutter={[16, 16]}>
-                <Col span={12}>
-                  <Card size="small" title="LIC/Mutual Funds">
-                    <Typography.Text>{data?.bankingDetails?.licMutualFunds || "Not specified"}</Typography.Text>
-                  </Card>
-                </Col>
-                <Col span={12}>
-                  <Card size="small" title="Assets">
-                    <Typography.Text>{data?.bankingDetails?.assets || "Not specified"}</Typography.Text>
-                  </Card>
-                </Col>
-              </Row>
-            </Card>
-          </section>
-        );
-
-      case 'businessDetails':
-        return (
           <BusinessDetailsDescription
-            key="businessDetails"
-            data={{
-              ...data,
-              bankName: verificationData?.bankName,
-              applicationNumber: applicationNumber,
-              loanId: loanId
-            }}
-            extra={getButton("businessDetails")}
+            data={legacyFormattedData}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("businessDetails")}
+                disabled={hasEditRequest}
+              />
+            }
             logs={false}
             currentDepartment={currentDepartment}
           />
-        );
 
-      case 'financeDetails':
-        // Check if it's Arka Fincap to show shareholders information
-        if (isArkaFincap(bankName)) {
-          return (
-            <section key="financeDetails" style={{ marginBottom: 24 }}>
-              <Card title="Finance Details" extra={getButton("financeDetails")}>
-                <Typography.Text strong style={{ display: 'block', margin: '0 0 16px 0' }}>
-                  Shareholders Information
-                </Typography.Text>
-                <Table
-                  className="striped-table"
-                  dataSource={data?.financeDetails?.shareholders || []}
-                  columns={[
-                    { title: "Name", dataIndex: "name", key: "name" },
-                    { title: "Designation", dataIndex: "designation", key: "designation" },
-                    { 
-                      title: "Shareholding %", 
-                      dataIndex: "shareholdingPercentage", 
-                      key: "shareholdingPercentage",
-                      render: (value: string) => value ? `${value}%` : "-"
-                    },
-                    { 
-                      title: "Coming into Loan Structure", 
-                      dataIndex: "comingIntoLoanStructure", 
-                      key: "comingIntoLoanStructure",
-                      render: (value: string) => value ? value.charAt(0).toUpperCase() + value.slice(1) : "-"
-                    },
-                    { title: "Relationship with Applicant", dataIndex: "relationshipWithApplicant", key: "relationshipWithApplicant" },
-                    { title: "Functional Role", dataIndex: "functionalOfPartnerDirector", key: "functionalOfPartnerDirector" },
-                  ]}
-                  pagination={false}
-                  locale={{ emptyText: "No shareholders added yet" }}
-                  bordered
-                />
-              </Card>
-            </section>
-          );
-        } else {
-          // Original layout for other banks (Axis Finance, etc.)
-          return (
-            <section key="financeDetails" style={{ marginBottom: 24 }}>
-              <Card title="Finance Details" extra={getButton("clientsDebtors")}>
-                <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                  <Descriptions.Item label="No. of Fixed Customers">
-                    {clientsDebtorsData?.clientsDebtors?.numberOfFixedCustomers || clientsDebtorsData?.numberOfFixedCustomers || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Credit Period">
-                    {clientsDebtorsData?.clientsDebtors?.creditPeriod || clientsDebtorsData?.creditPeriod || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Cash-Cheque Proportions">
-                    {clientsDebtorsData?.clientsDebtors?.cashChequeProportions || clientsDebtorsData?.cashChequeProportions || "-"}
-                  </Descriptions.Item>
-                </Descriptions>
-                <Typography.Text strong style={{ display: 'block', margin: '8px 0' }}>Business Metrics</Typography.Text>
-                <Descriptions bordered column={2} style={{ marginBottom: 12 }}>
-                  <Descriptions.Item label="Average Stock Maintenance">
-                    {clientsDebtorsData?.clientsDebtors?.averageStockMaintenance || clientsDebtorsData?.averageStockMaintenance || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Turnover">
-                    {clientsDebtorsData?.clientsDebtors?.turnover || clientsDebtorsData?.turnover || "-"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Net Margins">
-                    {clientsDebtorsData?.clientsDebtors?.netMargins || clientsDebtorsData?.netMargins || "-"}
-                  </Descriptions.Item>
-                </Descriptions>
-                <Table
-                  className="striped-table"
-                  dataSource={
-                    clientsDebtorsData?.clientsDebtors?.customers || 
-                    clientsDebtorsData?.customers || 
-                    [
-                      {
-                        name: clientsDebtorsData?.clientsDebtors?.customer1Name || clientsDebtorsData?.customer1Name,
-                        phone: clientsDebtorsData?.clientsDebtors?.customer1Phone || clientsDebtorsData?.customer1Phone,
-                        location: clientsDebtorsData?.clientsDebtors?.customer1Location || clientsDebtorsData?.customer1Location,
-                        review: clientsDebtorsData?.clientsDebtors?.customer1Review || clientsDebtorsData?.customer1Review,
-                      },
-                      {
-                        name: clientsDebtorsData?.clientsDebtors?.customer2Name || clientsDebtorsData?.customer2Name,
-                        phone: clientsDebtorsData?.clientsDebtors?.customer2Phone || clientsDebtorsData?.customer2Phone,
-                        location: clientsDebtorsData?.clientsDebtors?.customer2Location || clientsDebtorsData?.customer2Location,
-                        review: clientsDebtorsData?.clientsDebtors?.customer2Review || clientsDebtorsData?.customer2Review,
-                      },
-                      {
-                        name: clientsDebtorsData?.clientsDebtors?.customer3Name || clientsDebtorsData?.customer3Name,
-                        phone: clientsDebtorsData?.clientsDebtors?.customer3Phone || clientsDebtorsData?.customer3Phone,
-                        location: clientsDebtorsData?.clientsDebtors?.customer3Location || clientsDebtorsData?.customer3Location,
-                        review: clientsDebtorsData?.clientsDebtors?.customer3Review || clientsDebtorsData?.customer3Review,
-                      },
-                    ].filter((c: any) => c && (c.name || c.phone || c.location || c.review))
-                  }
-                  columns={[
-                    { title: "Name", dataIndex: "name", key: "name" },
-                    { title: "Phone", dataIndex: "phone", key: "phone" },
-                    { title: "Location", dataIndex: "location", key: "location" },
-                    { 
-                      title: "Review", 
-                      dataIndex: "review", 
-                      key: "review",
-                      render: (review: string) => review ? review.charAt(0).toUpperCase() + review.slice(1) : "-"
-                    },
-                  ]}
-                  pagination={false}
-                  locale={{ emptyText: "No customers added yet" }}
-                  bordered
-                />
-              </Card>
-            </section>
-          );
-        }
-
-      case 'thirdPartyCheck':
-        return (
-          <section key="thirdPartyCheck" style={{ marginBottom: 24 }}>
-            <Card
-              title="Third Party Check"
-              extra={
-                <Button
-                  style={{ border: "none" }}
-                  icon={<EditOutlined />}
-                  onClick={() => onEdit("thirdPartyCheck")}
-                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
-                />
-              }
-            >
-              <Table
-                className="striped-table"
-                dataSource={data?.thirdPartyCheck?.checks || []}
-                columns={[
-                  { title: "TPC Name", dataIndex: "tpcName", key: "tpcName" },
-                  { title: "Mobile", dataIndex: "mobileNumber", key: "mobileNumber" },
-                  {
-                    title: "Relationship",
-                    dataIndex: "relationship",
-                    key: "relationship",
-                    render: (text: string, record: any) =>
-                      text === "Other" && (record.otherRelation || record.relationshipOther)
-                        ? `Other - ${(record.otherRelation || record.relationshipOther)}`
-                        : text,
-                  },
-                  { title: "Feedback Status", dataIndex: "feedbackStatus", key: "feedbackStatus" },
-                  { title: "Comments", dataIndex: "comments", key: "comments" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No references added yet" }}
-                bordered
+          <BusinessMiscellaneousDescription
+            data={legacyFormattedData}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("miscellaneous")}
+                disabled={hasEditRequest}
               />
-            </Card>
-          </section>
-        );
+            }
+            logs={false}
+          />
 
-      case 'additionalDetails':
-        return (
-          <section key="additionalDetails" style={{ marginBottom: 24 }}>
-            <Card title="Additional Details" extra={getButton("additionalDetails")}>
-              {(data?.additionalDetails?.details || []).length > 0 ? (
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  {data?.additionalDetails?.details?.map((d: any, idx: number) => (
-                    <li key={idx}>{d?.value}</li>
-                  ))}
-                </ul>
-              ) : (
-                <div style={{ color: "#6b7280" }}>No additional details added</div>
-              )}
-            </Card>
-          </section>
-        );
+          <ExistingLoansDescription
+            data={legacyFormattedData}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("existingLoans")}
+                disabled={hasEditRequest}
+              />
+            }
+            logs={false}
+          />
 
-      case 'photoCapture':
-        return (
-          <section key="photoCapture" style={{ marginBottom: 24 }}>
+          <ThirdPartyCheckDescription
+            data={legacyFormattedData}
+            extra={
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit("thirdPartyCheck")}
+                disabled={hasEditRequest}
+              />
+            }
+            logs={false}
+          />
+
+          {/* Photo Capture Section */}
+          <section style={{ marginBottom: 24 }}>
             <Card title="Photo Capture">
               <div
                 style={{
@@ -1150,155 +769,40 @@ export const BusinessVerificationDetails: React.FC<
                   gap: "16px",
                 }}
               >
-                {data?.uploadedItems?.map((item: any, idx: number) => (
-                  <div key={item.id} style={{ position: "relative" }}>
-                    <Image
-                      src={imageUrls[item.id] || ""}
-                      alt={`Photo ${idx + 1}`}
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        objectFit: "cover",
-                        borderRadius: "4px",
-                      }}
-                    />
-                    <Button
-                      type="text"
-                      danger
-                      icon={<CloseCircleOutlined />}
-                      style={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        background: "rgba(255, 255, 255, 0.8)",
-                        borderRadius: "50%",
-                        padding: 4,
-                      }}
-                      disabled={hasEditRequest}
-                      onClick={() => handleDeleteClick(item.id)}
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        background: "rgba(0, 0, 0, 0.6)",
-                        color: "white",
-                        padding: "4px 8px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Photo {idx + 1}
+                {legacyFormattedData?.uploadedItems?.map((item: any, idx: number) => {
+                  return (
+                    <div key={item.id} style={{ position: "relative" }}>
+                      <Image
+                        src={imageUrls[item.id] || ""}
+                        alt={`Photo ${idx + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          background: "rgba(0, 0, 0, 0.6)",
+                          color: "white",
+                          padding: "4px 8px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           </section>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <>
-      {currentDepartment === 'PD' ? (
-        <>
-          {/* Dynamic section rendering based on bank configuration */}
-          {getSectionOrder(bankName).map((sectionId) => renderSection(sectionId)).filter(Boolean)}
-        </>
-      ) : (
-        <>
-          {/* Original order for non-PD */}
-          <BusinessBasicDetailsDescription
-            data={data}
-            extra={getButton("businessBasicDetails")}
-            logs={false}
-            currentDepartment={currentDepartment}
-          />
-          <BusinessDetailsDescription
-            data={data}
-            extra={getButton("businessDetails")}
-            logs={false}
-            currentDepartment={currentDepartment}
-          />
-          {currentDepartment !== 'PD' && (
-            <BusinessMiscellaneousDescription
-              data={data}
-              extra={getButton("miscellaneous")}
-              logs={false}
-            />
-          )}
-          {/* Existing Loans */}
-          <section style={{ marginBottom: 24 }}>
-            <Card
-              title="Existing Loans"
-              extra={
-                <Button
-                  style={{ border: "none" }}
-                  icon={<EditOutlined />}
-                  onClick={() => onEdit("existingLoans")}
-                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
-                />
-              }
-            >
-              <Table
-                className="striped-table"
-                dataSource={data?.existingLoans?.loans || []}
-                columns={[
-                  { title: "Bank Name", dataIndex: "bankName", key: "bankName" },
-                  { title: "Purpose", dataIndex: "purpose", key: "purpose" },
-                  { title: "Loan Amount", dataIndex: "loanAmount", key: "loanAmount" },
-                  { title: "EMI", dataIndex: "emi", key: "emi" },
-                  { title: "Tenure", dataIndex: "tenure", key: "tenure" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No existing loans added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-          {/* Third Party Check */}
-          <section style={{ marginBottom: 24 }}>
-            <Card
-              title="Third Party Check"
-              extra={
-                <Button
-                  style={{ border: "none" }}
-                  icon={<EditOutlined />}
-                  onClick={() => onEdit("thirdPartyCheck")}
-                  disabled={shouldDisableExistingLoansAndThirdPartyCheck}
-                />
-              }
-            >
-              <Table
-                className="striped-table"
-                dataSource={data?.thirdPartyCheck?.checks || []}
-                columns={[
-                  { title: "TPC Name", dataIndex: "tpcName", key: "tpcName" },
-                  { title: "Mobile", dataIndex: "mobileNumber", key: "mobileNumber" },
-                  {
-                    title: "Relationship",
-                    dataIndex: "relationship",
-                    key: "relationship",
-                    render: (text: string, record: any) =>
-                      text === "Other" && (record.otherRelation || record.relationshipOther)
-                        ? `Other - ${(record.otherRelation || record.relationshipOther)}`
-                        : text,
-                  },
-                  { title: "Feedback Status", dataIndex: "feedbackStatus", key: "feedbackStatus" },
-                  { title: "Comments", dataIndex: "comments", key: "comments" },
-                ]}
-                pagination={false}
-                locale={{ emptyText: "No references added yet" }}
-                bordered
-              />
-            </Card>
-          </section>
-        </>
+        </div>
       )}
 
       <section style={{ marginBottom: 24 }}>
@@ -1311,6 +815,7 @@ export const BusinessVerificationDetails: React.FC<
           admin={false}
           verificationType={activeTab}
           currentDepartment={currentDepartment}
+          dynamicSchema={schemaForm}
         />
       </section>
 
@@ -1674,6 +1179,6 @@ export const BusinessVerificationDetails: React.FC<
         setOpen={setOpen}
         verificationType="Business"
       />
-    </>
+    </div>
   );
 };

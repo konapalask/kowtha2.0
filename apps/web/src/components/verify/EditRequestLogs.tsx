@@ -27,6 +27,7 @@ import ColleagueReferencesDescription from "./Descriptions/ColleagueReferencesDe
 import PastEmploymentsDescription from "./Descriptions/PastEmploymentsDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import FamilyMemberDetailsDescription from "./Descriptions/FamilyMemberDetailsDescription";
+import DynamicSectionDescription from "./Descriptions/DynamicSectionDescription";
 
 const { Text } = Typography;
 
@@ -80,6 +81,7 @@ interface EditRequestLogsProps {
   verificationType: string;
   admin: boolean;
   currentDepartment?: string;
+  dynamicSchema?: any; // Schema for dynamic forms (RBL, etc.)
 }
 
 
@@ -137,6 +139,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
   // console.log(router);
   const pathname: any = router?.pathname;
+  const { dynamicSchema } = _props;
   const loanId = router?.query?.id || null;
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const { activeTab } = useTabContext();
@@ -318,16 +321,58 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
         </div>
       )}
       {Object.keys(changedData)
-        .filter((sectionKey) => getLabels[sectionKey as keyof typeof getLabels])
         .map((sectionKey) => {
           const SectionDescription =
             descriptions[sectionKey as keyof typeof descriptions];
           const currentSection = currentData?.[sectionKey];
           const editSection = changedData?.[sectionKey];
-          if (!SectionDescription) return null;
-
+          
           const changedKeys = getChangedKeys(currentSection, editSection);
           if (changedKeys.length === 0) return null; // Don't show sections with no changes
+          
+          // For dynamic sections (RBL, etc.) that don't have specific description components
+          if (!SectionDescription && !getLabels[sectionKey as keyof typeof getLabels]) {
+            // Find the section schema from dynamicSchema
+            const sectionSchema = dynamicSchema?.sections?.find(
+              (s: any) => s.id === sectionKey
+            );
+            
+            // Use schema label if available, otherwise generate from section key
+            const sectionLabel = sectionSchema?.title || sectionSchema?.label || sectionKey
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/^./, (str) => str.toUpperCase())
+              .trim();
+            
+            return (
+              <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
+                <Col span={12}>
+                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="secondary">(Current)</Text></>}>
+                    <DynamicSectionDescription
+                      data={currentSection}
+                      sectionLabel={sectionLabel}
+                      sectionSchema={sectionSchema}
+                      logs={false}
+                    />
+                  </Card>
+                </Col>
+                <Col span={12}>
+                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="success">(New)</Text></>}>
+                    <DynamicSectionDescription
+                      data={editSection}
+                      changedData={editSection}
+                      sectionLabel={sectionLabel}
+                      sectionSchema={sectionSchema}
+                      logs={true}
+                      changedFields={changedKeys}
+                    />
+                  </Card>
+                </Col>
+              </Row>
+            );
+          }
+          
+          // Skip if no description component and no label
+          if (!SectionDescription) return null;
 
           
           if (sectionKey === 'existingLoans') {
