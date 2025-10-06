@@ -31,6 +31,7 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
+import DynamicSectionDescription from "./Descriptions/DynamicSectionDescription";
 
 interface BusinessVerificationDetailsProps {
   verificationData: any;
@@ -603,6 +604,25 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
+  // Merge pending edits from local edit logs into the display data so UI reflects changes
+  // Only merge known sections to avoid unintended keys
+  const mergedLegacyData = {
+    ...legacyFormattedData,
+    basicDetails: {
+      ...(legacyFormattedData.basicDetails || {}),
+      ...(changedData?.basicDetails || changedData?.businessBasicDetails || {}),
+    },
+    businessDetails: {
+      ...(legacyFormattedData.businessDetails || {}),
+      ...(changedData?.businessDetails || {}),
+    },
+    miscellaneous: {
+      ...(legacyFormattedData.miscellaneous || {}),
+      ...(changedData?.miscellaneous || {}),
+    },
+    // Keep existingLoans and thirdPartyCheck structures intact; logs view already shows diffs
+  } as typeof legacyFormattedData;
+
   const handleEditorChange = (content: string) => {
     // const liMatch = content.match(/<li>/g);
     // const liCount = liMatch ? liMatch.length : 0;
@@ -701,6 +721,25 @@ export const BusinessVerificationDetails: React.FC<
             onEdit={handleDynamicSectionEdit}
             hasEditRequest={hasEditRequest}
           />
+
+          {/* Schema-driven read-only Business Details for PD banks */}
+          {(() => {
+            const businessSection = schemaForm.sections.find(s => s.id === 'businessDetails');
+            const mergedBusinessData = {
+              ...(dynamicFormData?.businessDetails || {}),
+              ...(changedData?.businessDetails || {}),
+            };
+            return businessSection ? (
+              <DynamicSectionDescription
+                data={mergedBusinessData}
+                changedData={changedData?.businessDetails}
+                logs={false}
+                changedFields={Object.keys(changedData?.businessDetails || {})}
+                sectionLabel={businessSection.label || 'Business Details'}
+                sectionSchema={businessSection}
+              />
+            ) : null;
+          })()}
         </div>
       )}
 
@@ -720,7 +759,7 @@ export const BusinessVerificationDetails: React.FC<
       {!useNewApproach && !formLoading && verificationData && (
         <div style={{ marginBottom: 24 }}>
           <BusinessBasicDetailsDescription
-            data={legacyFormattedData}
+            data={mergedLegacyData}
             extra={
               <Button
                 type="text"
@@ -734,7 +773,7 @@ export const BusinessVerificationDetails: React.FC<
           />
 
           <BusinessDetailsDescription
-            data={legacyFormattedData}
+            data={mergedLegacyData}
             extra={
               <Button
                 type="text"
@@ -748,7 +787,7 @@ export const BusinessVerificationDetails: React.FC<
           />
 
           <BusinessMiscellaneousDescription
-            data={legacyFormattedData}
+            data={mergedLegacyData}
             extra={
               <Button
                 type="text"
