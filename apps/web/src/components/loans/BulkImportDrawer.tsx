@@ -159,7 +159,6 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           rules={[
                             { required: true, message: "Required" },
                             { whitespace: true, message: "Cannot be empty" },
-                            { max: 20, message: "Cannot be more than 20 characters" },
                           ]}
                         >
                           <Input style={{ height: "32px" }} />
