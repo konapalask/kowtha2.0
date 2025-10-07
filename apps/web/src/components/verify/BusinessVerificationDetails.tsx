@@ -700,6 +700,13 @@ export const BusinessVerificationDetails: React.FC<
   return (
     <div>
       {/* Dynamic Form Status removed as requested */}
+      {currentDepartment === 'PD' && (verificationData?.bankName || verificationData?.loan?.bankName) && (
+        <section style={{ margin: '6px 0 12px', textAlign: 'center' }}>
+          <Text style={{ color: '#1e40af', fontWeight: 600 }}>
+            {verificationData?.bankName || verificationData?.loan?.bankName}
+          </Text>
+        </section>
+      )}
       
       {/* Loading Indicator */}
       {formLoading && (
