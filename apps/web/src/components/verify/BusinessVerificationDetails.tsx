@@ -720,26 +720,8 @@ export const BusinessVerificationDetails: React.FC<
             autoSave={true}
             onEdit={handleDynamicSectionEdit}
             hasEditRequest={hasEditRequest}
+            sideBySideSections={['businessDetails']}
           />
-
-          {/* Schema-driven read-only Business Details for PD banks */}
-          {(() => {
-            const businessSection = schemaForm.sections.find(s => s.id === 'businessDetails');
-            const mergedBusinessData = {
-              ...(dynamicFormData?.businessDetails || {}),
-              ...(changedData?.businessDetails || {}),
-            };
-            return businessSection ? (
-              <DynamicSectionDescription
-                data={mergedBusinessData}
-                changedData={changedData?.businessDetails}
-                logs={false}
-                changedFields={Object.keys(changedData?.businessDetails || {})}
-                sectionLabel={businessSection.label || 'Business Details'}
-                sectionSchema={businessSection}
-              />
-            ) : null;
-          })()}
         </div>
       )}
 

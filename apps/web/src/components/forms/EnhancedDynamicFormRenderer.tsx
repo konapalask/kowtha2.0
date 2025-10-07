@@ -41,6 +41,8 @@ interface EnhancedDynamicFormRendererProps {
   autoSave?: boolean;
   onEdit?: (sectionId: string) => void; // Callback when edit button is clicked
   hasEditRequest?: boolean; // Whether there's a pending edit request
+  layout?: 'vertical' | 'side-by-side'; // Layout option for form display
+  sideBySideSections?: string[]; // Specific sections that should use side-by-side layout
 }
 
 export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererProps> = ({
@@ -53,6 +55,8 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   autoSave = true,
   onEdit,
   hasEditRequest = false,
+  layout = 'vertical',
+  sideBySideSections = [],
 }) => {
   const [form] = Form.useForm();
   const [sectionValidation, setSectionValidation] = useState<{[key: string]: boolean}>({});
@@ -277,6 +281,9 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   const renderSection = (section: WebSectionDefinition) => {
     const isValid = validateSection(section);
     
+    // Check if this specific section should use side-by-side layout
+    const useSideBySideForSection = sideBySideSections.includes(section.id);
+    
     // Separate array and non-array fields
     const arrayFields = section.fields.filter(f => f.type === 'array');
     const regularFields = section.fields.filter(f => f.type !== 'array');
@@ -312,7 +319,12 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
         >
           {/* Regular fields in Descriptions table */}
           {regularFields.length > 0 && (
-            <Descriptions bordered column={2} size="middle" style={{ marginBottom: arrayFields.length > 0 ? 16 : 0 }}>
+            <Descriptions 
+              bordered 
+              column={2} 
+              size="middle" 
+              style={{ marginBottom: arrayFields.length > 0 ? 16 : 0 }}
+            >
               {regularFields.map(field => {
                 const value = form.getFieldValue([section.id, field.id]);
                 return (
