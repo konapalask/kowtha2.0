@@ -413,21 +413,6 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
         initialValues={initialData}
       >
         {schema.sections.map(renderSection)}
-        
-        <Divider />
-        
-        {!readOnly && (
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <Space size="large">
-              <Button type="primary" htmlType="submit" size="large">
-                Submit Verification
-              </Button>
-              <Button size="large" onClick={handleReset}>
-                Reset Form
-              </Button>
-            </Space>
-          </div>
-        )}
       </Form>
     </div>
   );
