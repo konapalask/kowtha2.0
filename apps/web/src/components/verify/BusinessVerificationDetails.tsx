@@ -430,6 +430,9 @@ export const BusinessVerificationDetails: React.FC<
     if (verificationData?.financialAnalysis) {
       financialData = verificationData.financialAnalysis;
       console.log('Financial data found in verificationData.financialAnalysis:', financialData);
+    } else if (verificationData?.verificationData?.financialAnalysis) {
+      financialData = verificationData.verificationData.financialAnalysis;
+      console.log('Financial data found in verificationData.verificationData.financialAnalysis:', financialData);
     }
     
     if (financialData) {
@@ -881,7 +884,7 @@ export const BusinessVerificationDetails: React.FC<
               />
             }
           >
-            <Form form={financialForm} layout="vertical" disabled={!!verificationData?.financialAnalysis}>
+      <Form form={financialForm} layout="vertical" disabled={!!(verificationData?.financialAnalysis || verificationData?.verificationData?.financialAnalysis)}>
             {/* Gross Profit Section */}
             <Card title={`To Gross Profit - ₹${calculatedGrossProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
               <Row gutter={[16, 8]}>
