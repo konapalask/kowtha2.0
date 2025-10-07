@@ -366,10 +366,18 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
-                  <span>
-                    {field.label}
-                    {field.required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
-                  </span>
+                  {(() => {
+                    const sectionLabel = (section.label || '').trim().toLowerCase();
+                    const fieldLabel = (field.label || '').trim().toLowerCase();
+                    const isDuplicateHeading = fieldLabel !== '' && fieldLabel === sectionLabel;
+                    if (isDuplicateHeading) return null; // avoid duplicate heading when same as section label
+                    return (
+                      <span>
+                        {field.label}
+                        {field.required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <Table
                   dataSource={arrayData.filter((item: any) => item && Object.keys(item).length > 0)}

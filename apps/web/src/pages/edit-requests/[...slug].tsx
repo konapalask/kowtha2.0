@@ -1,5 +1,6 @@
 "use client";
 import EditRequestLogs from "@/components/verify/EditRequestLogs";
+import { getMobileSchemaByBank } from "@/utils/mobileSchemaLoader";
 import {
   getEditRequestsById,
   getVerificationData,
@@ -16,6 +17,7 @@ const EditRequestDetails = () => {
   const [currentData, setCurrentData] = useState<any>({});
   const [changedData, setChangedData] = useState<any>({});
   const [currentDepartment, setCurrentDepartment] = useState<string>("");
+  const [dynamicSchema, setDynamicSchema] = useState<any>(null);
 
   useEffect(() => {
     if (id && loanid) {
@@ -43,6 +45,16 @@ const EditRequestDetails = () => {
               setCurrentDepartment("FI");
             }
           }
+
+    
+          const bankName =
+            res?.data?.verification?.bankName ||
+            res?.data?.loan?.bankName ||
+            "";
+          if (bankName) {
+            const schema = getMobileSchemaByBank(bankName);
+            if (schema) setDynamicSchema(schema);
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -62,6 +74,7 @@ const EditRequestDetails = () => {
         admin={true}
         verificationId={id as string}
         currentDepartment={currentDepartment}
+        dynamicSchema={dynamicSchema}
       />
     </div>
   );

@@ -330,38 +330,35 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           const changedKeys = getChangedKeys(currentSection, editSection);
           if (changedKeys.length === 0) return null; // Don't show sections with no changes
           
-          // For dynamic sections (RBL, etc.) that don't have specific description components
-          if (!SectionDescription && !getLabels[sectionKey as keyof typeof getLabels]) {
-            // Find the section schema from dynamicSchema
-            const sectionSchema = dynamicSchema?.sections?.find(
-              (s: any) => s.id === sectionKey
-            );
-            
-            // Use schema label if available, otherwise generate from section key
-            const sectionLabel = sectionSchema?.title || sectionSchema?.label || sectionKey
+          // Prefer dynamic rendering when a dynamic schema is provided and contains this section
+          const dynamicSectionSchema = dynamicSchema?.sections?.find(
+            (s: any) => s.id === sectionKey
+          );
+          if (dynamicSectionSchema) {
+            const sectionLabel = dynamicSectionSchema?.title || dynamicSectionSchema?.label || sectionKey
               .replace(/([A-Z])/g, ' $1')
               .replace(/^./, (str) => str.toUpperCase())
               .trim();
-            
+
             return (
               <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
                 <Col span={12}>
-                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="secondary">(Current)</Text></>}>
+                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="secondary">(Current)</Text></>}> 
                     <DynamicSectionDescription
                       data={currentSection}
                       sectionLabel={sectionLabel}
-                      sectionSchema={sectionSchema}
+                      sectionSchema={dynamicSectionSchema}
                       logs={false}
                     />
                   </Card>
                 </Col>
                 <Col span={12}>
-                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="success">(New)</Text></>}>
+                  <Card title={<><Text strong>{sectionLabel}</Text> <Text type="success">(New)</Text></>}> 
                     <DynamicSectionDescription
                       data={editSection}
                       changedData={editSection}
                       sectionLabel={sectionLabel}
-                      sectionSchema={sectionSchema}
+                      sectionSchema={dynamicSectionSchema}
                       logs={true}
                       changedFields={changedKeys}
                     />
