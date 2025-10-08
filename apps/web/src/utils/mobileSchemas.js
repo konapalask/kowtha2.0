@@ -1793,27 +1793,43 @@ export const formSchema = [
             typeOfBorrower: {
               type: 'string',
               title: 'Type of Borrower',
+              enum: [
+                'Individual',
+                'Proprietorship',
+                'Partnership Firm',
+                'Private Limited Company',
+                'Public Limited Company',
+                'LLP (Limited Liability Partnership)',
+                'Trust',
+                'Society',
+                'HUF (Hindu Undivided Family)',
+                'Others',
+              ],
             },
-            meetingDetails: {
-              type: 'string',
-              title: 'Meeting Details',
-            },
+            // meetingDetails: {
+            //   type: 'string',
+            //   title: 'Meeting Details',
+            // },
             addressVisited: {
               type: 'string',
               title: 'Address Visited',
+              readOnly: true,
             },
             personMet: {
               type: 'string',
               title: 'Person Met',
+              // readOnly: true,
             },
             contactNo: {
               type: 'integer',
               title: 'Contact No',
+              readOnly: true,
             },
-            dateOfVisit: {
-              type: 'string',
-              title: 'Date of Visit',
-            },
+            // dateOfVisit: {
+            //   type: 'string',
+            //   title: 'Date of Visit',
+            //   readOnly: true,
+            // },
           },
           required: ['referenceNumber', 'nameOfApplicant'],
         },
@@ -2040,20 +2056,21 @@ export const formSchema = [
             pfEsiApplied: {
               type: 'string',
               title: 'PF/ESI Applied',
+              enum: ['Yes', 'No', 'Applied'],
             },
           },
         },
         required: true,
       },
       {
-        id: 'tradeReferences',
-        label: 'Trade References',
+        id: 'tradeReferencesSuppliers',
+        label: 'Trade References - Suppliers',
         schema: {
           type: 'object',
           properties: {
             suppliers: {
               type: 'array',
-              title: 'Trade References - Suppliers',
+              title: 'Suppliers',
               items: {
                 type: 'object',
                 properties: {
@@ -2062,9 +2079,19 @@ export const formSchema = [
                 },
               },
             },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'tradeReferencesCustomers',
+        label: 'Trade References - Customers',
+        schema: {
+          type: 'object',
+          properties: {
             customers: {
               type: 'array',
-              title: 'Trade References - Customers',
+              title: 'Customers',
               items: {
                 type: 'object',
                 properties: {
@@ -2117,7 +2144,7 @@ export const formSchema = [
                   product: {type: 'string', title: 'Product'},
                   loanAmount: {type: 'number', title: 'Loan amount'},
                   emi: {type: 'number', title: 'EMI'},
-                  os: {type: 'string', title: 'O/S'},
+                  pos: {type: 'string', title: 'POS'},
                   remarks: {type: 'string', title: 'Remarks'},
                 },
               },
@@ -2132,45 +2159,76 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            bankName: {
-              type: 'string',
-              title: 'Bank Name',
-            },
-            accountHolderName: {
-              type: 'string',
-              title: 'Account Holder name',
-            },
-            accountType: {
-              type: 'string',
-              title: 'Account type',
-            },
-            noOfYear: {
-              type: 'integer',
-              title: 'No of year',
-            },
-            limitOfCCOD: {
-              type: 'string',
-              title: 'Limit of CC/OD',
-            },
-            remarks: {
-              type: 'string',
-              title: 'Remarks',
+            bankingDetails: {
+              type: 'array',
+              title: 'Banking Details',
+              items: {
+                type: 'object',
+                properties: {
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank Name',
+                  },
+                  accountHolderName: {
+                    type: 'string',
+                    title: 'Account Holder name',
+                  },
+                  accountType: {
+                    type: 'string',
+                    title: 'Account type',
+                    enum: [
+                      'Savings',
+                      'Current',
+                      'Overdraft',
+                      'Cash Credit',
+                      'Term Loan',
+                    ],
+                  },
+                  noOfYear: {
+                    type: 'integer',
+                    title: 'No of year',
+                  },
+                  limitOfCCOD: {
+                    type: 'string',
+                    title: 'Limit of CC/OD',
+                  },
+                  remarks: {
+                    type: 'string',
+                    title: 'Remarks',
+                  },
+                },
+              },
             },
             endUse: {
               type: 'string',
               title: 'End Use',
             },
-            ownContribution: {
-              type: 'string',
-              title: 'Own contribution',
-            },
-            particulars: {
-              type: 'string',
-              title: 'Particulars',
-            },
-            remarksAdditional: {
-              type: 'string',
-              title: 'Remarks',
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'ownContributions',
+        label: 'Own Contributions',
+        schema: {
+          type: 'object',
+          properties: {
+            ownContributions: {
+              type: 'array',
+              title: 'Own Contributions',
+              items: {
+                type: 'object',
+                properties: {
+                  particulars: {
+                    type: 'string',
+                    title: 'Particulars',
+                  },
+                  remarks: {
+                    type: 'string',
+                    title: 'Remarks',
+                  },
+                },
+              },
             },
           },
         },
@@ -2199,7 +2257,7 @@ export const formSchema = [
                     title: 'Approx. Market value',
                   },
                   yearsOfOwnership: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Years of ownership',
                   },
                 },
