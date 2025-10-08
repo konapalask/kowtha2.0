@@ -87,6 +87,29 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 Object.entries(property.items.properties).map(
                   ([subFieldId, subProperty]) => {
                     const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+
+                    // Handle enum fields (select dropdown) in arrays
+                    if (subProperty.enum && subProperty.enum.length > 0) {
+                      const options = subProperty.enum.map(option => ({
+                        id: option,
+                        name: option,
+                      }));
+
+                      return (
+                        <SelectFormItem
+                          key={subFieldKey}
+                          data={{
+                            control,
+                            key: subFieldKey,
+                            title: subProperty.title,
+                            required: false,
+                            options,
+                            defaultValue: item?.[subFieldId] ?? '',
+                          }}
+                        />
+                      );
+                    }
+
                     const isTextArea =
                       subProperty.title.toLowerCase().includes('about') ||
                       subProperty.title.toLowerCase().includes('address') ||
