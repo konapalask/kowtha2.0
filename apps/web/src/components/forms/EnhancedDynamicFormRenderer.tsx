@@ -294,14 +294,6 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
           title={
             <Space>
               <span>{section.label}</span>
-              {section.required && <span style={{ color: 'red' }}>*</span>}
-              {showValidation && (
-                isValid ? (
-                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                ) : (
-                  <ExclamationCircleOutlined style={{ color: '#faad14' }} />
-                )
-              )}
             </Space>
           }
           extra={
