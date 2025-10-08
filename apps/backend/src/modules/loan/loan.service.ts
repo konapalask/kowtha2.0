@@ -1572,7 +1572,6 @@ export class LoanService {
   async returnHTMLImageData(data: string[], bankName: string, fieldExecutive: string): Promise<string> {
     return `
     <div style="page-break-before: always;"></div>
-
       <div class="align-wrapper">
         <table class="section-table">
           <tr><td colspan="6" class="section-header">Uploaded Documents and Images</td></tr>
@@ -1584,9 +1583,7 @@ export class LoanService {
             </td>
           </tr>
         </table>
-        
       </div>
-
     `
   }
 
@@ -2130,7 +2127,7 @@ export class LoanService {
 
   // PD Verification PDF Generation
 
-  
+
 
   async generatePDFinalReportPDF(loanId: number) {
     try {
