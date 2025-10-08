@@ -12,7 +12,8 @@ enum UserRole {
   Admin
   Verifier
   FieldExecutive
-  SupportExecutive
+  SupportExecutive // Tracking purpose
+  VerificationExecutive // Assistant Verifier
   OperationsExecutive
 }
 
@@ -172,6 +173,7 @@ model Loan {
   isAddressSame           Boolean             @default(false)
   loanType                String
   bankName                String
+  templateName            String?
   loanAmount              Float?
   status                  LoanStatus
   department              Department?
@@ -207,6 +209,7 @@ model Verification {
   postponedDate         DateTime?
   postponedReason       String?
   businessName          String?
+  templateName          String?
   financialAnalysis     Json?
   synopsis              String?
   currentOfficeName     String?
