@@ -122,9 +122,11 @@ export const BusinessVerificationDetails: React.FC<
 
   useEffect(() => {
     const fetchImageUrls = async () => {
-      if (verificationData?.uploadedItems) {
+      const uploadedItems = verificationData?.uploadedItems || verificationData?.verificationData?.uploadedItems;
+      
+      if (uploadedItems) {
         const urls: { [key: string]: string } = {};
-        for (const item of verificationData.uploadedItems) {
+        for (const item of uploadedItems) {
           try {
             const response = await getS3ImageUrl(item.s3ImageUrl);
             urls[item.id] = response;
@@ -137,7 +139,7 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     fetchImageUrls();
-  }, [verificationData?.uploadedItems]);
+  }, [verificationData?.uploadedItems, verificationData?.verificationData?.uploadedItems]);
 
   useEffect(() => {
     const request = indexedDB.open("editLogs", 1);
@@ -732,6 +734,50 @@ export const BusinessVerificationDetails: React.FC<
             hasEditRequest={hasEditRequest}
             sideBySideSections={['businessDetails']}
           />
+          
+          {/* Photo Capture Section for Dynamic Form */}
+          <section style={{ marginBottom: 24 }}>
+            <Card title="Photo Capture">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gap: "16px",
+                }}
+              >
+                {(dynamicFormData?.uploadedItems || []).map((item: any, idx: number) => {
+                  return (
+                    <div key={item.id} style={{ position: "relative" }}>
+                      <Image
+                        src={imageUrls[item.id] || ""}
+                        alt={`Photo ${idx + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          background: "rgba(0, 0, 0, 0.6)",
+                          color: "white",
+                          padding: "4px 8px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </section>
         </div>
       )}
 
