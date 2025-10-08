@@ -25,6 +25,7 @@ import { VerificationType, LoanStatus, UserRole, VerificationStatus,
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 import { PDTemplateService } from './templates/pd-templates.service';
+import { formSchema } from 'src/forms';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -319,6 +320,28 @@ export class LoanController {
       }
     }
   }
+
+  @Get('get-bank-forms')
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({ summary: 'Get bank forms' })
+  @ApiResponse({ status: 200, description: 'Bank forms fetched successfully' })
+  async getBankForms(@Query('bankName') bankName: string, @Query('type') type: string) {
+    if(type === 'banks') {
+      return {
+        status: 200,
+        message: 'Bank forms fetched successfully',
+        data: Object.keys(formSchema)
+      }
+    }
+    const result = formSchema[bankName];
+    return {
+      status: 200,
+      message: 'Bank forms fetched successfully',
+      data: result
+    };
+  }
+
+
 
 
   @Get(':id/generate-final-report')

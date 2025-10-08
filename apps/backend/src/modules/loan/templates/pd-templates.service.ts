@@ -28,7 +28,7 @@ export class PDTemplateService {
     }
 
     async InterfaceMapping(bankName: string, verification: any, loan: any): Promise<any> {
-        if (bankName) {
+        if (bankName == 'Axis Bank') {
             // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
             let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
 
@@ -73,7 +73,7 @@ export class PDTemplateService {
             return axisFinanceUBLTemplate(verificationData, html_data);
         }
     }
-
+ 
     async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
         try {
           // Fetch loan details with verification data
