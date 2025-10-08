@@ -38,6 +38,7 @@ export function InputFormItem({data}) {
               editable={!isDisabled}
               keyboardType={data?.keyboardType || 'default'}
               secureTextEntry={data?.type === 'password'}
+              placeholderTextColor="#999"
             />
             {error && <Text style={styles.errorText}>{error.message}</Text>}
           </>
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   },
   disabledInput: {
     backgroundColor: '#f2f2f2',
-    color: '#777',
+    color: '#000',
   },
   errorBorder: {
     borderColor: 'red',

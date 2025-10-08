@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useLayoutEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -68,9 +68,13 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   console.log('sectionData', sectionData);
 
-  useLayoutEffect(() => {
+  // useLayoutEffect(() => {
+  //   loadFormData();
+  // }, []);
+
+  useEffect(() => {
     loadFormData();
-  }, []);
+  }, [bankName]);
 
   useEffect(() => {
     // Load schema based on bank name
@@ -118,23 +122,26 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     }
   };
 
-  const saveFormData = async (data: any) => {
-    try {
-      // console.log('data obtained', data);
-      const dataToSave = {
-        ...data,
-        // sectionData,
-        // uploadedItems,
-        investigable,
-        timestamp: new Date().toISOString(),
-      };
-      // console.log('dataToSave', dataToSave);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-      // console.log('Form data saved successfully');
-    } catch (error) {
-      console.error('Error saving form data:', error);
-    }
-  };
+  const saveFormData = useCallback(
+    async (data: any) => {
+      try {
+        // console.log('data obtained', data);
+        const dataToSave = {
+          ...data,
+          // sectionData,
+          // uploadedItems,
+          investigable,
+          timestamp: new Date().toISOString(),
+        };
+        // console.log('dataToSave', dataToSave);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        // console.log('Form data saved successfully');
+      } catch (error) {
+        console.error('Error saving form data:', error);
+      }
+    },
+    [investigable, STORAGE_KEY],
+  );
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev: any) => {
@@ -165,21 +172,34 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     return true;
   };
 
-  const handleSectionDataChange = (sectionId: string, data: any) => {
-    const updatedSectionData = {
-      ...sectionData,
-      [sectionId]: data,
-    };
-    setSectionData(updatedSectionData);
-    saveFormData(updatedSectionData);
-    // Removed auto-collapse - sections stay open while editing
-  };
+  const handleSectionDataChange = useCallback(
+    (sectionId: string, data: any) => {
+      setSectionData((prevSectionData: any) => {
+        const updatedSectionData = {
+          ...prevSectionData,
+          [sectionId]: data,
+        };
+        // Save the updated data
+        saveFormData(updatedSectionData);
+        return updatedSectionData;
+      });
+      // Removed auto-collapse - sections stay open while editing
+    },
+    [saveFormData],
+  );
 
-  const handleUploadedItemsChange = async (items: UploadedItem[]) => {
-    // console.log('items', items);
-    // setUploadedItems(items);
-    await saveFormData({...sectionData, uploadedItems: items});
-  };
+  const handleUploadedItemsChange = useCallback(
+    async (items: UploadedItem[]) => {
+      // console.log('items', items);
+      // setUploadedItems(items);
+      setSectionData((prevSectionData: any) => {
+        const updatedData = {...prevSectionData, uploadedItems: items};
+        saveFormData(updatedData);
+        return updatedData;
+      });
+    },
+    [saveFormData],
+  );
 
   const onSubmit = async (data: any) => {
     try {
