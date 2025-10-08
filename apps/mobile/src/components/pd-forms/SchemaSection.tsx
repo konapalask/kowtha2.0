@@ -1,14 +1,17 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Text,
-  TextInput,
-  Switch,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import {useForm} from 'react-hook-form';
+import {InputFormItem} from '../../lib/InputFormItem';
+import {SelectFormItem} from '../../lib/SelectFormItem';
+import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
+// import {CheckboxFormItem} from '../../lib/CheckboxFormItem';
+import {RadioFormItem} from '../../lib/RadioFormItem';
 
 type AnyObject = Record<string, any>;
 
@@ -41,50 +44,89 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   initialData = {},
   onSubmit,
 }) => {
-  const [data, setData] = useState<AnyObject>(initialData || {});
+  const {control, watch, setValue, getValues} = useForm({
+    defaultValues: initialData,
+    mode: 'onChange',
+  });
 
-  const handleChange = (fieldId: string, value: any) => {
-    const next = {...data, [fieldId]: value};
-    setData(next);
-    onSubmit(next);
-  };
+  const isInitialMount = useRef(true);
+
+  // Use watch subscription to avoid infinite loops
+  useEffect(() => {
+    const subscription = watch(value => {
+      // Skip the initial call on mount to avoid calling onSubmit with default values
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+      onSubmit(value as AnyObject);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onSubmit]);
 
   const renderField = (fieldId: string, property: JsonSchemaProperty) => {
-    const isRequired = schema.required?.includes(fieldId) || false;
-    const value = data[fieldId];
+    const isRequired = schema.required?.includes(fieldId) ?? true;
+    const formData = getValues();
 
-    // Handle array fields (like familyDetails)
+    // Handle array fields (like familyDetails) - keeping custom implementation for now
+    // as lib doesn't have a repeater component
     if (property.type === 'array' && property.items) {
-      const arrayData = Array.isArray(value) ? value : [];
+      const arrayData = Array.isArray(formData[fieldId])
+        ? formData[fieldId]
+        : [];
       return (
         <View style={styles.repeaterContainer}>
-          {/* <Text style={styles.repeaterLabel}>
+          <Text style={styles.repeaterLabel}>
             {property.title}
             {isRequired ? ' *' : ''}
-          </Text> */}
+          </Text>
           {arrayData.map((item: any, index: number) => (
             <View key={index} style={styles.repeaterItem}>
               <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
               {property.items?.properties &&
                 Object.entries(property.items.properties).map(
-                  ([subFieldId, subProperty]) => (
-                    <View key={subFieldId} style={styles.subFieldContainer}>
-                      <Text style={styles.subFieldLabel}>
-                        {subProperty.title}
-                      </Text>
-                      <TextInput
-                        style={styles.input}
-                        value={item?.[subFieldId] ?? ''}
-                        onChangeText={text => {
-                          const newArrayData = [...arrayData];
-                          newArrayData[index] = {...item, [subFieldId]: text};
-                          handleChange(fieldId, newArrayData);
+                  ([subFieldId, subProperty]) => {
+                    const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+                    const isTextArea =
+                      subProperty.title.toLowerCase().includes('about') ||
+                      subProperty.title.toLowerCase().includes('address') ||
+                      subProperty.title.toLowerCase().includes('description');
+
+                    if (isTextArea) {
+                      return (
+                        <TextAreaFormItem
+                          key={subFieldKey}
+                          data={{
+                            control,
+                            key: subFieldKey,
+                            title: subProperty.title,
+                            required: false,
+                            disabled: subProperty.readOnly,
+                            defaultValue: item?.[subFieldId] ?? '',
+                          }}
+                        />
+                      );
+                    }
+
+                    return (
+                      <InputFormItem
+                        key={subFieldKey}
+                        data={{
+                          control,
+                          key: subFieldKey,
+                          title: subProperty.title,
+                          required: false,
+                          disabled: subProperty.readOnly,
+                          defaultValue: item?.[subFieldId] ?? '',
+                          keyboardType:
+                            subProperty.type === 'number' ||
+                            subProperty.type === 'integer'
+                              ? 'numeric'
+                              : 'default',
                         }}
-                        placeholder={subProperty.title}
-                        editable={!subProperty.readOnly}
                       />
-                    </View>
-                  ),
+                    );
+                  },
                 )}
               <TouchableOpacity
                 style={styles.removeButton}
@@ -92,7 +134,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                   const newArrayData = arrayData.filter(
                     (_: any, i: number) => i !== index,
                   );
-                  handleChange(fieldId, newArrayData);
+                  setValue(fieldId, newArrayData);
                 }}>
                 <Text style={styles.removeButtonText}>Remove</Text>
               </TouchableOpacity>
@@ -102,7 +144,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             style={styles.addButton}
             onPress={() => {
               const newArrayData = [...arrayData, {}];
-              handleChange(fieldId, newArrayData);
+              setValue(fieldId, newArrayData);
             }}>
             <Text style={styles.addButtonText}>+ Add</Text>
           </TouchableOpacity>
@@ -111,99 +153,115 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     }
 
     // Handle enum fields (select dropdown)
-    if (property.enum) {
+    if (property.enum && property.enum.length > 0) {
+      const options = property.enum.map(option => ({
+        id: option,
+        name: option,
+      }));
+
       return (
-        <View style={styles.selectContainer}>
-          <Picker
-            selectedValue={value ?? ''}
-            onValueChange={val => handleChange(fieldId, val)}
-            style={styles.picker}
-            enabled={!property.readOnly}>
-            <Picker.Item label={`Select ${property.title}`} value="" />
-            {property.enum.map(option => (
-              <Picker.Item key={option} label={option} value={option} />
-            ))}
-          </Picker>
-        </View>
+        <SelectFormItem
+          data={{
+            control,
+            key: fieldId,
+            title: property.title,
+            required: isRequired,
+            options,
+            defaultValue: formData[fieldId] ?? '',
+          }}
+        />
       );
     }
 
     // Handle different field types
     switch (property.type) {
+      case 'boolean':
+        // Use RadioFormItem for boolean (Yes/No)
+        return (
+          <RadioFormItem
+            data={{
+              control,
+              key: fieldId,
+              title: property.title,
+              required: isRequired,
+              options: [
+                {key: true, title: 'Yes'},
+                {key: false, title: 'No'},
+              ],
+              layout: 'row',
+              defaultValue: formData[fieldId] ?? false,
+            }}
+          />
+        );
+
       case 'string':
+        // Check if it should be a textarea
+        const isTextArea =
+          property.title.toLowerCase().includes('about') ||
+          property.title.toLowerCase().includes('address') ||
+          property.title.toLowerCase().includes('description') ||
+          property.title.toLowerCase().includes('remark');
+
+        if (isTextArea) {
+          return (
+            <TextAreaFormItem
+              data={{
+                control,
+                key: fieldId,
+                title: property.title,
+                required: isRequired,
+                disabled: property.readOnly,
+                defaultValue: formData[fieldId] ?? '',
+                placeholder: property.title,
+              }}
+            />
+          );
+        }
+
         return (
-          <TextInput
-            style={[styles.input, property.readOnly && styles.readOnlyInput]}
-            value={value ?? ''}
-            onChangeText={text => handleChange(fieldId, text)}
-            placeholder={property.title}
-            // editable={!property.readOnly}
-            editable={true}
-            multiline={property.title.toLowerCase().includes('about')}
-            numberOfLines={
-              property.title.toLowerCase().includes('about') ? 4 : 1
-            }
-            textAlignVertical={
-              property.title.toLowerCase().includes('about') ? 'top' : 'center'
-            }
+          <InputFormItem
+            data={{
+              control,
+              key: fieldId,
+              title: property.title,
+              required: isRequired,
+              disabled: property.readOnly,
+              defaultValue: formData[fieldId] ?? '',
+              placeholder: property.title,
+            }}
           />
         );
+
       case 'number':
-        return (
-          <TextInput
-            style={[styles.input, property.readOnly && styles.readOnlyInput]}
-            value={value?.toString() ?? ''}
-            onChangeText={text => handleChange(fieldId, text)}
-            placeholder={property.title}
-            keyboardType="numeric"
-            editable={!property.readOnly}
-          />
-        );
       case 'integer':
         return (
-          <TextInput
-            style={[styles.input, property.readOnly && styles.readOnlyInput]}
-            value={value?.toString() ?? ''}
-            onChangeText={text => handleChange(fieldId, text)}
-            placeholder={property.title}
-            keyboardType="numeric"
-            editable={!property.readOnly}
+          <InputFormItem
+            data={{
+              control,
+              key: fieldId,
+              title: property.title,
+              required: isRequired,
+              disabled: property.readOnly,
+              defaultValue: formData[fieldId]?.toString() ?? '',
+              placeholder: property.title,
+              keyboardType: 'numeric',
+            }}
           />
         );
-      case 'boolean':
-        return (
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{property.title}</Text>
-            <Switch
-              value={!!value}
-              onValueChange={val => handleChange(fieldId, val)}
-              disabled={property.readOnly}
-            />
-          </View>
-        );
+
       default:
+        // Default to InputFormItem
         return (
-          // <TextInput
-          //   style={[styles.input, property.readOnly && styles.readOnlyInput]}
-          //   value={value ?? ''}
-          //   onChangeText={text => handleChange(fieldId, text)}
-          //   placeholder={property.title}
-          //   editable={!property.readOnly}
-          // />
-          <TextInput
-            style={[styles.input, property.readOnly && styles.readOnlyInput]}
-            value={value ?? ''}
-            onChangeText={text => handleChange(fieldId, text)}
-            placeholder={property.title}
-            // editable={!property.readOnly}
-            editable={true}
-            multiline={property.title.toLowerCase().includes('about')}
-            numberOfLines={
-              property.title.toLowerCase().includes('about') ? 4 : 1
-            }
-            textAlignVertical={
-              property.title.toLowerCase().includes('about') ? 'top' : 'center'
-            }
+          <InputFormItem
+            data={{
+              control,
+              key: fieldId,
+              title: property.title,
+              required: isRequired,
+              disabled: property.readOnly,
+              defaultValue: formData[fieldId] ?? '',
+              placeholder: property.title,
+            }}
           />
         );
     }
@@ -211,17 +269,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* <Text style={styles.title}>{title}</Text> */}
       {Object.entries(schema.properties).map(([fieldId, property]) => (
-        <View key={fieldId} style={styles.fieldContainer}>
-          {property.type !== 'array' && (
-            <Text style={styles.label}>
-              {property.title}
-              {schema.required?.includes(fieldId) ? ' *' : ''}
-            </Text>
-          )}
-          {renderField(fieldId, property)}
-        </View>
+        <View key={fieldId}>{renderField(fieldId, property)}</View>
       ))}
     </ScrollView>
   );
@@ -230,60 +279,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 const styles = StyleSheet.create({
   container: {
     padding: 12,
-    // maxHeight: 800,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 8,
-  },
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 6,
-    color: '#333',
-    fontWeight: '500',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#fff',
-    fontSize: 14,
-  },
-  readOnlyInput: {
-    backgroundColor: '#f5f5f5',
-    color: '#666',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  switchLabel: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  selectContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-  },
-  picker: {
-    height: 50,
   },
   repeaterContainer: {
-    marginTop: 8,
+    marginVertical: 8,
   },
   repeaterLabel: {
     fontSize: 14,
@@ -303,15 +301,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginBottom: 8,
-    fontWeight: '500',
-  },
-  subFieldContainer: {
-    marginBottom: 8,
-  },
-  subFieldLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
     fontWeight: '500',
   },
   addButton: {
