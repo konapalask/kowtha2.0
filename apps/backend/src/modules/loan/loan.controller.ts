@@ -321,28 +321,6 @@ export class LoanController {
     }
   }
 
-  @Get('get-bank-forms')
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({ summary: 'Get bank forms' })
-  @ApiResponse({ status: 200, description: 'Bank forms fetched successfully' })
-  async getBankForms(@Query('bankName') bankName: string, @Query('type') type: string) {
-    if(type === 'banks') {
-      return {
-        status: 200,
-        message: 'Bank forms fetched successfully',
-        data: Object.keys(formSchema)
-      }
-    }
-    const result = formSchema[bankName];
-    return {
-      status: 200,
-      message: 'Bank forms fetched successfully',
-      data: result
-    };
-  }
-
-
-
 
   @Get(':id/generate-final-report')
   @Roles(UserRole.Admin, UserRole.Verifier)
@@ -987,4 +965,26 @@ export class LoanController {
       data: result
     };
   }
+
+  
+  @Get('get-bank-forms')
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.SupportExecutive, UserRole.VerificationExecutive, UserRole.OperationsExecutive)
+  @ApiOperation({ summary: 'Get bank forms' })
+  @ApiResponse({ status: 200, description: 'Bank forms fetched successfully' })
+  async getBankForms(@Query('bankName') bankName: string, @Query('type') type: string) {
+    if(type === 'banks') {
+      return {
+        status: 200,
+        message: 'Bank forms fetched successfully',
+        data: Object.keys(formSchema)
+      }
+    }
+    const result = formSchema[bankName];
+    return {
+      status: 200,
+      message: 'Bank forms fetched successfully',
+      data: result
+    };
+  }
+
 } 

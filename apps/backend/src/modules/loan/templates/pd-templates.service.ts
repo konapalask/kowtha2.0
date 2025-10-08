@@ -28,13 +28,14 @@ export class PDTemplateService {
     }
 
     async InterfaceMapping(bankName: string, verification: any, loan: any): Promise<any> {
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+            
         if (bankName == 'Axis Bank') {
             // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
             let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
 
-            const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-            const imageBase64 = fs.readFileSync(imagePath, 'base64');
-            const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
             const status = verification?.approvedStatus || '';
 
             const uploadedItems = verificationData?.uploadedItems || [];
@@ -72,6 +73,48 @@ export class PDTemplateService {
               }
             return axisFinanceUBLTemplate(verificationData, html_data);
         }
+
+        if (bankName == 'Tata Ubl') {
+          // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
+          let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
+
+          const status = verification?.approvedStatus || '';
+
+          const uploadedItems = verificationData?.uploadedItems || [];
+  
+          // Generate presigned URLs for images
+          const imageUrls = await Promise.all(
+            uploadedItems.map(async (item: any) => {
+              try {
+                return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+              } catch (error) {
+                await this.loggingService.error('Failed to generate presigned URL for image', {
+                  s3ImageUrl: item.s3ImageUrl,
+                  error: error.message
+                });
+                return null;
+              }
+            })
+          );
+    
+          // Filter out any failed URL generations
+          const validImageUrls = imageUrls.filter(url => url !== null);
+    
+          const fieldExecutive = verification.fieldExecutive?.name || '';
+
+          const imagesData = await this.FormatPDImages(validImageUrls, bankName, fieldExecutive);
+
+          const html_data = {
+              bankName: bankName,
+              applicationNumber: loan.applicationNumber,
+              path: verification.path,
+              status: status,
+              imageDataUri: imageDataUri,
+              imagesData: imagesData,
+              fieldExecutive: fieldExecutive,
+            }
+          return axisFinanceUBLTemplate(verificationData, html_data);
+      }
     }
  
     async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
