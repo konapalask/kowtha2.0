@@ -74,19 +74,21 @@ const Investigable: React.FC<InvestigableProps> = ({
   }, []);
 
   useEffect(() => {
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 15000,
-    })
-      .then(location => {
-        const {latitude, longitude} = location;
-        setValue('geoTag', `${latitude},${longitude}`);
+    if (isInvestigable === false) {
+      GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
       })
-      .catch(error => {
-        console.error('Error getting location:', error);
-        setValue('geoTag', 'Location not available');
-      });
-  }, [setValue]);
+        .then(location => {
+          const {latitude, longitude} = location;
+          setValue('geoTag', `${latitude},${longitude}`);
+        })
+        .catch(error => {
+          console.error('Error getting location:', error);
+          setValue('geoTag', 'Location not available');
+        });
+    }
+  }, []);
 
   // useEffect(() => {
   //   if (Platform.OS === 'android') {

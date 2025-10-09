@@ -1240,7 +1240,7 @@ export const formSchema = [
             nameOfCoApplicants: {
               type: 'string',
               title: 'Name of Co-Applicant(s)',
-              readOnly: true,
+              // readOnly: true,
             },
           },
           required: ['nameOfApplicant', 'nameOfEntity'],
@@ -1256,7 +1256,7 @@ export const formSchema = [
             product: {
               type: 'string',
               title: 'Product',
-              readOnly: true,
+              // readOnly: true,
             },
             amount: {
               type: 'string',
@@ -1264,25 +1264,27 @@ export const formSchema = [
               readOnly: true,
             },
             tenure: {
-              type: 'string',
+              type: 'integer',
               title: 'Tenure',
             },
             repaymentFrom: {
-              type: 'string',
+              type: 'object',
               title: 'Repayment from',
-            },
-            bankName: {
-              type: 'string',
-              title: 'Bank name',
-              readOnly: true,
-            },
-            typeSAAccount: {
-              type: 'string',
-              title: 'Type (SA A/C)',
-            },
-            accountNo: {
-              type: 'string',
-              title: 'Account No.',
+              properties: {
+                bankName: {
+                  type: 'string',
+                  title: 'Bank name',
+                  readOnly: true,
+                },
+                typeSAAccount: {
+                  type: 'string',
+                  title: 'Type (SA A/C)',
+                },
+                accountNo: {
+                  type: 'string',
+                  title: 'Account No.',
+                },
+              },
             },
           },
         },
@@ -1294,9 +1296,10 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            add: {
+            address: {
               type: 'string',
-              title: 'Add',
+              title: 'Address',
+              readOnly: true,
             },
             rentedOwned: {
               type: 'string',
@@ -1329,9 +1332,9 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            add: {
+            address: {
               type: 'string',
-              title: 'Add',
+              title: 'Address',
             },
             rentedOwned: {
               type: 'string',
@@ -1343,7 +1346,7 @@ export const formSchema = [
               title: 'Owned by',
             },
             areaSqFt: {
-              type: 'string',
+              type: 'integer',
               title: 'Area (In Sq. Ft.)',
             },
             occupiedSinceYears: {
@@ -1356,7 +1359,7 @@ export const formSchema = [
             },
             addressOfPDAndPersonMet: {
               type: 'string',
-              title: 'Address of PD and persona met',
+              title: 'Address of PD and person met',
             },
           },
         },
@@ -1376,7 +1379,18 @@ export const formSchema = [
                 properties: {
                   name: {type: 'string', title: 'Name'},
                   age: {type: 'integer', title: 'Age'},
-                  qualification: {type: 'string', title: 'Qualification'},
+                  qualification: {
+                    type: 'string',
+                    title: 'Qualification',
+                    enum: [
+                      'Below 10th',
+                      '10th pass',
+                      'Under graduate',
+                      'Graduate',
+                      'Post Graduate',
+                      'Professional',
+                    ],
+                  },
                   profession: {type: 'string', title: 'Profession'},
                   relation: {type: 'string', title: 'Relation'},
                   monthlyIncome: {type: 'number', title: 'Monthly income'},
@@ -1394,10 +1408,19 @@ export const formSchema = [
           type: 'object',
           properties: {
             currentBusinessDetails: {
-              type: 'string',
+              type: 'array',
               title: 'Current Business Details',
+              items: {
+                type: 'object',
+                properties: {
+                  businessDetails: {
+                    type: 'string',
+                    title: 'Business Details',
+                  },
+                },
+              },
             },
-            stockAsOnDate: {
+            stockAsOnDay: {
               type: 'string',
               title: 'Stock as on date',
             },
@@ -1478,10 +1501,12 @@ export const formSchema = [
             covidEffectOnTurnover: {
               type: 'string',
               title: 'Is there any effect on turnover due to Covid',
+              enum: ['Yes', 'No'],
             },
             postLockdownBusinessSpeed: {
               type: 'string',
               title: 'After lockdown, is business running on same speed?',
+              enum: ['Yes', 'No'],
             },
             cashSalesPercentage: {
               type: 'integer',
@@ -1497,7 +1522,7 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            totalDebtorsAsOnDate: {
+            totalDebtorsAsOnDay: {
               type: 'integer',
               title: 'Total Debtors as on date',
             },
@@ -1516,7 +1541,7 @@ export const formSchema = [
                     type: 'string',
                     title: '% of Total Sales',
                   },
-                  debtorDays: {type: 'string', title: 'Debtor Days'},
+                  debtorDays: {type: 'integer', title: 'Debtor Days'},
                   relationshipSinceYears: {
                     type: 'integer',
                     title: 'Relationship since (years)',
@@ -1534,7 +1559,7 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            totalCreditorsAsOnDate: {
+            totalCreditorsAsOnDay: {
               type: 'integer',
               title: 'Total Creditors as on date',
             },
@@ -1553,7 +1578,7 @@ export const formSchema = [
                     type: 'string',
                     title: '% of Total Purchases',
                   },
-                  creditorDays: {type: 'string', title: 'Creditor Days'},
+                  creditorDays: {type: 'integer', title: 'Creditor Days'},
                   relationshipSinceYears: {
                     type: 'integer',
                     title: 'Relationship since (years)',
@@ -1747,7 +1772,7 @@ export const formSchema = [
         required: true,
       },
       {
-        id: 'документы',
+        id: 'documents',
         label: 'Documents',
         schema: {
           type: 'object',
@@ -1759,6 +1784,44 @@ export const formSchema = [
             otherDocumentSeen: {
               type: 'string',
               title: 'other Document Seen',
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'finalStatus',
+        label: 'Final Status',
+        schema: {
+          type: 'object',
+          properties: {
+            dateOfPD: {
+              type: 'string',
+              title: 'Date of PD',
+              format: 'date',
+            },
+            personMetAtTimeOfPD: {
+              type: 'string',
+              title: 'Person met at the time of PD',
+            },
+            phoneNoOfApplicant: {
+              type: 'string',
+              title: 'Phone no of applicant',
+              readOnly: true,
+            },
+            pdDoneBy: {
+              type: 'string',
+              title: 'PD done by',
+              readOnly: true,
+            },
+            latitudeLongitude: {
+              type: 'string',
+              title: 'Latitude and longitude',
+              readOnly: true,
+            },
+            videoLink: {
+              type: 'string',
+              title: 'Video link',
             },
           },
         },
