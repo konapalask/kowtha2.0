@@ -1,77 +1,107 @@
 import { format, toZonedTime } from 'date-fns-tz';
+import { pdBaseTemplate } from './pd-base.tempate';
 
 export const cholaTemplate = (verificationData1: any, html_data: any) => {
-    const verificationData = {
-        reportHeader: {
-            programName: 'Liquid Income Program',
-            dateOfVisit: '2025-01-01',
-            personMet: 'John Doe'
-        },
-        applicantDetails: {
-            primary: {
-                name: 'John Doe'
-            },
-            coApplicant: {
-                name: 'Jane Doe'
-            }
-        },
-        thirdPartyCheck: {
-            checks: [
-                {
-                    tpcName: 'John Doe',
-                    mobileNumber: '1234567890',
-                    relationship: 'Brother',
-                    feedbackStatus: 'Approved',
-                    comments: 'The business is doing well and the applicant is a good credit risk.'
-                }
-            ]
-        },
-        phoneNumbers: '1234567890',
-        businessDetails: {
-            businessName: 'ABC Inc.',
-            constitution: 'Private Limited',
-            visitedAddress: '123 Main St, Anytown, USA'
-        },
-        assets: '100000',
-        customerReferences: {
-            phoneNumbers: '1234567890'
-        },
-        otherIncomes: '100000',
-        existingLoans: '100000',
-        bankingDetails: {
-            bankName: 'ABC Bank',
-            accountNumber: '1234567890',
-            ifscCode: 'ABC123',
-            accountType: 'Savings',
-            accountBalance: '100000'
-        },
-        pdStatus: 'Approved',
-        recommendations: 'Approved',
-        disclaimer: 'The business is doing well and the applicant is a good credit risk.',
-        documentsVerified: 'Yes',
-        businessPhotos: 'Yes',
-        customerPhotos: 'Yes',
-        vendorPhotos: 'Yes',
-        grossDisposableIncome: '100000',
-        totalObligations: '100000',
-        netDisposableIncome: '100000',
-        age: '25',
-        name: 'John Doe',
-        relation: 'Brother',
-        loanDetails: {
-            requestedAmount: 100000,
-            purpose: 'Business Expansion'
-        },
-        itrProvided: 'Yes',
-        receiptsProvided: 'No',
-        bankStatementsProvided: 'No',
-        billsProvided: 'No',
-        comfortFactors: '100000',
-        discomfortFactors: '100000',
-        completed: 'Yes',
-        feedback: 'The business is doing well and the applicant is a good credit risk.',
-        remarks: 'The business is doing well and the applicant is a good credit risk.'
+  const verificationData = {
+    // Basic Information
+      "basicInformation": {
+        "name_of_the_applicant": "Ramesh Kumar",
+        "name_of_the_co-applicant": "Sita Devi",
+        "business_name": "Ramesh Enterprises",
+        "constitution": "Proprietorship",
+        "visited_address": "123, MG Road, Bangalore",
+        "loan_requested": 1000000,
+        "purpose_of_loan": "Business Expansion",
+        "date_of_visit": "2025-10-05",
+        "person_met": "Mr. Sharma",
+      },
+      
+
+  // Family Details
+  "applicants_family_details": {
+  "name": "Anil Kumar",
+  "relationship": "Father",
+  "age": "55",
+  // "education": "High School",
+  // "qualification": "Diploma",
+  },
+  
+  // Extra fields (seen in docx but not in ids JSON)
+  "assets": "House, Car", 
+  "reference_numbers": "9876543210, 8765432109",
+  "other_incomes": "Rental Income",
+  
+  //existing loan details
+  "existing_loans": {
+    "bank_name": "State Bank of India",
+    "loan_type": "Home Loan",
+    "loan_amount_in_rs": "2000000",
+    "emiinterest_in_rs": "1500000",
+    "total_tenure_completed_in_months": "60",
+  },
+
+  // Banking Details
+  "bankingDetails": {
+  "bank_name": "State Bank of India",
+  "ac_no": "123456789012",
+  "ac_type": "Savings",
+  },
+
+  // ITR / Financial Details
+  "itr": "ITR-2024-25.pdf",
+  "receipts": "500000",
+  "verification": "Verified",
+  "net_profit_marigin": "40%",
+
+  // Discomfort Factor
+  "status_of_this_case_-_positivenegativecredit_refer": "Positive",
+  "disclaimer": "All information provided is true to the best of my knowledge",
+
+  // Total Gross Disposable Income (A)
+  "total_gross_disposable_income_a": "150000",
+  "total_obligations_b": "50000",
+
+  // Profit & Loss style financial statement (sample figures to mirror screenshot)
+  "financialStatement": {
+    "income": {
+      "grossReceipts": 3600000,
+    },
+    "expenses": {
+      "purchases": 1080000,
+      "electricity": 120000,
+      "rent": 720000,
+      "salaries": 600000,
+      "transportation": 24000,
+      "other": 24000
+    }
+  }
+
+};
+
+    // Helper to safely format amounts (Indian numbering system)
+    const formatAmount = (val: any) => {
+      if (val === null || val === undefined || val === '') return '';
+      const num = typeof val === 'number' ? val : parseFloat(val);
+      if (isNaN(num)) return '' + val;
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
+
+    const fs = (verificationData as any).financialStatement || {};
+    const exp = fs.expenses || {};
+    const inc = fs.income || {};
+    const expenseTotal = [exp.purchases, exp.electricity, exp.rent, exp.salaries, exp.transportation, exp.other]
+      .filter(v => typeof v === 'number')
+      .reduce((a: number, b: number) => a + b, 0);
+    const incomeTotal = [inc.grossReceipts]
+      .filter(v => typeof v === 'number')
+      .reduce((a: number, b: number) => a + b, 0);
+    const netProfit = incomeTotal - expenseTotal;
+
+    // Disposable income summary (A, B, C = A - B)
+    const grossA = parseFloat((verificationData as any).total_gross_disposable_income_a) || 0;
+    const obligationsB = parseFloat((verificationData as any).total_obligations_b) || 0;
+    const netDisposableC = grossA - obligationsB;
+
     return `
      <!DOCTYPE html>
       <html>
@@ -80,7 +110,7 @@ export const cholaTemplate = (verificationData1: any, html_data: any) => {
         <style>
           body {
               font-family: Arial, sans-serif;
-              margin: 0;
+              margin-top: 24px;
               padding: 0;
               background: #fff;
               color: #222;
@@ -114,6 +144,7 @@ export const cholaTemplate = (verificationData1: any, html_data: any) => {
             .header .contact {
               font-size: 14px;
               text-align: right;
+              margin-top: 40px;
             }
             .logo {
               display: block;
@@ -206,17 +237,26 @@ export const cholaTemplate = (verificationData1: any, html_data: any) => {
             }
             .pdf-footer {
               position: fixed;
-              bottom: 0;
+              bottom: 20px;
               left: 0;
               width: 100%;
-              text-align: center;
-              color: #7f8c8d;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              color: #8b9090ff;
               font-size: 12px;
-              border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: transparent;
+              padding: 6px 40px 4px 40px; /* horizontal padding for spacing */
               z-index: 1000;
+              box-sizing: border-box;
             }
+            .pdf-footer p {
+              margin: 0;
+              padding: 0;
+              color: #444;
+            }
+            /* Page break helper: create a new page and reserve top spacing on next page */
+            .page-break { page-break-before: always; display: block; height: 50px; }
+            
             .logo {
               margin-top: 24px;
               text-align: center;
@@ -225,266 +265,405 @@ export const cholaTemplate = (verificationData1: any, html_data: any) => {
             .var-value {
               font-weight: bold;
             }
+
+
+
+
+
+            /* P&L table styling */
+                .pl-statement-table { width: 100%; border-collapse: collapse; margin: 32px 0 0 0; font-size: 14px; margin-bottom: 24px; }
+                .pl-statement-table th, .pl-statement-table td { border: 1px solid #000; padding: 6px 8px; }
+                .pl-statement-table th { background: #f2f2f2; text-align: center; font-weight: bold; }
+                .pl-heading { font-weight: bold; text-decoration: underline; }
+                .pl-section-label { font-weight: bold; }
+                .pl-total-row td { font-weight: bold; }
+                .pl-blank { background: #fff; }
+
+            /* Income summary list */
+                .income-summary-list {
+                  padding-left: 10px;
+                  margin: 8px 0 0 0;
+                }
+                .income-summary-list li {
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 16px;
+                  position: relative;
+                  padding-left: 14px; /* space for bullet */
+                }
+                .income-summary-list li::before {
+                  content: '•';
+                  position: absolute;
+                  left: 0;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  font-size: 14px;
+                  line-height: 1;
+                }
+                .income-summary-list .label {
+                  flex: 1 1 auto;
+                }
+                .income-summary-list .value {
+                  flex: 0 0 auto;
+                  font-weight: normal;
+                }
+
         </style>
       </head>
+
+
       <body>
         <div class="header">
           <div>
-            <div class="firm">KOWTHA & CO.</div>
+            <div class="firm">KOWTHA & CO.,</div>
             <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-            <div class="address"></div>
+            <div class="address">Flat No. 501, AB Heights, Prem Nagar Colony</div>
+            <div class="address">Road No. 1, Banjara Hills, Hyderabad-500 033</div>
           </div>
           <div class="contact">
-            Mobile no: 8332037517<br>
-            Mail ID: 
+            9490008968(AP)<br>8332037517(TS)<br>
+            Mail ID: <a href="mailto:kowthaTS@gmail.com">kowthaTS@gmail.com</a><br>
           </div>
         </div>
 
-        <div class="report-title">DUE DILIGENCE REPORT</div>
+        <div class="report-title">LIQUID INCOME PROGRAM REPORT</div>
 
-        <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
-              <tr>
-                <td class="branch-label">Application Number</td>
-                <td class="branch-value" style="border-right: 1px solid #000;"></td>
-                <td class="branch-label">Bank Name</td>
-                <td class="branch-value"></td>
-              </tr>
-            </table>
-          </div>
-        </div>
+        <footer class="pdf-footer">
+          <p>KOWTHA AND CO</p>
+          <p>CHOLA</p>
+        </footer>
 
-    <div class="align-wrapper">
+
+    <!-- Basic Information Table (rendered) -->
+    <div class="align-wrapper" style="margin-top:24px;">
       <table class="section-table">
-        <tr><td colspan="6" class="section-header">Residence Verification</td></tr>
+        <tr><td colspan="6" class="section-header">Basic Information</td></tr>
         <tr>
           <th>Name of the Applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.name || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.name_of_the_applicant || ''}</span></td>
         </tr>
         <tr>
-          <th>Name of the co-applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.name || ''}</span></td>
+          <th>Name of the Co-applicant</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation["name_of_the_co-applicant"] || ''}</span></td>
         </tr>
         <tr>
-          <th>Business name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.businessName || ''}</span></td>
+          <th>Business Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.business_name || ''}</span></td>
         </tr>
         <tr>
           <th>Constitution</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.constitution || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.constitution || ''}</span></td>
         </tr>
         <tr>
           <th>Visited Address</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails.visitedAddress || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.visited_address || ''}</span></td>
         </tr>
         <tr>
           <th>Loan Requested</th>
-          <td colspan="5"><span class="var-value">Rs. ${verificationData.loanDetails.requestedAmount}/-</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.loan_requested || ''}</span></td>
         </tr>
         <tr>
-          <th>Purpose of loan</th>
-          <td colspan="5"><span class="var-value">${verificationData.loanDetails.purpose || ''}</span></td>
+          <th>Purpose of Loan</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.purpose_of_loan || ''}</span></td>
         </tr>
         <tr>
           <th>Date of Visit</th>
-          <td colspan="5"><span class="var-value">${verificationData.reportHeader.dateOfVisit || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.date_of_visit || ''}</span></td>
         </tr>
         <tr>
           <th>Person Met</th>
-          <td colspan="5"><span class="var-value">${verificationData.reportHeader.personMet || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation.person_met || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+      <div class="align-wrapper">
+        <table class="section-table">
+          <tr>
+            <th style="margin-bottom: 6px;"><b>About the applicant and its business:</b></th>
+          </tr>
+          <tr>
+            <td>
+              <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                <li>Mr. ${verificationData.basicInformation.name_of_the_applicant || 'XXX'} is applicant aged 34 years, under graduate and native is Addanki.</li>
+                <li>Applicant started business under the name of M/s. ${verificationData.basicInformation.business_name || 'XXXX'} since 2022.</li>
+                <li>It is a sole proprietorship business concern, applicant is proprietor of the business and applicant manages all the business activities.</li>
+              <li>Nature of the business is saloon services, having overall 5 years of experience in same field.</li>
+              <li>Business provides services like hair cutting, facials, waxing, pedicure and manicure etc.</li>
+              <li>He also provides special works in the bridal makeup for marriages and other functions.</li>
+              <li>He charges around Rs. 300/- to Rs. 3,000/- per person based on service provided.</li>
+              <li>He also does outdoor services and charges around Rs. 15,000/- to 25,000/- based on service.</li>
+              <li>He does around 5–6 functions per month.</li>
+              <li>Customers are general public who are living around the same location.</li>
+              <li>He purchases stock at local market at Hyderabad and online mode.</li>
+              <li>He is running business from rented premise and he pays rent amount of Rs. 60,000/- per month.</li>
+              <li>During the PD, observed that there are 5 chairs, 3 pedicure and manicure chairs and 4 facial beds observed in the premises.</li>
+              <li>There are four workers working in this parlour under him and he pays salary amount of Rs. 50,000/- per month.</li>
+              <li>All business transactions will be done in cash.</li>
+              <li>Neighbor check done we got positive feedback about the applicant.</li>
+              <li>Hence Status of the case is Negative.</li>
+            </ul>
+          </td>
+        </tr>
+        </table>
+    </div>
+
+  <div class="page-break"></div>
+
+    <!-- Applicant's Family Details Table -->
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Applicant’s Family Details</td></tr>
+        <tr>
+          <th>Co Applicant Name</th>
+          <td colspan="5"><span class="var-value">${verificationData.basicInformation['name_of_the_co-applicant'] || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Age</th>
+          <td colspan="5"><span class="var-value">${verificationData.applicants_family_details.age || ''}</span></td>
+        </tr>
+        <tr>
+          <th>Relationship</th>
+          <td colspan="5"><span class="var-value">${verificationData.applicants_family_details.relationship || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Assets Table -->
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Assets</td></tr>
+        <tr>
+          <td colspan="5"><span class="var-value">${verificationData.assets || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Customers Reference Numbers Table -->
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Customers - Reference Numbers</td></tr>
+        <tr>
+          <td colspan="5"><span class="var-value">${verificationData.reference_numbers || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Other Incomes Table -->
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Other Incomes</td></tr>
+        <tr>
+          <td colspan="5"><span class="var-value">${verificationData.other_incomes || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Existing Loans</td></tr>
+        <!-- Horizontal header row -->
+        <tr>
+          <th>Bank Name</th>
+          <th>Type of Loan</th>
+          <th>Loan Amount (Rs.)</th>
+          <th>EMI / Interest (Rs.)</th>
+          <th>Total Tenure Completed (Months)</th>
+        </tr>
+        <!-- Values row -->
+        <tr>
+          <td><span class="var-value">${verificationData.existing_loans.bank_name || ''}</span></td>
+          <td><span class="var-value">${verificationData.existing_loans.loan_type || ''}</span></td>
+          <td><span class="var-value">${verificationData.existing_loans.loan_amount_in_rs || ''}</span></td>
+          <td><span class="var-value">${verificationData.existing_loans.emiinterest_in_rs || ''}</span></td>
+          <td><span class="var-value">${verificationData.existing_loans.total_tenure_completed_in_months || ''}</span></td>
         </tr>
       </table>
     </div>
 
     <div class="align-wrapper">
       <table class="section-table">
-        <tr><td colspan="6" class="section-header">About the applicant and its business</td></tr>
+        <tr><td colspan="6" class="section-header">Banking Details</td></tr>
+        <!-- Horizontal header row -->
         <tr>
-          <td colspan="5">
-            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              <li>${verificationData.name} is applicant aged.</li>
-              <li>Applicant started business under the name of </li>
-              <li>business concern, applicant is proprietor of the business and applicant manages all the business activities.</li>
-              <li>Nature of the business is erificationData.businessDetails.experienceYears years of experience in same field.</li>
-              <li>Business provides services like verificationData.businessDetails etc.</li>
-              <li>He charges around Rs. 1000/- to Rs. /- per person based on service provided.</li>
-              <li>He also does outdoor services and charges around Rs. verificationData.businessDetails.pricing.outdoorServices.min to verificationData.businessDetails.pricing.outdoorServices.max based on service.</li>
-              <li>He does around verificationData.businessDetails.monthlyFunctions functions per month.</li>
-              <li>Customers are verificationData.businessDetails.customerBase.</li>
-              <li>He purchases stock at verificationData.businessDetails.procurement.sources mode.</li>
-              <li>He is running business from verificationData.businessDetails.premises.type premise and he pays rent amount of Rs. verificationData.businessDetails.premises.monthlyRent/- per month.</li>
-              <li>During the PD, observed that there are verificationData.businessDetails.premises.facilities.chairs chairs, verificationData.businessDetails.premises.facilities.pedicureManicureChairs pedicure and manicure chairs and verificationData.businessDetails.premises.facilities.facialBeds facials beds observed in the premises</li>
-              <li>There are verificationData.businessDetails.numberOfWorkers workers working in this parlour under her and she pays salary amount of Rs. verificationData.businessDetails.staff.totalMonthlySalary}/- per month.</li>
+          <th>Bank Name</th>
+          <th>A/c No</th>
+          <th>A/c Type</th>
+        </tr>
+        <!-- Values row -->
+        <tr>
+          <td><span class="var-value">${verificationData.bankingDetails.bank_name || ''}</span></td>
+          <td><span class="var-value">${verificationData.bankingDetails.ac_no || ''}</span></td>
+          <td><span class="var-value">${verificationData.bankingDetails.ac_type || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">ITR / Financial Details</td></tr>
+        <!-- Horizontal header row -->
+        <tr>
+          <th>ITR</th>
+          <th>Receipts</th>
+          <th>Verification</th>
+          <th>Gp Margin & Expenses details</th>
+        </tr>
+        <!-- Values row -->
+        <tr>
+          <td><span class="var-value">${verificationData.itr || ''}</span></td>
+          <td><span class="var-value">${verificationData.receipts || ''}</span></td>
+          <td><span class="var-value">${verificationData.verification || ''}</span></td>
+          <td><span class="var-value">${verificationData.net_profit_marigin || ''}</span></td>
+        </tr>
+      </table>
+    </div>
+
+  <div class="page-break"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Comfort Factor</td></tr>
+        <tr>
+          <td colspan="6" style="padding:0;">
+            <ul style="margin:0; padding:8px 16px 8px 32px; list-style-type:disc;">
+              <li>Business name board seen</li>
+              <li>Verified Rental agreement, trade license, Bank statements, kacha records.</li>
+              <li>He has 05 years of experience in this field.</li>
             </ul>
           </td>
         </tr>
       </table>
     </div>
 
-     <div style="page-break-before: always;"></div>
-
+    
     <div class="align-wrapper">
       <table class="section-table">
-        <tr><td colspan="6" class="section-header">Applicant's family details</td></tr>
+        <tr><td colspan="6" class="section-header">Discomfort Factor</td></tr>
         <tr>
-          <th>Co Applicant Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.name || ''}</span></td>
-        </tr>
-        <tr>
-          <th>Age</th>
-          <td colspan="5"><span class="var-value">${verificationData.age || ''}</span></td>
-        </tr>
-        <tr>
-          <th>Relation</th>
-          <td colspan="5"><span class="var-value">${verificationData.relation || ''}</span></td>
+          <td colspan="6" style="padding:0;">
+            <ul style="margin:0; padding:8px 16px 8px 32px; list-style-type:disc;">
+              <li>Not provided IT, Bank Statement and Bills.</li>
+              <li>During the observation, UPI scanner was in the name of A Reddy. However, KYC has been verified applicant name is Mr. Ayyappa Swamy</li>
+            </ul>
+          </td>
         </tr>
       </table>
     </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Assets</td></tr>
-        <tr>
-          <th>Assets</th>
-          <td colspan="5"><span class="var-value">${verificationData.assets || ''}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Customers -- Reference numbers</td></tr>
-        <tr>
-          <th>Customers</th>
-          <td colspan="5"><span class="var-value">${verificationData.phoneNumbers || ''}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Other Incomes</td></tr>
-        <tr>
-          <th>Other Incomes</th>
-          <td colspan="5"><span class="var-value">${verificationData.otherIncomes || ''}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-      <tr><td colspan="6" class="section-header">Existing Loan Details</td></tr>
-      <tr>
-        <th>Bank name</th>
-        <th>Type of Loan</th>
-        <th>Loan amount (In Rs.)</th>
-        <th>EMI/Interest (In Rs.)</th>
-        <th>Total Tenure/completed [in months]</th>
-      </tr>
-      ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
-        ? verificationData.thirdPartyCheck.checks.map(tpc => `
-          <tr>
-            <td><span class="var-value">${''}</span></td>
-            <td><span class="var-value">${''}</span></td>
-            <td><span class="var-value">${''}</span></td>
-            <td><span class="var-value">${''}</span></td>
-            <td><span class="var-value">${''}</span></td>
-          </tr>
-        `).join('')
-        : '<tr><td colspan="5" style="text-align: center;">No existing loans found</td></tr>'}
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-      <tr><td colspan="6" class="section-header">Banking Details</td></tr>
-      <tr>
-        <th>Bank name</th>
-        <th>Account Number</th>
-        <th>IFSC Code</th>
-        <th>Account Type</th>
-        <th>Account Balance (In Rs.)</th>
-      </tr>
-      ${Array.isArray(verificationData.thirdPartyCheck?.checks) && verificationData.thirdPartyCheck.checks.length > 0
-        ? verificationData.thirdPartyCheck.checks.map(tpc => `
-          <tr>
-            <td><span class="var-value">${verificationData.bankingDetails.bankName || ''}</span></td>
-            <td><span class="var-value">${verificationData.bankingDetails.accountNumber || ''}</span></td>
-            <td><span class="var-value">${verificationData.bankingDetails.ifscCode || ''}</span></td>
-            <td><span class="var-value">${verificationData.bankingDetails.accountType || ''}</span></td>
-            <td><span class="var-value">${verificationData.bankingDetails.accountBalance || ''}</span></td>
-          </tr>
-        `).join('')
-        : '<tr><td colspan="5" style="text-align: center;">No banking details found</td></tr>'}
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">ITR, Receipts, Verification, GP Margin & Expenses details</td></tr>
-        <tr>
-            <th>ITR Provided</th>
-            <td colspan="5"><span class="var-value">${verificationData.itrProvided || ''}</span></td>
-        </tr>
-        <tr>
-            <th>Receipts Provided</th>
-            <td colspan="5"><span class="var-value">${verificationData.receiptsProvided || ''}</span></td>
-        </tr>
-        <tr>
-            <th>Bank Statements Provided</th>
-            <td colspan="5"><span class="var-value">${verificationData.bankStatementsProvided || ''}</span></td>
-        </tr>
-        <tr>
-            <th>Bills Provided</th>
-            <td colspan="5"><span class="var-value">${verificationData.billsProvided || ''}</span></td>
-        </tr>
-    </div>
-
-     <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="6" class="section-header">Recommendations</td></tr>
         <tr>
-          <th>Comfort Factor</th>
-          <td colspan="5"><span class="var-value">${verificationData.comfortFactors || ''}</span></td>
+          <td colspan="6" style="padding:0;">
+            <ul style="margin:0; padding:8px 16px 8px 32px; list-style-type:disc;">
+              <li>Status of PD is ${verificationData["status_of_this_case_-_positivenegativecredit_refer"] || ''}  (Phone-Pe linked bank account was showing other name of Mr. A Reddy and firm name is Heaven Family beauty.)</li>
+            </ul>
+          </td>
         </tr>
       </table>
     </div>
 
     <div class="align-wrapper">
       <table class="section-table">
-        <tr><td colspan="6" class="section-header">Discomfort Factor</td></tr>
+        <tr><td colspan="6" class="section-header">Disclaimer if any</td></tr>
         <tr>
-          <th>Discomfort Factor</th>
-          <td colspan="5"><span class="var-value">${verificationData.discomfortFactors || ''}</span></td>
-        </tr>
-        <tr>
-          <th>Status of PD</th>
-          <td colspan="5"><span class="var-value">${verificationData.pdStatus} (${verificationData.recommendations})</span></td>
+          <td colspan="6">We estimated financials, purely based on the valid documents provided by the applicant.</td>
         </tr>
       </table>
     </div>
 
+    
+    <!-- Profit & Loss Style Statement (Expenditure vs Income) -->
     <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Financial Summary</td></tr>
+      <table class="pl-statement-table">
         <tr>
-          <th>Total Gross disposable Income (A)</th>
-          <td colspan="5"><span class="var-value">Rs. ${verificationData.grossDisposableIncome}/- per month</span></td>
+          <th style="width:30%">PARTICULARS</th>
+          <th style="width:20%">Estimated</th>
+          <th style="width:30%">PARTICULARS</th>
+          <th style="width:20%">Estimated</th>
         </tr>
         <tr>
-          <th>Total Obligations (B)</th>
-          <td colspan="5"><span class="var-value">Rs. ${verificationData.totalObligations}/- per month</span></td>
+          <td class="pl-heading">EXPENDITURE</td>
+          <td></td>
+          <td class="pl-heading">INCOME</td>
+          <td></td>
         </tr>
         <tr>
-          <th>Net Disposable Income (C = A - B)</th>
-          <td colspan="5"><span class="var-value">Rs. ${verificationData.netDisposableIncome}/- per month</span></td>
+          <td>To purchases of Material</td>
+          <td>${formatAmount(exp.purchases)}</td>
+          <td>By Gross Receipts</td>
+          <td>${formatAmount(inc.grossReceipts)}</td>
+        </tr>
+        <tr>
+          <td>To Electricity</td>
+          <td>${formatAmount(exp.electricity)}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>To Rent</td>
+          <td>${formatAmount(exp.rent)}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>To Salaries</td>
+          <td>${formatAmount(exp.salaries)}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>To Transportation</td>
+          <td>${formatAmount(exp.transportation)}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>To Other expenses</td>
+          <td>${formatAmount(exp.other)}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><b>To Net Profit</b></td>
+          <td>${formatAmount(netProfit >= 0 ? netProfit : '')}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="pl-total-row">
+          <td>Total</td>
+          <td>${formatAmount(incomeTotal)}</td>
+          <td></td>
+          <td>${formatAmount(incomeTotal)}</td>
         </tr>
       </table>
     </div>
+    
+  
+    <div class="align-wrapper" style="font-size:14px;">
+      <ul class="income-summary-list" style="list-style-type: disc;">
+        <li><span class="label">Total Gross Disposable Income (A)</span><span class="value">Rs. ${formatAmount(grossA)} /- per month</span></li>
+        <li><span class="label">Total Obligations (B)</span><span class="value">Rs. ${formatAmount(obligationsB)} /- per month</span></li>
+        <li><span class="label">Net Disposable Income (C = A - B)</span><span class="value">Rs. ${formatAmount(netDisposableC)} /- per month</span></li>
+      </ul>
+    </div>
 
-    <div style="page-break-before: always;"></div>
+    <div class="align-wrapper" style="font-size:14px;">
+      <p>Gross disposable income is sum of Net profit & interest depreciations</p>
+        <ul >  
+          <li>Business premises photo with customer& Vendor’s Self to be attached in this report</li>
+        </ul>
+    </div>
+    
+  <div class="page-break"></div>
+
+    <div class="align-wrapper"">
+      <p style="margin-bottom: 6px;"><b><u>Business Photos:</u></b></p>
+      
+    </div>
   `
 }
