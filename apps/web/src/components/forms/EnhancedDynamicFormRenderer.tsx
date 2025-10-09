@@ -82,9 +82,21 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   }, [formValues, autoSave]);
 
   const renderField = (field: WebFieldDefinition, sectionId: string) => {
+    const isFieldReadOnly = readOnly || field.readOnly;
+    
+    // For readOnly fields, render as plain text instead of form controls
+    if (isFieldReadOnly) {
+      const value = form.getFieldValue([sectionId, field.id]);
+      return (
+        <Text type="secondary" style={{ fontSize: '14px', padding: '4px 0' }}>
+          {value || '-'}
+        </Text>
+      );
+    }
+
     const commonProps = {
       placeholder: field.placeholder || field.label,
-      disabled: readOnly || field.readOnly,
+      disabled: false, // Only global readOnly affects this now
     };
 
     switch (field.type) {
@@ -185,7 +197,7 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
               <Col span={24}>
                 <Space style={{ width: '100%', justifyContent: 'space-between' }}>
                   <Text strong>{`${field.label} ${index + 1}`}</Text>
-                  {!readOnly && items.length > 1 && (
+                  {!readOnly && !field.readOnly && items.length > 1 && (
                     <Button 
                       icon={<DeleteOutlined />} 
                       onClick={() => removeItem(index)}
@@ -198,59 +210,54 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
               </Col>
               
               {/* Dynamically render array item fields based on schema */}
-              {field.arrayItemFields && field.arrayItemFields.map((itemField: WebFieldDefinition) => (
-                <Col span={12} key={itemField.id}>
-                  {itemField.type === 'number' ? (
+              {field.arrayItemFields && field.arrayItemFields.map((itemField: WebFieldDefinition) => {
+                const isItemFieldReadOnly = readOnly || itemField.readOnly;
+                
+                return (
+                  <Col span={12} key={itemField.id}>
                     <div>
                       <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
-                      <InputNumber
-                        placeholder={itemField.label}
-                        value={item[itemField.id]}
-                        onChange={(value) => updateItem(index, itemField.id, value)}
-                        disabled={readOnly}
-                        style={{ width: '100%' }}
-                      />
+                      {isItemFieldReadOnly ? (
+                        <div style={{ padding: '4px 0', fontSize: '14px' }}>
+                          <Text type="secondary">{item[itemField.id] || '-'}</Text>
+                        </div>
+                      ) : itemField.type === 'number' ? (
+                        <InputNumber
+                          placeholder={itemField.label}
+                          value={item[itemField.id]}
+                          onChange={(value) => updateItem(index, itemField.id, value)}
+                          style={{ width: '100%' }}
+                        />
+                      ) : itemField.type === 'select' ? (
+                        <Select
+                          placeholder={itemField.label}
+                          value={item[itemField.id]}
+                          onChange={(value) => updateItem(index, itemField.id, value)}
+                          options={itemField.options?.map((opt: string) => ({ label: opt, value: opt }))}
+                          style={{ width: '100%' }}
+                        />
+                      ) : itemField.type === 'textarea' ? (
+                        <TextArea
+                          placeholder={itemField.label}
+                          value={item[itemField.id]}
+                          onChange={(e) => updateItem(index, itemField.id, e.target.value)}
+                          rows={2}
+                        />
+                      ) : (
+                        <Input
+                          placeholder={itemField.label}
+                          value={item[itemField.id]}
+                          onChange={(e) => updateItem(index, itemField.id, e.target.value)}
+                        />
+                      )}
                     </div>
-                  ) : itemField.type === 'select' ? (
-                    <div>
-                      <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
-                      <Select
-                        placeholder={itemField.label}
-                        value={item[itemField.id]}
-                        onChange={(value) => updateItem(index, itemField.id, value)}
-                        disabled={readOnly}
-                        options={itemField.options?.map((opt: string) => ({ label: opt, value: opt }))}
-                        style={{ width: '100%' }}
-                      />
-                    </div>
-                  ) : itemField.type === 'textarea' ? (
-                    <div>
-                      <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
-                      <TextArea
-                        placeholder={itemField.label}
-                        value={item[itemField.id]}
-                        onChange={(e) => updateItem(index, itemField.id, e.target.value)}
-                        disabled={readOnly}
-                        rows={2}
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
-                      <Input
-                        placeholder={itemField.label}
-                        value={item[itemField.id]}
-                        onChange={(e) => updateItem(index, itemField.id, e.target.value)}
-                        disabled={readOnly}
-                      />
-                    </div>
-                  )}
-                </Col>
-              ))}
+                  </Col>
+                );
+              })}
             </Row>
           </Card>
         ))}
-        {!readOnly && (
+        {!readOnly && !field.readOnly && (
           <Button 
             icon={<PlusOutlined />} 
             onClick={addItem}

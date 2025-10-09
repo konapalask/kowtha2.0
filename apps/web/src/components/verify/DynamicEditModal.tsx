@@ -72,28 +72,30 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
             ),
           }));
 
-          // Action column for row removal
-          columns.push({
-            title: '',
-            dataIndex: '__actions',
-            key: 'actions',
-            // Provide two-arg compatible function and derive index from row.key
-            render: (_: any, row: any) => {
-              const index = dataSource.findIndex(r => r.key === row.key);
-              if (fields.length <= 1 || index < 0) {
-                return <span />;
-              }
-              return (
-                <Button
-                  type="text"
-                  danger
-                  size="small"
-                  icon={<DeleteOutlined />}
-                  onClick={() => remove(fields[index].name)}
-                />
-              );
-            },
-          });
+          // Action column for row removal (only if field is not readOnly)
+          if (!field.readOnly) {
+            columns.push({
+              title: '',
+              dataIndex: '__actions',
+              key: 'actions',
+              // Provide two-arg compatible function and derive index from row.key
+              render: (_: any, row: any) => {
+                const index = dataSource.findIndex(r => r.key === row.key);
+                if (fields.length <= 1 || index < 0) {
+                  return <span />;
+                }
+                return (
+                  <Button
+                    type="text"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={() => remove(fields[index].name)}
+                  />
+                );
+              },
+            });
+          }
 
           return (
             <Card size="small" title={field.label} style={{ marginBottom: 12 }}>
@@ -104,14 +106,16 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
                 bordered
                 size="middle"
               />
-              <Button
-                type="dashed"
-                onClick={() => add()}
-                icon={<PlusOutlined />}
-                style={{ width: '100%', marginTop: 8 }}
-              >
-                Add {field.label}
-              </Button>
+              {!field.readOnly && (
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  icon={<PlusOutlined />}
+                  style={{ width: '100%', marginTop: 8 }}
+                >
+                  Add {field.label}
+                </Button>
+              )}
             </Card>
           );
         }}
@@ -120,9 +124,11 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
   };
 
   const renderFieldInput = (field: WebFieldDefinition) => {
+    const isReadOnly = field.readOnly;
+    
     switch (field.type) {
       case 'number':
-        return <InputNumber style={{ width: '100%' }} placeholder={field.placeholder} />;
+        return <InputNumber style={{ width: '100%' }} placeholder={field.placeholder} disabled={isReadOnly} />;
       
       case 'select':
         return (
@@ -130,17 +136,18 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
             placeholder={field.placeholder}
             options={field.options?.map(opt => ({ label: opt, value: opt }))}
             showSearch
+            disabled={isReadOnly}
           />
         );
       
       case 'textarea':
-        return <TextArea rows={3} placeholder={field.placeholder} />;
+        return <TextArea rows={3} placeholder={field.placeholder} disabled={isReadOnly} />;
       
       case 'array':
         return null; // Arrays are handled by renderArrayField
       
       default:
-        return <Input placeholder={field.placeholder} />;
+        return <Input placeholder={field.placeholder} disabled={isReadOnly} />;
     }
   };
 
