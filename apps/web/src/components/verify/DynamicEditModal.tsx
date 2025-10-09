@@ -25,6 +25,40 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // Helper function to validate non-empty strings
+  const validateNonEmpty = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      // Check if string has at least one non-whitespace character
+      return value.trim().length > 0;
+    }
+    if (typeof value === 'number') {
+      return !isNaN(value);
+    }
+    return true; // For other types, consider them valid
+  };
+
+  // Helper function to clean whitespace-only values
+  const cleanWhitespaceValues = (obj: any): any => {
+    if (typeof obj === 'string') {
+      return obj.trim() === '' ? undefined : obj.trim();
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(cleanWhitespaceValues).filter(item => item !== undefined);
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      const cleaned: any = {};
+      for (const key in obj) {
+        const cleanedValue = cleanWhitespaceValues(obj[key]);
+        if (cleanedValue !== undefined) {
+          cleaned[key] = cleanedValue;
+        }
+      }
+      return cleaned;
+    }
+    return obj;
+  };
+
   useEffect(() => {
     if (visible && initialData && sectionSchema) {
       // Set initial form values
@@ -36,13 +70,51 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      await onSave(sectionId, values);
+      
+      // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
+      const validationErrors: string[] = [];
+      if (sectionSchema) {
+        sectionSchema.fields.forEach(field => {
+          const value = values[field.id];
+          
+          // Check if value is whitespace-only (for both required and non-required fields)
+          if (typeof value === 'string' && value.trim() === '') {
+            validationErrors.push(field.label);
+          }
+          
+          // Check array fields
+          if (field.type === 'array' && field.arrayItemFields) {
+            const arrayValue = values[field.id];
+            if (Array.isArray(arrayValue)) {
+              arrayValue.forEach((item: any, index: number) => {
+                field.arrayItemFields?.forEach(itemField => {
+                  const itemValue = item[itemField.id];
+                  if (typeof itemValue === 'string' && itemValue.trim() === '') {
+                    validationErrors.push(`${field.label}[${index + 1}].${itemField.label}`);
+                  }
+                });
+              });
+            }
+          }
+        });
+      }
+      
+      if (validationErrors.length > 0) {
+        message.error(validationErrors.join(', '));
+        return;
+      }
+      
+      // Clean whitespace-only values before saving
+      const cleanedValues = cleanWhitespaceValues(values);
+      
+      // Only save to request logs if validation passes (at least one non-whitespace character)
+      await onSave(sectionId, cleanedValues);
       message.success('Changes saved to edit logs successfully');
       form.resetFields();
       onCancel();
     } catch (error) {
       console.error('Form validation error:', error);
-      message.error('Please fill all required fields');
+      message.error('Please fill all required fields with valid content');
     } finally {
       setLoading(false);
     }
@@ -65,7 +137,17 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
               <Form.Item
                 name={[row.namePath, itemField.id]}
                 style={{ marginBottom: 0 }}
-                rules={itemField.required ? [{ required: true, message: `${itemField.label} is required` }] : []}
+                rules={itemField.required ? [
+                  { required: true, message: `${itemField.label} is required` },
+                  {
+                    validator: (_: any, value: any) => {
+                      if (!validateNonEmpty(value)) {
+                        return Promise.reject(new Error(`Please enter at least one character for: ${itemField.label}`));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ] : []}
               >
                 {renderFieldInput(itemField)}
               </Form.Item>
@@ -126,6 +208,16 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
   const renderFieldInput = (field: WebFieldDefinition) => {
     const isReadOnly = field.readOnly;
     
+    // Common onChange handler to trim whitespace
+    const handleChange = (value: any, onChange?: (value: any) => void) => {
+      if (typeof value === 'string' && onChange) {
+        // Trim whitespace but allow user to type spaces
+        onChange(value);
+      } else if (onChange) {
+        onChange(value);
+      }
+    };
+    
     switch (field.type) {
       case 'number':
         return <InputNumber style={{ width: '100%' }} placeholder={field.placeholder} disabled={isReadOnly} />;
@@ -141,13 +233,40 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
         );
       
       case 'textarea':
-        return <TextArea rows={3} placeholder={field.placeholder} disabled={isReadOnly} />;
+        return (
+          <TextArea 
+            rows={3} 
+            placeholder={field.placeholder} 
+            disabled={isReadOnly}
+            onBlur={(e) => {
+              // Trim whitespace on blur
+              const trimmedValue = e.target.value.trim();
+              if (trimmedValue !== e.target.value) {
+                e.target.value = trimmedValue;
+                form.setFieldValue(field.id, trimmedValue);
+              }
+            }}
+          />
+        );
       
       case 'array':
         return null; // Arrays are handled by renderArrayField
       
       default:
-        return <Input placeholder={field.placeholder} disabled={isReadOnly} />;
+        return (
+          <Input 
+            placeholder={field.placeholder} 
+            disabled={isReadOnly}
+            onBlur={(e) => {
+              // Trim whitespace on blur
+              const trimmedValue = e.target.value.trim();
+              if (trimmedValue !== e.target.value) {
+                e.target.value = trimmedValue;
+                form.setFieldValue(field.id, trimmedValue);
+              }
+            }}
+          />
+        );
     }
   };
 
@@ -165,9 +284,17 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
         <Form.Item
           name={field.id}
           label={field.label}
-          rules={[
-            { required: field.required, message: `${field.label} is required` }
-          ]}
+          rules={field.required ? [
+            { required: true, message: `${field.label} is required` },
+            {
+              validator: (_: any, value: any) => {
+                if (!validateNonEmpty(value)) {
+                  return Promise.reject(new Error(`Please enter at least one character for: ${field.label}`));
+                }
+                return Promise.resolve();
+              }
+            }
+          ] : []}
         >
           {renderFieldInput(field)}
         </Form.Item>

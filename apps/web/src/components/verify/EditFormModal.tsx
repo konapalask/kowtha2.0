@@ -298,17 +298,84 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
     return currentVerification?.verificationData?.[formKeyMapping[formKey] || formKey];
   };
 
+  // Helper function to validate non-empty strings
+  const validateNonEmpty = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      // Check if string has at least one non-whitespace character
+      return value.trim().length > 0;
+    }
+    if (typeof value === 'number') {
+      return !isNaN(value);
+    }
+    return true; // For other types, consider them valid
+  };
+
+  // Helper function to clean whitespace-only values
+  const cleanWhitespaceValues = (obj: any): any => {
+    if (typeof obj === 'string') {
+      return obj.trim() === '' ? undefined : obj.trim();
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(cleanWhitespaceValues).filter(item => item !== undefined);
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      const cleaned: any = {};
+      for (const key in obj) {
+        const cleanedValue = cleanWhitespaceValues(obj[key]);
+        if (cleanedValue !== undefined) {
+          cleaned[key] = cleanedValue;
+        }
+      }
+      return cleaned;
+    }
+    return obj;
+  };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
+      
+      // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
+      const validationErrors: string[] = [];
+      Object.entries(values).forEach(([key, value]) => {
+        if (typeof value === 'string' && value.trim() === '') {
+          validationErrors.push(key);
+        }
+        
+        // Check nested objects and arrays
+        if (typeof value === 'object' && value !== null) {
+          const checkNestedValues = (obj: any, path: string = '') => {
+            Object.entries(obj).forEach(([nestedKey, nestedValue]) => {
+              const currentPath = path ? `${path}.${nestedKey}` : nestedKey;
+              if (typeof nestedValue === 'string' && nestedValue.trim() === '') {
+                validationErrors.push(currentPath);
+              } else if (typeof nestedValue === 'object' && nestedValue !== null) {
+                checkNestedValues(nestedValue, currentPath);
+              }
+            });
+          };
+          checkNestedValues(value, key);
+        }
+      });
+      
+      if (validationErrors.length > 0) {
+        message.error(validationErrors.join(', '));
+        setLoading(false);
+        return;
+      }
+      
       // Only proceed if validation passes
 
+      // Clean whitespace-only values before processing
+      const cleanedValues = cleanWhitespaceValues(values);
+      
       const formValues =
         formKey === "familyMemberDetails"
-          ? Object.values(values?.familyMemberDetails)
-          : values;
+          ? Object.values(cleanedValues?.familyMemberDetails)
+          : cleanedValues;
       console.log(formValues);
       const initialValues = await getInitialValues();
       const cleanedInitialValues = Object.fromEntries(

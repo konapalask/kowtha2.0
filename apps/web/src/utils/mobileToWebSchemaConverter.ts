@@ -109,6 +109,19 @@ export function getArrayItemDefinition(field: WebFieldDefinition): WebArrayItemD
   ];
 }
 
+// Helper function to validate non-empty strings
+function validateNonEmpty(value: any): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') {
+    // Check if string has at least one non-whitespace character
+    return value.trim().length > 0;
+  }
+  if (typeof value === 'number') {
+    return !isNaN(value);
+  }
+  return true; // For other types, consider them valid
+}
+
 export function validateFormData(formData: any, schema: WebFormDefinition): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -120,8 +133,8 @@ export function validateFormData(formData: any, schema: WebFormDefinition): { is
     section.fields.forEach(field => {
       if (field.required) {
         const value = formData[section.id]?.[field.id];
-        if (value === undefined || value === null || value === '') {
-          errors.push(`${field.label} is required`);
+        if (!validateNonEmpty(value)) {
+          errors.push(`Please enter at least one character for: ${field.label}`);
         }
       }
 

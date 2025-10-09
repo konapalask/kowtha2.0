@@ -21,7 +21,11 @@ const DynamicSectionDescription: React.FC<DynamicSectionDescriptionProps> = ({
   sectionSchema,
 }) => {
   const renderValue = (value: any, fieldKey?: string): React.ReactNode => {
-    if (value === null || value === undefined || value === '') {
+    // Check for empty or whitespace-only values
+    const isEmpty = value === null || value === undefined || 
+                   (typeof value === 'string' && value.trim() === '');
+    
+    if (isEmpty) {
       return <Text type="secondary">-</Text>;
     }
 

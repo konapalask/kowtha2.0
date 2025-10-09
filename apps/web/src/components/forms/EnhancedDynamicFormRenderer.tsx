@@ -81,15 +81,34 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     }
   }, [formValues, autoSave]);
 
+  // Helper function to validate non-empty strings
+  const validateNonEmpty = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      // Check if string has at least one non-whitespace character
+      return value.trim().length > 0;
+    }
+    if (typeof value === 'number') {
+      return !isNaN(value);
+    }
+    return true; // For other types, consider them valid
+  };
+
   const renderField = (field: WebFieldDefinition, sectionId: string) => {
     const isFieldReadOnly = readOnly || field.readOnly;
     
     // For readOnly fields, render as plain text instead of form controls
     if (isFieldReadOnly) {
       const value = form.getFieldValue([sectionId, field.id]);
+      const isEmpty = !validateNonEmpty(value);
+      const isEmptyString = typeof value === 'string' && value.trim() === '';
+      
       return (
-        <Text type="secondary" style={{ fontSize: '14px', padding: '4px 0' }}>
-          {value || '-'}
+        <Text 
+          type={(isEmpty || isEmptyString) && field.required ? "danger" : "secondary"} 
+          style={{ fontSize: '14px', padding: '4px 0' }}
+        >
+          {(isEmpty || isEmptyString) && field.required ? 'Please fill the required field' : (value || '-')}
         </Text>
       );
     }
@@ -99,40 +118,68 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
       disabled: false, // Only global readOnly affects this now
     };
 
-    switch (field.type) {
-      case 'text':
-        return <Input {...commonProps} />;
-      
-      case 'select':
-        return (
-          <Select 
-            {...commonProps} 
-            options={field.options?.map(opt => ({ label: opt, value: opt }))} 
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-          />
-        );
-      
-      case 'date':
-        return <DatePicker {...commonProps} style={{ width: '100%' }} />;
-      
-      case 'number':
-        return <InputNumber {...commonProps} style={{ width: '100%' }} />;
-      
-      case 'textarea':
-        return <TextArea {...commonProps} rows={4} />;
-      
-      case 'boolean':
-        return <Switch {...commonProps} />;
-      
-      case 'array':
-        return <DynamicArrayField field={field} sectionId={sectionId} readOnly={readOnly} />;
-      
-      default:
-        return <Input {...commonProps} />;
+    // Add validation rules for required fields
+    const validationRules = [];
+    if (field.required) {
+      validationRules.push({
+        required: true,
+        message: `${field.label} is required`,
+        validator: (_: any, value: any) => {
+          if (!validateNonEmpty(value)) {
+            return Promise.reject(new Error(`Please enter at least one character for: ${field.label}`));
+          }
+          return Promise.resolve();
+        }
+      });
     }
+
+    // Wrap field in Form.Item for validation
+    const renderFieldInput = () => {
+      switch (field.type) {
+        case 'text':
+          return <Input {...commonProps} />;
+        
+        case 'select':
+          return (
+            <Select 
+              {...commonProps} 
+              options={field.options?.map(opt => ({ label: opt, value: opt }))} 
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
+          );
+        
+        case 'date':
+          return <DatePicker {...commonProps} style={{ width: '100%' }} />;
+        
+        case 'number':
+          return <InputNumber {...commonProps} style={{ width: '100%' }} />;
+        
+        case 'textarea':
+          return <TextArea {...commonProps} rows={4} />;
+        
+        case 'boolean':
+          return <Switch {...commonProps} />;
+        
+        case 'array':
+          return <DynamicArrayField field={field} sectionId={sectionId} readOnly={readOnly} />;
+        
+        default:
+          return <Input {...commonProps} />;
+      }
+    };
+
+    return (
+      <Form.Item
+        name={[sectionId, field.id]}
+        rules={validationRules}
+        style={{ marginBottom: 0 }}
+      >
+        {renderFieldInput()}
+      </Form.Item>
+    );
   };
 
   const DynamicArrayField: React.FC<{field: WebFieldDefinition, sectionId: string, readOnly: boolean}> = ({ 
@@ -213,42 +260,66 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
               {field.arrayItemFields && field.arrayItemFields.map((itemField: WebFieldDefinition) => {
                 const isItemFieldReadOnly = readOnly || itemField.readOnly;
                 
+                // Validation rules for array item fields
+                const itemValidationRules = [];
+                if (itemField.required) {
+                  itemValidationRules.push({
+                    required: true,
+                    message: `${itemField.label} is required`,
+                    validator: (_: any, value: any) => {
+                      if (!validateNonEmpty(value)) {
+                        return Promise.reject(new Error(`Please enter at least one character for: ${itemField.label}`));
+                      }
+                      return Promise.resolve();
+                    }
+                  });
+                }
+                
                 return (
                   <Col span={12} key={itemField.id}>
                     <div>
                       <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
                       {isItemFieldReadOnly ? (
                         <div style={{ padding: '4px 0', fontSize: '14px' }}>
-                          <Text type="secondary">{item[itemField.id] || '-'}</Text>
+                          {(() => {
+                            const itemValue = item[itemField.id];
+                            const isEmpty = !validateNonEmpty(itemValue);
+                            const isEmptyString = typeof itemValue === 'string' && itemValue.trim() === '';
+                            return (isEmpty || isEmptyString) && itemField.required ? (
+                              <Text type="danger">Please fill the required field</Text>
+                            ) : (
+                              <Text type="secondary">{itemValue || '-'}</Text>
+                            );
+                          })()}
                         </div>
-                      ) : itemField.type === 'number' ? (
-                        <InputNumber
-                          placeholder={itemField.label}
-                          value={item[itemField.id]}
-                          onChange={(value) => updateItem(index, itemField.id, value)}
-                          style={{ width: '100%' }}
-                        />
-                      ) : itemField.type === 'select' ? (
-                        <Select
-                          placeholder={itemField.label}
-                          value={item[itemField.id]}
-                          onChange={(value) => updateItem(index, itemField.id, value)}
-                          options={itemField.options?.map((opt: string) => ({ label: opt, value: opt }))}
-                          style={{ width: '100%' }}
-                        />
-                      ) : itemField.type === 'textarea' ? (
-                        <TextArea
-                          placeholder={itemField.label}
-                          value={item[itemField.id]}
-                          onChange={(e) => updateItem(index, itemField.id, e.target.value)}
-                          rows={2}
-                        />
                       ) : (
-                        <Input
-                          placeholder={itemField.label}
-                          value={item[itemField.id]}
-                          onChange={(e) => updateItem(index, itemField.id, e.target.value)}
-                        />
+                        <Form.Item
+                          name={[sectionId, field.id, index, itemField.id]}
+                          rules={itemValidationRules}
+                          style={{ marginBottom: 0 }}
+                        >
+                          {itemField.type === 'number' ? (
+                            <InputNumber
+                              placeholder={itemField.label}
+                              style={{ width: '100%' }}
+                            />
+                          ) : itemField.type === 'select' ? (
+                            <Select
+                              placeholder={itemField.label}
+                              options={itemField.options?.map((opt: string) => ({ label: opt, value: opt }))}
+                              style={{ width: '100%' }}
+                            />
+                          ) : itemField.type === 'textarea' ? (
+                            <TextArea
+                              placeholder={itemField.label}
+                              rows={2}
+                            />
+                          ) : (
+                            <Input
+                              placeholder={itemField.label}
+                            />
+                          )}
+                        </Form.Item>
                       )}
                     </div>
                   </Col>
@@ -326,6 +397,10 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
             >
               {regularFields.map(field => {
                 const value = form.getFieldValue([section.id, field.id]);
+                const isEmpty = !validateNonEmpty(value);
+                const isEmptyString = typeof value === 'string' && value.trim() === '';
+                
+                
                 return (
                   <Descriptions.Item 
                     key={field.id} 
@@ -337,7 +412,11 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                     }
                     span={field.type === 'textarea' ? 2 : 1}
                   >
-                    {value || <Text type="secondary">-</Text>}
+                    {(isEmpty || isEmptyString) && field.required ? (
+                      <Text type="danger">Please fill the required field</Text>
+                    ) : (
+                      value || <Text type="secondary">-</Text>
+                    )}
                   </Descriptions.Item>
                 );
               })}
@@ -353,7 +432,14 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
               title: itemField.label,
               dataIndex: itemField.id,
               key: itemField.id,
-              render: (text: any) => text || <Text type="secondary">-</Text>,
+              render: (text: any) => {
+                const isEmpty = !validateNonEmpty(text);
+                const isEmptyString = typeof text === 'string' && text.trim() === '';
+                if ((isEmpty || isEmptyString) && itemField.required) {
+                  return <Text type="danger">Please fill the required field</Text>;
+                }
+                return text || <Text type="secondary">-</Text>;
+              },
             })) || [];
             
             return (
@@ -396,11 +482,49 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   };
 
   const handleSubmit = (values: any) => {
+    // First run the schema validation
     const validation = validateFormData(values, schema);
     if (!validation.isValid) {
       message.error(`Please fix the following errors: ${validation.errors.join(', ')}`);
       return;
     }
+    
+    // Additional validation for empty strings/spaces - only submit if at least one non-whitespace character
+    const additionalErrors: string[] = [];
+    schema.sections.forEach(section => {
+      section.fields.forEach(field => {
+        if (field.required) {
+          const value = values[section.id]?.[field.id];
+          if (!validateNonEmpty(value)) {
+            additionalErrors.push(`Please enter at least one character for: ${field.label}`);
+          }
+        }
+        
+        // Check array fields
+        if (field.type === 'array' && field.arrayItemFields) {
+          const arrayValue = values[section.id]?.[field.id];
+          if (Array.isArray(arrayValue)) {
+            arrayValue.forEach((item: any, index: number) => {
+              field.arrayItemFields?.forEach(itemField => {
+                  if (itemField.required) {
+                    const itemValue = item[itemField.id];
+                    if (!validateNonEmpty(itemValue)) {
+                      additionalErrors.push(`Please enter at least one character for: ${field.label}[${index + 1}].${itemField.label}`);
+                    }
+                  }
+              });
+            });
+          }
+        }
+      });
+    });
+    
+    if (additionalErrors.length > 0) {
+      message.error(`Please fix the following errors: ${additionalErrors.join(', ')}`);
+      return;
+    }
+    
+    // Only submit if validation passes (at least one non-whitespace character)
     onSubmit(values);
   };
 

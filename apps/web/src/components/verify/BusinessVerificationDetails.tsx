@@ -212,11 +212,35 @@ export const BusinessVerificationDetails: React.FC<
             
             // Initialize form data from existing verification data
             // Extract the actual form data from verificationData.verificationData
-            const formData = verificationData?.verificationData || verificationData || {};
+            const rawFormData = verificationData?.verificationData || verificationData || {};
+            
+            // Clean empty strings from form data
+            const cleanEmptyStrings = (obj: any): any => {
+              if (typeof obj === 'string') {
+                return obj.trim() === '' ? undefined : obj;
+              }
+              if (Array.isArray(obj)) {
+                return obj.map(cleanEmptyStrings);
+              }
+              if (typeof obj === 'object' && obj !== null) {
+                const cleaned: any = {};
+                for (const key in obj) {
+                  const cleanedValue = cleanEmptyStrings(obj[key]);
+                  if (cleanedValue !== undefined) {
+                    cleaned[key] = cleanedValue;
+                  }
+                }
+                return cleaned;
+              }
+              return obj;
+            };
+            
+            const formData = cleanEmptyStrings(rawFormData);
+            
             setDynamicFormData(formData);
             
             console.log('✓ PD dynamic schema loaded successfully:', schema.name);
-            console.log('✓ Form data initialized');
+            console.log('✓ Form data initialized:', formData);
           } else {
             console.log(`Bank "${bankName}" does not have PD forms configured`);
             setUseNewApproach(false);
@@ -259,9 +283,65 @@ export const BusinessVerificationDetails: React.FC<
     setEditModalVisible(true);
   };
 
+  // Helper function to validate non-empty strings
+  const validateNonEmpty = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      // Check if string has at least one non-whitespace character
+      return value.trim().length > 0;
+    }
+    if (typeof value === 'number') {
+      return !isNaN(value);
+    }
+    return true; // For other types, consider them valid
+  };
+
+  // Helper function to validate section data
+  const validateSectionData = (data: any, sectionSchema: any): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (!sectionSchema || !sectionSchema.fields) {
+      return { isValid: true, errors: [] };
+    }
+    
+    sectionSchema.fields.forEach((field: any) => {
+      const value = data[field.id];
+      
+      // Check if value is whitespace-only (for both required and non-required fields)
+      if (typeof value === 'string' && value.trim() === '') {
+        errors.push(field.label);
+      }
+      
+      // Check array fields
+      if (field.type === 'array' && field.arrayItemFields) {
+        const arrayValue = data[field.id];
+        if (Array.isArray(arrayValue)) {
+          arrayValue.forEach((item: any, index: number) => {
+            field.arrayItemFields?.forEach((itemField: any) => {
+              const itemValue = item[itemField.id];
+              if (typeof itemValue === 'string' && itemValue.trim() === '') {
+                errors.push(`${field.label}[${index + 1}].${itemField.label}`);
+              }
+            });
+          });
+        }
+      }
+    });
+    
+    return { isValid: errors.length === 0, errors };
+  };
+
   // Save dynamic section edits to IndexedDB
   const handleSaveDynamicEdit = async (sectionId: string, data: any) => {
     return new Promise<void>((resolve, reject) => {
+      // Validate data before saving
+      const validation = validateSectionData(data, currentSectionSchema);
+      if (!validation.isValid) {
+        message.error(validation.errors.join(', '));
+        reject(new Error('Validation failed'));
+        return;
+      }
+      
       const request = indexedDB.open("editLogs", 1);
 
       request.onerror = () => {
