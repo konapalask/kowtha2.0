@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Input, Button, Row, Col, Popconfirm } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { shouldDisableBankNameField } from "@/utils/loanCompletionChecker";
 
 const BankAccountRow: React.FC<{
   field: any;

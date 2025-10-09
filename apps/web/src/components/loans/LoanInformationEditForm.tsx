@@ -18,6 +18,7 @@ import {
   loanTypeOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
+import { isMobileVerificationCompleted } from "@/utils/loanCompletionChecker";
 // import { useWatch } from "antd/es/form/Form";
 interface LoanInfoFormProps {
   form: any;
@@ -44,6 +45,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   // console.log(form.getFieldsValue());
 
   const loanType = Form.useWatch("loanType", form);
+  
+  // Check if mobile verification is completed to disable bank name field
+  const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
 
   return (
     <div>
@@ -286,6 +290,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
+                disabled={isVerificationCompleted}
               />
             </Form.Item>
           </Col>
