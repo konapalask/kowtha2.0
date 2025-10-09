@@ -73,12 +73,12 @@ const getInitialDataByBank = (
   if (bankNameLower.includes('axis bank')) {
     return {
       applicantDetails: {
-        applicationNo: commonData.applicationNo,
         applicationId:
           userData?.loan?.applicationId || commonData.applicationNo,
-        loanAmount: commonData.loanAmount,
+        loanAmount: `${commonData.loanAmount}`,
         customerName: commonData.applicantName,
         contactNumber: commonData.contactNumber,
+        pdAddress: commonData.initiatedAddress,
       },
       businessPlaceVintage: {
         nameOfFirm: commonData.nameOfConcern,
@@ -165,6 +165,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
+  console.log('schemaForm', schemaForm);
 
   const formConfig = schemaForm || getFormConfigByBank(bankName);
 
@@ -620,7 +621,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       </View>
                     );
                   })
-                : formConfig.sections.map((section: any) => {
+                : formConfig?.sections?.map((section: any) => {
+                    console.log(formConfig);
                     const SectionComponent = section.component;
                     const isExpanded = expandedSections[section.id] || false;
 
