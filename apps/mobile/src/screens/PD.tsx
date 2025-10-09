@@ -18,7 +18,7 @@ import {
 } from '../components/pd-forms/bankFormConfigs';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
-import {clearItem} from '../helpers/utility';
+import {clearItem, getItem} from '../helpers/utility';
 import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
@@ -29,7 +29,11 @@ import PhotoCapture from '../components/forms/PhotoCapture';
 import GetLocation from 'react-native-get-location';
 
 // Function to get initial data based on bank name
-const getInitialDataByBank = (bankName: string, userData: any) => {
+const getInitialDataByBank = (
+  bankName: string,
+  userData: any,
+  loggedInUserName?: string,
+) => {
   if (!userData || !bankName) return {};
 
   const bankNameLower = bankName.toLowerCase();
@@ -51,7 +55,7 @@ const getInitialDataByBank = (bankName: string, userData: any) => {
       userData?.loan?.applicantMobile || userData?.contactNumber || '',
   };
 
-  // console.log('commonData', commonData);
+  console.log('commonData', commonData);
 
   // Bank-specific mappings
   if (bankNameLower.includes('axis finance ubl')) {
@@ -106,8 +110,20 @@ const getInitialDataByBank = (bankName: string, userData: any) => {
       },
       proposedLoanDetails: {
         product: userData?.loan?.product || '',
-        amount: commonData.loanAmount,
-        bankName: userData?.loan?.bankName || '',
+        amount: `${commonData.loanAmount}`,
+        tenure: userData?.loan?.tenure || '',
+        repaymentFrom: {
+          bankName: userData?.loan?.bankName || '',
+          typeSAAccount: userData?.loan?.accountType || '',
+          accountNo: userData?.loan?.accountNo || '',
+        },
+      },
+      officeAddress: {
+        address: commonData.initiatedAddress,
+      },
+      finalStatus: {
+        phoneNoOfApplicant: commonData.phoneNo,
+        pdDoneBy: loggedInUserName || '',
       },
     };
   }
@@ -166,17 +182,53 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [expandedSections, setExpandedSections] = useState<any>({
     investigable: true,
   });
+  const [loggedInUserName, setLoggedInUserName] = useState<string>('');
   // const [formData, setFormData] = useState<any>({});
-  const initialData = getInitialDataByBank(bankName, userData);
+  const initialData = getInitialDataByBank(
+    bankName,
+    userData,
+    loggedInUserName,
+  );
+  console.log('initialData', initialData);
   const [sectionData, setSectionData] = useState<any>(initialData);
-  // console.log('sectionData', sectionData);
+  console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
 
   // useLayoutEffect(() => {
   //   loadFormData();
   // }, []);
+
+  // Fetch logged-in user details
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getItem('userDetails');
+        if (userDetails?.name) {
+          setLoggedInUserName(userDetails.name);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
+  }, []);
+
+  // Update sectionData when loggedInUserName is fetched
+  useEffect(() => {
+    if (loggedInUserName && bankName) {
+      const updatedInitialData = getInitialDataByBank(
+        bankName,
+        userData,
+        loggedInUserName,
+      );
+      setSectionData((prev: any) => ({
+        ...prev,
+        ...updatedInitialData,
+      }));
+    }
+  }, [loggedInUserName, bankName, userData]);
 
   useEffect(() => {
     loadFormData();
@@ -213,6 +265,14 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
             };
           }
 
+          // Tata UBL - latitudeLongitude in finalStatus section
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: coordinates,
+            };
+          }
+
           return updates;
         });
       })
@@ -239,10 +299,18 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
             };
           }
 
+          // Tata UBL
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: 'Location not available',
+            };
+          }
+
           return updates;
         });
       });
-  }, []);
+  }, [bankName]);
 
   useEffect(() => {
     // Load schema based on bank name
