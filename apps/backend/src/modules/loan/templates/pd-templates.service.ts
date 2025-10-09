@@ -74,7 +74,7 @@ export class PDTemplateService {
             return axisFinanceUBLTemplate(verificationData, html_data);
         }
 
-        if (bankName == 'Tata Ubl') {
+        if (bankName == 'Rbl') {
           // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
           let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
 
