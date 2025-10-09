@@ -96,12 +96,12 @@ export interface RBLInterface {
     purchaseDetails: string;
   };
 
-  ownContributions: {
-    ownContributions: {
-      remarks: string;
-      particulars: string;
-    }[];
-  };
+  // ownContributions: {
+  //   ownContributions: {
+  //     remarks: string;
+  //     particulars: string;
+  //   }[];
+  // };
 
   businessOwnerDetails: {
     businessOwnerDetails: {
@@ -121,14 +121,11 @@ export interface RBLInterface {
     }[];
   };
 
-  tradeReferencesCustomers: {
+  tradeReferences: {
     customers: {
       contactDetails: string;
       nameOfCustomer: string;
     }[];
-  };
-
-  tradeReferencesSuppliers: {
     suppliers: {
       contactDetails: string;
       nameOfSuppliers: string;

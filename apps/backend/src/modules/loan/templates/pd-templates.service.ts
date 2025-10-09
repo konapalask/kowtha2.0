@@ -12,6 +12,8 @@ import { axisFinanceUBLTemplate } from './PD/axis-finance-ubl.template';
 import { LoggingService } from 'src/modules/common/logging/logging.service';
 import { AxisFinanceUBLInterface } from './PD/interface/axis-finance-ubl.interface';
 import { mapAxisUBL } from './PD/mappers/axis-finance-ubl.mapper';
+import { RBLInterface } from './PD/interface/rbl.interface';
+import { rblTemplate } from './PD/rbl.template';
 
 @Injectable()
 export class PDTemplateService {
@@ -34,7 +36,7 @@ export class PDTemplateService {
             
         if (bankName == 'Axis Bank') {
             // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
-            let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
+            let verificationData = loan.verificationData as AxisFinanceUBLInterface
 
             const status = verification?.approvedStatus || '';
 
@@ -75,9 +77,10 @@ export class PDTemplateService {
         }
 
         if (bankName == 'Rbl') {
+          
           // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
-          let verificationData: AxisFinanceUBLInterface = mapAxisUBL(verification);
-
+          let verificationData = verification as RBLInterface
+          
           const status = verification?.approvedStatus || '';
 
           const uploadedItems = verificationData?.uploadedItems || [];
@@ -113,7 +116,8 @@ export class PDTemplateService {
               imagesData: imagesData,
               fieldExecutive: fieldExecutive,
             }
-          return axisFinanceUBLTemplate(verificationData, html_data);
+            console.log(verificationData);
+          return rblTemplate(verificationData, html_data);
       }
     }
  

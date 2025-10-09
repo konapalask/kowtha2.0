@@ -92,7 +92,6 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
     </div>
 
     <div class="align-wrapper">
-    <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -107,6 +106,7 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
         </tr>
       </table>
     </div>
+    <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -211,6 +211,7 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
         </tr>
       </table>
     </div>
+    <div style="page-break-before: always;"></div>
 
 
     <div class="align-wrapper">
@@ -252,7 +253,6 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
       </table>
     </div>
 
-    <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -262,8 +262,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferencesSuppliers.suppliers) && verificationData.tradeReferencesSuppliers.suppliers.length > 0
-          ? verificationData.tradeReferencesSuppliers.suppliers.map(supplier => `
+        ${Array.isArray(verificationData.tradeReferences.suppliers) && verificationData.tradeReferences.suppliers.length > 0
+          ? verificationData.tradeReferences.suppliers.map(supplier => `
             <tr>
               <td><span class="var-value">${supplier.nameOfSuppliers || ''}</span></td>
               <td><span class="var-value">${supplier.contactDetails || ''}</span></td>
@@ -281,8 +281,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferencesCustomers.customers) && verificationData.tradeReferencesCustomers.customers.length > 0
-          ? verificationData.tradeReferencesCustomers.customers.map(customer => `
+        ${Array.isArray(verificationData.tradeReferences.customers) && verificationData.tradeReferences.customers.length > 0
+          ? verificationData.tradeReferences.customers.map(customer => `
             <tr>
               <td><span class="var-value">${customer.nameOfCustomer || ''}</span></td>
               <td><span class="var-value">${customer.contactDetails || ''}</span></td>
@@ -370,27 +370,6 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
         </tr>
     </div>
 
-    <div style="page-break-before: always;"></div>
-    
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Own Contribution</td></tr>
-        <tr>
-          <th>Particulars</th>
-          <th>Remarks</th>
-        </tr>
-        </tr>
-        ${Array.isArray(verificationData.ownContributions.ownContributions) && verificationData.ownContributions.ownContributions.length > 0
-          ? verificationData.ownContributions.ownContributions.map(customer => `
-            <tr>
-              <td><span class="var-value">${customer.particulars || ''}</span></td>
-              <td><span class="var-value">${customer.remarks || ''}</span></td>
-            </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'}
-      </table>
-    </div>
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -417,9 +396,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
     <div class="align-wrapper">
       <table class="section-table">
-        <tr><td colspan="6" class="section-header">Particulars</td></tr>
         <tr>
-          <th>Market for Output</th>
+          <th>Particulars</th>
           <td colspan="5"><span class="var-value">${verificationData.particulars.coordinates || ''}</span></td>
         </tr>
       </table>
@@ -434,3 +412,22 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
     </footer>
   `
 }
+
+// <div class="align-wrapper">
+// <table class="section-table">
+//   <tr><td colspan="7" class="section-header">Own Contribution</td></tr>
+//   <tr>
+//     <th>Particulars</th>
+//     <th>Remarks</th>
+//   </tr>
+//   </tr>
+//   ${Array.isArray(verificationData.ownContributions.ownContributions) && verificationData.ownContributions.ownContributions.length > 0
+//     ? verificationData.ownContributions.ownContributions.map(customer => `
+//       <tr>
+//         <td><span class="var-value">${customer.particulars || ''}</span></td>
+//         <td><span class="var-value">${customer.remarks || ''}</span></td>
+//       </tr>
+//     `).join('')
+//     : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'}
+// </table>
+// </div>
