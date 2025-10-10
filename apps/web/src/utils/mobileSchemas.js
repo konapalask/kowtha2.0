@@ -1,7 +1,7 @@
 export const formSchema = [
   {
     id: 1,
-    bankName: 'Axis Finance UBL Above 10L',
+    bankName: 'Axis Finance UBL Above 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -217,43 +217,43 @@ export const formSchema = [
         },
         required: true,
       },
-      {
-        id: 'documentsObserved',
-        label: 'Documents Observed',
-        schema: {
-          type: 'object',
-          properties: {
-            documentsObserved: {
-              type: 'array',
-              title: 'Documents Observed',
-              required: true,
-              items: {
-                type: 'object',
-                properties: {
-                  documentCategory: {
-                    type: 'string',
-                    title: 'Document Category',
-                    required: true,
-                  },
-                  documentName: {
-                    type: 'string',
-                    title: 'Document Name',
-                    required: true,
-                  },
-                  documentType: {
-                    type: 'string',
-                    title: 'Document Type',
-                    enum: ['PAN Card'],
-                    required: true,
-                  },
-                  remarks: {type: 'string', title: 'Remarks', required: true},
-                },
-              },
-            },
-          },
-        },
-        required: true,
-      },
+      // {
+      //   id: 'documentsObserved',
+      //   label: 'Documents Observed',
+      //   schema: {
+      //     type: 'object',
+      //     properties: {
+      //       documentsObserved: {
+      //         type: 'array',
+      //         title: 'Documents Observed',
+      //         required: true,
+      //         items: {
+      //           type: 'object',
+      //           properties: {
+      //             documentCategory: {
+      //               type: 'string',
+      //               title: 'Document Category',
+      //               required: true,
+      //             },
+      //             documentName: {
+      //               type: 'string',
+      //               title: 'Document Name',
+      //               required: true,
+      //             },
+      //             documentType: {
+      //               type: 'string',
+      //               title: 'Document Type',
+      //               enum: ['PAN Card'],
+      //               required: true,
+      //             },
+      //             remarks: {type: 'string', title: 'Remarks', required: true},
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      //   required: true,
+      // },
       {
         id: 'suppliersCreditors',
         label: 'Suppliers/Creditors',
@@ -613,6 +613,61 @@ export const formSchema = [
       //     required: true,
       //   },
       {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         schema: {
@@ -679,7 +734,7 @@ export const formSchema = [
   },
   {
     id: 2,
-    bankName: 'Axis Finance UBL Below 10L',
+    bankName: 'Axis Finance UBL Below 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -895,6 +950,61 @@ export const formSchema = [
         },
         required: true,
       },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
     ],
   },
   {
@@ -916,6 +1026,7 @@ export const formSchema = [
             pdDate: {
               type: 'string',
               title: 'PD Date',
+              format: 'date',
               required: true,
             },
             product: {
@@ -1332,6 +1443,61 @@ export const formSchema = [
         },
         required: true,
       },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
     ],
   },
   {
@@ -1389,9 +1555,10 @@ export const formSchema = [
               title: 'Residential Address',
               required: true,
             },
-            dateTimeOfVisit: {
+            dateOfVisit: {
               type: 'string',
-              title: 'Date & Time of Visit',
+              title: 'Date of Visit',
+              format: 'date',
               required: true,
             },
             personMet: {
@@ -1399,9 +1566,14 @@ export const formSchema = [
               title: 'Person Met',
               required: true,
             },
-            amountAndPurposeOfLoan: {
+            loanAmount: {
               type: 'string',
-              title: 'Amount and Purpose of Loan',
+              title: 'Loan Amount',
+              readOnly: true,
+            },
+            purposeOfLoan: {
+              type: 'string',
+              title: 'Purpose of Loan',
               readOnly: true,
               required: true,
             },
@@ -1422,6 +1594,356 @@ export const formSchema = [
             },
           },
           required: ['applicationNo', 'nameOfApplicant', 'nameOfConcern'],
+        },
+        required: true,
+      },
+      {
+        id: 'familyMembers',
+        label: 'Family Members',
+        schema: {
+          type: 'object',
+          properties: {
+            familyMembers: {
+              type: 'array',
+              title: 'Family Members',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    title: 'Name',
+                    required: true,
+                  },
+                  relationship: {
+                    type: 'string',
+                    title: 'Relationship',
+                    required: true,
+                  },
+                  age: {
+                    type: 'integer',
+                    title: 'Age',
+                    required: true,
+                  },
+                  education: {
+                    type: 'string',
+                    title: 'Education',
+                    required: true,
+                  },
+                  occupation: {
+                    type: 'string',
+                    title: 'Occupation',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'bankingDetails',
+        label: 'Banking Details',
+        schema: {
+          type: 'object',
+          properties: {
+            bankingDetails: {
+              type: 'array',
+              title: 'Banking Details',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank Name',
+                    required: true,
+                  },
+                  accountType: {
+                    type: 'string',
+                    title: 'Account Type',
+                    required: true,
+                  },
+                  averageBalance: {
+                    type: 'integer',
+                    title: 'Average Balance',
+                    required: true,
+                  },
+                  noOfYearsMaintained: {
+                    type: 'integer',
+                    title: 'No. of Years Maintained',
+                    required: true,
+                  },
+                },
+              },
+            },
+            licMutualFunds: {
+              type: 'string',
+              title: 'LIC / Mutual Funds',
+              required: true,
+            },
+            assets: {
+              type: 'string',
+              title: 'Assets',
+              required: true,
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'existingLoans',
+        label: 'Existing Loans',
+        schema: {
+          type: 'object',
+          properties: {
+            existingLoans: {
+              type: 'array',
+              title: 'Existing Loans',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  bank: {
+                    type: 'string',
+                    title: 'Bank',
+                    required: true,
+                  },
+                  type: {
+                    type: 'string',
+                    title: 'Type',
+                    required: true,
+                  },
+                  loanAmount: {
+                    type: 'number',
+                    title: 'Loan Amount',
+                    required: true,
+                  },
+                  emi: {
+                    type: 'number',
+                    title: 'EMI',
+                    required: true,
+                  },
+                  openClose: {
+                    type: 'string',
+                    title: 'Open/Close',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'businessDetails',
+        label: 'Business Details',
+        schema: {
+          type: 'object',
+          properties: {
+            businessDetails: {
+              type: 'array',
+              title: 'Business Details',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  businessDetails: {
+                    type: 'string',
+                    title: 'Business Details',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'regularCustomers',
+        label: 'Regular Customers',
+        schema: {
+          type: 'object',
+          properties: {
+            regularCustomers: {
+              type: 'array',
+              title: 'Regular Customers',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  nameOfRegularCustomers: {
+                    type: 'string',
+                    title: 'Name of Regular Customers',
+                    required: true,
+                  },
+                  contactNumberOfRegularCustomers: {
+                    type: 'integer',
+                    title: 'Contact Number of Regular Customers',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'regularSuppliers',
+        label: 'Regular Suppliers',
+        schema: {
+          type: 'object',
+          properties: {
+            regularSuppliers: {
+              type: 'array',
+              title: 'Regular Suppliers',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  nameOfRegularSuppliers: {
+                    type: 'string',
+                    title: 'Name of Regular Suppliers',
+                    required: true,
+                  },
+                  contactNumberOfRegularSuppliers: {
+                    type: 'integer',
+                    title: 'Contact Number of Regular Suppliers',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'financialDetails',
+        label: 'Financial Details',
+        schema: {
+          type: 'object',
+          properties: {
+            monthlyGrossReceipts: {
+              type: 'integer',
+              title: 'Monthly Gross Receipts',
+              required: true,
+            },
+            monthlyExpenses: {
+              type: 'string',
+              title: 'Monthly Expenses',
+              required: true,
+            },
+            netProfit: {
+              type: 'string',
+              title: 'Net Profit',
+              required: true,
+            },
+            netMargin: {
+              type: 'string',
+              title: 'Net Margin',
+              required: true,
+            },
+            majorExpenses: {
+              type: 'string',
+              title: 'Major Expenses',
+              required: true,
+            },
+            monthlyHouseholdExpenses: {
+              type: 'string',
+              title: 'Monthly Household Expenses',
+              required: true,
+            },
+            employees: {
+              type: 'string',
+              title: 'Employees',
+              required: true,
+            },
+            numberOfEmployees: {
+              type: 'string',
+              title: 'Number of Employees',
+              required: true,
+            },
+            otherIncomes: {
+              type: 'string',
+              title: 'Other Incomes',
+              required: true,
+            },
+            concerns: {
+              type: 'string',
+              title: 'Concerns',
+              required: true,
+            },
+            otherObservation: {
+              type: 'string',
+              title: 'Other Observation',
+              required: true,
+            },
+            neighborCheck: {
+              type: 'string',
+              title: 'Neighbor Check',
+              required: true,
+            },
+          },
         },
         required: true,
       },
@@ -2011,6 +2533,61 @@ export const formSchema = [
         required: true,
       },
       {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
         id: 'finalStatus',
         label: 'Final Status',
         schema: {
@@ -2246,10 +2823,6 @@ export const formSchema = [
             margins: {
               type: 'string',
               title: 'Margins',
-            },
-            documentsObserved: {
-              type: 'string',
-              title: 'Documents Observed',
             },
             activityObserved: {
               type: 'string',
@@ -2551,6 +3124,61 @@ export const formSchema = [
                   yearsOfOwnership: {
                     type: 'integer',
                     title: 'Years of ownership',
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
                   },
                 },
               },
