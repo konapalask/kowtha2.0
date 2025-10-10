@@ -103,12 +103,23 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
       const isEmpty = !validateNonEmpty(value);
       const isEmptyString = typeof value === 'string' && value.trim() === '';
       
+      // Safely convert value to string to prevent React rendering errors
+      const displayValue = (() => {
+        if (isEmpty || isEmptyString) {
+          return field.required ? 'Please fill the required field' : '-';
+        }
+        if (typeof value === 'object' && value !== null) {
+          return JSON.stringify(value);
+        }
+        return String(value || '-');
+      })();
+      
       return (
         <Text 
           type={(isEmpty || isEmptyString) && field.required ? "danger" : "secondary"} 
           style={{ fontSize: '14px', padding: '4px 0' }}
         >
-          {(isEmpty || isEmptyString) && field.required ? 'Please fill the required field' : (value || '-')}
+          {displayValue}
         </Text>
       );
     }
@@ -415,7 +426,9 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                     {(isEmpty || isEmptyString) && field.required ? (
                       <Text type="danger">Please fill the required field</Text>
                     ) : (
-                      value || <Text type="secondary">-</Text>
+                      typeof value === 'object' && value !== null 
+                        ? <Text type="secondary">{JSON.stringify(value)}</Text>
+                        : value || <Text type="secondary">-</Text>
                     )}
                   </Descriptions.Item>
                 );

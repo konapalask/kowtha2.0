@@ -785,7 +785,11 @@ export const BusinessVerificationDetails: React.FC<
       {currentDepartment === 'PD' && (verificationData?.bankName || verificationData?.loan?.bankName) && (
         <section style={{ margin: '6px 0 12px', textAlign: 'center' }}>
           <Text style={{ color: '#1e40af', fontWeight: 600 }}>
-            {verificationData?.bankName || verificationData?.loan?.bankName}
+            {typeof verificationData?.bankName === 'string' 
+              ? verificationData.bankName 
+              : typeof verificationData?.loan?.bankName === 'string'
+                ? verificationData.loan.bankName
+                : 'Unknown Bank'}
           </Text>
         </section>
       )}
