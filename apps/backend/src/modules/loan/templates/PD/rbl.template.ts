@@ -16,6 +16,14 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
   const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
 
+
+  const date = new Date();
+  const timeZone = 'Asia/Kolkata';
+  const zonedDate = toZonedTime(date, timeZone);
+
+  const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+
+
   return `
     ${pdBaseTemplate()}
 
@@ -262,8 +270,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferences.suppliers) && verificationData.tradeReferences.suppliers.length > 0
-          ? verificationData.tradeReferences.suppliers.map(supplier => `
+        ${Array.isArray(verificationData.tradeReferencesSuppliers.suppliers) && verificationData.tradeReferencesSuppliers.suppliers.length > 0
+          ? verificationData.tradeReferencesSuppliers.suppliers.map(supplier => `
             <tr>
               <td><span class="var-value">${supplier.nameOfSuppliers || ''}</span></td>
               <td><span class="var-value">${supplier.contactDetails || ''}</span></td>
@@ -281,8 +289,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferences.customers) && verificationData.tradeReferences.customers.length > 0
-          ? verificationData.tradeReferences.customers.map(customer => `
+        ${Array.isArray(verificationData.tradeReferencesCustomers.customers) && verificationData.tradeReferencesCustomers.customers.length > 0
+          ? verificationData.tradeReferencesCustomers.customers.map(customer => `
             <tr>
               <td><span class="var-value">${customer.nameOfCustomer || ''}</span></td>
               <td><span class="var-value">${customer.contactDetails || ''}</span></td>
@@ -364,12 +372,16 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           `).join('')
           : '<tr><td colspan="7" style="text-align: center;">No applicants main banking details available</td></tr>'}
         </table>
+    </div>
+    
+    <div class="align-wrapper">
+      <table class="section-table">
         <tr>
           <th>End Use</th>
           <td colspan="6"><span class="var-value">${verificationData.applicantsMainBankingDetails.endUse || ''}</span></td>
         </tr>
+      </table>
     </div>
-
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -403,14 +415,36 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
       </table>
     </div>
 
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
+        <tr>
+          <th>Remarks</th>
+          <td colspan="5">
+            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+              ${html_data.path || ''}
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <th>Final Recommendation</th>
+          <td colspan="5">
+            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+              ${finalRecommendationHtml}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
     <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${"Bank of India"}</span><br>
-      Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
+      Generated on ${istDate}
     </footer>
-  `
+    ${html_data.imagesData}
+  `;
 }
 
 // <div class="align-wrapper">
