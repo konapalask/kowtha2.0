@@ -236,7 +236,7 @@ export default function Loans() {
         dataIndex: "applicationNumber",
         key: "applicationNumber",
         fixed: "left",
-        width: 180,
+        width: 150,
         // align: "center",
       },
       {
@@ -250,6 +250,12 @@ export default function Loans() {
         dataIndex: "applicantMobile",
         key: "applicantMobile",
         width: 100,
+      },
+      {
+        title: "Bank Name",
+        dataIndex: "bankName",
+        key: "bankName",
+        width: 120,
       },
       {
         title: "Status",

@@ -380,6 +380,7 @@ const Feedback: React.FC<FeedbackProps> = ({
               >
                 <Radio value="positive">Positive</Radio>
                 <Radio value="negative">Negative</Radio>
+                <Radio value="credit_refer">Credit Refer</Radio>
               </Radio.Group>
               
               {/* Template Selection Dropdown */}
