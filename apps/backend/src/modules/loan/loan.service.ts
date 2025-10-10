@@ -33,7 +33,9 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { baseTemplate } from './templates/FI/base.template';
 import { Worker } from 'worker_threads';
 import { AxisFinanceUBLInterface } from './templates/PD/interface/axis-finance-ubl.interface';
+import pLimit from 'p-limit';
 
+const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
 export class LoanService {
@@ -1003,13 +1005,14 @@ export class LoanService {
       if (verificationData?.uploadedItems) {
         await Promise.all(
           verificationData.uploadedItems.map((item: any) =>
-            this.runWorker({
+            limit(() => this.runWorker({
               s3ImageUrl: item.s3ImageUrl,
               latitude: parseFloat(item.latitude),
               longitude: parseFloat(item.longitude),
               timestamp: item.timestamp
             })
           )
+        )
         );
       }
 

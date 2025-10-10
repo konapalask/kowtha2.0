@@ -63,8 +63,8 @@ export async function loadMobilePDFormsSchema(
 
     try {
       const response = await getPDSchema(bankName);
-      // const schema = await response.data;
-      const schema = getFormConfigByBank(bankName);
+      const schema = await response.data;
+      // const schema = getFormConfigByBank(bankName);
       cachedSchema[bankName] = schema;
       return schema;
     } catch (fetchError) {
