@@ -121,11 +121,14 @@ export interface RBLInterface {
     }[];
   };
 
-  tradeReferences: {
+  tradeReferencesCustomers: {
     customers: {
       contactDetails: string;
       nameOfCustomer: string;
     }[];
+  };
+
+  tradeReferencesSuppliers: {
     suppliers: {
       contactDetails: string;
       nameOfSuppliers: string;

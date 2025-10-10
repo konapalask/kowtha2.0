@@ -262,8 +262,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferences.suppliers) && verificationData.tradeReferences.suppliers.length > 0
-          ? verificationData.tradeReferences.suppliers.map(supplier => `
+        ${Array.isArray(verificationData.tradeReferencesSuppliers.suppliers) && verificationData.tradeReferencesSuppliers.suppliers.length > 0
+          ? verificationData.tradeReferencesSuppliers.suppliers.map(supplier => `
             <tr>
               <td><span class="var-value">${supplier.nameOfSuppliers || ''}</span></td>
               <td><span class="var-value">${supplier.contactDetails || ''}</span></td>
@@ -281,8 +281,8 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferences.customers) && verificationData.tradeReferences.customers.length > 0
-          ? verificationData.tradeReferences.customers.map(customer => `
+        ${Array.isArray(verificationData.tradeReferencesCustomers.customers) && verificationData.tradeReferencesCustomers.customers.length > 0
+          ? verificationData.tradeReferencesCustomers.customers.map(customer => `
             <tr>
               <td><span class="var-value">${customer.nameOfCustomer || ''}</span></td>
               <td><span class="var-value">${customer.contactDetails || ''}</span></td>
