@@ -24,7 +24,7 @@ import {getImageUploadPresignedUrl} from '../../services/field.services';
 import Icons from 'react-native-vector-icons/AntDesign';
 import compress from 'react-native-compressor';
 
-const MAX_UPLOADS = 20;
+const DEFAULT_MAX_UPLOADS = 20;
 
 interface ExtendedUploadedItem extends UploadedItem {
   isOverlayNeeded?: boolean;
@@ -34,12 +34,14 @@ type PhotoCaptureProps = {
   onUploadedItemsChange: (items: UploadedItem[]) => void;
   initialItems?: UploadedItem[];
   loanId: string;
+  maxUploads?: number;
 };
 
 const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   onUploadedItemsChange,
   initialItems = [],
   loanId,
+  maxUploads = DEFAULT_MAX_UPLOADS,
 }) => {
   const [uploadedItems, setUploadedItems] =
     useState<ExtendedUploadedItem[]>(initialItems);
@@ -230,10 +232,10 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   // Update handleCapture to use array API
   const handleCapture = async () => {
     try {
-      if (uploadedItems.length >= MAX_UPLOADS) {
+      if (uploadedItems.length >= maxUploads) {
         Alert.alert(
           'Upload Limit Reached',
-          `You can only upload up to ${MAX_UPLOADS} photos. Please remove some photos before adding more.`,
+          `You can only upload up to ${maxUploads} photos. Please remove some photos before adding more.`,
         );
         return;
       }
@@ -369,10 +371,10 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   // Update handleGallery to allow multiple selection and use array API
   const handleGallery = async () => {
     try {
-      if (uploadedItems.length >= MAX_UPLOADS) {
+      if (uploadedItems.length >= maxUploads) {
         Alert.alert(
           'Upload Limit Reached',
-          `You can only upload up to ${MAX_UPLOADS} photos. Please remove some photos before adding more.`,
+          `You can only upload up to ${maxUploads} photos. Please remove some photos before adding more.`,
         );
         return;
       }
@@ -419,7 +421,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
-        selectionLimit: MAX_UPLOADS - uploadedItems.length, // allow as many as possible
+        selectionLimit: maxUploads - uploadedItems.length, // allow as many as possible
         // presentationStyle: 'fullScreen',
       });
 
@@ -451,11 +453,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         <TouchableOpacity
           style={[
             styles.button,
-            (isUploading || uploadedItems.length >= MAX_UPLOADS) &&
+            (isUploading || uploadedItems.length >= maxUploads) &&
               styles.buttonDisabled,
           ]}
           onPress={handleCapture}
-          disabled={isUploading || uploadedItems.length >= MAX_UPLOADS}>
+          disabled={isUploading || uploadedItems.length >= maxUploads}>
           <Text style={styles.buttonText}>
             {isUploading ? (
               'Uploading...'
@@ -471,11 +473,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         <TouchableOpacity
           style={[
             styles.button,
-            (isUploading || uploadedItems.length >= MAX_UPLOADS) &&
+            (isUploading || uploadedItems.length >= maxUploads) &&
               styles.buttonDisabled,
           ]}
           onPress={handleGallery}
-          disabled={isUploading || uploadedItems.length >= MAX_UPLOADS}>
+          disabled={isUploading || uploadedItems.length >= maxUploads}>
           <Text style={styles.buttonText}>
             {isUploading ? (
               'Uploading...'
@@ -492,7 +494,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
       {uploadedItems.length > 0 && (
         <Text style={styles.uploadCount}>
-          {uploadedItems.length}/{MAX_UPLOADS} photos uploaded
+          {uploadedItems.length}/{maxUploads} photos uploaded
         </Text>
       )}
 

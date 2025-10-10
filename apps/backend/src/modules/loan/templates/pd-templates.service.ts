@@ -128,12 +128,11 @@ export class PDTemplateService {
           }
     
           const verification = loan.verifications[0];
-    
+          
           const bankName = loan.bankName;
           
           const verificationData: any = verification.verificationData;
           
-          // Generate HTML template using the appropriate template function
           const htmlTemplate = await this.InterfaceMapping(bankName, verificationData, loan, verification.synopsis, verification.financialAnalysis);
     
           const pdfBuffer = await this.loanService.PDFBufferGeneration(htmlTemplate);

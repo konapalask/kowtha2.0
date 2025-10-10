@@ -1,7 +1,7 @@
 export const formSchema = [
   {
     id: 1,
-    bankName: 'Axis Finance UBL Above 10L',
+    bankName: 'Axis Finance UBL Above 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -217,43 +217,43 @@ export const formSchema = [
         },
         required: true,
       },
-      {
-        id: 'documentsObserved',
-        label: 'Documents Observed',
-        schema: {
-          type: 'object',
-          properties: {
-            documentsObserved: {
-              type: 'array',
-              title: 'Documents Observed',
-              required: true,
-              items: {
-                type: 'object',
-                properties: {
-                  documentCategory: {
-                    type: 'string',
-                    title: 'Document Category',
-                    required: true,
-                  },
-                  documentName: {
-                    type: 'string',
-                    title: 'Document Name',
-                    required: true,
-                  },
-                  documentType: {
-                    type: 'string',
-                    title: 'Document Type',
-                    enum: ['PAN Card'],
-                    required: true,
-                  },
-                  remarks: {type: 'string', title: 'Remarks', required: true},
-                },
-              },
-            },
-          },
-        },
-        required: true,
-      },
+      // {
+      //   id: 'documentsObserved',
+      //   label: 'Documents Observed',
+      //   schema: {
+      //     type: 'object',
+      //     properties: {
+      //       documentsObserved: {
+      //         type: 'array',
+      //         title: 'Documents Observed',
+      //         required: true,
+      //         items: {
+      //           type: 'object',
+      //           properties: {
+      //             documentCategory: {
+      //               type: 'string',
+      //               title: 'Document Category',
+      //               required: true,
+      //             },
+      //             documentName: {
+      //               type: 'string',
+      //               title: 'Document Name',
+      //               required: true,
+      //             },
+      //             documentType: {
+      //               type: 'string',
+      //               title: 'Document Type',
+      //               enum: ['PAN Card'],
+      //               required: true,
+      //             },
+      //             remarks: {type: 'string', title: 'Remarks', required: true},
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      //   required: true,
+      // },
       {
         id: 'suppliersCreditors',
         label: 'Suppliers/Creditors',
@@ -613,6 +613,61 @@ export const formSchema = [
       //     required: true,
       //   },
       {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         schema: {
@@ -679,7 +734,7 @@ export const formSchema = [
   },
   {
     id: 2,
-    bankName: 'Axis Finance UBL Below 10L',
+    bankName: 'Axis Finance UBL Below 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -890,6 +945,61 @@ export const formSchema = [
               type: 'string',
               title: 'Business Synopsis',
               required: true,
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
             },
           },
         },
@@ -1333,6 +1443,61 @@ export const formSchema = [
         },
         required: true,
       },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
     ],
   },
   {
@@ -1390,9 +1555,10 @@ export const formSchema = [
               title: 'Residential Address',
               required: true,
             },
-            dateTimeOfVisit: {
+            dateOfVisit: {
               type: 'string',
-              title: 'Date & Time of Visit',
+              title: 'Date of Visit',
+              format: 'date',
               required: true,
             },
             personMet: {
@@ -1400,9 +1566,14 @@ export const formSchema = [
               title: 'Person Met',
               required: true,
             },
-            amountAndPurposeOfLoan: {
+            loanAmount: {
               type: 'string',
-              title: 'Amount and Purpose of Loan',
+              title: 'Loan Amount',
+              readOnly: true,
+            },
+            purposeOfLoan: {
+              type: 'string',
+              title: 'Purpose of Loan',
               readOnly: true,
               required: true,
             },
@@ -1489,18 +1660,13 @@ export const formSchema = [
                     title: 'Bank Name',
                     required: true,
                   },
-                  account: {
+                  accountType: {
                     type: 'string',
-                    title: 'Account',
-                    required: true,
-                  },
-                  type: {
-                    type: 'string',
-                    title: 'Type',
+                    title: 'Account Type',
                     required: true,
                   },
                   averageBalance: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Average Balance',
                     required: true,
                   },
@@ -1615,7 +1781,7 @@ export const formSchema = [
                     required: true,
                   },
                   contactNumberOfRegularCustomers: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Contact Number of Regular Customers',
                     required: true,
                   },
@@ -1645,7 +1811,7 @@ export const formSchema = [
                     required: true,
                   },
                   contactNumberOfRegularSuppliers: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Contact Number of Regular Suppliers',
                     required: true,
                   },
@@ -1718,7 +1884,7 @@ export const formSchema = [
           type: 'object',
           properties: {
             monthlyGrossReceipts: {
-              type: 'string',
+              type: 'integer',
               title: 'Monthly Gross Receipts',
               required: true,
             },
@@ -2367,6 +2533,61 @@ export const formSchema = [
         required: true,
       },
       {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
         id: 'finalStatus',
         label: 'Final Status',
         schema: {
@@ -2602,10 +2823,6 @@ export const formSchema = [
             margins: {
               type: 'string',
               title: 'Margins',
-            },
-            documentsObserved: {
-              type: 'string',
-              title: 'Documents Observed',
             },
             activityObserved: {
               type: 'string',
@@ -2907,6 +3124,61 @@ export const formSchema = [
                   yearsOfOwnership: {
                     type: 'integer',
                     title: 'Years of ownership',
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
                   },
                 },
               },
