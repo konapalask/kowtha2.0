@@ -25,6 +25,7 @@ interface JsonSchemaProperty {
   pattern?: string;
   items?: JsonSchemaProperty;
   properties?: Record<string, JsonSchemaProperty>;
+  format?: string;
 }
 
 interface JsonSchema {
@@ -135,10 +136,11 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 const subFieldValue = formData[fieldId]?.[subFieldId];
 
                 // Handle date fields in nested objects
-                const isDateField = subProperty.title
-                  .toLowerCase()
-                  .includes('date');
+                const isDateField =
+                  // subProperty.title.toLowerCase().includes('date') &&
+                  subProperty?.format === 'date';
                 if (isDateField) {
+                  console.log('subProperty', subProperty);
                   return (
                     <View key={subFieldKey}>
                       {renderDateField(
@@ -262,9 +264,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                     const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
 
                     // Handle date fields in arrays
-                    const isDateField = subProperty.title
-                      .toLowerCase()
-                      .includes('date');
+                    const isDateField = subProperty.format === 'date';
                     if (isDateField) {
                       return (
                         <View key={subFieldKey}>
@@ -399,10 +399,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               key: fieldId,
               title: property.title,
               required: isRequired,
-              options: [
-                {key: true, title: 'Yes'},
-                {key: false, title: 'No'},
-              ],
+              options: [{key: true, title: 'Yes'}],
               layout: 'row',
               defaultValue: formData[fieldId] ?? false,
             }}
@@ -411,7 +408,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
       case 'string':
         // Check if it should be a date field
-        const isDateField = property.title.toLowerCase().includes('date');
+        const isDateField = property.format === 'date';
         if (isDateField) {
           return renderDateField(
             fieldId,

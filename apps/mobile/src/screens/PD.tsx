@@ -55,7 +55,7 @@ const getInitialDataByBank = (
       userData?.loan?.applicantMobile || userData?.contactNumber || '',
   };
 
-  console.log('commonData', commonData);
+  // console.log('commonData', commonData);
 
   // Bank-specific mappings
   if (bankNameLower.includes('axis finance ubl')) {
@@ -165,7 +165,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
-  console.log('schemaForm', schemaForm);
+  // console.log('schemaForm', schemaForm);
 
   const formConfig = schemaForm || getFormConfigByBank(bankName);
 
@@ -190,9 +190,9 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     userData,
     loggedInUserName,
   );
-  console.log('initialData', initialData);
+  // console.log('initialData', initialData);
   const [sectionData, setSectionData] = useState<any>(initialData);
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
@@ -622,7 +622,6 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                     );
                   })
                 : formConfig?.sections?.map((section: any) => {
-                    console.log(formConfig);
                     const SectionComponent = section.component;
                     const isExpanded = expandedSections[section.id] || false;
 
