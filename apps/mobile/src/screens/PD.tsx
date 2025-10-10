@@ -135,7 +135,6 @@ const getInitialDataByBank = (
         referenceNumber: commonData.applicationNo,
         nameOfApplicant: commonData.applicantName,
         addressVisited: commonData.initiatedAddress,
-        personMet: commonData.applicantName,
         contactNo: commonData.phoneNo,
       },
       businessDetails: {
