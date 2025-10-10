@@ -152,6 +152,7 @@ export const pdBankOptions = [
   { value: "Aditya Birla", label: "Aditya Birla" },
   { value: "Ambit", label: "Ambit" },
   { value: "Axis ubl below 10 lakhs", label: "Axis ubl below 10 lakhs" },
+  { value: "Axis ubl above 10 lakhs", label: "Axis ubl above 10 lakhs" },
   { value: "Niwas Self employed", label: "Niwas Self employed" },
   { value: "Incred", label: "Incred" },
   { value: "Niwas salaried", label: "Niwas salaried" },
