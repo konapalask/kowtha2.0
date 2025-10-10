@@ -94,9 +94,8 @@ const getInitialDataByBank = (
         phoneNumber: commonData.phoneNo,
         nameOfConcern: commonData.nameOfConcern,
         initiatedAddress: commonData.initiatedAddress,
-        amountAndPurposeOfLoan: userData?.loan?.purpose
-          ? `${commonData.loanAmount} - ${userData.loan.purpose}`
-          : commonData.loanAmount,
+        loanAmount: `${commonData.loanAmount}`,
+        purposeOfLoan: userData?.loan?.loanType || '',
       },
     };
   }
@@ -190,12 +189,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     userData,
     loggedInUserName,
   );
-  // console.log('initialData', initialData);
+  console.log('initialData', initialData);
   const [sectionData, setSectionData] = useState<any>(initialData);
-  // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
+
+  // Log sectionData whenever it changes
+  useEffect(() => {
+    console.log('sectionData updated:', sectionData);
+  }, [sectionData]);
 
   // useLayoutEffect(() => {
   //   loadFormData();
@@ -216,23 +219,70 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     fetchUserDetails();
   }, []);
 
-  // Update sectionData when loggedInUserName is fetched
+  // Consolidated effect to update sectionData with all sources
   useEffect(() => {
-    if (loggedInUserName && bankName) {
-      const updatedInitialData = getInitialDataByBank(
+    const updateSectionData = async () => {
+      // Start with initial data
+      let updatedData = getInitialDataByBank(
         bankName,
         userData,
         loggedInUserName,
       );
-      setSectionData((prev: any) => ({
-        ...prev,
-        ...updatedInitialData,
-      }));
+
+      // Load saved data from AsyncStorage
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          console.log('parsedData', parsedData);
+          updatedData = {
+            ...updatedData,
+            ...parsedData,
+          };
+        }
+      } catch (error) {
+        console.error('Error loading form data:', error);
+      }
+
+      // Update state once with all data, but preserve existing sectionData to avoid overwriting form changes
+      setSectionData((prevSectionData: any) => {
+        // Only update if this is the initial load or if the bank/user has changed
+        // This prevents overwriting form changes when sections are toggled
+        if (
+          Object.keys(prevSectionData).length === 0 ||
+          prevSectionData._lastBankName !== bankName ||
+          prevSectionData._lastUserName !== loggedInUserName
+        ) {
+          return {
+            ...updatedData,
+            _lastBankName: bankName,
+            _lastUserName: loggedInUserName,
+          };
+        }
+        return prevSectionData;
+      });
+    };
+
+    if (bankName) {
+      updateSectionData();
     }
   }, [loggedInUserName, bankName, userData]);
 
-  useEffect(() => {
-    loadFormData();
+  // Load uploaded items and investigable separately
+  useLayoutEffect(() => {
+    const loadAdditionalData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setUploadedItems(parsedData.uploadedItems || []);
+          setInvestigable(parsedData.investigable ?? null);
+        }
+      } catch (error) {
+        console.error('Error loading additional data:', error);
+      }
+    };
+    loadAdditionalData();
   }, [bankName]);
 
   // Fetch current coordinates on component mount
@@ -339,25 +389,6 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // useEffect(() => {
   //   setFormData(watchedValues);
   // }, []);
-
-  const loadFormData = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        // console.log('parsedData', parsedData);
-        // setFormData(parsedData);
-        setSectionData((prev: any) => ({
-          ...prev,
-          ...parsedData,
-        }));
-        setUploadedItems(parsedData.uploadedItems || []);
-        setInvestigable(parsedData.investigable ?? null);
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
-    }
-  };
 
   const saveFormData = useCallback(
     async (data: any) => {

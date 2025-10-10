@@ -246,9 +246,51 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     // Handle array fields (like familyDetails) - keeping custom implementation for now
     // as lib doesn't have a repeater component
     if (property.type === 'array' && property.items) {
-      const arrayData = Array.isArray(formData[fieldId])
-        ? formData[fieldId]
-        : [];
+      // Use live watch to reflect updates immediately in UI
+      const watchedArray = watch(fieldId as any);
+      const arrayData = Array.isArray(watchedArray) ? watchedArray : [];
+
+      const handleAddItem = () => {
+        const currentData = getValues();
+        const currentArray = Array.isArray(currentData[fieldId])
+          ? currentData[fieldId]
+          : [];
+        const newArrayData = [...currentArray, {}];
+        setValue(fieldId, newArrayData, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        // Persist immediately so toggling sections does not revert
+        onSubmit(getValues());
+      };
+
+      const handleRemoveItem = (indexToRemove: number) => {
+        const currentData = getValues();
+        const currentArray = Array.isArray(currentData[fieldId])
+          ? currentData[fieldId]
+          : [];
+        const newArrayData = currentArray.filter(
+          (_: any, i: number) => i !== indexToRemove,
+        );
+
+        // Clear all field values for the removed item to prevent stale data
+        if (property.items?.properties) {
+          Object.keys(property.items.properties).forEach(subFieldId => {
+            const subFieldKey = `${fieldId}[${indexToRemove}].${subFieldId}`;
+            setValue(subFieldKey as any, undefined, {shouldDirty: true});
+          });
+        }
+
+        setValue(fieldId, newArrayData, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        // Persist immediately so toggling sections does not revert
+        onSubmit(getValues());
+      };
+
       return (
         <View style={styles.repeaterContainer}>
           <Text style={styles.repeaterLabel}>
@@ -256,7 +298,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             {isRequired ? ' *' : ''}
           </Text>
           {arrayData.map((item: any, index: number) => (
-            <View key={index} style={styles.repeaterItem}>
+            <View key={`${fieldId}-${index}`} style={styles.repeaterItem}>
               <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
               {property.items?.properties &&
                 Object.entries(property.items.properties).map(
@@ -345,22 +387,12 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 )}
               <TouchableOpacity
                 style={styles.removeButton}
-                onPress={() => {
-                  const newArrayData = arrayData.filter(
-                    (_: any, i: number) => i !== index,
-                  );
-                  setValue(fieldId, newArrayData);
-                }}>
+                onPress={() => handleRemoveItem(index)}>
                 <Text style={styles.removeButtonText}>Remove</Text>
               </TouchableOpacity>
             </View>
           ))}
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              const newArrayData = [...arrayData, {}];
-              setValue(fieldId, newArrayData);
-            }}>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
             <Text style={styles.addButtonText}>+ Add</Text>
           </TouchableOpacity>
         </View>

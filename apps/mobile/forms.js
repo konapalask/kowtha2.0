@@ -1,7 +1,7 @@
 export const formSchema = [
   {
     id: 1,
-    bankName: 'Axis Finance UBL Above 10L',
+    bankName: 'Axis Finance UBL Above 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -679,7 +679,7 @@ export const formSchema = [
   },
   {
     id: 2,
-    bankName: 'Axis Finance UBL Below 10L',
+    bankName: 'Axis Finance UBL Below 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -1390,9 +1390,10 @@ export const formSchema = [
               title: 'Residential Address',
               required: true,
             },
-            dateTimeOfVisit: {
+            dateOfVisit: {
               type: 'string',
-              title: 'Date & Time of Visit',
+              title: 'Date of Visit',
+              format: 'date',
               required: true,
             },
             personMet: {
@@ -1400,9 +1401,14 @@ export const formSchema = [
               title: 'Person Met',
               required: true,
             },
-            amountAndPurposeOfLoan: {
+            loanAmount: {
               type: 'string',
-              title: 'Amount and Purpose of Loan',
+              title: 'Loan Amount',
+              readOnly: true,
+            },
+            purposeOfLoan: {
+              type: 'string',
+              title: 'Purpose of Loan',
               readOnly: true,
               required: true,
             },
@@ -1489,18 +1495,13 @@ export const formSchema = [
                     title: 'Bank Name',
                     required: true,
                   },
-                  account: {
+                  accountType: {
                     type: 'string',
-                    title: 'Account',
-                    required: true,
-                  },
-                  type: {
-                    type: 'string',
-                    title: 'Type',
+                    title: 'Account Type',
                     required: true,
                   },
                   averageBalance: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Average Balance',
                     required: true,
                   },
@@ -1615,7 +1616,7 @@ export const formSchema = [
                     required: true,
                   },
                   contactNumberOfRegularCustomers: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Contact Number of Regular Customers',
                     required: true,
                   },
@@ -1645,7 +1646,7 @@ export const formSchema = [
                     required: true,
                   },
                   contactNumberOfRegularSuppliers: {
-                    type: 'string',
+                    type: 'integer',
                     title: 'Contact Number of Regular Suppliers',
                     required: true,
                   },
@@ -1718,7 +1719,7 @@ export const formSchema = [
           type: 'object',
           properties: {
             monthlyGrossReceipts: {
-              type: 'string',
+              type: 'integer',
               title: 'Monthly Gross Receipts',
               required: true,
             },
