@@ -18,7 +18,7 @@ import {
 } from '../components/pd-forms/bankFormConfigs';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
-import {clearItem} from '../helpers/utility';
+import {clearItem, getItem} from '../helpers/utility';
 import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
@@ -26,6 +26,134 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import SchemaSection from '../components/pd-forms/SchemaSection';
 import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
+import GetLocation from 'react-native-get-location';
+
+// Function to get initial data based on bank name
+const getInitialDataByBank = (
+  bankName: string,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!userData || !bankName) return {};
+
+  const bankNameLower = bankName.toLowerCase();
+
+  // console.log('userData', userData);
+
+  // Common data mapping
+  const commonData = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    nameOfConcern: userData?.businessName || userData?.loan?.businessName || '',
+    initiatedAddress:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNo:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    contactNumber:
+      userData?.loan?.applicantMobile || userData?.contactNumber || '',
+  };
+
+  console.log('commonData', commonData);
+
+  // Bank-specific mappings
+  if (bankNameLower.includes('axis finance ubl')) {
+    return {
+      basicDetails: {
+        applicationNo: commonData.applicationNo,
+        applicantName: commonData.applicantName,
+        concernName: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        phoneNo: commonData.phoneNo,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('axis bank')) {
+    return {
+      applicantDetails: {
+        applicationNo: commonData.applicationNo,
+        applicationId:
+          userData?.loan?.applicationId || commonData.applicationNo,
+        loanAmount: commonData.loanAmount,
+        customerName: commonData.applicantName,
+        contactNumber: commonData.contactNumber,
+      },
+      businessPlaceVintage: {
+        nameOfFirm: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('arka fincap')) {
+    return {
+      applicantDetails: {
+        applicationNo: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        phoneNumber: commonData.phoneNo,
+        nameOfConcern: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        amountAndPurposeOfLoan: userData?.loan?.purpose
+          ? `${commonData.loanAmount} - ${userData.loan.purpose}`
+          : commonData.loanAmount,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('tata ubl')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+        nameOfCoApplicants: userData?.coApplicantName || '',
+      },
+      proposedLoanDetails: {
+        product: userData?.loan?.product || '',
+        amount: `${commonData.loanAmount}`,
+        tenure: userData?.loan?.tenure || '',
+        repaymentFrom: {
+          bankName: userData?.loan?.bankName || '',
+          typeSAAccount: userData?.loan?.accountType || '',
+          accountNo: userData?.loan?.accountNo || '',
+        },
+      },
+      officeAddress: {
+        address: commonData.initiatedAddress,
+      },
+      finalStatus: {
+        phoneNoOfApplicant: commonData.phoneNo,
+        pdDoneBy: loggedInUserName || '',
+      },
+    };
+  }
+
+  if (bankNameLower.includes('rbl')) {
+    return {
+      caseDetails: {
+        referenceNumber: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        addressVisited: commonData.initiatedAddress,
+        personMet: commonData.applicantName,
+        contactNo: commonData.phoneNo,
+      },
+      businessDetails: {
+        businessName: commonData.nameOfConcern,
+        shopAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Default fallback for unknown banks
+  return {
+    basicDetails: {
+      applicantName: commonData.applicantName,
+      nameOfConcern: commonData.nameOfConcern,
+      initiatedAddress: commonData.initiatedAddress,
+      phoneNo: commonData.phoneNo,
+    },
+  };
+};
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -54,26 +182,134 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [expandedSections, setExpandedSections] = useState<any>({
     investigable: true,
   });
+  const [loggedInUserName, setLoggedInUserName] = useState<string>('');
   // const [formData, setFormData] = useState<any>({});
-  const [sectionData, setSectionData] = useState<any>({
-    basicDetails: {
-      applicantName: userData?.loan?.applicantName || '',
-      nameOfConcern: userData?.businessName || '',
-      initiatedAddress: userData?.applicantAddress || '',
-      phoneNo: userData?.loan?.applicantMobile || '',
-    },
-  });
-  // console.log('sectionData', sectionData);
+  const initialData = getInitialDataByBank(
+    bankName,
+    userData,
+    loggedInUserName,
+  );
+  console.log('initialData', initialData);
+  const [sectionData, setSectionData] = useState<any>(initialData);
+  console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
 
   // useLayoutEffect(() => {
   //   loadFormData();
   // }, []);
 
+  // Fetch logged-in user details
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getItem('userDetails');
+        if (userDetails?.name) {
+          setLoggedInUserName(userDetails.name);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
+  }, []);
+
+  // Update sectionData when loggedInUserName is fetched
+  useEffect(() => {
+    if (loggedInUserName && bankName) {
+      const updatedInitialData = getInitialDataByBank(
+        bankName,
+        userData,
+        loggedInUserName,
+      );
+      setSectionData((prev: any) => ({
+        ...prev,
+        ...updatedInitialData,
+      }));
+    }
+  }, [loggedInUserName, bankName, userData]);
+
   useEffect(() => {
     loadFormData();
+  }, [bankName]);
+
+  // Fetch current coordinates on component mount
+  useEffect(() => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+      .then(location => {
+        const {latitude, longitude} = location;
+        const coordinates = `${latitude},${longitude}`;
+
+        // Update section data with coordinates based on bank
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank - coordinates in particulars section
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: coordinates,
+            };
+          }
+
+          // Axis Finance UBL - siteCoordinates in thirdPartyCheck section
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: coordinates,
+            };
+          }
+
+          // Tata UBL - latitudeLongitude in finalStatus section
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: coordinates,
+            };
+          }
+
+          return updates;
+        });
+      })
+      .catch(error => {
+        console.error('Error getting location:', error);
+        // Set a fallback message if location is not available
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: 'Location not available',
+            };
+          }
+
+          // Axis Finance UBL
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: 'Location not available',
+            };
+          }
+
+          // Tata UBL
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: 'Location not available',
+            };
+          }
+
+          return updates;
+        });
+      });
   }, [bankName]);
 
   useEffect(() => {

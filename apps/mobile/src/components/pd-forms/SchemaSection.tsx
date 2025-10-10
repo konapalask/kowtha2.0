@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import dayjs from 'dayjs';
 import {InputFormItem} from '../../lib/InputFormItem';
 import {SelectFormItem} from '../../lib/SelectFormItem';
 import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
@@ -44,12 +46,23 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   initialData = {},
   onSubmit,
 }) => {
-  const {control, watch, setValue, getValues} = useForm({
+  const {control, watch, setValue, getValues, reset} = useForm({
     defaultValues: initialData,
     mode: 'onChange',
   });
 
   const isInitialMount = useRef(true);
+  const [datePickerState, setDatePickerState] = useState<{
+    visible: boolean;
+    fieldKey: string | null;
+  }>({visible: false, fieldKey: null});
+
+  // Update form values when initialData changes (e.g., from AsyncStorage or coordinates)
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      reset(initialData, {keepDirtyValues: true});
+    }
+  }, [initialData, reset]);
 
   // Use watch subscription to avoid infinite loops
   useEffect(() => {
@@ -64,9 +77,169 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
 
+  const showDatePicker = (fieldKey: string) => {
+    setDatePickerState({visible: true, fieldKey});
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerState({visible: false, fieldKey: null});
+  };
+
+  const handleDateConfirm = (date: Date) => {
+    if (datePickerState.fieldKey) {
+      const formattedDate = dayjs(date).format('DD-MM-YYYY');
+      setValue(datePickerState.fieldKey, formattedDate);
+    }
+    hideDatePicker();
+  };
+
+  const renderDateField = (
+    fieldKey: string,
+    title: string,
+    value: string,
+    isReadOnly: boolean = false,
+  ) => {
+    const displayValue = value || 'Select date';
+
+    return (
+      <View style={styles.dateFieldContainer}>
+        <Text style={styles.label}>{title}</Text>
+        <TouchableOpacity
+          style={[styles.dateField, isReadOnly && styles.disabledDateField]}
+          onPress={() => !isReadOnly && showDatePicker(fieldKey)}
+          disabled={isReadOnly}>
+          <Text style={[styles.dateText, !value && styles.placeholderText]}>
+            {displayValue}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const renderField = (fieldId: string, property: JsonSchemaProperty) => {
     const isRequired = schema.required?.includes(fieldId) ?? true;
     const formData = getValues();
+
+    // Handle nested object fields (like repaymentFrom)
+    if (property.type === 'object' && property.properties) {
+      return (
+        <View style={styles.nestedObjectContainer}>
+          <Text style={styles.nestedObjectLabel}>
+            {property.title}
+            {isRequired ? ' *' : ''}
+          </Text>
+          <View style={styles.nestedObjectContent}>
+            {Object.entries(property.properties).map(
+              ([subFieldId, subProperty]) => {
+                const subFieldKey = `${fieldId}.${subFieldId}`;
+                const subFieldValue = formData[fieldId]?.[subFieldId];
+
+                // Handle date fields in nested objects
+                const isDateField = subProperty.title
+                  .toLowerCase()
+                  .includes('date');
+                if (isDateField) {
+                  return (
+                    <View key={subFieldKey}>
+                      {renderDateField(
+                        subFieldKey,
+                        subProperty.title,
+                        subFieldValue,
+                        subProperty.readOnly,
+                      )}
+                    </View>
+                  );
+                }
+
+                // Handle enum in nested objects
+                if (subProperty.enum && subProperty.enum.length > 0) {
+                  const options = subProperty.enum.map(option => ({
+                    id: option,
+                    name: option,
+                  }));
+
+                  return (
+                    <SelectFormItem
+                      key={subFieldKey}
+                      data={{
+                        control,
+                        key: subFieldKey,
+                        title: subProperty.title,
+                        required: false,
+                        options,
+                        defaultValue: subFieldValue ?? '',
+                      }}
+                    />
+                  );
+                }
+
+                // Handle textarea in nested objects
+                const isTextArea =
+                  subProperty.title.toLowerCase().includes('about') ||
+                  subProperty.title.toLowerCase().includes('address') ||
+                  subProperty.title.toLowerCase().includes('description') ||
+                  subProperty.title.toLowerCase().includes('remark') ||
+                  subProperty.title.toLowerCase().includes('details');
+
+                if (isTextArea) {
+                  return (
+                    <TextAreaFormItem
+                      key={subFieldKey}
+                      data={{
+                        control,
+                        key: subFieldKey,
+                        title: subProperty.title,
+                        required: false,
+                        disabled: subProperty.readOnly,
+                        defaultValue: subFieldValue ?? '',
+                      }}
+                    />
+                  );
+                }
+
+                // Handle number/integer in nested objects
+                if (
+                  subProperty.type === 'number' ||
+                  subProperty.type === 'integer'
+                ) {
+                  return (
+                    <InputFormItem
+                      key={subFieldKey}
+                      data={{
+                        control,
+                        key: subFieldKey,
+                        title: subProperty.title,
+                        required: false,
+                        disabled: subProperty.readOnly,
+                        defaultValue: subFieldValue?.toString() ?? '',
+                        placeholder: subProperty.title,
+                        keyboardType: 'numeric',
+                      }}
+                    />
+                  );
+                }
+
+                // Default to InputFormItem for nested objects
+                return (
+                  <InputFormItem
+                    key={subFieldKey}
+                    data={{
+                      control,
+                      key: subFieldKey,
+                      title: subProperty.title,
+                      required: false,
+                      disabled: subProperty.readOnly,
+                      defaultValue: subFieldValue ?? '',
+                      placeholder: subProperty.title,
+                    }}
+                  />
+                );
+              },
+            )}
+          </View>
+        </View>
+      );
+    }
 
     // Handle array fields (like familyDetails) - keeping custom implementation for now
     // as lib doesn't have a repeater component
@@ -87,10 +260,52 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 Object.entries(property.items.properties).map(
                   ([subFieldId, subProperty]) => {
                     const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+
+                    // Handle date fields in arrays
+                    const isDateField = subProperty.title
+                      .toLowerCase()
+                      .includes('date');
+                    if (isDateField) {
+                      return (
+                        <View key={subFieldKey}>
+                          {renderDateField(
+                            subFieldKey,
+                            subProperty.title,
+                            item?.[subFieldId],
+                            subProperty.readOnly,
+                          )}
+                        </View>
+                      );
+                    }
+
+                    // Handle enum fields (select dropdown) in arrays
+                    if (subProperty.enum && subProperty.enum.length > 0) {
+                      const options = subProperty.enum.map(option => ({
+                        id: option,
+                        name: option,
+                      }));
+
+                      return (
+                        <SelectFormItem
+                          key={subFieldKey}
+                          data={{
+                            control,
+                            key: subFieldKey,
+                            title: subProperty.title,
+                            required: false,
+                            options,
+                            defaultValue: item?.[subFieldId] ?? '',
+                          }}
+                        />
+                      );
+                    }
+
                     const isTextArea =
                       subProperty.title.toLowerCase().includes('about') ||
                       subProperty.title.toLowerCase().includes('address') ||
-                      subProperty.title.toLowerCase().includes('description');
+                      subProperty.title.toLowerCase().includes('description') ||
+                      subProperty.title.toLowerCase().includes('remark') ||
+                      subProperty.title.toLowerCase().includes('details');
 
                     if (isTextArea) {
                       return (
@@ -195,12 +410,24 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         );
 
       case 'string':
+        // Check if it should be a date field
+        const isDateField = property.title.toLowerCase().includes('date');
+        if (isDateField) {
+          return renderDateField(
+            fieldId,
+            property.title,
+            formData[fieldId],
+            property.readOnly,
+          );
+        }
+
         // Check if it should be a textarea
         const isTextArea =
           property.title.toLowerCase().includes('about') ||
           property.title.toLowerCase().includes('address') ||
           property.title.toLowerCase().includes('description') ||
-          property.title.toLowerCase().includes('remark');
+          property.title.toLowerCase().includes('remark') ||
+          property.title.toLowerCase().includes('details');
 
         if (isTextArea) {
           return (
@@ -268,17 +495,69 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {Object.entries(schema.properties).map(([fieldId, property]) => (
-        <View key={fieldId}>{renderField(fieldId, property)}</View>
-      ))}
-    </ScrollView>
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {Object.entries(schema.properties).map(([fieldId, property]) => (
+          <View key={fieldId}>{renderField(fieldId, property)}</View>
+        ))}
+      </ScrollView>
+      <DateTimePickerModal
+        isVisible={datePickerState.visible}
+        mode="date"
+        onConfirm={handleDateConfirm}
+        onCancel={hideDatePicker}
+      />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     padding: 12,
+  },
+  dateFieldContainer: {
+    marginVertical: 8,
+  },
+  label: {
+    fontSize: 13,
+    color: '#333',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  dateField: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  disabledDateField: {
+    backgroundColor: '#f2f2f2',
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#000',
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  nestedObjectContainer: {
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+  },
+  nestedObjectLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  nestedObjectContent: {
+    gap: 8,
   },
   repeaterContainer: {
     marginVertical: 8,
