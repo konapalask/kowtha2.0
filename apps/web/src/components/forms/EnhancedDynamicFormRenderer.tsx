@@ -177,6 +177,9 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
         case 'array':
           return <DynamicArrayField field={field} sectionId={sectionId} readOnly={readOnly} />;
         
+        case 'object':
+          return <DynamicObjectField field={field} sectionId={sectionId} readOnly={readOnly} />;
+        
         default:
           return <Input {...commonProps} />;
       }
@@ -349,6 +352,96 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
             Add {field.label}
           </Button>
         )}
+      </div>
+    );
+  };
+
+  const DynamicObjectField: React.FC<{field: WebFieldDefinition, sectionId: string, readOnly: boolean}> = ({ 
+    field, 
+    sectionId, 
+    readOnly 
+  }) => {
+    const objectData = formData[sectionId]?.[field.id] || {};
+
+    // Update object data when formData changes (for initialData loading)
+    useEffect(() => {
+      const dataObject = formData[sectionId]?.[field.id];
+      if (dataObject && typeof dataObject === 'object') {
+        // Form will handle the updates automatically
+      }
+    }, [formData, sectionId, field.id]);
+
+    const renderObjectField = (objectField: WebFieldDefinition) => {
+      const fieldValue = objectData[objectField.id];
+      const isFieldReadOnly = readOnly || objectField.readOnly;
+
+      const commonProps = {
+        disabled: isFieldReadOnly,
+        placeholder: objectField.placeholder || objectField.label,
+      };
+
+      const renderObjectFieldInput = () => {
+        switch (objectField.type) {
+          case 'text':
+            return <Input {...commonProps} />;
+          
+          case 'select':
+            return (
+              <Select 
+                {...commonProps} 
+                options={objectField.options?.map(opt => ({ label: opt, value: opt }))} 
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            );
+          
+          case 'date':
+            return <DatePicker {...commonProps} style={{ width: '100%' }} />;
+          
+          case 'number':
+            return <InputNumber {...commonProps} style={{ width: '100%' }} />;
+          
+          case 'textarea':
+            return <TextArea {...commonProps} rows={4} />;
+          
+          case 'boolean':
+            return <Switch {...commonProps} />;
+          
+          default:
+            return <Input {...commonProps} />;
+        }
+      };
+
+      return (
+        <Form.Item
+          key={objectField.id}
+          name={[sectionId, field.id, objectField.id]}
+          label={objectField.label}
+          rules={objectField.required ? [
+            {
+              validator: (_, value) => {
+                if (!value || (typeof value === 'string' && value.trim() === '')) {
+                  return Promise.reject(new Error(`Please enter at least one character for: ${objectField.label}`));
+                }
+                return Promise.resolve();
+              }
+            }
+          ] : []}
+          style={{ marginBottom: 16 }}
+        >
+          {renderObjectFieldInput()}
+        </Form.Item>
+      );
+    };
+
+    return (
+      <div style={{ border: '1px solid #d9d9d9', borderRadius: 6, padding: 16, backgroundColor: '#fafafa' }}>
+        <Text strong style={{ marginBottom: 16, display: 'block' }}>
+          {field.label}
+        </Text>
+        {field.objectFields?.map(objectField => renderObjectField(objectField))}
       </div>
     );
   };

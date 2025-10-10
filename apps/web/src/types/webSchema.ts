@@ -1,7 +1,7 @@
 export interface WebFieldDefinition {
   id: string;
   label: string;
-  type: 'text' | 'select' | 'date' | 'number' | 'textarea' | 'array' | 'boolean';
+  type: 'text' | 'select' | 'date' | 'number' | 'textarea' | 'array' | 'boolean' | 'object';
   required?: boolean;
   options?: string[]; // for select fields
   validation?: {
@@ -13,7 +13,8 @@ export interface WebFieldDefinition {
   };
   readOnly?: boolean;
   placeholder?: string;
-  arrayItemFields?: WebFieldDefinition[]; 
+  arrayItemFields?: WebFieldDefinition[];
+  objectFields?: WebFieldDefinition[]; // for object type fields
 }
 
 export interface WebArrayItemDefinition {

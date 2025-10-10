@@ -205,6 +205,36 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
     );
   };
 
+  const renderObjectField = (field: WebFieldDefinition) => {
+    return (
+      <Card title={field.label} size="small" style={{ marginBottom: 16 }}>
+        <Row gutter={[16, 16]}>
+          {field.objectFields?.map((objectField) => (
+            <Col span={objectField.type === 'textarea' ? 24 : 12} key={objectField.id}>
+              <Form.Item
+                name={[field.id, objectField.id]}
+                label={objectField.label}
+                rules={objectField.required ? [
+                  { required: true, message: `${objectField.label} is required` },
+                  {
+                    validator: (_: any, value: any) => {
+                      if (!validateNonEmpty(value)) {
+                        return Promise.reject(new Error(`Please enter at least one character for: ${objectField.label}`));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ] : []}
+              >
+                {renderFieldInput(objectField)}
+              </Form.Item>
+            </Col>
+          ))}
+        </Row>
+      </Card>
+    );
+  };
+
   const renderFieldInput = (field: WebFieldDefinition) => {
     const isReadOnly = field.readOnly;
     
@@ -252,6 +282,9 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
       case 'array':
         return null; // Arrays are handled by renderArrayField
       
+      case 'object':
+        return null; // Objects are handled by renderObjectField
+      
       default:
         return (
           <Input 
@@ -275,6 +308,14 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
       return (
         <Col span={24} key={field.id}>
           {renderArrayField(field)}
+        </Col>
+      );
+    }
+
+    if (field.type === 'object') {
+      return (
+        <Col span={24} key={field.id}>
+          {renderObjectField(field)}
         </Col>
       );
     }

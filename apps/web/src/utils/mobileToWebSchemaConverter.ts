@@ -45,6 +45,28 @@ export function convertMobileSchemaToWeb(mobileSchema: any): WebFormDefinition {
         field.arrayItemFields = arrayItemFields;
       }
 
+      // Extract object fields for object type
+      if (prop.type === 'object' && prop.properties) {
+        const objectFields: WebFieldDefinition[] = [];
+        const objectProperties = prop.properties;
+        const objectRequired = prop.required || [];
+        
+        Object.keys(objectProperties).forEach((objectKey) => {
+          const objectProp = objectProperties[objectKey];
+          objectFields.push({
+            id: objectKey,
+            label: objectProp.title || objectKey,
+            type: getWebFieldType(objectProp),
+            required: objectRequired.includes(objectKey),
+            readOnly: objectProp.readOnly || false,
+            placeholder: objectProp.title || objectKey,
+            options: objectProp.enum || undefined,
+          });
+        });
+        
+        field.objectFields = objectFields;
+      }
+
       // Add validation rules
       if (prop.pattern) {
         field.validation = { pattern: prop.pattern };
@@ -92,6 +114,7 @@ function getWebFieldType(prop: any): WebFieldDefinition['type'] {
   if (prop.type === 'integer' || prop.type === 'number') return 'number';
   if (prop.type === 'boolean') return 'boolean';
   if (prop.type === 'array') return 'array';
+  if (prop.type === 'object') return 'object';
   if (prop.format === 'date' || prop.type === 'date') return 'date';
   return 'text';
 }
