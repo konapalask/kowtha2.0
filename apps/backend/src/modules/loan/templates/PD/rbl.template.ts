@@ -11,18 +11,16 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
   const recommendationStyles: Record<string, string> = {
     Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
     Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    credit_refer: '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
+    CreditRefer: '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
   };
 
   const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
-
 
   const date = new Date();
   const timeZone = 'Asia/Kolkata';
   const zonedDate = toZonedTime(date, timeZone);
 
   const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
-
 
   return `
     ${pdBaseTemplate()}
