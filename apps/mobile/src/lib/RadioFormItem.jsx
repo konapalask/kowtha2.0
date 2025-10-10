@@ -14,7 +14,14 @@ const CustomRadioGroup = ({options, value, onChange, layout = 'row'}) => (
         <TouchableOpacity
           key={idx}
           style={styles.optionContainer}
-          onPress={() => onChange(optionValue)}>
+          onPress={() => {
+            // If already selected, deselect it (set to null/undefined)
+            if (selected) {
+              onChange(null);
+            } else {
+              onChange(optionValue);
+            }
+          }}>
           <View
             style={[styles.radioCircle, selected && styles.radioCircleSelected]}
           />
