@@ -14,7 +14,7 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
     'CreditRefer': '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
   };
 
-  const finalRecommendationHtml = recommendationStyles['Positive'] || '';
+  const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
   
   const date = new Date();
   const timeZone = 'Asia/Kolkata';
@@ -576,12 +576,20 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Final Recommendation</th>
           <td colspan="5">
             <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              <li style="color: green; font-weight: bold;">POSITIVE</li>
+              ${finalRecommendationHtml}
             </ul>
           </td>
         </tr>
       </table>
     </div>
+    <br>
+    <br>
+    <br>
+    Disclaimer: 
+    <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+        The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions.
+    </ul>
+
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
