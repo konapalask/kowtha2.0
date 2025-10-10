@@ -9,13 +9,13 @@ import { pdBaseTemplate } from './pd-base.tempate';
 export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
   const recommendationStyles: Record<string, string> = {
-    Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-    Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    CreditRefer: '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
+    'Positive': '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+    'Negative': '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+    'CreditRefer': '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
   };
 
-  const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
-
+  const finalRecommendationHtml = recommendationStyles['Positive'] || '';
+  
   const date = new Date();
   const timeZone = 'Asia/Kolkata';
   const zonedDate = toZonedTime(date, timeZone);
@@ -576,7 +576,7 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
           <th>Final Recommendation</th>
           <td colspan="5">
             <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              ${finalRecommendationHtml}
+              <li style="color: green; font-weight: bold;">POSITIVE</li>
             </ul>
           </td>
         </tr>
