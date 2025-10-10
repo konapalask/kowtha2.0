@@ -1,6 +1,4 @@
 import * as RNFS from 'react-native-fs';
-// @ts-ignore - forms.js doesn't have TypeScript definitions
-import {formSchema, getFormConfigByBank} from '../../../../forms';
 import {getPDSchema} from '../../../services/field.services';
 
 export interface MobileFieldDefinition {
@@ -64,21 +62,10 @@ export async function loadMobilePDFormsSchema(
     try {
       const response = await getPDSchema(bankName);
       const schema = await response.data;
-      // const schema = getFormConfigByBank(bankName);
       cachedSchema[bankName] = schema;
       return schema;
     } catch (fetchError) {
       console.error('Failed to fetch schema from backend:', fetchError);
-
-      // Option 3: Fallback to local formSchema from forms.js
-      console.warn('Falling back to local formSchema for bank:', bankName);
-      const localForm = getFormConfigByBank(bankName);
-
-      if (localForm) {
-        cachedSchema[bankName] = localForm;
-        return localForm;
-      }
-
       return null;
     }
   }

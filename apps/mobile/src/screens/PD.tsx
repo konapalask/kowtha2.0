@@ -12,12 +12,6 @@ import {
 import {useForm} from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BackButton} from '../lib/BackButton';
-import {
-  getFormConfigByBank,
-  getAvailableBanks,
-  BankFormConfig,
-  BankFormSection,
-} from '../components/pd-forms/bankFormConfigs';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
 import {clearItem, getItem} from '../helpers/utility';
@@ -166,8 +160,6 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
   // console.log('schemaForm', schemaForm);
-
-  const formConfig = schemaForm || getFormConfigByBank(bankName);
 
   const {
     control,
@@ -472,7 +464,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const onSubmit = async (data: any) => {
     try {
-      if (!formConfig) {
+      if (!schemaForm) {
         Toast.show({
           type: 'error',
           text1: 'Error',
@@ -481,7 +473,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         return;
       }
 
-      const requiredSections = formConfig.sections.filter(
+      const requiredSections = schemaForm.sections.filter(
         (section: any) => section.required,
       );
       const missingRequiredSections = requiredSections.filter(
@@ -567,7 +559,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     });
   };
 
-  if (!formConfig) {
+  if (!schemaForm) {
     return (
       <View style={styles.container}>
         <BackButton
@@ -579,9 +571,6 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
             No form configuration found for bank: {bankName}
-          </Text>
-          <Text style={styles.availableBanksText}>
-            Available banks: {getAvailableBanks().join(', ')}
           </Text>
         </View>
       </View>
@@ -625,86 +614,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         {investigable && (
           <>
             <View style={styles.formContainer}>
-              {/* Schema-driven forms: if schemaForm is available, render from schema; else use existing config */}
-              {schemaForm?.sections?.length
-                ? schemaForm.sections.map((sec: any) => {
-                    const isExpanded = expandedSections[sec.id] || false;
-                    return (
-                      <View key={sec.id} style={styles.sectionContainer}>
-                        <TouchableOpacity
-                          style={styles.sectionHeader}
-                          onPress={() => toggleSection(sec.id)}>
-                          <Text style={styles.sectionTitle}>{sec.label}</Text>
-                          {isSectionValid(sec.id) && (
-                            <Icon name="check" size={18} color="#34C759" />
-                          )}
-                          <Text style={styles.sectionIndicator}>
-                            {isExpanded ? '▼' : '▶'}
-                          </Text>
-                        </TouchableOpacity>
-                        {isExpanded && (
-                          <View style={styles.sectionContent}>
-                            <SchemaSection
-                              title={sec.label}
-                              schema={sec.schema}
-                              initialData={sectionData[sec.id]}
-                              onSubmit={(data: any) =>
-                                handleSectionDataChange(sec.id, data)
-                              }
-                            />
-                          </View>
-                        )}
+              {schemaForm?.sections?.map((sec: any) => {
+                const isExpanded = expandedSections[sec.id] || false;
+                return (
+                  <View key={sec.id} style={styles.sectionContainer}>
+                    <TouchableOpacity
+                      style={styles.sectionHeader}
+                      onPress={() => toggleSection(sec.id)}>
+                      <Text style={styles.sectionTitle}>{sec.label}</Text>
+                      {isSectionValid(sec.id) && (
+                        <Icon name="check" size={18} color="#34C759" />
+                      )}
+                      <Text style={styles.sectionIndicator}>
+                        {isExpanded ? '▼' : '▶'}
+                      </Text>
+                    </TouchableOpacity>
+                    {isExpanded && (
+                      <View style={styles.sectionContent}>
+                        <SchemaSection
+                          title={sec.label}
+                          schema={sec.schema}
+                          initialData={sectionData[sec.id]}
+                          onSubmit={(data: any) =>
+                            handleSectionDataChange(sec.id, data)
+                          }
+                        />
                       </View>
-                    );
-                  })
-                : formConfig?.sections?.map((section: any) => {
-                    const SectionComponent = section.component;
-                    const isExpanded = expandedSections[section.id] || false;
-
-                    return (
-                      <View key={section.id} style={styles.sectionContainer}>
-                        <TouchableOpacity
-                          style={styles.sectionHeader}
-                          onPress={() => toggleSection(section.id)}>
-                          <Text style={styles.sectionTitle}>
-                            {section.label}
-                          </Text>
-                          {isSectionValid(section.id) && (
-                            // <View style={styles.validIndicator} />
-                            <Icon name="check" size={18} color="#34C759" />
-                          )}
-                          <Text style={styles.sectionIndicator}>
-                            {isExpanded ? '▼' : '▶'}
-                          </Text>
-                          {/* {isSectionValid(section.id) && (
-                        <View style={styles.validIndicator} />
-                      )} */}
-                        </TouchableOpacity>
-
-                        {isExpanded && (
-                          <View style={styles.sectionContent}>
-                            {section.id === 'photoCapture' ? (
-                              <SectionComponent
-                                onUploadedItemsChange={
-                                  handleUploadedItemsChange
-                                }
-                                initialItems={sectionData?.uploadedItems ?? []}
-                                loanId={item?.id || item?.verificationId}
-                                pd={true}
-                              />
-                            ) : (
-                              <SectionComponent
-                                onSubmit={(data: any) =>
-                                  handleSectionDataChange(section.id, data)
-                                }
-                                initialData={sectionData[section.id]}
-                              />
-                            )}
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
+                    )}
+                  </View>
+                );
+              })}
 
               {/* Photo Capture Section - Common for all forms */}
               <View style={styles.sectionContainer}>
