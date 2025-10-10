@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Button, Row, Col, Space, Card, message, Table } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Button, Row, Col, Space, Card, message, Table, Switch } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { WebSectionDefinition, WebFieldDefinition } from '@/types/webSchema';
 
@@ -51,7 +51,17 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
       for (const key in obj) {
         const cleanedValue = cleanWhitespaceValues(obj[key]);
         if (cleanedValue !== undefined) {
-          cleaned[key] = cleanedValue;
+          // Convert empty strings to false for boolean fields
+          if (cleanedValue === '' && sectionSchema?.fields) {
+            const field = sectionSchema.fields.find((f: any) => f.id === key);
+            if (field?.type === 'boolean') {
+              cleaned[key] = false;
+            } else {
+              cleaned[key] = cleanedValue;
+            }
+          } else {
+            cleaned[key] = cleanedValue;
+          }
         }
       }
       return cleaned;
@@ -278,6 +288,9 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
             }}
           />
         );
+      
+      case 'boolean':
+        return <Switch disabled={isReadOnly} />;
       
       case 'array':
         return null; // Arrays are handled by renderArrayField

@@ -521,7 +521,9 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                     ) : (
                       typeof value === 'object' && value !== null 
                         ? <Text type="secondary">{JSON.stringify(value)}</Text>
-                        : value || <Text type="secondary">-</Text>
+                        : typeof value === 'boolean' 
+                          ? <Text>{value ? 'Yes' : 'No'}</Text>
+                          : value || <Text type="secondary">-</Text>
                     )}
                   </Descriptions.Item>
                 );

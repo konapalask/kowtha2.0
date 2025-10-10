@@ -214,20 +214,30 @@ export const BusinessVerificationDetails: React.FC<
             // Extract the actual form data from verificationData.verificationData
             const rawFormData = verificationData?.verificationData || verificationData || {};
             
-            // Clean empty strings from form data
-            const cleanEmptyStrings = (obj: any): any => {
+            // Clean empty strings from form data and convert empty strings to false for boolean fields
+            const cleanEmptyStrings = (obj: any, schema?: any): any => {
               if (typeof obj === 'string') {
                 return obj.trim() === '' ? undefined : obj;
               }
               if (Array.isArray(obj)) {
-                return obj.map(cleanEmptyStrings);
+                return obj.map(item => cleanEmptyStrings(item, schema));
               }
               if (typeof obj === 'object' && obj !== null) {
                 const cleaned: any = {};
                 for (const key in obj) {
-                  const cleanedValue = cleanEmptyStrings(obj[key]);
+                  const cleanedValue = cleanEmptyStrings(obj[key], schema);
                   if (cleanedValue !== undefined) {
-                    cleaned[key] = cleanedValue;
+                    // Convert empty strings to false for boolean fields
+                    if (cleanedValue === '' && schema?.fields) {
+                      const field = schema.fields.find((f: any) => f.id === key);
+                      if (field?.type === 'boolean') {
+                        cleaned[key] = false;
+                      } else {
+                        cleaned[key] = cleanedValue;
+                      }
+                    } else {
+                      cleaned[key] = cleanedValue;
+                    }
                   }
                 }
                 return cleaned;
@@ -235,7 +245,7 @@ export const BusinessVerificationDetails: React.FC<
               return obj;
             };
             
-            const formData = cleanEmptyStrings(rawFormData);
+            const formData = cleanEmptyStrings(rawFormData, schema);
             
             setDynamicFormData(formData);
             

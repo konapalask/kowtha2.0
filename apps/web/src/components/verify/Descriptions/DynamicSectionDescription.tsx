@@ -29,6 +29,11 @@ const DynamicSectionDescription: React.FC<DynamicSectionDescriptionProps> = ({
       return <Text type="secondary">-</Text>;
     }
 
+    // Handle boolean values - show Yes/No instead of true/false
+    if (typeof value === 'boolean') {
+      return <Text>{value ? 'Yes' : 'No'}</Text>;
+    }
+
     if (Array.isArray(value)) {
       if (value.length === 0) {
         return <Text type="secondary">No items</Text>;

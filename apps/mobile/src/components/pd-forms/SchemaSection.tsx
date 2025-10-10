@@ -423,7 +423,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     // Handle different field types
     switch (property.type) {
       case 'boolean':
-        // Use RadioFormItem for boolean (Yes/No)
+        // Use RadioFormItem for boolean (Yes only)
         return (
           <RadioFormItem
             data={{

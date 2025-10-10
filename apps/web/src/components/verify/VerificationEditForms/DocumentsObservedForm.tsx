@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Button, Row, Col, Popconfirm } from "antd";
+import { Form, Input, Button, Row, Col, Popconfirm, Switch } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const DocumentRow: React.FC<{
