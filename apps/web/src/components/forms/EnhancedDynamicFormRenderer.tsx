@@ -425,7 +425,8 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
 
           {/* Array fields rendered as tables (FI style) */}
           {arrayFields.map(field => {
-            const arrayData = form.getFieldValue([section.id, field.id]) || [];
+            const rawData = form.getFieldValue([section.id, field.id]);
+            const arrayData = Array.isArray(rawData) ? rawData : [];
             
             // Build table columns from arrayItemFields
             const columns = field.arrayItemFields?.map((itemField: WebFieldDefinition) => ({
@@ -465,7 +466,11 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                   })()}
                 </div>
                 <Table
-                  dataSource={arrayData.filter((item: any) => item && Object.keys(item).length > 0)}
+                  dataSource={arrayData.filter((item: any) => 
+                    item && 
+                    typeof item === 'object' && 
+                    Object.keys(item).length > 0
+                  )}
                   columns={columns}
                   pagination={false}
                   bordered
