@@ -1,63 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Select, Button, Space, Typography, Row, Col } from 'antd';
-import { EnhancedDynamicFormRenderer } from '@/components/forms/EnhancedDynamicFormRenderer';
-import { getMobileSchemaByBank, getAllMobileBanks } from '@/utils/mobileSchemaLoader';
-import { WebFormDefinition, WebFormData } from '@/types/webSchema';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  Select,
+  Button,
+  Space,
+  Typography,
+  Row,
+  Col,
+  message,
+} from "antd";
+import { EnhancedDynamicFormRenderer } from "@/components/forms/EnhancedDynamicFormRenderer";
+import {
+  getSchemaFromBackend,
+  getSupportedBanks,
+  convertBackendSchemaToWebFormat,
+} from "@/services/schema.service";
+import { WebFormDefinition, WebFormData } from "@/types/webSchema";
 
 const { Title, Text } = Typography;
 
 const DynamicFormTest: React.FC = () => {
-  const [selectedBank, setSelectedBank] = useState<string>('');
+  const [selectedBank, setSelectedBank] = useState<string>("");
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [formData, setFormData] = useState<WebFormData>({});
   const [loading, setLoading] = useState(false);
+  const [availableBanks, setAvailableBanks] = useState<string[]>([]);
 
-  const availableBanks = getAllMobileBanks();
+  // Load available banks from backend on mount
+  useEffect(() => {
+    const loadBanks = async () => {
+      try {
+        const banks = await getSupportedBanks();
+        setAvailableBanks(banks);
+      } catch (error) {
+        message.error("Failed to load available banks");
+        console.error(error);
+      }
+    };
+    loadBanks();
+  }, []);
 
-  const handleBankChange = (bankName: string) => {
+  const handleBankChange = async (bankName: string) => {
     setSelectedBank(bankName);
     setLoading(true);
-    
-    const schema = getMobileSchemaByBank(bankName);
-    if (schema) {
-      setSchemaForm(schema);
-      // Initialize with some sample data
-      setFormData({
-        basicDetails: {
-          applicationNo: 'APP123456',
-          applicantName: 'John Doe',
-          concernName: 'Sample Business',
-          constitution: 'Proprietorship',
-          phoneNo: '9876543210',
-        },
-        familyDetails: {
-          familyDetails: [
-            {
-              name: 'Jane Doe',
-              relation: 'Spouse',
-              ageYears: 30,
-              qualification: 'Graduate',
-              occupation: 'Teacher',
-              incomePerMonth: 25000,
-              dependent: 'No',
-            }
-          ]
-        }
-      });
-    } else {
+
+    try {
+      // Fetch schema from backend
+      const backendResponse = await getSchemaFromBackend(bankName);
+      const schema = convertBackendSchemaToWebFormat(backendResponse.schema);
+
+      if (schema) {
+        setSchemaForm(schema);
+        // Initialize with some sample data
+        setFormData({
+          basicDetails: {
+            applicationNo: "APP123456",
+            applicantName: "John Doe",
+            concernName: "Sample Business",
+            constitution: "Proprietorship",
+            phoneNo: "9876543210",
+          },
+          familyDetails: {
+            familyDetails: [
+              {
+                name: "Jane Doe",
+                relation: "Spouse",
+                ageYears: 30,
+                qualification: "Graduate",
+                occupation: "Teacher",
+                incomePerMonth: 25000,
+                dependent: "No",
+              },
+            ],
+          },
+        });
+        message.success(`Schema loaded successfully for ${bankName}`);
+      } else {
+        setSchemaForm(null);
+        message.error("Failed to convert schema");
+      }
+    } catch (error: any) {
       setSchemaForm(null);
+      message.error(`Error loading schema: ${error.message}`);
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleFormSubmit = (data: WebFormData) => {
-    console.log('Form submitted:', data);
-    alert('Form submitted successfully! Check console for data.');
+    console.log("Form submitted:", data);
+    alert("Form submitted successfully! Check console for data.");
   };
 
   const handleFormDataChange = (sectionId: string, data: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [sectionId]: data,
     }));
@@ -77,17 +114,20 @@ const DynamicFormTest: React.FC = () => {
           </Col>
           <Col span={12}>
             <Select
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               placeholder="Choose a bank to test"
               value={selectedBank}
               onChange={handleBankChange}
-              options={availableBanks.map(bank => ({ label: bank, value: bank }))}
+              options={availableBanks.map((bank) => ({
+                label: bank,
+                value: bank,
+              }))}
             />
           </Col>
           <Col span={4}>
-            <Button 
+            <Button
               onClick={() => {
-                setSelectedBank('');
+                setSelectedBank("");
                 setSchemaForm(null);
                 setFormData({});
               }}
@@ -121,11 +161,12 @@ const DynamicFormTest: React.FC = () => {
       {!selectedBank && !loading && (
         <Card>
           <Text type="secondary">
-            Please select a bank from the dropdown above to test the dynamic form system.
+            Please select a bank from the dropdown above to test the dynamic
+            form system.
           </Text>
           <br />
           <Text type="secondary">
-            Supported banks: {availableBanks.join(', ')}
+            Supported banks: {availableBanks.join(", ")}
           </Text>
         </Card>
       )}

@@ -1,4 +1,3 @@
-import * as RNFS from 'react-native-fs';
 import {getPDSchema} from '../../../services/field.services';
 
 export interface MobileFieldDefinition {
@@ -32,41 +31,31 @@ let cachedSchema: Record<string, any> = {};
 export async function loadMobilePDFormsSchema(
   bankName: string,
 ): Promise<any | null> {
-  if (cachedSchema[bankName]) return cachedSchema[bankName];
+  if (cachedSchema[bankName]) {
+    return cachedSchema[bankName];
+  }
 
   try {
-    // Option 1: Read from file system using RNFS (React Native compatible)
-    const schemaPath =
-      RNFS.MainBundlePath + '/../packages/shared/pd_forms.generated.json';
-    const schemaContent = await RNFS.readFile(schemaPath, 'utf8');
-    const schema = JSON.parse(schemaContent) as MobileGeneratedSchema;
+    // Fetch schema from backend API (single source of truth)
+    console.log('Fetching PD schema from backend for bank:', bankName);
+    const response = await getPDSchema(bankName);
 
-    // Find the specific bank form from the schema
-    const bankForm = schema.forms.find(
-      f => f.name.toLowerCase() === bankName.toLowerCase(),
-    );
+    // Backend returns: { status, message, data: { bankName, schema, metadata } }
+    const backendData = response.data?.data;
 
-    if (bankForm) {
-      cachedSchema[bankName] = bankForm;
-      console.log('bankForm', bankForm);
-      return bankForm;
+    if (backendData && backendData.schema) {
+      // Cache and return the schema
+      cachedSchema[bankName] = backendData.schema;
+      console.log('✓ PD schema loaded from backend successfully:', bankName);
+      return backendData.schema;
     }
 
-    throw new Error(`Bank form not found for: ${bankName}`);
-  } catch (error) {
-    console.warn(
-      'Failed to load schema from file system, trying remote fetch:',
-      error,
+    throw new Error(`No schema data received from backend for: ${bankName}`);
+  } catch (error: any) {
+    console.error(
+      'Failed to fetch schema from backend:',
+      error.message || error,
     );
-
-    try {
-      const response = await getPDSchema(bankName);
-      const schema = await response.data;
-      cachedSchema[bankName] = schema;
-      return schema;
-    } catch (fetchError) {
-      console.error('Failed to fetch schema from backend:', fetchError);
-      return null;
-    }
+    return null;
   }
 }

@@ -1,10 +1,21 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
+import { CloseCircleOutlined, EditOutlined } from "@ant-design/icons";
 import {
-  CloseCircleOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Image, message, Modal, Table, Row, Col, Descriptions, Form, Input, Typography, Space } from "antd";
+  Button,
+  Card,
+  Image,
+  message,
+  Modal,
+  Table,
+  Row,
+  Col,
+  Descriptions,
+  Form,
+  Input,
+  Typography,
+  Space,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
@@ -21,7 +32,6 @@ import {
 
 // Import new dynamic form system
 import { EnhancedDynamicFormRenderer } from "@/components/forms/EnhancedDynamicFormRenderer";
-import { getMobileSchemaByBank, getSupportedBanks } from "@/utils/mobileSchemaLoader";
 import { WebFormDefinition, WebFormData } from "@/types/webSchema";
 import { DynamicEditModal } from "@/components/verify/DynamicEditModal";
 
@@ -84,16 +94,16 @@ export const BusinessVerificationDetails: React.FC<
   const [calculatedGrossProfit, setCalculatedGrossProfit] = useState<number>(0);
   const [calculatedNetProfit, setCalculatedNetProfit] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  
+
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
-  
+
   // Dynamic edit modal states
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [currentEditSection, setCurrentEditSection] = useState<string>('');
+  const [currentEditSection, setCurrentEditSection] = useState<string>("");
   const [currentSectionSchema, setCurrentSectionSchema] = useState<any>(null);
   const [localEditLogsUpdated, setLocalEditLogsUpdated] = useState(0);
 
@@ -122,8 +132,10 @@ export const BusinessVerificationDetails: React.FC<
 
   useEffect(() => {
     const fetchImageUrls = async () => {
-      const uploadedItems = verificationData?.uploadedItems || verificationData?.verificationData?.uploadedItems;
-      
+      const uploadedItems =
+        verificationData?.uploadedItems ||
+        verificationData?.verificationData?.uploadedItems;
+
       if (uploadedItems) {
         const urls: { [key: string]: string } = {};
         for (const item of uploadedItems) {
@@ -139,7 +151,10 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     fetchImageUrls();
-  }, [verificationData?.uploadedItems, verificationData?.verificationData?.uploadedItems]);
+  }, [
+    verificationData?.uploadedItems,
+    verificationData?.verificationData?.uploadedItems,
+  ]);
 
   useEffect(() => {
     const request = indexedDB.open("editLogs", 1);
@@ -160,7 +175,7 @@ export const BusinessVerificationDetails: React.FC<
           const existingLogs = event.target.result || {};
           const { id, timestamp, ...rest } = existingLogs;
           setChangedData(rest);
-          console.log('Loaded edit logs from IndexedDB:', rest);
+          console.log("Loaded edit logs from IndexedDB:", rest);
         };
 
         getRequest.onerror = (event: any) => {
@@ -177,60 +192,65 @@ export const BusinessVerificationDetails: React.FC<
     };
   }, [id, activeTab, editLogsUpdated, localEditLogsUpdated]);
 
-  // Load dynamic form schema based on bank name (ONLY FOR PD/BUSINESS VERIFICATION)
+  // Load dynamic form schema from backend based on bank name
   useEffect(() => {
     const loadDynamicSchema = async () => {
       try {
         setFormLoading(true);
-        
+
         // Get bank name from verification data
-        const bankName = verificationData?.bankName || 
-                        verificationData?.loan?.bankName || 
-                        '';
-        
+        const bankName =
+          verificationData?.bankName || verificationData?.loan?.bankName || "";
+
         // Skip if no bank name
         if (!bankName) {
-          console.log('No bank name found, skipping dynamic schema');
+          console.log("No bank name found, skipping dynamic schema");
           setUseNewApproach(false);
           setFormLoading(false);
           return;
         }
-        
-        console.log('Loading PD schema for bank:', bankName);
-        
-        // Check if bank is supported by new approach (has PD forms)
-        const supportedBanks = getSupportedBanks();
-        const isSupported = supportedBanks.some(bank => 
-          bank.toLowerCase() === bankName.toLowerCase()
-        );
-        
-        if (isSupported) {
-          const schema = getMobileSchemaByBank(bankName);
+
+        console.log("Loading PD schema from backend for bank:", bankName);
+
+        try {
+          // Fetch schema from backend (single source of truth)
+          const { getSchemaFromBackend, convertBackendSchemaToWebFormat } =
+            await import("@/services/schema.service");
+          const backendResponse = await getSchemaFromBackend(bankName);
+
+          // Convert backend schema to web format
+          const schema = convertBackendSchemaToWebFormat(
+            backendResponse.schema
+          );
+
           if (schema) {
             setSchemaForm(schema);
             setUseNewApproach(true);
-            
+
             // Initialize form data from existing verification data
             // Extract the actual form data from verificationData.verificationData
-            const rawFormData = verificationData?.verificationData || verificationData || {};
-            
+            const rawFormData =
+              verificationData?.verificationData || verificationData || {};
+
             // Clean empty strings from form data and convert empty strings to false for boolean fields
             const cleanEmptyStrings = (obj: any, schema?: any): any => {
-              if (typeof obj === 'string') {
-                return obj.trim() === '' ? undefined : obj;
+              if (typeof obj === "string") {
+                return obj.trim() === "" ? undefined : obj;
               }
               if (Array.isArray(obj)) {
-                return obj.map(item => cleanEmptyStrings(item, schema));
+                return obj.map((item) => cleanEmptyStrings(item, schema));
               }
-              if (typeof obj === 'object' && obj !== null) {
+              if (typeof obj === "object" && obj !== null) {
                 const cleaned: any = {};
                 for (const key in obj) {
                   const cleanedValue = cleanEmptyStrings(obj[key], schema);
                   if (cleanedValue !== undefined) {
                     // Convert empty strings to false for boolean fields
-                    if (cleanedValue === '' && schema?.fields) {
-                      const field = schema.fields.find((f: any) => f.id === key);
-                      if (field?.type === 'boolean') {
+                    if (cleanedValue === "" && schema?.fields) {
+                      const field = schema.fields.find(
+                        (f: any) => f.id === key
+                      );
+                      if (field?.type === "boolean") {
                         cleaned[key] = false;
                       } else {
                         cleaned[key] = cleanedValue;
@@ -244,29 +264,37 @@ export const BusinessVerificationDetails: React.FC<
               }
               return obj;
             };
-            
+
             const formData = cleanEmptyStrings(rawFormData, schema);
-            
+
             setDynamicFormData(formData);
-            
-            console.log('✓ PD dynamic schema loaded successfully:', schema.name);
-            console.log('✓ Form data initialized:', formData);
+
+            console.log(
+              "✓ PD schema loaded from backend successfully:",
+              schema.name
+            );
+            console.log("✓ Form data initialized:", formData);
           } else {
-            console.log(`Bank "${bankName}" does not have PD forms configured`);
+            console.log(
+              `Bank "${bankName}" schema could not be converted to web format`
+            );
             setUseNewApproach(false);
           }
-        } else {
-          console.log(`Bank "${bankName}" does not have PD forms - this is normal for FI-only banks`);
+        } catch (schemaError: any) {
+          console.log(
+            `Bank "${bankName}" does not have PD forms or error loading:`,
+            schemaError.message
+          );
           setUseNewApproach(false);
         }
       } catch (error) {
-        console.error('Error loading dynamic schema:', error);
+        console.error("Error loading dynamic schema:", error);
         setUseNewApproach(false);
       } finally {
         setFormLoading(false);
       }
     };
-    
+
     if (verificationData) {
       loadDynamicSchema();
     }
@@ -274,7 +302,7 @@ export const BusinessVerificationDetails: React.FC<
 
   // Handle dynamic form data changes
   const handleDynamicFormDataChange = (sectionId: string, data: any) => {
-    setDynamicFormData(prev => ({
+    setDynamicFormData((prev) => ({
       ...prev,
       [sectionId]: data,
     }));
@@ -283,11 +311,11 @@ export const BusinessVerificationDetails: React.FC<
   // Handle edit button click for dynamic sections
   const handleDynamicSectionEdit = (sectionId: string) => {
     if (!schemaForm) return;
-    
+
     // Find the section schema
-    const sectionSchema = schemaForm.sections.find(s => s.id === sectionId);
+    const sectionSchema = schemaForm.sections.find((s) => s.id === sectionId);
     if (!sectionSchema) return;
-    
+
     setCurrentEditSection(sectionId);
     setCurrentSectionSchema(sectionSchema);
     setEditModalVisible(true);
@@ -296,40 +324,43 @@ export const BusinessVerificationDetails: React.FC<
   // Helper function to validate non-empty strings
   const validateNonEmpty = (value: any): boolean => {
     if (value === null || value === undefined) return false;
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Check if string has at least one non-whitespace character
       return value.trim().length > 0;
     }
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return !isNaN(value);
     }
     return true; // For other types, consider them valid
   };
 
   // Helper function to validate section data
-  const validateSectionData = (data: any, sectionSchema: any): { isValid: boolean; errors: string[] } => {
+  const validateSectionData = (
+    data: any,
+    sectionSchema: any
+  ): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
-    
+
     if (!sectionSchema || !sectionSchema.fields) {
       return { isValid: true, errors: [] };
     }
-    
+
     sectionSchema.fields.forEach((field: any) => {
       const value = data[field.id];
-      
+
       // Check if value is whitespace-only (for both required and non-required fields)
-      if (typeof value === 'string' && value.trim() === '') {
+      if (typeof value === "string" && value.trim() === "") {
         errors.push(field.label);
       }
-      
+
       // Check array fields
-      if (field.type === 'array' && field.arrayItemFields) {
+      if (field.type === "array" && field.arrayItemFields) {
         const arrayValue = data[field.id];
         if (Array.isArray(arrayValue)) {
           arrayValue.forEach((item: any, index: number) => {
             field.arrayItemFields?.forEach((itemField: any) => {
               const itemValue = item[itemField.id];
-              if (typeof itemValue === 'string' && itemValue.trim() === '') {
+              if (typeof itemValue === "string" && itemValue.trim() === "") {
                 errors.push(`${field.label}[${index + 1}].${itemField.label}`);
               }
             });
@@ -337,7 +368,7 @@ export const BusinessVerificationDetails: React.FC<
         }
       }
     });
-    
+
     return { isValid: errors.length === 0, errors };
   };
 
@@ -347,11 +378,11 @@ export const BusinessVerificationDetails: React.FC<
       // Validate data before saving
       const validation = validateSectionData(data, currentSectionSchema);
       if (!validation.isValid) {
-        message.error(validation.errors.join(', '));
-        reject(new Error('Validation failed'));
+        message.error(validation.errors.join(", "));
+        reject(new Error("Validation failed"));
         return;
       }
-      
+
       const request = indexedDB.open("editLogs", 1);
 
       request.onerror = () => {
@@ -382,7 +413,7 @@ export const BusinessVerificationDetails: React.FC<
 
             putRequest.onsuccess = () => {
               setEditModalVisible(false);
-              setLocalEditLogsUpdated(prev => prev + 1); // Trigger refresh of edit logs
+              setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh of edit logs
               fetchVerificationData();
               resolve();
             };
@@ -420,22 +451,22 @@ export const BusinessVerificationDetails: React.FC<
   const handleDynamicFormSubmit = async (formData: WebFormData) => {
     try {
       setLoading(true);
-      
+
       const finalData = {
-        verificationType: 'Business',
-        findings: 'Business Verification Findings',
-        addressType: 'Business',
+        verificationType: "Business",
+        findings: "Business Verification Findings",
+        addressType: "Business",
         verificationData: formData,
       };
 
       // Submit verification data
       await verifierEditApi(id as string, "Business", finalData);
-      
-      message.success('Verification data updated successfully');
+
+      message.success("Verification data updated successfully");
       fetchVerificationData();
     } catch (error) {
-      console.error('Error submitting dynamic form:', error);
-      message.error('Failed to update verification data');
+      console.error("Error submitting dynamic form:", error);
+      message.error("Failed to update verification data");
     } finally {
       setLoading(false);
     }
@@ -447,47 +478,93 @@ export const BusinessVerificationDetails: React.FC<
   // Calculate profits whenever financial form values change
   useEffect(() => {
     if (financialFormValues) {
-      console.log('Financial form values:', financialFormValues);
+      console.log("Financial form values:", financialFormValues);
       const calculateProfits = () => {
         // Gross Profit Calculation
-        const openingStock = parseFloat((financialFormValues as any).toOpeningStock) || 0;
-        const purchase = parseFloat((financialFormValues as any).toPurchase) || 0;
-        const costOfServices = parseFloat((financialFormValues as any).toCostOfServices) || 0;
+        const openingStock =
+          parseFloat((financialFormValues as any).toOpeningStock) || 0;
+        const purchase =
+          parseFloat((financialFormValues as any).toPurchase) || 0;
+        const costOfServices =
+          parseFloat((financialFormValues as any).toCostOfServices) || 0;
         const wages = parseFloat((financialFormValues as any).toWages) || 0;
-        const hamaliCharges = parseFloat((financialFormValues as any).toHamaliCharges) || 0;
-        const manufacturingExpenses = parseFloat((financialFormValues as any).toManufacturingExpenses) || 0;
-        const packingCharges = parseFloat((financialFormValues as any).toPackingCharges) || 0;
+        const hamaliCharges =
+          parseFloat((financialFormValues as any).toHamaliCharges) || 0;
+        const manufacturingExpenses =
+          parseFloat((financialFormValues as any).toManufacturingExpenses) || 0;
+        const packingCharges =
+          parseFloat((financialFormValues as any).toPackingCharges) || 0;
         const sales = parseFloat((financialFormValues as any).bySales) || 0;
-        const services = parseFloat((financialFormValues as any).byServices) || 0;
-        const closingStock = parseFloat((financialFormValues as any).byClosingStock) || 0;
+        const services =
+          parseFloat((financialFormValues as any).byServices) || 0;
+        const closingStock =
+          parseFloat((financialFormValues as any).byClosingStock) || 0;
 
         // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-        const grossProfit = (sales + services + closingStock) - (openingStock + purchase + costOfServices + wages + hamaliCharges + manufacturingExpenses + packingCharges);
+        const grossProfit =
+          sales +
+          services +
+          closingStock -
+          (openingStock +
+            purchase +
+            costOfServices +
+            wages +
+            hamaliCharges +
+            manufacturingExpenses +
+            packingCharges);
 
         // Net Profit Calculation
-        const salaries = parseFloat((financialFormValues as any).toSalaries) || 0;
+        const salaries =
+          parseFloat((financialFormValues as any).toSalaries) || 0;
         const rent = parseFloat((financialFormValues as any).toRent) || 0;
-        const electricityCharges = parseFloat((financialFormValues as any).toElectricityCharges) || 0;
-        const printingStationery = parseFloat((financialFormValues as any).toPrintingStationery) || 0;
-        const telephoneCharges = parseFloat((financialFormValues as any).toTelephoneCharges) || 0;
-        const postageTelegram = parseFloat((financialFormValues as any).toPostageTelegram) || 0;
-        const officeMaintenance = parseFloat((financialFormValues as any).toOfficeMaintenance) || 0;
-        const repairsMaintenance = parseFloat((financialFormValues as any).toRepairsMaintenance) || 0;
-        const sadarExpenses = parseFloat((financialFormValues as any).toSadarExpenses) || 0;
-        const auditFee = parseFloat((financialFormValues as any).toAuditFee) || 0;
-        const advertisement = parseFloat((financialFormValues as any).toAdvertisement) || 0;
-        const bankCharges = parseFloat((financialFormValues as any).toBankCharges) || 0;
-        const insurance = parseFloat((financialFormValues as any).toInsurance) || 0;
-        const depreciation = parseFloat((financialFormValues as any).toDepreciation) || 0;
-        const interestOnLoan = parseFloat((financialFormValues as any).toInterestOnLoan) || 0;
-        const rentReceived = parseFloat((financialFormValues as any).byRentReceived) || 0;
-        const commissionReceived = parseFloat((financialFormValues as any).byCommissionReceived) || 0;
+        const electricityCharges =
+          parseFloat((financialFormValues as any).toElectricityCharges) || 0;
+        const printingStationery =
+          parseFloat((financialFormValues as any).toPrintingStationery) || 0;
+        const telephoneCharges =
+          parseFloat((financialFormValues as any).toTelephoneCharges) || 0;
+        const postageTelegram =
+          parseFloat((financialFormValues as any).toPostageTelegram) || 0;
+        const officeMaintenance =
+          parseFloat((financialFormValues as any).toOfficeMaintenance) || 0;
+        const repairsMaintenance =
+          parseFloat((financialFormValues as any).toRepairsMaintenance) || 0;
+        const sadarExpenses =
+          parseFloat((financialFormValues as any).toSadarExpenses) || 0;
+        const auditFee =
+          parseFloat((financialFormValues as any).toAuditFee) || 0;
+        const advertisement =
+          parseFloat((financialFormValues as any).toAdvertisement) || 0;
+        const bankCharges =
+          parseFloat((financialFormValues as any).toBankCharges) || 0;
+        const insurance =
+          parseFloat((financialFormValues as any).toInsurance) || 0;
+        const depreciation =
+          parseFloat((financialFormValues as any).toDepreciation) || 0;
+        const interestOnLoan =
+          parseFloat((financialFormValues as any).toInterestOnLoan) || 0;
+        const rentReceived =
+          parseFloat((financialFormValues as any).byRentReceived) || 0;
+        const commissionReceived =
+          parseFloat((financialFormValues as any).byCommissionReceived) || 0;
 
         // Indirect Expenses = All "To" fields in net profit section
-        const indirectExpenses = salaries + rent + electricityCharges + printingStationery + 
-          telephoneCharges + postageTelegram + officeMaintenance + repairsMaintenance + 
-          sadarExpenses + auditFee + advertisement + bankCharges + insurance + 
-          depreciation + interestOnLoan;
+        const indirectExpenses =
+          salaries +
+          rent +
+          electricityCharges +
+          printingStationery +
+          telephoneCharges +
+          postageTelegram +
+          officeMaintenance +
+          repairsMaintenance +
+          sadarExpenses +
+          auditFee +
+          advertisement +
+          bankCharges +
+          insurance +
+          depreciation +
+          interestOnLoan;
 
         // Other Incomes = Rent Received + Commission Received
         const otherIncomes = rentReceived + commissionReceived;
@@ -495,11 +572,11 @@ export const BusinessVerificationDetails: React.FC<
         // Net Profit = Gross Profit + Other Incomes - Indirect Expenses
         const netProfit = grossProfit + otherIncomes - indirectExpenses;
 
-        console.log('Calculated values:', {
+        console.log("Calculated values:", {
           grossProfit,
           netProfit,
           indirectExpenses,
-          otherIncomes
+          otherIncomes,
         });
 
         setCalculatedGrossProfit(grossProfit);
@@ -512,68 +589,86 @@ export const BusinessVerificationDetails: React.FC<
 
   // Load existing financial data when component mounts
   useEffect(() => {
-    console.log('verificationData received:', verificationData);
-    console.log('completeVerificationData received:', completeVerificationData);
-    
+    console.log("verificationData received:", verificationData);
+    console.log("completeVerificationData received:", completeVerificationData);
+
     // Now verificationData is the entire verification object, so financialAnalysis is directly under it
     let financialData = null;
-    
+
     // Try to get financial data from the correct path
     if (verificationData?.financialAnalysis) {
       financialData = verificationData.financialAnalysis;
-      console.log('Financial data found in verificationData.financialAnalysis:', financialData);
+      console.log(
+        "Financial data found in verificationData.financialAnalysis:",
+        financialData
+      );
     } else if (verificationData?.verificationData?.financialAnalysis) {
       financialData = verificationData.verificationData.financialAnalysis;
-      console.log('Financial data found in verificationData.verificationData.financialAnalysis:', financialData);
+      console.log(
+        "Financial data found in verificationData.verificationData.financialAnalysis:",
+        financialData
+      );
     }
-    
+
     if (financialData) {
-      console.log('Loading financial data:', financialData);
-      
+      console.log("Loading financial data:", financialData);
+
       // Set form values based on the API response structure
       const formValues = {
-        toOpeningStock: financialData.openingStock?.toString() || '',
-        toPurchase: financialData.purchase?.toString() || '',
-        toCostOfServices: financialData.costOfServices?.toString() || '',
-        toWages: financialData.wages?.toString() || '',
-        toHamaliCharges: financialData.hamaliCharges?.toString() || '',
-        toManufacturingExpenses: financialData.manufacturingExpenses?.toString() || '',
-        toPackingCharges: financialData.packingCharges?.toString() || '',
-        bySales: financialData.sales?.toString() || '',
-        byServices: financialData.services?.toString() || '',
-        byClosingStock: financialData.closingStock?.toString() || '',
-        toSalaries: financialData.salaries?.toString() || '',
-        toRent: financialData.rent?.toString() || '',
-        toElectricityCharges: financialData.electricityCharges?.toString() || '',
-        toPrintingStationery: financialData.printingStationery?.toString() || '',
-        toTelephoneCharges: financialData.telephoneCharges?.toString() || '',
-        toPostageTelegram: financialData.postageTelegram?.toString() || '',
-        toOfficeMaintenance: financialData.officeMaintenance?.toString() || '',
-        toRepairsMaintenance: financialData.repairsMaintenance?.toString() || '',
-        toSadarExpenses: financialData.sadarExpenses?.toString() || '',
-        toAuditFee: financialData.auditFee?.toString() || '',
-        toAdvertisement: financialData.advertisement?.toString() || '',
-        toBankCharges: financialData.bankCharges?.toString() || '',
-        toInsurance: financialData.insurance?.toString() || '',
-        toDepreciation: financialData.depreciation?.toString() || '',
-        toInterestOnLoan: financialData.interestOnLoan?.toString() || '',
-        byRentReceived: financialData.rentReceived?.toString() || '',
-        byCommissionReceived: financialData.commissionReceived?.toString() || '',
+        toOpeningStock: financialData.openingStock?.toString() || "",
+        toPurchase: financialData.purchase?.toString() || "",
+        toCostOfServices: financialData.costOfServices?.toString() || "",
+        toWages: financialData.wages?.toString() || "",
+        toHamaliCharges: financialData.hamaliCharges?.toString() || "",
+        toManufacturingExpenses:
+          financialData.manufacturingExpenses?.toString() || "",
+        toPackingCharges: financialData.packingCharges?.toString() || "",
+        bySales: financialData.sales?.toString() || "",
+        byServices: financialData.services?.toString() || "",
+        byClosingStock: financialData.closingStock?.toString() || "",
+        toSalaries: financialData.salaries?.toString() || "",
+        toRent: financialData.rent?.toString() || "",
+        toElectricityCharges:
+          financialData.electricityCharges?.toString() || "",
+        toPrintingStationery:
+          financialData.printingStationery?.toString() || "",
+        toTelephoneCharges: financialData.telephoneCharges?.toString() || "",
+        toPostageTelegram: financialData.postageTelegram?.toString() || "",
+        toOfficeMaintenance: financialData.officeMaintenance?.toString() || "",
+        toRepairsMaintenance:
+          financialData.repairsMaintenance?.toString() || "",
+        toSadarExpenses: financialData.sadarExpenses?.toString() || "",
+        toAuditFee: financialData.auditFee?.toString() || "",
+        toAdvertisement: financialData.advertisement?.toString() || "",
+        toBankCharges: financialData.bankCharges?.toString() || "",
+        toInsurance: financialData.insurance?.toString() || "",
+        toDepreciation: financialData.depreciation?.toString() || "",
+        toInterestOnLoan: financialData.interestOnLoan?.toString() || "",
+        byRentReceived: financialData.rentReceived?.toString() || "",
+        byCommissionReceived:
+          financialData.commissionReceived?.toString() || "",
       };
-      
-      console.log('Setting form values:', formValues);
-      
+
+      console.log("Setting form values:", formValues);
+
       // Set form values immediately
       financialForm.setFieldsValue(formValues);
-      console.log('Form values set successfully');
+      console.log("Form values set successfully");
 
       // Set calculated values
       setCalculatedGrossProfit(financialData.grossProfit || 0);
       setCalculatedNetProfit(financialData.netProfit || 0);
-      
-      console.log('Calculated values set - Gross Profit:', financialData.grossProfit, 'Net Profit:', financialData.netProfit);
+
+      console.log(
+        "Calculated values set - Gross Profit:",
+        financialData.grossProfit,
+        "Net Profit:",
+        financialData.netProfit
+      );
     } else {
-      console.log('No financial data found in verificationData.financialAnalysis');
+      console.log(
+        "No financial data found in verificationData.financialAnalysis"
+      );
     }
   }, [verificationData, financialForm]);
 
@@ -588,7 +683,8 @@ export const BusinessVerificationDetails: React.FC<
       const costOfServicesVal = parseFloat(values.toCostOfServices) || 0;
       const wagesVal = parseFloat(values.toWages) || 0;
       const hamaliChargesVal = parseFloat(values.toHamaliCharges) || 0;
-      const manufacturingExpensesVal = parseFloat(values.toManufacturingExpenses) || 0;
+      const manufacturingExpensesVal =
+        parseFloat(values.toManufacturingExpenses) || 0;
       const packingChargesVal = parseFloat(values.toPackingCharges) || 0;
       const salesVal = parseFloat(values.bySales) || 0;
       const servicesVal = parseFloat(values.byServices) || 0;
@@ -596,12 +692,15 @@ export const BusinessVerificationDetails: React.FC<
 
       const salariesVal = parseFloat(values.toSalaries) || 0;
       const rentVal = parseFloat(values.toRent) || 0;
-      const electricityChargesVal = parseFloat(values.toElectricityCharges) || 0;
-      const printingStationeryVal = parseFloat(values.toPrintingStationery) || 0;
+      const electricityChargesVal =
+        parseFloat(values.toElectricityCharges) || 0;
+      const printingStationeryVal =
+        parseFloat(values.toPrintingStationery) || 0;
       const telephoneChargesVal = parseFloat(values.toTelephoneCharges) || 0;
       const postageTelegramVal = parseFloat(values.toPostageTelegram) || 0;
       const officeMaintenanceVal = parseFloat(values.toOfficeMaintenance) || 0;
-      const repairsMaintenanceVal = parseFloat(values.toRepairsMaintenance) || 0;
+      const repairsMaintenanceVal =
+        parseFloat(values.toRepairsMaintenance) || 0;
       const sadarExpensesVal = parseFloat(values.toSadarExpenses) || 0;
       const auditFeeVal = parseFloat(values.toAuditFee) || 0;
       const advertisementVal = parseFloat(values.toAdvertisement) || 0;
@@ -610,17 +709,41 @@ export const BusinessVerificationDetails: React.FC<
       const depreciationVal = parseFloat(values.toDepreciation) || 0;
       const interestOnLoanVal = parseFloat(values.toInterestOnLoan) || 0;
       const rentReceivedVal = parseFloat(values.byRentReceived) || 0;
-      const commissionReceivedVal = parseFloat(values.byCommissionReceived) || 0;
+      const commissionReceivedVal =
+        parseFloat(values.byCommissionReceived) || 0;
 
-      const computedGrossProfit = (salesVal + servicesVal + closingStockVal) -
-        (openingStockVal + purchaseVal + costOfServicesVal + wagesVal + hamaliChargesVal + manufacturingExpensesVal + packingChargesVal);
+      const computedGrossProfit =
+        salesVal +
+        servicesVal +
+        closingStockVal -
+        (openingStockVal +
+          purchaseVal +
+          costOfServicesVal +
+          wagesVal +
+          hamaliChargesVal +
+          manufacturingExpensesVal +
+          packingChargesVal);
 
-      const indirectExpensesVal = salariesVal + rentVal + electricityChargesVal + printingStationeryVal + telephoneChargesVal +
-        postageTelegramVal + officeMaintenanceVal + repairsMaintenanceVal + sadarExpensesVal + auditFeeVal + advertisementVal +
-        bankChargesVal + insuranceVal + depreciationVal + interestOnLoanVal;
+      const indirectExpensesVal =
+        salariesVal +
+        rentVal +
+        electricityChargesVal +
+        printingStationeryVal +
+        telephoneChargesVal +
+        postageTelegramVal +
+        officeMaintenanceVal +
+        repairsMaintenanceVal +
+        sadarExpensesVal +
+        auditFeeVal +
+        advertisementVal +
+        bankChargesVal +
+        insuranceVal +
+        depreciationVal +
+        interestOnLoanVal;
 
       const otherIncomesVal = rentReceivedVal + commissionReceivedVal;
-      const computedNetProfit = computedGrossProfit + otherIncomesVal - indirectExpensesVal;
+      const computedNetProfit =
+        computedGrossProfit + otherIncomesVal - indirectExpensesVal;
 
       // Prepare the complete financial analysis data
       const financialData = {
@@ -652,16 +775,16 @@ export const BusinessVerificationDetails: React.FC<
         rentReceived: rentReceivedVal,
         commissionReceived: commissionReceivedVal,
         grossProfit: computedGrossProfit,
-        netProfit: computedNetProfit
+        netProfit: computedNetProfit,
       };
 
-      console.log('Submitting financial data:', financialData);
+      console.log("Submitting financial data:", financialData);
 
       // Call the financial analysis API with department parameter
       await submitFinancialAnalysis(id as string, financialData);
-      
+
       message.success("Financial analysis submitted successfully!");
-      
+
       // Refresh the verification data to show updated values
       fetchVerificationData();
     } catch (error) {
@@ -675,12 +798,12 @@ export const BusinessVerificationDetails: React.FC<
   if (!verificationData) return null;
 
   // Get bank name
-  const bankName = verificationData?.bankName || 'Axis Finance';
-  
-  // Extract the form data directly  
+  const bankName = verificationData?.bankName || "Axis Finance";
+
+  // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
   const data = rawApiData;
-  
+
   // For legacy FI components, wrap the data correctly
   // The description components expect data with nested structure like data.basicDetails
   const legacyFormattedData = {
@@ -691,12 +814,12 @@ export const BusinessVerificationDetails: React.FC<
     uploadedItems: data?.uploadedItems,
     // ExistingLoansDescription expects data.loans.loans structure
     loans: {
-      loans: data?.existingLoans?.loans || []
+      loans: data?.existingLoans?.loans || [],
     },
     // ThirdPartyCheckDescription expects data.thirdPartyCheck.checks structure
     thirdPartyCheck: {
-      checks: data?.thirdPartyCheck?.checks || []
-    }
+      checks: data?.thirdPartyCheck?.checks || [],
+    },
   };
 
   // Merge pending edits from local edit logs into the display data so UI reflects changes
@@ -732,10 +855,16 @@ export const BusinessVerificationDetails: React.FC<
   // Check if there are pending edit requests for key sections (Basic Details, Business Details, or Business Miscellaneous Details)
   const hasPendingEditRequestForKeySections = () => {
     if (!hasEditRequest) return false;
-    const keySections = currentDepartment === 'PD' 
-      ? ['businessBasicDetails', 'businessDetails', 'applicantDetails', 'familyDetails']
-      : ['businessBasicDetails', 'businessDetails', 'miscellaneous'];
-    return Object.keys(changedData).some(key => keySections.includes(key));
+    const keySections =
+      currentDepartment === "PD"
+        ? [
+            "businessBasicDetails",
+            "businessDetails",
+            "applicantDetails",
+            "familyDetails",
+          ]
+        : ["businessBasicDetails", "businessDetails", "miscellaneous"];
+    return Object.keys(changedData).some((key) => keySections.includes(key));
   };
 
   const handlePhotoRemoval = async (pid: any) => {
@@ -780,33 +909,35 @@ export const BusinessVerificationDetails: React.FC<
   // Helper function to create non-negative validation rule
   const createNonNegativeRule = (fieldName: string) => ({
     validator: (_: any, value: any) => {
-      if (value === '' || value === undefined || value === null) return Promise.resolve();
+      if (value === "" || value === undefined || value === null)
+        return Promise.resolve();
       const numValue = parseFloat(value);
       if (isNaN(numValue) || numValue < 0) {
         return Promise.reject(new Error(`${fieldName} must be non-negative`));
       }
       return Promise.resolve();
-    }
+    },
   });
 
   return (
     <div>
       {/* Dynamic Form Status removed as requested */}
-      {currentDepartment === 'PD' && (verificationData?.bankName || verificationData?.loan?.bankName) && (
-        <section style={{ margin: '6px 0 12px', textAlign: 'center' }}>
-          <Text style={{ color: '#1e40af', fontWeight: 600 }}>
-            {typeof verificationData?.bankName === 'string' 
-              ? verificationData.bankName 
-              : typeof verificationData?.loan?.bankName === 'string'
-                ? verificationData.loan.bankName
-                : 'Unknown Bank'}
-          </Text>
-        </section>
-      )}
-      
+      {currentDepartment === "PD" &&
+        (verificationData?.bankName || verificationData?.loan?.bankName) && (
+          <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
+            <Text style={{ color: "#1e40af", fontWeight: 600 }}>
+              {typeof verificationData?.bankName === "string"
+                ? verificationData.bankName
+                : typeof verificationData?.loan?.bankName === "string"
+                  ? verificationData.loan.bankName
+                  : "Unknown Bank"}
+            </Text>
+          </section>
+        )}
+
       {/* Loading Indicator */}
       {formLoading && (
-        <Card style={{ marginBottom: 16, textAlign: 'center' }}>
+        <Card style={{ marginBottom: 16, textAlign: "center" }}>
           <Space>
             <span>Loading dynamic form schema...</span>
           </Space>
@@ -826,9 +957,9 @@ export const BusinessVerificationDetails: React.FC<
             autoSave={true}
             onEdit={handleDynamicSectionEdit}
             hasEditRequest={hasEditRequest}
-            sideBySideSections={['businessDetails']}
+            sideBySideSections={["businessDetails"]}
           />
-          
+
           {/* Photo Capture Section for Dynamic Form */}
           <section style={{ marginBottom: 24 }}>
             <Card title="Photo Capture">
@@ -839,36 +970,38 @@ export const BusinessVerificationDetails: React.FC<
                   gap: "16px",
                 }}
               >
-                {(dynamicFormData?.uploadedItems || []).map((item: any, idx: number) => {
-                  return (
-                    <div key={item.id} style={{ position: "relative" }}>
-                      <Image
-                        src={imageUrls[item.id] || ""}
-                        alt={`Photo ${idx + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          background: "rgba(0, 0, 0, 0.6)",
-                          color: "white",
-                          padding: "4px 8px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                {(dynamicFormData?.uploadedItems || []).map(
+                  (item: any, idx: number) => {
+                    return (
+                      <div key={item.id} style={{ position: "relative" }}>
+                        <Image
+                          src={imageUrls[item.id] || ""}
+                          alt={`Photo ${idx + 1}`}
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "rgba(0, 0, 0, 0.6)",
+                            color: "white",
+                            padding: "4px 8px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             </Card>
           </section>
@@ -967,36 +1100,38 @@ export const BusinessVerificationDetails: React.FC<
                   gap: "16px",
                 }}
               >
-                {legacyFormattedData?.uploadedItems?.map((item: any, idx: number) => {
-                  return (
-                    <div key={item.id} style={{ position: "relative" }}>
-                      <Image
-                        src={imageUrls[item.id] || ""}
-                        alt={`Photo ${idx + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          background: "rgba(0, 0, 0, 0.6)",
-                          color: "white",
-                          padding: "4px 8px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                {legacyFormattedData?.uploadedItems?.map(
+                  (item: any, idx: number) => {
+                    return (
+                      <div key={item.id} style={{ position: "relative" }}>
+                        <Image
+                          src={imageUrls[item.id] || ""}
+                          alt={`Photo ${idx + 1}`}
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "rgba(0, 0, 0, 0.6)",
+                            color: "white",
+                            padding: "4px 8px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             </Card>
           </section>
@@ -1018,9 +1153,9 @@ export const BusinessVerificationDetails: React.FC<
       </section>
 
       {/* Financial Analysis Section - Only for PD department */}
-      {currentDepartment === 'PD' && (
+      {currentDepartment === "PD" && (
         <section style={{ marginBottom: 24 }}>
-          <Card 
+          <Card
             title="Financial Analysis"
             extra={
               <Button
@@ -1031,309 +1166,426 @@ export const BusinessVerificationDetails: React.FC<
               />
             }
           >
-      <Form form={financialForm} layout="vertical" disabled={!!(verificationData?.financialAnalysis || verificationData?.verificationData?.financialAnalysis)}>
-            {/* Gross Profit Section */}
-            <Card title={`To Gross Profit - ₹${calculatedGrossProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
-              <Row gutter={[16, 8]}>
-                {/* Left side - All "To" fields */}
-                <Col span={12}>
-                  <Row gutter={[8, 8]}>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toOpeningStock" 
-                        label="To Opening Stock"
-                        rules={[createNonNegativeRule('Opening Stock')]}
-                      >
-                        <Input placeholder="Opening Stock" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toPurchase" 
-                        label="To Purchase"
-                        rules={[createNonNegativeRule('Purchase')]}
-                      >
-                        <Input placeholder="Purchase" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toCostOfServices" 
-                        label="To Cost of Services"
-                        rules={[createNonNegativeRule('Cost of Services')]}
-                      >
-                        <Input placeholder="Cost of Services" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toWages" 
-                        label="To Wages"
-                        rules={[createNonNegativeRule('Wages')]}
-                      >
-                        <Input placeholder="Wages" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toHamaliCharges" 
-                        label="To Hamali Charges"
-                        rules={[createNonNegativeRule('Hamali Charges')]}
-                      >
-                        <Input placeholder="Hamali Charges" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toManufacturingExpenses" 
-                        label="To Manufacturing Expenses"
-                        rules={[createNonNegativeRule('Manufacturing Expenses')]}
-                      >
-                        <Input placeholder="Manufacturing Expenses" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toPackingCharges" 
-                        label="To Packing Charges"
-                        rules={[createNonNegativeRule('Packing Charges')]}
-                      >
-                        <Input placeholder="Packing Charges" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Col>
-                {/* Right side - All "By" fields */}
-                <Col span={12}>
-                  <Row gutter={[8, 8]}>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="bySales" 
-                        label="By Sales"
-                        rules={[createNonNegativeRule('Sales')]}
-                      >
-                        <Input placeholder="Sales" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="byServices" 
-                        label="By Services"
-                        rules={[createNonNegativeRule('Services')]}
-                      >
-                        <Input placeholder="Services" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="byClosingStock" 
-                        label="By Closing Stock"
-                        rules={[createNonNegativeRule('Closing Stock')]}
-                      >
-                        <Input placeholder="Closing Stock" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Card>
-            {/* Net Profit Section */}
-            <Card title={`To Net Profit - ₹${calculatedNetProfit.toLocaleString()}`} size="small" style={{ marginBottom: 16 }}>
-              <Row gutter={[16, 8]}>
-                {/* Left side - All "To" fields */}
-                <Col span={12}>
-                  <Row gutter={[8, 8]}>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toSalaries" 
-                        label="To Salaries"
-                        rules={[createNonNegativeRule('Salaries')]}
-                      >
-                        <Input placeholder="Salaries" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toRent" 
-                        label="To Rent"
-                        rules={[createNonNegativeRule('Rent')]}
-                      >
-                        <Input placeholder="Rent" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toElectricityCharges" 
-                        label="To Electricity Charges"
-                        rules={[createNonNegativeRule('Electricity Charges')]}
-                      >
-                        <Input placeholder="Electricity Charges" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toPrintingStationery" 
-                        label="To Printing & Stationery"
-                        rules={[createNonNegativeRule('Printing & Stationery')]}
-                      >
-                        <Input placeholder="Printing & Stationery" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toTelephoneCharges" 
-                        label="To Telephone Charges"
-                        rules={[createNonNegativeRule('Telephone Charges')]}
-                      >
-                        <Input placeholder="Telephone Charges" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toPostageTelegram" 
-                        label="To Postage & Telegram"
-                        rules={[createNonNegativeRule('Postage & Telegram')]}
-                      >
-                        <Input placeholder="Postage & Telegram" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toOfficeMaintenance" 
-                        label="To Office Maintenance"
-                        rules={[createNonNegativeRule('Office Maintenance')]}
-                      >
-                        <Input placeholder="Office Maintenance" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toRepairsMaintenance" 
-                        label="To Repairs & Maintenance"
-                        rules={[createNonNegativeRule('Repairs & Maintenance')]}
-                      >
-                        <Input placeholder="Repairs & Maintenance" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toSadarExpenses" 
-                        label="To Sadar Expenses"
-                        rules={[createNonNegativeRule('Sadar Expenses')]}
-                      >
-                        <Input placeholder="Sadar Expenses" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toAuditFee" 
-                        label="To Audit Fee"
-                        rules={[createNonNegativeRule('Audit Fee')]}
-                      >
-                        <Input placeholder="Audit Fee" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toAdvertisement" 
-                        label="To Advertisement"
-                        rules={[createNonNegativeRule('Advertisement')]}
-                      >
-                        <Input placeholder="Advertisement" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toBankCharges" 
-                        label="To Bank Charges"
-                        rules={[createNonNegativeRule('Bank Charges')]}
-                      >
-                        <Input placeholder="Bank Charges" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toInsurance" 
-                        label="To Insurance"
-                        rules={[createNonNegativeRule('Insurance')]}
-                      >
-                        <Input placeholder="Insurance" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toDepreciation" 
-                        label="To Depreciation"
-                        rules={[createNonNegativeRule('Depreciation')]}
-                      >
-                        <Input placeholder="Depreciation" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="toInterestOnLoan" 
-                        label="To Interest on Loan"
-                        rules={[createNonNegativeRule('Interest on Loan')]}
-                      >
-                        <Input placeholder="Interest on Loan" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Col>
-                {/* Right side - All "By" fields */}
-                <Col span={12}>
-                  <Row gutter={[8, 8]}>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="byRentReceived" 
-                        label="By Rent Received"
-                        rules={[createNonNegativeRule('Rent Received')]}
-                      >
-                        <Input placeholder="Rent Received" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                      <Form.Item 
-                        name="byCommissionReceived" 
-                        label="By Commission Received"
-                        rules={[createNonNegativeRule('Commission Received')]}
-                      >
-                        <Input placeholder="Commission Received" type="number" min={0} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Card>
+            <Form
+              form={financialForm}
+              layout="vertical"
+              disabled={
+                !!(
+                  verificationData?.financialAnalysis ||
+                  verificationData?.verificationData?.financialAnalysis
+                )
+              }
+            >
+              {/* Gross Profit Section */}
+              <Card
+                title={`To Gross Profit - ₹${calculatedGrossProfit.toLocaleString()}`}
+                size="small"
+                style={{ marginBottom: 16 }}
+              >
+                <Row gutter={[16, 8]}>
+                  {/* Left side - All "To" fields */}
+                  <Col span={12}>
+                    <Row gutter={[8, 8]}>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toOpeningStock"
+                          label="To Opening Stock"
+                          rules={[createNonNegativeRule("Opening Stock")]}
+                        >
+                          <Input
+                            placeholder="Opening Stock"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toPurchase"
+                          label="To Purchase"
+                          rules={[createNonNegativeRule("Purchase")]}
+                        >
+                          <Input placeholder="Purchase" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toCostOfServices"
+                          label="To Cost of Services"
+                          rules={[createNonNegativeRule("Cost of Services")]}
+                        >
+                          <Input
+                            placeholder="Cost of Services"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toWages"
+                          label="To Wages"
+                          rules={[createNonNegativeRule("Wages")]}
+                        >
+                          <Input placeholder="Wages" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toHamaliCharges"
+                          label="To Hamali Charges"
+                          rules={[createNonNegativeRule("Hamali Charges")]}
+                        >
+                          <Input
+                            placeholder="Hamali Charges"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toManufacturingExpenses"
+                          label="To Manufacturing Expenses"
+                          rules={[
+                            createNonNegativeRule("Manufacturing Expenses"),
+                          ]}
+                        >
+                          <Input
+                            placeholder="Manufacturing Expenses"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toPackingCharges"
+                          label="To Packing Charges"
+                          rules={[createNonNegativeRule("Packing Charges")]}
+                        >
+                          <Input
+                            placeholder="Packing Charges"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Col>
+                  {/* Right side - All "By" fields */}
+                  <Col span={12}>
+                    <Row gutter={[8, 8]}>
+                      <Col span={24}>
+                        <Form.Item
+                          name="bySales"
+                          label="By Sales"
+                          rules={[createNonNegativeRule("Sales")]}
+                        >
+                          <Input placeholder="Sales" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="byServices"
+                          label="By Services"
+                          rules={[createNonNegativeRule("Services")]}
+                        >
+                          <Input placeholder="Services" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="byClosingStock"
+                          label="By Closing Stock"
+                          rules={[createNonNegativeRule("Closing Stock")]}
+                        >
+                          <Input
+                            placeholder="Closing Stock"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              </Card>
+              {/* Net Profit Section */}
+              <Card
+                title={`To Net Profit - ₹${calculatedNetProfit.toLocaleString()}`}
+                size="small"
+                style={{ marginBottom: 16 }}
+              >
+                <Row gutter={[16, 8]}>
+                  {/* Left side - All "To" fields */}
+                  <Col span={12}>
+                    <Row gutter={[8, 8]}>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toSalaries"
+                          label="To Salaries"
+                          rules={[createNonNegativeRule("Salaries")]}
+                        >
+                          <Input placeholder="Salaries" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toRent"
+                          label="To Rent"
+                          rules={[createNonNegativeRule("Rent")]}
+                        >
+                          <Input placeholder="Rent" type="number" min={0} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toElectricityCharges"
+                          label="To Electricity Charges"
+                          rules={[createNonNegativeRule("Electricity Charges")]}
+                        >
+                          <Input
+                            placeholder="Electricity Charges"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toPrintingStationery"
+                          label="To Printing & Stationery"
+                          rules={[
+                            createNonNegativeRule("Printing & Stationery"),
+                          ]}
+                        >
+                          <Input
+                            placeholder="Printing & Stationery"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toTelephoneCharges"
+                          label="To Telephone Charges"
+                          rules={[createNonNegativeRule("Telephone Charges")]}
+                        >
+                          <Input
+                            placeholder="Telephone Charges"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toPostageTelegram"
+                          label="To Postage & Telegram"
+                          rules={[createNonNegativeRule("Postage & Telegram")]}
+                        >
+                          <Input
+                            placeholder="Postage & Telegram"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toOfficeMaintenance"
+                          label="To Office Maintenance"
+                          rules={[createNonNegativeRule("Office Maintenance")]}
+                        >
+                          <Input
+                            placeholder="Office Maintenance"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toRepairsMaintenance"
+                          label="To Repairs & Maintenance"
+                          rules={[
+                            createNonNegativeRule("Repairs & Maintenance"),
+                          ]}
+                        >
+                          <Input
+                            placeholder="Repairs & Maintenance"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toSadarExpenses"
+                          label="To Sadar Expenses"
+                          rules={[createNonNegativeRule("Sadar Expenses")]}
+                        >
+                          <Input
+                            placeholder="Sadar Expenses"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toAuditFee"
+                          label="To Audit Fee"
+                          rules={[createNonNegativeRule("Audit Fee")]}
+                        >
+                          <Input
+                            placeholder="Audit Fee"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toAdvertisement"
+                          label="To Advertisement"
+                          rules={[createNonNegativeRule("Advertisement")]}
+                        >
+                          <Input
+                            placeholder="Advertisement"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toBankCharges"
+                          label="To Bank Charges"
+                          rules={[createNonNegativeRule("Bank Charges")]}
+                        >
+                          <Input
+                            placeholder="Bank Charges"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toInsurance"
+                          label="To Insurance"
+                          rules={[createNonNegativeRule("Insurance")]}
+                        >
+                          <Input
+                            placeholder="Insurance"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toDepreciation"
+                          label="To Depreciation"
+                          rules={[createNonNegativeRule("Depreciation")]}
+                        >
+                          <Input
+                            placeholder="Depreciation"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="toInterestOnLoan"
+                          label="To Interest on Loan"
+                          rules={[createNonNegativeRule("Interest on Loan")]}
+                        >
+                          <Input
+                            placeholder="Interest on Loan"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Col>
+                  {/* Right side - All "By" fields */}
+                  <Col span={12}>
+                    <Row gutter={[8, 8]}>
+                      <Col span={24}>
+                        <Form.Item
+                          name="byRentReceived"
+                          label="By Rent Received"
+                          rules={[createNonNegativeRule("Rent Received")]}
+                        >
+                          <Input
+                            placeholder="Rent Received"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item
+                          name="byCommissionReceived"
+                          label="By Commission Received"
+                          rules={[createNonNegativeRule("Commission Received")]}
+                        >
+                          <Input
+                            placeholder="Commission Received"
+                            type="number"
+                            min={0}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              </Card>
             </Form>
           </Card>
         </section>
       )}
 
       {/* Submit Financial Analysis Button - Only for PD department */}
-      {currentDepartment === 'PD' && (
+      {currentDepartment === "PD" && (
         <section style={{ marginBottom: 24 }}>
           <Card>
             <Row justify="end">
               <Col>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   size="small"
                   onClick={handleFinancialSubmit}
                   loading={loading}
                   disabled={loading || !!verificationData?.financialAnalysis}
                   style={{
-                    background: (loading || !!verificationData?.financialAnalysis) ? "#9ca3af" : "#1e40af",
+                    background:
+                      loading || !!verificationData?.financialAnalysis
+                        ? "#9ca3af"
+                        : "#1e40af",
                     border: "none",
                     borderRadius: "6px",
                     height: "32px",
                     fontSize: "14px",
                     fontWeight: "500",
-                    boxShadow: (loading || !!verificationData?.financialAnalysis) ? "none" : "0 2px 8px rgba(30, 64, 175, 0.3)",
-                    color: "#ffffff"
+                    boxShadow:
+                      loading || !!verificationData?.financialAnalysis
+                        ? "none"
+                        : "0 2px 8px rgba(30, 64, 175, 0.3)",
+                    color: "#ffffff",
                   }}
                 >
-                  {loading ? "Submitting..." : (!!verificationData?.financialAnalysis ? "Financial Analysis Already Submitted" : "Submit Financial Analysis")}
+                  {loading
+                    ? "Submitting..."
+                    : !!verificationData?.financialAnalysis
+                      ? "Financial Analysis Already Submitted"
+                      : "Submit Financial Analysis"}
                 </Button>
               </Col>
             </Row>
@@ -1346,7 +1598,7 @@ export const BusinessVerificationDetails: React.FC<
       {/* <Button icon={<EyeOutlined />} onClick={()=>{
           setOpen(true)
         }}>Preview</Button> */}
-      {currentDepartment === 'PD' ? (
+      {currentDepartment === "PD" ? (
         <Feedback
           disabled={hasEditRequest}
           verdict={verdict}

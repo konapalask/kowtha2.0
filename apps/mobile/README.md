@@ -82,6 +82,51 @@ You've successfully run and modified your React Native App. :partying_face:
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
+# Testing
+
+This project includes comprehensive automated testing for all 27 PD (Personal Discussion) forms.
+
+## Quick Start
+
+```sh
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+
+# Run all 27 banks validation
+npm run test:all-banks
+```
+
+## Test Suites
+
+- **Unit Tests** - Basic functionality and utilities
+- **Component Tests** - React component rendering and behavior
+- **Integration Tests** - Form submission and API integration
+- **Bank Validation** - Automated tests for all 27 bank schemas
+
+## Documentation
+
+- 📖 [Full Testing Guide](./TESTING.md) - Comprehensive testing documentation
+- ⚡ [Quick Reference](./TESTING_QUICK_REFERENCE.md) - Common commands and tips
+
+## Coverage Goals
+
+| Metric | Target |
+|--------|--------|
+| Statements | 60% |
+| Branches | 50% |
+| Functions | 50% |
+| Lines | 60% |
+
+## CI/CD
+
+Tests run automatically on every push and pull request. See GitHub Actions for results.
+
 # Troubleshooting
 
 If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.

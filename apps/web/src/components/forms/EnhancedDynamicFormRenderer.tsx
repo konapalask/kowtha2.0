@@ -1,32 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Form, 
-  Input, 
-  Select, 
-  DatePicker, 
-  InputNumber, 
-  Card, 
-  Row, 
-  Col, 
-  Button, 
-  Space, 
+import React, { useState, useEffect } from "react";
+import {
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  InputNumber,
+  Card,
+  Row,
+  Col,
+  Button,
+  Space,
   Switch,
   Descriptions,
   Typography,
   Divider,
   message,
-  Table
-} from 'antd';
-import { 
-  PlusOutlined, 
-  DeleteOutlined, 
+  Table,
+} from "antd";
+import {
+  PlusOutlined,
+  DeleteOutlined,
   EditOutlined,
   EyeOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined
-} from '@ant-design/icons';
-import { WebFormDefinition, WebSectionDefinition, WebFieldDefinition, WebFormData } from '@/types/webSchema';
-import { validateFormData } from '@/utils/mobileToWebSchemaConverter';
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
+import {
+  WebFormDefinition,
+  WebSectionDefinition,
+  WebFieldDefinition,
+  WebFormData,
+} from "@/types/webSchema";
+import { validateFormData } from "@/utils/mobileToWebSchemaConverter";
+import dayjs from "dayjs";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -41,11 +47,13 @@ interface EnhancedDynamicFormRendererProps {
   autoSave?: boolean;
   onEdit?: (sectionId: string) => void; // Callback when edit button is clicked
   hasEditRequest?: boolean; // Whether there's a pending edit request
-  layout?: 'vertical' | 'side-by-side'; // Layout option for form display
+  layout?: "vertical" | "side-by-side"; // Layout option for form display
   sideBySideSections?: string[]; // Specific sections that should use side-by-side layout
 }
 
-export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererProps> = ({
+export const EnhancedDynamicFormRenderer: React.FC<
+  EnhancedDynamicFormRendererProps
+> = ({
   schema,
   initialData = {},
   onSubmit,
@@ -55,21 +63,116 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   autoSave = true,
   onEdit,
   hasEditRequest = false,
-  layout = 'vertical',
+  layout = "vertical",
   sideBySideSections = [],
 }) => {
   const [form] = Form.useForm();
-  const [sectionValidation, setSectionValidation] = useState<{[key: string]: boolean}>({});
+  const [sectionValidation, setSectionValidation] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [formData, setFormData] = useState<WebFormData>(initialData);
+
+  // Helper to normalize dates in data (convert strings to dayjs objects for DatePicker)
+  const normalizeDatesForForm = (data: any, schema: WebFormDefinition): any => {
+    const normalized = { ...data };
+
+    schema.sections.forEach((section) => {
+      section.fields.forEach((field) => {
+        if (field.type === "date" && data[section.id]?.[field.id]) {
+          const dateValue = data[section.id][field.id];
+          if (typeof dateValue === "string") {
+            normalized[section.id] = {
+              ...normalized[section.id],
+              [field.id]: dayjs(dateValue),
+            };
+          }
+        }
+
+        // Handle dates in array fields
+        if (field.type === "array" && field.arrayItemFields) {
+          field.arrayItemFields.forEach((itemField) => {
+            if (
+              itemField.type === "date" &&
+              Array.isArray(data[section.id]?.[field.id])
+            ) {
+              normalized[section.id] = {
+                ...normalized[section.id],
+                [field.id]: data[section.id][field.id].map((item: any) => {
+                  if (
+                    item[itemField.id] &&
+                    typeof item[itemField.id] === "string"
+                  ) {
+                    return {
+                      ...item,
+                      [itemField.id]: dayjs(item[itemField.id]),
+                    };
+                  }
+                  return item;
+                }),
+              };
+            }
+          });
+        }
+
+        // Handle dates in object fields
+        if (field.type === "object" && field.objectFields) {
+          field.objectFields.forEach((objField) => {
+            if (
+              objField.type === "date" &&
+              data[section.id]?.[field.id]?.[objField.id]
+            ) {
+              const dateValue = data[section.id][field.id][objField.id];
+              if (typeof dateValue === "string") {
+                normalized[section.id] = {
+                  ...normalized[section.id],
+                  [field.id]: {
+                    ...normalized[section.id][field.id],
+                    [objField.id]: dayjs(dateValue),
+                  },
+                };
+              }
+            }
+          });
+        }
+      });
+    });
+
+    return normalized;
+  };
+
+  // Helper to normalize dates for submission (convert dayjs objects to ISO strings)
+  const normalizeDatesForSubmit = (data: any): any => {
+    const normalized = JSON.parse(JSON.stringify(data)); // Deep clone
+
+    const processValue = (value: any): any => {
+      if (dayjs.isDayjs(value)) {
+        return value.format("YYYY-MM-DD");
+      }
+      if (Array.isArray(value)) {
+        return value.map(processValue);
+      }
+      if (value && typeof value === "object") {
+        const processed: any = {};
+        Object.keys(value).forEach((key) => {
+          processed[key] = processValue(value[key]);
+        });
+        return processed;
+      }
+      return value;
+    };
+
+    return processValue(normalized);
+  };
 
   // Initialize form with initialData
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      console.log('Setting form values from initialData:', initialData);
-      form.setFieldsValue(initialData);
-      setFormData(initialData);
+      console.log("Setting form values from initialData:", initialData);
+      const normalizedData = normalizeDatesForForm(initialData, schema);
+      form.setFieldsValue(normalizedData);
+      setFormData(normalizedData);
     }
-  }, [initialData, form]);
+  }, [initialData, form, schema]);
 
   // Watch form values for auto-save and validation
   const formValues = Form.useWatch([], form);
@@ -84,11 +187,11 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
   // Helper function to validate non-empty strings
   const validateNonEmpty = (value: any): boolean => {
     if (value === null || value === undefined) return false;
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Check if string has at least one non-whitespace character
       return value.trim().length > 0;
     }
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return !isNaN(value);
     }
     return true; // For other types, consider them valid
@@ -96,28 +199,43 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
 
   const renderField = (field: WebFieldDefinition, sectionId: string) => {
     const isFieldReadOnly = readOnly || field.readOnly;
-    
+
     // For readOnly fields, render as plain text instead of form controls
     if (isFieldReadOnly) {
       const value = form.getFieldValue([sectionId, field.id]);
       const isEmpty = !validateNonEmpty(value);
-      const isEmptyString = typeof value === 'string' && value.trim() === '';
-      
+      const isEmptyString = typeof value === "string" && value.trim() === "";
+
       // Safely convert value to string to prevent React rendering errors
       const displayValue = (() => {
         if (isEmpty || isEmptyString) {
-          return field.required ? 'Please fill the required field' : '-';
+          return field.required ? "Please fill the required field" : "-";
         }
-        if (typeof value === 'object' && value !== null) {
+
+        // Handle dayjs/date objects
+        if (dayjs.isDayjs(value)) {
+          return value.format("DD-MM-YYYY");
+        }
+
+        // Handle boolean
+        if (field.type === "boolean" || typeof value === "boolean") {
+          return value ? "Yes" : "No";
+        }
+
+        if (typeof value === "object" && value !== null) {
           return JSON.stringify(value);
         }
-        return String(value || '-');
+        return String(value || "-");
       })();
-      
+
       return (
-        <Text 
-          type={(isEmpty || isEmptyString) && field.required ? "danger" : "secondary"} 
-          style={{ fontSize: '14px', padding: '4px 0' }}
+        <Text
+          type={
+            (isEmpty || isEmptyString) && field.required
+              ? "danger"
+              : "secondary"
+          }
+          style={{ fontSize: "14px", padding: "4px 0" }}
         >
           {displayValue}
         </Text>
@@ -137,49 +255,76 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
         message: `${field.label} is required`,
         validator: (_: any, value: any) => {
           if (!validateNonEmpty(value)) {
-            return Promise.reject(new Error(`Please enter at least one character for: ${field.label}`));
+            return Promise.reject(
+              new Error(
+                `Please enter at least one character for: ${field.label}`
+              )
+            );
           }
           return Promise.resolve();
-        }
+        },
       });
     }
 
     // Wrap field in Form.Item for validation
     const renderFieldInput = () => {
       switch (field.type) {
-        case 'text':
+        case "text":
           return <Input {...commonProps} />;
-        
-        case 'select':
+
+        case "select":
           return (
-            <Select 
-              {...commonProps} 
-              options={field.options?.map(opt => ({ label: opt, value: opt }))} 
+            <Select
+              {...commonProps}
+              options={field.options?.map((opt) => ({
+                label: opt,
+                value: opt,
+              }))}
               showSearch
               filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
               }
             />
           );
-        
-        case 'date':
-          return <DatePicker {...commonProps} style={{ width: '100%' }} />;
-        
-        case 'number':
-          return <InputNumber {...commonProps} style={{ width: '100%' }} />;
-        
-        case 'textarea':
+
+        case "date":
+          return (
+            <DatePicker
+              {...commonProps}
+              style={{ width: "100%" }}
+              format="DD-MM-YYYY"
+            />
+          );
+
+        case "number":
+          return <InputNumber {...commonProps} style={{ width: "100%" }} />;
+
+        case "textarea":
           return <TextArea {...commonProps} rows={4} />;
-        
-        case 'boolean':
+
+        case "boolean":
           return <Switch {...commonProps} />;
-        
-        case 'array':
-          return <DynamicArrayField field={field} sectionId={sectionId} readOnly={readOnly} />;
-        
-        case 'object':
-          return <DynamicObjectField field={field} sectionId={sectionId} readOnly={readOnly} />;
-        
+
+        case "array":
+          return (
+            <DynamicArrayField
+              field={field}
+              sectionId={sectionId}
+              readOnly={readOnly}
+            />
+          );
+
+        case "object":
+          return (
+            <DynamicObjectField
+              field={field}
+              sectionId={sectionId}
+              readOnly={readOnly}
+            />
+          );
+
         default:
           return <Input {...commonProps} />;
       }
@@ -196,11 +341,11 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     );
   };
 
-  const DynamicArrayField: React.FC<{field: WebFieldDefinition, sectionId: string, readOnly: boolean}> = ({ 
-    field, 
-    sectionId, 
-    readOnly 
-  }) => {
+  const DynamicArrayField: React.FC<{
+    field: WebFieldDefinition;
+    sectionId: string;
+    readOnly: boolean;
+  }> = ({ field, sectionId, readOnly }) => {
     const [items, setItems] = useState<any[]>(
       formData[sectionId]?.[field.id] || [{}]
     );
@@ -210,8 +355,8 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
       const dataItems = formData[sectionId]?.[field.id];
       if (dataItems && Array.isArray(dataItems) && dataItems.length > 0) {
         // Filter out empty objects
-        const validItems = dataItems.filter(item => 
-          item && Object.keys(item).length > 0
+        const validItems = dataItems.filter(
+          (item) => item && Object.keys(item).length > 0
         );
         if (validItems.length > 0) {
           setItems(validItems);
@@ -256,11 +401,13 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
           <Card key={index} size="small" style={{ marginBottom: 12 }}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Space
+                  style={{ width: "100%", justifyContent: "space-between" }}
+                >
                   <Text strong>{`${field.label} ${index + 1}`}</Text>
                   {!readOnly && !field.readOnly && items.length > 1 && (
-                    <Button 
-                      icon={<DeleteOutlined />} 
+                    <Button
+                      icon={<DeleteOutlined />}
                       onClick={() => removeItem(index)}
                       danger
                       size="small"
@@ -269,85 +416,111 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
                   )}
                 </Space>
               </Col>
-              
+
               {/* Dynamically render array item fields based on schema */}
-              {field.arrayItemFields && field.arrayItemFields.map((itemField: WebFieldDefinition) => {
-                const isItemFieldReadOnly = readOnly || itemField.readOnly;
-                
-                // Validation rules for array item fields
-                const itemValidationRules = [];
-                if (itemField.required) {
-                  itemValidationRules.push({
-                    required: true,
-                    message: `${itemField.label} is required`,
-                    validator: (_: any, value: any) => {
-                      if (!validateNonEmpty(value)) {
-                        return Promise.reject(new Error(`Please enter at least one character for: ${itemField.label}`));
-                      }
-                      return Promise.resolve();
-                    }
-                  });
-                }
-                
-                return (
-                  <Col span={12} key={itemField.id}>
-                    <div>
-                      <Text type="secondary" style={{ fontSize: '12px' }}>{itemField.label}</Text>
-                      {isItemFieldReadOnly ? (
-                        <div style={{ padding: '4px 0', fontSize: '14px' }}>
-                          {(() => {
-                            const itemValue = item[itemField.id];
-                            const isEmpty = !validateNonEmpty(itemValue);
-                            const isEmptyString = typeof itemValue === 'string' && itemValue.trim() === '';
-                            return (isEmpty || isEmptyString) && itemField.required ? (
-                              <Text type="danger">Please fill the required field</Text>
+              {field.arrayItemFields &&
+                field.arrayItemFields.map((itemField: WebFieldDefinition) => {
+                  const isItemFieldReadOnly = readOnly || itemField.readOnly;
+
+                  // Validation rules for array item fields
+                  const itemValidationRules = [];
+                  if (itemField.required) {
+                    itemValidationRules.push({
+                      required: true,
+                      message: `${itemField.label} is required`,
+                      validator: (_: any, value: any) => {
+                        if (!validateNonEmpty(value)) {
+                          return Promise.reject(
+                            new Error(
+                              `Please enter at least one character for: ${itemField.label}`
+                            )
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    });
+                  }
+
+                  return (
+                    <Col span={12} key={itemField.id}>
+                      <div>
+                        <Text type="secondary" style={{ fontSize: "12px" }}>
+                          {itemField.label}
+                        </Text>
+                        {isItemFieldReadOnly ? (
+                          <div style={{ padding: "4px 0", fontSize: "14px" }}>
+                            {(() => {
+                              const itemValue = item[itemField.id];
+                              const isEmpty = !validateNonEmpty(itemValue);
+                              const isEmptyString =
+                                typeof itemValue === "string" &&
+                                itemValue.trim() === "";
+                              return (isEmpty || isEmptyString) &&
+                                itemField.required ? (
+                                <Text type="danger">
+                                  Please fill the required field
+                                </Text>
+                              ) : (
+                                <Text type="secondary">{itemValue || "-"}</Text>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <Form.Item
+                            name={[sectionId, field.id, index, itemField.id]}
+                            rules={itemValidationRules}
+                            style={{ marginBottom: 0 }}
+                          >
+                            {itemField.type === "number" ? (
+                              <InputNumber
+                                placeholder={itemField.label}
+                                style={{ width: "100%" }}
+                              />
+                            ) : itemField.type === "select" ? (
+                              <Select
+                                placeholder={itemField.label}
+                                options={itemField.options?.map(
+                                  (opt: string) => ({ label: opt, value: opt })
+                                )}
+                                style={{ width: "100%" }}
+                                showSearch
+                                filterOption={(input, option) =>
+                                  (option?.label ?? "")
+                                    .toLowerCase()
+                                    .includes(input.toLowerCase())
+                                }
+                              />
+                            ) : itemField.type === "date" ? (
+                              <DatePicker
+                                placeholder={itemField.label}
+                                style={{ width: "100%" }}
+                                format="DD-MM-YYYY"
+                              />
+                            ) : itemField.type === "boolean" ? (
+                              <Switch />
+                            ) : itemField.type === "textarea" ? (
+                              <TextArea
+                                placeholder={itemField.label}
+                                rows={2}
+                              />
                             ) : (
-                              <Text type="secondary">{itemValue || '-'}</Text>
-                            );
-                          })()}
-                        </div>
-                      ) : (
-                        <Form.Item
-                          name={[sectionId, field.id, index, itemField.id]}
-                          rules={itemValidationRules}
-                          style={{ marginBottom: 0 }}
-                        >
-                          {itemField.type === 'number' ? (
-                            <InputNumber
-                              placeholder={itemField.label}
-                              style={{ width: '100%' }}
-                            />
-                          ) : itemField.type === 'select' ? (
-                            <Select
-                              placeholder={itemField.label}
-                              options={itemField.options?.map((opt: string) => ({ label: opt, value: opt }))}
-                              style={{ width: '100%' }}
-                            />
-                          ) : itemField.type === 'textarea' ? (
-                            <TextArea
-                              placeholder={itemField.label}
-                              rows={2}
-                            />
-                          ) : (
-                            <Input
-                              placeholder={itemField.label}
-                            />
-                          )}
-                        </Form.Item>
-                      )}
-                    </div>
-                  </Col>
-                );
-              })}
+                              <Input placeholder={itemField.label} />
+                            )}
+                          </Form.Item>
+                        )}
+                      </div>
+                    </Col>
+                  );
+                })}
             </Row>
           </Card>
         ))}
         {!readOnly && !field.readOnly && (
-          <Button 
-            icon={<PlusOutlined />} 
+          <Button
+            icon={<PlusOutlined />}
             onClick={addItem}
             type="dashed"
-            style={{ width: '100%', marginTop: 8 }}
+            style={{ width: "100%", marginTop: 8 }}
           >
             Add {field.label}
           </Button>
@@ -356,17 +529,17 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     );
   };
 
-  const DynamicObjectField: React.FC<{field: WebFieldDefinition, sectionId: string, readOnly: boolean}> = ({ 
-    field, 
-    sectionId, 
-    readOnly 
-  }) => {
+  const DynamicObjectField: React.FC<{
+    field: WebFieldDefinition;
+    sectionId: string;
+    readOnly: boolean;
+  }> = ({ field, sectionId, readOnly }) => {
     const objectData = formData[sectionId]?.[field.id] || {};
 
     // Update object data when formData changes (for initialData loading)
     useEffect(() => {
       const dataObject = formData[sectionId]?.[field.id];
-      if (dataObject && typeof dataObject === 'object') {
+      if (dataObject && typeof dataObject === "object") {
         // Form will handle the updates automatically
       }
     }, [formData, sectionId, field.id]);
@@ -382,33 +555,44 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
 
       const renderObjectFieldInput = () => {
         switch (objectField.type) {
-          case 'text':
+          case "text":
             return <Input {...commonProps} />;
-          
-          case 'select':
+
+          case "select":
             return (
-              <Select 
-                {...commonProps} 
-                options={objectField.options?.map(opt => ({ label: opt, value: opt }))} 
+              <Select
+                {...commonProps}
+                options={objectField.options?.map((opt) => ({
+                  label: opt,
+                  value: opt,
+                }))}
                 showSearch
                 filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
                 }
               />
             );
-          
-          case 'date':
-            return <DatePicker {...commonProps} style={{ width: '100%' }} />;
-          
-          case 'number':
-            return <InputNumber {...commonProps} style={{ width: '100%' }} />;
-          
-          case 'textarea':
+
+          case "date":
+            return (
+              <DatePicker
+                {...commonProps}
+                style={{ width: "100%" }}
+                format="DD-MM-YYYY"
+              />
+            );
+
+          case "number":
+            return <InputNumber {...commonProps} style={{ width: "100%" }} />;
+
+          case "textarea":
             return <TextArea {...commonProps} rows={4} />;
-          
-          case 'boolean':
+
+          case "boolean":
             return <Switch {...commonProps} />;
-          
+
           default:
             return <Input {...commonProps} />;
         }
@@ -419,16 +603,27 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
           key={objectField.id}
           name={[sectionId, field.id, objectField.id]}
           label={objectField.label}
-          rules={objectField.required ? [
-            {
-              validator: (_, value) => {
-                if (!value || (typeof value === 'string' && value.trim() === '')) {
-                  return Promise.reject(new Error(`Please enter at least one character for: ${objectField.label}`));
-                }
-                return Promise.resolve();
-              }
-            }
-          ] : []}
+          rules={
+            objectField.required
+              ? [
+                  {
+                    validator: (_, value) => {
+                      if (
+                        !value ||
+                        (typeof value === "string" && value.trim() === "")
+                      ) {
+                        return Promise.reject(
+                          new Error(
+                            `Please enter at least one character for: ${objectField.label}`
+                          )
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]
+              : []
+          }
           style={{ marginBottom: 16 }}
         >
           {renderObjectFieldInput()}
@@ -437,11 +632,20 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     };
 
     return (
-      <div style={{ border: '1px solid #d9d9d9', borderRadius: 6, padding: 16, backgroundColor: '#fafafa' }}>
-        <Text strong style={{ marginBottom: 16, display: 'block' }}>
+      <div
+        style={{
+          border: "1px solid #d9d9d9",
+          borderRadius: 6,
+          padding: 16,
+          backgroundColor: "#fafafa",
+        }}
+      >
+        <Text strong style={{ marginBottom: 16, display: "block" }}>
           {field.label}
         </Text>
-        {field.objectFields?.map(objectField => renderObjectField(objectField))}
+        {field.objectFields?.map((objectField) =>
+          renderObjectField(objectField)
+        )}
       </div>
     );
   };
@@ -451,10 +655,10 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     if (!sectionData) return false;
 
     // Check if required fields are filled
-    const requiredFields = section.fields.filter(field => field.required);
-    const filledRequiredFields = requiredFields.filter(field => {
+    const requiredFields = section.fields.filter((field) => field.required);
+    const filledRequiredFields = requiredFields.filter((field) => {
       const value = sectionData[field.id];
-      return value !== undefined && value !== null && value !== '';
+      return value !== undefined && value !== null && value !== "";
     });
 
     return filledRequiredFields.length === requiredFields.length;
@@ -462,14 +666,14 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
 
   const renderSection = (section: WebSectionDefinition) => {
     const isValid = validateSection(section);
-    
+
     // Check if this specific section should use side-by-side layout
     const useSideBySideForSection = sideBySideSections.includes(section.id);
-    
+
     // Separate array and non-array fields
-    const arrayFields = section.fields.filter(f => f.type === 'array');
-    const regularFields = section.fields.filter(f => f.type !== 'array');
-    
+    const arrayFields = section.fields.filter((f) => f.type === "array");
+    const regularFields = section.fields.filter((f) => f.type !== "array");
+
     return (
       <section key={section.id} style={{ marginBottom: 24 }}>
         <Card
@@ -479,9 +683,11 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
             </Space>
           }
           extra={
-            onEdit && !readOnly && !hasEditRequest && (
-              <Button 
-                type="text" 
+            onEdit &&
+            !readOnly &&
+            !hasEditRequest && (
+              <Button
+                type="text"
                 icon={<EditOutlined />}
                 onClick={() => onEdit(section.id)}
                 disabled={hasEditRequest}
@@ -493,38 +699,65 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
         >
           {/* Regular fields in Descriptions table */}
           {regularFields.length > 0 && (
-            <Descriptions 
-              bordered 
-              column={2} 
-              size="middle" 
+            <Descriptions
+              bordered
+              column={2}
+              size="middle"
               style={{ marginBottom: arrayFields.length > 0 ? 16 : 0 }}
             >
-              {regularFields.map(field => {
+              {regularFields.map((field) => {
                 const value = form.getFieldValue([section.id, field.id]);
                 const isEmpty = !validateNonEmpty(value);
-                const isEmptyString = typeof value === 'string' && value.trim() === '';
-                
-                
+                const isEmptyString =
+                  typeof value === "string" && value.trim() === "";
+
+                // Format the display value
+                const getDisplayValue = () => {
+                  if ((isEmpty || isEmptyString) && field.required) {
+                    return (
+                      <Text type="danger">Please fill the required field</Text>
+                    );
+                  }
+
+                  // Handle dates
+                  if (dayjs.isDayjs(value)) {
+                    return value.format("DD-MM-YYYY");
+                  }
+
+                  // Handle booleans
+                  if (field.type === "boolean" || typeof value === "boolean") {
+                    return <Text>{value ? "Yes" : "No"}</Text>;
+                  }
+
+                  // Handle objects
+                  if (typeof value === "object" && value !== null) {
+                    return (
+                      <Text type="secondary">{JSON.stringify(value)}</Text>
+                    );
+                  }
+
+                  // Handle empty values
+                  if (!value && value !== 0 && value !== false) {
+                    return <Text type="secondary">-</Text>;
+                  }
+
+                  return value;
+                };
+
                 return (
-                  <Descriptions.Item 
-                    key={field.id} 
+                  <Descriptions.Item
+                    key={field.id}
                     label={
                       <Space>
                         <span>{field.label}</span>
-                        {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.required && (
+                          <span style={{ color: "red" }}>*</span>
+                        )}
                       </Space>
                     }
-                    span={field.type === 'textarea' ? 2 : 1}
+                    span={field.type === "textarea" ? 2 : 1}
                   >
-                    {(isEmpty || isEmptyString) && field.required ? (
-                      <Text type="danger">Please fill the required field</Text>
-                    ) : (
-                      typeof value === 'object' && value !== null 
-                        ? <Text type="secondary">{JSON.stringify(value)}</Text>
-                        : typeof value === 'boolean' 
-                          ? <Text>{value ? 'Yes' : 'No'}</Text>
-                          : value || <Text type="secondary">-</Text>
-                    )}
+                    {getDisplayValue()}
                   </Descriptions.Item>
                 );
               })}
@@ -532,58 +765,95 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
           )}
 
           {/* Array fields rendered as tables (FI style) */}
-          {arrayFields.map(field => {
+          {arrayFields.map((field) => {
             const rawData = form.getFieldValue([section.id, field.id]);
             const arrayData = Array.isArray(rawData) ? rawData : [];
-            
+
             // Build table columns from arrayItemFields
-            const columns = field.arrayItemFields?.map((itemField: WebFieldDefinition) => ({
-              title: itemField.label,
-              dataIndex: itemField.id,
-              key: itemField.id,
-              render: (text: any) => {
-                const isEmpty = !validateNonEmpty(text);
-                const isEmptyString = typeof text === 'string' && text.trim() === '';
-                if ((isEmpty || isEmptyString) && itemField.required) {
-                  return <Text type="danger">Please fill the required field</Text>;
-                }
-                return text || <Text type="secondary">-</Text>;
-              },
-            })) || [];
-            
+            const columns =
+              field.arrayItemFields?.map((itemField: WebFieldDefinition) => ({
+                title: itemField.label,
+                dataIndex: itemField.id,
+                key: itemField.id,
+                render: (text: any) => {
+                  const isEmpty = !validateNonEmpty(text);
+                  const isEmptyString =
+                    typeof text === "string" && text.trim() === "";
+
+                  if ((isEmpty || isEmptyString) && itemField.required) {
+                    return (
+                      <Text type="danger">Please fill the required field</Text>
+                    );
+                  }
+
+                  // Handle dates
+                  if (dayjs.isDayjs(text)) {
+                    return text.format("DD-MM-YYYY");
+                  }
+
+                  // Handle booleans
+                  if (
+                    itemField.type === "boolean" ||
+                    typeof text === "boolean"
+                  ) {
+                    return text ? "Yes" : "No";
+                  }
+
+                  // Handle empty
+                  if (!text && text !== 0 && text !== false) {
+                    return <Text type="secondary">-</Text>;
+                  }
+
+                  return text;
+                },
+              })) || [];
+
             return (
-              <div key={field.id} style={{ marginTop: regularFields.length > 0 ? 16 : 0 }}>
-                <div style={{ 
-                  fontWeight: 600,
-                  marginBottom: 8,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
+              <div
+                key={field.id}
+                style={{ marginTop: regularFields.length > 0 ? 16 : 0 }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   {(() => {
-                    const sectionLabel = (section.label || '').trim().toLowerCase();
-                    const fieldLabel = (field.label || '').trim().toLowerCase();
-                    const isDuplicateHeading = fieldLabel !== '' && fieldLabel === sectionLabel;
+                    const sectionLabel = (section.label || "")
+                      .trim()
+                      .toLowerCase();
+                    const fieldLabel = (field.label || "").trim().toLowerCase();
+                    const isDuplicateHeading =
+                      fieldLabel !== "" && fieldLabel === sectionLabel;
                     if (isDuplicateHeading) return null; // avoid duplicate heading when same as section label
                     return (
                       <span>
                         {field.label}
-                        {field.required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
+                        {field.required && (
+                          <span style={{ color: "red", marginLeft: 4 }}>*</span>
+                        )}
                       </span>
                     );
                   })()}
                 </div>
                 <Table
-                  dataSource={arrayData.filter((item: any) => 
-                    item && 
-                    typeof item === 'object' && 
-                    Object.keys(item).length > 0
+                  dataSource={arrayData.filter(
+                    (item: any) =>
+                      item &&
+                      typeof item === "object" &&
+                      Object.keys(item).length > 0
                   )}
                   columns={columns}
                   pagination={false}
                   bordered
-                  locale={{ emptyText: `No ${field.label.toLowerCase()} added yet` }}
-                  rowKey={(record, index) => index?.toString() || '0'}
+                  locale={{
+                    emptyText: `No ${field.label.toLowerCase()} added yet`,
+                  }}
+                  rowKey={(record, index) => index?.toString() || "0"}
                   size="middle"
                 />
               </div>
@@ -598,47 +868,61 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     // First run the schema validation
     const validation = validateFormData(values, schema);
     if (!validation.isValid) {
-      message.error(`Please fix the following errors: ${validation.errors.join(', ')}`);
+      message.error(
+        `Please fix the following errors: ${validation.errors.join(", ")}`
+      );
       return;
     }
-    
+
     // Additional validation for empty strings/spaces - only submit if at least one non-whitespace character
     const additionalErrors: string[] = [];
-    schema.sections.forEach(section => {
-      section.fields.forEach(field => {
+    schema.sections.forEach((section) => {
+      section.fields.forEach((field) => {
         if (field.required) {
           const value = values[section.id]?.[field.id];
-          if (!validateNonEmpty(value)) {
-            additionalErrors.push(`Please enter at least one character for: ${field.label}`);
+          if (!validateNonEmpty(value) && !dayjs.isDayjs(value)) {
+            additionalErrors.push(
+              `Please enter at least one character for: ${field.label}`
+            );
           }
         }
-        
+
         // Check array fields
-        if (field.type === 'array' && field.arrayItemFields) {
+        if (field.type === "array" && field.arrayItemFields) {
           const arrayValue = values[section.id]?.[field.id];
           if (Array.isArray(arrayValue)) {
             arrayValue.forEach((item: any, index: number) => {
-              field.arrayItemFields?.forEach(itemField => {
-                  if (itemField.required) {
-                    const itemValue = item[itemField.id];
-                    if (!validateNonEmpty(itemValue)) {
-                      additionalErrors.push(`Please enter at least one character for: ${field.label}[${index + 1}].${itemField.label}`);
-                    }
+              field.arrayItemFields?.forEach((itemField) => {
+                if (itemField.required) {
+                  const itemValue = item[itemField.id];
+                  if (
+                    !validateNonEmpty(itemValue) &&
+                    !dayjs.isDayjs(itemValue)
+                  ) {
+                    additionalErrors.push(
+                      `Please enter at least one character for: ${field.label}[${index + 1}].${itemField.label}`
+                    );
                   }
+                }
               });
             });
           }
         }
       });
     });
-    
+
     if (additionalErrors.length > 0) {
-      message.error(`Please fix the following errors: ${additionalErrors.join(', ')}`);
+      message.error(
+        `Please fix the following errors: ${additionalErrors.join(", ")}`
+      );
       return;
     }
-    
+
+    // Normalize dates before submission (convert dayjs to strings)
+    const normalizedValues = normalizeDatesForSubmit(values);
+
     // Only submit if validation passes (at least one non-whitespace character)
-    onSubmit(values);
+    onSubmit(normalizedValues);
   };
 
   const handleReset = () => {
@@ -650,9 +934,9 @@ export const EnhancedDynamicFormRenderer: React.FC<EnhancedDynamicFormRendererPr
     <div>
       {/* Header card removed as requested */}
 
-      <Form 
-        form={form} 
-        layout="vertical" 
+      <Form
+        form={form}
+        layout="vertical"
         onFinish={handleSubmit}
         initialValues={initialData}
       >
