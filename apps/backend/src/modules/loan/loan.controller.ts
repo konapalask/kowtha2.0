@@ -25,7 +25,7 @@ import { VerificationType, LoanStatus, UserRole, VerificationStatus,
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 import { PDTemplateService } from './templates/pd-templates.service';
-import { formSchema } from 'src/forms';
+import { formSchema } from './forms-schema';
 
 @ApiTags('loans')
 @Controller('loans')
