@@ -82,6 +82,8 @@ function main() {
     '  ' + mapEntries.join(',\n  '),
     '} as const;\n',
     'export type FormSchema = typeof formSchema;\n',
+    'export type BankName = keyof typeof formSchema;\n',
+    'export const BANK_NAMES = Object.keys(formSchema) as BankName[];\n',
   ].join('\n');
 
   fs.writeFileSync(path.join(outDir, 'index.ts'), indexTs, 'utf-8');

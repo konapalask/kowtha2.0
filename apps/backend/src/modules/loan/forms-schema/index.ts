@@ -57,3 +57,5 @@ export const formSchema = {
 } as const;
 
 export type FormSchema = typeof formSchema;
+export type BankName = keyof typeof formSchema;
+export const BANK_NAMES = Object.keys(formSchema) as BankName[];

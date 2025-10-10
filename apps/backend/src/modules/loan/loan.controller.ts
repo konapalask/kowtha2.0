@@ -25,7 +25,7 @@ import { VerificationType, LoanStatus, UserRole, VerificationStatus,
 import { Controller, Post, Get, Body, Param, UseGuards, Request, UseInterceptors, 
           UploadedFile, Query, BadRequestException, Patch, Res, Delete } from '@nestjs/common';
 import { PDTemplateService } from './templates/pd-templates.service';
-import { formSchema } from './forms-schema';
+import { formSchema, BANK_NAMES } from './forms-schema';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -967,17 +967,37 @@ export class LoanController {
   }
 
   
+  @Get('banks')
+  @Roles(All)
+  @ApiOperation({ summary: 'Get list of supported bank names' })
+  @ApiResponse({ status: 200, description: 'Bank names fetched successfully' })
+  async getBanks() {
+    return {
+      status: 200,
+      message: 'Bank names fetched successfully',
+      data: BANK_NAMES,
+    };
+  }
+
   @Get('get-bank-forms')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.SupportExecutive, UserRole.VerificationExecutive, UserRole.OperationsExecutive)
+  @Roles(All)
   @ApiOperation({ summary: 'Get bank forms' })
   @ApiResponse({ status: 200, description: 'Bank forms fetched successfully' })
   async getBankForms(@Query('bankName') bankName: string, @Query('type') type: string) {
-    if(type === 'banks') {
+    // Optional legacy support for type=banks
+    if (type === 'banks') {
       return {
         status: 200,
         message: 'Bank forms fetched successfully',
-        data: Object.keys(formSchema)
-      }
+        data: BANK_NAMES,
+      };
+    }
+    if (!bankName || !Object.prototype.hasOwnProperty.call(formSchema, bankName)) {
+      return {
+        status: 400,
+        message: 'Invalid or unsupported bank name',
+        data: null,
+      };
     }
     const result = formSchema[bankName];
     return {
