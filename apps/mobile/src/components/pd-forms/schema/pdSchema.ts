@@ -63,9 +63,9 @@ export async function loadMobilePDFormsSchema(
 
     try {
       const response = await getPDSchema(bankName);
-      const schema = await response.data;
+      // const schema = await response.data;
+      const schema = getFormConfigByBank(bankName);
       cachedSchema[bankName] = schema;
-      console.log('schema', schema);
       return schema;
     } catch (fetchError) {
       console.error('Failed to fetch schema from backend:', fetchError);
