@@ -433,6 +433,134 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
       </table>
     </div>
 
+  <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">FINANCIAL ANALYSIS</td></tr>
+        <tr>
+          <th>Particulars</th>
+          <th>Estimations</th>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Opening Stock</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.openingStock || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Purchase</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.purchase || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Cost of Services</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.costOfServices || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Wages</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.wages || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Hamali Charges</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.hamaliCharges || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Manufacturing Expenses</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.manufacturingExpenses || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Packing Charges</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.packingCharges || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Sales</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.sales || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Services</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.services || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Closing Stock</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.closingStock || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Salaries</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.salaries || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Rent</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.rent || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Electricity Charges</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.electricityCharges || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Printing Stationery</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.printingStationery || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Telephone Charges</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.telephoneCharges || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Postage Telegram</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.postageTelegram || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Office Maintenance</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.officeMaintenance || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Repairs Maintenance</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.repairsMaintenance || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Sadar Expenses</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.sadarExpenses || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Audit Fee</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.auditFee || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Advertisement</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.advertisement || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Bank Charges</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.bankCharges || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Insurance</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.insurance || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Depreciation</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.depreciation || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Interest On Loan</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.interestOnLoan || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Rent Received</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.rentReceived || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Commission Received</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.commissionReceived || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Net Profit</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.netProfit || 0}</span></td>
+        </tr>
+        <tr>
+          <td><span class="var-value">To Gross Profit</span></td>
+          <td><span class="var-value">${html_data.financialAnalysis?.grossProfit || 0}</span></td>
+        </tr>
+      </table>
+    </div>
+
     <div style="page-break-before: always;"></div>
 
     <div class="align-wrapper">
