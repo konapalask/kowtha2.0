@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -588,7 +590,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       <BackButton
         navigation={navigation}
         title={`PD - ${bankName}`}
@@ -598,7 +603,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         <CollapsibleSection
           title="Applicant asked to postpone?"
           onToggle={() => toggleSection('investigable')}
@@ -720,6 +726,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       onUploadedItemsChange={handleUploadedItemsChange}
                       initialItems={sectionData?.uploadedItems ?? []}
                       loanId={item?.id || item?.verificationId}
+                      maxUploads={50}
                     />
                   </View>
                 )}
@@ -738,7 +745,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           </>
         )}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
