@@ -9,8 +9,8 @@ import { pdBaseTemplate } from './pd-base.tempate';
 export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
   const recommendationStyles: Record<string, string> = {
-    positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-    negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+    Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+    Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
     credit_refer: '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
   };
 

@@ -128,7 +128,7 @@ export class PDTemplateService {
           }
     
           const verification = loan.verifications[0];
-          console.log(verification, "==================");
+          
           const bankName = loan.bankName;
           
           const verificationData: any = verification.verificationData;
