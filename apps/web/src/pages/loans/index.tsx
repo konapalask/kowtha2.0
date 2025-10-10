@@ -252,12 +252,6 @@ export default function Loans() {
         width: 100,
       },
       {
-        title: "Bank Name",
-        dataIndex: "bankName",
-        key: "bankName",
-        width: 120,
-      },
-      {
         title: "Status",
         dataIndex: "status",
         key: "status",
@@ -286,6 +280,15 @@ export default function Loans() {
         width: 120,
       },
     ];
+
+    if (currentDepartment === 'PD') {
+      baseColumns.push({
+        title: "Bank Name",
+        dataIndex: "bankName",
+        key: "bankName",
+        width: 120,
+      });
+    }
 
     // If current department is 'PD', only show Business column
     if (currentDepartment === 'PD') {

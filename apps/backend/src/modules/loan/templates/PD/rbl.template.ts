@@ -321,7 +321,6 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
     <div style="page-break-before: always;"></div>
 
-
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="7" class="section-header">Loan Details</td></tr>
@@ -385,6 +384,25 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
     <div class="align-wrapper">
       <table class="section-table">
+        <tr><td colspan="7" class="section-header">Own Contribution</td></tr>
+        <tr>
+          <th>Particulars</th>
+          <th>Remarks</th>
+        </tr>
+        </tr>
+        ${Array.isArray(verificationData.ownContributions.ownContributions) && verificationData.ownContributions.ownContributions.length > 0
+          ? verificationData.ownContributions.ownContributions.map(customer => `
+            <tr>
+              <td><span class="var-value">${customer.particulars || ''}</span></td>
+              <td><span class="var-value">${customer.remarks || ''}</span></td>
+            </tr>
+          `).join('')
+          : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'}
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
         <tr><td colspan="7" class="section-header">Net Worth</td></tr>
         <tr>
           <th>Type of Property/Other investments</th>
@@ -415,11 +433,13 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
       </table>
     </div>
 
+    <div style="page-break-before: always;"></div>
+
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
         <tr>
-          <th>Remarks</th>
+          <th>Synopsis</th>
           <td colspan="5">
             <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
               ${html_data.path || ''}
@@ -447,21 +467,3 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
   `;
 }
 
-// <div class="align-wrapper">
-// <table class="section-table">
-//   <tr><td colspan="7" class="section-header">Own Contribution</td></tr>
-//   <tr>
-//     <th>Particulars</th>
-//     <th>Remarks</th>
-//   </tr>
-//   </tr>
-//   ${Array.isArray(verificationData.ownContributions.ownContributions) && verificationData.ownContributions.ownContributions.length > 0
-//     ? verificationData.ownContributions.ownContributions.map(customer => `
-//       <tr>
-//         <td><span class="var-value">${customer.particulars || ''}</span></td>
-//         <td><span class="var-value">${customer.remarks || ''}</span></td>
-//       </tr>
-//     `).join('')
-//     : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'}
-// </table>
-// </div>

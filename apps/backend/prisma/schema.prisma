@@ -57,6 +57,7 @@ enum VerificationStatus {
 enum ApprovedStatus {
   Positive
   Negative
+  CreditRefer
 }
 
 enum LoanStatus {
