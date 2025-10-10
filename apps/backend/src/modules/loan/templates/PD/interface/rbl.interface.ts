@@ -107,6 +107,13 @@ export interface RBLInterface {
     }[];
   };
 
+  ownContributions?: {
+    ownContributions: {
+      particulars: string;
+      remarks: string;
+    }[];
+  };
+
   otherSourcesOfIncome?: {
     otherSourcesOfIncome: {
       details: string;
