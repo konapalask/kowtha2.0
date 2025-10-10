@@ -1,5 +1,5 @@
 export interface RBLInterface {
-  netWorth: {
+  netWorth?: {
     netWorth: {
       ownerName: string;
       typeOfProperty: string;
@@ -8,7 +8,7 @@ export interface RBLInterface {
     }[];
   };
 
-  caseDetails: {
+  caseDetails?: {
     contactNo: string;
     personMet: string;
     coApplicant: string;
@@ -18,11 +18,11 @@ export interface RBLInterface {
     referenceNumber: string;
   };
 
-  particulars: {
+  particulars?: {
     coordinates: string;
   };
 
-  loansDetails: {
+  loansDetails?: {
     loansDetails: {
       emi: number;
       pos: string;
@@ -33,13 +33,13 @@ export interface RBLInterface {
     }[];
   };
 
-  familyDetails: {
+  familyDetails?: {
     aboutApplicant: string;
     aboutCoApplicant: string;
     andTheirFamilyDetails: string;
   };
 
-  outputsSupply: {
+  outputsSupply?: {
     creditTerms: string;
     marketForOutput: string;
     modeOfMarketing: string;
@@ -47,7 +47,7 @@ export interface RBLInterface {
     stockOfFinishedGoods: string;
   };
 
-  uploadedItems: {
+  uploadedItems?: {
     id: string;
     uri: string;
     type: string;
@@ -61,7 +61,7 @@ export interface RBLInterface {
     isOverlayNeeded: boolean;
   }[];
 
-  businessDetails: {
+  businessDetails?: {
     margins: string;
     gstNumber: string;
     legalName: string;
@@ -81,13 +81,13 @@ export interface RBLInterface {
     documentsObserved: string;
   };
 
-  employeeDetails: {
+  employeeDetails?: {
     pfEsiApplied: string;
     noOfEmployees: number;
     salaryDetails: number;
   };
 
-  inputsPurchases: {
+  inputsPurchases?: {
     orderCycle: string;
     creditTerms: string;
     avgOrderQnty: number;
@@ -96,14 +96,7 @@ export interface RBLInterface {
     purchaseDetails: string;
   };
 
-  // ownContributions: {
-  //   ownContributions: {
-  //     remarks: string;
-  //     particulars: string;
-  //   }[];
-  // };
-
-  businessOwnerDetails: {
+  businessOwnerDetails?: {
     businessOwnerDetails: {
       age: number;
       name: string;
@@ -114,28 +107,28 @@ export interface RBLInterface {
     }[];
   };
 
-  otherSourcesOfIncome: {
+  otherSourcesOfIncome?: {
     otherSourcesOfIncome: {
       details: string;
       sourceOfIncome: string;
     }[];
   };
 
-  tradeReferencesCustomers: {
+  tradeReferencesCustomers?: {
     customers: {
       contactDetails: string;
       nameOfCustomer: string;
     }[];
   };
 
-  tradeReferencesSuppliers: {
+  tradeReferencesSuppliers?: {
     suppliers: {
       contactDetails: string;
       nameOfSuppliers: string;
     }[];
   };
 
-  applicantsMainBankingDetails: {
+  applicantsMainBankingDetails?: {
     endUse: string;
     bankingDetails: {
       remarks: string;
