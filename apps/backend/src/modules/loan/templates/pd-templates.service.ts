@@ -22,6 +22,10 @@ import { RBLInterface } from "./PD/interface/rbl.interface";
 import { rblTemplate } from "./PD/rbl.template";
 import { genericPDTemplate } from "./PD/generic.template";
 import { formSchema } from "../forms-schema";
+import {
+  validateVerificationData,
+  logDataStructure,
+} from "./PD/template-validator";
 
 @Injectable()
 export class PDTemplateService {
@@ -39,10 +43,11 @@ export class PDTemplateService {
     synopsis: string,
     financialAnalysis: any
   ): Promise<any> {
-    const imagePath = path.resolve(
-      process.env.SIGNATURE_PATH || "/home/ubuntu/kowtha/new_sign.jpg"
+    const signaturePath = path.resolve(
+      process.cwd(),
+      process.env.SIGNATURE_PATH
     );
-    const imageBase64 = fs.readFileSync(imagePath, "base64");
+    const imageBase64 = fs.readFileSync(signaturePath, "base64");
     const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
     const status = verification?.approvedStatus || "";
@@ -97,7 +102,8 @@ export class PDTemplateService {
     verification: any,
     loan: any,
     synopsis: string,
-    financialAnalysis: any
+    financialAnalysis: any,
+    schema?: any
   ): Promise<any> {
     // Banks with custom templates
     if (bankName == "Axis Bank") {
@@ -121,7 +127,7 @@ export class PDTemplateService {
         synopsis,
         financialAnalysis
       );
-      return rblTemplate(verificationData, html_data);
+      return rblTemplate(verificationData, html_data, schema);
     }
 
     // Generic template for all other banks (uses schema-driven approach)
@@ -204,12 +210,37 @@ export class PDTemplateService {
 
       const verificationData: any = verification.verificationData;
 
+      // Validate data against schema before generating PDF
+      const schema = formSchema[bankName as keyof typeof formSchema];
+      if (schema) {
+        logDataStructure(verificationData, `${bankName} Verification Data`);
+        const validationResult = validateVerificationData(
+          verificationData,
+          schema,
+          bankName
+        );
+
+        // Log validation results but don't block PDF generation
+        if (!validationResult.isValid) {
+          await this.loggingService.warn(
+            `Data validation issues for ${bankName} PDF generation`,
+            {
+              loanId,
+              missingFields: validationResult.missingRequiredFields,
+              emptyFields: validationResult.emptyRequiredFields,
+              unexpectedFields: validationResult.unexpectedFields,
+            }
+          );
+        }
+      }
+
       const htmlTemplate = await this.InterfaceMapping(
         bankName,
         verificationData,
         loan,
         verification.synopsis,
-        verification.financialAnalysis
+        verification.financialAnalysis,
+        schema
       );
 
       const pdfBuffer =

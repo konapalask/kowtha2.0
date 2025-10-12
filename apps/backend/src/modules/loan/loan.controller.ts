@@ -9,6 +9,7 @@ import { JwtAuthGuard } from "../accounts/jwt-auth.guard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { RolesGuard } from "../accounts/guards/roles.guard";
 import { Roles, All } from "../accounts/decorators/roles.decorator";
+import { Public } from "../accounts/public.decorator";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { createAssignmentDto } from "./dto/assign-loan-executive";
@@ -153,6 +154,34 @@ export class LoanController {
     return {
       status: 201,
       message: "Loans created successfully",
+      data: result,
+    };
+  }
+
+  @Post("qa-test-loan")
+  @Public()
+  @ApiOperation({
+    summary: "Create a QA test loan for mobile app testing",
+    description:
+      "Creates a test loan and verification for QA purposes. Only for development/testing.",
+  })
+  @ApiResponse({
+    status: 201,
+    description: "QA test loan created successfully",
+  })
+  async createQATestLoan(
+    @Body("bankName") bankName: string,
+    @Body("fieldExecutiveId") fieldExecutiveId: number,
+    @Body("qaData") qaData?: any
+  ) {
+    const result = await this.loanService.createQALoan(
+      bankName,
+      fieldExecutiveId,
+      qaData
+    );
+    return {
+      status: 201,
+      message: "QA test loan created successfully",
       data: result,
     };
   }
@@ -349,7 +378,7 @@ export class LoanController {
   }
 
   @Get(":id/preview-final-report")
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(All) // Allow all roles including field executives for QA testing
   @ApiOperation({ summary: "Generate PDF Preview for loan details" })
   @ApiResponse({ status: 200, description: "PDF generated successfully" })
   @ApiResponse({ status: 404, description: "Loan not found" })

@@ -17,26 +17,55 @@ export const TextAreaFormItem = ({data}) => (
         required: {value: data?.required !== false, message: 'Required'},
         ...data?.rules,
       }}
-      render={({field: {onChange, value}}) => (
-        <TextInput
-          style={[
-            styles.textArea,
-            data.errors?.[data.key] && styles.errorBorder,
-          ]}
-          value={value}
-          onChangeText={onChange}
-          multiline
-          numberOfLines={5}
-          textAlignVertical="top" // keeps text at top-left
-          placeholder={data?.placeholder || ''}
-          editable={data?.disabled !== true}
-        />
-      )}
-    />
+      render={({
+        field: {onChange, value, onBlur},
+        fieldState: {error, invalid},
+      }) => {
+        // Manual validation trigger on blur
+        const handleBlur = async () => {
+          onBlur();
+          // Trigger validation for this specific field on blur
+          if (data?.trigger) {
+            await data.trigger(data.key);
+          }
+        };
 
-    {data.errors?.[data.key] && (
-      <Text style={styles.errorText}>{data.errors[data.key]?.message}</Text>
+        return (
+          <TextInput
+            style={[styles.textArea, error && styles.errorBorder]}
+            value={value}
+            onChangeText={text => {
+              onChange(text);
+              if (invalid && data?.trigger) {
+                data.trigger(data.key);
+              }
+            }}
+            onBlur={handleBlur}
+            multiline
+            numberOfLines={5}
+            textAlignVertical="top" // keeps text at top-left
+            placeholder={data?.placeholder || ''}
+            editable={data?.disabled !== true}
+          />
+        );
+      }}
+    />
+    {!!data && (
+      // Prefer fieldState.error from Controller; fall back to external errors prop if provided
+      <>
+        {/** Render error from RHF field state if available */}
+        {/* eslint-disable-next-line react/no-children-prop */}
+      </>
     )}
+    {/* Display error consistently using Controller's fieldState */}
+    {/* We render a second Controller solely to access current error state without re-binding input */}
+    <Controller
+      control={data.control}
+      name={data.key}
+      render={({fieldState: {error}}) =>
+        error ? <Text style={styles.errorText}>{error.message}</Text> : null
+      }
+    />
   </View>
 );
 

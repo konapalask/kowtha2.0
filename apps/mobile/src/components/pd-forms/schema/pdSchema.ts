@@ -28,10 +28,25 @@ export interface MobileGeneratedSchema {
 
 let cachedSchema: Record<string, any> = {};
 
+/**
+ * Clear schema cache for a specific bank or all banks
+ * Useful for development/testing when schema changes
+ */
+export function clearSchemaCache(bankName?: string): void {
+  if (bankName) {
+    delete cachedSchema[bankName];
+    console.log(`✓ Schema cache cleared for: ${bankName}`);
+  } else {
+    cachedSchema = {};
+    console.log('✓ Schema cache cleared for all banks');
+  }
+}
+
 export async function loadMobilePDFormsSchema(
   bankName: string,
+  forceRefresh: boolean = false,
 ): Promise<any | null> {
-  if (cachedSchema[bankName]) {
+  if (cachedSchema[bankName] && !forceRefresh) {
     return cachedSchema[bankName];
   }
 

@@ -1,326 +1,480 @@
 export const ambitSchema = {
-  "id": 8,
-  "bankName": "Ambit",
-  "sections": [
+  id: 8,
+  bankName: "Ambit",
+  sections: [
     {
-      "id": "general",
-      "label": "General",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "nameOfApplicant": {
-            "type": "string",
-            "title": "Name of Applicant"
+      id: "general",
+      label: "General",
+      schema: {
+        type: "object",
+        properties: {
+          nameOfApplicant: {
+            type: "string",
+            title: "Name of Applicant",
+            readOnly: true,
           },
-          "nameOfCoApplicant": {
-            "type": "string",
-            "title": "Name of Co-Applicant"
+          nameOfCoApplicant: {
+            type: "string",
+            title: "Name of Co-Applicant",
           },
-          "applicationNo": {
-            "type": "integer",
-            "title": "Application no."
+          applicationNo: {
+            type: "string",
+            title: "Application no.",
+            readOnly: true,
           },
-          "nameOfConcern": {
-            "type": "string",
-            "title": "Name of Concern"
+          nameOfConcern: {
+            type: "string",
+            title: "Name of Concern",
+            readOnly: true,
           },
-          "nameOfTheProprietorAsPerLicense": {
-            "type": "string",
-            "title": "Name of the proprietor as per license"
-          }
-        }
+          nameOfTheProprietorAsPerLicense: {
+            type: "string",
+            title: "Name of the proprietor as per license",
+          },
+          latitude: {
+            type: "string",
+            title: "Latitude",
+          },
+          longitude: {
+            type: "string",
+            title: "Longitude",
+          },
+          region: {
+            type: "string",
+            title: "Region",
+          },
+          location: {
+            type: "string",
+            title: "Location",
+          },
+          branch: {
+            type: "string",
+            title: "Branch",
+          },
+        },
+        required: ["nameOfApplicant", "applicationNo", "nameOfConcern"],
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "address",
-      "label": "Address",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "rentedOwned": {
-            "type": "number",
-            "title": "Rented/Owned"
+      id: "address",
+      label: "Address",
+      schema: {
+        type: "object",
+        properties: {
+          address: {
+            type: "string",
+            title: "Address",
           },
-          "ownedBy": {
-            "type": "string",
-            "title": "Owned by"
+          rentedOwned: {
+            type: "string",
+            title: "Rented/Owned",
+            enum: ["Owned", "Rented", "Leased"],
           },
-          "areaInSqFt": {
-            "type": "string",
-            "title": "Area (In Sq. Ft.)"
+          ownedBy: {
+            type: "string",
+            title: "Owned by",
           },
-          "occupiedSinceYears": {
-            "type": "integer",
-            "title": "Occupied since (years)"
-          }
-        }
+          areaInSqFt: {
+            type: "number",
+            title: "Area (In Sq. Ft.)",
+          },
+          occupiedSinceYears: {
+            type: "integer",
+            title: "Occupied since (years)",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "marketValue",
-      "label": "Market Value",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "ownedBy": {
-            "type": "string",
-            "title": "Owned by"
+      id: "marketValue",
+      label: "Market Value",
+      schema: {
+        type: "object",
+        properties: {
+          marketValue: {
+            type: "number",
+            title: "Market Value",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
-          "areaInSqFt": {
-            "type": "string",
-            "title": "Area (In Sq. Ft.)"
+          ownedBy: {
+            type: "string",
+            title: "Owned by",
           },
-          "occupiedSinceYears": {
-            "type": "integer",
-            "title": "Occupied since (years)"
+          areaInSqFt: {
+            type: "number",
+            title: "Area (In Sq. Ft.)",
           },
-          "phoneNumber": {
-            "type": "string",
-            "title": "Phone Number",
-            "pattern": "^[0-9]{10}$"
+          occupiedSinceYears: {
+            type: "integer",
+            title: "Occupied since (years)",
           },
-          "appointmentFixed": {
-            "type": "string",
-            "title": "Appointment Fixed"
-          }
-        }
+          phoneNumber: {
+            type: "string",
+            title: "Phone Number",
+            pattern: "^[0-9]{10}$",
+          },
+          appointmentFixed: {
+            type: "string",
+            title: "Appointment Fixed",
+            enum: ["Yes", "No"],
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "noOfVisit",
-      "label": "No. of Visit",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "personMet": {
-            "type": "string",
-            "title": "Person Met"
+      id: "noOfVisit",
+      label: "No. of Visit",
+      schema: {
+        type: "object",
+        properties: {
+          noOfVisit: {
+            type: "integer",
+            title: "No. of Visit",
           },
-          "aboutTheApplicant": {
-            "type": "string",
-            "title": "About the Applicant"
-          }
-        }
+          personMet: {
+            type: "string",
+            title: "Person Met",
+          },
+          aboutTheApplicant: {
+            type: "string",
+            title: "About the Applicant",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "familyDetails",
-      "label": "Family details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
+      id: "familyDetails",
+      label: "Family details",
+      schema: {
+        type: "object",
+        properties: {
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                education: {
+                  type: "string",
+                  title: "Education",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+              },
+            },
           },
-          "relationalship": {
-            "type": "string",
-            "title": "Relationalship"
+          aboutTheBusiness: {
+            type: "string",
+            title: "About the Business",
           },
-          "age": {
-            "type": "integer",
-            "title": "Age"
-          },
-          "education": {
-            "type": "string",
-            "title": "Education"
-          },
-          "occupation": {
-            "type": "string",
-            "title": "Occupation"
-          },
-          "aboutTheBusiness": {
-            "type": "string",
-            "title": "About the Business"
-          }
-        }
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "otherObservations",
-      "label": "Other observations",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "concerns": {
-            "type": "string",
-            "title": "Concerns"
-          }
-        }
+      id: "otherObservations",
+      label: "Other observations",
+      schema: {
+        type: "object",
+        properties: {
+          concerns: {
+            type: "string",
+            title: "Concerns",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "purposeOfLoan",
-      "label": "Purpose of Loan",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "asPerAuditedIndividualItrS": {
-            "type": "string",
-            "title": "As per Audited individual ITR’s"
+      id: "purposeOfLoan",
+      label: "Purpose of Loan",
+      schema: {
+        type: "object",
+        properties: {
+          purposeOfLoan: {
+            type: "string",
+            title: "Purpose of Loan",
           },
-          "whetherRegisteredUnderMsme": {
-            "type": "string",
-            "title": "Whether registered under MSME"
+          asPerAuditedIndividualItrS: {
+            type: "string",
+            title: "As per Audited individual ITR's",
           },
-          "whetherRegisteredUnderGst": {
-            "type": "string",
-            "title": "Whether registered under GST"
-          }
-        }
+          whetherRegisteredUnderMsme: {
+            type: "string",
+            title: "Whether registered under MSME",
+            enum: ["Yes", "No"],
+          },
+          whetherRegisteredUnderGst: {
+            type: "string",
+            title: "Whether registered under GST",
+            enum: ["Yes", "No"],
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "documentsObserved",
-      "label": "Documents Observed",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "automationLevel": {
-            "type": "string",
-            "title": "Automation Level"
+      id: "documentsObserved",
+      label: "Documents Observed",
+      schema: {
+        type: "object",
+        properties: {
+          documentsObserved: {
+            type: "string",
+            title: "Documents Observed",
           },
-          "receipts": {
-            "type": "string",
-            "title": "Receipts"
+          automationLevel: {
+            type: "string",
+            title: "Automation Level",
           },
-          "payments": {
-            "type": "string",
-            "title": "Payments"
-          }
-        }
+          receipts: {
+            type: "number",
+            title: "Receipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          payments: {
+            type: "number",
+            title: "Payments",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "netProfit",
-      "label": "Net Profit",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "netMargin": {
-            "type": "number",
-            "title": "Net Margin"
-          }
-        }
+      id: "netProfit",
+      label: "Net Profit",
+      schema: {
+        type: "object",
+        properties: {
+          netProfit: {
+            type: "number",
+            title: "Net Profit",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netMargin: {
+            type: "number",
+            title: "Net Margin (%)",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "nameAndContactNumberOfRegularSuppliers",
-      "label": "Name and Contact number of Regular Suppliers",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "expenditure": {
-            "type": "string",
-            "title": "Expenditure"
-          }
-        }
+      id: "nameAndContactNumberOfRegularSuppliers",
+      label: "Name and Contact number of Regular Suppliers",
+      schema: {
+        type: "object",
+        properties: {
+          suppliers: {
+            type: "array",
+            title: "Regular Suppliers",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                  pattern: "^[0-9]{10}$",
+                },
+              },
+            },
+          },
+          expenditure: {
+            type: "number",
+            title: "Expenditure",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "employees",
-      "label": "Employees",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "assets": {
-            "type": "string",
-            "title": "Assets"
+      id: "employees",
+      label: "Employees",
+      schema: {
+        type: "object",
+        properties: {
+          noOfEmployees: {
+            type: "integer",
+            title: "No. of Employees",
           },
-          "licMutualFunds": {
-            "type": "string",
-            "title": "LIC/Mutual funds"
-          }
-        }
+          assets: {
+            type: "string",
+            title: "Assets",
+          },
+          licMutualFunds: {
+            type: "string",
+            title: "LIC/Mutual funds",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "bankName",
-      "label": "Bank Name",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "accountType": {
-            "type": "string",
-            "title": "Account Type"
+      id: "bankName",
+      label: "Bank Name",
+      schema: {
+        type: "object",
+        properties: {
+          bankName: {
+            type: "string",
+            title: "Bank Name",
           },
-          "averageBalance": {
-            "type": "number",
-            "title": "Average Balance"
+          accountType: {
+            type: "string",
+            title: "Account Type",
+            enum: ["Savings", "Current", "CC/OD"],
           },
-          "noOfYearsMaintained": {
-            "type": "integer",
-            "title": "No. of years maintained"
-          }
-        }
+          averageBalance: {
+            type: "number",
+            title: "Average Balance",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          noOfYearsMaintained: {
+            type: "integer",
+            title: "No. of years maintained",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "bankName",
-      "label": "Bank Name",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "title": "Type"
-          }
-        }
+      id: "existingLoans",
+      label: "Existing Loans",
+      schema: {
+        type: "object",
+        properties: {
+          existingLoans: {
+            type: "array",
+            title: "Existing Loans",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                type: {
+                  type: "string",
+                  title: "Type",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                openClose: {
+                  type: "string",
+                  title: "Open/Close",
+                  enum: ["Open", "Close"],
+                },
+              },
+            },
+          },
+          endUse: {
+            type: "string",
+            title: "End Use",
+          },
+          securityOffered: {
+            type: "string",
+            title: "Security Offered",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "loanAmount",
-      "label": "Loan Amount",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "emi": {
-            "type": "number",
-            "title": "EMI"
+      id: "otherBusinessIncome",
+      label: "Other Business/Income",
+      schema: {
+        type: "object",
+        properties: {
+          otherBusinessIncome: {
+            type: "number",
+            title: "Other Business/Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
-          "openClose": {
-            "type": "string",
-            "title": "Open/Close"
+          neighborCheck: {
+            type: "string",
+            title: "Neighbor Check",
           },
-          "endUse": {
-            "type": "string",
-            "title": "End Use"
-          },
-          "securityOffered": {
-            "type": "string",
-            "title": "Security Offered"
-          }
-        }
+        },
       },
-      "required": true
+      required: true,
     },
-    {
-      "id": "otherBusinessIncome",
-      "label": "Other Business/Income",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "neighborCheck": {
-            "type": "string",
-            "title": "Neighbor Check"
-          }
-        }
-      },
-      "required": true
-    }
-  ]
+  ],
 } as const;
 export default ambitSchema;

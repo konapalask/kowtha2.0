@@ -8,7 +8,12 @@ const CustomRadioGroup = ({options, value, onChange, layout = 'row'}) => (
     {options?.map((item, idx) => {
       const optionValue = item?.key || item;
       const optionLabel = item?.title || item;
-      const selected = value === optionValue;
+      // Improved comparison to handle type mismatches
+      const selected =
+        value === optionValue ||
+        (value === false && optionValue === false) ||
+        (value === true && optionValue === true) ||
+        String(value) === String(optionValue);
 
       return (
         <TouchableOpacity
@@ -23,8 +28,12 @@ const CustomRadioGroup = ({options, value, onChange, layout = 'row'}) => (
             }
           }}>
           <View
-            style={[styles.radioCircle, selected && styles.radioCircleSelected]}
-          />
+            style={[
+              styles.radioCircle,
+              selected && styles.radioCircleSelected,
+            ]}>
+            {selected && <View style={styles.radioInner} />}
+          </View>
           <Text style={styles.optionText}>{optionLabel}</Text>
         </TouchableOpacity>
       );
@@ -88,6 +97,12 @@ const styles = StyleSheet.create({
   },
   radioCircleSelected: {
     borderColor: '#007AFF',
+    backgroundColor: 'transparent',
+  },
+  radioInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#007AFF',
   },
   optionText: {color: '#000'},

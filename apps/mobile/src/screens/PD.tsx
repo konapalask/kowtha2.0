@@ -176,6 +176,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     investigable: true,
   });
   const [loggedInUserName, setLoggedInUserName] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // const [formData, setFormData] = useState<any>({});
   const initialData = getInitialDataByBank(
     bankName,
@@ -463,6 +464,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   );
 
   const onSubmit = async (data: any) => {
+    console.log('🚀 FORM SUBMISSION STARTED');
+
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log('🛑 ALREADY SUBMITTING - Ignoring duplicate submit');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       if (!schemaForm) {
         Toast.show({
@@ -473,42 +484,156 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         return;
       }
 
-      const requiredSections = schemaForm.sections.filter(
-        (section: any) => section.required,
-      );
-      const missingRequiredSections = requiredSections.filter(
-        (section: any) => {
-          if (section.id === 'photoCapture') {
-            return sectionData?.uploadedItems?.length === 0;
+      const validationErrors: string[] = [];
+
+      // Check ALL sections (both required and optional)
+      for (const section of schemaForm.sections) {
+        if (section.id === 'photoCapture') {
+          // Photo capture validation (only if section is required)
+          if (
+            section.required &&
+            (!sectionData?.uploadedItems ||
+              sectionData.uploadedItems.length === 0)
+          ) {
+            validationErrors.push(
+              `${section.label}: At least one photo is required`,
+            );
+          }
+          continue;
+        }
+
+        const sectionDataExists =
+          sectionData[section.id] !== undefined &&
+          sectionData[section.id] !== null;
+
+        // If section is REQUIRED and empty → error
+        if (section.required && !sectionDataExists) {
+          validationErrors.push(`${section.label}: Section is required`);
+          continue;
+        }
+
+        // If section is OPTIONAL and empty → skip validation (OK)
+        if (!section.required && !sectionDataExists) {
+          continue;
+        }
+
+        // If section has data (required OR optional), validate its contents
+        const sectionContent = sectionData[section.id];
+        if (typeof sectionContent === 'object' && sectionContent !== null) {
+          // Check if section is empty
+          if (Object.keys(sectionContent).length === 0) {
+            if (section.required) {
+              validationErrors.push(
+                `${section.label}: Section cannot be empty`,
+              );
+            }
+            continue;
           }
 
-          const sectionDataExists =
-            sectionData[section.id] !== undefined &&
-            sectionData[section.id] !== null;
-          if (!sectionDataExists) {
-            return true;
+          // Check field-level requirements within the section (for both required and optional sections)
+          const baseRequiredFields = section.schema?.required || [];
+
+          // Filter required fields based on conditional dependencies
+          const requiredFields = baseRequiredFields.filter(
+            (fieldId: string) => {
+              const fieldSchema = section.schema?.properties?.[fieldId];
+              if (!fieldSchema?.dependencies?.required) {
+                return true; // Always required if no conditional dependency
+              }
+
+              // Check if field should be required based on dependencies
+              const dependencies = fieldSchema.dependencies.required;
+              for (const [depFieldName, expectedValue] of Object.entries(
+                dependencies,
+              )) {
+                const actualValue = sectionContent[depFieldName];
+                if (Array.isArray(expectedValue)) {
+                  if (!expectedValue.includes(actualValue)) {
+                    return false; // Not required if dependency condition not met
+                  }
+                } else {
+                  if (actualValue !== expectedValue) {
+                    return false; // Not required if dependency condition not met
+                  }
+                }
+              }
+              return true; // Required if all dependency conditions are met
+            },
+          );
+          for (const fieldId of requiredFields) {
+            const fieldValue = sectionContent[fieldId];
+
+            // For array fields, check if array exists and has items with required fields
+            const fieldSchema = section.schema?.properties?.[fieldId];
+            if (fieldSchema?.type === 'array' && Array.isArray(fieldValue)) {
+              // If array is required but empty (and we have section data), that might be an issue
+              // But we'll allow empty arrays for now - user just hasn't added items yet
+
+              const itemRequiredFields = fieldSchema.items?.required || [];
+
+              // Check each item in the array for required fields
+              fieldValue.forEach((item: any, index: number) => {
+                if (item && typeof item === 'object') {
+                  itemRequiredFields.forEach((requiredField: string) => {
+                    const itemFieldValue = item[requiredField];
+                    const itemFieldEmpty =
+                      itemFieldValue === null ||
+                      itemFieldValue === undefined ||
+                      itemFieldValue === '' ||
+                      (typeof itemFieldValue === 'string' &&
+                        itemFieldValue.trim() === '');
+
+                    if (itemFieldEmpty) {
+                      const itemFieldTitle =
+                        fieldSchema.items?.properties?.[requiredField]?.title ||
+                        requiredField;
+                      validationErrors.push(
+                        `${section.label} → ${fieldSchema.title} [${index + 1}] → ${itemFieldTitle}: Required field is empty`,
+                      );
+                    }
+                  });
+                }
+              });
+              continue;
+            }
+
+            // Regular field validation
+            const isEmpty =
+              fieldValue === null ||
+              fieldValue === undefined ||
+              fieldValue === '';
+
+            if (isEmpty) {
+              const fieldTitle =
+                section.schema?.properties?.[fieldId]?.title || fieldId;
+              validationErrors.push(
+                `${section.label} → ${fieldTitle}: Required field is empty`,
+              );
+            }
           }
+        }
+      }
 
-          const sectionContent = sectionData[section.id];
-          if (typeof sectionContent === 'object' && sectionContent !== null) {
-            return Object.keys(sectionContent).length === 0;
-          }
+      if (validationErrors.length > 0) {
+        console.log('🛑 BLOCKING FORM SUBMISSION - Validation failed!');
 
-          return false;
-        },
-      );
-
-      if (missingRequiredSections.length > 0) {
-        const missingSectionNames = missingRequiredSections
-          .map((section: any) => section.label)
-          .join(', ');
         Toast.show({
           type: 'error',
-          text1: 'Validation Error',
-          text2: `Please complete required sections: ${missingSectionNames}`,
+          text1: '🪄 Abracadabra - Frontend Validation Error!',
+          text2: validationErrors[0], // Show first error
+          visibilityTime: 8000,
+          position: 'top',
         });
+
+        // Log all errors for debugging (using console.log to avoid toast display)
+        console.log('❌ Form validation failed:', validationErrors);
+
+        console.log('🛑 RETURNING NOW - Form should NOT submit');
+        setIsSubmitting(false);
         return;
       }
+
+      console.log('✅ Validation passed - Proceeding with submission');
 
       if (Object.keys(errors).length > 0) {
         Toast.show({
@@ -516,6 +641,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           text1: 'Error',
           text2: 'Please fill all required fields',
         });
+        setIsSubmitting(false);
         return;
       }
 
@@ -547,6 +673,9 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         text1: 'Error',
         text2: 'Failed to save form data',
       });
+      setIsSubmitting(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -554,8 +683,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     console.log('Form validation errors:', errors);
     Toast.show({
       type: 'error',
-      text1: 'Validation Error',
+      text1: '🔧 React Hook Form Error',
       text2: 'Please fill all required fields',
+      visibilityTime: 5000,
+      position: 'top',
     });
   };
 
@@ -621,7 +752,12 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                     <TouchableOpacity
                       style={styles.sectionHeader}
                       onPress={() => toggleSection(sec.id)}>
-                      <Text style={styles.sectionTitle}>{sec.label}</Text>
+                      <Text style={styles.sectionTitle}>
+                        {sec.label}
+                        {sec.required && (
+                          <Text style={styles.requiredMark}> *</Text>
+                        )}
+                      </Text>
                       {isSectionValid(sec.id) && (
                         <Icon name="check" size={18} color="#34C759" />
                       )}
@@ -721,6 +857,11 @@ const styles = StyleSheet.create({
     color: '#333',
     marginRight: 8,
     // flex: 1,
+  },
+  requiredMark: {
+    color: 'red',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   sectionIndicator: {
     flex: 1,

@@ -26,6 +26,18 @@ interface JsonSchemaProperty {
   items?: JsonSchemaProperty;
   properties?: Record<string, JsonSchemaProperty>;
   format?: string;
+  formatter?: {
+    useIndianFormat?: boolean;
+    locale?: string;
+    maxDecimalPlaces?: number;
+    minDecimalPlaces?: number;
+    showCurrency?: boolean;
+    currency?: string;
+  };
+  dependencies?: {
+    show?: Record<string, any>;
+    required?: Record<string, any>;
+  };
 }
 
 interface JsonSchema {
@@ -47,9 +59,37 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   initialData = {},
   onSubmit,
 }) => {
-  const {control, watch, setValue, getValues, reset} = useForm({
-    defaultValues: initialData,
-    mode: 'onChange',
+  // Helper function to convert numbers to strings for TextInput compatibility
+  const normalizeFormData = (data: AnyObject): AnyObject => {
+    const normalized: AnyObject = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (typeof value === 'number') {
+        normalized[key] = value.toString();
+      } else if (Array.isArray(value)) {
+        // Handle arrays (e.g., repeater fields)
+        normalized[key] = value.map(item =>
+          typeof item === 'object' && item !== null
+            ? normalizeFormData(item)
+            : typeof item === 'number'
+              ? item.toString()
+              : item,
+        );
+      } else if (value && typeof value === 'object') {
+        // Handle nested objects
+        normalized[key] = normalizeFormData(value);
+      } else {
+        normalized[key] = value;
+      }
+    });
+    return normalized;
+  };
+
+  const {control, watch, setValue, getValues, reset, trigger} = useForm({
+    defaultValues: normalizeFormData(initialData),
+    mode: 'onBlur', // Validate on blur so required errors appear immediately after clearing
+    reValidateMode: 'onChange', // Once invalid, keep error until value becomes valid
+    criteriaMode: 'firstError',
+    shouldFocusError: true,
   });
 
   const isInitialMount = useRef(true);
@@ -58,12 +98,57 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     fieldKey: string | null;
   }>({visible: false, fieldKey: null});
 
-  // Update form values when initialData changes (e.g., from AsyncStorage or coordinates)
+  // Hydrate default values once on mount to avoid wiping user input/errors on every keystroke
+  const didHydrateRef = useRef(false);
   useEffect(() => {
+    if (didHydrateRef.current) return;
     if (initialData && Object.keys(initialData).length > 0) {
-      reset(initialData, {keepDirtyValues: true});
+      reset(normalizeFormData(initialData), {
+        keepDirtyValues: true,
+        keepErrors: true,
+      });
     }
-  }, [initialData, reset]);
+    didHydrateRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Helper function to convert string values back to numbers for numeric fields
+  const denormalizeFormData = (
+    data: AnyObject,
+    schemaProps: any = schema.properties,
+  ): AnyObject => {
+    const denormalized: AnyObject = {};
+    Object.entries(data).forEach(([key, value]) => {
+      const fieldSchema = schemaProps?.[key];
+
+      if (fieldSchema?.type === 'number' || fieldSchema?.type === 'integer') {
+        // Convert string back to number if it's a valid number
+        if (typeof value === 'string' && value !== '') {
+          const numValue = Number(value);
+          denormalized[key] = isNaN(numValue) ? value : numValue;
+        } else {
+          denormalized[key] = value;
+        }
+      } else if (Array.isArray(value)) {
+        // Handle arrays (e.g., repeater fields)
+        denormalized[key] = value.map(item =>
+          typeof item === 'object' && item !== null
+            ? denormalizeFormData(item, fieldSchema?.items?.properties)
+            : item,
+        );
+      } else if (
+        value &&
+        typeof value === 'object' &&
+        fieldSchema?.type === 'object'
+      ) {
+        // Recursively handle nested objects with their schema
+        denormalized[key] = denormalizeFormData(value, fieldSchema?.properties);
+      } else {
+        denormalized[key] = value;
+      }
+    });
+    return denormalized;
+  };
 
   // Use watch subscription to avoid infinite loops
   useEffect(() => {
@@ -73,7 +158,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         isInitialMount.current = false;
         return;
       }
-      onSubmit(value as AnyObject);
+      // Convert string values back to numbers before submitting
+      onSubmit(denormalizeFormData(value as AnyObject));
     });
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
@@ -84,6 +170,29 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
   const hideDatePicker = () => {
     setDatePickerState({visible: false, fieldKey: null});
+  };
+
+  const checkConditionalVisibility = (
+    dependencies: Record<string, any>,
+    formData: any,
+  ) => {
+    for (const [fieldName, expectedValue] of Object.entries(dependencies)) {
+      const actualValue = formData[fieldName];
+
+      if (Array.isArray(expectedValue)) {
+        // Multiple allowed values
+        if (!expectedValue.includes(actualValue)) {
+          return false;
+        }
+      } else {
+        // Single expected value
+        if (actualValue !== expectedValue) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   };
 
   const handleDateConfirm = (date: Date) => {
@@ -118,8 +227,29 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   };
 
   const renderField = (fieldId: string, property: JsonSchemaProperty) => {
-    const isRequired = schema.required?.includes(fieldId) ?? true;
-    const formData = getValues();
+    const formData = watch(); // Use watch to trigger re-renders on field changes
+
+    // Check conditional required validation
+    let isRequired = schema.required?.includes(fieldId) ?? false;
+
+    if (property.dependencies?.required) {
+      const shouldBeRequired = checkConditionalVisibility(
+        property.dependencies.required,
+        formData,
+      );
+      isRequired = shouldBeRequired;
+    }
+
+    // Check conditional visibility
+    if (property.dependencies?.show) {
+      const shouldShow = checkConditionalVisibility(
+        property.dependencies.show,
+        formData,
+      );
+      if (!shouldShow) {
+        return null; // Hide field if conditions not met
+      }
+    }
 
     // Handle nested object fields (like repaymentFrom)
     if (property.type === 'object' && property.properties) {
@@ -216,6 +346,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         defaultValue: subFieldValue?.toString() ?? '',
                         placeholder: subProperty.title,
                         keyboardType: 'numeric',
+                        type: subProperty.type,
+                        formatter: (subProperty as any).formatter,
+                        trigger,
                       }}
                     />
                   );
@@ -304,6 +437,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 Object.entries(property.items.properties).map(
                   ([subFieldId, subProperty]) => {
                     const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+                    // Check if this field is required in the array items
+                    const isSubFieldRequired =
+                      property.items?.required?.includes(subFieldId) ?? false;
 
                     // Handle date fields in arrays
                     const isDateField = subProperty.format === 'date';
@@ -334,7 +470,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                             control,
                             key: subFieldKey,
                             title: subProperty.title,
-                            required: false,
+                            required: isSubFieldRequired,
                             options,
                             defaultValue: item?.[subFieldId] ?? '',
                           }}
@@ -357,7 +493,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                             control,
                             key: subFieldKey,
                             title: subProperty.title,
-                            required: false,
+                            required: isSubFieldRequired,
                             disabled: subProperty.readOnly,
                             defaultValue: item?.[subFieldId] ?? '',
                           }}
@@ -372,7 +508,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                           control,
                           key: subFieldKey,
                           title: subProperty.title,
-                          required: false,
+                          required: isSubFieldRequired,
                           disabled: subProperty.readOnly,
                           defaultValue: item?.[subFieldId] ?? '',
                           keyboardType:
@@ -380,6 +516,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                             subProperty.type === 'integer'
                               ? 'numeric'
                               : 'default',
+                          type: subProperty.type,
+                          formatter: (subProperty as any).formatter,
+                          trigger,
                         }}
                       />
                     );
@@ -423,7 +562,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     // Handle different field types
     switch (property.type) {
       case 'boolean':
-        // Use RadioFormItem for boolean (Yes only)
+        // Use RadioFormItem for boolean (Yes/No options)
+
         return (
           <RadioFormItem
             data={{
@@ -431,9 +571,12 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               key: fieldId,
               title: property.title,
               required: isRequired,
-              options: [{key: true, title: 'Yes'}],
+              options: [
+                {key: true, title: 'Yes'},
+                {key: false, title: 'No'},
+              ],
               layout: 'row',
-              defaultValue: formData[fieldId] ?? false,
+              defaultValue: formData[fieldId] ?? null,
             }}
           />
         );
@@ -469,6 +612,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 disabled: property.readOnly,
                 defaultValue: formData[fieldId] ?? '',
                 placeholder: property.title,
+                trigger,
               }}
             />
           );
@@ -484,11 +628,39 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               disabled: property.readOnly,
               defaultValue: formData[fieldId] ?? '',
               placeholder: property.title,
+              trigger,
             }}
           />
         );
 
       case 'number':
+        return (
+          <InputFormItem
+            data={{
+              control,
+              key: fieldId,
+              title: property.title,
+              required: isRequired,
+              disabled: property.readOnly,
+              defaultValue: formData[fieldId]?.toString() ?? '',
+              placeholder: property.title,
+              keyboardType: 'numeric', // Numeric keyboard for decimal numbers
+              type: 'number',
+              trigger,
+              formatter: (property as any).formatter, // Pass formatter from schema
+              rules: {
+                validate: {
+                  isNumber: (value: string) => {
+                    if (!value) return true; // Allow empty for non-required fields
+                    const numValue = parseFloat(value);
+                    return !isNaN(numValue) || 'Please enter a valid number';
+                  },
+                },
+              },
+            }}
+          />
+        );
+
       case 'integer':
         return (
           <InputFormItem
@@ -500,7 +672,23 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               disabled: property.readOnly,
               defaultValue: formData[fieldId]?.toString() ?? '',
               placeholder: property.title,
-              keyboardType: 'numeric',
+              keyboardType: 'number-pad', // Number pad for integers (no decimal point)
+              type: 'integer',
+              trigger,
+              formatter: (property as any).formatter, // Pass formatter from schema
+              rules: {
+                validate: {
+                  isInteger: (value: string) => {
+                    if (!value) return true; // Allow empty for non-required fields
+                    const intValue = parseInt(value, 10);
+                    return (
+                      (!isNaN(intValue) &&
+                        Number.isInteger(parseFloat(value))) ||
+                      'Please enter a valid integer'
+                    );
+                  },
+                },
+              },
             }}
           />
         );
@@ -517,6 +705,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               disabled: property.readOnly,
               defaultValue: formData[fieldId] ?? '',
               placeholder: property.title,
+              trigger,
             }}
           />
         );

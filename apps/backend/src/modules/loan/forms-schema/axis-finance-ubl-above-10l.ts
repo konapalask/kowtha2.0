@@ -1,603 +1,618 @@
 export const axisFinanceUblAbove10lSchema = {
-  "id": 1,
-  "bankName": "Axis Finance UBL Above 10L",
-  "sections": [
+  id: 1,
+  bankName: "Axis Finance UBL Above 10L",
+  sections: [
     {
-      "id": "basicDetails",
-      "label": "Basic Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "applicationNo": {
-            "type": "string",
-            "title": "Ref No/Application No",
-            "readOnly": true
+      id: "basicDetails",
+      label: "Basic Details",
+      schema: {
+        type: "object",
+        properties: {
+          applicationNo: {
+            type: "string",
+            title: "Ref No/Application No",
+            readOnly: true,
           },
-          "applicantName": {
-            "type": "string",
-            "title": "Name of the Applicant",
-            "readOnly": true
+          applicantName: {
+            type: "string",
+            title: "Name of the Applicant",
+            readOnly: true,
           },
-          "concernName": {
-            "type": "string",
-            "title": "Name of Concern"
+          concernName: {
+            type: "string",
+            title: "Name of Concern",
           },
-          "constitution": {
-            "type": "string",
-            "title": "Constitution",
-            "enum": [
+          constitution: {
+            type: "string",
+            title: "Constitution",
+            enum: [
               "Proprietorship",
               "Private Limited",
               "Limited Liability Partnership",
-              "Simple Partnership"
-            ]
+              "Simple Partnership",
+            ],
           },
-          "initiatedAddress": {
-            "type": "string",
-            "title": "Initiated Address",
-            "readOnly": true
+          initiatedAddress: {
+            type: "string",
+            title: "Initiated Address",
+            readOnly: true,
           },
-          "visitedAddress": {
-            "type": "string",
-            "title": "Visited Address"
+          visitedAddress: {
+            type: "string",
+            title: "Visited Address",
           },
-          "phoneNo": {
-            "type": "string",
-            "title": "Phone No.",
-            "pattern": "^[0-9]{10}$",
-            "readOnly": true
+          phoneNo: {
+            type: "string",
+            title: "Phone No.",
+            pattern: "^[0-9]{10}$",
+            readOnly: true,
           },
-          "appointmentFixed": {
-            "type": "string",
-            "title": "Appointment Fixed",
-            "enum": [
-              "Yes",
-              "No"
-            ]
+          appointmentFixed: {
+            type: "string",
+            title: "Appointment Fixed",
+            enum: ["Yes", "No"],
           },
-          "structureOfLoan": {
-            "type": "string",
-            "title": "Structure of Loan"
+          structureOfLoan: {
+            type: "string",
+            title: "Structure of Loan",
           },
-          "noOfVisit": {
-            "type": "integer",
-            "title": "No. of Visit"
+          noOfVisit: {
+            type: "integer",
+            title: "No. of Visit",
           },
-          "personMet": {
-            "type": "string",
-            "title": "Person Met"
+          personMet: {
+            type: "string",
+            title: "Person Met",
           },
-          "aboutApplicant": {
-            "type": "string",
-            "title": "About Applicant"
+          aboutApplicant: {
+            type: "string",
+            title: "About Applicant",
           },
-          "residentialDetails": {
-            "type": "string",
-            "title": "Residential Details"
+          residentialDetails: {
+            type: "string",
+            title: "Residential Details",
           },
-          "coApplicantDetails": {
-            "type": "string",
-            "title": "Co-Applicant Details"
-          }
+          coApplicantDetails: {
+            type: "string",
+            title: "Co-Applicant Details",
+          },
+          latitude: {
+            type: "string",
+            title: "Latitude",
+          },
+          longitude: {
+            type: "string",
+            title: "Longitude",
+          },
+          region: {
+            type: "string",
+            title: "Region",
+          },
+          location: {
+            type: "string",
+            title: "Location",
+          },
+          branch: {
+            type: "string",
+            title: "Branch",
+          },
         },
-        "required": [
-          "applicationNo",
-          "applicantName",
-          "concernName"
-        ]
+        required: ["applicationNo", "applicantName", "concernName"],
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "familyDetails",
-      "label": "Family Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "familyDetails": {
-            "type": "array",
-            "title": "Family Details",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "title": "Name"
+      id: "familyDetails",
+      label: "Family Details",
+      schema: {
+        type: "object",
+        properties: {
+          familyDetails: {
+            type: "array",
+            title: "Family Details",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
                 },
-                "relation": {
-                  "type": "string",
-                  "title": "Relation with Applicant"
+                relation: {
+                  type: "string",
+                  title: "Relation with Applicant",
                 },
-                "ageYears": {
-                  "type": "integer",
-                  "title": "Age (Yrs)"
+                ageYears: {
+                  type: "integer",
+                  title: "Age (Yrs)",
                 },
-                "qualification": {
-                  "type": "string",
-                  "title": "Qualification"
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
                 },
-                "occupation": {
-                  "type": "string",
-                  "title": "Occupation"
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
                 },
-                "incomePerMonth": {
-                  "type": "number",
-                  "title": "Income per month (approx.)"
+                incomePerMonth: {
+                  type: "number",
+                  title: "Income per month (approx.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
-                "dependent": {
-                  "type": "string",
-                  "title": "Dependent"
-                }
-              }
-            }
-          }
-        }
+                dependent: {
+                  type: "string",
+                  title: "Dependent",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "shareholdingDetails",
-      "label": "Shareholding Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "shareholdingDetails": {
-            "type": "array",
-            "title": "Constitution / Shareholding Details",
-            "items": {
-              "type": "object",
-              "properties": {
-                "shareholderName": {
-                  "type": "string",
-                  "title": "Name of the Shareholder"
+      id: "shareholdingDetails",
+      label: "Shareholding Details",
+      schema: {
+        type: "object",
+        properties: {
+          shareholdingDetails: {
+            type: "array",
+            title: "Constitution / Shareholding Details",
+            items: {
+              type: "object",
+              properties: {
+                shareholderName: {
+                  type: "string",
+                  title: "Name of the Shareholder",
                 },
-                "relationWithMainApplicant": {
-                  "type": "string",
-                  "title": "Relation with Main Applicant"
+                relationWithMainApplicant: {
+                  type: "string",
+                  title: "Relation with Main Applicant",
                 },
-                "designation": {
-                  "type": "string",
-                  "title": "Designation"
+                designation: {
+                  type: "string",
+                  title: "Designation",
                 },
-                "percentShareholding": {
-                  "type": "number",
-                  "title": "% of Shareholding"
+                percentShareholding: {
+                  type: "number",
+                  title: "% of Shareholding",
                 },
-                "comingIntoLoanStructure": {
-                  "type": "string",
-                  "title": "Coming into Loan Structure"
+                comingIntoLoanStructure: {
+                  type: "string",
+                  title: "Coming into Loan Structure",
                 },
-                "functionalRole": {
-                  "type": "string",
-                  "title": "Functional of Partner / Director"
-                }
-              }
-            }
-          }
-        }
+                functionalRole: {
+                  type: "string",
+                  title: "Functional of Partner / Director",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "businessDetails",
-      "label": "Business Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "aboutBusiness": {
-            "type": "string",
-            "title": "About the Business"
+      id: "businessDetails",
+      label: "Business Details",
+      schema: {
+        type: "object",
+        properties: {
+          aboutBusiness: {
+            type: "string",
+            title: "About the Business",
           },
-          "businessSynopsis": {
-            "type": "string",
-            "title": "Business Synopsis"
-          }
-        }
+          businessSynopsis: {
+            type: "string",
+            title: "Business Synopsis",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "documentsObserved",
-      "label": "Documents Observed",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "documentsObserved": {
-            "type": "array",
-            "title": "Documents Observed",
-            "items": {
-              "type": "object",
-              "properties": {
-                "documentCategory": {
-                  "type": "string",
-                  "title": "Document Category"
+      id: "documentsObserved",
+      label: "Documents Observed",
+      schema: {
+        type: "object",
+        properties: {
+          documentsObserved: {
+            type: "array",
+            title: "Documents Observed",
+            items: {
+              type: "object",
+              properties: {
+                documentCategory: {
+                  type: "string",
+                  title: "Document Category",
                 },
-                "documentName": {
-                  "type": "string",
-                  "title": "Document Name"
+                documentName: {
+                  type: "string",
+                  title: "Document Name",
                 },
-                "documentType": {
-                  "type": "string",
-                  "title": "Document Type",
-                  "enum": [
-                    "PAN Card"
-                  ]
+                documentType: {
+                  type: "string",
+                  title: "Document Type",
+                  enum: ["PAN Card"],
                 },
-                "remarks": {
-                  "type": "string",
-                  "title": "Remarks"
-                }
-              }
-            }
-          }
-        }
+                remarks: {
+                  type: "string",
+                  title: "Remarks",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "suppliersCreditors",
-      "label": "Suppliers/Creditors",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "noOfFixedSuppliers": {
-            "type": "integer",
-            "title": "No of Fixed Suppliers"
+      id: "suppliersCreditors",
+      label: "Suppliers/Creditors",
+      schema: {
+        type: "object",
+        properties: {
+          noOfFixedSuppliers: {
+            type: "integer",
+            title: "No of Fixed Suppliers",
           },
-          "supplierCreditPeriodDays": {
-            "type": "integer",
-            "title": "Credit Period in days"
+          supplierCreditPeriodDays: {
+            type: "integer",
+            title: "Credit Period in days",
           },
-          "supplierCashChequeProportion": {
-            "type": "number",
-            "title": "Cash-Cheque Proportion"
+          supplierCashChequeProportion: {
+            type: "number",
+            title: "Cash-Cheque Proportion",
           },
-          "top3Suppliers": {
-            "type": "array",
-            "title": "Top 3 Suppliers",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "title": "Name"
+          top3Suppliers: {
+            type: "array",
+            title: "Top 3 Suppliers",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
                 },
-                "contactDetails": {
-                  "type": "string",
-                  "title": "Contact Details"
+                contactDetails: {
+                  type: "string",
+                  title: "Contact Details",
                 },
-                "location": {
-                  "type": "string",
-                  "title": "Location"
+                location: {
+                  type: "string",
+                  title: "Location",
                 },
-                "refCheck": {
-                  "type": "string",
-                  "title": "Ref. Check"
-                }
-              }
-            }
-          }
-        }
+                refCheck: {
+                  type: "string",
+                  title: "Ref. Check",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "clientsDebtors",
-      "label": "Clients/Debtors",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "noOfFixedCustomers": {
-            "type": "integer",
-            "title": "No of Fixed Customers"
+      id: "clientsDebtors",
+      label: "Clients/Debtors",
+      schema: {
+        type: "object",
+        properties: {
+          noOfFixedCustomers: {
+            type: "integer",
+            title: "No of Fixed Customers",
           },
-          "clientCreditPeriodDays": {
-            "type": "integer",
-            "title": "Credit Period in days"
+          clientCreditPeriodDays: {
+            type: "integer",
+            title: "Credit Period in days",
           },
-          "clientCashChequeProportion": {
-            "type": "number",
-            "title": "Cash-Cheque Proportion"
+          clientCashChequeProportion: {
+            type: "number",
+            title: "Cash-Cheque Proportion",
           },
-          "top3Customers": {
-            "type": "array",
-            "title": "Top 3 Customers",
-            "buttonTitle": "Add Customer",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "title": "Name"
+          top3Customers: {
+            type: "array",
+            title: "Top 3 Customers",
+            buttonTitle: "Add Customer",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
                 },
-                "contactDetails": {
-                  "type": "string",
-                  "title": "Contact Details"
+                contactDetails: {
+                  type: "string",
+                  title: "Contact Details",
                 },
-                "location": {
-                  "type": "string",
-                  "title": "Location"
+                location: {
+                  type: "string",
+                  title: "Location",
                 },
-                "refCheck": {
-                  "type": "string",
-                  "title": "Ref. Check"
-                }
-              }
-            }
+                refCheck: {
+                  type: "string",
+                  title: "Ref. Check",
+                },
+              },
+            },
           },
-          "averageStockMaintained": {
-            "type": "number",
-            "title": "Average Stock Maintained"
+          averageStockMaintained: {
+            type: "number",
+            title: "Average Stock Maintained",
           },
-          "turnoverAndMargins": {
-            "type": "number",
-            "title": "Turnover & Margins"
-          }
-        }
+          turnoverAndMargins: {
+            type: "number",
+            title: "Turnover & Margins",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "expenditure",
-      "label": "Expenditure",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "salariesAndWages": {
-            "type": "array",
-            "title": "Salaries & Wages",
-            "items": {
-              "type": "object",
-              "properties": {
-                "noOfEmployees": {
-                  "type": "integer",
-                  "title": "No. of Employees"
+      id: "expenditure",
+      label: "Expenditure",
+      schema: {
+        type: "object",
+        properties: {
+          salariesAndWages: {
+            type: "array",
+            title: "Salaries & Wages",
+            items: {
+              type: "object",
+              properties: {
+                noOfEmployees: {
+                  type: "integer",
+                  title: "No. of Employees",
                 },
-                "salaryPerMonthPerEmployee": {
-                  "type": "number",
-                  "title": "Salary per Month per Employee"
+                salaryPerMonthPerEmployee: {
+                  type: "number",
+                  title: "Salary per Month per Employee",
                 },
-                "statusOfEmployee": {
-                  "type": "string",
-                  "title": "Status of Employee",
-                  "enum": [
-                    "Contract",
-                    "Full time"
-                  ]
+                statusOfEmployee: {
+                  type: "string",
+                  title: "Status of Employee",
+                  enum: ["Contract", "Full time"],
                 },
-                "noOfLabours": {
-                  "type": "integer",
-                  "title": "No. of Labours"
+                noOfLabours: {
+                  type: "integer",
+                  title: "No. of Labours",
                 },
-                "wagesPerMonthOrDay": {
-                  "type": "number",
-                  "title": "Wages per Month / Per Day"
+                wagesPerMonthOrDay: {
+                  type: "number",
+                  title: "Wages per Month / Per Day",
                 },
-                "statusOfLabour": {
-                  "type": "string",
-                  "title": "Status of Labour"
+                statusOfLabour: {
+                  type: "string",
+                  title: "Status of Labour",
                 },
-                "remarks": {
-                  "type": "string",
-                  "title": "Remarks"
-                }
-              }
-            }
+                remarks: {
+                  type: "string",
+                  title: "Remarks",
+                },
+              },
+            },
           },
-          "workingHours": {
-            "type": "string",
-            "title": "Working Hours"
+          workingHours: {
+            type: "string",
+            title: "Working Hours",
           },
-          "otherMajorExpensesAndBasis": {
-            "type": "string",
-            "title": "Other Major Expenses & Basis"
-          }
-        }
+          otherMajorExpensesAndBasis: {
+            type: "string",
+            title: "Other Major Expenses & Basis",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "assetDetails",
-      "label": "Asset Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "assetDetails": {
-            "type": "array",
-            "title": "Asset Details",
-            "items": {
-              "type": "object",
-              "properties": {
-                "address": {
-                  "type": "string",
-                  "title": "Address"
+      id: "assetDetails",
+      label: "Asset Details",
+      schema: {
+        type: "object",
+        properties: {
+          assetDetails: {
+            type: "array",
+            title: "Asset Details",
+            items: {
+              type: "object",
+              properties: {
+                address: {
+                  type: "string",
+                  title: "Address",
                 },
-                "areaMeasurements": {
-                  "type": "string",
-                  "title": "Area Measurements"
+                areaMeasurements: {
+                  type: "string",
+                  title: "Area Measurements",
                 },
-                "purchaseCostLakhs": {
-                  "type": "number",
-                  "title": "Purchase Cost (in Lakhs)"
+                purchaseCostLakhs: {
+                  type: "number",
+                  title: "Purchase Cost (in Lakhs)",
                 },
-                "purchaseYear": {
-                  "type": "integer",
-                  "title": "Purchase Year"
+                purchaseYear: {
+                  type: "integer",
+                  title: "Purchase Year",
                 },
-                "marketValueLakhs": {
-                  "type": "number",
-                  "title": "Market Value (in Lakhs)"
+                marketValueLakhs: {
+                  type: "number",
+                  title: "Market Value (in Lakhs)",
                 },
-                "ownerName": {
-                  "type": "string",
-                  "title": "Owner Name"
+                ownerName: {
+                  type: "string",
+                  title: "Owner Name",
                 },
-                "mortgaged": {
-                  "type": "string",
-                  "title": "Mortgaged (Yes/No)"
+                mortgaged: {
+                  type: "string",
+                  title: "Mortgaged (Yes/No)",
                 },
-                "liquidMoveableMonetary": {
-                  "type": "string",
-                  "title": "Any Liquid, Moveable & Monetary Items (Cash, Gold, FD, RD, MF, Shares, Bonds, Securities)"
+                liquidMoveableMonetary: {
+                  type: "string",
+                  title:
+                    "Any Liquid, Moveable & Monetary Items (Cash, Gold, FD, RD, MF, Shares, Bonds, Securities)",
                 },
-                "insurances": {
-                  "type": "string",
-                  "title": "Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured)"
-                }
-              }
-            }
+                insurances: {
+                  type: "string",
+                  title:
+                    "Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured)",
+                },
+              },
+            },
           },
-          "capitalInvestedLoansAdvances": {
-            "type": "string",
-            "title": "Capital Invested in any Business, Loans & Advances given"
+          capitalInvestedLoansAdvances: {
+            type: "string",
+            title: "Capital Invested in any Business, Loans & Advances given",
           },
-          "vehicles": {
-            "type": "string",
-            "title": "Car, Bike and Other Vehicles (Company Name and Model)"
-          }
-        }
+          vehicles: {
+            type: "string",
+            title: "Car, Bike and Other Vehicles (Company Name and Model)",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "loanDetails",
-      "label": "Existing Loans",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "loanDetails": {
-            "type": "array",
-            "title": "Loan Details",
-            "items": {
-              "type": "object",
-              "properties": {
-                "bankOrNbfcName": {
-                  "type": "string",
-                  "title": "Name of Bank / NBFC"
+      id: "loanDetails",
+      label: "Existing Loans",
+      schema: {
+        type: "object",
+        properties: {
+          loanDetails: {
+            type: "array",
+            title: "Loan Details",
+            items: {
+              type: "object",
+              properties: {
+                bankOrNbfcName: {
+                  type: "string",
+                  title: "Name of Bank / NBFC",
                 },
-                "typeOfLoan": {
-                  "type": "string",
-                  "title": "Type of Loan"
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
                 },
-                "sanctionedAmount": {
-                  "type": "number",
-                  "title": "Sanctioned Amount"
+                sanctionedAmount: {
+                  type: "number",
+                  title: "Sanctioned Amount",
                 },
-                "osBalance": {
-                  "type": "number",
-                  "title": "O/S Balance"
+                osBalance: {
+                  type: "number",
+                  title: "O/S Balance",
                 },
-                "emiRs": {
-                  "type": "number",
-                  "title": "EMI (in Rs.)"
+                emiRs: {
+                  type: "number",
+                  title: "EMI (in Rs.)",
                 },
-                "emiPaidBank": {
-                  "type": "string",
-                  "title": "EMI Paid Bank"
+                emiPaidBank: {
+                  type: "string",
+                  title: "EMI Paid Bank",
                 },
-                "securedAgainstAsset": {
-                  "type": "string",
-                  "title": "Secured Against which Asset"
-                }
-              }
-            }
-          }
-        }
+                securedAgainstAsset: {
+                  type: "string",
+                  title: "Secured Against which Asset",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "bankingDetails",
-      "label": "Banking Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "bankDetails": {
-            "type": "array",
-            "title": "Bank Details",
-            "items": {
-              "type": "object",
-              "properties": {
-                "bankName": {
-                  "type": "string",
-                  "title": "Bank Name"
+      id: "bankingDetails",
+      label: "Banking Details",
+      schema: {
+        type: "object",
+        properties: {
+          bankDetails: {
+            type: "array",
+            title: "Bank Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
                 },
-                "branchName": {
-                  "type": "string",
-                  "title": "Branch Name"
+                branchName: {
+                  type: "string",
+                  title: "Branch Name",
                 },
-                "accountType": {
-                  "type": "string",
-                  "title": "Account Type"
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
                 },
-                "openSinceYear": {
-                  "type": "integer",
-                  "title": "Open Since (Year)"
-                }
-              }
-            }
-          }
-        }
+                openSinceYear: {
+                  type: "integer",
+                  title: "Open Since (Year)",
+                },
+              },
+            },
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "thirdPartyCheck",
-      "label": "Third Party Check",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "thirdPartyCheck": {
-            "type": "array",
-            "title": "Third Party Check",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "individualOrBusinessName": {
-                  "type": "string",
-                  "title": "Individual / Business Name"
+      id: "thirdPartyCheck",
+      label: "Third Party Check",
+      schema: {
+        type: "object",
+        properties: {
+          thirdPartyCheck: {
+            type: "array",
+            title: "Third Party Check",
+            minItems: 2,
+            items: {
+              type: "object",
+              properties: {
+                individualOrBusinessName: {
+                  type: "string",
+                  title: "Individual / Business Name",
                 },
-                "address": {
-                  "type": "string",
-                  "title": "Address"
+                address: {
+                  type: "string",
+                  title: "Address",
                 },
-                "contactNo": {
-                  "type": "string",
-                  "title": "Contact No."
+                contactNo: {
+                  type: "string",
+                  title: "Contact No.",
                 },
-                "knowingSince": {
-                  "type": "string",
-                  "title": "Knowing Since"
+                knowingSince: {
+                  type: "string",
+                  title: "Knowing Since",
                 },
-                "feedbackOnBorrower": {
-                  "type": "string",
-                  "title": "Feedback on Borrower"
+                feedbackOnBorrower: {
+                  type: "string",
+                  title: "Feedback on Borrower",
                 },
-                "feedbackOnBusiness": {
-                  "type": "string",
-                  "title": "Feedback on Business"
-                }
-              }
-            }
+                feedbackOnBusiness: {
+                  type: "string",
+                  title: "Feedback on Business",
+                },
+              },
+            },
           },
-          "otherIncome": {
-            "type": "string",
-            "title": "Other Income (Income from other than initiated business)"
+          otherIncome: {
+            type: "string",
+            title: "Other Income (Income from other than initiated business)",
           },
-          "siteCoordinates": {
-            "type": "string",
-            "title": "Site Coordinates",
-            "readOnly": true
+          siteCoordinates: {
+            type: "string",
+            title: "Site Coordinates (Latitude, Longitude)",
           },
-          "observation": {
-            "type": "string",
-            "title": "Observation"
-          }
-        }
+          observation: {
+            type: "string",
+            title: "Observation",
+          },
+        },
       },
-      "required": true
-    }
-  ]
+      required: true,
+    },
+  ],
 } as const;
 export default axisFinanceUblAbove10lSchema;

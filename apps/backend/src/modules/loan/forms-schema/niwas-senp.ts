@@ -1,201 +1,221 @@
 export const niwasSenpSchema = {
-  "id": 24,
-  "bankName": "Niwas Senp",
-  "sections": [
+  id: 24,
+  bankName: "Niwas Senp",
+  sections: [
     {
-      "id": "general",
-      "label": "General",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "prospectNo": {
-            "type": "string",
-            "title": "Prospect No.",
-            "readOnly": true
+      id: "general",
+      label: "General",
+      schema: {
+        type: "object",
+        properties: {
+          prospectNo: {
+            type: "string",
+            title: "Prospect No.",
+            readOnly: true,
           },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "readOnly": true
+          name: {
+            type: "string",
+            title: "Name",
+            readOnly: true,
           },
-          "maritalStatus": {
-            "type": "string",
-            "title": "Marital Status"
+          maritalStatus: {
+            type: "string",
+            title: "Marital Status",
           },
-          "educationalQualification": {
-            "type": "string",
-            "title": "Educational Qualification"
+          educationalQualification: {
+            type: "string",
+            title: "Educational Qualification",
           },
-          "category": {
-            "type": "string",
-            "title": "Category"
+          category: {
+            type: "string",
+            title: "Category",
           },
-          "numberOfDependents": {
-            "type": "integer",
-            "title": "Number of Dependents"
+          numberOfDependents: {
+            type: "integer",
+            title: "Number of Dependents",
           },
-          "children": {
-            "type": "string",
-            "title": "Children"
+          children: {
+            type: "string",
+            title: "Children",
           },
-          "adults": {
-            "type": "string",
-            "title": "Adults"
+          adults: {
+            type: "string",
+            title: "Adults",
           },
-          "others": {
-            "type": "string",
-            "title": "Others"
+          others: {
+            type: "string",
+            title: "Others",
           },
-          "numberOfYearsInCurrentResidence": {
-            "type": "integer",
-            "title": "Number of years in Current Residence"
+          latitude: {
+            type: "string",
+            title: "Latitude",
           },
-          "currentResidenceHouseSize": {
-            "type": "string",
-            "title": "Current residence house size"
+          longitude: {
+            type: "string",
+            title: "Longitude",
           },
-          "previousAddressIf1Year": {
-            "type": "string",
-            "title": "Previous Address (if <1 year)"
+          region: {
+            type: "string",
+            title: "Region",
           },
-          "numberOfYearsStayedAtThatAddress": {
-            "type": "integer",
-            "title": "Number of Years stayed at that Address"
+          location: {
+            type: "string",
+            title: "Location",
           },
-          "numberOfYearsInCurrentCity": {
-            "type": "integer",
-            "title": "Number of Years in Current City"
+          branch: {
+            type: "string",
+            title: "Branch",
           },
-          "previousCityIf3Years": {
-            "type": "string",
-            "title": "Previous City (if ≤3 years)"
+          numberOfYearsInCurrentResidence: {
+            type: "integer",
+            title: "Number of years in Current Residence",
           },
-          "numberOfYearsInThatCity": {
-            "type": "integer",
-            "title": "Number of Years in that City"
+          currentResidenceHouseSize: {
+            type: "string",
+            title: "Current residence house size",
           },
-          "reasonForChange": {
-            "type": "string",
-            "title": "Reason for Change"
+          previousAddressIf1Year: {
+            type: "string",
+            title: "Previous Address (if <1 year)",
           },
-          "parentsStayingWith": {
-            "type": "string",
-            "title": "Parents Staying with?"
-          }
-        }
+          numberOfYearsStayedAtThatAddress: {
+            type: "integer",
+            title: "Number of Years stayed at that Address",
+          },
+          numberOfYearsInCurrentCity: {
+            type: "integer",
+            title: "Number of Years in Current City",
+          },
+          previousCityIf3Years: {
+            type: "string",
+            title: "Previous City (if ≤3 years)",
+          },
+          numberOfYearsInThatCity: {
+            type: "integer",
+            title: "Number of Years in that City",
+          },
+          reasonForChange: {
+            type: "string",
+            title: "Reason for Change",
+          },
+          parentsStayingWith: {
+            type: "string",
+            title: "Parents Staying with?",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "contactPersonNameNumber",
-      "label": "Contact Person Name & Number",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "businessIncomeComputationMonthly": {
-            "type": "number",
-            "title": "Business Income Computation (Monthly)"
-          }
-        }
+      id: "contactPersonNameNumber",
+      label: "Contact Person Name & Number",
+      schema: {
+        type: "object",
+        properties: {
+          businessIncomeComputationMonthly: {
+            type: "number",
+            title: "Business Income Computation (Monthly)",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "totalMonthlyExpensesB",
-      "label": "Total Monthly Expenses (B)",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "netMonthlyProfitAB": {
-            "type": "number",
-            "title": "Net Monthly Profit (=A-B)"
-          }
-        }
+      id: "totalMonthlyExpensesB",
+      label: "Total Monthly Expenses (B)",
+      schema: {
+        type: "object",
+        properties: {
+          netMonthlyProfitAB: {
+            type: "number",
+            title: "Net Monthly Profit (=A-B)",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "loanDetails",
-      "label": "Loan Details",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "purposeOfLoan": {
-            "type": "number",
-            "title": "Purpose Of Loan"
+      id: "loanDetails",
+      label: "Loan Details",
+      schema: {
+        type: "object",
+        properties: {
+          purposeOfLoan: {
+            type: "number",
+            title: "Purpose Of Loan",
           },
-          "minimumLoanAmountRequired": {
-            "type": "number",
-            "title": "Minimum Loan Amount Required"
+          minimumLoanAmountRequired: {
+            type: "number",
+            title: "Minimum Loan Amount Required",
           },
-          "tenureRequired": {
-            "type": "integer",
-            "title": "Tenure Required"
-          }
-        }
+          tenureRequired: {
+            type: "integer",
+            title: "Tenure Required",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "feedbackAboutApplicantFirm",
-      "label": "Feedback about Applicant/Firm",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "toBeFilledByPdOfficer": {
-            "type": "string",
-            "title": "To be Filled by PD Officer"
+      id: "feedbackAboutApplicantFirm",
+      label: "Feedback about Applicant/Firm",
+      schema: {
+        type: "object",
+        properties: {
+          toBeFilledByPdOfficer: {
+            type: "string",
+            title: "To be Filled by PD Officer",
           },
-          "briefCommentsObservationsOfTheCase": {
-            "type": "string",
-            "title": "Brief Comments / Observations of the case"
+          briefCommentsObservationsOfTheCase: {
+            type: "string",
+            title: "Brief Comments / Observations of the case",
           },
-          "initiatedAddress": {
-            "type": "string",
-            "title": "Initiated Address"
+          initiatedAddress: {
+            type: "string",
+            title: "Initiated Address",
           },
-          "visitedAddress": {
-            "type": "string",
-            "title": "Visited Address"
+          visitedAddress: {
+            type: "string",
+            title: "Visited Address",
           },
-          "residentialAddress": {
-            "type": "string",
-            "title": "Residential Address"
+          residentialAddress: {
+            type: "string",
+            title: "Residential Address",
           },
-          "otherObservations": {
-            "type": "string",
-            "title": "Other Observations"
+          otherObservations: {
+            type: "string",
+            title: "Other Observations",
           },
-          "concerns": {
-            "type": "string",
-            "title": "Concerns"
+          concerns: {
+            type: "string",
+            title: "Concerns",
           },
-          "statusOfThisCasePositiveNegativeCreditRefer": {
-            "type": "string",
-            "title": "Status of this Case - Positive/Negative/Credit Refer"
+          statusOfThisCasePositiveNegativeCreditRefer: {
+            type: "string",
+            title: "Status of this Case - Positive/Negative/Credit Refer",
           },
-          "nameOfPdOfficer": {
-            "type": "string",
-            "title": "Name of PD Officer"
-          }
-        }
+          nameOfPdOfficer: {
+            type: "string",
+            title: "Name of PD Officer",
+          },
+        },
       },
-      "required": true
+      required: true,
     },
     {
-      "id": "dateOfDiscussion",
-      "label": "Date of Discussion",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "signatureOfThePdOfficer": {
-            "type": "string",
-            "title": "Signature of the PD Officer"
-          }
-        }
+      id: "dateOfDiscussion",
+      label: "Date of Discussion",
+      schema: {
+        type: "object",
+        properties: {
+          signatureOfThePdOfficer: {
+            type: "string",
+            title: "Signature of the PD Officer",
+          },
+        },
       },
-      "required": true
-    }
-  ]
+      required: true,
+    },
+  ],
 } as const;
 export default niwasSenpSchema;
