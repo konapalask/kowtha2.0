@@ -1,10 +1,22 @@
-version: '3.8'
 services:
   db:
     image: postgres:14
+    container_name: kowtha-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: loan_verification
-      POSTGRES_USER: devuser
+      POSTGRES_USER: kowtha
       POSTGRES_PASSWORD: devpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./project-data/kowtha_dev_db_091025.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kowtha -d loan_verification"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
