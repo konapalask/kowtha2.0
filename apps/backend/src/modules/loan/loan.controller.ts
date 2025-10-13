@@ -267,7 +267,7 @@ export class LoanController {
   */
 
   @Get('get-verifier-loans')
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.VerificationExecutive)
   @ApiOperation({ summary: 'Get loans assigned to verifier' })
   @ApiResponse({
     status: 200,
@@ -281,7 +281,6 @@ export class LoanController {
       data: result
     };
   }
-
 
   @Get(':id/preview-final-report')
   @Roles(UserRole.Admin, UserRole.Verifier)
@@ -519,7 +518,7 @@ export class LoanController {
   }
 
   @Patch('verification/:id/financial-analysis')
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({ summary: 'Update financial analysis data for a verification' })
   @ApiResponse({
     status: 200,

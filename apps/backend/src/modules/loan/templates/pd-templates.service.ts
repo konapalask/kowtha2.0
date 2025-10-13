@@ -25,98 +25,73 @@ export class PDTemplateService {
 
     ) { }
 
-    async FormatPDImages(validImageUrls: string[], bankName: string, fieldExecutive: string): Promise<any> {
-        return this.loanService.formatImages(validImageUrls, bankName, fieldExecutive);
+    async FormatPDImages(verification: any, bankName: string, verificationData: any, applicationNumber: string): Promise<any> {
+      try {        
+        const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+        const imageBase64 = fs.readFileSync(imagePath, 'base64');
+        const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+        const status = verification?.approvedStatus || '';
+
+        const uploadedItems = verificationData?.uploadedItems || [];
+
+        // Generate presigned URLs for images
+        const imageUrls = await Promise.all(
+          uploadedItems.map(async (item: any) => {
+            try {
+              return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+            } catch (error) {
+              await this.loggingService.error('Failed to generate presigned URL for image', {
+                s3ImageUrl: item.s3ImageUrl,
+                error: error.message
+              });
+              return null;
+            }
+          })
+        );
+
+        // Filter out any failed URL generations
+        const validImageUrls = imageUrls.filter(url => url !== null);
+
+        const fieldExecutive = verification.fieldExecutive?.name || '';
+
+        const imagesData = await this.loanService.formatImages(validImageUrls, bankName, fieldExecutive);
+
+        const html_data = {
+            bankName: bankName,
+            applicationNumber: applicationNumber,
+            path: verification.path,
+            status: status,
+            imageDataUri: imageDataUri,
+            imagesData: imagesData,
+            fieldExecutive: fieldExecutive,
+          }
+
+        return html_data;
+      } catch (error) {
+          await this.loggingService.error('Failed to generate verification PDF', {
+            verification,
+            bankName,
+            verificationData,
+            applicationNumber,
+            error: error.message,
+            stack: error.stack,
+          });
+          throw error;
+        }
     }
 
     async InterfaceMapping(bankName: string, verification: any, loan: any): Promise<any> {
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-      const imageBase64 = fs.readFileSync(imagePath, 'base64');
-      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
-            
+      
         if (bankName == 'Axis Bank') {
-            // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
-            let verificationData = loan.verificationData as AxisFinanceUBLInterface
-
-            const status = verification?.approvedStatus || '';
-
-            const uploadedItems = verificationData?.uploadedItems || [];
-    
-            // Generate presigned URLs for images
-            const imageUrls = await Promise.all(
-              uploadedItems.map(async (item: any) => {
-                try {
-                  return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
-                } catch (error) {
-                  await this.loggingService.error('Failed to generate presigned URL for image', {
-                    s3ImageUrl: item.s3ImageUrl,
-                    error: error.message
-                  });
-                  return null;
-                }
-              })
-            );
-      
-            // Filter out any failed URL generations
-            const validImageUrls = imageUrls.filter(url => url !== null);
-      
-            const fieldExecutive = verification.fieldExecutive?.name || '';
-
-            const imagesData = await this.FormatPDImages(validImageUrls, bankName, fieldExecutive);
-
-            const html_data = {
-                bankName: bankName,
-                applicationNumber: loan.applicationNumber,
-                path: verification.path,
-                status: status,
-                imageDataUri: imageDataUri,
-                imagesData: imagesData,
-                fieldExecutive: fieldExecutive,
-              }
+            let verificationData = verification as AxisFinanceUBLInterface
+            const html_data = await this.FormatPDImages(verification, bankName, verificationData, loan.applicationNumber);
             return axisFinanceUBLTemplate(verificationData, html_data);
         }
 
         if (bankName == 'Rbl') {
-          
-          // Map incoming verification data (schema-driven or legacy) to AxisFinanceUBLInterface
           let verificationData = verification as RBLInterface
-          
-          const status = verification?.approvedStatus || '';
-
-          const uploadedItems = verificationData?.uploadedItems || [];
-  
-          // Generate presigned URLs for images
-          const imageUrls = await Promise.all(
-            uploadedItems.map(async (item: any) => {
-              try {
-                return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
-              } catch (error) {
-                await this.loggingService.error('Failed to generate presigned URL for image', {
-                  s3ImageUrl: item.s3ImageUrl,
-                  error: error.message
-                });
-                return null;
-              }
-            })
-          );
-    
-          // Filter out any failed URL generations
-          const validImageUrls = imageUrls.filter(url => url !== null);
-    
-          const fieldExecutive = verification.fieldExecutive?.name || '';
-
-          const imagesData = await this.FormatPDImages(validImageUrls, bankName, fieldExecutive);
-
-          const html_data = {
-              bankName: bankName,
-              applicationNumber: loan.applicationNumber,
-              path: verification.path,
-              status: status,
-              imageDataUri: imageDataUri,
-              imagesData: imagesData,
-              fieldExecutive: fieldExecutive,
-            }
-            console.log(verificationData);
+          const html_data = await this.FormatPDImages(verification, bankName, verificationData, loan.applicationNumber);
           return rblTemplate(verificationData, html_data);
       }
     }
