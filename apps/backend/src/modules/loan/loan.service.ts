@@ -23,6 +23,7 @@ import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
 import { PDBusinessVerificationData } from "./templates/PD/interface/pd-business.interface";
+import { formSchema } from "./forms-schema";
 import {
   Prisma,
   LoanStatus,
@@ -1537,9 +1538,63 @@ export class LoanService {
         throw new NotFoundException("Loan not found");
       }
 
-      // Format the verification data and generate presigned URLs for paths
+      // Format the verification data
+      console.error(
+        `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
+      );
+
       const verificationData = await Promise.all(
         loan.verifications.map(async (verification) => {
+          // For PD forms, handle both old hardcoded format and new schema format
+          let transformedVerificationData = verification.verificationData;
+          console.error(`🔍 Processing verification ${verification.id}`);
+
+          if (
+            department === "PD" &&
+            verification.verificationData &&
+            loan.bankName
+          ) {
+            // Check if data is in old format (has basicDetails, businessDetails, etc.)
+            const hasOldFormat = !!(
+              verification.verificationData.basicDetails ||
+              verification.verificationData.businessDetails ||
+              verification.verificationData.applicantDetails
+            );
+
+            // Always log for debugging
+            await this.loggingService.info(
+              `PD verification ${verification.id}: hasOldFormat = ${hasOldFormat}`,
+              {
+                verificationId: verification.id,
+                bankName: loan.bankName,
+                dataKeys: Object.keys(verification.verificationData),
+                hasOldFormat,
+              }
+            );
+
+            if (hasOldFormat) {
+              // Transform old format to schema format for backward compatibility
+              await this.loggingService.info(
+                `Transforming old format for bank: ${loan.bankName}`,
+                {
+                  verificationId: verification.id,
+                  bankName: loan.bankName,
+                }
+              );
+
+              transformedVerificationData =
+                this.transformOldFormatToSchemaFormat(
+                  verification.verificationData,
+                  loan.bankName
+                );
+
+              await this.loggingService.info(`Transformation completed`, {
+                verificationId: verification.id,
+                transformedKeys: Object.keys(transformedVerificationData),
+              });
+            }
+          }
+
           return {
             id: verification.id,
             type: verification.type,
@@ -1549,7 +1604,7 @@ export class LoanService {
             approvedStatus: verification.approvedStatus,
             finalReportPath: verification.finalReportPath,
             addressType: verification.addressType,
-            verificationData: verification.verificationData,
+            verificationData: transformedVerificationData,
             financialAnalysis: verification.financialAnalysis,
             synopsis: verification.synopsis,
             fieldExecutive: verification.fieldExecutive,
@@ -2668,5 +2723,115 @@ export class LoanService {
       });
       throw error;
     }
+  }
+
+  /**
+   * Transform old hardcoded format to schema format for backward compatibility
+   * Old format: { basicDetails: {...}, businessDetails: {...} }
+   * Schema format: { general: {...}, pdDetails: {...} }
+   */
+  private transformOldFormatToSchemaFormat(
+    oldData: any,
+    bankName: string
+  ): any {
+    if (!oldData || !bankName) return oldData;
+
+    const schema = formSchema[bankName as keyof typeof formSchema];
+    if (!schema || !schema.sections) return oldData;
+
+    const transformed: any = {};
+
+    // Map old format to schema format
+    schema.sections.forEach((section: any) => {
+      if (!section.fields) return;
+
+      transformed[section.id] = {};
+
+      section.fields.forEach((field: any) => {
+        const fieldId = field.id;
+        let value = "";
+
+        // Map from old format to schema format
+        switch (fieldId) {
+          case "nameOfTheApplicant":
+          case "nameOfApplicant":
+            value =
+              oldData.basicDetails?.applicantName ||
+              oldData.applicantDetails?.nameOfApplicant ||
+              oldData.applicantDetails?.customerName ||
+              "";
+            break;
+          case "businessName":
+          case "nameOfConcern":
+            value =
+              oldData.basicDetails?.businessName ||
+              oldData.basicDetails?.concernName ||
+              oldData.basicDetails?.nameOfEntity ||
+              oldData.businessDetails?.businessName ||
+              "";
+            break;
+          case "phoneNo":
+          case "contactNo":
+            value =
+              oldData.basicDetails?.phoneNo ||
+              oldData.applicantDetails?.contactNo ||
+              oldData.applicantDetails?.contactNumber ||
+              oldData.applicantDetails?.phoneNumber ||
+              "";
+            break;
+          case "applicationNumber":
+          case "applicationNo":
+            value =
+              oldData.basicDetails?.applicationNumber ||
+              oldData.basicDetails?.applicationNo ||
+              oldData.applicantDetails?.applicationNo ||
+              oldData.applicantDetails?.applicationId ||
+              "";
+            break;
+          case "visitedAddress":
+          case "currentAddress":
+          case "initiatedAddress":
+            value =
+              oldData.basicDetails?.visitedAddress ||
+              oldData.basicDetails?.initiatedAddress ||
+              oldData.applicantDetails?.currentAddress ||
+              oldData.applicantDetails?.pdAddress ||
+              oldData.officeAddress?.address ||
+              "";
+            break;
+          case "loanRequested":
+          case "loanAmount":
+            value =
+              oldData.basicDetails?.loanRequested ||
+              oldData.applicantDetails?.loanAmount ||
+              "";
+            break;
+          case "bankName":
+            value = oldData.basicDetails?.bankName || "";
+            break;
+          case "constitution":
+            value = oldData.basicDetails?.constitution || "";
+            break;
+          case "businessType":
+            value = oldData.businessDetails?.businessType || "";
+            break;
+          case "yearsInBusiness":
+            value = oldData.businessDetails?.yearsInBusiness || "";
+            break;
+          case "natureOfBusiness":
+            value = oldData.businessDetails?.natureOfBusiness || "";
+            break;
+          case "familyMembers":
+            value = oldData.familyMemberDetails || [];
+            break;
+          default:
+            value = "";
+        }
+
+        transformed[section.id][fieldId] = value;
+      });
+    });
+
+    return transformed;
   }
 }

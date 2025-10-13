@@ -72,7 +72,7 @@ export default function LoanVerifyDetails() {
   };
 
   const fetchEditRequests = async () => {
-    if (currentDepartment === 'PD') {
+    if (currentDepartment === "PD") {
       // For PD department, call the API with department parameter
       getEditRequestsApi("Pending", id as string)
         .then((res) => {
@@ -358,7 +358,8 @@ export default function LoanVerifyDetails() {
           </Tabs>
         </div>
 
-        {editModalVisible && (
+        {/* EditFormModal is only for FI department - PD uses DynamicEditModal in BusinessVerificationDetails */}
+        {editModalVisible && currentDepartment === "FI" && (
           <EditFormModal
             visible={editModalVisible}
             onCancel={() => setEditModalVisible(false)}

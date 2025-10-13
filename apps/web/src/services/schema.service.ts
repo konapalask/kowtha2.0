@@ -17,11 +17,12 @@ export interface BankSchemaResponse {
  * This is the single source of truth for all bank form schemas
  */
 export const getSchemaFromBackend = async (
-  bankName: string
+  bankName: string,
+  department: string = "PD"
 ): Promise<BankSchemaResponse> => {
   try {
     const response = await axiosInstance.get(`/loans/get-bank-forms`, {
-      params: { bankName },
+      params: { bankName, department },
     });
 
     if (response.data.status === 200) {

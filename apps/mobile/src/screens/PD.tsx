@@ -24,7 +24,83 @@ import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
 import GetLocation from 'react-native-get-location';
 
-// Function to get initial data based on bank name
+// Function to populate initial data from schema structure
+const populateInitialDataFromSchema = (
+  schema: any,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!schema || !schema.sections || !userData) return {};
+
+  const initialData: any = {};
+
+  // Common data mapping
+  const commonData = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    businessName: userData?.businessName || userData?.loan?.businessName || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNumber:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    address:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+  };
+
+  // Map common data to schema fields
+  schema.sections.forEach((section: any) => {
+    if (!section.fields) return;
+
+    initialData[section.id] = {};
+
+    section.fields.forEach((field: any) => {
+      const fieldId = field.id;
+
+      // Map common data to schema fields
+      switch (fieldId) {
+        case 'nameOfTheApplicant':
+        case 'nameOfApplicant':
+          initialData[section.id][fieldId] = commonData.applicantName;
+          break;
+        case 'businessName':
+        case 'nameOfConcern':
+          initialData[section.id][fieldId] = commonData.businessName;
+          break;
+        case 'phoneNo':
+        case 'contactNo':
+          initialData[section.id][fieldId] = commonData.phoneNo;
+          break;
+        case 'applicationNumber':
+        case 'applicationNo':
+          initialData[section.id][fieldId] = commonData.applicationNumber;
+          break;
+        case 'visitedAddress':
+        case 'currentAddress':
+        case 'initiatedAddress':
+          initialData[section.id][fieldId] = commonData.address;
+          break;
+        case 'loanRequested':
+        case 'loanAmount':
+          initialData[section.id][fieldId] = commonData.loanAmount;
+          break;
+        case 'bankName':
+          initialData[section.id][fieldId] = userData?.loan?.bankName || '';
+          break;
+        case 'pdDoneBy':
+        case 'nameOfPersonMet':
+          initialData[section.id][fieldId] = loggedInUserName || '';
+          break;
+        default:
+          // For other fields, leave empty to be filled by user
+          initialData[section.id][fieldId] = '';
+      }
+    });
+  });
+
+  return initialData;
+};
+
+// Function to get initial data based on bank name (DEPRECATED - keeping for fallback)
 const getInitialDataByBank = (
   bankName: string,
   userData: any,
@@ -342,13 +418,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [loggedInUserName, setLoggedInUserName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const [formData, setFormData] = useState<any>({});
-  const initialData = getInitialDataByBank(
-    bankName,
-    userData,
-    loggedInUserName,
-  );
-  console.log('initialData', initialData);
-  const [sectionData, setSectionData] = useState<any>(initialData);
+  // Initialize with empty object - schema will define the structure
+  const [sectionData, setSectionData] = useState<any>({});
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
@@ -533,6 +604,14 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const schema = await loadMobilePDFormsSchema(bankName);
         if (schema) {
           setSchemaForm(schema);
+
+          // Initialize sectionData with schema structure and userData
+          const initialData = populateInitialDataFromSchema(
+            schema,
+            userData,
+            loggedInUserName,
+          );
+          setSectionData(initialData);
         }
       } catch (e) {
         console.error('Error loading schema:', e);
@@ -540,7 +619,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       }
     };
     loadSchema();
-  }, [bankName]);
+  }, [bankName, userData, loggedInUserName]);
 
   // Watch form values to update formData
   // const watchedValues = watch();
@@ -809,11 +888,33 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         return;
       }
 
+      // Ensure all array items have UUIDs before submission
+      const processedSectionData = {...sectionData};
+
+      // Process each section to ensure array items have UUIDs
+      Object.keys(processedSectionData).forEach(sectionId => {
+        const sectionData = processedSectionData[sectionId];
+        if (sectionData && typeof sectionData === 'object') {
+          Object.keys(sectionData).forEach(fieldId => {
+            const fieldValue = sectionData[fieldId];
+            if (Array.isArray(fieldValue)) {
+              // Ensure each array item has a UUID
+              processedSectionData[sectionId][fieldId] = fieldValue.map(
+                (item: any) => ({
+                  ...item,
+                  _id: item._id || require('react-native-uuid').v4(),
+                }),
+              );
+            }
+          });
+        }
+      });
+
       const finalData = {
         verificationType: 'Business',
         findings: 'Business Verification Findings',
         addressType: 'Business',
-        verificationData: sectionData,
+        verificationData: processedSectionData,
       };
 
       // console.log('finalData', finalData);

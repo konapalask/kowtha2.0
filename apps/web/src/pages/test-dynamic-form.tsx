@@ -45,8 +45,8 @@ const DynamicFormTest: React.FC = () => {
     setLoading(true);
 
     try {
-      // Fetch schema from backend
-      const backendResponse = await getSchemaFromBackend(bankName);
+      // Fetch schema from backend (default to PD department)
+      const backendResponse = await getSchemaFromBackend(bankName, "PD");
       const schema = convertBackendSchemaToWebFormat(backendResponse.schema);
 
       if (schema) {

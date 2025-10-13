@@ -21,6 +21,7 @@ import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
 import { useRouter } from "next/router";
+import dayjs from "dayjs";
 
 import FinalVerdict from "./FinalVerdict";
 import Feedback from "./Feedback";
@@ -31,6 +32,7 @@ import {
 } from "@/services/verifier.services";
 
 // Import new dynamic form system
+import { DirectPDFormRenderer } from "./DirectPDFormRenderer";
 import { EnhancedDynamicFormRenderer } from "@/components/forms/EnhancedDynamicFormRenderer";
 import { WebFormDefinition, WebFormData } from "@/types/webSchema";
 import { DynamicEditModal } from "@/components/verify/DynamicEditModal";
@@ -41,7 +43,53 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
-import DynamicSectionDescription from "./Descriptions/DynamicSectionDescription";
+
+const serializeFormValues = (value: any): any => {
+  if (dayjs.isDayjs(value)) {
+    return value.format("DD/MM/YYYY");
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeFormValues(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.entries(value).reduce(
+      (acc, [key, val]) => ({
+        ...acc,
+        [key]: serializeFormValues(val),
+      }),
+      {} as Record<string, any>
+    );
+  }
+
+  return value;
+};
+
+const mergeDeep = (target: any, source: any): any => {
+  if (source === undefined) {
+    return target;
+  }
+
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  if (source && typeof source === "object") {
+    const base =
+      target && typeof target === "object" && !Array.isArray(target)
+        ? { ...target }
+        : {};
+
+    Object.keys(source).forEach((key) => {
+      base[key] = mergeDeep(base[key], source[key]);
+    });
+
+    return base;
+  }
+
+  return source;
+};
 
 interface BusinessVerificationDetailsProps {
   verificationData: any;
@@ -98,6 +146,7 @@ export const BusinessVerificationDetails: React.FC<
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
+  const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
 
@@ -216,7 +265,10 @@ export const BusinessVerificationDetails: React.FC<
           // Fetch schema from backend (single source of truth)
           const { getSchemaFromBackend, convertBackendSchemaToWebFormat } =
             await import("@/services/schema.service");
-          const backendResponse = await getSchemaFromBackend(bankName);
+          const backendResponse = await getSchemaFromBackend(
+            bankName,
+            currentDepartment || "PD"
+          );
 
           // Convert backend schema to web format
           const schema = convertBackendSchemaToWebFormat(
@@ -224,8 +276,10 @@ export const BusinessVerificationDetails: React.FC<
           );
 
           if (schema) {
+            console.log("✅ Schema loaded successfully:", schema);
             setSchemaForm(schema);
-            setUseNewApproach(true);
+            setUseGenericApproach(true);
+            setUseNewApproach(false);
 
             // Initialize form data from existing verification data
             // Extract the actual form data from verificationData.verificationData
@@ -273,6 +327,14 @@ export const BusinessVerificationDetails: React.FC<
               "✓ PD schema loaded from backend successfully:",
               schema.name
             );
+
+            // Debug: Log the data being passed to GenericVerificationDisplay
+            console.log("🎯 Data passed to GenericVerificationDisplay:");
+            console.log("  formData:", formData);
+            console.log(
+              "  schema sections:",
+              schema.sections?.map((s: any) => s.id)
+            );
             console.log("✓ Form data initialized:", formData);
           } else {
             console.log(
@@ -286,10 +348,12 @@ export const BusinessVerificationDetails: React.FC<
             schemaError.message
           );
           setUseNewApproach(false);
+          setUseGenericApproach(false);
         }
       } catch (error) {
         console.error("Error loading dynamic schema:", error);
         setUseNewApproach(false);
+        setUseGenericApproach(false);
       } finally {
         setFormLoading(false);
       }
@@ -469,6 +533,50 @@ export const BusinessVerificationDetails: React.FC<
       message.error("Failed to update verification data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDirectFormSave = async (formValues: any) => {
+    if (!id) {
+      throw new Error("Unable to save: Loan identifier is missing");
+    }
+
+    try {
+      const sanitizedValues = serializeFormValues(formValues);
+      const existingVerificationData =
+        (verificationData?.verificationData as Record<string, any>) || {};
+      const mergedVerificationData = mergeDeep(
+        existingVerificationData,
+        sanitizedValues
+      );
+
+      const verificationType =
+        verificationData?.type ||
+        completeVerificationData?.type ||
+        "Business";
+      const findings =
+        verificationData?.findings ||
+        completeVerificationData?.findings ||
+        "Business Verification Findings";
+      const approvedStatus =
+        verificationData?.approvedStatus ||
+        completeVerificationData?.approvedStatus ||
+        "Positive";
+
+      await verifierEditApi(String(id), verificationType, {
+        findings,
+        verificationData: mergedVerificationData,
+        approvedStatus,
+      });
+
+      fetchVerificationData?.();
+    } catch (error: any) {
+      console.error("Error saving PD form data:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to save PD form data";
+      throw new Error(errorMessage);
     }
   };
 
@@ -804,6 +912,13 @@ export const BusinessVerificationDetails: React.FC<
   const rawApiData = verificationData?.verificationData || verificationData;
   const data = rawApiData;
 
+  // Debug logging
+  console.log("🔍 BusinessVerificationDetails Debug:");
+  console.log("  verificationData:", verificationData);
+  console.log("  rawApiData:", rawApiData);
+  console.log("  data:", data);
+  console.log("  bankName:", bankName);
+
   // For legacy FI components, wrap the data correctly
   // The description components expect data with nested structure like data.basicDetails
   const legacyFormattedData = {
@@ -820,6 +935,9 @@ export const BusinessVerificationDetails: React.FC<
     thirdPartyCheck: {
       checks: data?.thirdPartyCheck?.checks || [],
     },
+    // For PD components, add top-level fields that they expect
+    applicationNumber: data?.basicDetails?.applicationNumber,
+    bankName: data?.basicDetails?.bankName,
   };
 
   // Merge pending edits from local edit logs into the display data so UI reflects changes
@@ -839,6 +957,13 @@ export const BusinessVerificationDetails: React.FC<
       ...(changedData?.miscellaneous || {}),
     },
     // Keep existingLoans and thirdPartyCheck structures intact; logs view already shows diffs
+    // Ensure top-level fields are updated from merged basicDetails
+    applicationNumber:
+      legacyFormattedData.applicationNumber ||
+      legacyFormattedData.basicDetails?.applicationNumber,
+    bankName:
+      legacyFormattedData.bankName ||
+      legacyFormattedData.basicDetails?.bankName,
   } as typeof legacyFormattedData;
 
   const handleEditorChange = (content: string) => {
@@ -1020,123 +1145,170 @@ export const BusinessVerificationDetails: React.FC<
         />
       )}
 
-      {/* Legacy FI-style Business Data Display (for banks without PD forms) */}
-      {!useNewApproach && !formLoading && verificationData && (
-        <div style={{ marginBottom: 24 }}>
-          <BusinessBasicDetailsDescription
-            data={mergedLegacyData}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("basicDetails")}
-                disabled={hasEditRequest}
-              />
-            }
-            logs={false}
-            currentDepartment={currentDepartment}
+      {/* Enhanced Dynamic Form (for PD forms with schema) */}
+      {useGenericApproach && !formLoading && schemaForm && (
+        <div>
+          <div
+            style={{
+              background: "#e6f7ff",
+              padding: 8,
+              marginBottom: 16,
+              borderRadius: 4,
+            }}
+          >
+            ✅ Using DirectPDFormRenderer - Direct Form Fields
+          </div>
+          <DirectPDFormRenderer
+            schema={schemaForm}
+            initialData={verificationData?.verificationData}
+            onSave={handleDirectFormSave}
+            readOnly={!!verificationData?.approvedStatus || hasEditRequest}
           />
-
-          <BusinessDetailsDescription
-            data={mergedLegacyData}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("businessDetails")}
-                disabled={hasEditRequest}
-              />
-            }
-            logs={false}
-            currentDepartment={currentDepartment}
-          />
-
-          <BusinessMiscellaneousDescription
-            data={mergedLegacyData}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("miscellaneous")}
-                disabled={hasEditRequest}
-              />
-            }
-            logs={false}
-          />
-
-          <ExistingLoansDescription
-            data={legacyFormattedData}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("existingLoans")}
-                disabled={hasEditRequest}
-              />
-            }
-            logs={false}
-          />
-
-          <ThirdPartyCheckDescription
-            data={legacyFormattedData}
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit("thirdPartyCheck")}
-                disabled={hasEditRequest}
-              />
-            }
-            logs={false}
-          />
-
-          {/* Photo Capture Section */}
-          <section style={{ marginBottom: 24 }}>
-            <Card title="Photo Capture">
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: "16px",
-                }}
-              >
-                {legacyFormattedData?.uploadedItems?.map(
-                  (item: any, idx: number) => {
-                    return (
-                      <div key={item.id} style={{ position: "relative" }}>
-                        <Image
-                          src={imageUrls[item.id] || ""}
-                          alt={`Photo ${idx + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "200px",
-                            objectFit: "cover",
-                            borderRadius: "4px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            background: "rgba(0, 0, 0, 0.6)",
-                            color: "white",
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </Card>
-          </section>
         </div>
       )}
+
+      {/* Legacy FI-style Business Data Display (for banks without PD forms) */}
+      {!useGenericApproach &&
+        !useNewApproach &&
+        !formLoading &&
+        verificationData && (
+          <div style={{ marginBottom: 24 }}>
+            <BusinessBasicDetailsDescription
+              data={mergedLegacyData}
+              extra={
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    currentDepartment === "PD"
+                      ? handleDynamicSectionEdit("basicDetails")
+                      : onEdit("basicDetails")
+                  }
+                  disabled={hasEditRequest}
+                />
+              }
+              logs={false}
+              currentDepartment={currentDepartment}
+            />
+
+            <BusinessDetailsDescription
+              data={mergedLegacyData}
+              extra={
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    currentDepartment === "PD"
+                      ? handleDynamicSectionEdit("businessDetails")
+                      : onEdit("businessDetails")
+                  }
+                  disabled={hasEditRequest}
+                />
+              }
+              logs={false}
+              currentDepartment={currentDepartment}
+            />
+
+            <BusinessMiscellaneousDescription
+              data={mergedLegacyData}
+              extra={
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    currentDepartment === "PD"
+                      ? handleDynamicSectionEdit("miscellaneous")
+                      : onEdit("miscellaneous")
+                  }
+                  disabled={hasEditRequest}
+                />
+              }
+              logs={false}
+            />
+
+            <ExistingLoansDescription
+              data={legacyFormattedData}
+              extra={
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    currentDepartment === "PD"
+                      ? handleDynamicSectionEdit("existingLoans")
+                      : onEdit("existingLoans")
+                  }
+                  disabled={hasEditRequest}
+                />
+              }
+              logs={false}
+            />
+
+            <ThirdPartyCheckDescription
+              data={legacyFormattedData}
+              extra={
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    currentDepartment === "PD"
+                      ? handleDynamicSectionEdit("thirdPartyCheck")
+                      : onEdit("thirdPartyCheck")
+                  }
+                  disabled={hasEditRequest}
+                />
+              }
+              logs={false}
+            />
+
+            {/* Photo Capture Section */}
+            <section style={{ marginBottom: 24 }}>
+              <Card title="Photo Capture">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  {legacyFormattedData?.uploadedItems?.map(
+                    (item: any, idx: number) => {
+                      return (
+                        <div key={item.id} style={{ position: "relative" }}>
+                          <Image
+                            src={imageUrls[item.id] || ""}
+                            alt={`Photo ${idx + 1}`}
+                            style={{
+                              width: "100%",
+                              height: "200px",
+                              objectFit: "cover",
+                              borderRadius: "4px",
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              background: "rgba(0, 0, 0, 0.6)",
+                              color: "white",
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Photo {idx + 1}{" "}
+                            {item?.isCamera ? null : "(Gallery)"}
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </Card>
+            </section>
+          </div>
+        )}
 
       <section style={{ marginBottom: 24 }}>
         <EditRequestLogs
@@ -1161,7 +1333,11 @@ export const BusinessVerificationDetails: React.FC<
               <Button
                 type="text"
                 icon={<EditOutlined />}
-                onClick={() => onEdit("financialAnalysis")}
+                onClick={() =>
+                  currentDepartment === "PD"
+                    ? handleDynamicSectionEdit("financialAnalysis")
+                    : onEdit("financialAnalysis")
+                }
                 disabled={hasEditRequest}
               />
             }

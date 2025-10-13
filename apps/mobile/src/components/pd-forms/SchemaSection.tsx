@@ -14,6 +14,13 @@ import {SelectFormItem} from '../../lib/SelectFormItem';
 import {TextAreaFormItem} from '../../lib/TextAreaFormItem';
 // import {CheckboxFormItem} from '../../lib/CheckboxFormItem';
 import {RadioFormItem} from '../../lib/RadioFormItem';
+import {
+  generateArrayItemId,
+  ensureArrayItemsHaveIds,
+  validateArrayItemIds,
+  cleanArrayForSubmission,
+  ArrayItemWithId,
+} from '../../helpers/arrayUtils';
 
 type AnyObject = Record<string, any>;
 
@@ -66,8 +73,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       if (typeof value === 'number') {
         normalized[key] = value.toString();
       } else if (Array.isArray(value)) {
-        // Handle arrays (e.g., repeater fields)
-        normalized[key] = value.map(item =>
+        // Handle arrays (e.g., repeater fields) - ensure all items have unique IDs
+        normalized[key] = ensureArrayItemsHaveIds(value).map(item =>
           typeof item === 'object' && item !== null
             ? normalizeFormData(item)
             : typeof item === 'number'
@@ -75,7 +82,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
               : item,
         );
       } else if (value && typeof value === 'object') {
-        // Handle nested objects
+        // Handle nested objects - preserve _id if present
         normalized[key] = normalizeFormData(value);
       } else {
         normalized[key] = value;
@@ -130,18 +137,20 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           denormalized[key] = value;
         }
       } else if (Array.isArray(value)) {
-        // Handle arrays (e.g., repeater fields)
-        denormalized[key] = value.map(item =>
-          typeof item === 'object' && item !== null
-            ? denormalizeFormData(item, fieldSchema?.items?.properties)
-            : item,
+        // Handle arrays (e.g., repeater fields) - clean and preserve IDs
+        denormalized[key] = cleanArrayForSubmission(
+          value.map(item =>
+            typeof item === 'object' && item !== null
+              ? denormalizeFormData(item, fieldSchema?.items?.properties)
+              : item,
+          ),
         );
       } else if (
         value &&
         typeof value === 'object' &&
         fieldSchema?.type === 'object'
       ) {
-        // Recursively handle nested objects with their schema
+        // Recursively handle nested objects with their schema - preserve _id
         denormalized[key] = denormalizeFormData(value, fieldSchema?.properties);
       } else {
         denormalized[key] = value;
@@ -158,8 +167,23 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         isInitialMount.current = false;
         return;
       }
-      // Convert string values back to numbers before submitting
-      onSubmit(denormalizeFormData(value as AnyObject));
+
+      // Convert string values back to numbers and ensure array integrity before submitting
+      const denormalizedData = denormalizeFormData(value as AnyObject);
+
+      // Validate array items have unique IDs before submission
+      Object.entries(denormalizedData).forEach(([key, val]) => {
+        if (Array.isArray(val)) {
+          if (!validateArrayItemIds(val)) {
+            console.warn(
+              `Array field ${key} has missing or duplicate IDs, fixing...`,
+            );
+            denormalizedData[key] = ensureArrayItemsHaveIds(val);
+          }
+        }
+      });
+
+      onSubmit(denormalizedData);
     });
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
@@ -388,7 +412,16 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         const currentArray = Array.isArray(currentData[fieldId])
           ? currentData[fieldId]
           : [];
-        const newArrayData = [...currentArray, {}];
+
+        // Create new item with unique ID
+        const newItem = {
+          _id: generateArrayItemId(),
+        };
+
+        const newArrayData = [
+          ...ensureArrayItemsHaveIds(currentArray),
+          newItem,
+        ];
         setValue(fieldId, newArrayData, {
           shouldDirty: true,
           shouldTouch: true,
@@ -403,7 +436,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         const currentArray = Array.isArray(currentData[fieldId])
           ? currentData[fieldId]
           : [];
-        const newArrayData = currentArray.filter(
+
+        // Ensure all items have IDs before filtering
+        const arrayWithIds = ensureArrayItemsHaveIds(currentArray);
+        const newArrayData = arrayWithIds.filter(
           (_: any, i: number) => i !== indexToRemove,
         );
 
@@ -430,64 +466,84 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             {property.title}
             {isRequired ? ' *' : ''}
           </Text>
-          {arrayData.map((item: any, index: number) => (
-            <View key={`${fieldId}-${index}`} style={styles.repeaterItem}>
-              <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
-              {property.items?.properties &&
-                Object.entries(property.items.properties).map(
-                  ([subFieldId, subProperty]) => {
-                    const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
-                    // Check if this field is required in the array items
-                    const isSubFieldRequired =
-                      property.items?.required?.includes(subFieldId) ?? false;
+          {ensureArrayItemsHaveIds(arrayData).map(
+            (item: ArrayItemWithId, index: number) => (
+              <View
+                key={item._id || `${fieldId}-${index}`}
+                style={styles.repeaterItem}>
+                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                {property.items?.properties &&
+                  Object.entries(property.items.properties).map(
+                    ([subFieldId, subProperty]) => {
+                      const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+                      // Check if this field is required in the array items
+                      const isSubFieldRequired =
+                        property.items?.required?.includes(subFieldId) ?? false;
 
-                    // Handle date fields in arrays
-                    const isDateField = subProperty.format === 'date';
-                    if (isDateField) {
+                      // Handle date fields in arrays
+                      const isDateField = subProperty.format === 'date';
+                      if (isDateField) {
+                        return (
+                          <View key={subFieldKey}>
+                            {renderDateField(
+                              subFieldKey,
+                              subProperty.title,
+                              item?.[subFieldId],
+                              subProperty.readOnly,
+                            )}
+                          </View>
+                        );
+                      }
+
+                      // Handle enum fields (select dropdown) in arrays
+                      if (subProperty.enum && subProperty.enum.length > 0) {
+                        const options = subProperty.enum.map(option => ({
+                          id: option,
+                          name: option,
+                        }));
+
+                        return (
+                          <SelectFormItem
+                            key={subFieldKey}
+                            data={{
+                              control,
+                              key: subFieldKey,
+                              title: subProperty.title,
+                              required: isSubFieldRequired,
+                              options,
+                              defaultValue: item?.[subFieldId] ?? '',
+                            }}
+                          />
+                        );
+                      }
+
+                      const isTextArea =
+                        subProperty.title.toLowerCase().includes('about') ||
+                        subProperty.title.toLowerCase().includes('address') ||
+                        subProperty.title
+                          .toLowerCase()
+                          .includes('description') ||
+                        subProperty.title.toLowerCase().includes('remark') ||
+                        subProperty.title.toLowerCase().includes('details');
+
+                      if (isTextArea) {
+                        return (
+                          <TextAreaFormItem
+                            key={subFieldKey}
+                            data={{
+                              control,
+                              key: subFieldKey,
+                              title: subProperty.title,
+                              required: isSubFieldRequired,
+                              disabled: subProperty.readOnly,
+                              defaultValue: item?.[subFieldId] ?? '',
+                            }}
+                          />
+                        );
+                      }
+
                       return (
-                        <View key={subFieldKey}>
-                          {renderDateField(
-                            subFieldKey,
-                            subProperty.title,
-                            item?.[subFieldId],
-                            subProperty.readOnly,
-                          )}
-                        </View>
-                      );
-                    }
-
-                    // Handle enum fields (select dropdown) in arrays
-                    if (subProperty.enum && subProperty.enum.length > 0) {
-                      const options = subProperty.enum.map(option => ({
-                        id: option,
-                        name: option,
-                      }));
-
-                      return (
-                        <SelectFormItem
-                          key={subFieldKey}
-                          data={{
-                            control,
-                            key: subFieldKey,
-                            title: subProperty.title,
-                            required: isSubFieldRequired,
-                            options,
-                            defaultValue: item?.[subFieldId] ?? '',
-                          }}
-                        />
-                      );
-                    }
-
-                    const isTextArea =
-                      subProperty.title.toLowerCase().includes('about') ||
-                      subProperty.title.toLowerCase().includes('address') ||
-                      subProperty.title.toLowerCase().includes('description') ||
-                      subProperty.title.toLowerCase().includes('remark') ||
-                      subProperty.title.toLowerCase().includes('details');
-
-                    if (isTextArea) {
-                      return (
-                        <TextAreaFormItem
+                        <InputFormItem
                           key={subFieldKey}
                           data={{
                             control,
@@ -496,41 +552,27 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                             required: isSubFieldRequired,
                             disabled: subProperty.readOnly,
                             defaultValue: item?.[subFieldId] ?? '',
+                            keyboardType:
+                              subProperty.type === 'number' ||
+                              subProperty.type === 'integer'
+                                ? 'numeric'
+                                : 'default',
+                            type: subProperty.type,
+                            formatter: (subProperty as any).formatter,
+                            trigger,
                           }}
                         />
                       );
-                    }
-
-                    return (
-                      <InputFormItem
-                        key={subFieldKey}
-                        data={{
-                          control,
-                          key: subFieldKey,
-                          title: subProperty.title,
-                          required: isSubFieldRequired,
-                          disabled: subProperty.readOnly,
-                          defaultValue: item?.[subFieldId] ?? '',
-                          keyboardType:
-                            subProperty.type === 'number' ||
-                            subProperty.type === 'integer'
-                              ? 'numeric'
-                              : 'default',
-                          type: subProperty.type,
-                          formatter: (subProperty as any).formatter,
-                          trigger,
-                        }}
-                      />
-                    );
-                  },
-                )}
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => handleRemoveItem(index)}>
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+                    },
+                  )}
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveItem(index)}>
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ),
+          )}
           <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
             <Text style={styles.addButtonText}>+ Add</Text>
           </TouchableOpacity>
