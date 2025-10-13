@@ -138,11 +138,175 @@ const getInitialDataByBank = (
     };
   }
 
+  // Chola
+  if (bankNameLower.includes('chola')) {
+    return {
+      general: {
+        nameOfTheApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        loanRequested: commonData.loanAmount,
+      },
+    };
+  }
+
+  // IDFC HL & ML, IDFC PL
+  if (bankNameLower.includes('idfc')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // IIFL
+  if (bankNameLower.includes('iifl')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // Hero Fincorp
+  if (bankNameLower.includes('hero fincorp')) {
+    return {
+      details: {
+        nameOfTheCustomer: commonData.applicantName,
+        nameOfTheFirm: commonData.nameOfConcern,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Hero Housing (Salaried and Self)
+  if (
+    bankNameLower.includes('herohousing') ||
+    bankNameLower.includes('hero housing')
+  ) {
+    return {
+      applicantDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // India Shelter & Niwas
+  if (
+    bankNameLower.includes('india shelter') ||
+    bankNameLower.includes('niwas')
+  ) {
+    return {
+      noOfVisit: {
+        applicantName: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // ICICI
+  if (bankNameLower.includes('icici')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // DCB
+  if (bankNameLower.includes('dcb')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // INCRED
+  if (bankNameLower.includes('incred')) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Axis Agri
+  if (bankNameLower.includes('axis agri')) {
+    return {
+      personalDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Aditya Birla
+  if (bankNameLower.includes('aditya birla')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Ambit
+  if (bankNameLower.includes('ambit')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+        contactNumber: commonData.phoneNo,
+      },
+    };
+  }
+
+  // Axis Finance (general, not UBL)
+  if (
+    bankNameLower.includes('axis finance') &&
+    !bankNameLower.includes('ubl')
+  ) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Yes Bank
+  if (bankNameLower.includes('yes bank')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // SMFG SME
+  if (bankNameLower.includes('smfg')) {
+    return {
+      basicDetails: {
+        nameOfApplicantOrBusiness: commonData.applicantName,
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
   // Default fallback for unknown banks
   return {
     basicDetails: {
       applicantName: commonData.applicantName,
       nameOfConcern: commonData.nameOfConcern,
+      nameOfApplicant: commonData.applicantName,
+      businessName: commonData.nameOfConcern,
       initiatedAddress: commonData.initiatedAddress,
       phoneNo: commonData.phoneNo,
     },

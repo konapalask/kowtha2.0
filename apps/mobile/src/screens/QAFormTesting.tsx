@@ -33,6 +33,7 @@ import {
   generateAssets,
   generateReferences,
 } from '../helpers/dummyPDData';
+import {generateMockDataFromSchema} from '../helpers/mockDataGenerator';
 
 // Function to get initial data based on bank name
 const getInitialDataByBank = (
@@ -275,11 +276,175 @@ const getInitialDataByBank = (
     };
   }
 
+  // Chola
+  if (bankNameLower.includes('chola')) {
+    return {
+      general: {
+        nameOfTheApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        loanRequested: commonData.loanAmount,
+      },
+    };
+  }
+
+  // IDFC HL & ML, IDFC PL
+  if (bankNameLower.includes('idfc')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // IIFL
+  if (bankNameLower.includes('iifl')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // Hero Fincorp
+  if (bankNameLower.includes('hero fincorp')) {
+    return {
+      details: {
+        nameOfTheCustomer: commonData.applicantName,
+        nameOfTheFirm: commonData.nameOfConcern,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Hero Housing (Salaried and Self)
+  if (
+    bankNameLower.includes('herohousing') ||
+    bankNameLower.includes('hero housing')
+  ) {
+    return {
+      applicantDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // India Shelter & Niwas
+  if (
+    bankNameLower.includes('india shelter') ||
+    bankNameLower.includes('niwas')
+  ) {
+    return {
+      noOfVisit: {
+        applicantName: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // ICICI
+  if (bankNameLower.includes('icici')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // DCB
+  if (bankNameLower.includes('dcb')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // INCRED
+  if (bankNameLower.includes('incred')) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Axis Agri
+  if (bankNameLower.includes('axis agri')) {
+    return {
+      personalDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Aditya Birla
+  if (bankNameLower.includes('aditya birla')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Ambit
+  if (bankNameLower.includes('ambit')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+        contactNumber: commonData.phoneNo,
+      },
+    };
+  }
+
+  // Axis Finance (general, not UBL)
+  if (
+    bankNameLower.includes('axis finance') &&
+    !bankNameLower.includes('ubl')
+  ) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Yes Bank
+  if (bankNameLower.includes('yes bank')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // SMFG SME
+  if (bankNameLower.includes('smfg')) {
+    return {
+      basicDetails: {
+        nameOfApplicantOrBusiness: commonData.applicantName,
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
   // Default fallback for unknown banks
   return {
     basicDetails: {
       applicantName: commonData.applicantName,
       nameOfConcern: commonData.nameOfConcern,
+      nameOfApplicant: commonData.applicantName,
+      businessName: commonData.nameOfConcern,
       initiatedAddress: commonData.initiatedAddress,
       phoneNo: commonData.phoneNo,
     },
@@ -402,6 +567,9 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
           qaLoanData.data.loan.applicationNumber;
         dummyData.userData.loanId = qaLoanData.data.loan.id;
         dummyData.userData.id = qaLoanData.data.verification.id;
+        dummyData.userData.businessName =
+          qaLoanData.data.verification.businessName ||
+          dummyData.userData.businessName;
 
         setItem(updatedItem);
 
@@ -442,11 +610,33 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
       setSchemaForm(schema);
 
       // Get initial data based on bank
-      const initialData = getInitialDataByBank(
+      let initialData = getInitialDataByBank(
         selectedBank,
         dummyData.userData,
         loggedInUserName,
       );
+
+      // For Chola, generate comprehensive mock data for ALL fields
+      if (selectedBank.toLowerCase().includes('chola')) {
+        try {
+          const comprehensiveMockData = generateMockDataFromSchema(schema);
+          // Merge with initial data (initial data takes precedence for basic fields)
+          initialData = {
+            ...comprehensiveMockData,
+            ...initialData,
+            general: {
+              ...comprehensiveMockData.general,
+              ...initialData.general,
+            },
+          };
+          console.log(
+            '✅ Chola: Generated comprehensive mock data for all sections',
+          );
+        } catch (error) {
+          console.error('❌ Failed to generate mock data for Chola:', error);
+          // Fallback to basic initialData
+        }
+      }
 
       // AUTO-INJECT GPS COORDINATES into all sections that need it
       const dataWithCoordinates = injectCoordinatesIntoSections(

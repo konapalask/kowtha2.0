@@ -1,469 +1,494 @@
-import { format, toZonedTime } from 'date-fns-tz';
-import { category } from 'google-play-scraper';
+import { format, toZonedTime } from "date-fns-tz";
+import { pdBaseTemplate } from "./pd-base.tempate";
 
+export const tataUblTemplate = (verificationData: any, html_data: any) => {
+  const date = new Date();
+  const timeZone = "Asia/Kolkata";
+  const zonedDate = toZonedTime(date, timeZone);
+  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
-export const axisagriTemplate = (verificationData1: any, html_data: any) => {
-  const verificationData = {
-    "basicDetails": {
-      "aadhar": "1234-5678-9012",
-      "panNumber": "ABCDE1234F",
-      "businessName": "BeyondScale Solutions",
-      "applicantName": "Jeevan Reddy",
-      "applicantNumber": "+91-9876543210",
-      "applicationNumber": "1234567890",
-      "businessAddress": "Plot No 45, Hi-Tech City, Hyderabad, Telangana",
-      "bankName": "HDFC Bank"
-    },
-    "businessDetails": {
-      "typeOfBusiness": "Retail",
-      "numberOfEmployees": "10",
-      "businessActivity": "Electronics Sales",
-      "businessActivityOther": "",
-      "constitution": "Proprietorship",
-      "natureOfBusiness": "Trading",
-      "stockSeen": "Yes",
-      "businessStartYear": "2015",
-      "occupiedSince": "2016",
-      "netMargin": "15%",
-      "businessPremisesSize": "1200 sqft",
-      "rawMaterialSupply": "Local Vendors",
-      "supplierRelationDuration": "5 years",
-      "incorporationDate": "2015-01-01"
-    },
-    "applicantDetails": {
-      "currentAddress": "Flat 301, Sunshine Apartments, Hyderabad",
-      "assets": "Car, Bike",
-      "purposeOfLoan": "Business Expansion",
-      "personMet": "Applicant",
-      "educationQualification": "MBA",
-      "incomeDetails": "Monthly Income: ₹1,50,000",
-      "nameOfCoApplicant": "Anitha Reddy",
-      "relationWithApplicant": "Spouse",
-      "maritalStatus": "Married",
-      "houseSize": "1500 sqft",
-      "workExperience": "12 years",
-      "purchase": "Latest Inventory Worth ₹5,00,000"
-    },
-    "uploadedItems": [
-      {
-        "id": "1",
-        "uri": "file://local/image1.jpg",
-        "type": "Aadhar",
-        "timestamp": "2025-09-02T10:30:00Z",
-        "s3ImageUrl": "https://s3.amazonaws.com/bucket/image1.jpg"
-      },
-      {
-        "id": "2",
-        "uri": "file://local/image2.jpg",
-        "type": "Business Premises",
-        "timestamp": "2025-09-02T10:35:00Z",
-        "s3ImageUrl": "https://s3.amazonaws.com/bucket/image2.jpg"
-      }
-    ],
-    "thirdPartyCheck": {
-      "checks": [
-        {
-          "tpcName": "Ramesh Kumar",
-          "comments": "Applicant is well known and trustworthy",
-          "relationship": "Supplier",
-          "mobileNumber": "+91-9876001122",
-          "feedbackStatus": "Positive"
-        },
-        {
-          "tpcName": "Suresh Reddy",
-          "comments": "Regular customer of the applicant's business",
-          "relationship": "Neighbor",
-          "mobileNumber": "+91-9876554321",
-          "feedbackStatus": "Neutral"
-        }
-      ]
-    },
-    "existingLoans": {
-      "loans": [
-        {
-          "emi": "₹10,000",
-          "tenure": "24 months",
-          "purpose": "Business Working Capital",
-          "bankName": "ICICI Bank",
-          "loanAmount": "₹2,00,000"
-        },
-        {
-          "emi": "₹8,000",
-          "tenure": "36 months",
-          "purpose": "Vehicle Purchase",
-          "bankName": "Axis Bank",
-          "loanAmount": "₹3,00,000"
-        }
-      ]
-    },
-    "familyMemberDetails": [
-      {
-        "age": "35",
-        "name": "Anitha Reddy",
-        "relation": "Spouse",
-        "otherRelation": "",
-        "employmentType": "Homemaker",
-        "educationalQualification": "Graduate"
-      },
-      {
-        "age": "8",
-        "name": "Aditya Reddy",
-        "relation": "Son",
-        "otherRelation": "",
-        "employmentType": "Student",
-        "educationalQualification": "Primary School"
-      }
-    ]
-  }
-    ;
   return `
-     <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              color: #222;
-              position: relative;
-              min-height: 60vh;
-            }
-            .header {
-              text-align: left;
-              padding: 24px 40px 8px 40px;
-              border-bottom: 2px solid #2c3e50;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-            }
-            .header .firm {
-              font-size: 28px;
-              font-weight: bold;
-              color: #1a237e;
-              letter-spacing: 1px;
-            }
-            .header .subtitle {
-              color: #1976d2;
-              font-style: italic;
-              font-size: 18px;
-              margin-bottom: 8px;
-            }
-            .header .address {
-              font-size: 14px;
-              margin-bottom: 4px;
-            }
-            .header .contact {
-              font-size: 14px;
-              text-align: right;
-            }
-            .logo {
-              display: block;
-              width: 220px;
-              filter: contrast(200%) brightness(80%) saturate(150%);
-              background: white;
-              image-rendering: auto;
-              margin-left: 0; /* aligns to left */
-              margin-bottom: 20px;
-            }
-            .report-title {
-              text-align: center;
-              font-size: 20px;
-              font-weight: bold;
-              margin: 24px 0 0 0;
-              letter-spacing: 1px;
-              text-decoration: underline;
-            }
-            .align-wrapper {
-              width: 90%;
-              margin: 0 auto;
-            }
-            .branch-box {
-              width: 100%;
-              margin: 18px 0 0 0;
-              border: 2px solid #888;
-              border-radius: 4px;
-              background: #f8f9fa;
-            }
-            .branch-table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            .branch-table td {
-              border: none;
-              padding: 10px 16px;
-              font-size: 16px;
-            }
-            .branch-label {
-              font-weight: bold;
-              width: 160px;
-            }
-            .branch-value {
-              font-size: 18px;
-              font-weight: bold;
-              color: #222;
-            }
-            .branch-note {
-              background: #ffe0b2;
-              color: #b26a00;
-              font-size: 13px;
-              text-align: center;
-              border-radius: 3px;
-              font-weight: bold;
-            }
-            .section-table {
-              width: 100%;
-              margin: 24px 0 0 0;
-              border-collapse: collapse;
-              font-size: 15px;
-            }
-            .section-header {
-              background: #f5f5f5;
-              font-weight: bold;
-              font-size: 16px;
-              text-align: center;
-              border: 1px solid #888;
-              padding: 8px;
-              letter-spacing: 1px;
-            }
-            .section-table th, .section-table td {
-              border: 1px solid #888;
-              padding: 8px 10px;
-              vertical-align: top;
-            }
-            .section-table th {
-              background: #f5f5f5;
-              font-weight: bold;
-              text-align: center; 
-              width: 220px;
-            }
-            .highlight {
-              font-weight: bold;
-              color: #1a237e;
-            }
-            .tick {
-              font-weight: bold;
-              color: #388e3c;
-              font-size: 18px;
-            }
-            .pdf-footer {
-              position: fixed;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              text-align: center;
-              color: #7f8c8d;
-              font-size: 12px;
-              border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: transparent;
-              z-index: 1000;
-            }
-            .logo {
-              margin-top: 24px;
-              text-align: center;
-              opacity: 0.15;
-            }
-            .var-value {
-              font-weight: normal;
-            }
-        </style>
-      </head>
-      <body>
-      <div class="header">
-        <div>
-          <div class="firm">KOWTHA & CO.</div>
-          <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-          <div class="address"></div>
-        </div>
-        <div class="contact">
-          Mobile no: 8332037517<br>
-          Mail ID: opspd@gmail.com
-        </div>
-      </div>
+    ${pdBaseTemplate()}
 
-        <div class="report-title">Personal Discussion Sheet(PD)</div>
+    <div class="report-title">Personal Discussion Report (For Tata Capital Limited)</div>
+
         <div class="align-wrapper">
-          <div class="branch-box">
-            <table class="branch-table">
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Sr. No.</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Particular Head</strong></td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px"><strong>Particular Description</strong></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">1</td>
+          <td style="border:1px solid #ccc;padding:8px">Name of Applicant</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">${verificationData.basicDetails?.nameOfApplicant || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">2</td>
+          <td style="border:1px solid #ccc;padding:8px">Name of Entity</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">${verificationData.basicDetails?.nameOfEntity || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">3</td>
+          <td style="border:1px solid #ccc;padding:8px">Name of Co-Applicant(s)</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">${verificationData.basicDetails?.nameOfCoApplicants || ""}</td>
+        </tr>
+        <tr>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">4</td>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">Proposed Loan Details</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Product</strong></td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Amount</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Tenure</strong></td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.proposedLoanDetails?.product || ""}</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.proposedLoanDetails?.amount || ""}</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.proposedLoanDetails?.tenure || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Repayment from</strong></td>
+          <td colspan="5" style="border:1px solid #ccc;padding:8px">
+            Bank name – ${verificationData.proposedLoanDetails?.bankName || ""}<br>
+            Type - ${verificationData.proposedLoanDetails?.typeSAAccount || ""}<br>
+            Account No. - ${verificationData.proposedLoanDetails?.accountNo || ""}
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">5</td>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">Office Address</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px"><strong>Add –</strong> ${verificationData.officeAddress?.add || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Rented/Owned</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Owned by</strong></td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Area(In Sq. Ft.)</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Occupied since(years)</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>CMV / Rent p.m.</strong></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.officeAddress?.rentedOwned || ""}</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.officeAddress?.ownedBy || ""}</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.officeAddress?.areaSqFt || ""}</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.officeAddress?.occupiedSinceYears || ""}</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.officeAddress?.cmvRentPerMonth || ""}</td>
+        </tr>
+        <tr>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">6</td>
+          <td rowspan="3" style="border:1px solid #ccc;padding:8px">Residential Address</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px"><strong>Add –</strong> ${verificationData.residentialAddress?.add || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Rented/Owned</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Owned by</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Area(In Sq. Ft.)</strong></td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Occupied since(years)</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>CMV / Rent p.m.</strong></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.rentedOwned || ""}</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.ownedBy || ""}</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.areaSqFt || ""}</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.occupiedSinceYears || ""}</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.cmvRentPerMonth || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">7</td>
+          <td style="border:1px solid #ccc;padding:8px">Address of PD</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">${verificationData.residentialAddress?.addressOfPDAndPersonMet || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">8</td>
+          <td style="border:1px solid #ccc;padding:8px">Family Details</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">
+            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
               <tr>
-                <td colspan="6" class="section-header">Reference Number - ${verificationData.basicDetails.applicationNumber}</td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Name</strong></td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Age</strong></td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Qualification</strong></td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Profession</strong></td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Relation</strong></td>
+                <td style="border:1px solid #ccc;padding:8px"><strong>Monthly Income</strong></td>
               </tr>
+              ${
+                Array.isArray(verificationData.familyDetails?.familyDetails) &&
+                verificationData.familyDetails?.familyDetails.length > 0
+                  ? verificationData.familyDetails.familyDetails
+                      .map(
+                        (family) => `
+              <tr>
+                <td style="border:1px solid #ccc;padding:8px">${family.name || ""}</td>
+                <td style="border:1px solid #ccc;padding:8px">${family.age || ""}</td>
+                <td style="border:1px solid #ccc;padding:8px">${family.qualification || ""}</td>
+                <td style="border:1px solid #ccc;padding:8px">${family.profession || ""}</td>
+                <td style="border:1px solid #ccc;padding:8px">${family.relation || ""}</td>
+                <td style="border:1px solid #ccc;padding:8px">${family.monthlyIncome || ""}</td>
+              </tr>
+              `
+                      )
+                      .join("")
+                  : '<tr><td colspan="6" style="border:1px solid #ccc;padding:8px;text-align:center;">No family details available</td></tr>'
+              }
             </table>
-          </div>
-        </div>
-    
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr>
-    <th>Name of  applicant </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          </td>
+        </tr>
+      </table>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">9</td>
+          <td style="border:1px solid #ccc;padding:8px">Current Business Details</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.currentBusinessDetails || ""}</td>
+        </tr>
+      </table>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">10</td>
+          <td style="border:1px solid #ccc;padding:8px">Stock as on date</td>
+          <td colspan="8" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.stockAsOnDate || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">11</td>
+          <td style="border:1px solid #ccc;padding:8px">Employees Details</td>
+          <td colspan="8" style="border:1px solid #ccc;padding:8px">
+            <strong>Current Employees: </strong>${verificationData.employeesDetails?.currentEmployees || ""}<br>
+            <strong>Salary Range: </strong>${verificationData.employeesDetails?.salaryRange || ""}<br>
+            <strong>Key Employee Name - </strong>${verificationData.employeesDetails?.keyEmployeeName || ""}
+          </td>
+        </tr>
+        <tr>
+          <td rowspan="2" style="border:1px solid #ccc;padding:8px">12</td>
+          <td rowspan="2" style="border:1px solid #ccc;padding:8px">Bank Details</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Primary Banker</strong></td>
+          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>Nature of Account</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Avg. Bal</strong></td>
+        </tr>
+        <tr>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.bankDetails?.primaryBanker || ""}</td>
+          <td colspan="5" style="border:1px solid #ccc;padding:8px">${verificationData.bankDetails?.natureOfAccount || ""}</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.bankDetails?.avgBal || ""}</td>
+        </tr>
+        <tr>
+          <td rowspan="8" style="border:1px solid #ccc;padding:8px">13</td>
+          <td rowspan="8" style="border:1px solid #ccc;padding:8px">Sales and Profit Details</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Turnover (FY 2024-25)</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.turnoverFY202425 || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Exp. Turnover (FY 2025-26)</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.expTurnoverFY202526 || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Monthly Turnover / Sales</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.monthlyTurnoverSales || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Net Monthly Income</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.netMonthlyIncome || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Profit Margin</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.profitMargin || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Is there any effect on turnover due to Covid</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.covidEffectOnTurnover || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">After lockdown, is business running on same speed?</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.postLockdownBusinessSpeed || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">Cash Sales (% of total turnover)</td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.salesAndProfitDetails?.cashSalesPercentage || ""}</td>
+        </tr>
+        <tr>
+          <td rowspan="4" style="border:1px solid #ccc;padding:8px">14</td>
+          <td rowspan="4" style="border:1px solid #ccc;padding:8px">Customer Details</td>
+          <td colspan="6" style="border:1px solid #ccc;padding:8px">Total Debtors as on date</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.customerDetails?.totalDebtorsAsOnDate || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="border:1px solid #ccc;padding:8px">Total Customers (No.)</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.customerDetails?.totalCustomersNo || ""}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Name of Customer</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>% of Total Sales</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Debtor Days</strong></td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Relationship since (years)</strong></td>
+        </tr>
+        <tr>
+          <td colspan="8" style="border:1px solid #ccc;padding:8px">
+            ${
+              Array.isArray(verificationData.customerDetails?.customers) &&
+              verificationData.customerDetails?.customers.length > 0
+                ? verificationData.customerDetails.customers
+                    .map(
+                      (customer) =>
+                        `${customer.nameOfCustomer || ""} - ${customer.percentageOfTotalSales || ""}% (${customer.debtorDays || ""} days, ${customer.relationshipSinceYears || ""} years)`
+                    )
+                    .join("<br>")
+                : "NA"
+            }
+          </td>
+        </tr>
+      </table>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td rowspan="4" style="border:1px solid #ccc;padding:8px">15</td>
+          <td rowspan="4" style="border:1px solid #ccc;padding:8px">Supplier Details</td>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">Total Creditors as on date</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.supplierDetails?.totalCreditorsAsOnDate || ""}</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="border:1px solid #ccc;padding:8px">Total Suppliers (No.)</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.supplierDetails?.totalSuppliersNo || ""}</td>
   </tr>
   <tr>
-    <th>Name of Entity </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Name of Supplier</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>% of Total Purchases</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Creditor Days</strong></td>
+          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Relationship since (years)</strong></td>
   </tr>
   <tr>
-    <th> Name of Co-Applicant(s)</th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">
+            ${
+              Array.isArray(verificationData.supplierDetails?.suppliers) &&
+              verificationData.supplierDetails?.suppliers.length > 0
+                ? verificationData.supplierDetails.suppliers
+                    .map(
+                      (supplier) =>
+                        `${supplier.nameOfSupplier || ""} - ${supplier.percentageOfTotalPurchases || ""}% (${supplier.creditorDays || ""} days, ${supplier.relationshipSinceYears || ""} years)`
+                    )
+                    .join("<br>")
+                : "NA"
+            }
+          </td>
   </tr>
-  tr>
-    <th>ProposedLoan Details </th>
-    <td colspan="2"><span class="var-value">${verificationData.businessDetails.constitution || ''}</span></td>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">16</td>
+          <td style="border:1px solid #ccc;padding:8px">Other Business/Income Details (if any)</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.otherBusinessIncomeDetails || ""}</td>
     </tr>
   <tr>
-    <th> Office Address </th>
-    <td colspan="2"><span class="var-value">${verificationData.businessDetails.constitution || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">17</td>
+          <td style="border:1px solid #ccc;padding:8px">Assets</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.assets || ""}</td>
     </tr>
   <tr>
-    <th>Residential Address </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td rowspan="2" style="border:1px solid #ccc;padding:8px">18</td>
+          <td rowspan="2" style="border:1px solid #ccc;padding:8px">Liabilities</td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Bank</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Nature of Loan</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Amount</strong></td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>EMI</strong></td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Tenure</strong></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Outstanding Balance</strong></td>
   </tr>
   <tr>
-    <th> Address of PD </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">
+            ${
+              Array.isArray(verificationData.otherDetails?.liabilities) &&
+              verificationData.otherDetails?.liabilities.length > 0
+                ? verificationData.otherDetails.liabilities
+                    .map(
+                      (liability) =>
+                        `${liability.bank || ""} - ${liability.natureOfLoan || ""}: ${liability.amount || ""} (EMI: ${liability.emi || ""}, Tenure: ${liability.tenure || ""}, Outstanding: ${liability.outstandingBalance || ""})`
+                    )
+                    .join("<br>")
+                : "No liabilities"
+            }
+          </td>
   </tr>
   <tr>
-    <th>Family Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
-  </tr>
-  
-    <tr>
-    <th> Current Business Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">19</td>
+          <td style="border:1px solid #ccc;padding:8px">End Use of proposed Loan</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.endUseOfProposedLoan || ""}</td>
   </tr>
     <tr>
-    <th> Stock as on date</th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">20</td>
+          <td style="border:1px solid #ccc;padding:8px">Political Connection</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.politicalConnection || ""}</td>
   </tr>
     <tr>
-    <th>Employees Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">21</td>
+          <td style="border:1px solid #ccc;padding:8px">Any Court Cases</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.anyCourtCases || ""}</td>
   </tr>
     <tr>
-    <th> Bank Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">22</td>
+          <td style="border:1px solid #ccc;padding:8px">Business belongs to which industry</td>
+          <td colspan="10" style="border:1px solid #ccc;padding:8px">${verificationData.otherDetails?.businessIndustry || ""}</td>
+  </tr>
+    <tr>
+          <td rowspan="5" style="border:1px solid #ccc;padding:8px">23</td>
+          <td rowspan="5" style="border:1px solid #ccc;padding:8px">Value Added Information</td>
+          <td colspan="7" style="border:1px solid #ccc;padding:8px">Customer Behavior?</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.customerBehavior || ""}</td>
   </tr>
 <tr>
-<th>Sales and Profit Details </th>
- <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="7" style="border:1px solid #ccc;padding:8px">Salaries paid during covid to employees?</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.salariesPaidDuringCovid || ""}</td>
   </tr>
    <tr>
-    <th> Customer Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="7" style="border:1px solid #ccc;padding:8px">If partly paid, % of deduction on salary?</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.salaryDeductionPercentage || ""}</td>
   </tr>
    <tr>
-    <th> Supplier Details </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="7" style="border:1px solid #ccc;padding:8px">Nature/Types of Neighborhood Shops</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.neighborhoodShopsNature || ""}</td>
   </tr>
    <tr>
-    <th> Other Business/ Income Details (if any) </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td colspan="7" style="border:1px solid #ccc;padding:8px">Digital wallet used in the business?</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.digitalWalletUsed || ""}</td>
+        </tr>
+      </table>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">Customer Shop/Office Locality</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.customerShopLocality || ""}</td>
   </tr>
    <tr>
-    <th>Assets </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">Nearby Bus Stop / Taxi Stand / Rickshaw Stand / Metro Station Name</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.nearbyTransportStand || ""}</td>
   </tr>
    <tr>
-    <th> Liabilities </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">Utility bill</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.utilityBillDetails || ""}</td>
   </tr>
    <tr>
-    <th> End Use of proposed Loan </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td style="border:1px solid #ccc;padding:8px"></td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">Loss Suffered In Business, If yes, the reason?</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.lossSufferedInBusiness || ""}</td>
   </tr>
    <tr>
-    <th> Political Connection </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">24</td>
+          <td style="border:1px solid #ccc;padding:8px">Strengths</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.strengths || ""}</td>
   </tr> 
   <tr>
-    <th> Any Court Cases </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">25</td>
+          <td style="border:1px solid #ccc;padding:8px">Weaknesses</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.valueAddedInformation?.weaknesses || ""}</td>
   </tr> 
   <tr>
-    <th> Business belongs to which industry </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td rowspan="11" style="border:1px solid #ccc;padding:8px">26</td>
+          <td rowspan="11" style="border:1px solid #ccc;padding:8px">Site Visit Observations</td>
+          <td style="border:1px solid #ccc;padding:8px">Name Plate Displayed</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.namePlateDisplayed || ""}</td>
   </tr>
   <tr>
-    <th> Value Added Information </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Office Well Furnished?</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.officeWellFurnished || ""}</td>
   </tr>
   <tr>
-    <th> Strengths </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Business Activity Seen</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.businessActivitySeen || ""}</td>
   </tr>
   <tr>
-    <th> Weaknesses </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Difficulty in locating premises?</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.difficultyInLocatingPremises || ""}</td>
   </tr>
   <tr>
-    <th> Site Visit Observations </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Neighborhood:</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.neighborhood || ""}</td>
   </tr>
   <tr>
-    <th>Third Party Confirmation </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Landmark</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.landmark || ""}</td>
   </tr>
   <tr>
-    <th> Pan Card </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Abnormal Increase / Decrease in Turnover</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.abnormalIncreaseDecreaseInTurnover || ""}</td>
   </tr>
   <tr>
-    <th>Document Seen</th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Any Decrease in Net worth</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.anyDecreaseInNetWorth || ""}</td>
   </tr>
   <tr>
-    <th> Final Status  </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">Stock Seen During PD?</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.stockSeenDuringPD || ""}</td>
   </tr>
   <tr>
-    <th> Date of PD: </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">No. of employees seen during PD?</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.noOfEmployeesSeenDuringPD || ""}</td>
   </tr>
   <tr>
-    <th>Person met at the time of PD: </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">No. of customers seen during PD?</td>
+          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.noOfCustomersSeenDuringPD || ""}</td>
   </tr>
   <tr>
-    <th> Phone No. of Applicant: </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">27</td>
+          <td style="border:1px solid #ccc;padding:8px">Third Party Confirmation</td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.siteVisitObservations?.thirdPartyConfirmation || ""}</td>
+        </tr>
+      </table>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">28</td>
+          <td style="border:1px solid #ccc;padding:8px">Pan Card</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.документы?.panCard || ""}</td>
   </tr>
   <tr>
-    <th>PD done by: </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">29</td>
+          <td style="border:1px solid #ccc;padding:8px">Document Seen</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.документы?.otherDocumentSeen || ""}</td>
   </tr>
   <tr>
-<th> Latitude and Longitude </th>
-<td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">30</td>
+          <td style="border:1px solid #ccc;padding:8px"><strong>Final Status</strong></td>
+          <td style="border:1px solid #ccc;padding:8px">-</td>
   </tr>
   <tr>
-<th> Person Interviewed / Met: </th>
- <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">31</td>
+          <td style="border:1px solid #ccc;padding:8px">Date of PD:</td>
+          <td style="border:1px solid #ccc;padding:8px">${istDate}</td>
 </tr>
   <tr>
-    <th> Designation  </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">32</td>
+          <td style="border:1px solid #ccc;padding:8px">Person met at the time of PD:</td>
+          <td style="border:1px solid #ccc;padding:8px">-</td>
   </tr>
   <tr>
-    <th> Signature </th>
-      <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessName || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">33</td>
+          <td style="border:1px solid #ccc;padding:8px">Phone No. of Applicant:</td>
+          <td style="border:1px solid #ccc;padding:8px">-</td>
   </tr>
   <tr>
-  <tr>
-    <th>Constitution</th>
-    <td colspan="2"><span class="var-value">${verificationData.businessDetails.constitution || ''}</span></td>
-    <th>Incorporation Date</th>
-    <td colspan="2"><span class="var-value">${verificationData.businessDetails.incorporationDate || ''}</span></td>
+          <td style="border:1px solid #ccc;padding:8px">34</td>
+          <td style="border:1px solid #ccc;padding:8px">PD done by:</td>
+          <td style="border:1px solid #ccc;padding:8px">-</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px">35</td>
+          <td style="border:1px solid #ccc;padding:8px">Latitude and Longitude</td>
+          <td style="border:1px solid #ccc;padding:8px">${verificationData.basicDetails?.latitude || ""}, ${verificationData.basicDetails?.longitude || ""}</td>
   </tr>
   <tr>
-    <th>Address of the Firm</th>
-    <td colspan="5"><span class="var-value">${verificationData.basicDetails.businessAddress || ''}</span></td>
+          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Video Link:</strong></td>
   </tr>
         </table>
+
+      <p style="margin:8px 0;line-height:1.5"><strong>Acknowledgment of Site Visit</strong></p>
+      <p style="margin:8px 0;line-height:1.5">(For Tata Capital Limited)</p>
+      <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met an Executive from Kowtha & Co on the date for Personal Discussion.</p>
+      <p style="margin:8px 0;line-height:1.5">I am informed that Executive is not authorized to collect any money.</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
+      <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Tata Capital Limited will be absolutely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any cases</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PHOTOS:</strong></p>
       </div>
 
-
-  `
-}
+    <footer class="pdf-footer">
+      <span style="color:rgb(8, 136, 36);">${html_data.bankName || "TATA UBL"}</span><br>
+      Generated on ${istDate}
+    </footer>
+    ${html_data.imagesData || ""}
+  `;
+};

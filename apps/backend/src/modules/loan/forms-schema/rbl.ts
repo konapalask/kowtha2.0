@@ -10,7 +10,7 @@ export const rblSchema = {
         properties: {
           referenceNumber: {
             type: "string",
-            title: "Reference Number( LOS ID)",
+            title: "Reference Number (LOS ID)",
             readOnly: true,
           },
           nameOfApplicant: {

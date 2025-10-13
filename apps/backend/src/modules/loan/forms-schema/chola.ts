@@ -91,7 +91,6 @@ export const cholaSchema = {
             title: "Person Met",
           },
         },
-        required: ["nameOfTheApplicant", "businessName"],
       },
       required: true,
     },

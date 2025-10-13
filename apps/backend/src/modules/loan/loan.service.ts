@@ -289,6 +289,8 @@ export class LoanService {
       // Generate QA test data
       const timestamp = Date.now();
       const applicationNumber = `QA-${bankName.substring(0, 3).toUpperCase()}-${timestamp}`;
+      const businessName =
+        qaData?.businessName || `QA Test Business ${timestamp}`;
 
       return await this.prisma.$transaction(async (prisma) => {
         // Create the QA loan (initiated by admin, assigned to field executive)
@@ -322,6 +324,7 @@ export class LoanService {
             addressType: AddressType.Business,
             fieldExecutive: { connect: { id: fieldExecutiveId } },
             status: VerificationStatus.Pending,
+            businessName: businessName,
           },
         });
 

@@ -4,32 +4,16 @@ import * as path from "path";
 import * as fs from "fs";
 import { RBLInterface } from "./interface/rbl.interface";
 import { pdBaseTemplate } from "./pd-base.tempate";
-import {
-  extractFieldRequirements,
-  displayFieldValue,
-  getRequiredIndicator,
-} from "./schema-pdf-mapper";
+import { displayFieldValue } from "./schema-pdf-mapper";
 
 export const rblTemplate = (
   verificationData: RBLInterface,
   html_data: any,
   schema?: any
 ) => {
-  // Extract field requirements from schema (single source of truth)
-  const fieldRequirements = schema ? extractFieldRequirements(schema) : {};
-
   // Helper function to display field values - schema-driven
-  const displayValue = (
-    sectionId: string,
-    fieldId: string,
-    value: any
-  ): string => {
-    return displayFieldValue(value, fieldRequirements, sectionId, fieldId);
-  };
-
-  // Helper function to get required indicator (*) - schema-driven
-  const requiredMark = (sectionId: string, fieldId: string): string => {
-    return getRequiredIndicator(fieldRequirements, sectionId, fieldId);
+  const displayValue = (value: any): string => {
+    return displayFieldValue(value, {}, "", "");
   };
 
   const recommendationStyles: Record<string, string> = {
@@ -161,16 +145,16 @@ export const rblTemplate = (
           <td colspan="5"><span class="var-value">${verificationData.businessDetails?.typeOfEntity || ""}</span></td>
         </tr>
         <tr>
-          <th>GST Number ${requiredMark("businessDetails", "gstNumber")}</th>
-          <td colspan="5"><span class="var-value">${displayValue("businessDetails", "gstNumber", verificationData.businessDetails?.gstNumber)}</span></td>
+          <th>GST Number</th>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.gstNumber)}</span></td>
         </tr>
          <tr>
-          <th>Legal Name ${requiredMark("businessDetails", "legalName")}</th>
-          <td colspan="5"><span class="var-value">${displayValue("businessDetails", "legalName", verificationData.businessDetails?.legalName)}</span></td>
+          <th>Legal Name</th>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.legalName)}</span></td>
         </tr>
         <tr>
-          <th>Trade Name ${requiredMark("businessDetails", "tradeName")}</th>
-          <td colspan="5"><span class="var-value">${displayValue("businessDetails", "tradeName", verificationData.businessDetails?.tradeName)}</span></td>
+          <th>Trade Name</th>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.tradeName)}</span></td>
         </tr>      
         <tr>
           <th>Last GST Return(As per GST records)</th>
