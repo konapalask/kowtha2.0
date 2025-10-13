@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,7 +20,7 @@ import {
 } from '../components/pd-forms/bankFormConfigs';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
-import {clearItem} from '../helpers/utility';
+import {clearItem, getItem} from '../helpers/utility';
 import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
@@ -26,6 +28,132 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import SchemaSection from '../components/pd-forms/SchemaSection';
 import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
+import GetLocation from 'react-native-get-location';
+
+// Function to get initial data based on bank name
+const getInitialDataByBank = (
+  bankName: string,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!userData || !bankName) return {};
+
+  const bankNameLower = bankName.toLowerCase();
+
+  // console.log('userData', userData);
+
+  // Common data mapping
+  const commonData = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    nameOfConcern: userData?.businessName || userData?.loan?.businessName || '',
+    initiatedAddress:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNo:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    contactNumber:
+      userData?.loan?.applicantMobile || userData?.contactNumber || '',
+  };
+
+  // console.log('commonData', commonData);
+
+  // Bank-specific mappings
+  if (bankNameLower.includes('axis finance ubl')) {
+    return {
+      basicDetails: {
+        applicationNo: commonData.applicationNo,
+        applicantName: commonData.applicantName,
+        concernName: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        phoneNo: commonData.phoneNo,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('axis bank')) {
+    return {
+      applicantDetails: {
+        applicationId:
+          userData?.loan?.applicationId || commonData.applicationNo,
+        loanAmount: `${commonData.loanAmount}`,
+        customerName: commonData.applicantName,
+        contactNumber: commonData.contactNumber,
+        pdAddress: commonData.initiatedAddress,
+      },
+      businessPlaceVintage: {
+        nameOfFirm: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('arka fincap')) {
+    return {
+      applicantDetails: {
+        applicationNo: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        phoneNumber: commonData.phoneNo,
+        nameOfConcern: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        loanAmount: `${commonData.loanAmount}`,
+        purposeOfLoan: userData?.loan?.loanType || '',
+      },
+    };
+  }
+
+  if (bankNameLower.includes('tata ubl')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+        nameOfCoApplicants: userData?.coApplicantName || '',
+      },
+      proposedLoanDetails: {
+        product: userData?.loan?.product || '',
+        amount: `${commonData.loanAmount}`,
+        tenure: userData?.loan?.tenure || '',
+        repaymentFrom: {
+          bankName: userData?.loan?.bankName || '',
+          typeSAAccount: userData?.loan?.accountType || '',
+          accountNo: userData?.loan?.accountNo || '',
+        },
+      },
+      officeAddress: {
+        address: commonData.initiatedAddress,
+      },
+      finalStatus: {
+        phoneNoOfApplicant: commonData.phoneNo,
+        pdDoneBy: loggedInUserName || '',
+      },
+    };
+  }
+
+  if (bankNameLower.includes('rbl')) {
+    return {
+      caseDetails: {
+        referenceNumber: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        addressVisited: commonData.initiatedAddress,
+        contactNo: commonData.phoneNo,
+      },
+      businessDetails: {
+        businessName: commonData.nameOfConcern,
+        shopAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Default fallback for unknown banks
+  return {
+    basicDetails: {
+      applicantName: commonData.applicantName,
+      nameOfConcern: commonData.nameOfConcern,
+      initiatedAddress: commonData.initiatedAddress,
+      phoneNo: commonData.phoneNo,
+    },
+  };
+};
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -37,6 +165,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
+  // console.log('schemaForm', schemaForm);
 
   const formConfig = schemaForm || getFormConfigByBank(bankName);
 
@@ -54,26 +183,185 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [expandedSections, setExpandedSections] = useState<any>({
     investigable: true,
   });
+  const [loggedInUserName, setLoggedInUserName] = useState<string>('');
   // const [formData, setFormData] = useState<any>({});
-  const [sectionData, setSectionData] = useState<any>({
-    basicDetails: {
-      applicantName: userData?.loan?.applicantName || '',
-      nameOfConcern: userData?.businessName || '',
-      initiatedAddress: userData?.applicantAddress || '',
-      phoneNo: userData?.loan?.applicantMobile || '',
-    },
-  });
-  // console.log('sectionData', sectionData);
+  const initialData = getInitialDataByBank(
+    bankName,
+    userData,
+    loggedInUserName,
+  );
+  console.log('initialData', initialData);
+  const [sectionData, setSectionData] = useState<any>(initialData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
+
+  // Log sectionData whenever it changes
+  useEffect(() => {
+    console.log('sectionData updated:', sectionData);
+  }, [sectionData]);
 
   // useLayoutEffect(() => {
   //   loadFormData();
   // }, []);
 
+  // Fetch logged-in user details
   useEffect(() => {
-    loadFormData();
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getItem('userDetails');
+        if (userDetails?.name) {
+          setLoggedInUserName(userDetails.name);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
+  }, []);
+
+  // Consolidated effect to update sectionData with all sources
+  useEffect(() => {
+    const updateSectionData = async () => {
+      // Start with initial data
+      let updatedData = getInitialDataByBank(
+        bankName,
+        userData,
+        loggedInUserName,
+      );
+
+      // Load saved data from AsyncStorage
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          console.log('parsedData', parsedData);
+          updatedData = {
+            ...updatedData,
+            ...parsedData,
+          };
+        }
+      } catch (error) {
+        console.error('Error loading form data:', error);
+      }
+
+      // Update state once with all data, but preserve existing sectionData to avoid overwriting form changes
+      setSectionData((prevSectionData: any) => {
+        // Only update if this is the initial load or if the bank/user has changed
+        // This prevents overwriting form changes when sections are toggled
+        if (
+          Object.keys(prevSectionData).length === 0 ||
+          prevSectionData._lastBankName !== bankName ||
+          prevSectionData._lastUserName !== loggedInUserName
+        ) {
+          return {
+            ...updatedData,
+            _lastBankName: bankName,
+            _lastUserName: loggedInUserName,
+          };
+        }
+        return prevSectionData;
+      });
+    };
+
+    if (bankName) {
+      updateSectionData();
+    }
+  }, [loggedInUserName, bankName, userData]);
+
+  // Load uploaded items and investigable separately
+  useLayoutEffect(() => {
+    const loadAdditionalData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setUploadedItems(parsedData.uploadedItems || []);
+          setInvestigable(parsedData.investigable ?? null);
+        }
+      } catch (error) {
+        console.error('Error loading additional data:', error);
+      }
+    };
+    loadAdditionalData();
+  }, [bankName]);
+
+  // Fetch current coordinates on component mount
+  useEffect(() => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+      .then(location => {
+        const {latitude, longitude} = location;
+        const coordinates = `${latitude},${longitude}`;
+
+        // Update section data with coordinates based on bank
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank - coordinates in particulars section
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: coordinates,
+            };
+          }
+
+          // Axis Finance UBL - siteCoordinates in thirdPartyCheck section
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: coordinates,
+            };
+          }
+
+          // Tata UBL - latitudeLongitude in finalStatus section
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: coordinates,
+            };
+          }
+
+          return updates;
+        });
+      })
+      .catch(error => {
+        console.error('Error getting location:', error);
+        // Set a fallback message if location is not available
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: 'Location not available',
+            };
+          }
+
+          // Axis Finance UBL
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: 'Location not available',
+            };
+          }
+
+          // Tata UBL
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: 'Location not available',
+            };
+          }
+
+          return updates;
+        });
+      });
   }, [bankName]);
 
   useEffect(() => {
@@ -102,25 +390,6 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // useEffect(() => {
   //   setFormData(watchedValues);
   // }, []);
-
-  const loadFormData = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        // console.log('parsedData', parsedData);
-        // setFormData(parsedData);
-        setSectionData((prev: any) => ({
-          ...prev,
-          ...parsedData,
-        }));
-        setUploadedItems(parsedData.uploadedItems || []);
-        setInvestigable(parsedData.investigable ?? null);
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
-    }
-  };
 
   const saveFormData = useCallback(
     async (data: any) => {
@@ -320,7 +589,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       <BackButton
         navigation={navigation}
         title={`PD - ${bankName}`}
@@ -330,7 +602,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         <CollapsibleSection
           title="Applicant asked to postpone?"
           onToggle={() => toggleSection('investigable')}
@@ -384,7 +657,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       </View>
                     );
                   })
-                : formConfig.sections.map((section: any) => {
+                : formConfig?.sections?.map((section: any) => {
                     const SectionComponent = section.component;
                     const isExpanded = expandedSections[section.id] || false;
 
@@ -452,6 +725,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       onUploadedItemsChange={handleUploadedItemsChange}
                       initialItems={sectionData?.uploadedItems ?? []}
                       loanId={item?.id || item?.verificationId}
+                      maxUploads={50}
                     />
                   </View>
                 )}
@@ -470,7 +744,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           </>
         )}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

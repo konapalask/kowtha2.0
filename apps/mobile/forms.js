@@ -1,7 +1,7 @@
 export const formSchema = [
   {
     id: 1,
-    bankName: 'Axis Finance UBL Above 10L',
+    bankName: 'Axis Finance UBL Above 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -13,15 +13,18 @@ export const formSchema = [
               type: 'string',
               title: 'Ref No/Application No',
               readOnly: true,
+              required: true,
             },
             applicantName: {
               type: 'string',
               title: 'Name of the Applicant',
               readOnly: true,
+              required: true,
             },
             concernName: {
               type: 'string',
               title: 'Name of Concern',
+              required: true,
             },
             constitution: {
               type: 'string',
@@ -32,50 +35,61 @@ export const formSchema = [
                 'Limited Liability Partnership',
                 'Simple Partnership',
               ],
+              required: true,
             },
             initiatedAddress: {
               type: 'string',
               title: 'Initiated Address',
               readOnly: true,
+              required: true,
             },
             visitedAddress: {
               type: 'string',
               title: 'Visited Address',
+              required: true,
             },
             phoneNo: {
               type: 'string',
               title: 'Phone No.',
               pattern: '^[0-9]{10}$',
               readOnly: true,
+              required: true,
             },
             appointmentFixed: {
               type: 'string',
               title: 'Appointment Fixed',
               enum: ['Yes', 'No'],
+              required: true,
             },
             structureOfLoan: {
               type: 'string',
               title: 'Structure of Loan',
+              required: true,
             },
             noOfVisit: {
               type: 'integer',
               title: 'No. of Visit',
+              required: true,
             },
             personMet: {
               type: 'string',
               title: 'Person Met',
+              required: true,
             },
             aboutApplicant: {
               type: 'string',
               title: 'About Applicant',
+              required: true,
             },
             residentialDetails: {
               type: 'string',
               title: 'Residential Details',
+              required: true,
             },
             coApplicantDetails: {
               type: 'string',
               title: 'Co-Applicant Details',
+              required: true,
             },
           },
           required: ['applicationNo', 'applicantName', 'concernName'],
@@ -91,19 +105,41 @@ export const formSchema = [
             familyDetails: {
               type: 'array',
               title: 'Family Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  relation: {type: 'string', title: 'Relation with Applicant'},
-                  ageYears: {type: 'integer', title: 'Age (Yrs)'},
-                  qualification: {type: 'string', title: 'Qualification'},
-                  occupation: {type: 'string', title: 'Occupation'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  relation: {
+                    type: 'string',
+                    title: 'Relation with Applicant',
+                    required: true,
+                  },
+                  ageYears: {
+                    type: 'integer',
+                    title: 'Age (Yrs)',
+                    required: true,
+                  },
+                  qualification: {
+                    type: 'string',
+                    title: 'Qualification',
+                    required: true,
+                  },
+                  occupation: {
+                    type: 'string',
+                    title: 'Occupation',
+                    required: true,
+                  },
                   incomePerMonth: {
                     type: 'number',
                     title: 'Income per month (approx.)',
+                    required: true,
                   },
-                  dependent: {type: 'string', title: 'Dependent'},
+                  dependent: {
+                    type: 'string',
+                    title: 'Dependent',
+                    required: true,
+                  },
                 },
               },
             },
@@ -120,29 +156,39 @@ export const formSchema = [
             shareholdingDetails: {
               type: 'array',
               title: 'Constitution / Shareholding Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
                   shareholderName: {
                     type: 'string',
                     title: 'Name of the Shareholder',
+                    required: true,
                   },
                   relationWithMainApplicant: {
                     type: 'string',
                     title: 'Relation with Main Applicant',
+                    required: true,
                   },
-                  designation: {type: 'string', title: 'Designation'},
+                  designation: {
+                    type: 'string',
+                    title: 'Designation',
+                    required: true,
+                  },
                   percentShareholding: {
                     type: 'number',
                     title: '% of Shareholding',
+                    required: true,
                   },
                   comingIntoLoanStructure: {
                     type: 'string',
                     title: 'Coming into Loan Structure',
+                    required: true,
                   },
                   functionalRole: {
                     type: 'string',
                     title: 'Functional of Partner / Director',
+                    required: true,
                   },
                 },
               },
@@ -160,45 +206,54 @@ export const formSchema = [
             aboutBusiness: {
               type: 'string',
               title: 'About the Business',
+              required: true,
             },
             businessSynopsis: {
               type: 'string',
               title: 'Business Synopsis',
+              required: true,
             },
           },
         },
         required: true,
       },
-      {
-        id: 'documentsObserved',
-        label: 'Documents Observed',
-        schema: {
-          type: 'object',
-          properties: {
-            documentsObserved: {
-              type: 'array',
-              title: 'Documents Observed',
-              items: {
-                type: 'object',
-                properties: {
-                  documentCategory: {
-                    type: 'string',
-                    title: 'Document Category',
-                  },
-                  documentName: {type: 'string', title: 'Document Name'},
-                  documentType: {
-                    type: 'string',
-                    title: 'Document Type',
-                    enum: ['PAN Card'],
-                  },
-                  remarks: {type: 'string', title: 'Remarks'},
-                },
-              },
-            },
-          },
-        },
-        required: true,
-      },
+      // {
+      //   id: 'documentsObserved',
+      //   label: 'Documents Observed',
+      //   schema: {
+      //     type: 'object',
+      //     properties: {
+      //       documentsObserved: {
+      //         type: 'array',
+      //         title: 'Documents Observed',
+      //         required: true,
+      //         items: {
+      //           type: 'object',
+      //           properties: {
+      //             documentCategory: {
+      //               type: 'string',
+      //               title: 'Document Category',
+      //               required: true,
+      //             },
+      //             documentName: {
+      //               type: 'string',
+      //               title: 'Document Name',
+      //               required: true,
+      //             },
+      //             documentType: {
+      //               type: 'string',
+      //               title: 'Document Type',
+      //               enum: ['PAN Card'],
+      //               required: true,
+      //             },
+      //             remarks: {type: 'string', title: 'Remarks', required: true},
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      //   required: true,
+      // },
       {
         id: 'suppliersCreditors',
         label: 'Suppliers/Creditors',
@@ -208,25 +263,37 @@ export const formSchema = [
             noOfFixedSuppliers: {
               type: 'integer',
               title: 'No of Fixed Suppliers',
+              required: true,
             },
             supplierCreditPeriodDays: {
               type: 'integer',
               title: 'Credit Period in days',
+              required: true,
             },
             supplierCashChequeProportion: {
               type: 'number',
               title: 'Cash-Cheque Proportion',
+              required: true,
             },
             top3Suppliers: {
               type: 'array',
               title: 'Top 3 Suppliers',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
-                  location: {type: 'string', title: 'Location'},
-                  refCheck: {type: 'string', title: 'Ref. Check'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
+                  location: {type: 'string', title: 'Location', required: true},
+                  refCheck: {
+                    type: 'string',
+                    title: 'Ref. Check',
+                    required: true,
+                  },
                 },
               },
             },
@@ -243,36 +310,50 @@ export const formSchema = [
             noOfFixedCustomers: {
               type: 'integer',
               title: 'No of Fixed Customers',
+              required: true,
             },
             clientCreditPeriodDays: {
               type: 'integer',
               title: 'Credit Period in days',
+              required: true,
             },
             clientCashChequeProportion: {
               type: 'number',
               title: 'Cash-Cheque Proportion',
+              required: true,
             },
             top3Customers: {
               type: 'array',
               title: 'Top 3 Customers',
               buttonTitle: 'Add Customer',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
-                  location: {type: 'string', title: 'Location'},
-                  refCheck: {type: 'string', title: 'Ref. Check'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
+                  location: {type: 'string', title: 'Location', required: true},
+                  refCheck: {
+                    type: 'string',
+                    title: 'Ref. Check',
+                    required: true,
+                  },
                 },
               },
             },
             averageStockMaintained: {
               type: 'number',
               title: 'Average Stock Maintained',
+              required: true,
             },
             turnoverAndMargins: {
               type: 'number',
               title: 'Turnover & Margins',
+              required: true,
             },
           },
         },
@@ -287,33 +368,54 @@ export const formSchema = [
             salariesAndWages: {
               type: 'array',
               title: 'Salaries & Wages',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  noOfEmployees: {type: 'integer', title: 'No. of Employees'},
+                  noOfEmployees: {
+                    type: 'integer',
+                    title: 'No. of Employees',
+                    required: true,
+                  },
                   salaryPerMonthPerEmployee: {
                     type: 'number',
                     title: 'Salary per Month per Employee',
+                    required: true,
                   },
                   statusOfEmployee: {
                     type: 'string',
                     title: 'Status of Employee',
                     enum: ['Contract', 'Full time'],
+                    required: true,
                   },
-                  noOfLabours: {type: 'integer', title: 'No. of Labours'},
+                  noOfLabours: {
+                    type: 'integer',
+                    title: 'No. of Labours',
+                    required: true,
+                  },
                   wagesPerMonthOrDay: {
                     type: 'number',
                     title: 'Wages per Month / Per Day',
+                    required: true,
                   },
-                  statusOfLabour: {type: 'string', title: 'Status of Labour'},
-                  remarks: {type: 'string', title: 'Remarks'},
+                  statusOfLabour: {
+                    type: 'string',
+                    title: 'Status of Labour',
+                    required: true,
+                  },
+                  remarks: {type: 'string', title: 'Remarks', required: true},
                 },
               },
             },
-            workingHours: {type: 'string', title: 'Working Hours'},
+            workingHours: {
+              type: 'string',
+              title: 'Working Hours',
+              required: true,
+            },
             otherMajorExpensesAndBasis: {
               type: 'string',
               title: 'Other Major Expenses & Basis',
+              required: true,
             },
           },
         },
@@ -328,34 +430,52 @@ export const formSchema = [
             assetDetails: {
               type: 'array',
               title: 'Asset Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  address: {type: 'string', title: 'Address'},
+                  address: {type: 'string', title: 'Address', required: true},
                   areaMeasurements: {
                     type: 'string',
                     title: 'Area Measurements',
+                    required: true,
                   },
                   purchaseCostLakhs: {
                     type: 'number',
                     title: 'Purchase Cost (in Lakhs)',
+                    required: true,
                   },
-                  purchaseYear: {type: 'integer', title: 'Purchase Year'},
+                  purchaseYear: {
+                    type: 'integer',
+                    title: 'Purchase Year',
+                    required: true,
+                  },
                   marketValueLakhs: {
                     type: 'number',
                     title: 'Market Value (in Lakhs)',
+                    required: true,
                   },
-                  ownerName: {type: 'string', title: 'Owner Name'},
-                  mortgaged: {type: 'string', title: 'Mortgaged (Yes/No)'},
+                  ownerName: {
+                    type: 'string',
+                    title: 'Owner Name',
+                    required: true,
+                  },
+                  mortgaged: {
+                    type: 'string',
+                    title: 'Mortgaged (Yes/No)',
+                    required: true,
+                  },
                   liquidMoveableMonetary: {
                     type: 'string',
                     title:
                       'Any Liquid, Moveable & Monetary Items (Cash, Gold, FD, RD, MF, Shares, Bonds, Securities)',
+                    required: true,
                   },
                   insurances: {
                     type: 'string',
                     title:
                       'Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured)',
+                    required: true,
                   },
                 },
               },
@@ -363,10 +483,12 @@ export const formSchema = [
             capitalInvestedLoansAdvances: {
               type: 'string',
               title: 'Capital Invested in any Business, Loans & Advances given',
+              required: true,
             },
             vehicles: {
               type: 'string',
               title: 'Car, Bike and Other Vehicles (Company Name and Model)',
+              required: true,
             },
           },
         },
@@ -381,24 +503,44 @@ export const formSchema = [
             loanDetails: {
               type: 'array',
               title: 'Loan Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
                   bankOrNbfcName: {
                     type: 'string',
                     title: 'Name of Bank / NBFC',
+                    required: true,
                   },
-                  typeOfLoan: {type: 'string', title: 'Type of Loan'},
+                  typeOfLoan: {
+                    type: 'string',
+                    title: 'Type of Loan',
+                    required: true,
+                  },
                   sanctionedAmount: {
                     type: 'number',
                     title: 'Sanctioned Amount',
+                    required: true,
                   },
-                  osBalance: {type: 'number', title: 'O/S Balance'},
-                  emiRs: {type: 'number', title: 'EMI (in Rs.)'},
-                  emiPaidBank: {type: 'string', title: 'EMI Paid Bank'},
+                  osBalance: {
+                    type: 'number',
+                    title: 'O/S Balance',
+                    required: true,
+                  },
+                  emiRs: {
+                    type: 'number',
+                    title: 'EMI (in Rs.)',
+                    required: true,
+                  },
+                  emiPaidBank: {
+                    type: 'string',
+                    title: 'EMI Paid Bank',
+                    required: true,
+                  },
                   securedAgainstAsset: {
                     type: 'string',
                     title: 'Secured Against which Asset',
+                    required: true,
                   },
                 },
               },
@@ -416,13 +558,30 @@ export const formSchema = [
             bankDetails: {
               type: 'array',
               title: 'Bank Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  bankName: {type: 'string', title: 'Bank Name'},
-                  branchName: {type: 'string', title: 'Branch Name'},
-                  accountType: {type: 'string', title: 'Account Type'},
-                  openSinceYear: {type: 'integer', title: 'Open Since (Year)'},
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank Name',
+                    required: true,
+                  },
+                  branchName: {
+                    type: 'string',
+                    title: 'Branch Name',
+                    required: true,
+                  },
+                  accountType: {
+                    type: 'string',
+                    title: 'Account Type',
+                    required: true,
+                  },
+                  openSinceYear: {
+                    type: 'integer',
+                    title: 'Open Since (Year)',
+                    required: true,
+                  },
                 },
               },
             },
@@ -454,6 +613,61 @@ export const formSchema = [
       //     required: true,
       //   },
       {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
         id: 'thirdPartyCheck',
         label: 'Third Party Check',
         schema: {
@@ -463,23 +677,35 @@ export const formSchema = [
               type: 'array',
               title: 'Third Party Check',
               minItems: 2,
+              required: true,
               items: {
                 type: 'object',
                 properties: {
                   individualOrBusinessName: {
                     type: 'string',
                     title: 'Individual / Business Name',
+                    required: true,
                   },
-                  address: {type: 'string', title: 'Address'},
-                  contactNo: {type: 'string', title: 'Contact No.'},
-                  knowingSince: {type: 'string', title: 'Knowing Since'},
+                  address: {type: 'string', title: 'Address', required: true},
+                  contactNo: {
+                    type: 'string',
+                    title: 'Contact No.',
+                    required: true,
+                  },
+                  knowingSince: {
+                    type: 'string',
+                    title: 'Knowing Since',
+                    required: true,
+                  },
                   feedbackOnBorrower: {
                     type: 'string',
                     title: 'Feedback on Borrower',
+                    required: true,
                   },
                   feedbackOnBusiness: {
                     type: 'string',
                     title: 'Feedback on Business',
+                    required: true,
                   },
                 },
               },
@@ -487,15 +713,18 @@ export const formSchema = [
             otherIncome: {
               type: 'string',
               title: 'Other Income (Income from other than initiated business)',
+              required: true,
             },
             siteCoordinates: {
               type: 'string',
               title: 'Site Coordinates',
               readOnly: true,
+              required: true,
             },
             observation: {
               type: 'string',
               title: 'Observation',
+              required: true,
             },
           },
         },
@@ -505,7 +734,7 @@ export const formSchema = [
   },
   {
     id: 2,
-    bankName: 'Axis Finance UBL Below 10L',
+    bankName: 'Axis Finance UBL Below 10 Lakhs',
     sections: [
       {
         id: 'basicDetails',
@@ -517,15 +746,18 @@ export const formSchema = [
               type: 'string',
               title: 'Ref No/Application No',
               readOnly: true,
+              required: true,
             },
             applicantName: {
               type: 'string',
               title: 'Name of the Applicant',
               readOnly: true,
+              required: true,
             },
             concernName: {
               type: 'string',
               title: 'Name of Concern',
+              required: true,
             },
             constitution: {
               type: 'string',
@@ -536,50 +768,61 @@ export const formSchema = [
                 'Limited Liability Partnership',
                 'Simple Partnership',
               ],
+              required: true,
             },
             initiatedAddress: {
               type: 'string',
               title: 'Initiated Address',
               readOnly: true,
+              required: true,
             },
             visitedAddress: {
               type: 'string',
               title: 'Visited Address',
+              required: true,
             },
             phoneNo: {
               type: 'string',
               title: 'Phone No.',
               pattern: '^[0-9]{10}$',
               readOnly: true,
+              required: true,
             },
             appointmentFixed: {
               type: 'string',
               title: 'Appointment Fixed',
               enum: ['Yes', 'No'],
+              required: true,
             },
             structureOfLoan: {
               type: 'string',
               title: 'Structure of Loan',
+              required: true,
             },
             noOfVisit: {
               type: 'integer',
               title: 'No. of Visit',
+              required: true,
             },
             personMet: {
               type: 'string',
               title: 'Person Met',
+              required: true,
             },
             aboutApplicant: {
               type: 'string',
               title: 'About Applicant',
+              required: true,
             },
             residentialDetails: {
               type: 'string',
               title: 'Residential Details',
+              required: true,
             },
             coApplicantDetails: {
               type: 'string',
               title: 'Co-Applicant Details',
+              required: true,
             },
           },
           required: ['applicationNo', 'applicantName', 'concernName'],
@@ -595,19 +838,41 @@ export const formSchema = [
             familyDetails: {
               type: 'array',
               title: 'Family Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  relation: {type: 'string', title: 'Relation with Applicant'},
-                  ageYears: {type: 'integer', title: 'Age (Yrs)'},
-                  qualification: {type: 'string', title: 'Qualification'},
-                  occupation: {type: 'string', title: 'Occupation'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  relation: {
+                    type: 'string',
+                    title: 'Relation with Applicant',
+                    required: true,
+                  },
+                  ageYears: {
+                    type: 'integer',
+                    title: 'Age (Yrs)',
+                    required: true,
+                  },
+                  qualification: {
+                    type: 'string',
+                    title: 'Qualification',
+                    required: true,
+                  },
+                  occupation: {
+                    type: 'string',
+                    title: 'Occupation',
+                    required: true,
+                  },
                   incomePerMonth: {
                     type: 'number',
                     title: 'Income per month (approx.)',
+                    required: true,
                   },
-                  dependent: {type: 'string', title: 'Dependent'},
+                  dependent: {
+                    type: 'string',
+                    title: 'Dependent',
+                    required: true,
+                  },
                 },
               },
             },
@@ -624,29 +889,39 @@ export const formSchema = [
             shareholdingDetails: {
               type: 'array',
               title: 'Constitution / Shareholding Details',
+              required: true,
               items: {
                 type: 'object',
                 properties: {
                   shareholderName: {
                     type: 'string',
                     title: 'Name of the Shareholder',
+                    required: true,
                   },
                   relationWithMainApplicant: {
                     type: 'string',
                     title: 'Relation with Main Applicant',
+                    required: true,
                   },
-                  designation: {type: 'string', title: 'Designation'},
+                  designation: {
+                    type: 'string',
+                    title: 'Designation',
+                    required: true,
+                  },
                   percentShareholding: {
                     type: 'number',
                     title: '% of Shareholding',
+                    required: true,
                   },
                   comingIntoLoanStructure: {
                     type: 'string',
                     title: 'Coming into Loan Structure',
+                    required: true,
                   },
                   functionalRole: {
                     type: 'string',
                     title: 'Functional of Partner / Director',
+                    required: true,
                   },
                 },
               },
@@ -664,10 +939,67 @@ export const formSchema = [
             aboutBusiness: {
               type: 'string',
               title: 'About the Business',
+              required: true,
             },
             businessSynopsis: {
               type: 'string',
               title: 'Business Synopsis',
+              required: true,
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
             },
           },
         },
@@ -685,59 +1017,63 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            applicationNo: {
-              type: 'string',
-              title: 'Application No',
-              readOnly: true,
-            },
             applicationId: {
               type: 'string',
               title: 'Application ID',
               readOnly: true,
+              required: true,
             },
             pdDate: {
               type: 'string',
               title: 'PD Date',
+              format: 'date',
+              required: true,
             },
             product: {
               type: 'string',
               title: 'Product (HL / LAP / Asha HL)',
               enum: ['HL', 'LAP', 'Asha HL'],
+              required: true,
             },
             loanAmount: {
               type: 'string',
               title: 'Loan Amount',
               readOnly: true,
+              required: true,
             },
             customerName: {
               type: 'string',
               title: 'Customer Name',
               readOnly: true,
+              required: true,
             },
             pdAddress: {
               type: 'string',
               title: 'PD Address (Residence/Office/Factory/Godown)',
-              enum: ['residence', 'Office', 'Factory', 'Godown'],
+              required: true,
             },
             contactNumber: {
               type: 'string',
               title: ' Contact Number (Mobile / Landline)',
               readOnly: true,
+              required: true,
             },
             personMet: {
               type: 'string',
               title: 'Person Met',
+              required: true,
             },
             relationshipWithBorrower: {
               type: 'string',
               title: 'Relationship with Borrower',
               enum: [
-                'Himself or Herself',
+                'Applicant',
                 'Co-applicant',
                 'Guarantor',
                 'Family',
                 'Neighbor',
               ],
+              required: true,
             },
           },
           required: ['applicationId', 'customerName'],
@@ -745,8 +1081,8 @@ export const formSchema = [
         required: true,
       },
       {
-        id: 'familyBackground',
-        label: 'Family Background',
+        id: 'borrowerDetails',
+        label: 'Borrower Details',
         schema: {
           type: 'object',
           properties: {
@@ -756,26 +1092,44 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
+                  name: {type: 'string', title: 'Name', required: true},
                   relationToApplicant: {
                     type: 'string',
                     title: 'Relation to applicant',
                   },
-                  age: {type: 'integer', title: 'age'},
-                  qualification: {type: 'string', title: 'qualification'},
-                  occupation: {type: 'string', title: 'occupation'},
-                  incomePerMonth: {type: 'number', title: 'income per month'},
-                  dependent: {type: 'string', title: 'dependent'},
+                  age: {type: 'integer', title: 'age', required: true},
+                  qualification: {
+                    type: 'string',
+                    title: 'qualification',
+                    required: true,
+                  },
+                  occupation: {
+                    type: 'string',
+                    title: 'occupation',
+                    required: true,
+                  },
+                  incomePerMonth: {
+                    type: 'number',
+                    title: 'income per month',
+                    required: true,
+                  },
+                  dependent: {
+                    type: 'string',
+                    title: 'dependent',
+                    required: true,
+                  },
                 },
               },
             },
             totalFamilyMembers: {
               type: 'integer',
               title: 'Total Family Members (Nos)',
+              required: true,
             },
             noOfEarningMembers: {
               type: 'integer',
               title: 'No. of Earning Members (Nos)',
+              required: true,
             },
           },
         },
@@ -791,6 +1145,7 @@ export const formSchema = [
               type: 'string',
               title: 'Name of Firm',
               readOnly: true,
+              required: true,
             },
             constitution: {
               type: 'string',
@@ -829,6 +1184,11 @@ export const formSchema = [
               title: 'Is Resi Cum office?',
               enum: ['Yes', 'No'],
             },
+            officeDetails: {
+              type: 'string',
+              title: 'Office Details (If office same as residence)',
+              required: false,
+            },
           },
         },
         required: true,
@@ -845,6 +1205,10 @@ export const formSchema = [
                 'Nature of Business (Trading / Manufacturing / Services / Others)',
               enum: ['Trading', 'Manufacturing', 'Services', 'Others'],
             },
+            natureOfBusinessOther: {
+              type: 'string',
+              title: 'Spicify Nature of Business (Other)',
+            },
             productServicesOffered: {
               type: 'string',
               title: 'Product / Services Offered',
@@ -853,171 +1217,9 @@ export const formSchema = [
               type: 'string',
               title: 'Business Model & Background of Business',
             },
-          },
-        },
-        required: true,
-      },
-      {
-        id: 'businessDetails',
-        label: 'Business Details',
-        schema: {
-          type: 'object',
-          properties: {
-            aboutTheBusiness: {
+            otherDetailsObserved: {
               type: 'string',
-              title: 'About the business',
-            },
-            yearBusinessStarted: {
-              type: 'integer',
-              title: 'Year Business Started',
-            },
-            typeOfBusiness: {
-              type: 'string',
-              title: 'Type of Business (e.g., Proprietorship/Partnership)',
-              enum: [
-                'Proprietorship',
-                'Private Limited',
-                'Limited Liability Partnership',
-                'Simple Partnership',
-              ],
-            },
-            businessName: {
-              type: 'string',
-              title: 'Business Name',
-            },
-            natureOfBusiness: {
-              type: 'string',
-              title: 'Nature of Business',
-            },
-            stockSource: {
-              type: 'string',
-              title: 'Stock Source (Suppliers/Farmers)',
-            },
-            stockHandling: {
-              type: 'string',
-              title: 'Stock Handling (Premises / Direct Delivery)',
-            },
-            salesVolume: {
-              type: 'string',
-              title: 'Sales Volume',
-            },
-            profitPerUnit: {
-              type: 'string',
-              title: 'Profit per Unit',
-            },
-            businessPremisesOwnership: {
-              type: 'string',
-              title: 'Business Premises Ownership',
-            },
-            numberOfWorkers: {
-              type: 'string',
-              title: 'Number of Workers',
-            },
-            wageExpenses: {
-              type: 'string',
-              title: 'Wage Expenses',
-            },
-            majorTransactionMode: {
-              type: 'string',
-              title: 'Major Transaction Mode (Cash/Bank)',
-            },
-            regularCustomers: {
-              type: 'array',
-              title: 'Regular Customers',
-              items: {
-                type: 'object',
-                properties: {
-                  nameOfRegularCustomers: {
-                    type: 'string',
-                    title: 'Name of Regular Customers',
-                  },
-                  contactNumberOfRegularCustomers: {
-                    type: 'string',
-                    title: 'Contact Number of Regular Customers',
-                  },
-                },
-              },
-            },
-            regularSuppliers: {
-              type: 'array',
-              title: 'Regular Suppliers',
-              items: {
-                type: 'object',
-                properties: {
-                  nameOfRegularSuppliers: {
-                    type: 'string',
-                    title: 'Name of Regular Suppliers',
-                  },
-                  contactNumberOfRegularSuppliers: {
-                    type: 'string',
-                    title: 'Contact Number of Regular Suppliers',
-                  },
-                },
-              },
-            },
-            businessActivityObserved: {
-              type: 'string',
-              title: 'Business Activity observed',
-            },
-            stockLevelObserved: {
-              type: 'string',
-              title: 'Stock Level observed',
-            },
-            documentsObserved: {
-              type: 'string',
-              title: 'Documents Observed',
-            },
-            gstRegistration: {
-              type: 'string',
-              title:
-                'Whether Business was Registered under GST - Yes/No If Yes then mention GST Number',
-              enum: ['Yes', 'No'],
-            },
-            gstNumber: {
-              type: 'string',
-              title: 'GST Number',
-            },
-            itrFiled: {
-              type: 'string',
-              title: 'ITRs Filed - Yes/No If Yes then mention the income',
-              enum: ['Yes', 'No'],
-            },
-            income: {
-              type: 'string',
-              title: 'Income',
-            },
-          },
-        },
-        required: true,
-      },
-      {
-        id: 'otherDetailsObserved',
-        label: 'Other details observed during visit',
-        schema: {
-          type: 'object',
-          properties: {
-            businessNameBoardSeen: {
-              type: 'string',
-              title: 'Business name board seen',
-              enum: ['Yes', 'no'],
-            },
-            noOfEmployeesSeen: {
-              type: 'integer',
-              title: 'No. of employees seen',
-            },
-            businessActivitySeen: {
-              type: 'string',
-              title: 'Business activity seen',
-              enum: ['Yes', 'no'],
-            },
-            stockSeen: {
-              type: 'string',
-              title: 'Stock seen',
-              enum: ['Yes', 'no'],
-            },
-            noOfMachinesSeen: {
-              type: 'integer',
-              title: 'No. of machines seen',
+              title: 'Other details observed during visit',
             },
             top3ClientsCustomers: {
               type: 'array',
@@ -1025,9 +1227,13 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
-                  location: {type: 'string', title: 'Location'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
+                  location: {type: 'string', title: 'Location', required: true},
                 },
               },
             },
@@ -1037,9 +1243,13 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
-                  location: {type: 'string', title: 'Location'},
+                  name: {type: 'string', title: 'Name', required: true},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
+                  location: {type: 'string', title: 'Location', required: true},
                 },
               },
             },
@@ -1066,72 +1276,224 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            monthlyGrossReceipts: {
+            turnoverAndMargin: {
               type: 'string',
-              title: 'Monthly Gross Receipts',
+              title: 'Turnover and Margin',
+              required: true,
             },
-            monthlyExpenses: {
+            salesFluctuations: {
               type: 'string',
-              title: 'Monthly Expenses',
+              title: 'Sales fluctuations',
+              required: true,
             },
-            netProfit: {
+            customerIdentityEstablished: {
               type: 'string',
-              title: 'Net Profit',
+              title: 'Customer Identity established during PD',
+              enum: ['Yes', 'No'],
+              required: true,
             },
-            netMargin: {
+            charteredACDetails: {
               type: 'string',
-              title: 'Net Margin',
+              title: 'Chartered A/C details',
+              required: true,
             },
-            majorExpenses: {
-              type: 'string',
-              title: 'Major Expenses',
+            detailsOfExistingLoans: {
+              type: 'array',
+              title: 'Details of existing loans confirmed during PD',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  loanType: {
+                    type: 'string',
+                    title: 'Loan type',
+                    required: true,
+                  },
+                  loanAmount: {
+                    type: 'number',
+                    title: 'Loan amount',
+                    required: true,
+                  },
+                  tenure: {
+                    type: 'string',
+                    title: 'Tenure',
+                    required: true,
+                  },
+                  emi: {
+                    type: 'number',
+                    title: 'EMI',
+                    required: true,
+                  },
+                  balanceTenure: {
+                    type: 'string',
+                    title: 'Balance Tenure',
+                    required: true,
+                  },
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank name',
+                    required: true,
+                  },
+                },
+              },
             },
-            monthlyHouseholdExpenses: {
-              type: 'string',
-              title: 'Monthly Household Expenses',
-            },
-            employees: {
-              type: 'string',
-              title: 'Employees',
-            },
-            numberOfEmployees: {
-              type: 'string',
-              title: 'Number of Employees',
-            },
-            otherIncomes: {
-              type: 'string',
-              title: 'Other Incomes',
-            },
-            concerns: {
-              type: 'string',
-              title: 'Concerns',
-            },
-            otherObservation: {
-              type: 'string',
-              title: 'Other Observation',
-            },
-            neighborCheckThirdParty: {
+            loansFromFamilyFriends: {
               type: 'string',
               title:
-                'Details of neighbor check / Third party check done and status',
+                'Loans taken from family, friends, business associates, etc',
+              required: true,
             },
           },
-          endUseOfProposedLoan: {
-            type: 'string',
-            title: 'End use of proposed Loan (detailed)',
+        },
+        required: true,
+      },
+      {
+        id: 'workingCapitalDetails',
+        label: 'Details of Working Capital (OD/CC) if any',
+        schema: {
+          type: 'object',
+          properties: {
+            bankName: {
+              type: 'string',
+              title: 'Bank name',
+              required: true,
+            },
+            limit: {
+              type: 'string',
+              title: 'Limit',
+              required: true,
+            },
+            utilisation: {
+              type: 'string',
+              title: 'Utilisation',
+              required: true,
+            },
+            collateral: {
+              type: 'string',
+              title: 'Collateral',
+              required: true,
+            },
+            linkedLoans: {
+              type: 'string',
+              title: 'Linked Loans (if any)',
+              required: false,
+            },
+            endUseOfProposedLoans: {
+              type: 'string',
+              title: 'End use of Proposed loans in (detailed)',
+              required: true,
+            },
           },
-          bankingPerformance: {
-            type: 'string',
-            title: 'Banking performance',
+        },
+        required: true,
+      },
+      {
+        id: 'bankingDetails',
+        label: 'Banking details',
+        schema: {
+          type: 'object',
+          properties: {
+            bankingDetails: {
+              type: 'array',
+              title: 'Banking details',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank name',
+                    required: true,
+                  },
+                  accountType: {
+                    type: 'string',
+                    title: 'A/c type',
+                    required: true,
+                  },
+                  averageBalances: {
+                    type: 'string',
+                    title: 'Average balances',
+                    required: true,
+                  },
+                },
+              },
+            },
           },
-          anyChequeBounces: {
-            type: 'string',
-            title: 'Any cheque bounces (Y/N)',
-            enum: ['Yes', 'no'],
+        },
+        required: true,
+      },
+      {
+        id: 'bankingPerformance',
+        label: 'Banking performance',
+        schema: {
+          type: 'object',
+          properties: {
+            anyChequeBounces: {
+              type: 'string',
+              title: 'Any Cheque bounces',
+              enum: ['Yes', 'No'],
+              required: true,
+            },
+            detailsOfCollateral: {
+              type: 'string',
+              title: 'Details of collateral',
+              required: true,
+            },
           },
-          detailsOfCollateral: {
-            type: 'string',
-            title: 'Details of collateral (Address of property)',
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
           },
         },
         required: true,
@@ -1152,66 +1514,436 @@ export const formSchema = [
               type: 'string',
               title: 'Application No',
               readOnly: true,
+              required: true,
             },
             nameOfApplicant: {
               type: 'string',
               title: 'Name of Applicant',
               readOnly: true,
+              required: true,
             },
             nameOfCoApplicant: {
               type: 'string',
               title: 'Name of Co-Applicant',
+              required: true,
             },
             phoneNumber: {
               type: 'string',
               title: 'Phone Number',
               readOnly: true,
+              required: true,
             },
             nameOfConcern: {
               type: 'string',
               title: 'Name of Concern',
               readOnly: true,
+              required: true,
             },
             initiatedAddress: {
               type: 'string',
               title: 'Initiated Address',
               readOnly: true,
+              required: true,
             },
             visitedAddress: {
               type: 'string',
               title: 'Visited Address',
+              required: true,
             },
             residentialAddress: {
               type: 'string',
               title: 'Residential Address',
+              required: true,
             },
-            dateTimeOfVisit: {
+            dateOfVisit: {
               type: 'string',
-              title: 'Date & Time of Visit',
+              title: 'Date of Visit',
+              format: 'date',
+              required: true,
             },
             personMet: {
               type: 'string',
               title: 'Person Met',
+              required: true,
             },
-            amountAndPurposeOfLoan: {
+            loanAmount: {
               type: 'string',
-              title: 'Amount and Purpose of Loan',
+              title: 'Loan Amount',
               readOnly: true,
+            },
+            purposeOfLoan: {
+              type: 'string',
+              title: 'Purpose of Loan',
+              readOnly: true,
+              required: true,
             },
             typeOfCollateral: {
               type: 'string',
               title: 'Type of collateral',
+              required: true,
             },
             collateralPropertyAddress: {
               type: 'string',
               title: 'Collateral Property Address',
+              required: true,
             },
             aboutApplicant: {
               type: 'string',
               title: 'About Applicant(Descriptive section)',
+              required: true,
             },
           },
           required: ['applicationNo', 'nameOfApplicant', 'nameOfConcern'],
+        },
+        required: true,
+      },
+      {
+        id: 'familyMembers',
+        label: 'Family Members',
+        schema: {
+          type: 'object',
+          properties: {
+            familyMembers: {
+              type: 'array',
+              title: 'Family Members',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    title: 'Name',
+                    required: true,
+                  },
+                  relationship: {
+                    type: 'string',
+                    title: 'Relationship',
+                    required: true,
+                  },
+                  age: {
+                    type: 'integer',
+                    title: 'Age',
+                    required: true,
+                  },
+                  education: {
+                    type: 'string',
+                    title: 'Education',
+                    required: true,
+                  },
+                  occupation: {
+                    type: 'string',
+                    title: 'Occupation',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'bankingDetails',
+        label: 'Banking Details',
+        schema: {
+          type: 'object',
+          properties: {
+            bankingDetails: {
+              type: 'array',
+              title: 'Banking Details',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  bankName: {
+                    type: 'string',
+                    title: 'Bank Name',
+                    required: true,
+                  },
+                  accountType: {
+                    type: 'string',
+                    title: 'Account Type',
+                    required: true,
+                  },
+                  averageBalance: {
+                    type: 'integer',
+                    title: 'Average Balance',
+                    required: true,
+                  },
+                  noOfYearsMaintained: {
+                    type: 'integer',
+                    title: 'No. of Years Maintained',
+                    required: true,
+                  },
+                },
+              },
+            },
+            licMutualFunds: {
+              type: 'string',
+              title: 'LIC / Mutual Funds',
+              required: true,
+            },
+            assets: {
+              type: 'string',
+              title: 'Assets',
+              required: true,
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'existingLoans',
+        label: 'Existing Loans',
+        schema: {
+          type: 'object',
+          properties: {
+            existingLoans: {
+              type: 'array',
+              title: 'Existing Loans',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  bank: {
+                    type: 'string',
+                    title: 'Bank',
+                    required: true,
+                  },
+                  type: {
+                    type: 'string',
+                    title: 'Type',
+                    required: true,
+                  },
+                  loanAmount: {
+                    type: 'number',
+                    title: 'Loan Amount',
+                    required: true,
+                  },
+                  emi: {
+                    type: 'number',
+                    title: 'EMI',
+                    required: true,
+                  },
+                  openClose: {
+                    type: 'string',
+                    title: 'Open/Close',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'businessDetails',
+        label: 'Business Details',
+        schema: {
+          type: 'object',
+          properties: {
+            businessDetails: {
+              type: 'array',
+              title: 'Business Details',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  businessDetails: {
+                    type: 'string',
+                    title: 'Business Details',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'regularCustomers',
+        label: 'Regular Customers',
+        schema: {
+          type: 'object',
+          properties: {
+            regularCustomers: {
+              type: 'array',
+              title: 'Regular Customers',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  nameOfRegularCustomers: {
+                    type: 'string',
+                    title: 'Name of Regular Customers',
+                    required: true,
+                  },
+                  contactNumberOfRegularCustomers: {
+                    type: 'integer',
+                    title: 'Contact Number of Regular Customers',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'regularSuppliers',
+        label: 'Regular Suppliers',
+        schema: {
+          type: 'object',
+          properties: {
+            regularSuppliers: {
+              type: 'array',
+              title: 'Regular Suppliers',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  nameOfRegularSuppliers: {
+                    type: 'string',
+                    title: 'Name of Regular Suppliers',
+                    required: true,
+                  },
+                  contactNumberOfRegularSuppliers: {
+                    type: 'integer',
+                    title: 'Contact Number of Regular Suppliers',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'financialDetails',
+        label: 'Financial Details',
+        schema: {
+          type: 'object',
+          properties: {
+            monthlyGrossReceipts: {
+              type: 'integer',
+              title: 'Monthly Gross Receipts',
+              required: true,
+            },
+            monthlyExpenses: {
+              type: 'string',
+              title: 'Monthly Expenses',
+              required: true,
+            },
+            netProfit: {
+              type: 'string',
+              title: 'Net Profit',
+              required: true,
+            },
+            netMargin: {
+              type: 'string',
+              title: 'Net Margin',
+              required: true,
+            },
+            majorExpenses: {
+              type: 'string',
+              title: 'Major Expenses',
+              required: true,
+            },
+            monthlyHouseholdExpenses: {
+              type: 'string',
+              title: 'Monthly Household Expenses',
+              required: true,
+            },
+            employees: {
+              type: 'string',
+              title: 'Employees',
+              required: true,
+            },
+            numberOfEmployees: {
+              type: 'string',
+              title: 'Number of Employees',
+              required: true,
+            },
+            otherIncomes: {
+              type: 'string',
+              title: 'Other Incomes',
+              required: true,
+            },
+            concerns: {
+              type: 'string',
+              title: 'Concerns',
+              required: true,
+            },
+            otherObservation: {
+              type: 'string',
+              title: 'Other Observation',
+              required: true,
+            },
+            neighborCheck: {
+              type: 'string',
+              title: 'Neighbor Check',
+              required: true,
+            },
+          },
         },
         required: true,
       },
@@ -1240,7 +1972,7 @@ export const formSchema = [
             nameOfCoApplicants: {
               type: 'string',
               title: 'Name of Co-Applicant(s)',
-              readOnly: true,
+              // readOnly: true,
             },
           },
           required: ['nameOfApplicant', 'nameOfEntity'],
@@ -1256,7 +1988,7 @@ export const formSchema = [
             product: {
               type: 'string',
               title: 'Product',
-              readOnly: true,
+              // readOnly: true,
             },
             amount: {
               type: 'string',
@@ -1264,25 +1996,27 @@ export const formSchema = [
               readOnly: true,
             },
             tenure: {
-              type: 'string',
+              type: 'integer',
               title: 'Tenure',
             },
             repaymentFrom: {
-              type: 'string',
+              type: 'object',
               title: 'Repayment from',
-            },
-            bankName: {
-              type: 'string',
-              title: 'Bank name',
-              readOnly: true,
-            },
-            typeSAAccount: {
-              type: 'string',
-              title: 'Type (SA A/C)',
-            },
-            accountNo: {
-              type: 'string',
-              title: 'Account No.',
+              properties: {
+                bankName: {
+                  type: 'string',
+                  title: 'Bank name',
+                  readOnly: true,
+                },
+                typeSAAccount: {
+                  type: 'string',
+                  title: 'Type (SA A/C)',
+                },
+                accountNo: {
+                  type: 'string',
+                  title: 'Account No.',
+                },
+              },
             },
           },
         },
@@ -1294,9 +2028,11 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            add: {
+            address: {
               type: 'string',
-              title: 'Add',
+              title: 'Address',
+              readOnly: true,
+              required: true,
             },
             rentedOwned: {
               type: 'string',
@@ -1329,9 +2065,10 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            add: {
+            address: {
               type: 'string',
-              title: 'Add',
+              title: 'Address',
+              required: true,
             },
             rentedOwned: {
               type: 'string',
@@ -1343,7 +2080,7 @@ export const formSchema = [
               title: 'Owned by',
             },
             areaSqFt: {
-              type: 'string',
+              type: 'integer',
               title: 'Area (In Sq. Ft.)',
             },
             occupiedSinceYears: {
@@ -1356,7 +2093,7 @@ export const formSchema = [
             },
             addressOfPDAndPersonMet: {
               type: 'string',
-              title: 'Address of PD and persona met',
+              title: 'Address of PD and person met',
             },
           },
         },
@@ -1374,12 +2111,31 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
+                  name: {type: 'string', title: 'Name', required: true},
                   age: {type: 'integer', title: 'Age'},
-                  qualification: {type: 'string', title: 'Qualification'},
-                  profession: {type: 'string', title: 'Profession'},
-                  relation: {type: 'string', title: 'Relation'},
-                  monthlyIncome: {type: 'number', title: 'Monthly income'},
+                  qualification: {
+                    type: 'string',
+                    title: 'Qualification',
+                    enum: [
+                      'Below 10th',
+                      '10th pass',
+                      'Under graduate',
+                      'Graduate',
+                      'Post Graduate',
+                      'Professional',
+                    ],
+                  },
+                  profession: {
+                    type: 'string',
+                    title: 'Profession',
+                    required: true,
+                  },
+                  relation: {type: 'string', title: 'Relation', required: true},
+                  monthlyIncome: {
+                    type: 'number',
+                    title: 'Monthly income',
+                    required: true,
+                  },
                 },
               },
             },
@@ -1394,10 +2150,19 @@ export const formSchema = [
           type: 'object',
           properties: {
             currentBusinessDetails: {
-              type: 'string',
+              type: 'array',
               title: 'Current Business Details',
+              items: {
+                type: 'object',
+                properties: {
+                  businessDetails: {
+                    type: 'string',
+                    title: 'Business Details',
+                  },
+                },
+              },
             },
-            stockAsOnDate: {
+            stockAsOnDay: {
               type: 'string',
               title: 'Stock as on date',
             },
@@ -1478,10 +2243,12 @@ export const formSchema = [
             covidEffectOnTurnover: {
               type: 'string',
               title: 'Is there any effect on turnover due to Covid',
+              enum: ['Yes', 'No'],
             },
             postLockdownBusinessSpeed: {
               type: 'string',
               title: 'After lockdown, is business running on same speed?',
+              enum: ['Yes', 'No'],
             },
             cashSalesPercentage: {
               type: 'integer',
@@ -1497,7 +2264,7 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            totalDebtorsAsOnDate: {
+            totalDebtorsAsOnDay: {
               type: 'integer',
               title: 'Total Debtors as on date',
             },
@@ -1516,7 +2283,7 @@ export const formSchema = [
                     type: 'string',
                     title: '% of Total Sales',
                   },
-                  debtorDays: {type: 'string', title: 'Debtor Days'},
+                  debtorDays: {type: 'integer', title: 'Debtor Days'},
                   relationshipSinceYears: {
                     type: 'integer',
                     title: 'Relationship since (years)',
@@ -1534,7 +2301,7 @@ export const formSchema = [
         schema: {
           type: 'object',
           properties: {
-            totalCreditorsAsOnDate: {
+            totalCreditorsAsOnDay: {
               type: 'integer',
               title: 'Total Creditors as on date',
             },
@@ -1553,7 +2320,7 @@ export const formSchema = [
                     type: 'string',
                     title: '% of Total Purchases',
                   },
-                  creditorDays: {type: 'string', title: 'Creditor Days'},
+                  creditorDays: {type: 'integer', title: 'Creditor Days'},
                   relationshipSinceYears: {
                     type: 'integer',
                     title: 'Relationship since (years)',
@@ -1585,14 +2352,15 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  bank: {type: 'string', title: 'Bank'},
+                  bank: {type: 'string', title: 'Bank', required: true},
                   natureOfLoan: {type: 'string', title: 'Nature of Loan'},
-                  amount: {type: 'number', title: 'Amount'},
-                  emi: {type: 'number', title: 'EMI'},
-                  tenure: {type: 'string', title: 'Tenure'},
+                  amount: {type: 'number', title: 'Amount', required: true},
+                  emi: {type: 'number', title: 'EMI', required: true},
+                  tenure: {type: 'string', title: 'Tenure', required: true},
                   outstandingBalance: {
                     type: 'number',
                     title: 'Outstanding Balance',
+                    required: true,
                   },
                 },
               },
@@ -1747,7 +2515,7 @@ export const formSchema = [
         required: true,
       },
       {
-        id: 'документы',
+        id: 'documents',
         label: 'Documents',
         schema: {
           type: 'object',
@@ -1759,6 +2527,99 @@ export const formSchema = [
             otherDocumentSeen: {
               type: 'string',
               title: 'other Document Seen',
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'finalStatus',
+        label: 'Final Status',
+        schema: {
+          type: 'object',
+          properties: {
+            dateOfPD: {
+              type: 'string',
+              title: 'Date of PD',
+              format: 'date',
+            },
+            personMetAtTimeOfPD: {
+              type: 'string',
+              title: 'Person met at the time of PD',
+            },
+            phoneNoOfApplicant: {
+              type: 'string',
+              title: 'Phone no of applicant',
+              readOnly: true,
+            },
+            pdDoneBy: {
+              type: 'string',
+              title: 'PD done by',
+              readOnly: true,
+            },
+            latitudeLongitude: {
+              type: 'string',
+              title: 'Latitude and longitude',
+              readOnly: true,
+            },
+            videoLink: {
+              type: 'string',
+              title: 'Video link',
             },
           },
         },
@@ -1847,7 +2708,7 @@ export const formSchema = [
               items: {
                 type: 'object',
                 properties: {
-                  name: {type: 'string', title: 'Name'},
+                  name: {type: 'string', title: 'Name', required: true},
                   age: {type: 'integer', title: 'Age'},
                   qualification: {
                     type: 'string',
@@ -1861,8 +2722,8 @@ export const formSchema = [
                     ],
                   },
                   occupation: {type: 'string', title: 'Occupation'},
-                  relation: {type: 'string', title: 'Relation'},
-                  remarks: {type: 'string', title: 'Remarks'},
+                  relation: {type: 'string', title: 'Relation', required: true},
+                  remarks: {type: 'string', title: 'Remarks', required: true},
                 },
               },
             },
@@ -1962,10 +2823,6 @@ export const formSchema = [
             margins: {
               type: 'string',
               title: 'Margins',
-            },
-            documentsObserved: {
-              type: 'string',
-              title: 'Documents Observed',
             },
             activityObserved: {
               type: 'string',
@@ -2075,7 +2932,11 @@ export const formSchema = [
                 type: 'object',
                 properties: {
                   nameOfSuppliers: {type: 'string', title: 'Name of Suppliers'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
                 },
               },
             },
@@ -2096,7 +2957,11 @@ export const formSchema = [
                 type: 'object',
                 properties: {
                   nameOfCustomer: {type: 'string', title: 'Name of Customer'},
-                  contactDetails: {type: 'string', title: 'Contact Details'},
+                  contactDetails: {
+                    type: 'string',
+                    title: 'Contact Details',
+                    required: true,
+                  },
                 },
               },
             },
@@ -2143,9 +3008,9 @@ export const formSchema = [
                   },
                   product: {type: 'string', title: 'Product'},
                   loanAmount: {type: 'number', title: 'Loan amount'},
-                  emi: {type: 'number', title: 'EMI'},
+                  emi: {type: 'number', title: 'EMI', required: true},
                   pos: {type: 'string', title: 'POS'},
-                  remarks: {type: 'string', title: 'Remarks'},
+                  remarks: {type: 'string', title: 'Remarks', required: true},
                 },
               },
             },
@@ -2259,6 +3124,61 @@ export const formSchema = [
                   yearsOfOwnership: {
                     type: 'integer',
                     title: 'Years of ownership',
+                  },
+                },
+              },
+            },
+          },
+        },
+        required: true,
+      },
+      {
+        id: 'documentsObserved',
+        label: 'Documents Observed',
+        schema: {
+          type: 'object',
+          properties: {
+            itrs: {
+              type: 'boolean',
+              title: 'ITRs',
+              required: true,
+            },
+            gstCertificate: {
+              type: 'boolean',
+              title: 'GST Certificate',
+              required: true,
+            },
+            gstReturns: {
+              type: 'boolean',
+              title: 'GST Returns',
+              required: true,
+            },
+            msmeLicence: {
+              type: 'boolean',
+              title: 'MSME Licence',
+              required: true,
+            },
+            labourLicence: {
+              type: 'boolean',
+              title: 'Labour Licence',
+              required: true,
+            },
+            fssaiLicense: {
+              type: 'boolean',
+              title: 'FSSAI License',
+              required: true,
+            },
+            additionalDocuments: {
+              type: 'array',
+              title: 'Additional Documents',
+              required: true,
+              items: {
+                type: 'object',
+                properties: {
+                  documentName: {
+                    type: 'string',
+                    title: 'Document Name',
+                    required: true,
                   },
                 },
               },

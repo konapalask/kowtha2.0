@@ -25,75 +25,64 @@ export class PDTemplateService {
 
     ) { }
 
-    async FormatPDImages(verification: any, bankName: string, verificationData: any, applicationNumber: string): Promise<any> {
-      try {        
-        const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-        const imageBase64 = fs.readFileSync(imagePath, 'base64');
-        const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+    async FormatPDImages(verification: any, bankName: string, applicationNumber: string, synopsis: string, financialAnalysis: any): Promise<any> {
+      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
+      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
-        const status = verification?.approvedStatus || '';
+      const status = verification?.approvedStatus || '';
 
-        const uploadedItems = verificationData?.uploadedItems || [];
+      const uploadedItems = verification?.uploadedItems || [];
 
-        // Generate presigned URLs for images
-        const imageUrls = await Promise.all(
-          uploadedItems.map(async (item: any) => {
-            try {
-              return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
-            } catch (error) {
-              await this.loggingService.error('Failed to generate presigned URL for image', {
-                s3ImageUrl: item.s3ImageUrl,
-                error: error.message
-              });
-              return null;
-            }
-          })
-        );
-
-        // Filter out any failed URL generations
-        const validImageUrls = imageUrls.filter(url => url !== null);
-
-        const fieldExecutive = verification.fieldExecutive?.name || '';
-
-        const imagesData = await this.loanService.formatImages(validImageUrls, bankName, fieldExecutive);
-
-        const html_data = {
-            bankName: bankName,
-            applicationNumber: applicationNumber,
-            path: verification.path,
-            status: status,
-            imageDataUri: imageDataUri,
-            imagesData: imagesData,
-            fieldExecutive: fieldExecutive,
+      // Generate presigned URLs for images
+      const imageUrls = await Promise.all(
+        uploadedItems.map(async (item: any) => {
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+          } catch (error) {
+            await this.loggingService.error('Failed to generate presigned URL for image', {
+              s3ImageUrl: item.s3ImageUrl,
+              error: error.message
+            });
+            return null;
           }
+        })
+      );
 
-        return html_data;
-      } catch (error) {
-          await this.loggingService.error('Failed to generate verification PDF', {
-            verification,
-            bankName,
-            verificationData,
-            applicationNumber,
-            error: error.message,
-            stack: error.stack,
-          });
-          throw error;
+      // Filter out any failed URL generations
+      const validImageUrls = imageUrls.filter(url => url !== null);
+
+      const fieldExecutive = verification.fieldExecutive?.name || '';
+
+      const imagesData = await this.loanService.formatImages(validImageUrls, bankName, fieldExecutive);
+
+      return {
+          bankName: bankName,
+          applicationNumber: applicationNumber,
+          path: synopsis,
+          financialAnalysis: financialAnalysis,
+          status: status,
+          imageDataUri: imageDataUri,
+          imagesData: imagesData,
+          fieldExecutive: fieldExecutive,
         }
     }
 
-    async InterfaceMapping(bankName: string, verification: any, loan: any): Promise<any> {
-      
+    async InterfaceMapping(bankName: string, verification: any, loan: any, synopsis: string, financialAnalysis: any): Promise<any> {
+
         if (bankName == 'Axis Bank') {
-            let verificationData = verification as AxisFinanceUBLInterface
-            const html_data = await this.FormatPDImages(verification, bankName, verificationData, loan.applicationNumber);
+            let verificationData = loan.verificationData as AxisFinanceUBLInterface
+            const html_data = await this.FormatPDImages(verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis);
             return axisFinanceUBLTemplate(verificationData, html_data);
         }
 
         if (bankName == 'Rbl') {
           let verificationData = verification as RBLInterface
-          const html_data = await this.FormatPDImages(verification, bankName, verificationData, loan.applicationNumber);
+          const html_data = await this.FormatPDImages(verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis);
           return rblTemplate(verificationData, html_data);
-      }
+        } else {
+          throw new NotFoundException('Bank not found');
+        }
     }
  
     async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
@@ -122,6 +111,8 @@ export class PDTemplateService {
                   verificationData: true,
                   path: true,
                   finalReportPath: true,
+                  synopsis: true,
+                  financialAnalysis: true,
                   fieldExecutive: { select: { name: true } }
                 }
               },
@@ -137,13 +128,12 @@ export class PDTemplateService {
           }
     
           const verification = loan.verifications[0];
-    
+          
           const bankName = loan.bankName;
           
           const verificationData: any = verification.verificationData;
-          console.log(loan.verifications.length);
-          // Generate HTML template using the appropriate template function
-          const htmlTemplate = await this.InterfaceMapping(bankName, verificationData, loan);
+          
+          const htmlTemplate = await this.InterfaceMapping(bankName, verificationData, loan, verification.synopsis, verification.financialAnalysis);
     
           const pdfBuffer = await this.loanService.PDFBufferGeneration(htmlTemplate);
     

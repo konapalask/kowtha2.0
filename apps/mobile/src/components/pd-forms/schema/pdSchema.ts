@@ -1,6 +1,7 @@
 import * as RNFS from 'react-native-fs';
 // @ts-ignore - forms.js doesn't have TypeScript definitions
 import {formSchema, getFormConfigByBank} from '../../../../forms';
+import {getPDSchema} from '../../../services/field.services';
 
 export interface MobileFieldDefinition {
   id: string;
@@ -49,6 +50,7 @@ export async function loadMobilePDFormsSchema(
 
     if (bankForm) {
       cachedSchema[bankName] = bankForm;
+      console.log('bankForm', bankForm);
       return bankForm;
     }
 
@@ -60,14 +62,9 @@ export async function loadMobilePDFormsSchema(
     );
 
     try {
-      // Option 2: Fetch from backend API (fallback)
-      const response = await fetch(
-        `/api/pd-schema/${encodeURIComponent(bankName)}`,
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      const schema = await response.json();
+      const response = await getPDSchema(bankName);
+      const schema = await response.data;
+      // const schema = getFormConfigByBank(bankName);
       cachedSchema[bankName] = schema;
       return schema;
     } catch (fetchError) {
