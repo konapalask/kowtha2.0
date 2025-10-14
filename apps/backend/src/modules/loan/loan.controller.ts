@@ -53,7 +53,7 @@ import {
   Res,
   Delete,
 } from "@nestjs/common";
-import { PDTemplateService } from "./templates/pd-templates.service";
+import { PDTemplateService } from "./pd-templates.service";
 import { formSchema, BANK_NAMES } from "./forms-schema";
 
 @ApiTags("loans")

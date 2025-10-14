@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { LoanService } from "../loan.service";
+import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
 import {
   Prisma,
@@ -14,18 +14,18 @@ import {
   ApprovedStatus,
   Department,
 } from "@prisma/client";
-import { axisFinanceUBLTemplate } from "./PD/axis-finance-ubl.template";
+import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
 import { LoggingService } from "src/modules/common/logging/logging.service";
-import { AxisFinanceUBLInterface } from "./PD/interface/axis-finance-ubl.interface";
-import { mapAxisUBL } from "./PD/mappers/axis-finance-ubl.mapper";
-import { RBLInterface } from "./PD/interface/rbl.interface";
-import { rblTemplate } from "./PD/rbl.template";
-import { genericPDTemplate } from "./PD/generic.template";
-import { formSchema } from "../forms-schema";
+import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
+// import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
+import { RBLInterface } from "./templates/PD/interface/rbl.interface";
+import { rblTemplate } from "./templates/PD/html/rbl.template";
+import { genericPDTemplate } from "./templates/PD/html/generic.template";
+import { formSchema } from "./forms-schema";
 import {
   validateVerificationData,
   logDataStructure,
-} from "./PD/template-validator";
+} from "./templates/PD/html/template-validator";
 
 @Injectable()
 export class PDTemplateService {

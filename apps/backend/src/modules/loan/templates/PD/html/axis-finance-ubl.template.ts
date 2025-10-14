@@ -2,7 +2,7 @@ import { format, toZonedTime } from "date-fns-tz";
 import { category } from "google-play-scraper";
 import * as path from "path";
 import * as fs from "fs";
-import { AxisFinanceUBLInterface } from "./interface/axis-finance-ubl.interface";
+import { AxisFinanceUBLInterface } from "../interface/axis-finance-ubl.interface";
 import { pdBaseTemplate } from "./pd-base.tempate";
 
 export const axisFinanceUBLTemplate = (

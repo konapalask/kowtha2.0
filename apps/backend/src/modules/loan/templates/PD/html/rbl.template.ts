@@ -1,22 +1,35 @@
-import { format, toZonedTime } from 'date-fns-tz';
-import { NewTemplateInterface } from './interface/new-template.interface';
-import { pdBaseTemplate } from './pd-base.tempate';
+import { format, toZonedTime } from "date-fns-tz";
+import { category } from "google-play-scraper";
+import * as path from "path";
+import * as fs from "fs";
+import { RBLInterface } from "../interface/rbl.interface";
+import { pdBaseTemplate } from "./pd-base.tempate";
+import { displayFieldValue } from "./schema-pdf-mapper";
 
-export const newTemplate = (verificationData: NewTemplateInterface, html_data: any) => {
-
-  const recommendationStyles: Record<string, string> = {
-    'Positive': '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-    'Negative': '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    'CreditRefer': '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
+export const rblTemplate = (
+  verificationData: RBLInterface,
+  html_data: any,
+  schema?: any
+) => {
+  // Helper function to display field values - schema-driven
+  const displayValue = (value: any): string => {
+    return displayFieldValue(value, {}, "", "");
   };
 
-  const finalRecommendationHtml = recommendationStyles[html_data.status] || '';
-  
+  const recommendationStyles: Record<string, string> = {
+    Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
+    Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
+    CreditRefer:
+      '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
+  };
+
+  const finalRecommendationHtml = recommendationStyles[html_data.status] || "";
+
   const date = new Date();
-  const timeZone = 'Asia/Kolkata';
+  const timeZone = "Asia/Kolkata";
   const zonedDate = toZonedTime(date, timeZone);
 
-  const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
   return `
     ${pdBaseTemplate()}
@@ -28,19 +41,19 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
         <tr><td colspan="7" class="section-header">Case Details</td></tr>
           <tr>
             <th>Reference Number(LOS ID)</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.referenceNumber || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Name of the Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.nameOfApplicant || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Co - Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.coApplicant || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Type of Borrower</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.typeOfBorrower || ''}</span></td>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.referenceNumber || ""}</span></td>
+           </tr>
+           <tr>
+             <th>Name of the Applicant</th>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.nameOfApplicant || ""}</span></td>
+           </tr>
+           <tr>
+             <th>Co - Applicant</th>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.coApplicant || ""}</span></td>
+           </tr>
+           <tr>
+             <th>Type of Borrower</th>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.typeOfBorrower || ""}</span></td>
           </tr>
         </table>
       </div>
@@ -50,19 +63,19 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
         <tr><td colspan="7" class="section-header">Meeting Details</td></tr>
           <tr>
             <th>Address Visited</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.addressVisited || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Person Met</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.personMet || ''}</span></td>
-          </tr>
-          <tr>
-            <th>Contact Number</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.contactNo || ''}</span></td>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.addressVisited || ""}</span></td>
+           </tr>
+           <tr>
+             <th>Person Met</th>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.personMet || ""}</span></td>
+           </tr>
+           <tr>
+             <th>Contact Number</th>
+             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.contactNo || ""}</span></td>
           </tr>
           <tr>
             <th>Date of Visit</th>
-            <td colspan="5"><span class="var-value">${verificationData.caseDetails?.dateOfVisit || ''}</span></td>
+            <td colspan="5"><span class="var-value">${""}</span></td>
           </tr>
         </table>
       </div>
@@ -78,31 +91,43 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Relation</th>
           <th>Remarks</th>
         </tr>
-        ${Array.isArray(verificationData.businessOwnerDetails?.businessOwnerDetails) && verificationData.businessOwnerDetails?.businessOwnerDetails.length > 0
-          ? verificationData.businessOwnerDetails.businessOwnerDetails.map(businessOwner => `
+         ${
+           Array.isArray(
+             verificationData.businessOwnerDetails?.businessOwnerDetails
+           ) &&
+           verificationData.businessOwnerDetails?.businessOwnerDetails.length >
+             0
+             ? verificationData.businessOwnerDetails?.businessOwnerDetails
+                 .map(
+                   (businessOwner) => `
             <tr>
-              <td><span class="var-value">${businessOwner.name || ''}</span></td>
-              <td><span class="var-value">${businessOwner.age || ''}</span></td>
-              <td><span class="var-value">${businessOwner.qualification || ''}</span></td>
-              <td><span class="var-value">${businessOwner.occupation || ''}</span></td>
-              <td><span class="var-value">${businessOwner.relation || ''}</span></td>
-              <td><span class="var-value">${businessOwner.remarks || ''}</span></td>
+              <td><span class="var-value">${businessOwner.name || ""}</span></td>
+              <td><span class="var-value">${businessOwner.age || ""}</span></td>
+              <td><span class="var-value">${businessOwner.qualification || ""}</span></td>
+              <td><span class="var-value">${businessOwner.occupation || ""}</span></td>
+              <td><span class="var-value">${businessOwner.relation || ""}</span></td>
+              <td><span class="var-value">${businessOwner.remarks || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="6" style="text-align: center;">No business owner details available</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="6" style="text-align: center;">No business owner details available</td></tr>'
+         }
       </table>
     </div>
+
+    <div class="align-wrapper">
 
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="7" class="section-header">Family Details</td></tr>
         <tr>
           <th>About the Applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutApplicant || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutApplicant || ""}</span></td>
         </tr>
         <tr>
           <th>About the Co - Applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutCoApplicant || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutCoApplicant || ""}</span></td>
         </tr>
       </table>
     </div>
@@ -113,71 +138,71 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
         <tr><td colspan="7" class="section-header">Business Details</td></tr>
         <tr>
           <th>Business Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessName || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessName || ""}</span></td>
         </tr>
         <tr>
           <th>Type of Entity</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.typeOfEntity || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.typeOfEntity || ""}</span></td>
         </tr>
         <tr>
           <th>GST Number</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.gstNumber || ''}</span></td>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.gstNumber)}</span></td>
         </tr>
          <tr>
           <th>Legal Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.legalName || ''}</span></td>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.legalName)}</span></td>
         </tr>
         <tr>
           <th>Trade Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.tradeName || ''}</span></td>
+          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.tradeName)}</span></td>
         </tr>      
         <tr>
           <th>Last GST Return(As per GST records)</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.lastGSTReturn || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.lastGSTReturn || ""}</span></td>
         </tr> 
         <tr>
           <th>Establishment</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.establishment || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.establishment || ""}</span></td>
         </tr>
         <tr>
           <th>Shop Address</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopAddress || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopAddress || ""}</span></td>
         </tr>
         <tr>
           <th>Shop Ownership</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopOwnership || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopOwnership || ""}</span></td>
         </tr>
         <tr>
           <th>Godown</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownAddress || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownAddress || ""}</span></td>
         </tr>
         <tr>
           <th>Godown Ownership</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownOwnership || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownOwnership || ""}</span></td>
         </tr>
         <tr>
           <th>Nature of Business</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.natureOfBusiness || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.natureOfBusiness || ""}</span></td>
         </tr>
         <tr>
           <th>Product Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.productDetails || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.productDetails || ""}</span></td>
         </tr>
         <tr>
           <th>Business Process</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProcess || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProcess || ""}</span></td>
         </tr>
         <tr>
           <th>Margins</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.margins || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.margins || ""}</span></td>
         </tr>
         <tr>
           <th>Documents Observed</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.documentsObserved || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.documentsObserved || ""}</span></td>
         </tr>
         <tr>
           <th>Activity Observed</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.activityObserved || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.activityObserved || ""}</span></td>
         </tr>
       </table>
     </div>
@@ -187,70 +212,72 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
         <tr><td colspan="6" class="section-header">Inputs/Purchases</td></tr>
         <tr>
           <th>Details of Inputs</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.detailsOfInputs || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.detailsOfInputs || ""}</span></td>
         </tr>
         <tr>
           <th>Purchase Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.purchaseDetails || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.purchaseDetails || ""}</span></td>
         </tr>
         <tr>
           <th>Order Cycle</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.orderCycle || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.orderCycle || ""}</span></td>
         </tr>
         <tr>
           <th>Avg Order Qnty</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.avgOrderQnty || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.avgOrderQnty || ""}</span></td>
         </tr>
         <tr>
           <th>Credit Terms</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.creditTerms || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.creditTerms || ""}</span></td>
         </tr>
         <tr>
           <th>Other Remarks</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.otherRemarks || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.otherRemarks || ""}</span></td>
         </tr>
       </table>
     </div>
     <div style="page-break-before: always;"></div>
+
 
     <div class="align-wrapper">
       <table class="section-table">
         <tr><td colspan="6" class="section-header">Outputs/Supply</td></tr>
         <tr>
           <th>Market for Output</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.marketForOutput || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.marketForOutput || ""}</span></td>
         </tr>
         <tr>
           <th>Mode of Marketing</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.modeOfMarketing || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.modeOfMarketing || ""}</span></td>
         </tr>
         <tr>
           <th>Type of Customers</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.typeOfCustomers || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.typeOfCustomers || ""}</span></td>
         </tr>
         <tr>
           <th>Credit Terms</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.creditTerms || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.creditTerms || ""}</span></td>
         </tr>
         <tr>
           <th>Stock of Finished Goods</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.stockOfFinishedGoods || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.stockOfFinishedGoods || ""}</span></td>
         </tr>
         <tr><td colspan="6" class="section-header">Employee Details</td></tr>
         <tr>
           <th>No of Employees</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.noOfEmployees || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.noOfEmployees || ""}</span></td>
         </tr>
         <tr>
           <th>Salary Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.salaryDetails || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.salaryDetails || ""}</span></td>
         </tr>
         <tr>
           <th>PF/ESI Applied</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.pfEsiApplied || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.pfEsiApplied || ""}</span></td>
         </tr>
       </table>
     </div>
+
 
     <div class="align-wrapper">
       <table class="section-table">
@@ -260,14 +287,21 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferencesSuppliers?.suppliers) && verificationData.tradeReferencesSuppliers?.suppliers.length > 0
-          ? verificationData.tradeReferencesSuppliers.suppliers.map(supplier => `
+         ${
+           Array.isArray(verificationData.tradeReferences?.suppliers) &&
+           verificationData.tradeReferences?.suppliers.length > 0
+             ? verificationData.tradeReferences?.suppliers
+                 .map(
+                   (supplier) => `
             <tr>
-              <td><span class="var-value">${supplier.nameOfSuppliers || ''}</span></td>
-              <td><span class="var-value">${supplier.contactDetails || ''}</span></td>
+              <td><span class="var-value">${supplier.nameOfSuppliers || ""}</span></td>
+              <td><span class="var-value">${supplier.contactDetails || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No trade references suppliers listed</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No trade references suppliers listed</td></tr>'
+         }
       </table>
     </div>
 
@@ -279,14 +313,21 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Contact Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.tradeReferencesCustomers?.customers) && verificationData.tradeReferencesCustomers?.customers.length > 0
-          ? verificationData.tradeReferencesCustomers.customers.map(customer => `
+         ${
+           Array.isArray(verificationData.tradeReferences?.customers) &&
+           verificationData.tradeReferences?.customers.length > 0
+             ? verificationData.tradeReferences?.customers
+                 .map(
+                   (customer) => `
             <tr>
-              <td><span class="var-value">${customer.nameOfCustomer || ''}</span></td>
-              <td><span class="var-value">${customer.contactDetails || ''}</span></td>
+              <td><span class="var-value">${customer.nameOfCustomer || ""}</span></td>
+              <td><span class="var-value">${customer.contactDetails || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No trade references customers listed</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No trade references customers listed</td></tr>'
+         }
       </table>
     </div>
 
@@ -298,14 +339,24 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Details</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.otherSourcesOfIncome?.otherSourcesOfIncome) && verificationData.otherSourcesOfIncome?.otherSourcesOfIncome.length > 0
-          ? verificationData.otherSourcesOfIncome.otherSourcesOfIncome.map(income => `
+         ${
+           Array.isArray(
+             verificationData.otherSourcesOfIncome?.otherSourcesOfIncome
+           ) &&
+           verificationData.otherSourcesOfIncome?.otherSourcesOfIncome.length >
+             0
+             ? verificationData.otherSourcesOfIncome?.otherSourcesOfIncome
+                 .map(
+                   (customer) => `
             <tr>
-              <td><span class="var-value">${income.sourceOfIncome || ''}</span></td>
-              <td><span class="var-value">${income.details || ''}</span></td>
+              <td><span class="var-value">${customer.sourceOfIncome || ""}</span></td>
+              <td><span class="var-value">${customer.details || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No other sources of income listed</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No other sources of income listed</td></tr>'
+         }
       </table>
     </div>
 
@@ -322,18 +373,25 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>POS</th>
           <th>Remarks</th>
         </tr>
-        ${Array.isArray(verificationData.loansDetails?.loansDetails) && verificationData.loansDetails?.loansDetails.length > 0
-          ? verificationData.loansDetails.loansDetails.map(loan => `
+         ${
+           Array.isArray(verificationData.loansDetails?.loansDetails) &&
+           verificationData.loansDetails?.loansDetails.length > 0
+             ? verificationData.loansDetails?.loansDetails
+                 .map(
+                   (loan) => `
             <tr>
-              <td><span class="var-value">${loan.nameOfBankInstitution || ''}</span></td>
-              <td><span class="var-value">${loan.product || ''}</span></td>
-              <td><span class="var-value">${loan.loanAmount || ''}</span></td>
-              <td><span class="var-value">${loan.emi || ''}</span></td>
-              <td><span class="var-value">${loan.pos || ''}</span></td>
-              <td><span class="var-value">${loan.remarks || ''}</span></td>
+              <td><span class="var-value">${loan.nameOfBankInstitution || ""}</span></td>
+              <td><span class="var-value">${loan.product || ""}</span></td>
+              <td><span class="var-value">${loan.loanAmount || ""}</span></td>
+              <td><span class="var-value">${loan.emi || ""}</span></td>
+              <td><span class="var-value">${loan.pos || ""}</span></td>
+              <td><span class="var-value">${loan.remarks || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'
+         }
         </table>
     </div>
 
@@ -348,18 +406,28 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Limit of CC/OD</th>
           <th>Remarks</th>
         </tr>
-        ${Array.isArray(verificationData.applicantsMainBankingDetails?.bankingDetails) && verificationData.applicantsMainBankingDetails?.bankingDetails.length > 0
-          ? verificationData.applicantsMainBankingDetails.bankingDetails.map(banking => `
+         ${
+           Array.isArray(
+             verificationData.applicantsMainBankingDetails?.bankingDetails
+           ) &&
+           verificationData.applicantsMainBankingDetails?.bankingDetails
+             .length > 0
+             ? verificationData.applicantsMainBankingDetails?.bankingDetails
+                 .map(
+                   (loan) => `
             <tr>
-              <td><span class="var-value">${banking.bankName || ''}</span></td>
-              <td><span class="var-value">${banking.accountHolderName || ''}</span></td>
-              <td><span class="var-value">${banking.accountType || ''}</span></td>
-              <td><span class="var-value">${banking.noOfYear || ''}</span></td>
-              <td><span class="var-value">${banking.limitOfCCOD || ''}</span></td>
-              <td><span class="var-value">${banking.remarks || ''}</span></td>
+              <td><span class="var-value">${loan.bankName || ""}</span></td>
+              <td><span class="var-value">${loan.accountHolderName || ""}</span></td>
+              <td><span class="var-value">${loan.accountType || ""}</span></td>
+              <td><span class="var-value">${loan.noOfYear || ""}</span></td>
+              <td><span class="var-value">${loan.limitOfCCOD || ""}</span></td>
+              <td><span class="var-value">${loan.remarks || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No applicants main banking details available</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No applicants main banking details available</td></tr>'
+         }
         </table>
     </div>
     
@@ -367,7 +435,7 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
       <table class="section-table">
         <tr>
           <th>End Use</th>
-          <td colspan="6"><span class="var-value">${verificationData.applicantsMainBankingDetails?.endUse || ''}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.applicantsMainBankingDetails?.endUse || ""}</span></td>
         </tr>
       </table>
     </div>
@@ -380,14 +448,21 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Remarks</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.ownContributions?.ownContributions) && verificationData.ownContributions?.ownContributions.length > 0
-          ? verificationData.ownContributions.ownContributions.map(contribution => `
+         ${
+           Array.isArray(verificationData.ownContributions?.ownContributions) &&
+           verificationData.ownContributions?.ownContributions.length > 0
+             ? verificationData.ownContributions?.ownContributions
+                 .map(
+                   (customer) => `
             <tr>
-              <td><span class="var-value">${contribution.particulars || ''}</span></td>
-              <td><span class="var-value">${contribution.remarks || ''}</span></td>
+              <td><span class="var-value">${customer.particulars || ""}</span></td>
+              <td><span class="var-value">${customer.remarks || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'
+         }
       </table>
     </div>
 
@@ -401,16 +476,23 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Approx Market Value</th>
         </tr>
         </tr>
-        ${Array.isArray(verificationData.netWorth?.netWorth) && verificationData.netWorth?.netWorth.length > 0
-          ? verificationData.netWorth.netWorth.map(worth => `
+         ${
+           Array.isArray(verificationData.netWorth?.netWorth) &&
+           verificationData.netWorth?.netWorth.length > 0
+             ? verificationData.netWorth?.netWorth
+                 .map(
+                   (customer) => `
             <tr>
-              <td><span class="var-value">${worth.typeOfProperty || ''}</span></td>
-              <td><span class="var-value">${worth.ownerName || ''}</span></td>
-              <td><span class="var-value">${worth.yearsOfOwnership || ''}</span></td>
-              <td><span class="var-value">${worth.approxMarketValue || ''}</span></td>
+              <td><span class="var-value">${customer.typeOfProperty || ""}</span></td>
+              <td><span class="var-value">${customer.ownerName || ""}</span></td>
+              <td><span class="var-value">${customer.yearsOfOwnership || ""}</span></td>
+              <td><span class="var-value">${customer.approxMarketValue || ""}</span></td>
             </tr>
-          `).join('')
-          : '<tr><td colspan="7" style="text-align: center;">No net worth listed</td></tr>'}
+          `
+                 )
+                 .join("")
+             : '<tr><td colspan="7" style="text-align: center;">No net worth listed</td></tr>'
+         }
       </table>
     </div>
 
@@ -418,7 +500,7 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
       <table class="section-table">
         <tr>
           <th>Particulars</th>
-          <td colspan="5"><span class="var-value">${verificationData.particulars?.coordinates || ''}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.particulars?.coordinates || ""}</span></td>
         </tr>
       </table>
     </div>
@@ -560,7 +642,7 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
           <th>Synopsis</th>
           <td colspan="5">
             <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              ${html_data.path || ''}
+              ${html_data.path || ""}
             </ul>
           </td>
         </tr>
@@ -579,8 +661,9 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
     <br>
     Disclaimer: 
     <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-        The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. The bank will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions.
+        The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions.
     </ul>
+
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
@@ -590,4 +673,4 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
     </footer>
     ${html_data.imagesData}
   `;
-}
+};
