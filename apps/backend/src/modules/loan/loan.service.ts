@@ -726,10 +726,13 @@ export class LoanService {
         department: department,
       };
 
+
       const userRole = role.find((r: any) => r.department === department);
 
       if (userRole.role === UserRole.Verifier) {
         where.verifierId = verifierId;
+      } else {
+        
       }
 
       const verifications = await this.prisma.verification.findMany({
