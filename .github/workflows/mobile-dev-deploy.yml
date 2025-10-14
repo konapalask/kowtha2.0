@@ -45,7 +45,7 @@ jobs:
         accessKey: ${{ secrets.REVOPUSH_ACCESS_KEY }}
 
     - name: Release Android bundle
-      run: revopush release-react kowtha-app android -d Staging    # customize app name and env
+      run: revopush release-react kowtha-app android -d Staging --des "Trigger redeploy" --mandatory   # customize app name and env
 
     #- name: Release iOS bundle
     #  run: revopush release-react MyAwesomeApp ios -d Staging        # customize app name and env
