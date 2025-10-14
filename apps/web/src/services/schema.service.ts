@@ -96,11 +96,14 @@ const convertSchemaPropertiesToFields = (
       required: requiredFields.includes(fieldId) || property.required || false,
       readOnly: property.readOnly || false,
       placeholder: property.title || fieldId,
+      formatter: property.formatter,
+      dependencies: property.dependencies,
     };
 
     // Handle enum (select dropdown)
     if (property.enum && Array.isArray(property.enum)) {
       field.options = property.enum;
+      field.enum = property.enum;
     }
 
     // Handle array fields

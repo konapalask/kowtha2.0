@@ -13,7 +13,6 @@ import {
   DatePicker,
   Switch,
   message,
-  Modal,
   Tag,
 } from "antd";
 import {
@@ -24,6 +23,10 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
+import {
+  formatNumberForInput,
+  parseFormattedNumber,
+} from "../../utils/numberFormatting";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -60,17 +63,40 @@ const ArrayEditForm: React.FC<{
       case "text":
         return <Input {...commonProps} />;
       case "number":
-        return <InputNumber {...commonProps} style={{ width: "100%" }} />;
+        return (
+          <InputNumber
+            {...commonProps}
+            style={{ width: "100%" }}
+            formatter={
+              fieldDef.formatter
+                ? (val) =>
+                    val === undefined || val === null
+                      ? ""
+                      : formatNumberForInput(val, fieldDef.formatter)
+                : undefined
+            }
+            parser={
+              fieldDef.formatter
+                ? (val) => {
+                    const parsed = parseFormattedNumber(val ?? "");
+                    return parsed === "" ? undefined : Number(parsed);
+                  }
+                : undefined
+            }
+          />
+        );
       case "textarea":
         return <TextArea {...commonProps} rows={3} />;
       case "select":
         return (
           <Select {...commonProps} style={{ width: "100%" }}>
-            {fieldDef.enum?.map((option: string) => (
+            {(fieldDef.options || fieldDef.enum || []).map(
+              (option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
-            ))}
+              )
+            )}
           </Select>
         );
       case "boolean":
@@ -167,6 +193,124 @@ const addUuidsToArrayItems = (data: any, schema: any): any => {
   return processedData;
 };
 
+const isEmptyValue = (value: any): boolean => {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") return value.trim().length === 0;
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+};
+
+const resolveDependencyValue = (
+  formValues: Record<string, any>,
+  currentSectionId: string,
+  dependencyPath: string
+) => {
+  if (!formValues) return undefined;
+
+  const pathSegments = dependencyPath.split(".");
+  let sectionKey = currentSectionId;
+  let fieldPath = pathSegments;
+
+  if (pathSegments.length > 1 && formValues[pathSegments[0]] !== undefined) {
+    sectionKey = pathSegments[0];
+    fieldPath = pathSegments.slice(1);
+  }
+
+  let value = formValues?.[sectionKey];
+  for (const segment of fieldPath) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    value = value[segment];
+  }
+
+  return value;
+};
+
+const evaluateDependencies = (
+  dependencies: Record<string, any> | undefined,
+  sectionId: string,
+  formValues: Record<string, any>
+): boolean => {
+  if (!dependencies) return true;
+
+  return Object.entries(dependencies).every(([dependencyKey, expected]) => {
+    const actual = resolveDependencyValue(formValues, sectionId, dependencyKey);
+
+    if (Array.isArray(expected)) {
+      return expected.includes(actual);
+    }
+
+    return actual === expected;
+  });
+};
+
+const shouldFieldBeVisible = (
+  field: any,
+  sectionId: string,
+  formValues: Record<string, any>
+): boolean => {
+  if (!field?.dependencies?.show) {
+    return true;
+  }
+
+  return evaluateDependencies(field.dependencies.show, sectionId, formValues);
+};
+
+const shouldFieldBeRequired = (
+  field: any,
+  sectionId: string,
+  formValues: Record<string, any>
+): boolean => {
+  if (field?.dependencies?.required) {
+    return evaluateDependencies(field.dependencies.required, sectionId, formValues);
+  }
+
+  return !!field?.required;
+};
+
+const buildFieldValidationRules = (
+  field: any,
+  sectionId: string,
+  formValues: Record<string, any>
+) => {
+  const rules: any[] = [];
+  const hasConditionalRequired = !!field?.dependencies?.required;
+
+  if (field?.required && !hasConditionalRequired) {
+    rules.push({
+      required: true,
+      message: `${field.label || field.id} is required`,
+    });
+  }
+
+  if (hasConditionalRequired) {
+    rules.push({
+      validator: (_: any, value: any) => {
+        const shouldRequire = evaluateDependencies(
+          field.dependencies.required,
+          sectionId,
+          formValues
+        );
+
+        if (!shouldRequire) {
+          return Promise.resolve();
+        }
+
+        if (isEmptyValue(value)) {
+          return Promise.reject(
+            new Error(`${field.label || field.id} is required`)
+          );
+        }
+
+        return Promise.resolve();
+      },
+    });
+  }
+
+  return rules;
+};
+
 interface DirectPDFormRendererProps {
   schema: any;
   initialData?: any;
@@ -211,7 +355,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
   }, [initialData, form, schema]);
 
   // Render field based on type
-  const renderField = (field: any, sectionId?: string) => {
+  const renderFieldControl = (field: any, sectionId?: string) => {
     const commonProps = {
       placeholder: `Enter ${field.label}`,
       disabled: field.readOnly || !editMode,
@@ -222,14 +366,35 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         return <Input {...commonProps} />;
 
       case "number":
-        return <InputNumber {...commonProps} style={{ width: "100%" }} />;
+        return (
+          <InputNumber
+            {...commonProps}
+            style={{ width: "100%" }}
+            formatter={
+              field.formatter
+                ? (value) =>
+                    value === undefined || value === null
+                      ? ""
+                      : formatNumberForInput(value, field.formatter)
+                : undefined
+            }
+            parser={
+              field.formatter
+                ? (value) => {
+                    const parsed = parseFormattedNumber(value ?? "");
+                    return parsed === "" ? undefined : Number(parsed);
+                  }
+                : undefined
+            }
+          />
+        );
 
       case "textarea":
         return <TextArea {...commonProps} rows={3} />;
 
       case "select":
         return (
-          <Select {...commonProps}>
+          <Select {...commonProps} style={{ width: "100%" }}>
             {(field.options || field.enum || []).map((option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
@@ -248,7 +413,9 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       case "boolean":
-        return <Switch {...commonProps} />;
+        return (
+          <Switch disabled={field.readOnly || !editMode} />
+        );
 
       case "array":
         return renderArrayField(field, sectionId || "");
@@ -297,6 +464,22 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             {...commonProps}
             style={{ width: "100%" }}
             size="small"
+            formatter={
+              field.formatter
+                ? (val) =>
+                    val === undefined || val === null
+                      ? ""
+                      : formatNumberForInput(val, field.formatter)
+                : undefined
+            }
+            parser={
+              field.formatter
+                ? (val) => {
+                    const parsed = parseFormattedNumber(val ?? "");
+                    return parsed === "" ? undefined : Number(parsed);
+                  }
+                : undefined
+            }
             onChange={(val) => onChange(val)}
           />
         );
@@ -397,6 +580,8 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             required: itemField.required,
             readOnly: itemField.readOnly,
             span: itemField.span || 8,
+            formatter: itemField.formatter,
+            dependencies: itemField.dependencies,
           };
         }
       );
@@ -411,6 +596,23 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     const sectionData = form.getFieldValue(sectionId) || {};
     const fieldValue = form.getFieldValue([sectionId, field.id]);
     const itemFields = getArrayItemFields(field);
+
+    const checkItemDependencies = (
+      dependencies: Record<string, any> | undefined,
+      itemData: any
+    ) => {
+      if (!dependencies) return true;
+
+      return Object.entries(dependencies).every(([dependencyKey, expected]) => {
+        const actual = itemData?.[dependencyKey];
+
+        if (Array.isArray(expected)) {
+          return expected.includes(actual);
+        }
+
+        return actual === expected;
+      });
+    };
 
     // Access the nested structure: sectionData[field.id][field.id] for arrays
     let arrayData: any[] = [];
@@ -519,6 +721,9 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
                   {itemFields.map((itemField: any) => {
                     const key = itemField.id || itemField.key;
                     const value = item[key] ?? "";
+                    if (!checkItemDependencies(itemField.dependencies?.show, item)) {
+                      return null;
+                    }
 
                     return (
                       <Col key={key} span={itemField.span || 12}>
@@ -694,60 +899,70 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             style={{ marginBottom: 16 }}
           >
             <Row gutter={[16, 16]}>
-              {section.fields?.map((field: any) => {
-                const isArrayField = field.type === "array";
+              {section.fields?.map((field: any) => (
+                <Form.Item
+                  key={`${section.id}-${field.id}`}
+                  noStyle
+                  shouldUpdate={() => true}
+                >
+                  {() => {
+                    const formValues = form.getFieldsValue(true);
+                    if (!shouldFieldBeVisible(field, section.id, formValues)) {
+                      return null;
+                    }
 
-                const baseSpan = field.span || 8;
-                const colSpan = isArrayField ? 24 : baseSpan;
-                const colMd = isArrayField ? 24 : baseSpan;
-                const colLg = isArrayField ? 24 : field.span || 6;
+                    const isArrayField = field.type === "array";
+                    const baseSpan = field.span || 8;
+                    const colSpan = isArrayField ? 24 : baseSpan;
+                    const colMd = isArrayField ? 24 : baseSpan;
+                    const colLg = isArrayField ? 24 : field.span || 6;
+                    const required = shouldFieldBeRequired(
+                      field,
+                      section.id,
+                      formValues
+                    );
+                    const valuePropName =
+                      !isArrayField && field.type === "boolean"
+                        ? "checked"
+                        : undefined;
+                    const validationRules = buildFieldValidationRules(
+                      field,
+                      section.id,
+                      formValues
+                    );
 
-                return (
-                  <Col
-                    key={field.id}
-                    span={colSpan} // Default to 3 columns
-                    xs={24}
-                    sm={isArrayField ? 24 : 12}
-                    md={colMd}
-                    lg={colLg}
-                  >
-                    {isArrayField ? (
-                      <Form.Item label={field.label} required={field.required}>
-                        <Form.Item
-                          noStyle
-                          shouldUpdate={(prevValues, currentValues) => {
-                            const prevSection = prevValues?.[section.id];
-                            const currentSection = currentValues?.[section.id];
-                            return (
-                              prevSection?.[field.id] !==
-                              currentSection?.[field.id]
-                            );
-                          }}
-                        >
-                          {() => renderArrayField(field, section.id)}
-                        </Form.Item>
-                      </Form.Item>
-                    ) : (
-                      <Form.Item
-                        name={[section.id, field.id]}
-                        label={field.label}
-                        rules={[
-                          ...(field.required
-                            ? [
-                                {
-                                  required: true,
-                                  message: `${field.label} is required`,
-                                },
-                              ]
-                            : []),
-                        ]}
+                    return (
+                      <Col
+                        span={colSpan}
+                        xs={24}
+                        sm={isArrayField ? 24 : 12}
+                        md={colMd}
+                        lg={colLg}
                       >
-                        {renderField(field, section.id)}
-                      </Form.Item>
-                    )}
-                  </Col>
-                );
-              })}
+                        {isArrayField ? (
+                          <Form.Item
+                            label={field.label}
+                            required={required}
+                            style={{ marginBottom: 0 }}
+                          >
+                            {renderArrayField(field, section.id)}
+                          </Form.Item>
+                        ) : (
+                          <Form.Item
+                            name={[section.id, field.id]}
+                            label={field.label}
+                            valuePropName={valuePropName}
+                            required={required}
+                            rules={validationRules}
+                          >
+                            {renderFieldControl(field, section.id)}
+                          </Form.Item>
+                        )}
+                      </Col>
+                    );
+                  }}
+                </Form.Item>
+              ))}
             </Row>
           </Card>
         ))}
