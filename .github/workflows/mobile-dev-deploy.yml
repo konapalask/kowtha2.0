@@ -32,6 +32,12 @@ jobs:
     - name: Install dependencies
       run: npm install --force
 
+    - name: Add missing module
+      run: npm install react-native-uuid
+
+    - name: Clear Metro cache
+      run: npx react-native start --reset-cache & sleep 5; kill $!
+
     - name: Setup Revopush CLI
       uses: revopush/revopush-github-action@v1
       with:
