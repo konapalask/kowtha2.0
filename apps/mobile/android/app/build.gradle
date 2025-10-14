@@ -125,3 +125,4 @@ implementation 'androidx.activity:activity-ktx:1.7.0'
         implementation jscFlavor
     }
 }
+apply from: "../../node_modules/@revopush/react-native-code-push/android/codepush.gradle"
