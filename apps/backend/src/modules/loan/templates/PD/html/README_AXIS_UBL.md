@@ -28,7 +28,7 @@ This pilot makes PDF generation deterministic and schema-ready for Axis Finance 
 1) Ensure the web UI saves PD data for a PD loan with bank `Axis Finance` (or existing bankName).
 2) Call preview endpoint:
    - `GET /loans/:id/preview-final-report?type=Business&department=PD`
-3) The service calls `PDTemplateService.previewPDVerificationPDF` → `InterfaceMapping` → `axisFinanceUBLTemplate` → Puppeteer → PDF buffer.
+3) The service calls `PDTemplateService.generatePreviewPDF` → `InterfaceMapping` → `axisFinanceUBLTemplate` → Puppeteer → PDF buffer.
 
 ## Next steps (optional)
 - Migrate mobile/web Axis UBL to use the generated schema (snake_case ids).

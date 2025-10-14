@@ -4,17 +4,16 @@ import * as path from "path";
 import * as fs from "fs";
 import { RBLInterface } from "../interface/rbl.interface";
 import { pdBaseTemplate } from "./pd-base.tempate";
-import { displayFieldValue } from "./schema-pdf-mapper";
+// import { displayFieldValue } from "./schema-pdf-mapper";
 
 export const rblTemplate = (
   verificationData: RBLInterface,
-  html_data: any,
-  schema?: any
-) => {
-  // Helper function to display field values - schema-driven
-  const displayValue = (value: any): string => {
-    return displayFieldValue(value, {}, "", "");
-  };
+  html_data: any) => {
+  // => {
+  // // Helper function to display field values - schema-driven
+  // const displayValue = (value: any): string => {
+  //   return displayFieldValue(value, {}, "", "");
+  // };
 
   const recommendationStyles: Record<string, string> = {
     Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
@@ -146,15 +145,15 @@ export const rblTemplate = (
         </tr>
         <tr>
           <th>GST Number</th>
-          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.gstNumber)}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.gstNumber}</span></td>
         </tr>
          <tr>
           <th>Legal Name</th>
-          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.legalName)}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.legalName}</span></td>
         </tr>
         <tr>
           <th>Trade Name</th>
-          <td colspan="5"><span class="var-value">${displayValue(verificationData.businessDetails?.tradeName)}</span></td>
+          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.tradeName}</span></td>
         </tr>      
         <tr>
           <th>Last GST Return(As per GST records)</th>

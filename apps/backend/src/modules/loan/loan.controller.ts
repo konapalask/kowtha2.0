@@ -5,27 +5,25 @@ import { GetLoansDto } from "./dto/get-loans.dto";
 import { NotFoundException } from "@nestjs/common";
 import { CreateLoanDto } from "./dto/create-loan.dto";
 import { VerifyLoanDto } from "./dto/verify-loan.dto";
-import { JwtAuthGuard } from "../accounts/jwt-auth.guard";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { RolesGuard } from "../accounts/guards/roles.guard";
-import { Roles, All } from "../accounts/decorators/roles.decorator";
 import { Public } from "../accounts/public.decorator";
+import { JwtAuthGuard } from "../accounts/jwt-auth.guard";
+import { RolesGuard } from "../accounts/guards/roles.guard";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { createAssignmentDto } from "./dto/assign-loan-executive";
 import { AuthenticatedRequest } from "../common/types/request.types";
+import { Roles, All } from "../accounts/decorators/roles.decorator";
 import { DeleteVerificationDto } from "./dto/delete-verification.dto";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
 import { CreateVerificationRetryDto } from "./dto/create-verification-retry.dto";
-import { UpdateVerificationStatusDto } from "./dto/update-verification-status.dto";
 import { CreateFinancialAnalysisDto } from "./dto/create-financial-analysis.dto";
 import { UpdateFinancialAnalysisDto } from "./dto/update-financial-analysis.dto";
+import { UpdateVerificationStatusDto } from "./dto/update-verification-status.dto";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiConsumes,
 } from "@nestjs/swagger";
 import {
   VerificationType,
@@ -34,7 +32,6 @@ import {
   VerificationStatus,
   AddressType,
   ApprovedStatus,
-  LocationType,
   Department,
 } from "@prisma/client";
 import {
@@ -45,8 +42,6 @@ import {
   Param,
   UseGuards,
   Request,
-  UseInterceptors,
-  UploadedFile,
   Query,
   BadRequestException,
   Patch,
@@ -354,7 +349,7 @@ export class LoanController {
   */
 
   @Get("get-verifier-loans")
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.VerificationExecutive)
   @ApiOperation({ summary: "Get loans assigned to verifier" })
   @ApiResponse({
     status: 200,
@@ -398,7 +393,7 @@ export class LoanController {
         );
       } else if (department === Department.PD) {
         console.log("Preview PD Verification PDF");
-        pdfBuffer = await this.pdTemplateService.previewPDVerificationPDF(
+        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(
           Number(id)
         );
       }
@@ -703,6 +698,47 @@ export class LoanController {
     };
   }
 
+  @Get(":id/export-financial-analysis")
+  @Roles(UserRole.Admin, UserRole.Verifier)
+  @ApiOperation({
+    summary: "Export financial analysis data as Excel file",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Excel file generated successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Verification not found",
+  })
+  async exportFinancialAnalysis(
+    @Param("id") loanId: string,
+    @Res() res: Response
+  ) {
+    try {
+      const excelBuffer = await this.loanService.exportFinancialAnalysisToExcel(
+        Number(loanId)
+      );
+
+      res.set({
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename=financial-analysis-loan-${loanId}.xlsx`,
+        "Content-Length": excelBuffer.length,
+      });
+
+      res.send(excelBuffer);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({
+          message: "Failed to export financial analysis",
+          error: error.message,
+        });
+      }
+    }
+  }
+
   /*
       The below API's are used by only Field Executive. His tasks include: Edit Verification Report, Submit Verification Data and Upload Proofs
   */
@@ -732,14 +768,10 @@ export class LoanController {
 
   @Get("field-executive/assigned")
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
-  @ApiOperation({
-    summary:
-      "Get all loans assigned to field executive with verification details",
-  })
+  @ApiOperation({ summary: "Get all loans assigned to field executive with verification details" })
   @ApiResponse({
     status: 200,
-    description:
-      "Returns a paginated list of loans assigned to the field executive with verification details",
+    description: "Returns a paginated list of loans assigned to the field executive with verification details",
     schema: {
       type: "object",
       properties: {
@@ -920,13 +952,8 @@ export class LoanController {
 
   @Delete(":id/verification/:type")
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({
-    summary: "Delete verification assigned to a field executive",
-  })
-  @ApiBody({
-    type: DeleteVerificationDto,
-    description: "Field executive ID to identify the verification to delete",
-  })
+  @ApiOperation({ summary: "Delete verification assigned to a field executive" })
+  @ApiBody({ type: DeleteVerificationDto, description: "Field executive ID to identify the verification to delete" })
   @ApiResponse({
     status: 200,
     description: "The verification has been successfully deleted",
@@ -964,11 +991,7 @@ export class LoanController {
     status: 400,
     description: "Cannot delete a completed verification",
   })
-  @ApiResponse({
-    status: 404,
-    description:
-      "Verification not found or not assigned to this field executive",
-  })
+  @ApiResponse({ status: 404, description: "Verification not found or not assigned to this field executive" })
   async deleteVerification(
     @Param("id") loanId: string,
     @Param("type") verificationType: VerificationType,
@@ -1070,10 +1093,8 @@ export class LoanController {
   }
 
   @Post("verification/:id/financial-analysis")
-  @Roles(UserRole.Admin, UserRole.Verifier)
-  @ApiOperation({
-    summary: "Create financial analysis data for a verification",
-  })
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
+  @ApiOperation({ summary: "Create financial analysis data for a verification" })
   @ApiResponse({
     status: 201,
     description: "Financial analysis created successfully",

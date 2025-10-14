@@ -4,16 +4,7 @@ import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
-import {
-  Prisma,
-  LoanStatus,
-  VerificationType,
-  VerificationStatus,
-  AddressType,
-  UserRole,
-  ApprovedStatus,
-  Department,
-} from "@prisma/client";
+import { VerificationType, Department } from "@prisma/client";
 import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
 import { LoggingService } from "src/modules/common/logging/logging.service";
 import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
@@ -36,17 +27,9 @@ export class PDTemplateService {
     private loanService: LoanService
   ) {}
 
-  async FormatPDImages(
-    verification: any,
-    bankName: string,
-    applicationNumber: string,
-    synopsis: string,
-    financialAnalysis: any
-  ): Promise<any> {
-    const signaturePath = path.resolve(
-      process.cwd(),
-      process.env.SIGNATURE_PATH
-    );
+  async FormatPDImages(verification: any, bankName: string, applicationNumber: string, synopsis: string, financialAnalysis: any): Promise<any> {
+
+    const signaturePath = path.resolve(process.cwd(),process.env.SIGNATURE_PATH);
     const imageBase64 = fs.readFileSync(signaturePath, "base64");
     const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
@@ -127,7 +110,7 @@ export class PDTemplateService {
         synopsis,
         financialAnalysis
       );
-      return rblTemplate(verificationData, html_data, schema);
+      return rblTemplate(verificationData, html_data);
     }
 
     // Generic template for all other banks (uses schema-driven approach)
@@ -160,7 +143,7 @@ export class PDTemplateService {
     }
   }
 
-  async previewPDVerificationPDF(loanId: number): Promise<Buffer> {
+  async generatePreviewPDF(loanId: number): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -243,8 +226,7 @@ export class PDTemplateService {
         schema
       );
 
-      const pdfBuffer =
-        await this.loanService.PDFBufferGeneration(htmlTemplate);
+      const pdfBuffer = await this.loanService.PDFBufferGeneration(htmlTemplate);
 
       await this.loggingService.info(
         "Verification PDF generated successfully",

@@ -207,6 +207,7 @@ model Verification {
   status                VerificationStatus
   locationType          LocationType?
   isPostponed           Boolean?
+  initialSubmitted      Boolean? @default(false)
   postponedDate         DateTime?
   postponedReason       String?
   businessName          String?

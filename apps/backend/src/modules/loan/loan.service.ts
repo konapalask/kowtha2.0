@@ -73,11 +73,23 @@ export class LoanService {
   }
 
   async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
+    // Use project-local temp directory to avoid system permission issues
+    // This directory will be in the project root: /kowtha/.temp/puppeteer
+    const tempDir = path.resolve(process.cwd(), '.temp', 'puppeteer');
+    
+    // Ensure the directory exists and has proper permissions
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true, mode: 0o755 });
+    }
+
     const browser = await puppeteer.launch({
       headless: true,
+      userDataDir: tempDir,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
         "--lang=en-IN",
         "--intl.accept_languages=en-IN",
       ],
@@ -726,11 +738,18 @@ export class LoanService {
         department: department,
       };
 
-
       const userRole = role.find((r: any) => r.department === department);
 
       if (userRole.role === UserRole.Verifier) {
         where.verifierId = verifierId;
+        if (department === Department.PD) {
+          where.initialSubmitted = true;
+        }
+      } else if (userRole.role === UserRole.VerificationExecutive) {
+        if (department === Department.PD) {
+          where.initialSubmitted = false;
+        }
+        where.initialSubmitted = false;
       } else {
         
       }
@@ -2641,6 +2660,14 @@ export class LoanService {
         },
       });
 
+      if (updatedVerification.initialSubmitted === false && updatedVerification.financialAnalysis !== null && updatedVerification.synopsis !== null) {
+
+        await this.prisma.verification.update({
+          where: { id: verification.id },
+          data: { initialSubmitted: true },
+        });
+      }
+
       await this.loggingService.info(
         "Financial analysis created successfully",
         {
@@ -2721,6 +2748,232 @@ export class LoanService {
         throw error;
       }
       await this.loggingService.error("Failed to update financial analysis", {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
+  async exportFinancialAnalysisToExcel(loanId: number): Promise<Buffer> {
+    const ExcelJS = await import('exceljs');
+    
+    try {
+      // Fetch verification with financial analysis
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          department: Department.PD,
+          type: VerificationType.Business,
+        },
+        include: {
+          loan: true,
+        },
+      });
+
+      if (!verification) {
+        throw new NotFoundException("Verification not found");
+      }
+
+      const financialAnalysis = (verification.financialAnalysis as any) || {};
+
+      // Create workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Financial Analysis');
+
+      // Set column widths
+      worksheet.columns = [
+        { width: 25 }, // A - Left Particulars
+        { width: 15 }, // B - Left Actuals
+        { width: 15 }, // C - Left Estimations
+        { width: 25 }, // D - Right Particulars
+        { width: 15 }, // E - Right Actuals
+        { width: 15 }, // F - Right Estimations
+      ];
+
+      // Add title
+      const titleRow = worksheet.addRow(['Trading and Profit & Loss Account for the year ending 31.03.2026']);
+      worksheet.mergeCells('A1:F1');
+      titleRow.font = { bold: true, size: 14 };
+      titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
+      titleRow.height = 30;
+
+      // Add header row
+      const headerRow = worksheet.addRow([
+        'Particulars', 'Actuals', 'Estimations',
+        'Particulars', 'Actuals', 'Estimations'
+      ]);
+      headerRow.font = { bold: true };
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' }
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+
+      // Define the rows structure based on the screenshot
+      const leftItems = [
+        { label: 'To Opening Stock', key: 'openingStock' },
+        { label: 'To Purchase', key: 'purchase' },
+        { label: 'To Cost of Services', key: 'costOfServices' },
+        { label: 'To Wages', key: 'wages' },
+        { label: 'To Hamali Charges', key: 'hamaliCharges' },
+        { label: 'To Manufacturing Expenses', key: 'manufacturingExpenses' },
+        { label: 'To Packing Charges', key: 'packingCharges' },
+        { label: '', key: '' }, // Empty row
+        { label: 'To Gross Profit', key: 'grossProfit', isBold: true },
+        { label: '', key: '' }, // Empty row
+        { label: 'To Salaries', key: 'salaries' },
+        { label: 'To Rent', key: 'rent' },
+        { label: 'To Electricity Charges', key: 'electricityCharges' },
+        { label: 'To Printing & Stationery', key: 'printingStationery' },
+        { label: 'To Telephone Charges', key: 'telephoneCharges' },
+        { label: 'To Postage & Telegram', key: 'postageTelegram' },
+        { label: 'To Office Maintenance', key: 'officeMaintenance' },
+        { label: 'To Repairs & Maintenance', key: 'repairsMaintenance' },
+        { label: 'To Sadar Expenses', key: 'sadarExpenses' },
+        { label: 'To Audit Fee', key: 'auditFee' },
+        { label: 'To Advertisement', key: 'advertisement' },
+        { label: 'To Bank Charges', key: 'bankCharges' },
+        { label: 'To Insurance', key: 'insurance' },
+        { label: 'To Depreciation', key: 'depreciation' },
+        { label: 'To Interest on Loan', key: 'interestOnLoan' },
+        { label: '', key: '' }, // Empty row
+        { label: 'To Net Profit', key: 'netProfit', isBold: true },
+        { label: '', key: '' }, // Empty row
+      ];
+
+      const rightItems = [
+        { label: 'By Sales', key: 'sales' },
+        { label: 'By Services', key: 'services' },
+        { label: 'By Closing Stock', key: 'closingStock' },
+        { label: '', key: '' }, // Empty row
+        { label: '', key: '' }, // Empty row
+        { label: '', key: '' }, // Empty row
+        { label: '', key: '' }, // Empty row
+        { label: '', key: '' }, // Empty row
+        { label: 'By Gross Profit', key: 'grossProfit', isBold: true },
+        { label: 'By Rent Received', key: 'rentReceived' },
+        { label: 'By Commission Received', key: 'commissionReceived' },
+        // Fill rest with empty rows to match left side
+        ...Array(17).fill({ label: '', key: '' }),
+      ];
+
+      // Add data rows
+      let lastRowNumber = 2; // Start after header
+      for (let i = 0; i < Math.max(leftItems.length, rightItems.length); i++) {
+        const leftItem = leftItems[i] || { label: '', key: '' };
+        const rightItem = rightItems[i] || { label: '', key: '' };
+
+        const row = worksheet.addRow([
+          leftItem.label,
+          leftItem.key ? (financialAnalysis[leftItem.key] || '') : '',
+          '', // Estimations column - left empty for now
+          rightItem.label,
+          rightItem.key ? (financialAnalysis[rightItem.key] || '') : '',
+          '', // Estimations column - left empty for now
+        ]);
+
+        // Apply bold formatting to gross profit and net profit rows
+        if (leftItem.isBold || rightItem.isBold) {
+          row.font = { bold: true };
+        }
+
+        // Apply borders
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          cell.alignment = { vertical: 'middle' };
+        });
+
+        // Align numbers to the right
+        if (row.getCell(2).value) {
+          row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
+        }
+        if (row.getCell(3).value) {
+          row.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
+        }
+        if (row.getCell(5).value) {
+          row.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
+        }
+        if (row.getCell(6).value) {
+          row.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
+        }
+        
+        lastRowNumber++;
+      }
+
+      // Add signature at the end
+      try {
+        const signaturePath = path.resolve(process.cwd(), process.env.SIGNATURE_PATH || '');
+        if (fs.existsSync(signaturePath)) {
+          // Add some spacing
+          worksheet.addRow([]);
+          worksheet.addRow([]);
+          lastRowNumber += 3;
+
+          // Add signature label
+          const signatureRow = worksheet.addRow([]);
+          signatureRow.getCell(1).font = { bold: true };
+          signatureRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+          lastRowNumber++;
+
+          // Read signature image
+          const imageBuffer = fs.readFileSync(signaturePath);
+          
+          // Add image to workbook
+          const imageId = workbook.addImage({
+            buffer: imageBuffer as any,
+            extension: 'jpeg',
+          });
+
+          // Position the image (left-aligned, below the signature label)
+          worksheet.addImage(imageId, {
+            tl: { col: 0, row: lastRowNumber }, // top-left position (column A, left-aligned)
+            ext: { width: 350, height: 250 } // image dimensions
+          });
+
+          // Add extra rows to make space for the image
+          worksheet.addRow([]);
+          worksheet.addRow([]);
+          worksheet.addRow([]);
+          worksheet.addRow([]);
+        }
+      } catch (signatureError) {
+        // Log error but don't fail the export if signature is missing
+        await this.loggingService.warn(
+          "Failed to add signature to Excel export",
+          {
+            loanId,
+            error: signatureError.message,
+          }
+        );
+      }
+
+      // Generate buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+      
+      await this.loggingService.info(
+        "Financial analysis exported to Excel successfully",
+        { loanId }
+      );
+
+      return Buffer.from(buffer);
+    } catch (error) {
+      await this.loggingService.error("Failed to export financial analysis to Excel", {
         loanId,
         error: error.message,
         stack: error.stack,
