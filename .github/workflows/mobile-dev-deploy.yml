@@ -2,7 +2,7 @@ name: CI/CD - Revopush
 
 on:
   push:
-    #branches: [ mobile-app-cicd-revopush ]      # or whichever branch triggers deployments
+    branches: [ mobile-app-cicd-revopush ]      # or whichever branch triggers deployments
   #workflow_dispatch:        # allows manual workflow runs from the Actions tab
 
 jobs:
