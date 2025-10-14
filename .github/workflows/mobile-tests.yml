@@ -2,7 +2,7 @@ name: Mobile App - PD Forms Tests
 
 on:
   push:
-    branches: [main, develop, formfactor]
+    branches: [revopush-cicd]
     paths:
       - 'apps/mobile/**'
       - 'apps/backend/src/modules/loan/forms-schema/**'
