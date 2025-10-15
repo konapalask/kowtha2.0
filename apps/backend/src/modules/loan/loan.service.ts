@@ -73,33 +73,25 @@ export class LoanService {
   }
 
   async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
-    // Use project-local temp directory to avoid system permission issues
-    // This directory will be in the project root: /kowtha/.temp/puppeteer
-    const tempDir = path.resolve(process.cwd(), '.temp', 'puppeteer');
-    
-    // Ensure the directory exists and has proper permissions
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true, mode: 0o755 });
-    }
-
     const browser = await puppeteer.launch({
       headless: true,
-      userDataDir: tempDir,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
         "--lang=en-IN",
         "--intl.accept_languages=en-IN",
       ],
     });
 
+    // Create a new page
     const page = await browser.newPage();
+
+    // Set content to the HTML template
     await page.setContent(htmlTemplate, {
       waitUntil: "networkidle0",
     });
 
+    // Generate PDF
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
