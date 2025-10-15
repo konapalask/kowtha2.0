@@ -454,7 +454,7 @@ export class LoanController {
   }
 
   @Get(":id/verification-data")
-  @Roles(UserRole.Admin, UserRole.Verifier)
+  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({ summary: "Get verification data for a loan" })
   @ApiResponse({
     status: 200,
