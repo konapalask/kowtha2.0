@@ -33,7 +33,18 @@ import logo from "../../../public/images/appLogos/KowthaDarkIcon.png";
 import smallLogo from "../../../public/images/appLogos/kowthaSmallLogo.png";
 // import attendanceIcon from "../../../public/images/svgIcons/attendance.svg";
 import { getOfficesApi } from "@/services/settings.services";
-import { getUserDetails, setUserDetails, getCurrentDepartment, setCurrentDepartment, initializeCurrentDepartment, subscribeToUserDetailsChanges, notifyUserDetailsChange, getUserDetailsUpdateCounter, getCurrentDepartmentRole, getFirstAvailableNavigationOption } from "@/utils/utility";
+import {
+  getUserDetails,
+  setUserDetails,
+  getCurrentDepartment,
+  setCurrentDepartment,
+  initializeCurrentDepartment,
+  subscribeToUserDetailsChanges,
+  notifyUserDetailsChange,
+  getUserDetailsUpdateCounter,
+  getCurrentDepartmentRole,
+  getFirstAvailableNavigationOption,
+} from "@/utils/utility";
 import { getAllEditRequestsApi } from "@/services/verifier.services";
 import { updateUserDepartmentApi } from "@/services/auth.services";
 import { updateUserApi } from "@/services/users.services";
@@ -81,12 +92,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [requestData, setRequestData] = useState<any>([]);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
-  const [userDepartmentRoles, setUserDepartmentRoles] = useState<{ department: string; role: string }[]>([]);
+  const [userDepartmentRoles, setUserDepartmentRoles] = useState<
+    { department: string; role: string }[]
+  >([]);
   const [modalUserData, setModalUserData] = useState(userDetails);
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
-  const [currentDept, setCurrentDept] = useState<string>('');
+  const [currentDept, setCurrentDept] = useState<string>("");
   const [offices, setOffices] = useState<any[]>([]);
-  const [currentBranchName, setCurrentBranchName] = useState<string>('');
+  const [currentBranchName, setCurrentBranchName] = useState<string>("");
 
   useEffect(() => {
     const handleUserDetailsChange = () => {
@@ -133,12 +146,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       const currentDeptRole = userDetails.departmentRoles.find(
         (role: any) => role.department === currentDept
       );
-      
+
       if (currentDeptRole?.officeId) {
-        const office = offices.find((office: any) => office.id === currentDeptRole.officeId);
-        setCurrentBranchName(office?.name || '');
+        const office = offices.find(
+          (office: any) => office.id === currentDeptRole.officeId
+        );
+        setCurrentBranchName(office?.name || "");
       } else {
-        setCurrentBranchName('');
+        setCurrentBranchName("");
       }
     }
   }, [currentDept, userDetails?.departmentRoles, offices]);
@@ -175,7 +190,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // }, [screens]);
 
   const menuItems = [
-    ...(!(getCurrentDepartmentRole() === "Verifier" )
+    ...(!(getCurrentDepartmentRole() === "Verifier")
       ? [
           {
             key: "dashboard",
@@ -202,7 +217,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/users">Users</Link>,
     },
-    ...(getCurrentDepartmentRole() === "Admin" || getCurrentDepartmentRole() === "Verifier"
+    ...(getCurrentDepartmentRole() === "Admin" ||
+    getCurrentDepartmentRole() === "Verifier" ||
+    getCurrentDepartmentRole() === "VerificationExecutive"
       ? [
           {
             key: "verify",
@@ -257,8 +274,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setModalUserData(userDetails);
   };
 
-
-
   const handleSettingsModalClose = () => {
     setIsSettingsModalVisible(false);
   };
@@ -270,16 +285,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const handleCurrentDepartmentChange = (newCurrentDepartment: string) => {
-    console.log('Changing current department to:', newCurrentDepartment);
+    console.log("Changing current department to:", newCurrentDepartment);
     setCurrentDept(newCurrentDepartment);
     setCurrentDepartment(newCurrentDepartment);
     message.success(`Current department changed to ${newCurrentDepartment}`);
-    
+
     const userDetails = getUserDetails();
     const newDepartmentRole = userDetails?.departmentRoles?.find(
       (role: any) => role.department === newCurrentDepartment
     )?.role;
-    
+
     if (newDepartmentRole) {
       const firstOption = getFirstAvailableNavigationOption(newDepartmentRole);
       router.push(firstOption);
@@ -301,14 +316,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  const handleUserUpdate = async (updatedData: { name: string; email: string }) => {
+  const handleUserUpdate = async (updatedData: {
+    name: string;
+    email: string;
+  }) => {
     try {
-      console.log('Attempting to update user:', userDetails.id, updatedData);
-      
+      console.log("Attempting to update user:", userDetails.id, updatedData);
+
       // Update user with name and email using PATCH API
       const response = await updateUserApi(userDetails.id, updatedData);
-      console.log('User update response:', response);
-      
+      console.log("User update response:", response);
+
       // Create updated user details with new name and email
       const updatedUserDetails = {
         ...userDetails,
@@ -323,13 +341,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Notify other components about the user details change
       notifyUserDetailsChange();
       message.success("User information updated successfully");
-      
     } catch (error: any) {
       console.error("Error updating user information:", error);
       console.error("Error response:", error?.response?.data);
       console.error("Error status:", error?.response?.status);
-      
-      const errorMessage = error?.response?.data?.message || "Failed to update user information";
+
+      const errorMessage =
+        error?.response?.data?.message || "Failed to update user information";
       message.error(errorMessage);
       throw error; // Re-throw to let the modal handle the error
     }
@@ -338,18 +356,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleUserDepartmentChange = async (newDefaultDepartment: string) => {
     try {
       // Validate department parameter
-      if (!newDefaultDepartment || newDefaultDepartment.trim() === '') {
-        message.error('Please select a valid department');
+      if (!newDefaultDepartment || newDefaultDepartment.trim() === "") {
+        message.error("Please select a valid department");
         return;
       }
-      
-      console.log('Attempting to update department:', userDetails.id, newDefaultDepartment);
-      console.log('User details:', userDetails);
-      
+
+      console.log(
+        "Attempting to update department:",
+        userDetails.id,
+        newDefaultDepartment
+      );
+      console.log("User details:", userDetails);
+
       // Update user with selected default department using PATCH API
-      const response = await updateUserDepartmentApi(userDetails.id, newDefaultDepartment);
-      console.log('Department update response:', response);
-      
+      const response = await updateUserDepartmentApi(
+        userDetails.id,
+        newDefaultDepartment
+      );
+      console.log("Department update response:", response);
+
       // Create updated user details with new default department
       const updatedUserDetails = {
         ...userDetails,
@@ -363,14 +388,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Notify other components about the user details change
       notifyUserDetailsChange();
       message.success("Default department updated successfully");
-      
     } catch (error: any) {
       console.error("Error updating default department:", error);
       console.error("Error response:", error?.response?.data);
       console.error("Error status:", error?.response?.status);
       console.error("Error message:", error?.message);
-      
-      const errorMessage = error?.message || error?.response?.data?.message || "Failed to update default department";
+
+      const errorMessage =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Failed to update default department";
       message.error(errorMessage);
       throw error; // Re-throw to let the modal handle the error
     }
@@ -453,30 +480,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   {currentDept}
                 </Text>
                 {currentBranchName && (
-                  <Text style={{ fontWeight: 500, color: "var(--neutral-600)" }}>
+                  <Text
+                    style={{ fontWeight: 500, color: "var(--neutral-600)" }}
+                  >
                     - {currentBranchName}
                   </Text>
                 )}
-                {userDetails?.departmentRoles && userDetails.departmentRoles.length > 1 && (
-                  <Tooltip title="Change Current Department">
-                    <Button
-                      type="text"
-                      icon={<SwapOutlined />}
-                      onClick={handleChangeDepartment}
-                      style={{
-                        color: "var(--primary-800)",
-                        fontSize: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    />
-                  </Tooltip>
-                )}
+                {userDetails?.departmentRoles &&
+                  userDetails.departmentRoles.length > 1 && (
+                    <Tooltip title="Change Current Department">
+                      <Button
+                        type="text"
+                        icon={<SwapOutlined />}
+                        onClick={handleChangeDepartment}
+                        style={{
+                          color: "var(--primary-800)",
+                          fontSize: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      />
+                    </Tooltip>
+                  )}
               </Space>
             )}
-            
-            {(getCurrentDepartmentRole() === "Admin" ) && (
+
+            {getCurrentDepartmentRole() === "Admin" && (
               <Popover
                 placement="bottomRight"
                 trigger="hover"
@@ -572,9 +602,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 minute: "2-digit",
               })}
             </Text>
-            
 
-            
             {/* <Text style={{ fontWeight: 500 }}>
               {currentBranchName || "Loading..."}
             </Text> */}
@@ -636,21 +664,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           color: var(--primary-800) !important;
         }
         .ant-layout-sider-trigger {
-            background: var(--primary-50) !important;
-            color: var(--primary-800) !important;
-            font-size: 20px !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s;
+          background: var(--primary-50) !important;
+          color: var(--primary-800) !important;
+          font-size: 20px !important;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: background 0.3s;
         }
 
-          .ant-layout-sider-trigger:hover {
-            background: var(--primary-100) !important;
-            color: var(--primary-700) !important;
-          }
+        .ant-layout-sider-trigger:hover {
+          background: var(--primary-100) !important;
+          color: var(--primary-700) !important;
+        }
       `}</style>
-      
+
       <UserSettingsModal
         visible={isSettingsModalVisible}
         onCancel={handleSettingsModalClose}
@@ -660,7 +688,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onChangeCurrentDepartment={handleCurrentDepartmentChange}
         loading={isLoadingUserData}
       />
-      
+
       <SelectDepartmentModal
         visible={showDepartmentModal}
         departmentRoles={userDepartmentRoles}
@@ -672,4 +700,3 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </Layout>
   );
 }
-
