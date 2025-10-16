@@ -13,51 +13,45 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Ref No/Application No",
             readOnly: true,
           },
-          applicantName: {
+          customerName: {
             type: "string",
-            title: "Name of the Applicant",
+            title: "Name of the Customer",
             readOnly: true,
+          },
+          dateOfReport: {
+            type: "date",
+            title: "Date of Report",
           },
           concernName: {
             type: "string",
-            title: "Name of Concern",
+            title: "Name of the Concern",
           },
           constitution: {
             type: "string",
             title: "Constitution",
-            enum: [
-              "Proprietorship",
-              "Private Limited",
-              "Limited Liability Partnership",
-              "Simple Partnership",
-            ],
           },
           initiatedAddress: {
             type: "string",
             title: "Initiated Address",
-            readOnly: true,
           },
           visitedAddress: {
             type: "string",
             title: "Visited Address",
           },
           phoneNo: {
-            type: "string",
+            type: "number",
             title: "Phone No.",
-            pattern: "^[0-9]{10}$",
-            readOnly: true,
           },
           appointmentFixed: {
-            type: "string",
+            type: "date",
             title: "Appointment Fixed",
-            enum: ["Yes", "No"],
           },
           structureOfLoan: {
             type: "string",
             title: "Structure of Loan",
           },
           noOfVisit: {
-            type: "integer",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
@@ -76,14 +70,6 @@ export const axisFinanceUblAbove10lSchema = {
             type: "string",
             title: "Co-Applicant Details",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
           region: {
             type: "string",
             title: "Region",
@@ -97,7 +83,7 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Branch",
           },
         },
-        required: ["applicationNo", "applicantName", "concernName"],
+        required: ["applicationNo", "customerName", "concernName"],
       },
       required: true,
     },
@@ -201,16 +187,9 @@ export const axisFinanceUblAbove10lSchema = {
       id: "businessDetails",
       label: "Business Details",
       schema: {
-        type: "object",
-        properties: {
-          aboutBusiness: {
-            type: "string",
-            title: "About the Business",
-          },
-          businessSynopsis: {
-            type: "string",
-            title: "Business Synopsis",
-          },
+        aboutBusiness: {
+          type: "array",
+          title: "About the Business",
         },
       },
       required: true,
@@ -238,7 +217,6 @@ export const axisFinanceUblAbove10lSchema = {
                 documentType: {
                   type: "string",
                   title: "Document Type",
-                  enum: ["PAN Card"],
                 },
                 remarks: {
                   type: "string",
@@ -261,11 +239,11 @@ export const axisFinanceUblAbove10lSchema = {
             type: "integer",
             title: "No of Fixed Suppliers",
           },
-          supplierCreditPeriodDays: {
+          creditPeriod: {
             type: "integer",
-            title: "Credit Period in days",
+            title: "Credit Period",
           },
-          supplierCashChequeProportion: {
+          cashChequeProportion: {
             type: "number",
             title: "Cash-Cheque Proportion",
           },
@@ -277,10 +255,10 @@ export const axisFinanceUblAbove10lSchema = {
               properties: {
                 name: {
                   type: "string",
-                  title: "Name",
+                  title: "Name (top 3 Suppliers)",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "number",
                   title: "Contact Details",
                 },
                 location: {
@@ -310,7 +288,7 @@ export const axisFinanceUblAbove10lSchema = {
           },
           clientCreditPeriodDays: {
             type: "integer",
-            title: "Credit Period in days",
+            title: "Credit Period",
           },
           clientCashChequeProportion: {
             type: "number",
@@ -377,7 +355,6 @@ export const axisFinanceUblAbove10lSchema = {
                 statusOfEmployee: {
                   type: "string",
                   title: "Status of Employee",
-                  enum: ["Contract", "Full time"],
                 },
                 noOfLabours: {
                   type: "integer",
@@ -399,7 +376,7 @@ export const axisFinanceUblAbove10lSchema = {
             },
           },
           workingHours: {
-            type: "string",
+            type: "number",
             title: "Working Hours",
           },
           otherMajorExpensesAndBasis: {
@@ -453,12 +430,12 @@ export const axisFinanceUblAbove10lSchema = {
                 liquidMoveableMonetary: {
                   type: "string",
                   title:
-                    "Any Liquid, Moveable & Monetary Items (Cash, Gold, FD, RD, MF, Shares, Bonds, Securities)",
+                    "Any Liquid, Moveable & Monetary Items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities",
                 },
                 insurances: {
                   type: "string",
                   title:
-                    "Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured)",
+                    "Life Insurance, Mediclaim, Property/Asset Insurance, Medician, Property.Asses Insurance (Premium & Sum Assured)",
                 },
               },
             },
@@ -497,7 +474,7 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 sanctionedAmount: {
                   type: "number",
-                  title: "Sanctioned Amount",
+                  title: "Sanctioned Amount (in Lakhs)",
                 },
                 osBalance: {
                   type: "number",
@@ -606,9 +583,43 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Site Coordinates (Latitude, Longitude)",
           },
           observation: {
-            type: "string",
+            type: "array",
             title: "Observation",
+            items: {
+              type: "string",
+              title: "Observation",
+            },
           },
+          Remarks: {
+            type: "string",
+            title: "Remarks",
+
+          },
+          AFLVerifierNameAndEmpCode: {
+            type: "string",
+            title: "AFL Verifier's Name & Emp Code",
+          },
+          AFLVerifierSignature: {
+            type: "string",
+            title: "AFL Verifier's Signature",
+          },
+          Status: {
+            type: "string",
+            title: "Status",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "photos",
+      label: "Photos",
+      schema: {
+        type: "array",
+        title: "Photos",
+        items: {
+          type: "string",
+          title: "Photos",
         },
       },
       required: true,
