@@ -14,9 +14,7 @@ export const axisFinanceUblAbove10lSchema = {
             readOnly: true,
           },
           customerName: {
-          customerName: {
             type: "string",
-            title: "Name of the Customer",
             title: "Name of the Customer",
             readOnly: true,
           },
@@ -27,7 +25,6 @@ export const axisFinanceUblAbove10lSchema = {
           },
           concernName: {
             type: "string",
-            title: "Name of the Concern",
             title: "Name of the Concern",
           },
           constitution: {
@@ -44,7 +41,6 @@ export const axisFinanceUblAbove10lSchema = {
           },
           phoneNo: {
             type: "number",
-            type: "number",
             title: "Phone No.",
           },
           appointmentFixed: {
@@ -57,7 +53,6 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Structure of Loan",
           },
           noOfVisit: {
-            type: "string",
             type: "string",
             title: "No. of Visit",
           },
@@ -91,10 +86,10 @@ export const axisFinanceUblAbove10lSchema = {
           },
         },
         required: ["applicationNo", "customerName", "concernName"],
-        required: ["applicationNo", "customerName", "concernName"],
       },
       required: true,
     },
+
     {
       id: "familyDetails",
       label: "Family Details",
@@ -195,12 +190,12 @@ export const axisFinanceUblAbove10lSchema = {
       id: "businessDetails",
       label: "Business Details",
       schema: {
-        aboutBusiness: {
-          type: "array",
-          title: "About the Business",
-        aboutBusiness: {
-          type: "array",
-          title: "About the Business",
+        type: "object",
+        properties: {
+          aboutBusiness: {
+            type: "array",
+            title: "About the Business",
+          },
         },
       },
       required: true,
@@ -251,12 +246,9 @@ export const axisFinanceUblAbove10lSchema = {
             title: "No of Fixed Suppliers",
           },
           creditPeriod: {
-          creditPeriod: {
             type: "integer",
             title: "Credit Period",
-            title: "Credit Period",
           },
-          cashChequeProportion: {
           cashChequeProportion: {
             type: "number",
             title: "Cash-Cheque Proportion",
@@ -270,10 +262,8 @@ export const axisFinanceUblAbove10lSchema = {
                 name: {
                   type: "string",
                   title: "Name (top 3 Suppliers)",
-                  title: "Name (top 3 Suppliers)",
                 },
                 contactDetails: {
-                  type: "number",
                   type: "number",
                   title: "Contact Details",
                 },
@@ -304,7 +294,6 @@ export const axisFinanceUblAbove10lSchema = {
           },
           clientCreditPeriodDays: {
             type: "integer",
-            title: "Credit Period",
             title: "Credit Period",
           },
           clientCashChequeProportion: {
@@ -394,7 +383,6 @@ export const axisFinanceUblAbove10lSchema = {
           },
           workingHours: {
             type: "number",
-            type: "number",
             title: "Working Hours",
           },
           otherMajorExpensesAndBasis: {
@@ -449,12 +437,10 @@ export const axisFinanceUblAbove10lSchema = {
                   type: "string",
                   title:
                     "Any Liquid, Moveable & Monetary Items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities",
-                    "Any Liquid, Moveable & Monetary Items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities",
                 },
                 insurances: {
                   type: "string",
                   title:
-                    "Life Insurance, Mediclaim, Property/Asset Insurance, Medician, Property.Asses Insurance (Premium & Sum Assured)",
                     "Life Insurance, Mediclaim, Property/Asset Insurance, Medician, Property.Asses Insurance (Premium & Sum Assured)",
                 },
               },
@@ -494,7 +480,6 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 sanctionedAmount: {
                   type: "number",
-                  title: "Sanctioned Amount (in Lakhs)",
                   title: "Sanctioned Amount (in Lakhs)",
                 },
                 osBalance: {
@@ -605,7 +590,6 @@ export const axisFinanceUblAbove10lSchema = {
           },
           observation: {
             type: "array",
-            type: "array",
             title: "Observation",
             items: {
               type: "string",
@@ -615,28 +599,6 @@ export const axisFinanceUblAbove10lSchema = {
           Remarks: {
             type: "string",
             title: "Remarks",
-
-          },
-          AFLVerifierNameAndEmpCode: {
-            type: "string",
-            title: "AFL Verifier's Name & Emp Code",
-          },
-          AFLVerifierSignature: {
-            type: "string",
-            title: "AFL Verifier's Signature",
-          },
-          Status: {
-            type: "string",
-            title: "Status",
-            items: {
-              type: "string",
-              title: "Observation",
-            },
-          },
-          Remarks: {
-            type: "string",
-            title: "Remarks",
-
           },
           AFLVerifierNameAndEmpCode: {
             type: "string",
@@ -654,19 +616,7 @@ export const axisFinanceUblAbove10lSchema = {
       },
       required: true,
     },
-    {
-      id: "photos",
-      label: "Photos",
-      schema: {
-        type: "array",
-        title: "Photos",
-        items: {
-          type: "string",
-          title: "Photos",
-        },
-      },
-      required: true,
-    },
+   
   ],
 } as const;
 export default axisFinanceUblAbove10lSchema;
