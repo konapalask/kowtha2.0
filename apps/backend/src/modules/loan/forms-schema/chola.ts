@@ -3,8 +3,8 @@ export const cholaSchema = {
   bankName: "Chola",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "basicInformation",
+      label: "Basic Information",
       schema: {
         type: "object",
         properties: {
@@ -15,7 +15,7 @@ export const cholaSchema = {
           },
           nameOfTheCoApplicant: {
             type: "string",
-            title: "Name of the Co-Applicant",
+            title: "Name of the Co-applicant",
           },
           businessName: {
             type: "string",
@@ -25,12 +25,6 @@ export const cholaSchema = {
           constitution: {
             type: "string",
             title: "Constitution",
-            enum: [
-              "Proprietorship",
-              "Private Limited",
-              "Limited Liability Partnership",
-              "Simple Partnership",
-            ],
           },
           visitedAddress: {
             type: "string",
@@ -39,7 +33,6 @@ export const cholaSchema = {
           loanRequested: {
             type: "number",
             title: "Loan Requested",
-            readOnly: true,
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -51,36 +44,6 @@ export const cholaSchema = {
             type: "string",
             title: "Purpose of Loan",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "pdDetails",
-      label: "PD Details",
-      schema: {
-        type: "object",
-        properties: {
           dateOfVisit: {
             type: "string",
             title: "Date of Visit",
@@ -91,68 +54,27 @@ export const cholaSchema = {
             title: "Person Met",
           },
         },
+          required: ["nameOfTheApplicant", "nameOfTheCoApplicant", "constitution", "visitedAddress", "loanRequested", "purposeOfLoan", "dateOfVisit", "personMet"],
       },
-      required: true,
     },
     {
-      id: "aboutApplicantAndBusiness",
-      label: "About the Applicant and Business",
+      id: "aboutTheApplicantAndItsBusiness",
+      label: "About the Applicant & its Business",
       schema: {
-        type: "object",
-        properties: {
-          aboutApplicant: {
-            type: "string",
-            title: "About the Applicant",
-          },
-          businessStartedYear: {
-            type: "integer",
-            title: "Business Started Year",
-          },
-          natureOfBusiness: {
-            type: "string",
-            title: "Nature of Business",
-          },
-          yearsOfExperience: {
-            type: "integer",
-            title: "Years of Experience in Same Field",
-          },
-          businessPremisesOwnership: {
-            type: "string",
-            title: "Business Premises Ownership",
-            enum: ["Owned", "Rented"],
-          },
-          rentAmountIfRented: {
-            type: "number",
-            title: "Rent Amount (if Rented)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            aboutTheApplicant: {
+              type: "string",
+              title: "About the Applicant & Business",
             },
           },
-          numberOfEmployees: {
-            type: "integer",
-            title: "Number of Employees",
-          },
-          salaryDetails: {
-            type: "string",
-            title: "Salary Details",
-          },
-          businessObservations: {
-            type: "string",
-            title: "Business Observations (Footfall, Stock, Equipment)",
-          },
-          businessActivityLevel: {
-            type: "string",
-            title: "Business Activity Level Observed",
-          },
-        },
+        },  
       },
-      required: true,
     },
     {
-      id: "familyDetails",
+      id: "applicantsFamilyDetails",
       label: "Applicant's Family Details",
       schema: {
         type: "object",
@@ -167,7 +89,7 @@ export const cholaSchema = {
                   type: "string",
                   title: "Name",
                 },
-                relationship: {
+                relation: {
                   type: "string",
                   title: "Relationship",
                 },
@@ -175,180 +97,103 @@ export const cholaSchema = {
                   type: "integer",
                   title: "Age",
                 },
-                education: {
-                  type: "string",
-                  title: "Education",
-                },
-                qualification: {
-                  type: "string",
-                  title: "Qualification",
-                },
-                occupation: {
-                  type: "string",
-                  title: "Occupation",
-                },
               },
             },
           },
         },
       },
-      required: true,
-    },
-    {
-      id: "customers",
-      label: "Customers (Name, Phone, Business Name)",
-      schema: {
-        type: "object",
-        properties: {
-          customers: {
-            type: "array",
-            title: "Regular Customers",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                phone: {
-                  type: "string",
-                  title: "Phone",
-                },
-                businessName: {
-                  type: "string",
-                  title: "Business Name",
-                },
-              },
-            },
-          },
-          customerFeedback: {
-            type: "string",
-            title: "Customer Feedback",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "suppliers",
-      label: "Suppliers",
-      schema: {
-        type: "object",
-        properties: {
-          suppliers: {
-            type: "array",
-            title: "Regular Suppliers",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                phone: {
-                  type: "string",
-                  title: "Phone",
-                },
-                businessName: {
-                  type: "string",
-                  title: "Business Name",
-                },
-              },
-            },
-          },
-          supplierFeedback: {
-            type: "string",
-            title: "Supplier Feedback",
-          },
-        },
-      },
-      required: true,
     },
     {
       id: "assets",
       label: "Assets",
       schema: {
-        type: "object",
-        properties: {
-          assetsOwnedByApplicant: {
-            type: "string",
-            title: "Assets Owned by Applicant",
-          },
-          assetsOwnedByCoApplicant: {
-            type: "string",
-            title: "Assets Owned by Co-Applicant",
-          },
-          assetsOwnedByGuarantor: {
-            type: "string",
-            title: "Assets Owned by Guarantor",
-          },
-          assetDetails: {
-            type: "array",
-            title: "Detailed Asset List",
-            items: {
-              type: "object",
-              properties: {
-                assetType: {
-                  type: "string",
-                  title: "Asset Type",
-                },
-                description: {
-                  type: "string",
-                  title: "Description",
-                },
-                marketValue: {
-                  type: "string",
-                  title: "Market Value",
-                },
-                ownerName: {
-                  type: "string",
-                  title: "Owner Name",
-                },
+        type: "array",
+          items: {
+            type: "object",
+            properties: {
+              assetDetails: {
+                type: "string",
+                title: "Asset details",
               },
             },
-          },
         },
-      },
-      required: true,
+      }, 
     },
     {
-      id: "existingLoans",
-      label: "Existing Loan Details",
+      id: "customersReferenceNumbers",
+      label: "Customers - Reference Numbers",
       schema: {
-        type: "object",
-        properties: {
-          existingLoans: {
-            type: "array",
-            title: "Existing Loans",
-            items: {
-              type: "object",
-              properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                typeOfLoan: {
-                  type: "string",
-                  title: "Type of Loan",
-                },
-                loanAmount: {
-                  type: "string",
-                  title: "Loan Amount",
-                },
-                emi: {
-                  type: "string",
-                  title: "EMI / Interest",
-                },
-                tenureTotalCompleted: {
-                  type: "string",
-                  title: "Total Tenure / Completed (in months)",
-                },
-              },
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            customerReferenceNumber: {
+              type: "string",
+              title: "Customer Reference Number",
+            }
+          },
+        },
+      },
+    },
+    {
+      id: "otherIncomes",
+      label: "Other Incomes",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            otherIncome: {
+              type: "string",
+              title: "Other Income",
             },
           },
         },
       },
-      required: true,
+    },
+    {
+      id: "existingLoanDetails",
+      label: "Existing Loan Details",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            bankName: {
+              type: "string",
+              title: "Bank Name",
+            },
+            typeOfLoan: {
+              type: "string",
+              title: "Type of Loan",
+            },
+            loanAmount: {
+              type: "number",
+              title: "Loan Amount (In Rs.)",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+              emiInterest: {
+                type: "number",
+                title: "EMI/Interest (In Rs.)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              tenureTotalCompleted: {
+                type: "string",
+                title: "Total Tenure / Completed [in months]",
+              }, 
+            },
+          },
+        },
+      },
     },
     {
       id: "bankingDetails",
@@ -368,121 +213,265 @@ export const cholaSchema = {
                 },
                 accountNo: {
                   type: "string",
-                  title: "Account No",
+                  title: "A/c No",
                 },
                 accountType: {
                   type: "string",
-                  title: "Account Type",
-                  enum: ["Savings", "Current", "CC/OD"],
+                  title: "A/c Type",
                 },
               },
             },
           },
         },
       },
-      required: true,
     },
     {
-      id: "itrAndVerification",
-      label: "ITR, Receipts, Verification, GP Margin & Expenses Details",
+      id: "itrFinancialDetails",
+      label: "ITR / Financial Details",
       schema: {
         type: "object",
         properties: {
-          itrDetails: {
+          itr: {
             type: "string",
-            title: "ITR Details",
+            title: "ITR",
           },
-          receiptsVerified: {
+          receipts: {
             type: "string",
-            title: "Receipts Verified",
+            title: "Receipts",
           },
-          gpMargin: {
+          verification: {
             type: "string",
-            title: "GP Margin",
+            title: "Verification",
           },
-          expensesDetails: {
+          gpMarginAndExpenses: {
             type: "string",
-            title: "Expenses Details",
+            title: "GP Margin & Expenses Details",
+          },
+
+        },
+      },
+    },
+    {
+      id: "comfortFactor",
+      label: "Comfort Factor",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            comfortFactor: {
+              type: "string",
+              title: "Comfort Factor",
+            }
           },
         },
       },
-      required: true,
     },
     {
-      id: "financials",
-      label: "Financials",
+      id: "discomfortFactor",
+      label: "Discomfort Factor(e.g., Mismatch name board, Not filing ITR, not provided bank statements, etc.)",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            discomfortFactor: {
+              type: "string",
+              title: "Discomfort Factor",
+            }
+          },
+        },
+      },
+    },
+    {
+      id: "Recommendations",
+      label: "Recommendations",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            recommendations: {
+              type: "string",
+              title: "Recommendations",
+            }
+          },
+        },
+      },
+    },
+    {
+      id: "disclaimer",
+      label: "Disclaimer if any",
+      schema: {
+        type: "object",
+        properties: {
+          disclaimer: {
+            type: "string",
+            title: "Disclaimer if any",
+          },
+        },
+      },
+    },
+     {
+       id: "financialStatement",
+       label: "Financial Statement",
+       schema: {
+         type: "object",
+         properties: {
+           expenditure: {
+             type: "object",
+             title: "EXPENDITURE",
+             properties: {
+               toPurchaseOfMaterial: {
+                 type: "number",
+                 title: "To purchase of Material",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toElectricity: {
+                 type: "number",
+                 title: "To Electricity",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toRent: {
+                 type: "number",
+                 title: "To Rent",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toSalaries: {
+                 type: "number",
+                 title: "To Salaries",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toTransportation: {
+                 type: "number",
+                 title: "To Transportation",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toOtherExpenses: {
+                 type: "number",
+                 title: "To other expenses",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               toNetProfit: {
+                 type: "number",
+                 title: "To Net profit",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               totalExpenditure: {
+                 type: "number",
+                 title: "Total",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+             },
+           },
+           income: {
+             type: "object",
+             title: "INCOME",
+             properties: {
+               byGrossReceipts: {
+                 type: "number",
+                 title: "By Gross Receipts",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+               totalIncome: {
+                 type: "number",
+                 title: "Total",
+                 formatter: {
+                   useIndianFormat: true,
+                   locale: "en-IN",
+                   maxDecimalPlaces: 2,
+                   minDecimalPlaces: 0,
+                 },
+               },
+             },
+           },
+         },
+         required: ["expenditure", "income"],
+       },
+     },
+    {
+      id: "financialAnalysis",
+      label: "Financial Analysis",
       schema: {
         type: "object",
         properties: {
           totalGrossDisposableIncome: {
             type: "number",
-            title: "Total Gross Disposable Income per Month",
+            title: "Total Gross Disposable Income (A)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           totalObligations: {
             type: "number",
-            title: "Total Obligations per Month",
+            title: "Total Obligations (B)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           netDisposableIncome: {
             type: "number",
-            title: "Net Disposable Income per Month",
-          },
-          netProfitMargin: {
-            type: "number",
-            title: "Net Profit & Margin",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "otherIncomes",
-      label: "Other Incomes",
-      schema: {
-        type: "object",
-        properties: {
-          otherIncomesIfAny: {
-            type: "string",
-            title: "Other Incomes (if any)",
+            title: "Net Disposable Income (C = A – B)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
-      required: true,
-    },
-    {
-      id: "comfortAndDiscomfortFactors",
-      label: "Comfort & Discomfort Factors",
-      schema: {
-        type: "object",
-        properties: {
-          comfortFactor: {
-            type: "string",
-            title: "Comfort Factor",
-          },
-          discomfortFactor: {
-            type: "string",
-            title: "Discomfort Factor",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "recommendations",
-      label: "Recommendations",
-      schema: {
-        type: "object",
-        properties: {
-          recommendations: {
-            type: "string",
-            title: "Recommendations",
-          },
-          disclaimer: {
-            type: "string",
-            title: "Disclaimer (if any)",
-          },
-        },
-      },
-      required: true,
     },
   ],
 } as const;

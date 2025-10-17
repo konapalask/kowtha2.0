@@ -46,12 +46,14 @@ export const arkaFincapSchema = {
             title: "Residential Premises",
           },
           appointmentFixed: {
-            type: "time",
+            type: "string",
             title: "Appointment Fixed",
+            format: "time",
           },
           dateOfVisit: {
-            type: "date",
+            type: "string",
             title: "Date of Visit",
+            format: "date",
           },
           personMet: {
             type: "string",
@@ -568,20 +570,7 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
-    {
-      id: "photos",
-      label: "Photos",
-      schema: {
-        type: "object",
-        properties: {
-          photos: {
-            type: "string",
-            title: "Photos",
-          },
-        },
-      },
-      required: true,
-    },
+
   ],
 } as const;
 export default arkaFincapSchema;
