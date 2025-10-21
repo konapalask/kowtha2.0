@@ -101,14 +101,46 @@ export class DashboardService {
 
   async getAppDeployments() {
     try {
-      const appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
-
+      // First, get the latest deployment from database
       let getDeployment = await this.prisma.appDeployment.findFirst({
         orderBy: {
           createdAt: 'desc'
         }
       });
 
+      // Try to fetch app details from Play Store
+      let appDetails;
+      try {
+        appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
+      } catch (scraperError) {
+        // Log scraper error but don't fail the entire request
+        await this.loggingService.warn('Failed to scrape Play Store data', {
+          error: scraperError.message,
+          stack: scraperError.stack,
+        });
+        
+        // If we have a cached deployment, return it
+        if (getDeployment) {
+          if (process.env.NODE_ENV === 'development') {
+            getDeployment.playStoreUrl = null;
+            getDeployment.version = null;
+          }
+          return getDeployment;
+        }
+        
+        // No cached data and scraper failed - return a default response
+        return {
+          version: null,
+          isActive: true,
+          source: 'Google Play',
+          playStoreUrl: 'https://play.google.com/store/apps/details?id=com.beyondscale.kowthafi',
+          forceUpdate: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      
+      // If we have existing deployment with same version, return it
       if (getDeployment) {
         if (getDeployment.version === appDetails.version) {
           if (process.env.NODE_ENV === 'development') {
@@ -119,7 +151,8 @@ export class DashboardService {
           return getDeployment;
         }
       }
-
+      
+      // Create new deployment entry for new version
       let createDeployment = await this.prisma.appDeployment.create({
         data: {
           version: appDetails.version,
@@ -129,7 +162,7 @@ export class DashboardService {
           forceUpdate: true,
         }
       });
-
+      
       await this.loggingService.info('Fetched app deployments', { createDeployment });
       
       if (process.env.NODE_ENV === 'development') {
