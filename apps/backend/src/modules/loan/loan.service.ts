@@ -2748,6 +2748,82 @@ export class LoanService {
     }
   }
 
+  async submitVerificationExecutive(
+    loanId: number,
+    verificationType: VerificationType,
+    verificationData: any,
+    financialAnalysisData: any,
+    synopsis?: string
+  ) {
+    try {
+      const verification = await this.prisma.verification.findFirst({
+        where: {
+          loanId,
+          type: verificationType,
+        },
+      });
+
+      if (!verification) {
+        await this.loggingService.warn(
+          "Verification executive submission failed - Verification not found",
+          {
+            loanId,
+            verificationType,
+          }
+        );
+        throw new NotFoundException("Verification not found");
+      }
+
+      // Merge existing financialAnalysis with new data to preserve unchanged fields
+      const existingFinancialAnalysis =
+        (verification.financialAnalysis as any) || {};
+      const mergedFinancialAnalysis = {
+        ...existingFinancialAnalysis,
+        ...financialAnalysisData,
+      };
+
+      const updatedVerification = await this.prisma.verification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          verificationData,
+          financialAnalysis: mergedFinancialAnalysis,
+          ...(synopsis !== undefined && { synopsis }),
+          initialSubmitted: true,
+          status: VerificationStatus.Completed,
+          updatedAt: new Date(),
+        },
+      });
+
+      await this.loggingService.info(
+        "Verification executive submission completed successfully",
+        {
+          loanId,
+          verificationId: verification.id,
+          verificationType,
+          initialSubmitted: true,
+        }
+      );
+
+      return updatedVerification;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      await this.loggingService.error(
+        "Failed to submit verification executive data",
+        {
+          loanId,
+          verificationType,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
+      throw error;
+    }
+  }
+
   async exportFinancialAnalysisToExcel(loanId: number): Promise<Buffer> {
     const ExcelJS = await import('exceljs');
     
