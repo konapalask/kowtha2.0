@@ -103,7 +103,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   const [datePickerState, setDatePickerState] = useState<{
     visible: boolean;
     fieldKey: string | null;
-  }>({visible: false, fieldKey: null});
+    mode: 'date' | 'time' | 'datetime';
+  }>({visible: false, fieldKey: null, mode: 'date'});
 
   // Hydrate default values once on mount to avoid wiping user input/errors on every keystroke
   const didHydrateRef = useRef(false);
@@ -188,12 +189,12 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
 
-  const showDatePicker = (fieldKey: string) => {
-    setDatePickerState({visible: true, fieldKey});
+  const showDatePicker = (fieldKey: string, mode: 'date' | 'time' | 'datetime' = 'date') => {
+    setDatePickerState({visible: true, fieldKey, mode});
   };
 
   const hideDatePicker = () => {
-    setDatePickerState({visible: false, fieldKey: null});
+    setDatePickerState({visible: false, fieldKey: null, mode: 'date'});
   };
 
   const checkConditionalVisibility = (
@@ -221,8 +222,22 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
   const handleDateConfirm = (date: Date) => {
     if (datePickerState.fieldKey) {
-      const formattedDate = dayjs(date).format('DD-MM-YYYY');
-      setValue(datePickerState.fieldKey, formattedDate);
+      let formattedValue: string;
+      
+      switch (datePickerState.mode) {
+        case 'time':
+          formattedValue = dayjs(date).format('hh:mm A');
+          break;
+        case 'datetime':
+          formattedValue = dayjs(date).format('DD-MM-YYYY hh:mm A');
+          break;
+        case 'date':
+        default:
+          formattedValue = dayjs(date).format('DD-MM-YYYY');
+          break;
+      }
+      
+      setValue(datePickerState.fieldKey, formattedValue);
     }
     hideDatePicker();
   };
@@ -232,15 +247,38 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     title: string,
     value: string,
     isReadOnly: boolean = false,
+    format: string = 'date',
   ) => {
-    const displayValue = value || 'Select date';
+    let displayValue = value;
+    let placeholderText = 'Select date';
+    let pickerMode: 'date' | 'time' | 'datetime' = 'date';
+
+    switch (format) {
+      case 'time':
+        placeholderText = 'Select time';
+        pickerMode = 'time';
+        break;
+      case 'date-time':
+        placeholderText = 'Select date and time';
+        pickerMode = 'datetime';
+        break;
+      case 'date':
+      default:
+        placeholderText = 'Select date';
+        pickerMode = 'date';
+        break;
+    }
+
+    if (!displayValue) {
+      displayValue = placeholderText;
+    }
 
     return (
       <View style={styles.dateFieldContainer}>
         <Text style={styles.label}>{title}</Text>
         <TouchableOpacity
           style={[styles.dateField, isReadOnly && styles.disabledDateField]}
-          onPress={() => !isReadOnly && showDatePicker(fieldKey)}
+          onPress={() => !isReadOnly && showDatePicker(fieldKey, pickerMode)}
           disabled={isReadOnly}>
           <Text style={[styles.dateText, !value && styles.placeholderText]}>
             {displayValue}
@@ -289,10 +327,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 const subFieldKey = `${fieldId}.${subFieldId}`;
                 const subFieldValue = formData[fieldId]?.[subFieldId];
 
-                // Handle date fields in nested objects
-                const isDateField =
-                  // subProperty.title.toLowerCase().includes('date') &&
-                  subProperty?.format === 'date';
+                // Handle date/time fields in nested objects
+                const isDateField = subProperty?.format === 'date' || subProperty?.format === 'time' || subProperty?.format === 'date-time';
                 if (isDateField) {
                   console.log('subProperty', subProperty);
                   return (
@@ -302,6 +338,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         subProperty.title,
                         subFieldValue,
                         subProperty.readOnly,
+                        subProperty.format,
                       )}
                     </View>
                   );
@@ -480,8 +517,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                       const isSubFieldRequired =
                         property.items?.required?.includes(subFieldId) ?? false;
 
-                      // Handle date fields in arrays
-                      const isDateField = subProperty.format === 'date';
+                      // Handle date/time fields in arrays
+                      const isDateField = subProperty.format === 'date' || subProperty.format === 'time' || subProperty.format === 'date-time';
                       if (isDateField) {
                         return (
                           <View key={subFieldKey}>
@@ -490,6 +527,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                               subProperty.title,
                               item?.[subFieldId],
                               subProperty.readOnly,
+                              subProperty.format,
                             )}
                           </View>
                         );
@@ -624,14 +662,15 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         );
 
       case 'string':
-        // Check if it should be a date field
-        const isDateField = property.format === 'date';
+        // Check if it should be a date/time field
+        const isDateField = property.format === 'date' || property.format === 'time' || property.format === 'date-time';
         if (isDateField) {
           return renderDateField(
             fieldId,
             property.title,
             formData[fieldId],
             property.readOnly,
+            property.format,
           );
         }
 
@@ -763,7 +802,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       </ScrollView>
       <DateTimePickerModal
         isVisible={datePickerState.visible}
-        mode="date"
+        mode={datePickerState.mode}
+        is24Hour={false}
         onConfirm={handleDateConfirm}
         onCancel={hideDatePicker}
       />

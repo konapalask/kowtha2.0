@@ -23,7 +23,7 @@ export const arkaFincapSchema = {
             title: "Name of Co-Applicant",
           },
           phoneNumber: {
-            type: "string",
+            type: "integer",
             title: "Phone Number",
             readOnly: true,
           },
@@ -32,26 +32,28 @@ export const arkaFincapSchema = {
             title: "Name of Concern",
             readOnly: true,
           },
-          initiatedAddress: {
+          initiatedPremises: {
             type: "string",
-            title: "Initiated Address",
+            title: "Initiated Premises",
             readOnly: true,
           },
-          visitedAddress: {
+          visitedPremises: {
             type: "string",
-            title: "Visited Address",
+            title: "Visited Premises",
           },
-          residentialAddress: {
+          residentialPremises: {
             type: "string",
-            title: "Residential Address",
+            title: "Residential Premises",
           },
           appointmentFixed: {
             type: "string",
-            title: "Appointment Fixed (Time)",
+            title: "Appointment Fixed",
+            format: "time",
           },
           dateOfVisit: {
             type: "string",
             title: "Date of Visit",
+            format: "date",
           },
           personMet: {
             type: "string",
@@ -74,29 +76,9 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Collateral Property Address",
           },
-          aboutApplicant: {
+          aboutTheApplicant: {
             type: "string",
-            title: "About Applicant (Descriptive Section)",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
+            title: "About the Applicant",
           },
         },
         required: ["applicationNo", "nameOfApplicant", "nameOfConcern"],
@@ -160,12 +142,12 @@ export const arkaFincapSchema = {
                 },
                 accountType: {
                   type: "string",
-                  title: "Account Type",
+                  title: "ACCOUNT TYPE",
                   enum: ["Savings", "Current", "CC/OD"],
                 },
                 avgBalance: {
                   type: "number",
-                  title: "Average Balance",
+                  title: "AVG BAL",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
@@ -174,8 +156,8 @@ export const arkaFincapSchema = {
                   },
                 },
                 noOfYearsMaintained: {
-                  type: "integer",
-                  title: "No. of Years Maintained",
+                  type: "number",
+                  title: "NO: OF YEARS MAINTAINED",
                 },
               },
             },
@@ -192,7 +174,7 @@ export const arkaFincapSchema = {
         properties: {
           licMutualFunds: {
             type: "string",
-            title: "LIC/Mutual Funds Details",
+            title: "LIC/Mutual Funds",
           },
         },
       },
@@ -253,15 +235,15 @@ export const arkaFincapSchema = {
               properties: {
                 bank: {
                   type: "string",
-                  title: "Bank",
+                  title: "BANK",
                 },
                 type: {
                   type: "string",
-                  title: "Type",
+                  title: "TYPE",
                 },
                 loanAmount: {
                   type: "number",
-                  title: "Loan Amount",
+                  title: "LOAN",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
@@ -281,7 +263,7 @@ export const arkaFincapSchema = {
                 },
                 status: {
                   type: "string",
-                  title: "Open/Close",
+                  title: "OPEN/CLOSE",
                   enum: ["Open", "Close"],
                 },
               },
@@ -295,83 +277,13 @@ export const arkaFincapSchema = {
       id: "aboutTheBusiness",
       label: "About the Business",
       schema: {
-        type: "object",
-        properties: {
-          businessStartedYear: {
-            type: "integer",
-            title: "Business Started Year",
-          },
-          constitution: {
-            type: "string",
-            title: "Constitution",
-            enum: [
-              "Sole Proprietorship",
-              "Partnership",
-              "Private Limited",
-              "Limited Liability Partnership",
-            ],
-          },
-          proprietorDetails: {
-            type: "string",
-            title: "Proprietor/Partner Details",
-          },
-          businessName: {
-            type: "string",
-            title: "Business Name",
-          },
-          natureOfBusiness: {
-            type: "string",
-            title: "Nature of Business",
-          },
-          businessDescription: {
-            type: "string",
-            title: "Business Description (Detailed)",
-          },
-          purchasesFrom: {
-            type: "string",
-            title: "Purchases Stock From",
-          },
-          deliveryMode: {
-            type: "string",
-            title: "Delivery Mode",
-          },
-          stockMaintenance: {
-            type: "string",
-            title: "Stock Maintenance Details",
-          },
-          salesVolume: {
-            type: "string",
-            title: "Monthly Sales Volume",
-          },
-          profitMargin: {
-            type: "string",
-            title: "Profit Margin per Unit/Kg",
-          },
-          businessPremisesOwnership: {
-            type: "string",
-            title: "Business Premises Ownership",
-            enum: ["Owned", "Rented"],
-          },
-          numberOfWorkers: {
-            type: "integer",
-            title: "Number of Workers",
-          },
-          totalWages: {
-            type: "number",
-            title: "Total Wages per Month",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          transactionMode: {
-            type: "string",
-            title: "Major Business Transaction Mode",
-            enum: ["Cash", "Bank", "Cash/Bank"],
-          },
+        type: "array",
+        title: "About the Business",
+        items: {
+          type: "string",
+          title: "Business Detail",
         },
+        minItems: 1,
       },
       required: true,
     },
@@ -392,7 +304,7 @@ export const arkaFincapSchema = {
                   title: "Customer Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -419,7 +331,7 @@ export const arkaFincapSchema = {
                   title: "Supplier Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "number",
                   title: "Contact Number",
                 },
               },
@@ -431,14 +343,13 @@ export const arkaFincapSchema = {
     },
     {
       id: "businessActivityObserved",
-      label: "Business Activity and Stock Level Observed",
+      label: "Business Activity and Stock Level observed",
       schema: {
         type: "object",
         properties: {
-          businessActivityObserved: {
+          businessActivityAndStockLevelObserved: {
             type: "string",
-            title:
-              "Business Activity and Stock Level Observed at Time of Visit",
+            title: "Business Activity and Stock Level observed at the time of visit",
           },
         },
       },
@@ -467,11 +378,6 @@ export const arkaFincapSchema = {
           gstRegistered: {
             type: "string",
             title: "Whether Business Registered under GST?",
-            enum: ["Yes", "No"],
-          },
-          gstNumber: {
-            type: "string",
-            title: "GST Number (if registered)",
           },
         },
       },
@@ -486,11 +392,6 @@ export const arkaFincapSchema = {
           itrFiled: {
             type: "string",
             title: "As per Audited Individual ITR's",
-            enum: ["Yes", "No", "Not Applicable"],
-          },
-          itrDetails: {
-            type: "string",
-            title: "ITR Details (if filed)",
           },
         },
       },
@@ -564,7 +465,7 @@ export const arkaFincapSchema = {
         properties: {
           netMargin: {
             type: "number",
-            title: "Net Margin %",
+            title: "Net Margin",
           },
         },
       },
@@ -577,15 +478,9 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           familyExpenses: {
-            type: "number",
-            title:
-              "Family Expenses (Purchases, Salaries, Electricity, Transport/Travelling, Other)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
+            type: "string",
+            title: "Family Expenses",
+
           },
         },
       },
@@ -609,13 +504,13 @@ export const arkaFincapSchema = {
       id: "concerns",
       label: "Concerns",
       schema: {
-        type: "object",
-        properties: {
-          concerns: {
-            type: "string",
-            title: "Concerns (Any Negative Observations)",
-          },
+        type: "array",
+        title: "Concerns",
+        items: {
+          type: "string",
+          title: "Concerns",
         },
+        minItems: 1,
       },
       required: true,
     },
@@ -623,13 +518,13 @@ export const arkaFincapSchema = {
       id: "otherObservations",
       label: "Other Observations",
       schema: {
-        type: "object",
-        properties: {
-          otherObservations: {
-            type: "string",
-            title: "Other Observations",
-          },
+        type: "array",
+        title: "Other Observations",
+        items: {
+          type: "string",
+          title: "Other Observations",
         },
+        minItems: 1,
       },
       required: true,
     },
@@ -637,13 +532,13 @@ export const arkaFincapSchema = {
       id: "otherIncomes",
       label: "Other Incomes",
       schema: {
-        type: "object",
-        properties: {
-          otherIncomes: {
-            type: "string",
-            title: "Other Incomes",
-          },
+        type: "array",
+        title: "Other Incomes",
+        items: {
+          type: "string",
+          title: "Other Incomes",
         },
+        minItems: 1,
       },
       required: true,
     },
@@ -661,6 +556,21 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
+    {
+      id: "status",
+      label: "Status",
+      schema: {
+        type: "object",
+        properties: {
+          status: {
+            type: "string",
+            title: "Status",
+          },
+        },
+      },
+      required: true,
+    },
+
   ],
 } as const;
 export default arkaFincapSchema;
