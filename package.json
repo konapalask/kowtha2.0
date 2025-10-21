@@ -12,7 +12,9 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "convert:templates": "node scripts/convert-docx-to-html.mjs",
+    "convert:templates:force": "node scripts/convert-docx-to-html.mjs --force"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -55,8 +57,10 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
+    "mammoth": "^1.11.0",
     "prettier": "^3.0.0",
     "prisma": "^5.0.0",
+    "sanitize-html": "^2.17.0",
     "source-map-support": "^0.5.21",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",

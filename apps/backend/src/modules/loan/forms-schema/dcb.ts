@@ -3,7 +3,7 @@ export const dcbSchema = {
   bankName: "DCB",
   sections: [
     {
-      id: "dateOfVtailsisit",
+      id: "dateOfVisit",
       label: "Date of Visit",
       schema: {
         type: "object",

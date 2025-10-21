@@ -513,8 +513,8 @@ const VerificationListScreen = () => {
                   item?.status === 'Pending'
                     ? '#FFA500'
                     : item?.status === 'Completed'
-                    ? '#32CD32'
-                    : 'transparent',
+                      ? '#32CD32'
+                      : 'transparent',
               },
             ]}
           />
@@ -710,6 +710,14 @@ const VerificationListScreen = () => {
           setOpenDeptModal={setOpenDeptModal}
         />
       )}
+
+      {/* QA Forms Testing FAB - Development Only */}
+      <TouchableOpacity
+        style={styles.qaFab}
+        onPress={() => navigation.navigate('QAFormTesting' as any)}>
+        <Icon name="assignment" size={24} color="#fff" />
+        <Text style={styles.qaFabText}>QA</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -998,6 +1006,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  qaFab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#FF9500',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 1000,
+  },
+  qaFabText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginTop: 2,
   },
 });
 

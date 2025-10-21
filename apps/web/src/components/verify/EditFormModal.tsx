@@ -143,6 +143,87 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           if (docData) {
             form.setFieldsValue({ documentsObserved: docData });
           }
+        // Tata UBL specific form handling
+        } else if (formKey === "basicDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const basicData = currentVerification?.verificationData?.basicDetails;
+          if (basicData) {
+            form.setFieldsValue({ basicDetails: basicData });
+          }
+        } else if (formKey === "proposedLoanDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const loanData = currentVerification?.verificationData?.proposedLoanDetails;
+          if (loanData) {
+            form.setFieldsValue({ proposedLoanDetails: loanData });
+          }
+        } else if (formKey === "officeAddress" && currentVerification?.bankName === "Tata Ubl") {
+          const officeData = currentVerification?.verificationData?.officeAddress;
+          if (officeData) {
+            form.setFieldsValue({ officeAddress: officeData });
+          }
+        } else if (formKey === "residentialAddress" && currentVerification?.bankName === "Tata Ubl") {
+          const resData = currentVerification?.verificationData?.residentialAddress;
+          if (resData) {
+            form.setFieldsValue({ residentialAddress: resData });
+          }
+        } else if (formKey === "employeeDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const empData = currentVerification?.verificationData?.employeeDetails;
+          if (empData) {
+            form.setFieldsValue({ employeeDetails: empData });
+          }
+        } else if (formKey === "bankDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const bankData = currentVerification?.verificationData?.bankDetails;
+          if (bankData) {
+            form.setFieldsValue({ bankDetails: bankData });
+          }
+        } else if (formKey === "salesAndProfitDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const salesData = currentVerification?.verificationData?.salesAndProfitDetails;
+          if (salesData) {
+            form.setFieldsValue({ salesAndProfitDetails: salesData });
+          }
+        } else if (formKey === "customersDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const custData = currentVerification?.verificationData?.customersDetails;
+          if (custData) {
+            form.setFieldsValue({ customersDetails: custData });
+          }
+        } else if (formKey === "supplierDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const suppData = currentVerification?.verificationData?.supplierDetails;
+          if (suppData) {
+            form.setFieldsValue({ supplierDetails: suppData });
+          }
+        } else if (formKey === "additionalBusinessDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const addBizData = currentVerification?.verificationData?.additionalBusinessDetails;
+          if (addBizData) {
+            form.setFieldsValue({ additionalBusinessDetails: addBizData });
+          }
+        } else if (formKey === "existingLoans" && currentVerification?.bankName === "Tata Ubl") {
+          const loanData = currentVerification?.verificationData?.existingLoans;
+          if (loanData) {
+            form.setFieldsValue({ existingLoans: loanData });
+          }
+        } else if (formKey === "miscelleanousDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const miscData = currentVerification?.verificationData?.miscelleanousDetails;
+          if (miscData) {
+            form.setFieldsValue({ miscelleanousDetails: miscData });
+          }
+        } else if (formKey === "valueAddedDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const valueData = currentVerification?.verificationData?.valueAddedDetails;
+          if (valueData) {
+            form.setFieldsValue({ valueAddedDetails: valueData });
+          }
+        } else if (formKey === "siteVisitDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const siteData = currentVerification?.verificationData?.siteVisitDetails;
+          if (siteData) {
+            form.setFieldsValue({ siteVisitDetails: siteData });
+          }
+        } else if (formKey === "thirdPartyCheck" && currentVerification?.bankName === "Tata Ubl") {
+          const tpcData = currentVerification?.verificationData?.thirdPartyCheck;
+          if (tpcData) {
+            form.setFieldsValue({ thirdPartyCheck: tpcData });
+          }
+        } else if (formKey === "additionalDetails" && currentVerification?.bankName === "Tata Ubl") {
+          const addData = currentVerification?.verificationData?.additionalDetails;
+          if (addData) {
+            form.setFieldsValue({ additionalDetails: addData });
+          }
       }
       if (formKey === "assetDetails") {
           const assetData = currentVerification?.verificationData?.assetDetails;
@@ -187,6 +268,9 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (formKey === "bankingDetails") {
         return currentVerification?.verificationData?.bankingDetails;
       }
+      if (formKey === "financeDetails") {
+        return currentVerification?.verificationData?.financeDetails;
+      }
       if (formKey === "shareholdingDetails") {
         return currentVerification?.verificationData?.shareholdingDetails;
       }
@@ -205,10 +289,47 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       if (formKey === "assetDetails") {
         return { assetDetails: currentVerification?.verificationData?.assetDetails };
       }
+      if (formKey === "additionalDetails") {
+        return currentVerification?.verificationData?.additionalDetails;
+      }
     }
     
     // Handle other forms normally
     return currentVerification?.verificationData?.[formKeyMapping[formKey] || formKey];
+  };
+
+  // Helper function to validate non-empty strings
+  const validateNonEmpty = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      // Check if string has at least one non-whitespace character
+      return value.trim().length > 0;
+    }
+    if (typeof value === 'number') {
+      return !isNaN(value);
+    }
+    return true; // For other types, consider them valid
+  };
+
+  // Helper function to clean whitespace-only values
+  const cleanWhitespaceValues = (obj: any): any => {
+    if (typeof obj === 'string') {
+      return obj.trim() === '' ? undefined : obj.trim();
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(cleanWhitespaceValues).filter(item => item !== undefined);
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      const cleaned: any = {};
+      for (const key in obj) {
+        const cleanedValue = cleanWhitespaceValues(obj[key]);
+        if (cleanedValue !== undefined) {
+          cleaned[key] = cleanedValue;
+        }
+      }
+      return cleaned;
+    }
+    return obj;
   };
 
   const handleSubmit = async () => {
@@ -216,12 +337,45 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       setLoading(true);
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
+      
+      // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
+      const validationErrors: string[] = [];
+      Object.entries(values).forEach(([key, value]) => {
+        if (typeof value === 'string' && value.trim() === '') {
+          validationErrors.push(key);
+        }
+        
+        // Check nested objects and arrays
+        if (typeof value === 'object' && value !== null) {
+          const checkNestedValues = (obj: any, path: string = '') => {
+            Object.entries(obj).forEach(([nestedKey, nestedValue]) => {
+              const currentPath = path ? `${path}.${nestedKey}` : nestedKey;
+              if (typeof nestedValue === 'string' && nestedValue.trim() === '') {
+                validationErrors.push(currentPath);
+              } else if (typeof nestedValue === 'object' && nestedValue !== null) {
+                checkNestedValues(nestedValue, currentPath);
+              }
+            });
+          };
+          checkNestedValues(value, key);
+        }
+      });
+      
+      if (validationErrors.length > 0) {
+        message.error(validationErrors.join(', '));
+        setLoading(false);
+        return;
+      }
+      
       // Only proceed if validation passes
 
+      // Clean whitespace-only values before processing
+      const cleanedValues = cleanWhitespaceValues(values);
+      
       const formValues =
         formKey === "familyMemberDetails"
-          ? Object.values(values?.familyMemberDetails)
-          : values;
+          ? Object.values(cleanedValues?.familyMemberDetails)
+          : cleanedValues;
       console.log(formValues);
       const initialValues = await getInitialValues();
       const cleanedInitialValues = Object.fromEntries(
@@ -591,6 +745,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             currentTab={currentTab}
             getMaritalStatus={getMaritalStatus}
             currentDepartment={currentDepartment}
+            bankName={initialValues?.verifications?.find((v: any) => v.addressType === currentTab)?.bankName}
           />
         </Row>
       </Form>

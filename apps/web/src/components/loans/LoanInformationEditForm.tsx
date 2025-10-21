@@ -18,6 +18,7 @@ import {
   loanTypeOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
+import { isMobileVerificationCompleted } from "@/utils/loanCompletionChecker";
 // import { useWatch } from "antd/es/form/Form";
 interface LoanInfoFormProps {
   form: any;
@@ -44,6 +45,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   // console.log(form.getFieldsValue());
 
   const loanType = Form.useWatch("loanType", form);
+  
+  // Check if mobile verification is completed to disable bank name field
+  const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
 
   return (
     <div>
@@ -140,18 +144,6 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               rules={[
                 { required: true, message: "Required" },
                 { whitespace: true, message: "Cannot be empty" },
-                { max: 20, message: "Cannot be more than 20 characters" },
-                {
-                  validator: (_, value) => {
-                    if (value && value.startsWith(' ')) {
-                      return Promise.reject('Cannot start with a space.');
-                    }
-                    if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                      return Promise.reject('Special characters are not allowed.');
-                    }
-                    return Promise.resolve();
-                  },
-                },
               ]}
             >
               <Input readOnly={selectedLoan?.applicationNumber} />
@@ -205,7 +197,8 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               rules={[
                 {
                   validator: (_, value) => {
-                    if (value === undefined || value === null || value === "") {
+                    // Allow empty values - field is not required
+                    if (value === undefined || value === null || value === "" || value === 0) {
                       return Promise.resolve();
                     }
                     
@@ -297,6 +290,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
+                disabled={isVerificationCompleted}
               />
             </Form.Item>
           </Col>

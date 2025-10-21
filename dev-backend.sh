@@ -35,7 +35,7 @@ echo ""
 
 # Check if database is already initialized
 echo "🔍 Checking database state..."
-DB_INITIALIZED=$(docker-compose exec db psql -U kowtha -d loan_verification -tAc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null || echo "0")
+DB_INITIALIZED=$(docker-compose exec -T db psql -U kowtha -d loan_verification -tAc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null || echo "0")
 
 if [ "$DB_INITIALIZED" -gt "0" ]; then
     echo "✅ Database already initialized with $DB_INITIALIZED tables"

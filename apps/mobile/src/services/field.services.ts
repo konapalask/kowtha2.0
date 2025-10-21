@@ -61,3 +61,11 @@ export const uploadImageToS3 = async (
 export const verificationRetryApi = async (payload: any) => {
   return axiosInstance.post(`/loans/verification-retry`, payload);
 };
+
+export const getPDSchema = async (bankName: string) => {
+  return axiosInstance.get(
+    `/loans/get-bank-forms?bankName=${encodeURIComponent(
+      bankName,
+    )}&department=PD`,
+  );
+};

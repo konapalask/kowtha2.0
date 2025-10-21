@@ -22,11 +22,17 @@ import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneo
 import ApplicantDetailsDescription from "./Descriptions/ApplicantDetailsDescription";
 import { useRouter } from "next/router";
 import { useTabContext } from "@/pages/verify/[id]";
-import { getUserDetails, isEmpty, getCurrentDepartmentRole } from "@/utils/utility";
+import {
+  getUserDetails,
+  isEmpty,
+  getCurrentDepartmentRole,
+} from "@/utils/utility";
 import ColleagueReferencesDescription from "./Descriptions/ColleagueReferencesDescription";
 import PastEmploymentsDescription from "./Descriptions/PastEmploymentsDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import FamilyMemberDetailsDescription from "./Descriptions/FamilyMemberDetailsDescription";
+import DynamicSectionDescription from "./Descriptions/DynamicSectionDescription";
+import { ArrayDiffDisplay } from "./ArrayDiffDisplay";
 
 const { Text } = Typography;
 
@@ -80,16 +86,14 @@ interface EditRequestLogsProps {
   verificationType: string;
   admin: boolean;
   currentDepartment?: string;
+  dynamicSchema?: any; // Schema for dynamic forms (RBL, etc.)
 }
-
 
 const getChangedKeys = (currentSection: any, editSection: any) => {
   if (!currentSection || !editSection) return [];
 
   return Object.keys({ ...currentSection, ...editSection }).filter((key) => {
-
     if (!currentSection[key] && !editSection[key]) return false;
-
 
     if (!currentSection[key] || !editSection[key]) return true;
 
@@ -118,18 +122,21 @@ const getChangedKeys = (currentSection: any, editSection: any) => {
 
 const mergeDataWithChanges = (currentData: any, changedData: any) => {
   if (!currentData || !changedData) return currentData;
-  
+
   const mergedData = { ...currentData };
-  
-  Object.keys(changedData).forEach(sectionKey => {
-    if (changedData[sectionKey] && typeof changedData[sectionKey] === 'object') {
+
+  Object.keys(changedData).forEach((sectionKey) => {
+    if (
+      changedData[sectionKey] &&
+      typeof changedData[sectionKey] === "object"
+    ) {
       mergedData[sectionKey] = {
         ...mergedData[sectionKey],
-        ...changedData[sectionKey]
+        ...changedData[sectionKey],
       };
     }
   });
-  
+
   return mergedData;
 };
 
@@ -137,6 +144,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
   const router: any = useRouter();
   // console.log(router);
   const pathname: any = router?.pathname;
+  const { dynamicSchema } = _props;
   const loanId = router?.query?.id || null;
   // const verificationType = router?.query?.activeTab || "PermanentAddress";
   const { activeTab } = useTabContext();
@@ -253,7 +261,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
     <Card
       title={
         <div style={{ display: "flex", alignItems: "center" }}>
-          {(getCurrentDepartmentRole() === "Admin" ) && (
+          {getCurrentDepartmentRole() === "Admin" && (
             <LeftOutlined
               style={{ cursor: "pointer", marginRight: 8 }}
               onClick={() => window.history.back()}
@@ -281,7 +289,7 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
               Request Approval
             </Button>
           )}
-          {(getCurrentDepartmentRole() === "Admin" ) &&
+          {getCurrentDepartmentRole() === "Admin" &&
             pathname.startsWith("/edit-requests") && (
               <Space>
                 <Button
@@ -317,94 +325,248 @@ const EditRequestLogs: React.FC<EditRequestLogsProps> = (_props) => {
           Awaiting approval from admin
         </div>
       )}
-      {Object.keys(changedData)
-        .filter((sectionKey) => getLabels[sectionKey as keyof typeof getLabels])
-        .map((sectionKey) => {
-          const SectionDescription =
-            descriptions[sectionKey as keyof typeof descriptions];
-          const currentSection = currentData?.[sectionKey];
-          const editSection = changedData?.[sectionKey];
-          if (!SectionDescription) return null;
+      {Object.keys(changedData).map((sectionKey) => {
+        const SectionDescription =
+          descriptions[sectionKey as keyof typeof descriptions];
+        const currentSection = currentData?.[sectionKey];
+        const editSection = changedData?.[sectionKey];
 
-          const changedKeys = getChangedKeys(currentSection, editSection);
-          if (changedKeys.length === 0) return null; // Don't show sections with no changes
+        const changedKeys = getChangedKeys(currentSection, editSection);
+        if (changedKeys.length === 0) return null; // Don't show sections with no changes
 
-          
-          if (sectionKey === 'existingLoans') {
+        // Prefer dynamic rendering when a dynamic schema is provided and contains this section
+        const dynamicSectionSchema = dynamicSchema?.sections?.find(
+          (s: any) => s.id === sectionKey
+        );
+        if (dynamicSectionSchema) {
+          const sectionLabel =
+            dynamicSectionSchema?.title ||
+            dynamicSectionSchema?.label ||
+            sectionKey
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (str) => str.toUpperCase())
+              .trim();
+
+          // Check if this section contains array fields that need special diff display
+          const arrayFields =
+            dynamicSectionSchema.fields?.filter(
+              (field: any) => field.type === "array"
+            ) || [];
+          const hasArrayFields = arrayFields.length > 0;
+
+          // If there are array fields, render them with ArrayDiffDisplay
+          if (hasArrayFields) {
             return (
-              <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
-                <Col span={12}>
-                  <SectionDescription
-                    data={{ loans: currentSection }}
-                    extra={null}
-                    logs={true}
-                    changedFields={changedKeys}
-                    changedData={{ loans: editSection }}
-                  />
-                </Col>
-                <Col span={12}>
-                  <SectionDescription
-                    data={{ loans: editSection }}
-                    extra={null}
-                    logs={true}
-                    changedFields={changedKeys}
-                    changedData={{ loans: currentSection }}
-                  />
-                </Col>
-              </Row>
+              <div key={sectionKey} style={{ marginBottom: 32 }}>
+                {arrayFields.map((arrayField: any) => {
+                  const currentArray = currentSection?.[arrayField.id] || [];
+                  const changedArray = editSection?.[arrayField.id] || [];
+
+                  // Only show if there are actual changes in this array
+                  if (
+                    JSON.stringify(currentArray) ===
+                    JSON.stringify(changedArray)
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <ArrayDiffDisplay
+                      key={`${sectionKey}-${arrayField.id}`}
+                      fieldName={arrayField.id}
+                      fieldLabel={
+                        arrayField.label || arrayField.title || arrayField.id
+                      }
+                      currentArray={currentArray}
+                      changedArray={changedArray}
+                      arraySchema={arrayField}
+                      showSideBySide={false}
+                    />
+                  );
+                })}
+
+                {/* Show non-array fields in traditional side-by-side view */}
+                {dynamicSectionSchema.fields?.some(
+                  (field: any) => field.type !== "array"
+                ) && (
+                  <Row gutter={24} style={{ marginBottom: 16 }}>
+                    <Col span={12}>
+                      <Card
+                        size="small"
+                        title={
+                          <>
+                            <Text strong>{sectionLabel}</Text>{" "}
+                            <Text type="secondary">(Current)</Text>
+                          </>
+                        }
+                      >
+                        <DynamicSectionDescription
+                          data={currentSection}
+                          sectionLabel={sectionLabel}
+                          sectionSchema={{
+                            ...dynamicSectionSchema,
+                            fields:
+                              dynamicSectionSchema.fields?.filter(
+                                (field: any) => field.type !== "array"
+                              ) || [],
+                          }}
+                          logs={false}
+                        />
+                      </Card>
+                    </Col>
+                    <Col span={12}>
+                      <Card
+                        size="small"
+                        title={
+                          <>
+                            <Text strong>{sectionLabel}</Text>{" "}
+                            <Text type="success">(New)</Text>
+                          </>
+                        }
+                      >
+                        <DynamicSectionDescription
+                          data={editSection}
+                          changedData={editSection}
+                          sectionLabel={sectionLabel}
+                          sectionSchema={{
+                            ...dynamicSectionSchema,
+                            fields:
+                              dynamicSectionSchema.fields?.filter(
+                                (field: any) => field.type !== "array"
+                              ) || [],
+                          }}
+                          logs={true}
+                          changedFields={changedKeys}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+                )}
+              </div>
             );
           }
 
+          // Default side-by-side view for sections without arrays
+          return (
+            <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
+              <Col span={12}>
+                <Card
+                  title={
+                    <>
+                      <Text strong>{sectionLabel}</Text>{" "}
+                      <Text type="secondary">(Current)</Text>
+                    </>
+                  }
+                >
+                  <DynamicSectionDescription
+                    data={currentSection}
+                    sectionLabel={sectionLabel}
+                    sectionSchema={dynamicSectionSchema}
+                    logs={false}
+                  />
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card
+                  title={
+                    <>
+                      <Text strong>{sectionLabel}</Text>{" "}
+                      <Text type="success">(New)</Text>
+                    </>
+                  }
+                >
+                  <DynamicSectionDescription
+                    data={editSection}
+                    changedData={editSection}
+                    sectionLabel={sectionLabel}
+                    sectionSchema={dynamicSectionSchema}
+                    logs={true}
+                    changedFields={changedKeys}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          );
+        }
+
+        // Skip if no description component and no label
+        if (!SectionDescription) return null;
+
+        if (sectionKey === "existingLoans") {
           return (
             <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
               <Col span={12}>
                 <SectionDescription
-                  data={{ [sectionKey]: currentSection }}
+                  data={{ loans: currentSection }}
                   extra={null}
                   logs={true}
                   changedFields={changedKeys}
-                  isCurrentVersion={true}
-                  currentDepartment={currentDepartment}
+                  changedData={{ loans: editSection }}
                 />
               </Col>
               <Col span={12}>
                 <SectionDescription
-                  data={{ [sectionKey]: editSection }}
-                  extra={
-                    null
-                    // false && (
-                    //   <Space>
-                    //     <Button
-                    //       danger
-                    //       icon={<CloseCircleOutlined />}
-                    //       onClick={handleApprove}
-                    //     >
-                    //       Reject
-                    //     </Button>
-                    //     <Button
-                    //       type="primary"
-                    //       icon={<CheckCircleOutlined />}
-                    //       onClick={handleApprove}
-                    //     >
-                    //       Approve
-                    //     </Button>
-                    //   </Space>
-                    // )
-                  }
+                  data={{ loans: editSection }}
+                  extra={null}
                   logs={true}
                   changedFields={changedKeys}
-                  isCurrentVersion={false}
-                  currentDepartment={currentDepartment}
+                  changedData={{ loans: currentSection }}
                 />
-                {/* {changedKeys.length > 0 && (
+              </Col>
+            </Row>
+          );
+        }
+
+        return (
+          <Row gutter={24} key={sectionKey} style={{ marginBottom: 32 }}>
+            <Col span={12}>
+              <SectionDescription
+                data={{ [sectionKey]: currentSection }}
+                extra={null}
+                logs={true}
+                changedFields={changedKeys}
+                isCurrentVersion={true}
+                currentDepartment={currentDepartment}
+              />
+            </Col>
+            <Col span={12}>
+              <SectionDescription
+                data={{ [sectionKey]: editSection }}
+                extra={
+                  null
+                  // false && (
+                  //   <Space>
+                  //     <Button
+                  //       danger
+                  //       icon={<CloseCircleOutlined />}
+                  //       onClick={handleApprove}
+                  //     >
+                  //       Reject
+                  //     </Button>
+                  //     <Button
+                  //       type="primary"
+                  //       icon={<CheckCircleOutlined />}
+                  //       onClick={handleApprove}
+                  //     >
+                  //       Approve
+                  //     </Button>
+                  //   </Space>
+                  // )
+                }
+                logs={true}
+                changedFields={changedKeys}
+                isCurrentVersion={false}
+                currentDepartment={currentDepartment}
+              />
+              {/* {changedKeys.length > 0 && (
                   <div style={{ color: "#52c41a", fontSize: 12, marginTop: 4 }}>
                     Changed fields: {changedKeys.join(", ")}
                   </div>
                 )} */}
-              </Col>
-            </Row>
-          );
-        })}
+            </Col>
+          </Row>
+        );
+      })}
     </Card>
   );
 };

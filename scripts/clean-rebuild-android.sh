@@ -50,7 +50,7 @@ echo ""
 
 # Step 5: Start Metro with clean cache
 echo -e "${YELLOW}5. Starting Metro bundler with fresh cache...${NC}"
-cd kowtha/apps/mobile
+cd /Users/shashank/projects/kowtha/apps/mobile
 npm start -- --reset-cache > /Users/shashank/projects/kowtha/logs/mobile.log 2>&1 &
 METRO_PID=$!
 echo -e "${GREEN}✓ Metro started (PID: $METRO_PID)${NC}"
@@ -67,7 +67,7 @@ echo -e "${YELLOW}7. Building and installing app...${NC}"
 echo -e "${BLUE}This will take 1-2 minutes...${NC}"
 echo ""
 
-cd kowtha/apps/mobile
+cd /Users/shashank/projects/kowtha/apps/mobile
 npx react-native run-android
 
 echo ""

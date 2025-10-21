@@ -41,8 +41,9 @@ const getDeviceId = async () => {
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [otp, setOtp] = useState('');
+  // DEV MODE: Pre-fill credentials for faster testing
+  const [mobileNumber, setMobileNumber] = useState(__DEV__ ? '9912994742' : '');
+  const [otp, setOtp] = useState(__DEV__ ? '122446' : '');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);
   // console.log('REACT_APP_BASE_URL', REACT_APP_BASE_URL);
@@ -97,21 +98,34 @@ const LoginScreen = () => {
       await setItem('accessToken', response?.accessToken);
       await setItem('refreshToken', response?.refreshToken);
 
-      // Request all permissions after successful login
-      await requestAllPermissions();
+      // Fetch user details BEFORE navigation
+      try {
+        const userDetails = await getUserDetailsApi();
+        // console.log(userDetails);
+        await setItem('userDetails', userDetails?.data);
+      } catch (error) {
+        console.log('Error fetching user details:', error);
+        Alert.alert(
+          'Error',
+          'Failed to load user details. Please try logging in again.',
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Navigate first so UI never hangs on permission prompts
+      setLoading(false);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
           routes: [{name: 'VerificationList'}],
         }),
       );
-      try {
-        const userDetails = await getUserDetailsApi();
-        // console.log(userDetails);
-        await setItem('userDetails', userDetails?.data);
-      } catch (error) {
-        console.log(error);
-      }
+
+      // Fire-and-forget permissions to avoid blocking UX
+      requestAllPermissions().catch(err => {
+        console.warn('Permissions request failed:', err);
+      });
     } catch (error: any) {
       if (mobileNumber === '1234567890' && otp === '123456') {
         await setItem('testUser', true);

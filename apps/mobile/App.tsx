@@ -32,6 +32,7 @@ import BusinessVerification from './src/screens/BusinessVerification';
 import {getPlaystoreVersion} from './src/services/auth';
 import DeviceInfo from 'react-native-device-info';
 import PD from './src/screens/PD';
+import QAFormTesting from './src/screens/QAFormTesting';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -52,6 +53,7 @@ export type RootStackParamList = {
     item: {name: string; applicationNumber: string};
     verificationType: 'Business';
   };
+  QAFormTesting: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -219,6 +221,14 @@ const App = () => {
               //   height: 0,
               // },
             })}
+          />
+          <Stack.Screen
+            name="QAFormTesting"
+            component={QAFormTesting}
+            options={{
+              headerShown: false,
+              title: 'QA Form Testing',
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

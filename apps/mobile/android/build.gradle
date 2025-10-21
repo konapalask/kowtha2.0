@@ -1,6 +1,7 @@
 buildscript {
     project.ext.react = [
-    nodeExecutableAndArgs: ["/home/jayakrishna/.nvm/versions/node/v23.6.0/bin/node"]
+    // Use Node from PATH so the build works across machines
+    nodeExecutableAndArgs: ["node"]
 ]
 
     ext {

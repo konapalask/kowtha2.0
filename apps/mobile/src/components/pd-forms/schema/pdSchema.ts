@@ -1,6 +1,4 @@
-import * as RNFS from 'react-native-fs';
-// @ts-ignore - forms.js doesn't have TypeScript definitions
-import {formSchema, getFormConfigByBank} from '../../../../forms';
+import {getPDSchema} from '../../../services/field.services';
 
 export interface MobileFieldDefinition {
   id: string;
@@ -30,59 +28,49 @@ export interface MobileGeneratedSchema {
 
 let cachedSchema: Record<string, any> = {};
 
+/**
+ * Clear schema cache for a specific bank or all banks
+ * Useful for development/testing when schema changes
+ */
+export function clearSchemaCache(bankName?: string): void {
+  if (bankName) {
+    delete cachedSchema[bankName];
+    console.log(`✓ Schema cache cleared for: ${bankName}`);
+  } else {
+    cachedSchema = {};
+    console.log('✓ Schema cache cleared for all banks');
+  }
+}
+
 export async function loadMobilePDFormsSchema(
   bankName: string,
+  forceRefresh: boolean = false,
 ): Promise<any | null> {
-  if (cachedSchema[bankName]) return cachedSchema[bankName];
+  if (cachedSchema[bankName] && !forceRefresh) {
+    return cachedSchema[bankName];
+  }
 
   try {
-    // Option 1: Read from file system using RNFS (React Native compatible)
-    const schemaPath =
-      RNFS.MainBundlePath + '/../packages/shared/pd_forms.generated.json';
-    const schemaContent = await RNFS.readFile(schemaPath, 'utf8');
-    const schema = JSON.parse(schemaContent) as MobileGeneratedSchema;
+    // Fetch schema from backend API (single source of truth)
+    console.log('Fetching PD schema from backend for bank:', bankName);
+    const response = await getPDSchema(bankName);
 
-    // Find the specific bank form from the schema
-    const bankForm = schema.forms.find(
-      f => f.name.toLowerCase() === bankName.toLowerCase(),
-    );
+    // Backend returns: { status, message, data: { bankName, schema, metadata } }
+    const backendData = response.data?.data;
 
-    if (bankForm) {
-      cachedSchema[bankName] = bankForm;
-      return bankForm;
+    if (backendData && backendData.schema) {
+      // Cache and return the schema
+      cachedSchema[bankName] = backendData.schema;
+      console.log('✓ PD schema loaded from backend successfully:', bankName);
+      return backendData.schema;
     }
 
-    throw new Error(`Bank form not found for: ${bankName}`);
-  } catch (error) {
-    console.warn(
-      'Failed to load schema from file system, trying remote fetch:',
-      error,
+    throw new Error(`No schema data received from backend for: ${bankName}`);
+  } catch (error: any) {
+    console.error(
+      'Failed to fetch schema from backend:',
+      error.message || error,
     );
-
-    try {
-      // Option 2: Fetch from backend API (fallback)
-      const response = await fetch(
-        `/api/pd-schema/${encodeURIComponent(bankName)}`,
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      const schema = await response.json();
-      cachedSchema[bankName] = schema;
-      return schema;
-    } catch (fetchError) {
-      console.error('Failed to fetch schema from backend:', fetchError);
-
-      // Option 3: Fallback to local formSchema from forms.js
-      console.warn('Falling back to local formSchema for bank:', bankName);
-      const localForm = getFormConfigByBank(bankName);
-
-      if (localForm) {
-        cachedSchema[bankName] = localForm;
-        return localForm;
-      }
-
-      return null;
-    }
+    return null;
   }
 }

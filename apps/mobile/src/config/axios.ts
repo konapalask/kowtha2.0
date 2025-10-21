@@ -58,17 +58,38 @@ axiosInstance.interceptors.response.use(
   async error => {
     const refreshTokenApi = 'accounts/refresh-token/';
     const verifyOtpApi = 'accounts/otp/verify';
-    const originalRequest = error.config;
+    const originalRequest = error?.config;
     const errorMessage =
       error?.response?.data?.detail?.code || error?.response?.data?.code;
     const errorStatusCode = error?.response?.status;
     const tokenInvalid = 'TOKEN_EXPIRED';
     const accountNotFound = 'UNAUTHORIZED_USER';
-    console.log(originalRequest.url);
+
+    // Log error for debugging
+    if (originalRequest?.url) {
+      console.log('Request URL:', originalRequest.url);
+    }
+    console.log('Error Status:', errorStatusCode);
+    console.log(
+      'Error Message:',
+      error?.response?.data?.message || error?.message,
+    );
+
+    // Handle 500 errors gracefully - just reject, don't crash
+    if (errorStatusCode >= 500) {
+      console.error('Server error:', error?.response?.data);
+      return Promise.reject(error);
+    }
+
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error:', error.message);
+      return Promise.reject(error);
+    }
 
     if (
       ['/accounts/otp/verify', '/accounts/otp/generate'].includes(
-        originalRequest.url,
+        originalRequest?.url,
       )
     ) {
       // clearAll();
@@ -87,7 +108,7 @@ axiosInstance.interceptors.response.use(
     }
 
     //Prevent infinite loops
-    if (errorStatusCode === 401 && originalRequest.url === refreshTokenApi) {
+    if (errorStatusCode === 401 && originalRequest?.url === refreshTokenApi) {
       // clearAll();
       RNRestart.Restart();
 

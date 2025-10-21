@@ -1,39 +1,51 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as XLSX from 'xlsx';
-import { Buffer } from 'buffer'; // Import the Buffer type
-import * as puppeteer from 'puppeteer';
-import { Logger } from '@nestjs/common';
-import { format, toZonedTime } from 'date-fns-tz';
-import { GetLoansDto } from './dto/get-loans.dto';
-import { EditLoanDto } from './dto/edit-loan.dto';
-import { PrismaService } from '../../prisma.service';
-import { CreateLoanDto } from './dto/create-loan.dto';
-import { S3Service } from '../common/s3utils/s3.service';
-import { workTemplate } from './templates/FI/work.template';
-import { PaginatedResponse } from '../common/dto/pagination.dto';
-import { CreateLambdaLoanDto } from './dto/create-lamba-loan.dto';
-import { addressTemplate } from './templates/FI/address.template';
-import { createAssignmentDto } from './dto/assign-loan-executive';
-import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { EditVerificationDto } from './dto/edit-verification.dto';
-import { LoggingService } from '../common/logging/logging.service';
-import { businessTemplate } from './templates/FI/business.template';
-import { VerificationData } from './templates/FI/address.interface';
-import { WorkVerificationData } from './templates/FI/work.interface';
-import { BusinessVerificationData } from './templates/FI/business.interface';
-import { PDBusinessVerificationData } from './templates/PD/interface/pd-business.interface';
+import * as fs from "fs";
+import * as path from "path";
+import * as XLSX from "xlsx";
+import { Buffer } from "buffer"; // Import the Buffer type
+import * as puppeteer from "puppeteer";
+import { Logger } from "@nestjs/common";
+import { format, toZonedTime } from "date-fns-tz";
+import { GetLoansDto } from "./dto/get-loans.dto";
+import { EditLoanDto } from "./dto/edit-loan.dto";
+import { PrismaService } from "../../prisma.service";
+import { CreateLoanDto } from "./dto/create-loan.dto";
+import { S3Service } from "../common/s3utils/s3.service";
+import { workTemplate } from "./templates/FI/work.template";
+import { PaginatedResponse } from "../common/dto/pagination.dto";
+import { CreateLambdaLoanDto } from "./dto/create-lamba-loan.dto";
+import { addressTemplate } from "./templates/FI/address.template";
+import { createAssignmentDto } from "./dto/assign-loan-executive";
+import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
+import { EditVerificationDto } from "./dto/edit-verification.dto";
+import { LoggingService } from "../common/logging/logging.service";
+import { businessTemplate } from "./templates/FI/business.template";
+import { VerificationData } from "./templates/FI/address.interface";
+import { WorkVerificationData } from "./templates/FI/work.interface";
+import { BusinessVerificationData } from "./templates/FI/business.interface";
+import { PDBusinessVerificationData } from "./templates/PD/interface/pd-business.interface";
 import {
-  Prisma, LoanStatus, VerificationType, VerificationStatus,
-  AddressType, UserRole, ApprovedStatus, Department
-} from '@prisma/client';
-import { FieldExecutiveAssignedDto } from './dto/field-executive-assigned.dto';
-import { CreatePDEmailLogDto } from './dto/create-pd-email-log.dto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { baseTemplate } from './templates/FI/base.template';
-import { Worker } from 'worker_threads';
-import { AxisFinanceUBLInterface } from './templates/PD/interface/axis-finance-ubl.interface';
+  Prisma,
+  LoanStatus,
+  VerificationType,
+  VerificationStatus,
+  AddressType,
+  UserRole,
+  ApprovedStatus,
+  Department,
+} from "@prisma/client";
+import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
+import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { baseTemplate } from "./templates/FI/base.template";
+import { Worker } from "worker_threads";
+import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
+import pLimit from "p-limit";
 
+const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
 export class LoanService {
@@ -41,19 +53,20 @@ export class LoanService {
     private prisma: PrismaService,
     private loggingService: LoggingService,
     private logger: Logger,
-    private s3Service: S3Service,
-  ) { }
-
+    private s3Service: S3Service
+  ) {}
 
   async runWorker(data: any) {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(path.resolve(__dirname, 'imageWorker.js'), { workerData: data });
-      worker.on('message', (msg) => {
+      const worker = new Worker(path.resolve(__dirname, "imageWorker.js"), {
+        workerData: data,
+      });
+      worker.on("message", (msg) => {
         if (msg.success) resolve(msg.result);
         else reject(new Error(msg.error));
       });
-      worker.on('error', reject);
-      worker.on('exit', (code) => {
+      worker.on("error", reject);
+      worker.on("exit", (code) => {
         if (code !== 0) reject(new Error(`Worker stopped with code ${code}`));
       });
     });
@@ -62,24 +75,29 @@ export class LoanService {
   async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--lang=en-IN",
+        "--intl.accept_languages=en-IN",
+      ],
     });
 
     const page = await browser.newPage();
     await page.setContent(htmlTemplate, {
-      waitUntil: 'networkidle0'
+      waitUntil: "networkidle0",
     });
 
     const pdfArray = await page.pdf({
-      format: 'a4',
+      format: "a4",
       margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
+        top: "20px",
+        right: "20px",
+        bottom: "20px",
+        left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: true
+      preferCSSPageSize: true,
     });
     const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
@@ -90,22 +108,21 @@ export class LoanService {
 
   async createLambdaLoan(data: CreateLambdaLoanDto) {
     try {
-
       const office = await this.prisma.office.findFirst({
         where: {
-          department: 'PD',
+          department: "PD",
         },
       });
 
       if (!office) {
-        throw new NotFoundException('Office not found');
+        throw new NotFoundException("Office not found");
       }
 
       const loan = await this.prisma.loan.create({
         data: {
-          department: 'PD',
-          loanType: 'Business',
-          status: 'Unassigned',
+          department: "PD",
+          loanType: "Business",
+          status: "Unassigned",
           bankName: data.bankName,
           loanAmount: Number(data.loanAmount),
           applicantName: data.applicantName,
@@ -113,16 +130,15 @@ export class LoanService {
           office: { connect: { id: office.id } },
           applicantAddress: data.applicantAddress,
           applicationNumber: data.applicationNumber,
-          applicantType: data.applicantType || 'Primary Applicant',
+          applicantType: data.applicantType || "Primary Applicant",
         },
         include: {
           office: true,
         },
       });
       return loan;
-    }
-    catch (error) {
-      await this.loggingService.error('Failed to create lambo loan', {
+    } catch (error) {
+      await this.loggingService.error("Failed to create lambo loan", {
         data,
         error: error.message,
         stack: error.stack,
@@ -131,7 +147,11 @@ export class LoanService {
     }
   }
 
-  async createLoan(data: CreateLoanDto, officeId: number, department: Department) {
+  async createLoan(
+    data: CreateLoanDto,
+    officeId: number,
+    department: Department
+  ) {
     try {
       // Start a transaction to ensure all operations succeed or fail together
       return await this.prisma.$transaction(async (prisma) => {
@@ -177,9 +197,10 @@ export class LoanService {
                 data: {
                   loan: { connect: { id: loan.id } },
                   type,
-                  addressType: type === 'Work' ? 'PermanentAddress' : 'CurrentAddress',
+                  addressType:
+                    type === "Work" ? "PermanentAddress" : "CurrentAddress",
                   fieldExecutive: { connect: { id: data.fieldExecutiveId } },
-                  status: 'Pending',
+                  status: "Pending",
                 },
               })
             )
@@ -192,13 +213,16 @@ export class LoanService {
           });
         }
 
-        await this.loggingService.info('Loan created successfully with verifications', {
-          loanId: loan.id,
-          applicationNumber: loan.applicationNumber,
-          applicantName: loan.applicantName,
-          loanAmount: loan.loanAmount,
-          fieldExecutiveId: data.fieldExecutiveId,
-        });
+        await this.loggingService.info(
+          "Loan created successfully with verifications",
+          {
+            loanId: loan.id,
+            applicationNumber: loan.applicationNumber,
+            applicantName: loan.applicantName,
+            loanAmount: loan.loanAmount,
+            fieldExecutiveId: data.fieldExecutiveId,
+          }
+        );
 
         // Fetch the complete loan data with verifications
         return await prisma.loan.findUnique({
@@ -215,7 +239,7 @@ export class LoanService {
         });
       });
     } catch (error) {
-      await this.loggingService.error('Failed to create loan', {
+      await this.loggingService.error("Failed to create loan", {
         data,
         error: error.message,
         stack: error.stack,
@@ -224,64 +248,180 @@ export class LoanService {
     }
   }
 
+  // Create a QA test loan for testing purposes
+  async createQALoan(bankName: string, fieldExecutiveId: number, qaData?: any) {
+    try {
+      // Find an admin user who will initiate the loan
+      const adminDepartmentRole = await this.prisma.departmentRole.findFirst({
+        where: {
+          role: UserRole.Admin,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      if (!adminDepartmentRole) {
+        throw new Error(
+          "No admin user found in system. Cannot create QA loan."
+        );
+      }
+
+      const adminUser = adminDepartmentRole.user;
+
+      // Verify the field executive exists
+      const fieldExecutive = await this.prisma.user.findUnique({
+        where: { id: fieldExecutiveId },
+      });
+
+      if (!fieldExecutive) {
+        throw new Error(
+          `Field executive with ID ${fieldExecutiveId} not found`
+        );
+      }
+
+      // Get first office in the system
+      const office = await this.prisma.office.findFirst();
+      if (!office) {
+        throw new Error("No office found in system");
+      }
+
+      // Generate QA test data
+      const timestamp = Date.now();
+      const applicationNumber = `QA-${bankName.substring(0, 3).toUpperCase()}-${timestamp}`;
+      const businessName =
+        qaData?.businessName || `QA Test Business ${timestamp}`;
+
+      return await this.prisma.$transaction(async (prisma) => {
+        // Create the QA loan (initiated by admin, assigned to field executive)
+        const loan = await prisma.loan.create({
+          data: {
+            applicationNumber,
+            applicantName:
+              qaData?.applicantName || `QA Test Applicant ${timestamp}`,
+            applicantMobile: qaData?.applicantMobile || "9999999999",
+            applicantAddress:
+              qaData?.applicantAddress || "QA Test Address, Mumbai - 400001",
+            loanType: qaData?.loanType || "Business Loan",
+            bankName: bankName,
+            loanAmount: qaData?.loanAmount || 1000000,
+            office: { connect: { id: office.id } },
+            operationsExecutive: { connect: { id: adminUser.id } }, // Admin initiates
+            status: LoanStatus.Assigned,
+            department: Department.PD,
+          },
+          include: {
+            operationsExecutive: true,
+            office: true,
+          },
+        });
+
+        // Create a PD verification assigned to the field executive
+        const verification = await prisma.verification.create({
+          data: {
+            loan: { connect: { id: loan.id } },
+            type: VerificationType.Business,
+            addressType: AddressType.Business,
+            fieldExecutive: { connect: { id: fieldExecutiveId } },
+            status: VerificationStatus.Pending,
+            businessName: businessName,
+          },
+        });
+
+        await this.loggingService.info("QA test loan created successfully", {
+          loanId: loan.id,
+          applicationNumber: loan.applicationNumber,
+          bankName: bankName,
+          initiatedBy: adminUser.id,
+          assignedTo: fieldExecutiveId,
+          verificationId: verification.id,
+        });
+
+        return {
+          loan,
+          verification,
+          message: "QA test loan created successfully",
+        };
+      });
+    } catch (error) {
+      await this.loggingService.error("Failed to create QA loan", {
+        bankName,
+        fieldExecutiveId,
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+  }
+
   // Assign a field executive to a verification for a loan
-  async assignVerification(
-    loanId: number,
-    createData: createAssignmentDto,
-  ) {
+  async assignVerification(loanId: number, createData: createAssignmentDto) {
     try {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
       if (!loan) {
-        await this.loggingService.warn('Verification assignment failed - Loan not found', { loanId });
-        throw new NotFoundException('Loan not found');
+        await this.loggingService.warn(
+          "Verification assignment failed - Loan not found",
+          { loanId }
+        );
+        throw new NotFoundException("Loan not found");
       }
 
       if (!createData.fieldExecutiveId || !createData.verifierId) {
-        throw new BadRequestException('Field Executive ID or Verifier ID is required when assigning a field executive');
+        throw new BadRequestException(
+          "Field Executive ID or Verifier ID is required when assigning a field executive"
+        );
       }
 
-      if (createData.fieldExecutiveId && (!createData.address || !createData.verificationType)) {
-        throw new BadRequestException('Address and Verification Type is required when assigning a field executive');
+      if (
+        createData.fieldExecutiveId &&
+        (!createData.address || !createData.verificationType)
+      ) {
+        throw new BadRequestException(
+          "Address and Verification Type is required when assigning a field executive"
+        );
       }
 
       return await this.prisma.$transaction(async (prisma) => {
         const verification = await prisma.verification.create({
           data: {
             loan: { connect: { id: loan.id } },
-            type: createData.verificationType || 'AddressOne',
+            type: createData.verificationType || "AddressOne",
             verifier: { connect: { id: createData.verifierId } },
             fieldExecutive: { connect: { id: createData.fieldExecutiveId } },
-            status: 'Pending',
+            status: "Pending",
             applicantAddress: createData.address || null,
             locationType: createData.locationType || null,
             businessName: createData.businessName || null,
             currentOfficeName: createData.currentOfficeName || null,
-            department: loan.department
-          }
+            department: loan.department,
+          },
         });
 
         const loanStatusChange = await prisma.loan.update({
           where: { id: loanId },
-          data: { status: 'Assigned' },
+          data: { status: "Assigned" },
         });
 
-        await this.loggingService.info('Verification assigned successfully', {
+        await this.loggingService.info("Verification assigned successfully", {
           loanId,
-          createData
+          createData,
         });
 
         return verification;
       });
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      await this.loggingService.error('Failed to assign verification', {
+      await this.loggingService.error("Failed to assign verification", {
         loanId,
         createData,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -295,7 +435,7 @@ export class LoanService {
     documents: string[],
     path?: string,
     verificationData?: any,
-    pictureSource?: 'Camera' | 'Gallery',
+    pictureSource?: "Camera" | "Gallery"
   ) {
     try {
       const verification = await this.prisma.verification.findUnique({
@@ -308,11 +448,14 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Verification report submission failed - Verification not found', {
-          loanId,
-          verificationType
-        });
-        throw new NotFoundException('Verification not found');
+        await this.loggingService.warn(
+          "Verification report submission failed - Verification not found",
+          {
+            loanId,
+            verificationType,
+          }
+        );
+        throw new NotFoundException("Verification not found");
       }
 
       const updatedVerification = await this.prisma.verification.update({
@@ -323,47 +466,59 @@ export class LoanService {
           },
         },
         data: {
-          status: 'Completed',
+          status: "Completed",
           verificationData: verificationData || null,
           pictureSource: pictureSource || null,
         },
       });
 
-      await this.loggingService.info('Verification report submitted successfully', {
-        loanId,
-        verificationType,
-        fieldExecutiveId,
-        verificationId: verification.id,
-        hasPath: !!path,
-        hasVerificationData: !!verificationData,
-        pictureSource
-      });
+      await this.loggingService.info(
+        "Verification report submitted successfully",
+        {
+          loanId,
+          verificationType,
+          fieldExecutiveId,
+          verificationId: verification.id,
+          hasPath: !!path,
+          hasVerificationData: !!verificationData,
+          pictureSource,
+        }
+      );
 
       return updatedVerification;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to submit verification report', {
+      await this.loggingService.error("Failed to submit verification report", {
         loanId,
         verificationType,
         fieldExecutiveId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
 
-  async verifyLoan(loanId: number, verifierId: number, status: LoanStatus, approvedStatus: ApprovedStatus, comments?: string) {
+  async verifyLoan(
+    loanId: number,
+    verifierId: number,
+    status: LoanStatus,
+    approvedStatus: ApprovedStatus,
+    comments?: string
+  ) {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
       });
 
       if (!loan) {
-        await this.loggingService.warn('Loan verification failed - Loan not found', { loanId });
-        throw new NotFoundException('Loan not found');
+        await this.loggingService.warn(
+          "Loan verification failed - Loan not found",
+          { loanId }
+        );
+        throw new NotFoundException("Loan not found");
       }
 
       const updatedLoan = await this.prisma.loan.update({
@@ -373,11 +528,11 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Loan verified successfully', {
+      await this.loggingService.info("Loan verified successfully", {
         loanId,
         verifierId,
         status,
-        hasComments: !!comments
+        hasComments: !!comments,
       });
 
       return updatedLoan;
@@ -385,12 +540,12 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to verify loan', {
+      await this.loggingService.error("Failed to verify loan", {
         loanId,
         verifierId,
         status,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -399,17 +554,17 @@ export class LoanService {
   async getLoansByOffice(officeId: number, department: Department) {
     try {
       const office = await this.prisma.office.findUnique({
-        where: { id: officeId }
+        where: { id: officeId },
       });
 
       if (!office) {
-        throw new NotFoundException('Office not found');
+        throw new NotFoundException("Office not found");
       }
 
       const loans = await this.prisma.loan.findMany({
         where: {
           officeId,
-          department: department
+          department: department,
         },
         include: {
           operationsExecutive: {
@@ -418,7 +573,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-            }
+            },
           },
           verifications: {
             include: {
@@ -428,7 +583,7 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                }
+                },
               },
               verifier: {
                 select: {
@@ -436,48 +591,51 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                }
+                },
               },
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       });
 
-      await this.loggingService.info('Retrieved loans by office', {
+      await this.loggingService.info("Retrieved loans by office", {
         officeId,
         department,
-        count: loans.length
+        count: loans.length,
       });
 
       return loans;
     } catch (error) {
-      await this.loggingService.error('Failed to get loans by office', {
+      await this.loggingService.error("Failed to get loans by office", {
         officeId,
         department,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
 
-  async getLoansByFieldExecutive(fieldExecutiveId: number, department: Department) {
+  async getLoansByFieldExecutive(
+    fieldExecutiveId: number,
+    department: Department
+  ) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
-        where: { id: fieldExecutiveId }
+        where: { id: fieldExecutiveId },
       });
 
       if (!fieldExecutive) {
-        throw new NotFoundException('Field executive not found');
+        throw new NotFoundException("Field executive not found");
       }
 
       const verifications = await this.prisma.verification.findMany({
         where: {
           fieldExecutiveId,
-          department: department
+          department: department,
         },
         include: {
           loan: {
@@ -486,17 +644,17 @@ export class LoanService {
               applicationNumber: true,
               applicantName: true,
               loanAmount: true,
-              status: true
-            }
-          }
-        }
+              status: true,
+            },
+          },
+        },
       });
 
-      const loanIds = verifications.map(v => v.loanId);
+      const loanIds = verifications.map((v) => v.loanId);
       const loans = await this.prisma.loan.findMany({
         where: {
           id: { in: loanIds },
-          department: department
+          department: department,
         },
         include: {
           operationsExecutive: {
@@ -505,7 +663,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-            }
+            },
           },
           verifications: {
             include: {
@@ -515,56 +673,66 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                }
+                },
               },
               verifier: {
                 select: {
                   id: true,
                   name: true,
-                  mobile: true
-                }
-              }
-            }
-          }
-        }
+                  mobile: true,
+                },
+              },
+            },
+          },
+        },
       });
 
-      await this.loggingService.debug('Retrieved loans by field executive', {
+      await this.loggingService.debug("Retrieved loans by field executive", {
         fieldExecutiveId,
         department,
-        count: loans.length
+        count: loans.length,
       });
 
       return loans;
     } catch (error) {
-      await this.loggingService.error('Failed to get loans by field executive', {
-        fieldExecutiveId,
-        department,
-        error: error.message,
-        stack: error.stack
-      });
+      await this.loggingService.error(
+        "Failed to get loans by field executive",
+        {
+          fieldExecutiveId,
+          department,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
     }
   }
 
-  async getLoansByVerifier(verifierId: number, department: Department, role: any) {
+  async getLoansByVerifier(
+    verifierId: number,
+    department: Department,
+    role: any
+  ) {
     try {
       const verifier = await this.prisma.user.findUnique({
-        where: { id: verifierId }
+        where: { id: verifierId },
       });
 
       if (!verifier) {
-        throw new NotFoundException('Verifier not found');
+        throw new NotFoundException("Verifier not found");
       }
 
       const where: Prisma.VerificationWhereInput = {
-        department: department
+        department: department,
       };
+
 
       const userRole = role.find((r: any) => r.department === department);
 
       if (userRole.role === UserRole.Verifier) {
         where.verifierId = verifierId;
+      } else {
+        
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -578,9 +746,9 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           fieldExecutive: {
             select: {
@@ -588,21 +756,21 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-            }
+            },
           },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       });
 
       // Group verifications by loan to avoid duplicates
       const loanMap = new Map();
-      verifications.forEach(verification => {
+      verifications.forEach((verification) => {
         if (!loanMap.has(verification.loan.id)) {
           loanMap.set(verification.loan.id, {
             ...verification.loan,
-            verifications: []
+            verifications: [],
           });
         }
         loanMap.get(verification.loan.id).verifications.push(verification);
@@ -610,27 +778,30 @@ export class LoanService {
 
       const loans = Array.from(loanMap.values());
 
-      await this.loggingService.info('Retrieved loans by verifier', {
+      await this.loggingService.info("Retrieved loans by verifier", {
         verifierId,
         role,
-        count: loans.length
+        count: loans.length,
       });
 
       return loans;
     } catch (error) {
-      await this.loggingService.error('Failed to get loans by verifier', {
+      await this.loggingService.error("Failed to get loans by verifier", {
         verifierId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
 
-  async getLoans(officeId: number, filters?: GetLoansDto): Promise<PaginatedResponse<any>> {
+  async getLoans(
+    officeId: number,
+    filters?: GetLoansDto
+  ): Promise<PaginatedResponse<any>> {
     try {
       const where: Prisma.LoanWhereInput = {
-        department: filters.department
+        department: filters.department,
       };
 
       if (filters?.status) {
@@ -642,18 +813,21 @@ export class LoanService {
       }
 
       if (filters?.applicationNumber) {
-        where.applicationNumber = { contains: filters.applicationNumber, mode: 'insensitive' };
+        where.applicationNumber = {
+          contains: filters.applicationNumber,
+          mode: "insensitive",
+        };
       }
 
       // Add date range filter
       if (filters?.startDate || filters?.endDate) {
         where.createdAt = {
           ...(filters.startDate && {
-            gte: new Date(`${filters.startDate}T00:00:00.000Z`)
+            gte: new Date(`${filters.startDate}T00:00:00.000Z`),
           }),
           ...(filters.endDate && {
-            lte: new Date(`${filters.endDate}T23:59:59.999Z`)
-          })
+            lte: new Date(`${filters.endDate}T23:59:59.999Z`),
+          }),
         };
       }
 
@@ -665,17 +839,17 @@ export class LoanService {
               ...(filters.fieldExecutiveEmployeeCode && {
                 employeeCode: {
                   contains: filters.fieldExecutiveEmployeeCode,
-                  mode: 'insensitive'
-                }
+                  mode: "insensitive",
+                },
               }),
               ...(filters.fieldExecutiveName && {
                 name: {
                   contains: filters.fieldExecutiveName,
-                  mode: 'insensitive'
-                }
-              })
-            }
-          }
+                  mode: "insensitive",
+                },
+              }),
+            },
+          },
         };
       }
 
@@ -694,7 +868,7 @@ export class LoanService {
               name: true,
               mobile: true,
               employeeCode: true,
-            }
+            },
           },
           verifications: {
             include: {
@@ -706,7 +880,7 @@ export class LoanService {
                   employeeCode: true,
                   departmentRoles: {
                     where: {
-                      department: filters.department
+                      department: filters.department,
                     },
                     select: {
                       officeId: true,
@@ -714,11 +888,11 @@ export class LoanService {
                         select: {
                           id: true,
                           name: true,
-                        }
-                      }
-                    }
-                  }
-                }
+                        },
+                      },
+                    },
+                  },
+                },
               },
               verifier: {
                 select: {
@@ -726,29 +900,29 @@ export class LoanService {
                   name: true,
                   mobile: true,
                   employeeCode: true,
-                }
+                },
               },
               verificationRetries: {
                 select: {
                   reason: true,
                   date: true,
-                }
+                },
               },
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: "desc",
         },
         skip,
-        take: Number(limit)
+        take: Number(limit),
       });
 
-      await this.loggingService.debug('Retrieved loans with filters', {
+      await this.loggingService.debug("Retrieved loans with filters", {
         filters,
         count: loans.length,
         page,
-        limit
+        limit,
       });
 
       return {
@@ -757,14 +931,14 @@ export class LoanService {
           total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit)
-        }
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
-      await this.loggingService.error('Failed to get loans', {
+      await this.loggingService.error("Failed to get loans", {
         filters,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -778,13 +952,24 @@ export class LoanService {
       const loan = await this.prisma.loan.findUnique({ where: { id: loanId } });
 
       if (!loan) {
-        await this.loggingService.warn('Verification assignment update failed - Loan not found', { loanId });
-        throw new NotFoundException('Loan not found');
+        await this.loggingService.warn(
+          "Verification assignment update failed - Loan not found",
+          { loanId }
+        );
+        throw new NotFoundException("Loan not found");
       }
 
       // // If field executive is provided, address is mandatory
-      if (!updateData.fieldExecutiveId && !updateData.address && !updateData.businessName && !updateData.currentOfficeName && !updateData.verifierId) {
-        throw new BadRequestException('Address is required when assigning a field executive');
+      if (
+        !updateData.fieldExecutiveId &&
+        !updateData.address &&
+        !updateData.businessName &&
+        !updateData.currentOfficeName &&
+        !updateData.verifierId
+      ) {
+        throw new BadRequestException(
+          "Address is required when assigning a field executive"
+        );
       }
 
       // Start a transaction to ensure all operations succeed or fail together
@@ -799,43 +984,61 @@ export class LoanService {
           },
           data: {
             ...(updateData.address && { applicantAddress: updateData.address }),
-            ...(updateData.businessName && { businessName: updateData.businessName }),
+            ...(updateData.businessName && {
+              businessName: updateData.businessName,
+            }),
             ...(updateData.verifierId && { verifierId: updateData.verifierId }),
-            ...(updateData.fieldExecutiveId && { fieldExecutiveId: updateData.fieldExecutiveId }),
-            ...(updateData.currentOfficeName && { currentOfficeName: updateData.currentOfficeName }),
-            status: 'Pending' // Reset status when assignment is updated
+            ...(updateData.fieldExecutiveId && {
+              fieldExecutiveId: updateData.fieldExecutiveId,
+            }),
+            ...(updateData.currentOfficeName && {
+              currentOfficeName: updateData.currentOfficeName,
+            }),
+            status: "Pending", // Reset status when assignment is updated
           },
         });
 
-        await this.loggingService.info('Verification assignment updated successfully', {
-          loanId,
-          updateData
-        });
+        await this.loggingService.info(
+          "Verification assignment updated successfully",
+          {
+            loanId,
+            updateData,
+          }
+        );
 
         return verification;
       });
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      await this.loggingService.error('Failed to update verification assignment', {
-        loanId,
-        updateData,
-        error: error.message,
-        stack: error.stack
-      });
+      await this.loggingService.error(
+        "Failed to update verification assignment",
+        {
+          loanId,
+          updateData,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
     }
   }
 
-  async getAssignedLoansWithVerifications(fieldExecutiveId: number, filters?: FieldExecutiveAssignedDto) {
+  async getAssignedLoansWithVerifications(
+    fieldExecutiveId: number,
+    filters?: FieldExecutiveAssignedDto
+  ) {
     try {
       const fieldExecutive = await this.prisma.user.findUnique({
-        where: { id: fieldExecutiveId }
+        where: { id: fieldExecutiveId },
       });
 
       if (!fieldExecutive) {
-        throw new NotFoundException('Field executive not found');
+        throw new NotFoundException("Field executive not found");
       }
 
       // Calculate today's date range
@@ -844,7 +1047,6 @@ export class LoanService {
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
-
 
       const where: Prisma.VerificationWhereInput = {
         fieldExecutiveId,
@@ -864,11 +1066,10 @@ export class LoanService {
               },
               {
                 isPostponed: false,
-              }
-            ]
-          }
-
-        ]
+              },
+            ],
+          },
+        ],
       };
 
       if (filters?.status) {
@@ -879,8 +1080,8 @@ export class LoanService {
         where.loan = {
           applicationNumber: {
             contains: filters.applicationNumber,
-            mode: 'insensitive'
-          }
+            mode: "insensitive",
+          },
         };
       }
 
@@ -903,60 +1104,93 @@ export class LoanService {
               loanAmount: true,
               status: true,
               bankName: true,
-              loanType: true
-            }
+              loanType: true,
+            },
           },
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: "desc",
         },
         skip,
-        take: Number(limit)
+        take: Number(limit),
       });
       // console.log(verifications[0].loan.applicantMobile, "verifications");
 
       const now = new Date();
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const startOfToday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+      const startOfTomorrow = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1
+      );
 
-      const isAvailableToday = await this.prisma.attendance.findFirst({
+      const isAvailableToday = (await this.prisma.attendance.findFirst({
         where: {
           userId: fieldExecutiveId,
           date: {
             gte: startOfToday,
-            lt: startOfTomorrow
-          }
-        }
-      }) ? true : false;
+            lt: startOfTomorrow,
+          },
+        },
+      }))
+        ? true
+        : false;
 
-      await this.loggingService.debug('Retrieved assigned loans with verifications', {
-        fieldExecutiveId,
-        count: verifications.length,
-        page,
-        limit,
-        excludedRetriesForToday: true
-      });
+      await this.loggingService.debug(
+        "Retrieved assigned loans with verifications",
+        {
+          fieldExecutiveId,
+          count: verifications.length,
+          page,
+          limit,
+          excludedRetriesForToday: true,
+        }
+      );
 
       return {
         isAvailableToday,
-        data:
-        {
+        data: {
           items: verifications,
           meta: {
             total,
             page,
             limit,
-            totalPages: Math.ceil(total / limit)
-          }
-        }
+            totalPages: Math.ceil(total / limit),
+          },
+        },
       };
     } catch (error) {
-      await this.loggingService.error('Failed to get assigned loans with verifications', {
-        fieldExecutiveId,
-        error: error.message,
-        stack: error.stack
-      });
+      await this.loggingService.error(
+        "Failed to get assigned loans with verifications",
+        {
+          fieldExecutiveId,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
+    }
+  }
+
+  private isJsonObject(value: Prisma.JsonValue): value is Prisma.JsonObject {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
+  private safeParseJson(value: string): Prisma.JsonValue {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      this.logger.warn(
+        "Failed to parse verification data JSON string, returning original value",
+        {
+          valuePreview: value?.slice?.(0, 100),
+        }
+      );
+      return value;
     }
   }
 
@@ -966,7 +1200,7 @@ export class LoanService {
     fieldExecutiveId: number,
     findings: string,
     verificationData?: any,
-    addressType?: AddressType,
+    addressType?: AddressType
   ) {
     try {
       let updatedAddressType = addressType;
@@ -976,12 +1210,19 @@ export class LoanService {
           where: {
             loanId,
             addressType: addressType,
-            status: 'Completed',
+            status: "Completed",
           },
         });
 
-        if (completedVerification && (addressType === 'CurrentAddress' || addressType === 'PermanentAddress')) {
-          updatedAddressType = updatedAddressType === 'CurrentAddress' ? 'PermanentAddress' : 'CurrentAddress';
+        if (
+          completedVerification &&
+          (addressType === "CurrentAddress" ||
+            addressType === "PermanentAddress")
+        ) {
+          updatedAddressType =
+            updatedAddressType === "CurrentAddress"
+              ? "PermanentAddress"
+              : "CurrentAddress";
           if (verificationData && verificationData.addressVerification) {
             verificationData.addressVerification.address = updatedAddressType;
           }
@@ -997,18 +1238,22 @@ export class LoanService {
       });
 
       if (!verification) {
-        throw new Error('Verification not found or not assigned to this field executive');
+        throw new Error(
+          "Verification not found or not assigned to this field executive"
+        );
       }
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
         await Promise.all(
           verificationData.uploadedItems.map((item: any) =>
-            this.runWorker({
-              s3ImageUrl: item.s3ImageUrl,
-              latitude: parseFloat(item.latitude),
-              longitude: parseFloat(item.longitude),
-              timestamp: item.timestamp
-            })
+            limit(() =>
+              this.runWorker({
+                s3ImageUrl: item.s3ImageUrl,
+                latitude: parseFloat(item.latitude),
+                longitude: parseFloat(item.longitude),
+                timestamp: item.timestamp,
+              })
+            )
           )
         );
       }
@@ -1019,7 +1264,7 @@ export class LoanService {
           id: verification.id,
         },
         data: {
-          status: 'Completed',
+          status: "Completed",
           verificationData: verificationData || null,
           addressType: updatedAddressType || null,
           updatedAt: new Date(),
@@ -1035,7 +1280,7 @@ export class LoanService {
         });
 
         const allCompleted = allVerifications.every(
-          v => v.status === VerificationStatus.Completed
+          (v) => v.status === VerificationStatus.Completed
         );
 
         // If all verifications are complete, update loan status to FVCompleted
@@ -1045,26 +1290,35 @@ export class LoanService {
             data: { status: LoanStatus.FVCompleted },
           });
 
-          await this.loggingService.info('All verifications completed, loan status updated', {
-            loanId,
-            newStatus: LoanStatus.FVCompleted
-          });
+          await this.loggingService.info(
+            "All verifications completed, loan status updated",
+            {
+              loanId,
+              newStatus: LoanStatus.FVCompleted,
+            }
+          );
         }
       }
 
-      await this.loggingService.info('Verification report updated successfully with processed images', {
-        loanId,
-        verificationType,
-        fieldExecutiveId,
-        processedImagesCount: verificationData?.uploadedItems?.length || 0
-      });
+      await this.loggingService.info(
+        "Verification report updated successfully with processed images",
+        {
+          loanId,
+          verificationType,
+          fieldExecutiveId,
+          processedImagesCount: verificationData?.uploadedItems?.length || 0,
+        }
+      );
 
       return {
         verification: updatedVerification,
       };
     } catch (error) {
-      this.logger.error(`Error updating verification report: ${error.message}`, error.stack);
-      throw new Error('Failed to update verification report');
+      this.logger.error(
+        `Error updating verification report: ${error.message}`,
+        error.stack
+      );
+      throw new Error("Failed to update verification report");
     }
   }
 
@@ -1072,7 +1326,7 @@ export class LoanService {
     loanId: number,
     verificationType: VerificationType,
     fieldExecutiveId: number,
-    status: VerificationStatus,
+    status: VerificationStatus
   ) {
     try {
       // Verify that the field executive is assigned to this verification
@@ -1085,12 +1339,17 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Verification status update failed - Verification not found or not assigned', {
-          loanId,
-          verificationType,
-          fieldExecutiveId
-        });
-        throw new NotFoundException('Verification not found or not assigned to this field executive');
+        await this.loggingService.warn(
+          "Verification status update failed - Verification not found or not assigned",
+          {
+            loanId,
+            verificationType,
+            fieldExecutiveId,
+          }
+        );
+        throw new NotFoundException(
+          "Verification not found or not assigned to this field executive"
+        );
       }
 
       // Update verification status
@@ -1112,7 +1371,7 @@ export class LoanService {
         });
 
         const allCompleted = allVerifications.every(
-          v => v.status === VerificationStatus.Completed
+          (v) => v.status === VerificationStatus.Completed
         );
 
         // If all verifications are complete, update loan status to FVCompleted
@@ -1122,31 +1381,37 @@ export class LoanService {
             data: { status: LoanStatus.FVCompleted },
           });
 
-          await this.loggingService.info('All verifications completed, loan status updated', {
-            loanId,
-            newStatus: LoanStatus.FVCompleted
-          });
+          await this.loggingService.info(
+            "All verifications completed, loan status updated",
+            {
+              loanId,
+              newStatus: LoanStatus.FVCompleted,
+            }
+          );
         }
       }
 
-      await this.loggingService.info('Verification status updated successfully', {
-        loanId,
-        verificationType,
-        fieldExecutiveId,
-        newStatus: status
-      });
+      await this.loggingService.info(
+        "Verification status updated successfully",
+        {
+          loanId,
+          verificationType,
+          fieldExecutiveId,
+          newStatus: status,
+        }
+      );
 
       return updatedVerification;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to update verification status', {
+      await this.loggingService.error("Failed to update verification status", {
         loanId,
         verificationType,
         fieldExecutiveId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -1155,7 +1420,7 @@ export class LoanService {
   async deleteVerification(
     loanId: number,
     verificationType: VerificationType,
-    fieldExecutiveId: number,
+    fieldExecutiveId: number
   ) {
     try {
       // Verify that the field executive is assigned to this verification
@@ -1168,27 +1433,35 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Verification deletion failed - Verification not found or not assigned', {
-          loanId,
-          verificationType,
-          fieldExecutiveId
-        });
-        throw new NotFoundException('Verification not found or not assigned to this field executive');
+        await this.loggingService.warn(
+          "Verification deletion failed - Verification not found or not assigned",
+          {
+            loanId,
+            verificationType,
+            fieldExecutiveId,
+          }
+        );
+        throw new NotFoundException(
+          "Verification not found or not assigned to this field executive"
+        );
       }
 
       // Check if verification is already completed
       if (verification.status === VerificationStatus.Completed) {
-        throw new BadRequestException('Cannot delete a completed verification');
+        throw new BadRequestException("Cannot delete a completed verification");
       }
 
-      const verificationRetries = await this.prisma.verificationRetries.findMany({
-        where: {
-          verificationId: verification.id,
-        },
-      });
+      const verificationRetries =
+        await this.prisma.verificationRetries.findMany({
+          where: {
+            verificationId: verification.id,
+          },
+        });
 
       if (verificationRetries.length > 0) {
-        throw new BadRequestException('Cannot delete the verification as it has been rescheduled');
+        throw new BadRequestException(
+          "Cannot delete the verification as it has been rescheduled"
+        );
       }
 
       // Delete the verification
@@ -1212,33 +1485,39 @@ export class LoanService {
           data: { status: LoanStatus.Unassigned },
         });
 
-        await this.loggingService.info('All verifications deleted, loan status updated to Unassigned', {
-          loanId,
-          newStatus: LoanStatus.Unassigned
-        });
+        await this.loggingService.info(
+          "All verifications deleted, loan status updated to Unassigned",
+          {
+            loanId,
+            newStatus: LoanStatus.Unassigned,
+          }
+        );
       }
 
-      await this.loggingService.info('Verification deleted successfully', {
+      await this.loggingService.info("Verification deleted successfully", {
         loanId,
         verificationType,
         fieldExecutiveId,
-        verificationId: verification.id
+        verificationId: verification.id,
       });
 
       return {
-        message: 'Verification deleted successfully',
-        deletedVerification
+        message: "Verification deleted successfully",
+        deletedVerification,
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      await this.loggingService.error('Failed to delete verification', {
+      await this.loggingService.error("Failed to delete verification", {
         loanId,
         verificationType,
         fieldExecutiveId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -1256,51 +1535,96 @@ export class LoanService {
                 select: {
                   id: true,
                   name: true,
-                  mobile: true
-                }
+                  mobile: true,
+                },
               },
               verifier: {
                 select: {
                   id: true,
                   name: true,
-                  mobile: true
-                }
+                  mobile: true,
+                },
               },
-            }
+            },
           },
-        }
+        },
       });
 
       if (!loan) {
-        await this.loggingService.warn('Failed to get verification data - Loan not found', { loanId });
-        throw new NotFoundException('Loan not found');
+        await this.loggingService.warn(
+          "Failed to get verification data - Loan not found",
+          { loanId }
+        );
+        throw new NotFoundException("Loan not found");
       }
 
-      // Format the verification data and generate presigned URLs for paths
-      const verificationData = await Promise.all(loan.verifications.map(async verification => {
+      // Format the verification data
+      console.error(
+        `🔍 getVerificationData called for loan ${loanId}, department: ${department}`
+      );
 
-        return {
-          id: verification.id,
-          type: verification.type,
-          path: verification.path,
-          status: verification.status,
-          bankName: loan.bankName,
-          approvedStatus: verification.approvedStatus,
-          finalReportPath: verification.finalReportPath,
-          addressType: verification.addressType,
-          verificationData: verification.verificationData,
-          financialAnalysis: verification.financialAnalysis,
-          synopsis: verification.synopsis,
-          fieldExecutive: verification.fieldExecutive,
-          createdAt: verification.createdAt,
-          updatedAt: verification.updatedAt
-        };
-      }));
+      const verificationData = await Promise.all(
+        loan.verifications.map(async (verification) => {
+          // For PD forms, handle both old hardcoded format and new schema format
+          const rawVerificationData = verification
+            .verificationData as Prisma.JsonValue;
+          const parsedVerificationData =
+            typeof rawVerificationData === "string"
+              ? this.safeParseJson(rawVerificationData)
+              : rawVerificationData;
 
-      await this.loggingService.info('Verification data retrieved successfully', {
-        loanId,
-        verificationCount: verificationData.length
-      });
+          let transformedVerificationData: Prisma.JsonValue =
+            parsedVerificationData;
+
+          console.error(`🔍 Processing verification ${verification.id}`);
+
+          if (
+            department === "PD" &&
+            this.isJsonObject(parsedVerificationData)
+          ) {
+            const verificationDataObject =
+              parsedVerificationData as Record<string, any>;
+
+            const hasLegacyShape = ["basicDetails", "businessDetails", "applicantDetails"].some(
+              (key) => verificationDataObject[key]
+            );
+
+            await this.loggingService.info(
+              `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
+              {
+                verificationId: verification.id,
+                dataKeys: Object.keys(verificationDataObject),
+                legacyShapeDetected: hasLegacyShape,
+              }
+            );
+          }
+
+          return {
+            id: verification.id,
+            type: verification.type,
+            path: verification.path,
+            status: verification.status,
+            bankName: loan.bankName,
+            approvedStatus: verification.approvedStatus,
+            finalReportPath: verification.finalReportPath,
+            addressType: verification.addressType,
+            verificationData: transformedVerificationData,
+            financialAnalysis: verification.financialAnalysis,
+            synopsis: verification.synopsis,
+            fieldExecutive: verification.fieldExecutive,
+            createdAt: verification.createdAt,
+            updatedAt: verification.updatedAt,
+          };
+        })
+      );
+
+      await this.loggingService.info(
+        "Verification data retrieved successfully",
+        {
+          loanId,
+          verificationCount: verificationData.length,
+        }
+      );
 
       return {
         loanId: loan.id,
@@ -1312,26 +1636,30 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to get verification data', {
+      await this.loggingService.error("Failed to get verification data", {
         loanId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
 
-  async createLoans(createLoanDtos: CreateLoanDto[], officeId: number, department: Department) {
+  async createLoans(
+    createLoanDtos: CreateLoanDto[],
+    officeId: number,
+    department: Department
+  ) {
     try {
       const results = {
         successful: [],
         failed: [],
         totalProcessed: createLoanDtos.length,
         successfulCount: 0,
-        failedCount: 0
+        failedCount: 0,
       };
       if (!department) {
-        throw new BadRequestException('Department is required');
+        throw new BadRequestException("Department is required");
       }
 
       for (const dto of createLoanDtos) {
@@ -1339,32 +1667,39 @@ export class LoanService {
           // Check if operations executive exists
           if (dto.operationsExecutiveId) {
             const operationsExecutive = await this.prisma.user.findUnique({
-              where: { id: dto.operationsExecutiveId }
+              where: { id: dto.operationsExecutiveId },
             });
 
             if (!operationsExecutive) {
-              throw new NotFoundException(`Operations executive with ID ${dto.operationsExecutiveId} not found`);
+              throw new NotFoundException(
+                `Operations executive with ID ${dto.operationsExecutiveId} not found`
+              );
             }
-          }
-          else {
+          } else {
             dto.operationsExecutiveId = null;
           }
 
           // Check if field executive exists (if provided)
           if (dto.fieldExecutiveId) {
             const fieldExecutive = await this.prisma.user.findUnique({
-              where: { id: dto.fieldExecutiveId }
+              where: { id: dto.fieldExecutiveId },
             });
 
             if (!fieldExecutive) {
-              throw new NotFoundException(`Field executive with ID ${dto.fieldExecutiveId} not found`);
+              throw new NotFoundException(
+                `Field executive with ID ${dto.fieldExecutiveId} not found`
+              );
             }
-          }
-          else {
+          } else {
             dto.fieldExecutiveId = null;
           }
 
-          const { operationsExecutiveId, fieldExecutiveId, verifierId, ...rest } = dto;
+          const {
+            operationsExecutiveId,
+            fieldExecutiveId,
+            verifierId,
+            ...rest
+          } = dto;
 
           // Generate application number if not provided
           const applicationNumber = dto.applicationNumber || `APP${Date.now()}`;
@@ -1373,16 +1708,18 @@ export class LoanService {
             ...rest,
             applicationNumber,
             department,
-            status: dto.status || 'Unassigned',
+            status: dto.status || "Unassigned",
             office: { connect: { id: officeId } },
-            ...(operationsExecutiveId && { operationsExecutive: { connect: { id: operationsExecutiveId } } }),
+            ...(operationsExecutiveId && {
+              operationsExecutive: { connect: { id: operationsExecutiveId } },
+            }),
             ...(fieldExecutiveId && {
-              fieldExecutive: { connect: { id: fieldExecutiveId } }
-            })
+              fieldExecutive: { connect: { id: fieldExecutiveId } },
+            }),
           };
 
           const loan = await this.prisma.loan.create({
-            data: loanData
+            data: loanData,
           });
 
           results.successful.push(loan);
@@ -1390,23 +1727,23 @@ export class LoanService {
         } catch (error) {
           results.failed.push({
             data: dto,
-            error: error.message
+            error: error.message,
           });
           results.failedCount++;
         }
       }
 
-      await this.loggingService.info('Loans created', {
+      await this.loggingService.info("Loans created", {
         totalProcessed: results.totalProcessed,
         successfulCount: results.successfulCount,
-        failedCount: results.failedCount
+        failedCount: results.failedCount,
       });
 
       return results;
     } catch (error) {
-      await this.loggingService.error('Failed to create loans', {
+      await this.loggingService.error("Failed to create loans", {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -1419,8 +1756,10 @@ export class LoanService {
       });
 
       if (!loan) {
-        await this.loggingService.warn('Loan edit failed - Loan not found', { loanId });
-        throw new NotFoundException('Loan not found');
+        await this.loggingService.warn("Loan edit failed - Loan not found", {
+          loanId,
+        });
+        throw new NotFoundException("Loan not found");
       }
 
       const updatedLoan = await this.prisma.loan.update({
@@ -1431,7 +1770,7 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Loan updated successfully', {
+      await this.loggingService.info("Loan updated successfully", {
         loanId,
         updatedFields: Object.keys(editLoanDto),
       });
@@ -1441,7 +1780,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to edit loan', {
+      await this.loggingService.error("Failed to edit loan", {
         loanId,
         error: error.message,
         stack: error.stack,
@@ -1453,7 +1792,7 @@ export class LoanService {
   async editVerificationData(
     loanId: number,
     verificationType: VerificationType,
-    editVerificationDto: EditVerificationDto,
+    editVerificationDto: EditVerificationDto
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -1464,11 +1803,14 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Verification edit failed - Verification not found', {
-          loanId,
-          verificationType,
-        });
-        throw new NotFoundException('Verification not found');
+        await this.loggingService.warn(
+          "Verification edit failed - Verification not found",
+          {
+            loanId,
+            verificationType,
+          }
+        );
+        throw new NotFoundException("Verification not found");
       }
 
       const updatedVerification = await this.prisma.verification.update({
@@ -1481,7 +1823,7 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Verification data updated successfully', {
+      await this.loggingService.info("Verification data updated successfully", {
         loanId,
         verificationType,
         updatedFields: Object.keys(editVerificationDto),
@@ -1492,7 +1834,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to edit verification data', {
+      await this.loggingService.error("Failed to edit verification data", {
         loanId,
         verificationType,
         error: error.message,
@@ -1502,9 +1844,10 @@ export class LoanService {
     }
   }
 
-
-  async generateFinalReportPDF(loanId: number, addressType: AddressType): Promise<string> {
-
+  async generateFinalReportPDF(
+    loanId: number,
+    addressType: AddressType
+  ): Promise<string> {
     const loan = await this.prisma.loan.findUnique({
       where: { id: loanId },
       select: {
@@ -1529,47 +1872,53 @@ export class LoanService {
             verificationData: true,
             path: true,
             finalReportPath: true,
-            fieldExecutive: { select: { name: true } }
-          }
+            fieldExecutive: { select: { name: true } },
+          },
         },
-      }
+      },
     });
 
     if (!loan) {
-      throw new NotFoundException('Loan not found');
+      throw new NotFoundException("Loan not found");
     }
 
     const verification = loan.verifications[0];
 
     if (!verification) {
-      throw new NotFoundException(`Verification for address type ${addressType} not found`);
+      throw new NotFoundException(
+        `Verification for address type ${addressType} not found`
+      );
     }
 
     const finalReportPath = verification.finalReportPath;
 
-    let finalReportPdfUrl = '';
+    let finalReportPdfUrl = "";
 
     const s3_path = `final_pdf/${loanId}/${addressType}.pdf`;
 
     if (finalReportPath) {
-      finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+      finalReportPdfUrl =
+        await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
       return finalReportPdfUrl;
-    }
-    else {
+    } else {
       const pdfBuffer = await this.generateVerificationPDF(loanId, addressType);
 
       const pdfUrl = await this.s3Service.uploadPdfToS3(pdfBuffer, s3_path);
 
       const updatedVerification = await this.prisma.verification.update({
         where: { id: verification.id },
-        data: { finalReportPath: s3_path }
+        data: { finalReportPath: s3_path },
       });
 
       return pdfUrl;
     }
   }
 
-  async returnHTMLImageData(data: string[], bankName: string, fieldExecutive: string): Promise<string> {
+  async returnHTMLImageData(
+    data: string[],
+    bankName: string,
+    fieldExecutive: string
+  ): Promise<string> {
     return `
     <div style="page-break-before: always;"></div>
       <div class="align-wrapper">
@@ -1578,23 +1927,29 @@ export class LoanService {
           <tr>
             <td colspan="6">
               <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px;">
-                ${data.join('')}
+                ${data.join("")}
               </div>
             </td>
           </tr>
         </table>
       </div>
-    `
+    `;
   }
 
-  async formatImages(images: string[], bankName: string, fieldExecutive: string): Promise<string> {
+  async formatImages(
+    images: string[],
+    bankName: string,
+    fieldExecutive: string
+  ): Promise<string> {
     let result = [];
     let finalResult = [];
     let count = 0;
     const date = new Date();
-    const timeZone = 'Asia/Kolkata';
+    const timeZone = "Asia/Kolkata";
     const zonedDate = toZonedTime(date, timeZone);
-    const istDate = format(zonedDate, 'dd-MM-yyyy hh:mm:ss a xxx', { timeZone });
+    const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", {
+      timeZone,
+    });
     for (let i = 0; i < images.length; i++) {
       result.push(`<div style="width: 70%; margin: 1%; border: 1px solid #ddd; padding: 10px; text-align: center; display: inline-block; vertical-align: top; box-sizing: border-box; page-break-inside: avoid;">
                   <img src="${images[i]}" style="width: 100%; height: 300px; object-fit: contain; margin-bottom: 10px;" />
@@ -1603,20 +1958,27 @@ export class LoanService {
 
       count++;
       if (count % 4 === 0) {
-        finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
+        finalResult.push(
+          await this.returnHTMLImageData(result, bankName, fieldExecutive)
+        );
         result = [];
         count = 0;
       }
     }
 
     if (count > 0 && count < 4) {
-      finalResult.push(await this.returnHTMLImageData(result, bankName, fieldExecutive));
+      finalResult.push(
+        await this.returnHTMLImageData(result, bankName, fieldExecutive)
+      );
     }
 
-    return finalResult.join('');
+    return finalResult.join("");
   }
 
-  async generateVerificationPDF(loanId: number, addressType: AddressType): Promise<Buffer> {
+  async generateVerificationPDF(
+    loanId: number,
+    addressType: AddressType
+  ): Promise<Buffer> {
     try {
       // Fetch loan details with verification data
       const loan = await this.prisma.loan.findUnique({
@@ -1642,47 +2004,57 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true } }
-            }
+              fieldExecutive: { select: { name: true } },
+            },
           },
-        }
+        },
       });
 
       if (!loan) {
-        throw new NotFoundException('Loan not found');
+        throw new NotFoundException("Loan not found");
       }
 
       const verification = loan.verifications[0];
 
       if (!verification) {
-        throw new NotFoundException(`Verification for address type ${addressType} not found`);
+        throw new NotFoundException(
+          `Verification for address type ${addressType} not found`
+        );
       }
 
-      const status = verification?.approvedStatus || '';
+      const status = verification?.approvedStatus || "";
 
       // let address = verification.fieldExecutive?.office?.address || '' +
       //   ', ' + verification.fieldExecutive?.office?.location || '' +
       //   ', ' + verification.fieldExecutive?.office?.name || '';
-      let address = '';
+      let address = "";
       // address = address.toLocaleLowerCase();
 
       // Get the verification data
-      let verificationData: VerificationData | WorkVerificationData | BusinessVerificationData = {};
-      if (addressType === 'Work') {
-        verificationData = verification.verificationData as WorkVerificationData || {};
-      }
-      else if (addressType === 'Business') {
-        verificationData = verification.verificationData as BusinessVerificationData || {};
-      }
-      else if (addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-        verificationData = verification.verificationData as VerificationData || {};
-      }
-      else {
-        throw new NotFoundException('Invalid address type');
+      let verificationData:
+        | VerificationData
+        | WorkVerificationData
+        | BusinessVerificationData = {};
+      if (addressType === "Work") {
+        verificationData =
+          (verification.verificationData as WorkVerificationData) || {};
+      } else if (addressType === "Business") {
+        verificationData =
+          (verification.verificationData as BusinessVerificationData) || {};
+      } else if (
+        addressType === "PermanentAddress" ||
+        addressType === "CurrentAddress"
+      ) {
+        verificationData =
+          (verification.verificationData as VerificationData) || {};
+      } else {
+        throw new NotFoundException("Invalid address type");
       }
 
-      const imagePath = path.resolve(process.env.SIGNATURE_PATH || '/home/ubuntu/kowtha/new_sign.jpg');
-      const imageBase64 = fs.readFileSync(imagePath, 'base64');
+      const imagePath = path.resolve(
+        process.env.SIGNATURE_PATH || "/home/ubuntu/kowtha/new_sign.jpg"
+      );
+      const imageBase64 = fs.readFileSync(imagePath, "base64");
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
       // Get uploaded items for this verification only
@@ -1692,23 +2064,32 @@ export class LoanService {
       const imageUrls = await Promise.all(
         uploadedItems.map(async (item) => {
           try {
-            return await this.s3Service.generatePresignedDownloadUrl(item.s3ImageUrl);
+            return await this.s3Service.generatePresignedDownloadUrl(
+              item.s3ImageUrl
+            );
           } catch (error) {
-            await this.loggingService.error('Failed to generate presigned URL for image', {
-              s3ImageUrl: item.s3ImageUrl,
-              error: error.message
-            });
+            await this.loggingService.error(
+              "Failed to generate presigned URL for image",
+              {
+                s3ImageUrl: item.s3ImageUrl,
+                error: error.message,
+              }
+            );
             return null;
           }
         })
       );
 
       // Filter out any failed URL generations
-      const validImageUrls = imageUrls.filter(url => url !== null);
+      const validImageUrls = imageUrls.filter((url) => url !== null);
 
-      let htmlTemplate = '';
+      let htmlTemplate = "";
 
-      const imagesData = await this.formatImages(validImageUrls, loan.bankName, verification.fieldExecutive?.name || '');
+      const imagesData = await this.formatImages(
+        validImageUrls,
+        loan.bankName,
+        verification.fieldExecutive?.name || ""
+      );
 
       const html_data = {
         bankName: loan.bankName,
@@ -1716,28 +2097,43 @@ export class LoanService {
         status: status,
         imageDataUri: imageDataUri,
         imagesData: imagesData,
-        fieldExecutive: verification.fieldExecutive?.name || '',
-      }
+        fieldExecutive: verification.fieldExecutive?.name || "",
+      };
 
-      if (addressType === 'PermanentAddress' || addressType === 'CurrentAddress') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
-          addressTemplate(verificationData as VerificationData, html_data, addressType);
-      }
-      else if (addressType === 'Work') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
+      if (
+        addressType === "PermanentAddress" ||
+        addressType === "CurrentAddress"
+      ) {
+        htmlTemplate =
+          this.generateBaseHTMLTemplate(loan, address) +
+          addressTemplate(
+            verificationData as VerificationData,
+            html_data,
+            addressType
+          );
+      } else if (addressType === "Work") {
+        htmlTemplate =
+          this.generateBaseHTMLTemplate(loan, address) +
           workTemplate(verificationData as WorkVerificationData, html_data);
-      }
-      else if (addressType === 'Business') {
-        htmlTemplate = this.generateBaseHTMLTemplate(loan, address) +
-          businessTemplate(verificationData as BusinessVerificationData, html_data);
-      }
-      else {
-        throw new NotFoundException('Invalid address type');
+      } else if (addressType === "Business") {
+        htmlTemplate =
+          this.generateBaseHTMLTemplate(loan, address) +
+          businessTemplate(
+            verificationData as BusinessVerificationData,
+            html_data
+          );
+      } else {
+        throw new NotFoundException("Invalid address type");
       }
       // Launch a new browser instance
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-IN', '--intl.accept_languages=en-IN']
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--lang=en-IN",
+          "--intl.accept_languages=en-IN",
+        ],
       });
 
       // Create a new page
@@ -1745,35 +2141,38 @@ export class LoanService {
 
       // Set content to the HTML template
       await page.setContent(htmlTemplate, {
-        waitUntil: 'networkidle0'
+        waitUntil: "networkidle0",
       });
 
       // Generate PDF
       const pdfArray = await page.pdf({
-        format: 'a4',
+        format: "a4",
         margin: {
-          top: '20px',
-          right: '20px',
-          bottom: '20px',
-          left: '20px'
+          top: "20px",
+          right: "20px",
+          bottom: "20px",
+          left: "20px",
         },
         printBackground: true,
-        preferCSSPageSize: true
+        preferCSSPageSize: true,
       });
       const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
       // Close the browser
       await browser.close();
 
-      await this.loggingService.info('Verification PDF generated successfully', {
-        loanId,
-        addressType,
-        applicationNumber: loan.applicationNumber,
-      });
+      await this.loggingService.info(
+        "Verification PDF generated successfully",
+        {
+          loanId,
+          addressType,
+          applicationNumber: loan.applicationNumber,
+        }
+      );
 
       return pdfBuffer;
     } catch (error) {
-      await this.loggingService.error('Failed to generate verification PDF', {
+      await this.loggingService.error("Failed to generate verification PDF", {
         loanId,
         addressType,
         error: error.message,
@@ -1784,12 +2183,12 @@ export class LoanService {
   }
 
   private generateBaseHTMLTemplate(loan: any, address: string): string {
-    let mailId = '';
+    let mailId = "";
 
-    if (address.includes('vijayawada')) {
-      mailId = 'apfi@cakowtha.co.in';
+    if (address.includes("vijayawada")) {
+      mailId = "apfi@cakowtha.co.in";
     } else {
-      mailId = 'tsfi@cakowtha.co.in';
+      mailId = "tsfi@cakowtha.co.in";
     }
 
     return baseTemplate(address, mailId, loan);
@@ -1810,7 +2209,7 @@ export class LoanService {
       });
 
       if (!verification) {
-        throw new NotFoundException('Verification not found');
+        throw new NotFoundException("Verification not found");
       }
 
       const updatedVerification = await this.prisma.verification.update({
@@ -1822,7 +2221,7 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Verification approval updated', {
+      await this.loggingService.info("Verification approval updated", {
         loanId,
         verificationType,
         approvedStatus,
@@ -1830,14 +2229,17 @@ export class LoanService {
       });
       return updatedVerification;
     } catch (error) {
-      await this.loggingService.error('Failed to update verification approval', {
-        loanId,
-        verificationType,
-        approvedStatus,
-        path,
-        error: error.message,
-        stack: error.stack,
-      });
+      await this.loggingService.error(
+        "Failed to update verification approval",
+        {
+          loanId,
+          verificationType,
+          approvedStatus,
+          path,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
     }
   }
@@ -1852,23 +2254,23 @@ export class LoanService {
             select: {
               id: true,
               applicationNumber: true,
-              applicantName: true
-            }
-          }
-        }
+              applicantName: true,
+            },
+          },
+        },
       });
 
       if (!verification) {
-        throw new NotFoundException('Verification not found');
+        throw new NotFoundException("Verification not found");
       }
 
       // Validate that the field executive exists
       const fieldExecutive = await this.prisma.user.findUnique({
-        where: { id: createVerificationRetryDto.fieldExecutiveId }
+        where: { id: createVerificationRetryDto.fieldExecutiveId },
       });
 
       if (!fieldExecutive) {
-        throw new NotFoundException('Field executive not found');
+        throw new NotFoundException("Field executive not found");
       }
 
       // Create the verification retry
@@ -1888,50 +2290,53 @@ export class LoanService {
                 select: {
                   id: true,
                   applicationNumber: true,
-                  applicantName: true
-                }
-              }
-            }
+                  applicantName: true,
+                },
+              },
+            },
           },
           fieldExecutive: {
             select: {
               id: true,
               name: true,
               mobile: true,
-              employeeCode: true
-            }
-          }
-        }
+              employeeCode: true,
+            },
+          },
+        },
       });
 
       const updateVerification = await this.prisma.verification.update({
         where: {
-          id: verification.id
+          id: verification.id,
         },
         data: {
           isPostponed: true,
           postponedDate: new Date(createVerificationRetryDto.date),
-          postponedReason: createVerificationRetryDto.reason
-        }
+          postponedReason: createVerificationRetryDto.reason,
+        },
       });
 
-      await this.loggingService.info('Verification retry created successfully', {
-        verificationRetryId: verificationRetry.id,
-        verificationId: createVerificationRetryDto.verificationId,
-        fieldExecutiveId: createVerificationRetryDto.fieldExecutiveId,
-        loanId: verification.loan.id,
-        applicationNumber: verification.loan.applicationNumber
-      });
+      await this.loggingService.info(
+        "Verification retry created successfully",
+        {
+          verificationRetryId: verificationRetry.id,
+          verificationId: createVerificationRetryDto.verificationId,
+          fieldExecutiveId: createVerificationRetryDto.fieldExecutiveId,
+          loanId: verification.loan.id,
+          applicationNumber: verification.loan.applicationNumber,
+        }
+      );
 
       return verificationRetry;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to create verification retry', {
+      await this.loggingService.error("Failed to create verification retry", {
         data: createVerificationRetryDto,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -1946,7 +2351,7 @@ export class LoanService {
         });
 
         if (!loan) {
-          throw new NotFoundException('Loan not found');
+          throw new NotFoundException("Loan not found");
         }
       }
 
@@ -1970,7 +2375,7 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('PD Email Log created successfully', {
+      await this.loggingService.info("PD Email Log created successfully", {
         pdEmailLogId: pdEmailLog.id,
         messageID: pdEmailLog.messageID,
         subject: pdEmailLog.subject,
@@ -1982,7 +2387,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to create PD Email Log', {
+      await this.loggingService.error("Failed to create PD Email Log", {
         data,
         error: error.message,
         stack: error.stack,
@@ -2000,7 +2405,7 @@ export class LoanService {
           where: { loanId },
           select: { id: true },
         });
-        const verificationIds = verifications.map(v => v.id);
+        const verificationIds = verifications.map((v) => v.id);
         if (verificationIds.length > 0) {
           await prisma.verificationRetries.deleteMany({
             where: { verificationId: { in: verificationIds } },
@@ -2028,17 +2433,26 @@ export class LoanService {
           where: { id: loanId },
         });
 
-        await this.loggingService.info('Loan and all related entities deleted', {
-          loanId,
-        });
-        return { message: 'Loan and all related entities deleted', deletedLoan };
+        await this.loggingService.info(
+          "Loan and all related entities deleted",
+          {
+            loanId,
+          }
+        );
+        return {
+          message: "Loan and all related entities deleted",
+          deletedLoan,
+        };
       });
     } catch (error) {
-      await this.loggingService.error('Failed to delete loan and related entities', {
-        loanId,
-        error: error.message,
-        stack: error.stack,
-      });
+      await this.loggingService.error(
+        "Failed to delete loan and related entities",
+        {
+          loanId,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
     }
   }
@@ -2054,7 +2468,7 @@ export class LoanService {
         });
 
         if (!originalLoan) {
-          throw new NotFoundException('Loan not found');
+          throw new NotFoundException("Loan not found");
         }
 
         const newLoan = await prisma.loan.create({
@@ -2074,11 +2488,18 @@ export class LoanService {
             department: originalLoan.department,
             reassignCount: originalLoan.reassignCount + 1,
             office: { connect: { id: originalLoan.officeId } },
-            ...(originalLoan.operationsExecutiveId && { operationsExecutive: { connect: { id: originalLoan.operationsExecutiveId } } }),
+            ...(originalLoan.operationsExecutiveId && {
+              operationsExecutive: {
+                connect: { id: originalLoan.operationsExecutiveId },
+              },
+            }),
           },
         });
 
-        if (originalLoan.verifications && originalLoan.verifications.length > 0) {
+        if (
+          originalLoan.verifications &&
+          originalLoan.verifications.length > 0
+        ) {
           for (const v of originalLoan.verifications) {
             await prisma.verification.create({
               data: {
@@ -2086,7 +2507,9 @@ export class LoanService {
                 type: v.type,
                 addressType: v.addressType,
                 department: department,
-                ...(v.verifierId && { verifier: { connect: { id: v.verifierId } } }),
+                ...(v.verifierId && {
+                  verifier: { connect: { id: v.verifierId } },
+                }),
                 fieldExecutive: { connect: { id: v.fieldExecutiveId } },
                 status: VerificationStatus.Pending,
                 locationType: v.locationType,
@@ -2102,13 +2525,16 @@ export class LoanService {
           }
         }
 
-        await this.loggingService.info('Loan reassigned by cloning with incremented reassignCount', {
-          originalLoanId,
-          newLoanId: newLoan.id,
-          previousReassignCount: originalLoan.reassignCount,
-          newReassignCount: newLoan.reassignCount,
-          verificationsCloned: originalLoan.verifications?.length || 0,
-        });
+        await this.loggingService.info(
+          "Loan reassigned by cloning with incremented reassignCount",
+          {
+            originalLoanId,
+            newLoanId: newLoan.id,
+            previousReassignCount: originalLoan.reassignCount,
+            newReassignCount: newLoan.reassignCount,
+            verificationsCloned: originalLoan.verifications?.length || 0,
+          }
+        );
 
         return newLoan;
       });
@@ -2116,7 +2542,7 @@ export class LoanService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to reassign loan', {
+      await this.loggingService.error("Failed to reassign loan", {
         originalLoanId,
         error: error.message,
         stack: error.stack,
@@ -2127,15 +2553,13 @@ export class LoanService {
 
   // PD Verification PDF Generation
 
-
-
   async generatePDFinalReportPDF(loanId: number) {
     try {
       const loan = await this.prisma.loan.findUnique({
         where: { id: loanId },
         include: {
           verifications: {
-            where: { addressType: 'Business' },
+            where: { addressType: "Business" },
             select: {
               id: true,
               type: true,
@@ -2145,33 +2569,36 @@ export class LoanService {
               verificationData: true,
               path: true,
               finalReportPath: true,
-              fieldExecutive: { select: { name: true } }
-            }
-          }
-        }
+              fieldExecutive: { select: { name: true } },
+            },
+          },
+        },
       });
 
       if (!loan) {
-        throw new NotFoundException('Loan not found');
+        throw new NotFoundException("Loan not found");
       }
 
       const verification = loan.verifications[0];
 
       if (!verification) {
-        throw new NotFoundException(`Verification for address type Business not found`);
+        throw new NotFoundException(
+          `Verification for address type Business not found`
+        );
       }
 
       const finalReportPath = verification.finalReportPath;
 
       if (!finalReportPath) {
-        throw new NotFoundException('Final report path not found');
+        throw new NotFoundException("Final report path not found");
       }
 
-      const finalReportPdfUrl = await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
+      const finalReportPdfUrl =
+        await this.s3Service.generatePresignedDownloadUrl(finalReportPath);
 
       return finalReportPdfUrl;
     } catch (error) {
-      await this.loggingService.error('Failed to generate Final Report PDF', {
+      await this.loggingService.error("Failed to generate Final Report PDF", {
         loanId,
         error: error.message,
         stack: error.stack,
@@ -2180,7 +2607,11 @@ export class LoanService {
     }
   }
 
-  async createFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
+  async createFinancialAnalysis(
+    loanId: number,
+    financialAnalysisData: any,
+    synopsis?: string
+  ) {
     try {
       const verification = await this.prisma.verification.findFirst({
         where: {
@@ -2191,10 +2622,13 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Financial analysis creation failed - Verification not found', {
-          loanId,
-        });
-        throw new NotFoundException('Verification not found');
+        await this.loggingService.warn(
+          "Financial analysis creation failed - Verification not found",
+          {
+            loanId,
+          }
+        );
+        throw new NotFoundException("Verification not found");
       }
 
       const updatedVerification = await this.prisma.verification.update({
@@ -2207,26 +2641,33 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Financial analysis created successfully', {
-        loanId,
-        verificationId: verification.id,
-      });
+      await this.loggingService.info(
+        "Financial analysis created successfully",
+        {
+          loanId,
+          verificationId: verification.id,
+        }
+      );
 
       return updatedVerification;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to create financial analysis', {
+      await this.loggingService.error("Failed to create financial analysis", {
         loanId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
 
-  async updateFinancialAnalysis(loanId: number, financialAnalysisData: any, synopsis?: string) {
+  async updateFinancialAnalysis(
+    loanId: number,
+    financialAnalysisData: any,
+    synopsis?: string
+  ) {
     try {
       const verification = await this.prisma.verification.findFirst({
         where: {
@@ -2237,17 +2678,21 @@ export class LoanService {
       });
 
       if (!verification) {
-        await this.loggingService.warn('Financial analysis update failed - Verification not found', {
-          loanId,
-        });
-        throw new NotFoundException('Verification not found');
+        await this.loggingService.warn(
+          "Financial analysis update failed - Verification not found",
+          {
+            loanId,
+          }
+        );
+        throw new NotFoundException("Verification not found");
       }
 
       // Merge existing financialAnalysis with new data to preserve unchanged fields
-      const existingFinancialAnalysis = verification.financialAnalysis as any || {};
+      const existingFinancialAnalysis =
+        (verification.financialAnalysis as any) || {};
       const mergedFinancialAnalysis = {
         ...existingFinancialAnalysis,
-        ...financialAnalysisData
+        ...financialAnalysisData,
       };
 
       const updatedVerification = await this.prisma.verification.update({
@@ -2261,23 +2706,28 @@ export class LoanService {
         },
       });
 
-      await this.loggingService.info('Financial analysis updated successfully', {
-        loanId,
-        verificationId: verification.id,
-        updatedFields: Object.keys(financialAnalysisData)
-      });
+      await this.loggingService.info(
+        "Financial analysis updated successfully",
+        {
+          loanId,
+          verificationId: verification.id,
+          updatedFields: Object.keys(financialAnalysisData),
+        }
+      );
 
       return updatedVerification;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      await this.loggingService.error('Failed to update financial analysis', {
+      await this.loggingService.error("Failed to update financial analysis", {
         loanId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
   }
-} 
+
+
+}

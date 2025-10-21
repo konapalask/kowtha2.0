@@ -19,7 +19,7 @@ interface OTPResponse {
 }
 
 export const generateOTP = async (mobileNumber: string): Promise<void> => {
-try {
+  try {
     const response = await axiosInstance.post('/accounts/otp/generate', {
       mobile: mobileNumber,
       isMobile: true,
@@ -86,17 +86,18 @@ export const verifyOTP = async (
       deviceId: deviceId || null,
     });
 
-    // if (response.status !== 200) {
-    //   throw new Error('Failed to verify OTP');
-    // }
-    return response?.data;
+    // Normalize token keys from backend into camelCase expected by app
+    const data = response?.data || {};
+    const accessToken =
+      data.accessToken ?? data.access_token ?? data.token ?? undefined;
+    const refreshToken =
+      data.refreshToken ?? data.refresh_token ?? data.token ?? undefined;
 
-    // return {
-    //   access_token: response.data.token,
-    //   refresh_token: response.data.token,
-    //   // access_token: response.data.access_token,
-    //   // refresh_token: response.data.refresh_token,
-    // };
+    if (!accessToken || !refreshToken) {
+      console.warn('verifyOTP: Missing tokens in response', data);
+    }
+
+    return {accessToken, refreshToken};
   } catch (error) {
     console.error('Error verifying OTP:', error);
     throw error;

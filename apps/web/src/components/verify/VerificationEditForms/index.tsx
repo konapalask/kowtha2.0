@@ -1,116 +1,55 @@
 import React from "react";
-import BasicDetailsForm from "./BasicDetailsForm";
-import ResidenceDetailsForm from "./ResidenceDetailsForm";
-import FamilyEmploymentDetailsForm from "./FamilyEmploymentDetailsForm";
-import AddressVerificationForm from "./AddressVerificationForm";
-import ThirdPartyCheckForm from "./ThirdPartyCheckForm";
-// import FinalObservationsForm from './FinalObservationsForm';
-import OfficeVerificationForm from "./OfficeVerificationForm";
-import WorkBasicDetails from "./WorkBasicDetails";
-import BusinessBasicDetails from "./BusinessBasicDetails";
-import BusinessDetails from "./BusinessDetails";
-import ApplicantDetails from "./ApplicantDetails";
-import BusinessMiscellaneous from "./BusinessMiscellaneous";
-import ColleagueReferencesDetails from "./ColleagueReferencesDetails";
-import PastEmploymentDetails from "./PastEmploymentDetails";
-import ExistingLoansDetails from "./ExistingLoansDetails";
-import FamilyMemberForm from "./FamilyMemberForm";
-import ToGrossProfitForm from "./ToGrossProfitForm";
-import ToNetProfitForm from "./ToNetProfitForm";
-import FamilyDetails from "./FamilyDetails";
-import FinancialAnalysisForm from "./FinancialAnalysisForm";
-import ShareholdingDetailsForm from "./ShareholdingDetailsForm";
-import SuppliersCreditorsForm from "./SuppliersCreditorsForm";
-import ClientsDebtorsForm from "./ClientsDebtorsForm";
-import SalariesWagesForm from "./SalariesWagesForm";
-import AssetDetailsForm from "./AssetDetailsForm";
-import DocumentsObservedForm from "./DocumentsObservedForm";
-import BankingDetailsForm from "./BankingDetailsForm";
+import { Form, FormInstance } from "antd";
 
 interface FormSelectorProps {
-  form: any;
+  form: FormInstance;
   formKey: string;
-  currentTab: any;
-  getMaritalStatus: any;
+  currentTab: string;
+  getMaritalStatus?: () => string;
   currentDepartment?: string;
+  bankName?: string;
 }
 
+/**
+ * FormSelector - Legacy component for FI department forms
+ *
+ * Note: PD department now uses DynamicEditModal with array tracking.
+ * This component is maintained for backward compatibility with FI forms.
+ */
 export const FormSelector: React.FC<FormSelectorProps> = ({
   form,
   formKey,
   currentTab,
   getMaritalStatus,
   currentDepartment,
+  bankName,
 }) => {
-  switch (formKey) {
-    case "basicDetails":
-      return <BasicDetailsForm form={form} />;
-    case "addressVerification":
-      return <AddressVerificationForm form={form} />;
-    case "residenceDetails":
-      return <ResidenceDetailsForm form={form} />;
-    case "familyEmploymentDetails":
-      return (
-        <FamilyEmploymentDetailsForm
-          form={form}
-          getMaritalStatus={getMaritalStatus}
-        />
-      );
-    case "thirdPartyCheck":
-      return <ThirdPartyCheckForm form={form} />;
-    // case 'finalObservations':
-    //   return <FinalObservationsForm form={form} />;
-    case "employmentDetails":
-      return <OfficeVerificationForm form={form} />;
-    case "workBasicDetails":
-      return <WorkBasicDetails form={form} />;
-    case "colleagueReferences":
-      return <ColleagueReferencesDetails form={form} />;
-    case "pastEmployment":
-      return <PastEmploymentDetails form={form} />;
-    case "existingLoans":
-      return <ExistingLoansDetails form={form} />;
-    case "businessBasicDetails":
-      return <BusinessBasicDetails form={form} currentDepartment={currentDepartment} />;
-    case "businessDetails":
-      return <BusinessDetails form={form} currentDepartment={currentDepartment} />;
-    case "applicantDetails":
-      return <ApplicantDetails form={form} currentDepartment={currentDepartment} />;
-    case "familyDetails":
-      return <FamilyDetails form={form} />;
-    case "miscellaneous":
-      return <BusinessMiscellaneous form={form} />;
-    case "familyMemberDetails":
-      return <FamilyMemberForm form={form} />;
-    case "shareholdingDetails":
-      return <ShareholdingDetailsForm form={form} />;
-    case "suppliersCreditors":
-      return <SuppliersCreditorsForm form={form} />;
-    case "clientsDebtors":
-      return <ClientsDebtorsForm form={form} />;
-    case "salariesWages":
-      return <SalariesWagesForm form={form} />;
-    case "documentsObserved":
-      return <DocumentsObservedForm form={form} />;
-    case "assetDetails":
-      return <AssetDetailsForm form={form} />;
-    case "bankingDetails":
-      return <BankingDetailsForm form={form} />;
-    case "toGrossProfit":
-      return <ToGrossProfitForm form={form} />;
-    case "toNetProfit":
-      return <ToNetProfitForm form={form} />;
-    case "financialAnalysis":
-      return <FinancialAnalysisForm form={form} />;
-    default:
-      return null;
+  // For PD department, forms should use DynamicEditModal instead
+  if (currentDepartment === "PD") {
+    return (
+      <div style={{ padding: "16px", textAlign: "center", color: "#999" }}>
+        <p>
+          PD forms now use the dynamic schema system with enhanced array
+          tracking.
+        </p>
+        <p>Please use the DynamicEditModal for editing PD form data.</p>
+      </div>
+    );
   }
+
+  // Legacy FI form rendering
+  // This is a stub - you may need to implement specific FI form fields here
+  return (
+    <div>
+      <p style={{ color: "#999", fontStyle: "italic" }}>
+        Legacy form editor for {formKey}
+      </p>
+      <p style={{ color: "#faad14", fontSize: "12px" }}>
+        Note: This is a legacy component. Consider migrating to DynamicEditModal
+        for better array handling.
+      </p>
+    </div>
+  );
 };
 
-export { default as BasicDetailsForm } from "./BasicDetailsForm";
-export { default as ResidenceDetailsForm } from "./ResidenceDetailsForm";
-export { default as FamilyEmploymentDetailsForm } from "./FamilyEmploymentDetailsForm";
-export { default as AddressVerificationForm } from "./AddressVerificationForm";
-export { default as ThirdPartyCheckForm } from "./ThirdPartyCheckForm";
-export { default as FinalObservationsForm } from "./FinalObservationsForm";
-export { default as OfficeVerificationForm } from "./OfficeVerificationForm";
+

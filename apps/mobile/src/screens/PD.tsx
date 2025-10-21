@@ -6,19 +6,15 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {useForm} from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BackButton} from '../lib/BackButton';
-import {
-  getFormConfigByBank,
-  getAvailableBanks,
-  BankFormConfig,
-  BankFormSection,
-} from '../components/pd-forms/bankFormConfigs';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
-import {clearItem} from '../helpers/utility';
+import {clearItem, getItem} from '../helpers/utility';
 import Toast from 'react-native-toast-message';
 import Investigable from '../components/forms/Investigable';
 import CollapsibleSection from '../components/CollapsibleSection';
@@ -26,6 +22,372 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import SchemaSection from '../components/pd-forms/SchemaSection';
 import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
+import GetLocation from 'react-native-get-location';
+
+// Function to populate initial data from schema structure
+const populateInitialDataFromSchema = (
+  schema: any,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!schema || !schema.sections || !userData) return {};
+
+  const initialData: any = {};
+
+  // Common data mapping
+  const commonData = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    businessName: userData?.businessName || userData?.loan?.businessName || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNumber:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    address:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+  };
+
+  // Map common data to schema fields
+  schema.sections.forEach((section: any) => {
+    if (!section.fields) return;
+
+    initialData[section.id] = {};
+
+    section.fields.forEach((field: any) => {
+      const fieldId = field.id;
+
+      // Map common data to schema fields
+      switch (fieldId) {
+        case 'nameOfTheApplicant':
+        case 'nameOfApplicant':
+          initialData[section.id][fieldId] = commonData.applicantName;
+          break;
+        case 'businessName':
+        case 'nameOfConcern':
+          initialData[section.id][fieldId] = commonData.businessName;
+          break;
+        case 'phoneNo':
+        case 'contactNo':
+          initialData[section.id][fieldId] = commonData.phoneNo;
+          break;
+        case 'applicationNumber':
+        case 'applicationNo':
+          initialData[section.id][fieldId] = commonData.applicationNumber;
+          break;
+        case 'visitedAddress':
+        case 'currentAddress':
+        case 'initiatedAddress':
+          initialData[section.id][fieldId] = commonData.address;
+          break;
+        case 'loanRequested':
+        case 'loanAmount':
+          initialData[section.id][fieldId] = commonData.loanAmount;
+          break;
+        case 'bankName':
+          initialData[section.id][fieldId] = userData?.loan?.bankName || '';
+          break;
+        case 'pdDoneBy':
+        case 'nameOfPersonMet':
+          initialData[section.id][fieldId] = loggedInUserName || '';
+          break;
+        default:
+          // For other fields, leave empty to be filled by user
+          initialData[section.id][fieldId] = '';
+      }
+    });
+  });
+
+  return initialData;
+};
+
+// Function to get initial data based on bank name (DEPRECATED - keeping for fallback)
+const getInitialDataByBank = (
+  bankName: string,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!userData || !bankName) return {};
+
+  const bankNameLower = bankName.toLowerCase();
+
+  // console.log('userData', userData);
+
+  // Common data mapping
+  const commonData = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    nameOfConcern: userData?.businessName || userData?.loan?.businessName || '',
+    initiatedAddress:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNo:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    contactNumber:
+      userData?.loan?.applicantMobile || userData?.contactNumber || '',
+  };
+
+  // console.log('commonData', commonData);
+
+  // Bank-specific mappings
+  if (bankNameLower.includes('axis finance ubl')) {
+    return {
+      basicDetails: {
+        applicationNo: commonData.applicationNo,
+        applicantName: commonData.applicantName,
+        concernName: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        phoneNo: commonData.phoneNo,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('axis bank')) {
+    return {
+      applicantDetails: {
+        applicationId:
+          userData?.loan?.applicationId || commonData.applicationNo,
+        loanAmount: `${commonData.loanAmount}`,
+        customerName: commonData.applicantName,
+        contactNumber: commonData.contactNumber,
+        pdAddress: commonData.initiatedAddress,
+      },
+      businessPlaceVintage: {
+        nameOfFirm: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  if (bankNameLower.includes('arka fincap')) {
+    return {
+      applicantDetails: {
+        applicationNo: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        phoneNumber: commonData.phoneNo,
+        nameOfConcern: commonData.nameOfConcern,
+        initiatedAddress: commonData.initiatedAddress,
+        loanAmount: `${commonData.loanAmount}`,
+        purposeOfLoan: userData?.loan?.loanType || '',
+      },
+    };
+  }
+
+  if (bankNameLower.includes('tata ubl')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+        nameOfCoApplicants: userData?.coApplicantName || '',
+      },
+      proposedLoanDetails: {
+        product: userData?.loan?.product || '',
+        amount: `${commonData.loanAmount}`,
+        tenure: userData?.loan?.tenure || '',
+        repaymentFrom: {
+          bankName: userData?.loan?.bankName || '',
+          typeSAAccount: userData?.loan?.accountType || '',
+          accountNo: userData?.loan?.accountNo || '',
+        },
+      },
+      officeAddress: {
+        address: commonData.initiatedAddress,
+      },
+      finalStatus: {
+        phoneNoOfApplicant: commonData.phoneNo,
+        pdDoneBy: loggedInUserName || '',
+      },
+    };
+  }
+
+  if (bankNameLower.includes('rbl')) {
+    return {
+      caseDetails: {
+        referenceNumber: commonData.applicationNo,
+        nameOfApplicant: commonData.applicantName,
+        addressVisited: commonData.initiatedAddress,
+        contactNo: commonData.phoneNo,
+      },
+      businessDetails: {
+        businessName: commonData.nameOfConcern,
+        shopAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Chola
+  if (bankNameLower.includes('chola')) {
+    return {
+      general: {
+        nameOfTheApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        loanRequested: commonData.loanAmount,
+      },
+    };
+  }
+
+  // IDFC HL & ML, IDFC PL
+  if (bankNameLower.includes('idfc')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // IIFL
+  if (bankNameLower.includes('iifl')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // Hero Fincorp
+  if (bankNameLower.includes('hero fincorp')) {
+    return {
+      details: {
+        nameOfTheCustomer: commonData.applicantName,
+        nameOfTheFirm: commonData.nameOfConcern,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // Hero Housing (Salaried and Self)
+  if (
+    bankNameLower.includes('herohousing') ||
+    bankNameLower.includes('hero housing')
+  ) {
+    return {
+      applicantDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // India Shelter & Niwas
+  if (
+    bankNameLower.includes('india shelter') ||
+    bankNameLower.includes('niwas')
+  ) {
+    return {
+      noOfVisit: {
+        applicantName: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // ICICI
+  if (bankNameLower.includes('icici')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessAddress: commonData.initiatedAddress,
+      },
+    };
+  }
+
+  // DCB
+  if (bankNameLower.includes('dcb')) {
+    return {
+      basicDetails: {
+        nameOfApplicant: commonData.applicantName,
+      },
+    };
+  }
+
+  // INCRED
+  if (bankNameLower.includes('incred')) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Axis Agri
+  if (bankNameLower.includes('axis agri')) {
+    return {
+      personalDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Aditya Birla
+  if (bankNameLower.includes('aditya birla')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Ambit
+  if (bankNameLower.includes('ambit')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        nameOfBusiness: commonData.nameOfConcern,
+        contactNumber: commonData.phoneNo,
+      },
+    };
+  }
+
+  // Axis Finance (general, not UBL)
+  if (
+    bankNameLower.includes('axis finance') &&
+    !bankNameLower.includes('ubl')
+  ) {
+    return {
+      basicDetails: {
+        applicantName: commonData.applicantName,
+        nameOfEntity: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Yes Bank
+  if (bankNameLower.includes('yes bank')) {
+    return {
+      applicantDetails: {
+        nameOfApplicant: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // SMFG SME
+  if (bankNameLower.includes('smfg')) {
+    return {
+      basicDetails: {
+        nameOfApplicantOrBusiness: commonData.applicantName,
+        applicantName: commonData.applicantName,
+        businessName: commonData.nameOfConcern,
+      },
+    };
+  }
+
+  // Default fallback for unknown banks
+  return {
+    basicDetails: {
+      applicantName: commonData.applicantName,
+      nameOfConcern: commonData.nameOfConcern,
+      nameOfApplicant: commonData.applicantName,
+      businessName: commonData.nameOfConcern,
+      initiatedAddress: commonData.initiatedAddress,
+      phoneNo: commonData.phoneNo,
+    },
+  };
+};
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const {item} = route.params as {item: any};
@@ -37,8 +399,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   const bankName = userData?.loan?.bankName;
   const [schemaForm, setSchemaForm] = useState<any>(null);
-
-  const formConfig = schemaForm || getFormConfigByBank(bankName);
+  // console.log('schemaForm', schemaForm);
 
   const {
     control,
@@ -54,26 +415,181 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [expandedSections, setExpandedSections] = useState<any>({
     investigable: true,
   });
+  const [loggedInUserName, setLoggedInUserName] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // const [formData, setFormData] = useState<any>({});
-  const [sectionData, setSectionData] = useState<any>({
-    basicDetails: {
-      applicantName: userData?.loan?.applicantName || '',
-      nameOfConcern: userData?.businessName || '',
-      initiatedAddress: userData?.applicantAddress || '',
-      phoneNo: userData?.loan?.applicantMobile || '',
-    },
-  });
-  // console.log('sectionData', sectionData);
+  // Initialize with empty object - schema will define the structure
+  const [sectionData, setSectionData] = useState<any>({});
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  console.log('sectionData', sectionData);
+  // console.log('sectionData', sectionData);
+
+  // Log sectionData whenever it changes
+  useEffect(() => {
+    console.log('sectionData updated:', sectionData);
+  }, [sectionData]);
 
   // useLayoutEffect(() => {
   //   loadFormData();
   // }, []);
 
+  // Fetch logged-in user details
   useEffect(() => {
-    loadFormData();
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getItem('userDetails');
+        if (userDetails?.name) {
+          setLoggedInUserName(userDetails.name);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
+  }, []);
+
+  // Consolidated effect to update sectionData with all sources
+  useEffect(() => {
+    const updateSectionData = async () => {
+      // Start with initial data
+      let updatedData = getInitialDataByBank(
+        bankName,
+        userData,
+        loggedInUserName,
+      );
+
+      // Load saved data from AsyncStorage
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          console.log('parsedData', parsedData);
+          updatedData = {
+            ...updatedData,
+            ...parsedData,
+          };
+        }
+      } catch (error) {
+        console.error('Error loading form data:', error);
+      }
+
+      // Update state once with all data, but preserve existing sectionData to avoid overwriting form changes
+      setSectionData((prevSectionData: any) => {
+        // Only update if this is the initial load or if the bank/user has changed
+        // This prevents overwriting form changes when sections are toggled
+        if (
+          Object.keys(prevSectionData).length === 0 ||
+          prevSectionData._lastBankName !== bankName ||
+          prevSectionData._lastUserName !== loggedInUserName
+        ) {
+          return {
+            ...updatedData,
+            _lastBankName: bankName,
+            _lastUserName: loggedInUserName,
+          };
+        }
+        return prevSectionData;
+      });
+    };
+
+    if (bankName) {
+      updateSectionData();
+    }
+  }, [loggedInUserName, bankName, userData]);
+
+  // Load uploaded items and investigable separately
+  useLayoutEffect(() => {
+    const loadAdditionalData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setUploadedItems(parsedData.uploadedItems || []);
+          setInvestigable(parsedData.investigable ?? null);
+        }
+      } catch (error) {
+        console.error('Error loading additional data:', error);
+      }
+    };
+    loadAdditionalData();
+  }, [bankName]);
+
+  // Fetch current coordinates on component mount
+  useEffect(() => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+      .then(location => {
+        const {latitude, longitude} = location;
+        const coordinates = `${latitude},${longitude}`;
+
+        // Update section data with coordinates based on bank
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank - coordinates in particulars section
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: coordinates,
+            };
+          }
+
+          // Axis Finance UBL - siteCoordinates in thirdPartyCheck section
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: coordinates,
+            };
+          }
+
+          // Tata UBL - latitudeLongitude in finalStatus section
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: coordinates,
+            };
+          }
+
+          return updates;
+        });
+      })
+      .catch(error => {
+        console.error('Error getting location:', error);
+        // Set a fallback message if location is not available
+        setSectionData((prev: any) => {
+          const bankNameLower = bankName?.toLowerCase() || '';
+          const updates: any = {...prev};
+
+          // RBL bank
+          if (bankNameLower.includes('rbl')) {
+            updates.particulars = {
+              ...prev.particulars,
+              coordinates: 'Location not available',
+            };
+          }
+
+          // Axis Finance UBL
+          if (bankNameLower.includes('axis finance ubl')) {
+            updates.thirdPartyCheck = {
+              ...prev.thirdPartyCheck,
+              siteCoordinates: 'Location not available',
+            };
+          }
+
+          // Tata UBL
+          if (bankNameLower.includes('tata ubl')) {
+            updates.finalStatus = {
+              ...prev.finalStatus,
+              latitudeLongitude: 'Location not available',
+            };
+          }
+
+          return updates;
+        });
+      });
   }, [bankName]);
 
   useEffect(() => {
@@ -88,6 +604,14 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const schema = await loadMobilePDFormsSchema(bankName);
         if (schema) {
           setSchemaForm(schema);
+
+          // Initialize sectionData with schema structure and userData
+          const initialData = populateInitialDataFromSchema(
+            schema,
+            userData,
+            loggedInUserName,
+          );
+          setSectionData(initialData);
         }
       } catch (e) {
         console.error('Error loading schema:', e);
@@ -95,32 +619,13 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       }
     };
     loadSchema();
-  }, [bankName]);
+  }, [bankName, userData, loggedInUserName]);
 
   // Watch form values to update formData
   // const watchedValues = watch();
   // useEffect(() => {
   //   setFormData(watchedValues);
   // }, []);
-
-  const loadFormData = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        // console.log('parsedData', parsedData);
-        // setFormData(parsedData);
-        setSectionData((prev: any) => ({
-          ...prev,
-          ...parsedData,
-        }));
-        setUploadedItems(parsedData.uploadedItems || []);
-        setInvestigable(parsedData.investigable ?? null);
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
-    }
-  };
 
   const saveFormData = useCallback(
     async (data: any) => {
@@ -202,8 +707,18 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   );
 
   const onSubmit = async (data: any) => {
+    console.log('🚀 FORM SUBMISSION STARTED');
+
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log('🛑 ALREADY SUBMITTING - Ignoring duplicate submit');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      if (!formConfig) {
+      if (!schemaForm) {
         Toast.show({
           type: 'error',
           text1: 'Error',
@@ -212,42 +727,156 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         return;
       }
 
-      const requiredSections = formConfig.sections.filter(
-        (section: any) => section.required,
-      );
-      const missingRequiredSections = requiredSections.filter(
-        (section: any) => {
-          if (section.id === 'photoCapture') {
-            return sectionData?.uploadedItems?.length === 0;
+      const validationErrors: string[] = [];
+
+      // Check ALL sections (both required and optional)
+      for (const section of schemaForm.sections) {
+        if (section.id === 'photoCapture') {
+          // Photo capture validation (only if section is required)
+          if (
+            section.required &&
+            (!sectionData?.uploadedItems ||
+              sectionData.uploadedItems.length === 0)
+          ) {
+            validationErrors.push(
+              `${section.label}: At least one photo is required`,
+            );
+          }
+          continue;
+        }
+
+        const sectionDataExists =
+          sectionData[section.id] !== undefined &&
+          sectionData[section.id] !== null;
+
+        // If section is REQUIRED and empty → error
+        if (section.required && !sectionDataExists) {
+          validationErrors.push(`${section.label}: Section is required`);
+          continue;
+        }
+
+        // If section is OPTIONAL and empty → skip validation (OK)
+        if (!section.required && !sectionDataExists) {
+          continue;
+        }
+
+        // If section has data (required OR optional), validate its contents
+        const sectionContent = sectionData[section.id];
+        if (typeof sectionContent === 'object' && sectionContent !== null) {
+          // Check if section is empty
+          if (Object.keys(sectionContent).length === 0) {
+            if (section.required) {
+              validationErrors.push(
+                `${section.label}: Section cannot be empty`,
+              );
+            }
+            continue;
           }
 
-          const sectionDataExists =
-            sectionData[section.id] !== undefined &&
-            sectionData[section.id] !== null;
-          if (!sectionDataExists) {
-            return true;
+          // Check field-level requirements within the section (for both required and optional sections)
+          const baseRequiredFields = section.schema?.required || [];
+
+          // Filter required fields based on conditional dependencies
+          const requiredFields = baseRequiredFields.filter(
+            (fieldId: string) => {
+              const fieldSchema = section.schema?.properties?.[fieldId];
+              if (!fieldSchema?.dependencies?.required) {
+                return true; // Always required if no conditional dependency
+              }
+
+              // Check if field should be required based on dependencies
+              const dependencies = fieldSchema.dependencies.required;
+              for (const [depFieldName, expectedValue] of Object.entries(
+                dependencies,
+              )) {
+                const actualValue = sectionContent[depFieldName];
+                if (Array.isArray(expectedValue)) {
+                  if (!expectedValue.includes(actualValue)) {
+                    return false; // Not required if dependency condition not met
+                  }
+                } else {
+                  if (actualValue !== expectedValue) {
+                    return false; // Not required if dependency condition not met
+                  }
+                }
+              }
+              return true; // Required if all dependency conditions are met
+            },
+          );
+          for (const fieldId of requiredFields) {
+            const fieldValue = sectionContent[fieldId];
+
+            // For array fields, check if array exists and has items with required fields
+            const fieldSchema = section.schema?.properties?.[fieldId];
+            if (fieldSchema?.type === 'array' && Array.isArray(fieldValue)) {
+              // If array is required but empty (and we have section data), that might be an issue
+              // But we'll allow empty arrays for now - user just hasn't added items yet
+
+              const itemRequiredFields = fieldSchema.items?.required || [];
+
+              // Check each item in the array for required fields
+              fieldValue.forEach((item: any, index: number) => {
+                if (item && typeof item === 'object') {
+                  itemRequiredFields.forEach((requiredField: string) => {
+                    const itemFieldValue = item[requiredField];
+                    const itemFieldEmpty =
+                      itemFieldValue === null ||
+                      itemFieldValue === undefined ||
+                      itemFieldValue === '' ||
+                      (typeof itemFieldValue === 'string' &&
+                        itemFieldValue.trim() === '');
+
+                    if (itemFieldEmpty) {
+                      const itemFieldTitle =
+                        fieldSchema.items?.properties?.[requiredField]?.title ||
+                        requiredField;
+                      validationErrors.push(
+                        `${section.label} → ${fieldSchema.title} [${index + 1}] → ${itemFieldTitle}: Required field is empty`,
+                      );
+                    }
+                  });
+                }
+              });
+              continue;
+            }
+
+            // Regular field validation
+            const isEmpty =
+              fieldValue === null ||
+              fieldValue === undefined ||
+              fieldValue === '';
+
+            if (isEmpty) {
+              const fieldTitle =
+                section.schema?.properties?.[fieldId]?.title || fieldId;
+              validationErrors.push(
+                `${section.label} → ${fieldTitle}: Required field is empty`,
+              );
+            }
           }
+        }
+      }
 
-          const sectionContent = sectionData[section.id];
-          if (typeof sectionContent === 'object' && sectionContent !== null) {
-            return Object.keys(sectionContent).length === 0;
-          }
+      if (validationErrors.length > 0) {
+        console.log('🛑 BLOCKING FORM SUBMISSION - Validation failed!');
 
-          return false;
-        },
-      );
-
-      if (missingRequiredSections.length > 0) {
-        const missingSectionNames = missingRequiredSections
-          .map((section: any) => section.label)
-          .join(', ');
         Toast.show({
           type: 'error',
-          text1: 'Validation Error',
-          text2: `Please complete required sections: ${missingSectionNames}`,
+          text1: '🪄 Abracadabra - Frontend Validation Error!',
+          text2: validationErrors[0], // Show first error
+          visibilityTime: 8000,
+          position: 'top',
         });
+
+        // Log all errors for debugging (using console.log to avoid toast display)
+        console.log('❌ Form validation failed:', validationErrors);
+
+        console.log('🛑 RETURNING NOW - Form should NOT submit');
+        setIsSubmitting(false);
         return;
       }
+
+      console.log('✅ Validation passed - Proceeding with submission');
 
       if (Object.keys(errors).length > 0) {
         Toast.show({
@@ -255,14 +884,37 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           text1: 'Error',
           text2: 'Please fill all required fields',
         });
+        setIsSubmitting(false);
         return;
       }
+
+      // Ensure all array items have UUIDs before submission
+      const processedSectionData = {...sectionData};
+
+      // Process each section to ensure array items have UUIDs
+      Object.keys(processedSectionData).forEach(sectionId => {
+        const sectionData = processedSectionData[sectionId];
+        if (sectionData && typeof sectionData === 'object') {
+          Object.keys(sectionData).forEach(fieldId => {
+            const fieldValue = sectionData[fieldId];
+            if (Array.isArray(fieldValue)) {
+              // Ensure each array item has a UUID
+              processedSectionData[sectionId][fieldId] = fieldValue.map(
+                (item: any) => ({
+                  ...item,
+                  _id: item._id || require('react-native-uuid').v4(),
+                }),
+              );
+            }
+          });
+        }
+      });
 
       const finalData = {
         verificationType: 'Business',
         findings: 'Business Verification Findings',
         addressType: 'Business',
-        verificationData: sectionData,
+        verificationData: processedSectionData,
       };
 
       // console.log('finalData', finalData);
@@ -286,6 +938,9 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         text1: 'Error',
         text2: 'Failed to save form data',
       });
+      setIsSubmitting(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -293,12 +948,14 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     console.log('Form validation errors:', errors);
     Toast.show({
       type: 'error',
-      text1: 'Validation Error',
+      text1: '🔧 React Hook Form Error',
       text2: 'Please fill all required fields',
+      visibilityTime: 5000,
+      position: 'top',
     });
   };
 
-  if (!formConfig) {
+  if (!schemaForm) {
     return (
       <View style={styles.container}>
         <BackButton
@@ -311,16 +968,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           <Text style={styles.errorText}>
             No form configuration found for bank: {bankName}
           </Text>
-          <Text style={styles.availableBanksText}>
-            Available banks: {getAvailableBanks().join(', ')}
-          </Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       <BackButton
         navigation={navigation}
         title={`PD - ${bankName}`}
@@ -330,7 +987,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         <CollapsibleSection
           title="Applicant asked to postpone?"
           onToggle={() => toggleSection('investigable')}
@@ -352,86 +1010,41 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         {investigable && (
           <>
             <View style={styles.formContainer}>
-              {/* Schema-driven forms: if schemaForm is available, render from schema; else use existing config */}
-              {schemaForm?.sections?.length
-                ? schemaForm.sections.map((sec: any) => {
-                    const isExpanded = expandedSections[sec.id] || false;
-                    return (
-                      <View key={sec.id} style={styles.sectionContainer}>
-                        <TouchableOpacity
-                          style={styles.sectionHeader}
-                          onPress={() => toggleSection(sec.id)}>
-                          <Text style={styles.sectionTitle}>{sec.label}</Text>
-                          {isSectionValid(sec.id) && (
-                            <Icon name="check" size={18} color="#34C759" />
-                          )}
-                          <Text style={styles.sectionIndicator}>
-                            {isExpanded ? '▼' : '▶'}
-                          </Text>
-                        </TouchableOpacity>
-                        {isExpanded && (
-                          <View style={styles.sectionContent}>
-                            <SchemaSection
-                              title={sec.label}
-                              schema={sec.schema}
-                              initialData={sectionData[sec.id]}
-                              onSubmit={(data: any) =>
-                                handleSectionDataChange(sec.id, data)
-                              }
-                            />
-                          </View>
+              {schemaForm?.sections?.map((sec: any) => {
+                const isExpanded = expandedSections[sec.id] || false;
+                return (
+                  <View key={sec.id} style={styles.sectionContainer}>
+                    <TouchableOpacity
+                      style={styles.sectionHeader}
+                      onPress={() => toggleSection(sec.id)}>
+                      <Text style={styles.sectionTitle}>
+                        {sec.label}
+                        {sec.required && (
+                          <Text style={styles.requiredMark}> *</Text>
                         )}
+                      </Text>
+                      {isSectionValid(sec.id) && (
+                        <Icon name="check" size={18} color="#34C759" />
+                      )}
+                      <Text style={styles.sectionIndicator}>
+                        {isExpanded ? '▼' : '▶'}
+                      </Text>
+                    </TouchableOpacity>
+                    {isExpanded && (
+                      <View style={styles.sectionContent}>
+                        <SchemaSection
+                          title={sec.label}
+                          schema={sec.schema}
+                          initialData={sectionData[sec.id]}
+                          onSubmit={(data: any) =>
+                            handleSectionDataChange(sec.id, data)
+                          }
+                        />
                       </View>
-                    );
-                  })
-                : formConfig.sections.map((section: any) => {
-                    const SectionComponent = section.component;
-                    const isExpanded = expandedSections[section.id] || false;
-
-                    return (
-                      <View key={section.id} style={styles.sectionContainer}>
-                        <TouchableOpacity
-                          style={styles.sectionHeader}
-                          onPress={() => toggleSection(section.id)}>
-                          <Text style={styles.sectionTitle}>
-                            {section.label}
-                          </Text>
-                          {isSectionValid(section.id) && (
-                            // <View style={styles.validIndicator} />
-                            <Icon name="check" size={18} color="#34C759" />
-                          )}
-                          <Text style={styles.sectionIndicator}>
-                            {isExpanded ? '▼' : '▶'}
-                          </Text>
-                          {/* {isSectionValid(section.id) && (
-                        <View style={styles.validIndicator} />
-                      )} */}
-                        </TouchableOpacity>
-
-                        {isExpanded && (
-                          <View style={styles.sectionContent}>
-                            {section.id === 'photoCapture' ? (
-                              <SectionComponent
-                                onUploadedItemsChange={
-                                  handleUploadedItemsChange
-                                }
-                                initialItems={sectionData?.uploadedItems ?? []}
-                                loanId={item?.id || item?.verificationId}
-                                pd={true}
-                              />
-                            ) : (
-                              <SectionComponent
-                                onSubmit={(data: any) =>
-                                  handleSectionDataChange(section.id, data)
-                                }
-                                initialData={sectionData[section.id]}
-                              />
-                            )}
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
+                    )}
+                  </View>
+                );
+              })}
 
               {/* Photo Capture Section - Common for all forms */}
               <View style={styles.sectionContainer}>
@@ -452,6 +1065,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                       onUploadedItemsChange={handleUploadedItemsChange}
                       initialItems={sectionData?.uploadedItems ?? []}
                       loanId={item?.id || item?.verificationId}
+                      maxUploads={50}
                     />
                   </View>
                 )}
@@ -470,7 +1084,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
           </>
         )}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -508,6 +1122,11 @@ const styles = StyleSheet.create({
     color: '#333',
     marginRight: 8,
     // flex: 1,
+  },
+  requiredMark: {
+    color: 'red',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   sectionIndicator: {
     flex: 1,
