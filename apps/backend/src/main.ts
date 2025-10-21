@@ -15,7 +15,14 @@ async function bootstrap() {
   }));
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://app.cakowtha.co.in', 'https://kowtha.beyondscale.tech', 'https://app.cakowtha.co.in/'],
+    origin: [
+      'http://localhost:3000',
+      'https://app.cakowtha.co.in',
+      'https://kowtha.beyondscale.tech',
+      'https://app.cakowtha.co.in/',
+      'http://10.0.2.2:8081',  // React Native development server in Android emulator
+      'http://localhost:8081'   // React Native development server
+    ],
     methods: '*',
     allowedHeaders: '*',
     credentials: true,
