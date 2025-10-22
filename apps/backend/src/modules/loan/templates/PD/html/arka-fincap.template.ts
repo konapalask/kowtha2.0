@@ -10,101 +10,113 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   return `
     ${pdBaseTemplate()}
 
-    <div class="template-content">
-      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+    <div class="report-title">ARKA FINCAP - VERIFICATION REPORT</div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Applicant Details</td></tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Application No</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${html_data.applicationNumber || ""}</p></td>
+          <th>Application No</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.applicationNo || html_data.applicationNumber || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Applicant</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.nameOfApplicant || ""}</p></td>
+          <th>Name of Applicant</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.nameOfApplicant || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Co-Applicant</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.nameOfCoApplicant || ""}</p></td>
+          <th>Name of Co-Applicant</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.nameOfCoApplicant || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Phone Number</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.phoneNumber || ""}</p></td>
+          <th>Phone Number</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.phoneNumber || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Concern</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.nameOfConcern || ""}</p></td>
+          <th>Name of Concern</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.nameOfConcern || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Initiated Premises</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.initiatedAddress || ""}</p></td>
+          <th>Initiated Premises</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.initiatedPremises || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Visited Premises</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.visitedAddress || ""}</p></td>
+          <th>Visited Premises</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.visitedPremises || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Residential Premises</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.residentialAddress || ""}</p></td>
+          <th>Residential Premises</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.residentialPremises || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Appointment Fixed</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.appointmentFixed || ""}</p></td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: ${verificationData.applicantDetails?.dateOfVisit || html_data.dateOfReport || ""}</p></td>
+          <th>Appointment Fixed</th>
+          <td colspan="2"><span class="var-value">${verificationData.applicantDetails?.appointmentFixed || ""}</span></td>
+          <th>Date of Visit</th>
+          <td colspan="3"><span class="var-value">${verificationData.applicantDetails?.dateOfVisit || html_data.dateOfReport || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.personMet || ""}</p></td>
+          <th>Person Met</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.personMet || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount and Purpose of Loan</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.amountAndPurposeOfLoan || ""}</p></td>
+          <th>Amount and Purpose of Loan</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.amountAndPurposeOfLoan || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.typeOfCollateral || ""} and Market value of collateral security - ${verificationData.applicantDetails?.marketValueOfCollateral || ""}</p></td>
+          <th>Type of Collateral</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.typeOfCollateral || ""} ${verificationData.applicantDetails?.marketValueOfCollateral ? `(Market Value: ${verificationData.applicantDetails.marketValueOfCollateral})` : ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Collateral Property Address</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.collateralPropertyAddress || ""}</p></td>
+          <th>Collateral Property Address</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.collateralPropertyAddress || ""}</span></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Applicant</strong></p></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.applicantDetails?.aboutApplicant || ""}</p></td>
+          <th>About the Applicant</th>
+          <td colspan="6"><span class="var-value">${verificationData.applicantDetails?.aboutTheApplicant || ""}</span></td>
         </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Family Members</td></tr>
         <tr>
-          <td rowspan="${(Array.isArray(verificationData.familyMembers?.familyMembers) ? verificationData.familyMembers?.familyMembers.length : 0) + 2}" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Members</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Age</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Education</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Occupation</strong></p></td>
+          <th>Name</th>
+          <th>Relationship</th>
+          <th>Age</th>
+          <th>Education</th>
+          <th>Occupation</th>
         </tr>
         ${
           Array.isArray(verificationData.familyMembers?.familyMembers) &&
           verificationData.familyMembers?.familyMembers.length > 0
             ? verificationData.familyMembers?.familyMembers
                 .map(
-                  (member, index) => `
+                  (member) => `
         <tr>
-          ${index === 0 ? "" : '<td style="border:1px solid #ccc;padding:8px"></td>'}
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relationship || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.age || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.education || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.occupation || ""}</p></td>
+          <td><span class="var-value">${member.name || ""}</span></td>
+          <td><span class="var-value">${member.relationship || ""}</span></td>
+          <td><span class="var-value">${member.age || ""}</span></td>
+          <td><span class="var-value">${member.education || ""}</span></td>
+          <td><span class="var-value">${member.occupation || ""}</span></td>
         </tr>
         `
                 )
                 .join("")
-            : '<tr><td colspan="6" style="border:1px solid #ccc;padding:8px;text-align:center;">No family members listed</td></tr>'
+            : '<tr><td colspan="5" style="text-align:center;">No family members listed</td></tr>'
         }
       </table>
+    </div>
 
-      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+    <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Banking Details</td></tr>
         <tr>
-          <td rowspan="${(Array.isArray(verificationData.bankingDetails?.bankingDetails) ? verificationData.bankingDetails?.bankingDetails.length : 0) + 1}" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Banking Details</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>BANK NAME</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>ACCOUNT TYPE</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>AVG BAL</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>NO: OF YEARS MAINTAINED</strong></p></td>
+          <th>Bank Name</th>
+          <th>Account Type</th>
+          <th>Average Balance</th>
+          <th>Years Maintained</th>
         </tr>
         ${
           Array.isArray(verificationData.bankingDetails?.bankingDetails) &&
@@ -113,129 +125,254 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 .map(
                   (bank) => `
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.bankName || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.accountType || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.avgBalance || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.noOfYearsMaintained || ""}</p></td>
+          <td><span class="var-value">${bank.bankName || ""}</span></td>
+          <td><span class="var-value">${bank.accountType || ""}</span></td>
+          <td><span class="var-value">${bank.avgBalance || ""}</span></td>
+          <td><span class="var-value">${bank.noOfYearsMaintained || ""}</span></td>
         </tr>
         `
                 )
                 .join("")
-            : '<tr><td colspan="7" style="border:1px solid #ccc;padding:8px;text-align:center;">No banking details available</td></tr>'
+            : '<tr><td colspan="4" style="text-align:center;">No banking details available</td></tr>'
         }
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>LIC/Mutual funds</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.licMutualFunds?.licMutualFundsDetails || ""}</p></td>
+          <th>LIC/Mutual Funds</th>
+          <td colspan="6"><span class="var-value">${verificationData.licMutualFunds?.licMutualFunds || ""}</span></td>
         </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Assets</td></tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Assets</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.assetsDetails?.assetsDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td rowspan="${(Array.isArray(verificationData.noOfLoans?.noOfLoans) ? verificationData.noOfLoans?.noOfLoans.length : 0) + 1}" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>No. of Loans</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>BANK</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>TYPE</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>LOAN</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>EMI</strong></p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>OPEN/CLOSE</strong></p></td>
+          <th>Asset Description</th>
+          <th>Area</th>
+          <th>Market Value</th>
+          <th>Name of Asset Holder</th>
         </tr>
         ${
-          Array.isArray(verificationData.noOfLoans?.noOfLoans) &&
-          verificationData.noOfLoans?.noOfLoans.length > 0
-            ? verificationData.noOfLoans?.noOfLoans
+          Array.isArray(verificationData.assets?.assets) &&
+          verificationData.assets?.assets.length > 0
+            ? verificationData.assets?.assets
+                .map(
+                  (asset) => `
+        <tr>
+          <td><span class="var-value">${asset.description || ""}</span></td>
+          <td><span class="var-value">${asset.area || ""}</span></td>
+          <td><span class="var-value">${asset.marketValue || ""}</span></td>
+          <td><span class="var-value">${asset.nameOfAssetHolder || ""}</span></td>
+        </tr>
+        `
+                )
+                .join("")
+            : '<tr><td colspan="4" style="text-align:center;">No assets listed</td></tr>'
+        }
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Existing Loans</td></tr>
+        <tr>
+          <th>Bank</th>
+          <th>Type</th>
+          <th>Loan Amount</th>
+          <th>EMI</th>
+          <th>Status</th>
+        </tr>
+        ${
+          Array.isArray(verificationData.existingLoans?.loans) &&
+          verificationData.existingLoans?.loans.length > 0
+            ? verificationData.existingLoans?.loans
                 .map(
                   (loan) => `
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.bank || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.type || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.loanAmount || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.emi || ""}</p></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.openClose || ""}</p></td>
+          <td><span class="var-value">${loan.bank || ""}</span></td>
+          <td><span class="var-value">${loan.type || ""}</span></td>
+          <td><span class="var-value">${loan.loanAmount || ""}</span></td>
+          <td><span class="var-value">${loan.emi || ""}</span></td>
+          <td><span class="var-value">${loan.status || ""}</span></td>
         </tr>
         `
                 )
                 .join("")
-            : '<tr><td colspan="8" style="border:1px solid #ccc;padding:8px;text-align:center;">No loans listed</td></tr>'
+            : '<tr><td colspan="5" style="text-align:center;">No loans listed</td></tr>'
         }
+      </table>
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Business Information</td></tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Business</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.aboutBusiness?.aboutBusinessDescription || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name and Contact number of Regular Customers</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.regularCustomers?.regularCustomersDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name and Contact number of Regular Suppliers</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.regularSuppliers?.regularSuppliersDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Business Activity and stock level observed at the time of visit</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.businessActivityObserved?.businessActivityObservedDescription || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Documents Observed</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documentsObserved?.documentsObservedDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Whether Business Registered under GST?</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.gstRegistration?.gstRegistrationDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>As per Audited individual ITR's</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.itrDetails?.itrDetailsDescription || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Gross Receipts</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.monthlyGrossReceipts?.monthlyGrossReceipts || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Expenses</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.monthlyExpenses?.monthlyExpenses || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Profit</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.netProfit?.netProfit || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.netMargin?.netMargin || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Expenses</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.familyExpenses?.familyExpensesDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Employees</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.employees?.employeesDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Concerns</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.concerns?.concernsDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.otherObservationsDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherIncomes?.otherIncomesDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Neighbor Check</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.neighborCheck?.neighborCheckDetails || ""}</p></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Status</strong></p></td>
-          <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.status || ""}</strong></p></td>
+          <th>About the Business</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.aboutTheBusiness) && verificationData.aboutTheBusiness.length > 0
+              ? verificationData.aboutTheBusiness.join('<br />')
+              : ""
+          }</span></td>
         </tr>
       </table>
-
-      <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
-      <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO </strong>will not be held liable in any case.</p>
-
-      <p style="margin:8px 0;line-height:1.5"><strong>Photos</strong>:</p>
     </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Regular Customers</td></tr>
+        <tr>
+          <th>Customer Name</th>
+          <th>Contact Number</th>
+        </tr>
+        ${
+          Array.isArray(verificationData.regularCustomers?.customers) &&
+          verificationData.regularCustomers?.customers.length > 0
+            ? verificationData.regularCustomers?.customers
+                .map(
+                  (customer) => `
+        <tr>
+          <td><span class="var-value">${customer.name || ""}</span></td>
+          <td><span class="var-value">${customer.contactNumber || ""}</span></td>
+        </tr>
+        `
+                )
+                .join("")
+            : '<tr><td colspan="2" style="text-align:center;">No customers listed</td></tr>'
+        }
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Regular Suppliers</td></tr>
+        <tr>
+          <th>Supplier Name</th>
+          <th>Contact Number</th>
+        </tr>
+        ${
+          Array.isArray(verificationData.regularSuppliers?.suppliers) &&
+          verificationData.regularSuppliers?.suppliers.length > 0
+            ? verificationData.regularSuppliers?.suppliers
+                .map(
+                  (supplier) => `
+        <tr>
+          <td><span class="var-value">${supplier.name || ""}</span></td>
+          <td><span class="var-value">${supplier.contactNumber || ""}</span></td>
+        </tr>
+        `
+                )
+                .join("")
+            : '<tr><td colspan="2" style="text-align:center;">No suppliers listed</td></tr>'
+        }
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Business Activity & Documentation</td></tr>
+        <tr>
+          <th>Business Activity and Stock Level Observed</th>
+          <td colspan="6"><span class="var-value">${verificationData.businessActivityObserved?.businessActivityAndStockLevelObserved || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Documents Observed</th>
+          <td colspan="6"><span class="var-value">${verificationData.documentsObserved?.documentsObserved || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Whether Business Registered under GST?</th>
+          <td colspan="6"><span class="var-value">${verificationData.gstRegistration?.gstRegistered || ""}</span></td>
+        </tr>
+        <tr>
+          <th>As per Audited individual ITR's</th>
+          <td colspan="6"><span class="var-value">${verificationData.itrDetails?.itrFiled || ""}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Financial Details</td></tr>
+        <tr>
+          <th>Monthly Gross Receipts</th>
+          <td colspan="6"><span class="var-value">${verificationData.monthlyGrossReceipts?.monthlyGrossReceipts || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Monthly Expenses</th>
+          <td colspan="6"><span class="var-value">${verificationData.monthlyExpenses?.monthlyExpenses || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Net Profit</th>
+          <td colspan="6"><span class="var-value">${verificationData.netProfit?.netProfit || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Net Margin</th>
+          <td colspan="6"><span class="var-value">${verificationData.netMargin?.netMargin || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Family Expenses</th>
+          <td colspan="6"><span class="var-value">${verificationData.familyExpenses?.familyExpenses || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Number of Employees</th>
+          <td colspan="6"><span class="var-value">${verificationData.employees?.numberOfEmployees || ""}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Additional Observations</td></tr>
+        <tr>
+          <th>Concerns</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.concerns) && verificationData.concerns.length > 0
+              ? verificationData.concerns.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Other Observations</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.otherObservations) && verificationData.otherObservations.length > 0
+              ? verificationData.otherObservations.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Other Incomes</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.otherIncomes) && verificationData.otherIncomes.length > 0
+              ? verificationData.otherIncomes.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Neighbor Check</th>
+          <td colspan="6"><span class="var-value">${verificationData.neighborCheck?.neighborCheck || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td colspan="6"><strong><span class="var-value">${verificationData.status?.status || html_data.status || ""}</span></strong></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr>
+          <td colspan="7"><strong>Disclaimer Clause:</strong></td>
+        </tr>
+        <tr>
+          <td colspan="7"><span class="var-value">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <br>
+    <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
 
     <footer class="pdf-footer">
       <span style="color:rgb(8, 136, 36);">${html_data.bankName || "Arka Fincap"}</span><br>
