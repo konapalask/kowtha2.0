@@ -133,7 +133,7 @@ export async function getCholaTemplate() {
 export async function getHeroFincorpTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/hero-fincorp.template"
+      "modules/loan/templates/PD/html/hero-fincorp.template"
     );
     return module.heroFincorpTemplate || module.default;
   } catch (error) {

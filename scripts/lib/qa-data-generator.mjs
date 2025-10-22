@@ -646,6 +646,187 @@ export const generateMockDataFromSchema = (schema) => {
       );
     }
 
+    // Hero Fincorp specific data population
+    if (schema.bankName === "Hero Fincorp") {
+      switch (section.id) {
+        case "basicDetails": {
+          sectionData = {
+            applicantName: faker.person.fullName(),
+            concernName: faker.company.name(),
+            officeAddress: faker.location.streetAddress({ useFullAddress: true }),
+            phoneNumber: generateIndianPhone(),
+            appointmentFixed: faker.helpers.arrayElement([
+              "10:30 AM",
+              "02:00 PM",
+              "04:45 PM",
+            ]),
+            dateOfVisit: faker.date
+              .past({ years: 1 })
+              .toISOString()
+              .split("T")[0],
+            structureOfLoan: faker.helpers.arrayElement([
+              "Term Loan",
+              "Working Capital",
+              "Equipment Finance",
+            ]),
+            loanAmount: faker.number.int({ min: 500000, max: 5000000 }),
+            numberOfVisits: faker.helpers.arrayElement(["First", "Second"]),
+            personMet: faker.person.fullName(),
+            verifierNotes:
+              "The following data and explanation are based on the verbal information provided to us during the visit.",
+          };
+          break;
+        }
+        case "applicantProfile": {
+          sectionData.applicantSummary = `Applicant ${faker.person.fullName()} aged ${faker.number.int({
+            min: 30,
+            max: 55,
+          })} years resides with family at ${faker.location.city()}.`;
+          sectionData.familyMembers = [
+            {
+              name: faker.person.fullName(),
+              relation: "Spouse",
+              age: faker.number.int({ min: 28, max: 50 }),
+              qualification: "Graduate",
+              occupation: "Homemaker",
+              income: "Dependent",
+            },
+            {
+              name: faker.person.fullName(),
+              relation: "Son",
+              age: faker.number.int({ min: 8, max: 16 }),
+              qualification: "School",
+              occupation: "Student",
+              income: "Dependent",
+            },
+            {
+              name: faker.person.fullName(),
+              relation: "Daughter",
+              age: faker.number.int({ min: 6, max: 14 }),
+              qualification: "School",
+              occupation: "Student",
+              income: "Dependent",
+            },
+          ];
+          break;
+        }
+        case "businessProfile": {
+          sectionData = [
+            {
+              detail: `Business operates under the name ${faker.company.name()} engaged in ${faker.helpers.arrayElement([
+                "retail",
+                "wholesale",
+                "manufacturing",
+                "service",
+              ])} trading since ${faker.date
+                .past({ years: 8 })
+                .getFullYear()}.`,
+            },
+            {
+              detail: `Average monthly turnover reported around Rs. ${faker.number
+                .int({ min: 300000, max: 900000 })
+                .toLocaleString("en-IN")}.` ,
+            },
+          ];
+          break;
+        }
+        case "financialSummary": {
+          sectionData.assessmentYear = `AY ${faker.date
+            .past({ years: 2 })
+            .getFullYear()}-${faker.date.past({ years: 1 }).getFullYear()}`;
+          sectionData.turnover = faker.number.int({ min: 1500000, max: 8000000 });
+          sectionData.netProfit = faker.number.int({ min: 200000, max: 1200000 });
+          sectionData.netMarginPercent = `${faker.number.int({ min: 8, max: 25 })}%`;
+          sectionData.documentsObserved = [
+            "GST Certificate",
+            "ITR Statement",
+            "Bank Statement",
+          ];
+          sectionData.automationLevel =
+            "POS billing with digital inventory tracking observed at site.";
+          break;
+        }
+        case "relationships": {
+          sectionData.customers = [
+            {
+              name: faker.company.name(),
+              contactNumber: generateIndianPhone(),
+            },
+            {
+              name: faker.company.name(),
+              contactNumber: generateIndianPhone(),
+            },
+          ];
+          sectionData.purchaseReferences = [
+            {
+              name: faker.company.name(),
+              contactNumber: generateIndianPhone(),
+            },
+            {
+              name: faker.company.name(),
+              contactNumber: generateIndianPhone(),
+            },
+          ];
+          sectionData.margins = `Applicant reports net margins around ${faker.number.int({
+            min: 12,
+            max: 22,
+          })}% after expenses.`;
+          sectionData.employeesCount = `${faker.number.int({
+            min: 8,
+            max: 20,
+          })} workers on payroll and contract.`;
+          sectionData.assets = "Owns commercial premises and delivery vehicle fleet.";
+          break;
+        }
+        case "existingLoanDetails": {
+          sectionData = [
+            {
+              financialInstitution: "HDFC Bank",
+              loanAmount: faker.number.int({ min: 500000, max: 2000000 }),
+              natureOfLoan: "Business Loan",
+              emi: faker.number.int({ min: 12000, max: 35000 }),
+            },
+            {
+              financialInstitution: "Axis Bank",
+              loanAmount: faker.number.int({ min: 200000, max: 800000 }),
+              natureOfLoan: "Vehicle Loan",
+              emi: faker.number.int({ min: 8000, max: 20000 }),
+            },
+          ];
+          break;
+        }
+        case "loanAnalysis": {
+          sectionData.endUse = [
+            "Expansion of manufacturing capacity",
+            "Purchase of automated packaging line",
+          ];
+          sectionData.securityOffered = [
+            "Equitable mortgage of residential property",
+            "Hypothecation of machinery",
+          ];
+          sectionData.address = faker.location.streetAddress({ useFullAddress: true });
+          sectionData.observations = [
+            "Business premises observed to be active with staff present.",
+            "Inventory levels adequate for current order book.",
+          ];
+          sectionData.concerns = [
+            "Needs to strengthen bookkeeping practices.",
+            "Recommend maintaining higher cash reserves.",
+          ];
+          sectionData.otherBusinessIncome = [
+            "Rental income from commercial property: Rs. 25,000/- per month",
+          ];
+          sectionData.status = faker.helpers.arrayElement([
+            "Positive",
+            "Credit Refer",
+            "Negative",
+          ]);
+          sectionData.place = faker.location.city();
+          break;
+        }
+      }
+    }
+
     // Add special case for familyBackground section
     if (section.id === "familyBackground") {
       console.log("Special case triggered for familyBackground");
