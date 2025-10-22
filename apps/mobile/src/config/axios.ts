@@ -2,10 +2,31 @@ import axios from 'axios';
 import {REACT_APP_BASE_URL} from '@env';
 import RNRestart from 'react-native-restart';
 import {clearAll, clearItem, getItem, setItem} from '../helpers/utility';
+import {Platform} from 'react-native';
+
+// TypeScript declarations for @env module
+declare module '@env' {
+  export const REACT_APP_BASE_URL: string;
+}
+
+// Use the environment variable if available, otherwise use platform-specific localhost
+const getBaseURL = () => {
+  if (REACT_APP_BASE_URL) {
+    return REACT_APP_BASE_URL;
+  }
+
+  // For Android emulator, use 10.0.2.2 to access host machine
+  // For iOS simulator, use localhost
+  // For physical devices, use your actual backend URL
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:3001/api';
+  } else {
+    return 'http://localhost:3001/api';
+  }
+};
 
 const axiosConfig = {
-  // baseURL: REACT_APP_BASE_URL,
-  baseURL: REACT_APP_BASE_URL,
+  baseURL: getBaseURL(),
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

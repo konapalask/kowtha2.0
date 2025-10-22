@@ -1,20 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model User {
+  id                       Int                   @id @default(autoincrement())
+  mobile                   String                @unique
+  name                     String
+  email                    String?               @unique
+  employeeCode             String?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  status                   UserStatus            @default(Active)
+  deviceId                 String?
+  locality                 String?
+  defaultDepartment        Department?
+  attendances              Attendance[]          @relation("UserAttendance")
+  departmentRoles          DepartmentRole[]      @relation("UserDepartmentRole")
+  editRequestsApproved     EditRequest[]         @relation("EditRequestApprover")
+  editRequestsRequested    EditRequest[]         @relation("EditRequestRequester")
+  operationsExecutiveLoans Loan[]                @relation("OperationsExecutive")
+  sessions                 Session[]
+  verifications            Verification[]        @relation("VerificationFieldExecutive")
+  verificationsVerifier    Verification[]        @relation("VerificationVerifier")
+  verificationRetries      VerificationRetries[]
+}
+
+model DepartmentRole {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  department Department
+  role       UserRole
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  officeId   Int?
+  office     Office?    @relation(fields: [officeId], references: [id])
+  user       User       @relation("UserDepartmentRole", fields: [userId], references: [id])
+
+  @@unique([userId, department])
+}
+
+model Organization {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  offices     Office[]
+}
+
+model Office {
+  id              Int              @id @default(autoincrement())
+  name            String
+  location        String
+  address         String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  archived        Boolean          @default(false)
+  organizationId  Int              @default(1)
+  department      Department?
+  departmentRoles DepartmentRole[]
+  loans           Loan[]
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+}
+
+model Loan {
+  id                    Int            @id @default(autoincrement())
+  applicationNumber     String
+  applicantName         String
+  applicantMobile       String
+  applicantAddress      String?
+  applicantAddress1     String?
+  applicantAddress2     String?
+  isAddressSame         Boolean        @default(false)
+  loanType              String
+  bankName              String
+  loanAmount            Float?
+  status                LoanStatus
+  officeId              Int
+  operationsExecutiveId Int?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  applicantType         String?
+  department            Department?
+  reassignCount         Int            @default(0)
+  templateName          String?
+  editRequests          EditRequest[]
+  office                Office         @relation(fields: [officeId], references: [id])
+  operationsExecutive   User?          @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
+  pdEmailLogs           PDEmailLog[]
+  verifications         Verification[]
+
+  @@unique([applicationNumber, applicantType, department, reassignCount])
+}
+
+model Verification {
+  id                  Int                   @id @default(autoincrement())
+  loanId              Int
+  type                VerificationType
+  fieldExecutiveId    Int
+  status              VerificationStatus
+  applicantAddress    String?
+  verificationData    Json?
+  pictureSource       PictureSource?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  addressType         AddressType?
+  path                String?
+  approvedStatus      ApprovedStatus?
+  finalReportPath     String?
+  locationType        LocationType?
+  verifierId          Int?
+  businessName        String?
+  isPostponed         Boolean?
+  postponedDate       DateTime?
+  postponedReason     String?
+  currentOfficeName   String?
+  department          Department?
+  financialAnalysis   Json?
+  synopsis            String?
+  templateName        String?
+  editRequests        EditRequest[]
+  fieldExecutive      User                  @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
+  loan                Loan                  @relation(fields: [loanId], references: [id])
+  verifier            User?                 @relation("VerificationVerifier", fields: [verifierId], references: [id])
+  verificationRetries VerificationRetries[]
+
+  @@unique([loanId, type])
+}
+
+model VerificationRetries {
+  id               Int          @id @default(autoincrement())
+  verificationId   Int
+  date             DateTime
+  geotag           String?
+  address          String?
+  reason           String?
+  fieldExecutiveId Int
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  fieldExecutive   User         @relation(fields: [fieldExecutiveId], references: [id])
+  verification     Verification @relation(fields: [verificationId], references: [id])
+}
+
+model Session {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  otp         String?
+  otpExpires  DateTime?
+  createdAt   DateTime  @default(now())
+  lastLoginAt DateTime?
+  isActive    Boolean   @default(true)
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model EditRequest {
+  id             Int               @id @default(autoincrement())
+  loanId         Int?
+  verificationId Int?
+  requestedBy    Int
+  approvedBy     Int?
+  status         EditRequestStatus
+  changes        Json
+  remarks        String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  type           EditRequestType?
+  department     Department?
+  approver       User?             @relation("EditRequestApprover", fields: [approvedBy], references: [id])
+  loan           Loan?             @relation(fields: [loanId], references: [id])
+  requester      User              @relation("EditRequestRequester", fields: [requestedBy], references: [id])
+  verification   Verification?     @relation(fields: [verificationId], references: [id])
+}
+
+model Attendance {
+  id         Int              @id @default(autoincrement())
+  userId     Int
+  date       DateTime
+  status     AttendanceStatus
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  department Department?
+  user       User             @relation("UserAttendance", fields: [userId], references: [id])
+}
+
+model AppDeployment {
+  id           Int      @id @default(autoincrement())
+  version      String
+  isActive     Boolean  @default(true)
+  source       String
+  forceUpdate  Boolean  @default(false)
+  appStoreUrl  String?
+  playStoreUrl String?
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PDEmailLog {
+  id          Int       @id @default(autoincrement())
+  messageID   String
+  fromEmail   String[]
+  toEmail     String[]
+  ccEmail     String[]
+  bccEmail    String[]
+  subject     String
+  body        String
+  attachments String[]
+  receivedAt  DateTime?
+  parsedData  Json?
+  s3Path      String?
+  loanId      Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  loan        Loan?     @relation(fields: [loanId], references: [id])
+}
+
+model Bank {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  logo      String?
+  parent    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRole {
   Admin
   Verifier
   FieldExecutive
-  SupportExecutive // Tracking purpose
-  VerificationExecutive // Assistant Verifier
+  SupportExecutive
   OperationsExecutive
+  VerificationExecutive
 }
 
 enum UserStatus {
@@ -100,226 +320,4 @@ enum LocationType {
 enum Department {
   FI
   PD
-}
-
-model User {
-  id                       Int                  @id @default(autoincrement())
-  mobile                   String               @unique
-  name                     String
-  email                    String?              @unique
-  employeeCode             String?
-  locality                 String?
-  deviceId                 String?
-  defaultDepartment        Department?
-  status                   UserStatus           @default(Active)
-  createdAt                DateTime             @default(now())
-  updatedAt                DateTime             @updatedAt
-  // Relations
-  operationsExecutiveLoans Loan[]               @relation("OperationsExecutive")
-  verifications            Verification[]       @relation("VerificationFieldExecutive")
-  verificationsVerifier    Verification[]       @relation("VerificationVerifier")
-  sessions                 Session[]
-  editRequestsRequested    EditRequest[]        @relation("EditRequestRequester")
-  editRequestsApproved     EditRequest[]        @relation("EditRequestApprover")
-  attendances              Attendance[]         @relation("UserAttendance")
-  verificationRetries      VerificationRetries[]
-  departmentRoles          DepartmentRole[]     @relation("UserDepartmentRole")
-}
-
-
-model DepartmentRole {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation("UserDepartmentRole", fields: [userId], references: [id])
-  userId      Int
-  department  Department
-  role        UserRole
-  officeId    Int?
-  office      Office?   @relation(fields: [officeId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([userId, department])
-}
-
-model Organization {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  offices     Office[]
-}
-
-model Office {
-  id                  Int          @id @default(autoincrement())
-  name                String
-  location            String
-  address             String
-  department          Department?
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  loans               Loan[]
-  archived            Boolean      @default(false)
-  organizationId      Int          @default(1)
-  organization        Organization @relation(fields: [organizationId], references: [id])
-  departmentRoles     DepartmentRole[]
-}
-
-model Loan {
-  id                      Int                 @id @default(autoincrement())
-  applicationNumber       String              
-  applicantName           String
-  applicantMobile         String
-  applicantAddress        String?
-  applicantAddress1       String?
-  applicantAddress2       String?
-  isAddressSame           Boolean             @default(false)
-  loanType                String
-  bankName                String
-  templateName            String?
-  loanAmount              Float?
-  status                  LoanStatus
-  department              Department?
-  officeId                Int
-  office                  Office              @relation(fields: [officeId], references: [id])
-  operationsExecutiveId   Int?
-  operationsExecutive     User?               @relation("OperationsExecutive", fields: [operationsExecutiveId], references: [id])
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
-  reassignCount           Int                 @default(0)
-  applicantType           String?
-  editRequests            EditRequest[]
-  verifications           Verification[]
-  pdEmailLogs             PDEmailLog[]
-  @@unique([applicationNumber, applicantType, department, reassignCount]) // New optional field
-}
-
-model Verification {
-  id                    Int                @id @default(autoincrement())
-  loanId                Int
-  loan                  Loan               @relation(fields: [loanId], references: [id])
-  type                  VerificationType
-  addressType           AddressType?
-  approvedStatus        ApprovedStatus?
-  department            Department?
-  verifierId            Int?
-  verifier              User?               @relation("VerificationVerifier", fields: [verifierId], references: [id])
-  fieldExecutiveId      Int
-  fieldExecutive        User               @relation("VerificationFieldExecutive", fields: [fieldExecutiveId], references: [id])
-  status                VerificationStatus
-  locationType          LocationType?
-  isPostponed           Boolean?
-  initialSubmitted      Boolean? @default(false)
-  postponedDate         DateTime?
-  postponedReason       String?
-  businessName          String?
-  templateName          String?
-  financialAnalysis     Json?
-  synopsis              String?
-  currentOfficeName     String?
-  path                  String? // Array of S3 paths for verification documents
-  finalReportPath       String? // S3 path for final report
-  applicantAddress      String?
-  verificationData      Json? // JSON field to store address/work data
-  pictureSource         PictureSource? // Source of the uploaded picture
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
-  editRequests          EditRequest[] // Add this relation
-  verificationRetries   VerificationRetries[]
-  @@unique([loanId, type])
-}
-
-model VerificationRetries {
-  id                  Int @id @default(autoincrement())
-  verificationId      Int
-  verification        Verification @relation(fields: [verificationId], references: [id])
-  date                DateTime
-  geotag              String?
-  address             String?
-  reason              String?
-  fieldExecutiveId    Int
-  fieldExecutive      User         @relation(fields: [fieldExecutiveId], references: [id])
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-}
-
-model Session {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id])
-  userId      Int
-  otp         String?
-  otpExpires  DateTime?
-  createdAt   DateTime  @default(now())
-  lastLoginAt DateTime?
-  isActive    Boolean   @default(true)
-}
-
-model EditRequest {
-  id             Int               @id @default(autoincrement())
-  loanId         Int?
-  loan           Loan?              @relation(fields: [loanId], references: [id])
-  verificationId Int?
-  verification   Verification?     @relation(fields: [verificationId], references: [id])
-  requestedBy    Int
-  requester      User              @relation("EditRequestRequester", fields: [requestedBy], references: [id])
-  approvedBy     Int?
-  approver       User?             @relation("EditRequestApprover", fields: [approvedBy], references: [id])
-  status         EditRequestStatus
-  department     Department?
-  changes        Json // Stores the proposed changes
-  remarks        String?
-  type           EditRequestType?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-}
-
-model Attendance {
-  id             Int              @id @default(autoincrement())
-  userId         Int
-  user           User             @relation("UserAttendance", fields: [userId], references: [id])
-  date           DateTime
-  status         AttendanceStatus
-  department     Department?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-}
-
-model AppDeployment {
-  id            Int   @id @default(autoincrement())
-  version       String
-  isActive      Boolean @default(true)
-  source        String
-  forceUpdate   Boolean @default(false)
-  appStoreUrl   String?
-  playStoreUrl  String?
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model PDEmailLog {
-  id          Int      @id @default(autoincrement())
-  messageID   String
-  fromEmail   String[]
-  toEmail     String[]
-  ccEmail     String[]
-  bccEmail    String[]
-  subject     String
-  body        String
-  attachments String[]
-  receivedAt  DateTime?
-  parsedData  Json?
-  s3Path      String?
-  
-  loanId      Int?
-  loan        Loan?    @relation(fields: [loanId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Bank {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  logo        String?
-  parent      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
