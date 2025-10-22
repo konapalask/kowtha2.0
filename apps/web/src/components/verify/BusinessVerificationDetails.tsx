@@ -25,6 +25,7 @@ import React, { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
+import AssistantVerifierFooter from "./AssistantVerifierFooter";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 
@@ -35,6 +36,7 @@ import {
   patchFinalVerdict,
   verifierEditApi,
   submitFinancialAnalysis,
+  asstVerifierSubmitApi,
 } from "@/services/verifier.services";
 
 // Import new dynamic form system
@@ -910,6 +912,91 @@ export const BusinessVerificationDetails: React.FC<
     } catch (error) {
       console.error("Error submitting financial analysis:", error);
       message.error("Failed to submit financial analysis");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Assistant Verifier Submit
+  const handleAssistantVerifierSubmit = async () => {
+    try {
+      setLoading(true);
+
+      // Get financial form values
+      const financialValues = await financialForm
+        .validateFields()
+        .catch(() => ({}));
+
+      // Prepare verification data
+      const verificationDataPayload = {
+        ...dynamicFormData,
+        ...changedData,
+      };
+
+      // Get synopsis from editor content
+      const synopsis =
+        editorContent || "Business verification completed successfully";
+
+      // Prepare financial analysis data
+      const financialData = {
+        openingStock: parseFloat(financialValues.toOpeningStock) || 0,
+        purchase: parseFloat(financialValues.toPurchase) || 0,
+        costOfServices: parseFloat(financialValues.toCostOfServices) || 0,
+        wages: parseFloat(financialValues.toWages) || 0,
+        hamaliCharges: parseFloat(financialValues.toHamaliCharges) || 0,
+        manufacturingExpenses:
+          parseFloat(financialValues.toManufacturingExpenses) || 0,
+        packingCharges: parseFloat(financialValues.toPackingCharges) || 0,
+        sales: parseFloat(financialValues.bySales) || 0,
+        services: parseFloat(financialValues.byServices) || 0,
+        closingStock: parseFloat(financialValues.byClosingStock) || 0,
+        salaries: parseFloat(financialValues.toSalaries) || 0,
+        rent: parseFloat(financialValues.toRent) || 0,
+        electricityCharges:
+          parseFloat(financialValues.toElectricityCharges) || 0,
+        printingStationery:
+          parseFloat(financialValues.toPrintingStationery) || 0,
+        telephoneCharges: parseFloat(financialValues.toTelephoneCharges) || 0,
+        postageTelegram: parseFloat(financialValues.toPostageTelegram) || 0,
+        officeMaintenance: parseFloat(financialValues.toOfficeMaintenance) || 0,
+        repairsMaintenance:
+          parseFloat(financialValues.toRepairsMaintenance) || 0,
+        sadarExpenses: parseFloat(financialValues.toSadarExpenses) || 0,
+        auditFee: parseFloat(financialValues.toAuditFee) || 0,
+        advertisement: parseFloat(financialValues.toAdvertisement) || 0,
+        bankCharges: parseFloat(financialValues.toBankCharges) || 0,
+        insurance: parseFloat(financialValues.toInsurance) || 0,
+        depreciation: parseFloat(financialValues.toDepreciation) || 0,
+        interestOnLoan: parseFloat(financialValues.toInterestOnLoan) || 0,
+        rentReceived: parseFloat(financialValues.byRentReceived) || 0,
+        commissionReceived:
+          parseFloat(financialValues.byCommissionReceived) || 0,
+        grossProfit: calculatedGrossProfit,
+        netProfit: calculatedNetProfit,
+      };
+
+      // Prepare the complete payload
+      const payload = {
+        verificationType: "Business",
+        verificationData: verificationDataPayload,
+        synopsis,
+        ...financialData,
+      };
+
+      // Call the assistant verifier API
+      await asstVerifierSubmitApi(id as string, payload);
+
+      message.success("Verification submitted successfully!");
+
+      // Refresh the verification data
+      fetchVerificationData();
+    } catch (error: any) {
+      console.error("Error submitting assistant verifier data:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit verification data";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -1886,15 +1973,25 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* Footer */}
       {role !== "VerificationExecutive" && (
-        <Footer
-          editorContent={editorContent}
-          disabled={hasEditRequest}
-          handleSave={handleSave}
-          verdict={completeVerificationData?.approvedStatus}
-          open={open}
-          setOpen={setOpen}
-          verificationType="Business"
-        />
+        <>
+          {role === "AssistantVerifier" ? (
+            <AssistantVerifierFooter
+              onSave={handleAssistantVerifierSubmit}
+              loading={loading}
+              disabled={hasEditRequest}
+            />
+          ) : (
+            <Footer
+              editorContent={editorContent}
+              disabled={hasEditRequest}
+              handleSave={handleSave}
+              verdict={completeVerificationData?.approvedStatus}
+              open={open}
+              setOpen={setOpen}
+              verificationType="Business"
+            />
+          )}
+        </>
       )}
     </div>
   );
