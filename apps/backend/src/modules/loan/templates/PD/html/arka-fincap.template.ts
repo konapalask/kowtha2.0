@@ -390,9 +390,9 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
       parts.push(`Loan Amount: ${loanAmountDisplay}`);
     }
     const purpose = getValue(
-      verificationData.applicantDetails?.amountAndPurposeOfLoan,
-      verificationData.amountAndPurposeOfLoan,
-      loanDetails?.loanPurpose
+      verificationData.applicantDetails?.purposeOfLoan,
+      verificationData.purposeOfLoan,
+      loanDetails?.purposeOfLoan
     );
     if (purpose) {
       parts.push(`Purpose: ${purpose}`);

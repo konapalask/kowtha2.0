@@ -59,9 +59,9 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Person Met",
           },
-          amountAndPurposeOfLoan: {
+          purposeOfLoan: {
             type: "string",
-            title: "Amount and Purpose of Loan",
+            title: "Purpose of Loan",
             readOnly: true,
           },
           typeOfCollateral: {
