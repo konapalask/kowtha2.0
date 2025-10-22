@@ -19,6 +19,7 @@ import { CreateVerificationRetryDto } from "./dto/create-verification-retry.dto"
 import { CreateFinancialAnalysisDto } from "./dto/create-financial-analysis.dto";
 import { UpdateFinancialAnalysisDto } from "./dto/update-financial-analysis.dto";
 import { UpdateVerificationStatusDto } from "./dto/update-verification-status.dto";
+import { SubmitVerificationExecutiveDto } from "./dto/submit-verification-executive.dto";
 import {
   ApiTags,
   ApiOperation,
@@ -1141,6 +1142,73 @@ export class LoanController {
     return {
       status: 201,
       message: "Financial analysis created successfully",
+      data: result,
+    };
+  }
+
+  @Post(":id/submit-verification-executive")
+  @Roles(UserRole.Admin, UserRole.VerificationExecutive)
+  @ApiOperation({
+    summary:
+      "VerificationExecutive submits verification data with financial analysis and synopsis. Sets initialSubmitted to true",
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      "Verification data, financial analysis, and synopsis submitted successfully",
+    schema: {
+      type: "object",
+      properties: {
+        status: { type: "number", example: 200 },
+        message: {
+          type: "string",
+          example:
+            "Verification submitted successfully by Verification Executive",
+        },
+        data: {
+          type: "object",
+          properties: {
+            id: { type: "number" },
+            loanId: { type: "number" },
+            type: { type: "string", enum: Object.values(VerificationType) },
+            verificationData: { type: "object" },
+            financialAnalysis: { type: "object" },
+            synopsis: { type: "string" },
+            initialSubmitted: { type: "boolean", example: true },
+            status: {
+              type: "string",
+              enum: Object.values(VerificationStatus),
+            },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - Invalid data provided",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Verification not found",
+  })
+  async submitVerificationExecutive(
+    @Param("id") loanId: string,
+    @Body() submitDto: SubmitVerificationExecutiveDto
+  ) {
+    const { verificationType, verificationData, synopsis, ...financialAnalysisData } = submitDto;
+    
+    const result = await this.loanService.submitVerificationExecutive(
+      Number(loanId),
+      verificationType,
+      verificationData,
+      financialAnalysisData,
+      synopsis
+    );
+    return {
+      status: 200,
+      message: "Verification submitted successfully by Verification Executive",
       data: result,
     };
   }
