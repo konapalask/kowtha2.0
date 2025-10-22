@@ -23,6 +23,7 @@ import SchemaSection from '../components/pd-forms/SchemaSection';
 import {loadMobilePDFormsSchema} from '../components/pd-forms/schema/pdSchema';
 import PhotoCapture from '../components/forms/PhotoCapture';
 import GetLocation from 'react-native-get-location';
+import {colors} from '../constants/colors';
 
 // Function to populate initial data from schema structure
 const populateInitialDataFromSchema = (
@@ -1170,7 +1171,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#ddd',
   },
   submitButton: {
-    backgroundColor: '#871db4',
+    backgroundColor: colors.button.primary.background,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',

@@ -23,12 +23,22 @@ import {
   createUserApi,
   getUsersApi,
   updateUserApi,
-  updateUserDepartmentRolesApi, 
+  updateUserDepartmentRolesApi,
   UserFilters,
 } from "@/services/users.services";
-import { getOfficesApi, getOfficesByDepartmentApi } from "@/services/settings.services";
+import {
+  getOfficesApi,
+  getOfficesByDepartmentApi,
+} from "@/services/settings.services";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, setUserDetails, notifyUserDetailsChange, getCurrentDepartmentRole, useDepartmentChange } from "@/utils/utility";
+import {
+  getUserDetails,
+  getCurrentDepartment,
+  setUserDetails,
+  notifyUserDetailsChange,
+  getCurrentDepartmentRole,
+  useDepartmentChange,
+} from "@/utils/utility";
 import FilterOverlay from "@/components/users/FilterOverlay";
 
 const { Option } = Select;
@@ -69,7 +79,7 @@ const RoleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
   { label: "Verifier", value: "Verifier" },
-  { label: "Field Executive", value: "FieldExecutive" }
+  { label: "Field Executive", value: "FieldExecutive" },
 ];
 
 // import { Form, Checkbox, Select, Row, Col } from "antd";
@@ -79,19 +89,30 @@ const FIroleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
   { label: "Verifier", value: "Verifier" },
-  { label: "Field Executive", value: "FieldExecutive" }
+  { label: "Field Executive", value: "FieldExecutive" },
 ];
 
 const PDroleOptions = [
   { label: "Admin", value: "Admin" },
   { label: "Operations Executive", value: "OperationsExecutive" },
   { label: "Verifier", value: "Verifier" },
-  { label: "Field Executive", value: "FieldExecutive" }
+  { label: "Field Executive", value: "FieldExecutive" },
+  { label: "Verification Executive", value: "VerificationExecutive" },
 ];
 
 const departments = ["FI", "PD"];
 
-const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { form: FormInstance, editingUser: User | null, fiOffices: any[], pdOffices: any[] }) => {
+const DepartmentRoleSelector = ({
+  form,
+  editingUser,
+  fiOffices,
+  pdOffices,
+}: {
+  form: FormInstance;
+  editingUser: User | null;
+  fiOffices: any[];
+  pdOffices: any[];
+}) => {
   // Get current department roles directly from form
   const getCurrentDepartments = () => {
     const currentRoles = form.getFieldValue("departmentRoles") || [];
@@ -102,7 +123,10 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
     const current = form.getFieldValue("departmentRoles") || [];
     if (checked) {
       form.setFieldsValue({
-        departmentRoles: [...current, { department: dept, role: undefined, officeId: undefined }],
+        departmentRoles: [
+          ...current,
+          { department: dept, role: undefined, officeId: undefined },
+        ],
       });
     } else {
       const updated = current.filter((item: any) => item.department !== dept);
@@ -117,7 +141,12 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
         const isChecked = currentDepartments.includes(dept);
 
         return (
-          <Row key={dept} align="middle" gutter={16} style={{ marginBottom: 12 }}>
+          <Row
+            key={dept}
+            align="middle"
+            gutter={16}
+            style={{ marginBottom: 12 }}
+          >
             <Col>
               <Checkbox
                 checked={isChecked}
@@ -130,7 +159,11 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
               {isChecked && (
                 <>
                   <Form.Item
-                    name={["departmentRoles", currentDepartments.indexOf(dept), "role"]}
+                    name={[
+                      "departmentRoles",
+                      currentDepartments.indexOf(dept),
+                      "role",
+                    ]}
                     noStyle
                   >
                     <Select
@@ -141,8 +174,14 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
                   </Form.Item>
                   {/* Branch per department */}
                   <Form.Item
-                    name={["departmentRoles", currentDepartments.indexOf(dept), "officeId"]}
-                    rules={[{ required: true, message: `Select branch for ${dept}` }]}
+                    name={[
+                      "departmentRoles",
+                      currentDepartments.indexOf(dept),
+                      "officeId",
+                    ]}
+                    rules={[
+                      { required: true, message: `Select branch for ${dept}` },
+                    ]}
                     style={{ display: "inline-block", marginLeft: 12 }}
                   >
                     <Select
@@ -159,7 +198,11 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
                     />
                   </Form.Item>
                   <Form.Item
-                    name={["departmentRoles", currentDepartments.indexOf(dept), "department"]}
+                    name={[
+                      "departmentRoles",
+                      currentDepartments.indexOf(dept),
+                      "department",
+                    ]}
                     initialValue={dept}
                     hidden
                   >
@@ -175,7 +218,6 @@ const DepartmentRoleSelector = ({ form, editingUser, fiOffices, pdOffices }: { f
   );
 };
 
-
 export default function Users() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -187,7 +229,7 @@ export default function Users() {
   const [offices, setOffices] = useState<Office[]>([]);
   const [fiOffices, setFiOffices] = useState<any[]>([]);
   const [pdOffices, setPdOffices] = useState<any[]>([]);
-  const [officeMap, setOfficeMap] = useState<{[key: number]: string}>({});
+  const [officeMap, setOfficeMap] = useState<{ [key: number]: string }>({});
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -221,7 +263,7 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers(1, pagination.pageSize, filters);
-  }, [currentDepartment]); 
+  }, [currentDepartment]);
 
   useEffect(() => {
     getOfficesApi()
@@ -232,14 +274,14 @@ export default function Users() {
             value: Number(item.id),
           })) ?? [];
         setOffices(all);
-        const officeNameMap: {[key: number]: string} = {};
+        const officeNameMap: { [key: number]: string } = {};
         res?.data?.data?.forEach((item: any) => {
           officeNameMap[item.id] = item.name;
         });
         setOfficeMap(officeNameMap);
       })
       .catch((err) => console.log(err));
-    getOfficesByDepartmentApi('FI')
+    getOfficesByDepartmentApi("FI")
       .then((res) => {
         const fi =
           res?.data?.data?.map((item: any) => ({
@@ -250,7 +292,7 @@ export default function Users() {
       })
       .catch((err) => console.log(err));
 
-    getOfficesByDepartmentApi('PD')
+    getOfficesByDepartmentApi("PD")
       .then((res) => {
         const pd =
           res?.data?.data?.map((item: any) => ({
@@ -260,47 +302,54 @@ export default function Users() {
         setPdOffices(pd);
       })
       .catch((err) => console.log(err));
-  }, [currentDepartment]); 
-
+  }, [currentDepartment]);
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
       const trimmedValues = { ...values };
-      ["name", "mobile", "email", "employeeCode", "locality"].forEach((field) => {
-        if (typeof trimmedValues[field] === "string") {
-          trimmedValues[field] = trimmedValues[field].trim();
+      ["name", "mobile", "email", "employeeCode", "locality"].forEach(
+        (field) => {
+          if (typeof trimmedValues[field] === "string") {
+            trimmedValues[field] = trimmedValues[field].trim();
+          }
         }
-      });
+      );
 
       // Ensure departmentRoles is always an array
-      if (!trimmedValues.departmentRoles || !Array.isArray(trimmedValues.departmentRoles)) {
+      if (
+        !trimmedValues.departmentRoles ||
+        !Array.isArray(trimmedValues.departmentRoles)
+      ) {
         trimmedValues.departmentRoles = [];
       }
 
-      console.log('Submitting user data:', trimmedValues);
+      console.log("Submitting user data:", trimmedValues);
 
       if (editingUser) {
         // Split PATCH: main fields, then departmentRoles
         const { departmentRoles, ...mainFields } = trimmedValues;
         await updateUserApi(editingUser?.id, mainFields);
         await updateUserDepartmentRolesApi(editingUser?.id, departmentRoles);
-        
+
         // Check if the current user is editing their own profile
-        if (editingUser.id === userDetails?.sub || editingUser.id === userDetails?.id) {
+        if (
+          editingUser.id === userDetails?.sub ||
+          editingUser.id === userDetails?.id
+        ) {
           const updatedUserDetails = {
             ...userDetails,
             ...mainFields,
-            departmentRoles: departmentRoles
+            departmentRoles: departmentRoles,
           };
-          
+
           setUserDetails(updatedUserDetails);
           // Notify other components about the user details change
           setTimeout(() => {
             notifyUserDetailsChange();
           }, 100);
         }
-        
+
         message.success("User updated successfully");
         fetchUsers(pagination.current, pagination.pageSize, filters);
       } else {
@@ -312,7 +361,7 @@ export default function Users() {
       form.resetFields();
       setEditingUser(null);
     } catch (error: any) {
-      console.error('Error submitting user:', error);
+      console.error("Error submitting user:", error);
       message.error(error?.response?.data?.message);
     } finally {
       setLoading(false);
@@ -323,7 +372,7 @@ export default function Users() {
     // console.log('Editing user data:', user);
     // console.log('User office data:', user.office);
     // console.log('User officeId:', user.officeId);
-    
+
     setEditingUser(user);
     form.setFieldsValue({
       name: user.name,
@@ -332,7 +381,7 @@ export default function Users() {
       employeeCode: user.employeeCode,
       role: user.role,
       locality: user.locality,
-      officeId: user.office?.id || user.officeId, 
+      officeId: user.office?.id || user.officeId,
       departmentRoles: user.departmentRoles,
     });
     setIsModalVisible(true);
@@ -401,7 +450,9 @@ export default function Users() {
       render: (_: string, record: User) => {
         let deptRole = record.role;
         if (currentDepartment && Array.isArray(record.departmentRoles)) {
-          const found = record.departmentRoles.find((dr: any) => dr.department === currentDepartment);
+          const found = record.departmentRoles.find(
+            (dr: any) => dr.department === currentDepartment
+          );
           if (found && found.role) {
             deptRole = found.role;
           }
@@ -425,14 +476,16 @@ export default function Users() {
           }
         };
         const getRoleLabel = (role: string) => {
-          const allOptions = [...RoleOptions, ...FIroleOptions, ...PDroleOptions];
-          const roleOption = allOptions.find(option => option.value === role);
+          const allOptions = [
+            ...RoleOptions,
+            ...FIroleOptions,
+            ...PDroleOptions,
+          ];
+          const roleOption = allOptions.find((option) => option.value === role);
           return roleOption ? roleOption.label : role;
         };
         return (
-          <Tag color={getRoleColor(deptRole)}>
-            {getRoleLabel(deptRole)}
-          </Tag>
+          <Tag color={getRoleColor(deptRole)}>{getRoleLabel(deptRole)}</Tag>
         );
       },
     },
@@ -445,7 +498,7 @@ export default function Users() {
         if (office?.name) {
           return office.name;
         }
-        
+
         if (record.departmentRoles && Array.isArray(record.departmentRoles)) {
           const branchNames = record.departmentRoles
             .map((deptRole: any) => {
@@ -455,13 +508,13 @@ export default function Users() {
               return null;
             })
             .filter((name: string | null) => name !== null);
-          
+
           if (branchNames.length > 0) {
-            return branchNames.join(', ');
+            return branchNames.join(", ");
           }
         }
-        
-        return '-';
+
+        return "-";
       },
     },
     {
@@ -475,9 +528,10 @@ export default function Users() {
         ) : (
           <Tag color="red">Inactive</Tag>
         ),
-      ...(getCurrentDepartmentRole() !== "Admin" && getCurrentDepartmentRole() !== "PDAdmin" && { fixed: "right" }),
+      ...(getCurrentDepartmentRole() !== "Admin" &&
+        getCurrentDepartmentRole() !== "PDAdmin" && { fixed: "right" }),
     },
-          ...(getCurrentDepartmentRole() === "Admin" 
+    ...(getCurrentDepartmentRole() === "Admin"
       ? [
           {
             title: "Actions",
@@ -503,7 +557,7 @@ export default function Users() {
   return (
     <DashboardLayout>
       <Card>
-        {(getCurrentDepartmentRole() === "Admin" ) && (
+        {getCurrentDepartmentRole() === "Admin" && (
           <div
             style={{
               marginBottom: 16,
@@ -539,7 +593,8 @@ export default function Users() {
           onChange={handleTableChange}
           sticky
           pagination={
-            (Object.values(filters).some((v) => v !== undefined && v !== "") && users.length <= 10)
+            Object.values(filters).some((v) => v !== undefined && v !== "") &&
+            users.length <= 10
               ? false
               : {
                   current: pagination.current,
@@ -574,7 +629,7 @@ export default function Users() {
           // }}
           initialValues={{
             departmentRoles: [],
-            status: "Active"
+            status: "Active",
           }}
           style={{ gap: 8, display: "flex", flexDirection: "column" }}
         >
@@ -585,11 +640,13 @@ export default function Users() {
               { required: true, message: "Please enter name" },
               {
                 validator: (_, value) => {
-                  if (value && value.startsWith(' ')) {
-                    return Promise.reject('Cannot start with a space.');
+                  if (value && value.startsWith(" ")) {
+                    return Promise.reject("Cannot start with a space.");
                   }
                   if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                    return Promise.reject('Special characters are not allowed.');
+                    return Promise.reject(
+                      "Special characters are not allowed."
+                    );
                   }
                   return Promise.resolve();
                 },
@@ -604,9 +661,9 @@ export default function Users() {
             label="Mobile Number"
             rules={[
               { required: true, message: "Please enter mobile number" },
-              { 
-                pattern: /^[0-9]{10}$/, 
-                message: "Mobile number must be exactly 10 digits" 
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Mobile number must be exactly 10 digits",
               },
               { pattern: /^[^\s].*$/, message: "Cannot start with a space." },
             ]}
@@ -635,11 +692,13 @@ export default function Users() {
               { required: true, message: "Please enter employee code" },
               {
                 validator: (_, value) => {
-                  if (value && value.startsWith(' ')) {
-                    return Promise.reject('Cannot start with a space.');
+                  if (value && value.startsWith(" ")) {
+                    return Promise.reject("Cannot start with a space.");
                   }
                   if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                    return Promise.reject('Special characters are not allowed.');
+                    return Promise.reject(
+                      "Special characters are not allowed."
+                    );
                   }
                   return Promise.resolve();
                 },
@@ -661,11 +720,17 @@ export default function Users() {
               {
                 validator: (_, value) => {
                   if (!value || !Array.isArray(value) || value.length === 0) {
-                    return Promise.reject('Please select at least one department and role');
+                    return Promise.reject(
+                      "Please select at least one department and role"
+                    );
                   }
-                  const hasAllRoles = value.every((item: any) => item.department && item.role);
+                  const hasAllRoles = value.every(
+                    (item: any) => item.department && item.role
+                  );
                   if (!hasAllRoles) {
-                    return Promise.reject('Please select roles for all departments');
+                    return Promise.reject(
+                      "Please select roles for all departments"
+                    );
                   }
                   return Promise.resolve();
                 },
@@ -673,7 +738,12 @@ export default function Users() {
             ]}
             style={{ marginBottom: 8 }}
           >
-            <DepartmentRoleSelector form={form} editingUser={editingUser} fiOffices={fiOffices} pdOffices={pdOffices} />
+            <DepartmentRoleSelector
+              form={form}
+              editingUser={editingUser}
+              fiOffices={fiOffices}
+              pdOffices={pdOffices}
+            />
           </Form.Item>
           <Form.Item
             name="locality"
@@ -682,11 +752,13 @@ export default function Users() {
               { required: true, message: "Please enter location" },
               {
                 validator: (_, value) => {
-                  if (value && value.startsWith(' ')) {
-                    return Promise.reject('Cannot start with a space.');
+                  if (value && value.startsWith(" ")) {
+                    return Promise.reject("Cannot start with a space.");
                   }
                   if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                    return Promise.reject('Special characters are not allowed.');
+                    return Promise.reject(
+                      "Special characters are not allowed."
+                    );
                   }
                   return Promise.resolve();
                 },

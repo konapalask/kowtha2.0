@@ -41,7 +41,9 @@ const getInitialDataByBank = (
   userData: any,
   loggedInUserName?: string,
 ) => {
-  if (!userData || !bankName) return {};
+  if (!userData || !bankName) {
+    return {};
+  }
 
   const bankNameLower = bankName.toLowerCase();
 
@@ -616,26 +618,49 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
         loggedInUserName,
       );
 
-      // For Chola, generate comprehensive mock data for ALL fields
-      if (selectedBank.toLowerCase().includes('chola')) {
-        try {
-          const comprehensiveMockData = generateMockDataFromSchema(schema);
-          // Merge with initial data (initial data takes precedence for basic fields)
-          initialData = {
-            ...comprehensiveMockData,
-            ...initialData,
-            general: {
-              ...comprehensiveMockData.general,
-              ...initialData.general,
-            },
-          };
-          console.log(
-            '✅ Chola: Generated comprehensive mock data for all sections',
-          );
-        } catch (error) {
-          console.error('❌ Failed to generate mock data for Chola:', error);
-          // Fallback to basic initialData
-        }
+      // Generate comprehensive mock data for ALL fields using enhanced faker.js generator
+      try {
+        const comprehensiveMockData = generateMockDataFromSchema(schema);
+        console.log('🔍 Generated comprehensive mock data for all sections', {
+          bankName: selectedBank,
+          sectionCount: schema.sections?.length || 0,
+          mockDataKeys: Object.keys(comprehensiveMockData),
+        });
+
+        // Merge with initial data (initial data takes precedence for basic fields)
+        // Deep merge to handle nested objects properly
+        initialData = {
+          ...comprehensiveMockData,
+          ...initialData,
+        };
+
+        // Handle specific bank section merging for better data integrity
+        Object.keys(comprehensiveMockData).forEach(sectionId => {
+          if (
+            (initialData as any)[sectionId] &&
+            typeof (initialData as any)[sectionId] === 'object' &&
+            !Array.isArray((initialData as any)[sectionId])
+          ) {
+            // Merge object sections, keeping initial data where it exists
+            (initialData as any)[sectionId] = {
+              ...(comprehensiveMockData as any)[sectionId],
+              ...(initialData as any)[sectionId],
+            };
+          } else if (!(initialData as any)[sectionId]) {
+            // If no initial data for this section, use mock data
+            (initialData as any)[sectionId] = (comprehensiveMockData as any)[
+              sectionId
+            ];
+          }
+        });
+
+        console.log(
+          '✅ Enhanced Mock Data Generation: Generated comprehensive faker.js data for all sections',
+          {bankName: selectedBank},
+        );
+      } catch (error) {
+        console.error('❌ Failed to generate comprehensive mock data:', error);
+        // Continue with basic initialData as fallback
       }
 
       // AUTO-INJECT GPS COORDINATES into all sections that need it

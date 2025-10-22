@@ -8,16 +8,12 @@ export const axisBankSchema = {
       schema: {
         type: "object",
         properties: {
-          applicationNo: {
-            type: "string",
-            title: "Application No",
-            readOnly: true,
-          },
-          applicationId: {
+          applicationNumber: {
             type: "string",
             title: "Application ID",
             readOnly: true,
           },
+
           pdDate: {
             type: "string",
             title: "PD Date",
@@ -39,19 +35,25 @@ export const axisBankSchema = {
               minDecimalPlaces: 0,
             },
           },
-          customerName: {
+          applicantName: {
             type: "string",
             title: "Customer Name",
             readOnly: true,
           },
           pdAddress: {
             type: "string",
-            title: "PD Address (Residence/Office/Factory/Godown)",
+            title: "PD Address Type (Residence/Office/Factory/Godown)",
             enum: ["residence", "Office", "Factory", "Godown"],
           },
+          applicantAddress: {
+            type: "string",
+            title: "Full Address",
+            readOnly: true,
+          },
+
           contactNumber: {
             type: "string",
-            title: " Contact Number (Mobile / Landline)",
+            title: "Contact Number (Mobile / Landline)",
             readOnly: true,
           },
           personMet: {
@@ -69,34 +71,13 @@ export const axisBankSchema = {
               "Neighbor",
             ],
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
-        required: ["applicationId", "customerName"],
       },
       required: true,
     },
     {
       id: "familyBackground",
-      label: "Family Background",
+      label: "Borrower Details",
       schema: {
         type: "object",
         properties: {
@@ -161,7 +142,7 @@ export const axisBankSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfFirm: {
+          businessName: {
             type: "string",
             title: "Name of Firm",
             readOnly: true,
@@ -219,6 +200,16 @@ export const axisBankSchema = {
               "Nature of Business (Trading / Manufacturing / Services / Others)",
             enum: ["Trading", "Manufacturing", "Services", "Others"],
           },
+          natureOfBusinessOther: {
+            type: "string",
+            title: "Nature of Business (Other)",
+            show: {
+              natureOfBusiness: "Others",
+            },
+            required: {
+              natureOfBusiness: "Others",
+            },
+          },
           productServicesOffered: {
             type: "string",
             title: "Product / Services Offered",
@@ -226,152 +217,10 @@ export const axisBankSchema = {
           businessModelBackground: {
             type: "string",
             title: "Business Model & Background of Business",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessDetails",
-      label: "Business Details",
-      schema: {
-        type: "object",
-        properties: {
-          aboutTheBusiness: {
-            type: "string",
-            title: "About the business",
-          },
-          yearBusinessStarted: {
-            type: "integer",
-            title: "Year Business Started",
-          },
-          typeOfBusiness: {
-            type: "string",
-            title: "Type of Business (e.g., Proprietorship/Partnership)",
-            enum: [
-              "Proprietorship",
-              "Private Limited",
-              "Limited Liability Partnership",
-              "Simple Partnership",
-            ],
-          },
-          businessName: {
-            type: "string",
-            title: "Business Name",
-          },
-          natureOfBusiness: {
-            type: "string",
-            title: "Nature of Business",
-          },
-          stockSource: {
-            type: "string",
-            title: "Stock Source (Suppliers/Farmers)",
-          },
-          stockHandling: {
-            type: "string",
-            title: "Stock Handling (Premises / Direct Delivery)",
-          },
-          salesVolume: {
-            type: "string",
-            title: "Sales Volume",
-          },
-          profitPerUnit: {
-            type: "string",
-            title: "Profit per Unit",
-          },
-          businessPremisesOwnership: {
-            type: "string",
-            title: "Business Premises Ownership",
-          },
-          numberOfWorkers: {
-            type: "integer",
-            title: "Number of Workers",
-          },
-          wageExpenses: {
-            type: "number",
-            title: "Wage Expenses",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+            ui: {
+              widget: "textarea",
+              rows: 6,
             },
-          },
-          majorTransactionMode: {
-            type: "string",
-            title: "Major Transaction Mode (Cash/Bank)",
-          },
-          regularCustomers: {
-            type: "array",
-            title: "Regular Customers",
-            items: {
-              type: "object",
-              properties: {
-                nameOfRegularCustomers: {
-                  type: "string",
-                  title: "Name of Regular Customers",
-                },
-                contactNumberOfRegularCustomers: {
-                  type: "string",
-                  title: "Contact Number of Regular Customers",
-                },
-              },
-            },
-          },
-          regularSuppliers: {
-            type: "array",
-            title: "Regular Suppliers",
-            items: {
-              type: "object",
-              properties: {
-                nameOfRegularSuppliers: {
-                  type: "string",
-                  title: "Name of Regular Suppliers",
-                },
-                contactNumberOfRegularSuppliers: {
-                  type: "string",
-                  title: "Contact Number of Regular Suppliers",
-                },
-              },
-            },
-          },
-          businessActivityObserved: {
-            type: "string",
-            title: "Business Activity observed",
-          },
-          stockLevelObserved: {
-            type: "string",
-            title: "Stock Level observed",
-          },
-          documentsObserved: {
-            type: "string",
-            title: "Documents Observed",
-          },
-          gstRegistration: {
-            type: "boolean",
-            title:
-              "Whether Business was Registered under GST - Yes/No If Yes then mention GST Number",
-          },
-          gstNumber: {
-            type: "string",
-            title: "GST Number",
-            dependencies: {
-              show: {
-                gstRegistration: true,
-              },
-              required: {
-                gstRegistration: true,
-              },
-            },
-          },
-          itrFiled: {
-            type: "string",
-            title: "ITRs Filed - Yes/No If Yes then mention the income",
-            enum: ["Yes", "No"],
-          },
-          income: {
-            type: "string",
-            title: "Income",
           },
         },
       },
@@ -471,102 +320,115 @@ export const axisBankSchema = {
       schema: {
         type: "object",
         properties: {
-          monthlyGrossReceipts: {
-            type: "number",
-            title: "Monthly Gross Receipts",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          turnOverAndMargin: {
+            type: "string",
+            title: "Turnover and Margin",
+          },
+          peakSalesMonths: {
+            type: "string",
+            title: "Peak sales months - Volume in INR",
+          },
+          lowSalesMonths: {
+            type: "string",
+            title: "Low sales months - Volume in INR",
+          },
+          customerIdentityEstablished: {
+            type: "string",
+            title: "Customer Identity established during PD",
+            enum: ["Yes", "No"],
+          },
+          customerIdentityDetails: {
+            type: "string",
+            title: "If yes, established through document",
+            show: {
+              customerIdentityEstablished: "Yes",
             },
           },
-          monthlyExpenses: {
-            type: "number",
-            title: "Monthly Expenses",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          charteredACDetails: {
+            type: "string",
+            title: "Chartered A/c details",
+          },
+          detailsOfExistingLoans: {
+            type: "array",
+            title: "Details of existing loans confirmed during PD",
+            items: {
+              type: "object",
+              properties: {
+                loanType: {
+                  type: "string",
+                  title: "Loan type",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                tenure: {
+                  type: "string",
+                  title: "Tenure",
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                balTenure: {
+                  type: "string",
+                  title: "Bal tenure",
+                },
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+              },
             },
           },
-          netProfit: {
-            type: "number",
-            title: "Net Profit",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          loansFromFamilyFriends: {
+            type: "string",
+            title: "Loans taken from family, friends business associates etc.",
+          },
+          workingCapitalBankName: {
+            type: "string",
+            title: "Working Capital - Bank Name",
+          },
+          workingCapitalLimit: {
+            type: "string",
+            title: "Working Capital - Limit",
+          },
+          workingCapitalUtilisation: {
+            type: "string",
+            title: "Working Capital - Utilisation",
+          },
+          workingCapitalCollateral: {
+            type: "string",
+            title: "Working Capital - Collateral",
+          },
+          workingCapitalLinkedLoans: {
+            type: "string",
+            title: "Working Capital - Details of linked loans (if any)",
+          },
+          endUseOfProposedLoan: {
+            type: "string",
+            title: "End Use of proposed Loan in detail",
+            ui: {
+              widget: "textarea",
+              rows: 6,
             },
           },
-          netMargin: {
-            type: "number",
-            title: "Net Margin",
-          },
-          majorExpenses: {
-            type: "number",
-            title: "Major Expenses",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          monthlyHouseholdExpenses: {
-            type: "number",
-            title: "Monthly Household Expenses",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          employees: {
+          averageBalances: {
             type: "string",
-            title: "Employees",
+            title: "Average Balances",
           },
-          numberOfEmployees: {
-            type: "integer",
-            title: "Number of Employees",
-          },
-          otherIncomes: {
-            type: "string",
-            title: "Other Incomes",
-          },
-          concerns: {
-            type: "string",
-            title: "Concerns",
-          },
-          otherObservation: {
-            type: "string",
-            title: "Other Observation",
-          },
-          neighborCheckThirdParty: {
-            type: "string",
-            title:
-              "Details of neighbor check / Third party check done and status",
-          },
-        },
-        endUseOfProposedLoan: {
-          type: "string",
-          title: "End use of proposed Loan (detailed)",
-        },
-        bankingPerformance: {
-          type: "string",
-          title: "Banking performance",
-        },
-        anyChequeBounces: {
-          type: "string",
-          title: "Any cheque bounces (Y/N)",
-          enum: ["Yes", "no"],
-        },
-        detailsOfCollateral: {
-          type: "string",
-          title: "Details of collateral (Address of property)",
         },
       },
       required: true,

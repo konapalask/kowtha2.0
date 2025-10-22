@@ -42,7 +42,7 @@ const getDeviceId = async () => {
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   // DEV MODE: Pre-fill credentials for faster testing
-  const [mobileNumber, setMobileNumber] = useState(__DEV__ ? '9912994742' : '');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState(__DEV__ ? '122446' : '');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);

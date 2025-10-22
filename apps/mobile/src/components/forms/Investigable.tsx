@@ -11,8 +11,6 @@ import {
 } from 'react-native';
 import {colors} from '../../constants/colors';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import GetLocation from 'react-native-get-location';
 import {getItem} from '../../helpers/utility';
 import dayjs from 'dayjs';
 import {verificationRetryApi} from '../../services/field.services';
@@ -46,17 +44,14 @@ const Investigable: React.FC<InvestigableProps> = ({
   } = useForm<{
     reason: string;
     date: Date | null;
-    geoTag: string;
   }>({
     defaultValues: {
       reason: '',
       date: dayjs().toDate(),
-      geoTag: '',
     },
   });
   const navigation = useNavigation<any>();
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  // const geoTag = watch('geoTag');
   const selectedDate = watch('date');
   const [userDetails, setUserDetails] = useState<any>({});
   // console.log(userDetails);
@@ -71,23 +66,6 @@ const Investigable: React.FC<InvestigableProps> = ({
       }
     };
     fetchUserDetails();
-  }, []);
-
-  useEffect(() => {
-    if (isInvestigable === false) {
-      GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-      })
-        .then(location => {
-          const {latitude, longitude} = location;
-          setValue('geoTag', `${latitude},${longitude}`);
-        })
-        .catch(error => {
-          console.error('Error getting location:', error);
-          setValue('geoTag', 'Location not available');
-        });
-    }
   }, []);
 
   // useEffect(() => {
@@ -124,15 +102,10 @@ const Investigable: React.FC<InvestigableProps> = ({
     : '';
 
   const onSubmit = async (data: any) => {
-    // if (!data.geoTag || !data.date || !data.reason) {
-    //   Alert.alert('Error', 'Geo Tag, Date, and Reason are mandatory.');
-    //   return;
-    // }
     try {
       const payload = {
         verificationId: item?.id,
         date: dayjs(data.date).toISOString(),
-        geotag: data.geoTag,
         address: item?.address,
         reason: data.reason,
         fieldExecutiveId: Number(userDetails?.sub),
@@ -186,24 +159,6 @@ const Investigable: React.FC<InvestigableProps> = ({
       </View>
       {isInvestigable === false && (
         <View style={styles.inputContainer}>
-          {/* Geo Tag Field */}
-          <Text style={styles.label}>Geo Tag</Text>
-          <Controller
-            control={control}
-            name="geoTag"
-            rules={{required: true}}
-            render={({field: {value}}) => (
-              <TextInput
-                style={[styles.input, styles.disabledInput]}
-                value={value}
-                editable={false}
-                placeholder="Geo Tag"
-              />
-            )}
-          />
-          {errors.geoTag && (
-            <Text style={{color: 'red'}}>Geo Tag is required</Text>
-          )}
           {/* Date Picker Field */}
           <Text style={styles.label}>Date</Text>
           <TouchableOpacity
