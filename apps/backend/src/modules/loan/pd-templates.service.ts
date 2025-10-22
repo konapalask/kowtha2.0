@@ -1,11 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
-import { S3Service } from "src/modules/common/s3utils/s3.service";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { formSchema } from "./forms-schema";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
+import * as templates from "./templates/PD/html/_index";
+import * as interfaces from "./templates/PD/interface/_index";
 import { VerificationType, Department } from "@prisma/client";
-import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
+import { S3Service } from "src/modules/common/s3utils/s3.service";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { LoggingService } from "src/modules/common/logging/logging.service";
 import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
 // import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
@@ -23,11 +25,12 @@ import { arkaFincapTemplate } from "./templates/PD/html/arka-fincap.template";
 import { heroHousingSelfTemplate } from "./templates/PD/html/hero-housing-self.template";
 import { idfcHlMlTemplate } from "./templates/PD/html/idfc-hl-ml.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
-import { formSchema } from "./forms-schema";
 import {
   validateVerificationData,
   logDataStructure,
 } from "./templates/PD/html/template-validator";
+
+
 
 @Injectable()
 export class PDTemplateService {
@@ -325,7 +328,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisFinanceUBLTemplate(verificationData, html_data);
+      return templates.axisFinanceUBLTemplate(verificationData, html_data);
     }
 
     if (bankName == "RBL" || bankName == "Rbl") {
@@ -604,4 +607,91 @@ export class PDTemplateService {
       throw error;
     }
   }
+
+  // async FormatPDImages(verification: any, bankName: string, applicationNumber: string, synopsis: string, financialAnalysis: any): Promise<any> {
+
+  //   const signaturePath = path.resolve(process.cwd(),process.env.SIGNATURE_PATH);
+  //   const imageBase64 = fs.readFileSync(signaturePath, "base64");
+  //   const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
+  //   const status = verification?.approvedStatus || "";
+
+  //   const uploadedItems = verification?.uploadedItems || [];
+
+  //   // Generate presigned URLs for images
+  //   const imageUrls = await Promise.all(
+  //     uploadedItems.map(async (item: any) => {
+  //       try {
+  //         return await this.s3Service.generatePresignedDownloadUrl(
+  //           item.s3ImageUrl
+  //         );
+  //       } catch (error) {
+  //         await this.loggingService.error(
+  //           "Failed to generate presigned URL for image",
+  //           {
+  //             s3ImageUrl: item.s3ImageUrl,
+  //             error: error.message,
+  //           }
+  //         );
+  //         return null;
+  //       }
+  //     })
+  //   );
+
+  //   // Filter out any failed URL generations
+  //   const validImageUrls = imageUrls.filter((url) => url !== null);
+
+  //   const fieldExecutive = verification.fieldExecutive?.name || "";
+
+  //   const imagesData = await this.loanService.formatImages(
+  //     validImageUrls,
+  //     bankName,
+  //     fieldExecutive
+  //   );
+
+  //   return {
+  //     bankName: bankName,
+  //     applicationNumber: applicationNumber,
+  //     path: synopsis,
+  //     financialAnalysis: financialAnalysis,
+  //     status: status,
+  //     imageDataUri: imageDataUri,
+  //     imagesData: imagesData,
+  //     fieldExecutive: fieldExecutive,
+  //   };
+  // }
+
+  // async InterfaceMapping(
+  //   bankName: string,
+  //   verification: any,
+  //   loan: any,
+  //   synopsis: string,
+  //   financialAnalysis: any,
+  //   schema?: any
+  // ): Promise<any> {
+    
+  //   if (bankName == "Axis Bank") {
+  //     let verificationData = loan.verificationData as interfaces.AxisFinanceUBLInterface;
+  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
+  //     return templates.axisFinanceUBLTemplate(verificationData, html_data);
+  //   }
+
+  //   if (bankName == "RBL" || bankName == "Rbl") {
+  //     let verificationData = verification as interfaces.RBLInterface;
+  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
+  //     return templates.rblTemplate(verificationData, html_data);
+  //   }
+
+  //   if (bankName == "Aditya Birla") {
+  //     let verificationData = verification as any;
+  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
+  //     return templates.adityaBirlaTemplate(verificationData, html_data);
+  //   }
+
+  //   if (bankName == "Arka Fincap") {
+  //     let verificationData = verification as interfaces.ArkaFincapInterface;
+  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
+  //     return templates.arkaFincapTemplate(verificationData, html_data);
+  //   }
+  // }
 }

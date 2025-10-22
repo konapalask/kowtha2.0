@@ -110,6 +110,7 @@ export class DashboardService {
 
       // Try to fetch app details from Play Store
       let appDetails;
+      
       try {
         appDetails = await gplay.app({ appId: 'com.beyondscale.kowthafi' });
       } catch (scraperError) {

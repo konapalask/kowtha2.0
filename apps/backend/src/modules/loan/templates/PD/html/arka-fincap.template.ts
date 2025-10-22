@@ -835,6 +835,162 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             }
     </div>
 
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Regular Customers</td></tr>
+        <tr>
+          <th>Customer Name</th>
+          <th>Contact Number</th>
+        </tr>
+        ${
+          Array.isArray(verificationData.regularCustomers?.customers) &&
+          verificationData.regularCustomers?.customers.length > 0
+            ? verificationData.regularCustomers?.customers
+                .map(
+                  (customer) => `
+        <tr>
+          <td><span class="var-value">${customer.name || ""}</span></td>
+          <td><span class="var-value">${customer.contactNumber || ""}</span></td>
+        </tr>
+        `
+                )
+                .join("")
+            : '<tr><td colspan="2" style="text-align:center;">No customers listed</td></tr>'
+        }
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Regular Suppliers</td></tr>
+        <tr>
+          <th>Supplier Name</th>
+          <th>Contact Number</th>
+        </tr>
+        ${
+          Array.isArray(verificationData.regularSuppliers?.suppliers) &&
+          verificationData.regularSuppliers?.suppliers.length > 0
+            ? verificationData.regularSuppliers?.suppliers
+                .map(
+                  (supplier) => `
+        <tr>
+          <td><span class="var-value">${supplier.name || ""}</span></td>
+          <td><span class="var-value">${supplier.contactNumber || ""}</span></td>
+        </tr>
+        `
+                )
+                .join("")
+            : '<tr><td colspan="2" style="text-align:center;">No suppliers listed</td></tr>'
+        }
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Business Activity & Documentation</td></tr>
+        <tr>
+          <th>Business Activity and Stock Level Observed</th>
+          <td colspan="6"><span class="var-value">${verificationData.businessActivityObserved?.businessActivityAndStockLevelObserved || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Documents Observed</th>
+          <td colspan="6"><span class="var-value">${verificationData.documentsObserved?.documentsObserved || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Whether Business Registered under GST?</th>
+          <td colspan="6"><span class="var-value">${verificationData.gstRegistration?.gstRegistered || ""}</span></td>
+        </tr>
+        <tr>
+          <th>As per Audited individual ITR's</th>
+          <td colspan="6"><span class="var-value">${verificationData.itrDetails?.itrFiled || ""}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Financial Details</td></tr>
+        <tr>
+          <th>Monthly Gross Receipts</th>
+          <td colspan="6"><span class="var-value">${verificationData.monthlyGrossReceipts?.monthlyGrossReceipts || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Monthly Expenses</th>
+          <td colspan="6"><span class="var-value">${verificationData.monthlyExpenses?.monthlyExpenses || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Net Profit</th>
+          <td colspan="6"><span class="var-value">${verificationData.netProfit?.netProfit || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Net Margin</th>
+          <td colspan="6"><span class="var-value">${verificationData.netMargin?.netMargin || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Family Expenses</th>
+          <td colspan="6"><span class="var-value">${verificationData.familyExpenses?.familyExpenses || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Number of Employees</th>
+          <td colspan="6"><span class="var-value">${verificationData.employees?.numberOfEmployees || ""}</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr><td colspan="7" class="section-header">Additional Observations</td></tr>
+        <tr>
+          <th>Concerns</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.concerns) && verificationData.concerns.length > 0
+              ? verificationData.concerns.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Other Observations</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.otherObservations) && verificationData.otherObservations.length > 0
+              ? verificationData.otherObservations.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Other Incomes</th>
+          <td colspan="6"><span class="var-value">${
+            Array.isArray(verificationData.otherIncomes) && verificationData.otherIncomes.length > 0
+              ? verificationData.otherIncomes.join('<br />')
+              : ""
+          }</span></td>
+        </tr>
+        <tr>
+          <th>Neighbor Check</th>
+          <td colspan="6"><span class="var-value">${verificationData.neighborCheck?.neighborCheck || ""}</span></td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td colspan="6"><strong><span class="var-value">${verificationData.status?.status || html_data.status || ""}</span></strong></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="align-wrapper">
+      <table class="section-table">
+        <tr>
+          <td colspan="7"><strong>Disclaimer Clause:</strong></td>
+        </tr>
+        <tr>
+          <td colspan="7"><span class="var-value">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <br>
+    <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
+
     <footer class="pdf-footer">
       <span style="color:rgb(8, 136, 36);">${html_data.bankName || ""}</span><br>
       Generated on ${istDate}
