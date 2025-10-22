@@ -25,6 +25,7 @@ import Toast from 'react-native-toast-message';
 import loginBackground from '../assets/Images/loginBackground.jpg';
 import DeviceInfo from 'react-native-device-info';
 import {getUserDetailsApi} from '../services/user.services';
+import {useUser} from '../contexts/UserContext';
 // import {get} from 'http';
 // import {REACT_APP_BASE_URL} from '@env';
 
@@ -41,6 +42,7 @@ const getDeviceId = async () => {
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const {refreshUserDetails} = useUser();
   // DEV MODE: Pre-fill credentials for faster testing
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState(__DEV__ ? '122446' : '');
@@ -103,6 +105,9 @@ const LoginScreen = () => {
         const userDetails = await getUserDetailsApi();
         // console.log(userDetails);
         await setItem('userDetails', userDetails?.data);
+
+        // Refresh user context with new details
+        await refreshUserDetails();
       } catch (error) {
         console.log('Error fetching user details:', error);
         Alert.alert(
