@@ -3,12 +3,10 @@ import { category } from "google-play-scraper";
 import * as path from "path";
 import * as fs from "fs";
 import { RBLInterface } from "../interface/rbl.interface";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 // import { displayFieldValue } from "./schema-pdf-mapper";
 
-export const rblTemplate = (
-  verificationData: RBLInterface,
-  html_data: any) => {
+export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
   // => {
   // // Helper function to display field values - schema-driven
   // const displayValue = (value: any): string => {
@@ -31,7 +29,7 @@ export const rblTemplate = (
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
   return `
-    ${pdBaseTemplate()}
+    ${pdBaseTemplate(html_data)}
 
       <div class="report-title">PERSONAL DISCUSSION SHEET</div>
     
@@ -665,11 +663,7 @@ export const rblTemplate = (
 
 
     <br>
-    <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
-      Generated on ${istDate}
-    </footer>
-    ${html_data.imagesData}
+    
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };

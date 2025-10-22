@@ -11,6 +11,17 @@ import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-u
 // import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
 import { RBLInterface } from "./templates/PD/interface/rbl.interface";
 import { rblTemplate } from "./templates/PD/html/rbl.template";
+import { iciciTemplate } from "./templates/PD/html/icici.template";
+import { cholaTemplate } from "./templates/PD/html/chola.template";
+import { heroFincorpTemplate } from "./templates/PD/html/hero-fincorp.template";
+import { iiflTemplate } from "./templates/PD/html/iifl.template";
+import { yesBankTemplate } from "./templates/PD/html/yes-bank.template";
+import { tataUblTemplate } from "./templates/PD/html/tata-ubl.template";
+import { axisBankTemplate } from "./templates/PD/html/axis-bank.template";
+import { axisFinanceTemplate } from "./templates/PD/html/axis-finance.template";
+import { arkaFincapTemplate } from "./templates/PD/html/arka-fincap.template";
+import { heroHousingSelfTemplate } from "./templates/PD/html/hero-housing-self.template";
+import { idfcHlMlTemplate } from "./templates/PD/html/idfc-hl-ml.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
 import { formSchema } from "./forms-schema";
 import {
@@ -27,46 +38,260 @@ export class PDTemplateService {
     private loanService: LoanService
   ) {}
 
-  async FormatPDImages(verification: any, bankName: string, applicationNumber: string, synopsis: string, financialAnalysis: any): Promise<any> {
-
-    const signaturePath = path.resolve(process.cwd(),process.env.SIGNATURE_PATH);
+  async FormatPDImages(
+    verification: any,
+    bankName: string,
+    applicationNumber: string,
+    synopsis: string,
+    financialAnalysis: any,
+    loan?: any
+  ): Promise<any> {
+    const signaturePath = path.resolve(
+      process.cwd(),
+      process.env.SIGNATURE_PATH
+    );
     const imageBase64 = fs.readFileSync(signaturePath, "base64");
     const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
     const status = verification?.approvedStatus || "";
 
+    const fieldExecutive = verification.fieldExecutive?.name || "";
+
     const uploadedItems = verification?.uploadedItems || [];
 
-    // Generate presigned URLs for images
-    const imageUrls = await Promise.all(
-      uploadedItems.map(async (item: any) => {
+    const photoGroups: Array<{
+      documentType: string;
+      photos: Array<{
+        url: string;
+        latitude?: string | number;
+        longitude?: string | number;
+        timestamp?: string;
+        remarks?: string;
+      }>;
+    }> = [];
+
+    const appendPhotoGroup = (
+      documentType: string,
+      photos: Array<{
+        url: string;
+        latitude?: string | number;
+        longitude?: string | number;
+        timestamp?: string;
+        remarks?: string;
+      }>
+    ) => {
+      if (photos.length === 0) return;
+      photoGroups.push({
+        documentType: documentType || "Document",
+        photos,
+      });
+    };
+
+    const resolveCoordinate = (value: any) => {
+      if (value === undefined || value === null) return undefined;
+      const numeric = Number(value);
+      if (!Number.isNaN(numeric)) {
+        return numeric.toFixed(6);
+      }
+      return String(value);
+    };
+
+    const getPhotoEntriesFromItem = (item: any) => {
+      if (Array.isArray(item?.photos) && item.photos.length > 0) {
+        return item.photos;
+      }
+      if (Array.isArray(item?.images) && item.images.length > 0) {
+        return item.images;
+      }
+      if (Array.isArray(item?.documents) && item.documents.length > 0) {
+        return item.documents;
+      }
+      if (Array.isArray(item?.photoList) && item.photoList.length > 0) {
+        return item.photoList;
+      }
+      if (item?.s3ImageUrl || item?.uri || item?.url || item?.path) {
+        return [item];
+      }
+      return [];
+    };
+
+    for (const item of uploadedItems) {
+      const documentType =
+        item?.documentType ||
+        item?.type ||
+        item?.title ||
+        item?.documentCategory ||
+        "Document";
+
+      const entries = getPhotoEntriesFromItem(item);
+
+      const processedPhotos: Array<{
+        url: string;
+        latitude?: string | number;
+        longitude?: string | number;
+        timestamp?: string;
+        remarks?: string;
+      }> = [];
+
+      for (const entry of entries) {
+        const possibleS3Key =
+          entry?.s3ImageUrl ||
+          entry?.s3Key ||
+          entry?.uri ||
+          entry?.url ||
+          entry?.path ||
+          item?.s3ImageUrl;
+
+        if (!possibleS3Key) {
+          continue;
+        }
+
         try {
-          return await this.s3Service.generatePresignedDownloadUrl(
-            item.s3ImageUrl
-          );
+          const presignedUrl =
+            await this.s3Service.generatePresignedDownloadUrl(
+              possibleS3Key
+            );
+          if (!presignedUrl) {
+            continue;
+          }
+
+          const latitude =
+            resolveCoordinate(
+              entry?.latitude ??
+                entry?.lat ??
+                entry?.geoTag?.latitude ??
+                item?.latitude ??
+                item?.lat ??
+                item?.geoTag?.latitude
+            ) ?? undefined;
+
+          const longitude =
+            resolveCoordinate(
+              entry?.longitude ??
+                entry?.lng ??
+                entry?.geoTag?.longitude ??
+                item?.longitude ??
+                item?.lng ??
+                item?.geoTag?.longitude
+            ) ?? undefined;
+
+          processedPhotos.push({
+            url: presignedUrl,
+            latitude,
+            longitude,
+            timestamp:
+              entry?.timestamp ??
+              entry?.capturedAt ??
+              item?.timestamp ??
+              undefined,
+            remarks: entry?.remarks ?? entry?.note ?? item?.remarks,
+          });
         } catch (error) {
           await this.loggingService.error(
-            "Failed to generate presigned URL for image",
+            "Failed to generate presigned URL for grouped image",
             {
-              s3ImageUrl: item.s3ImageUrl,
+              s3ImageUrl: possibleS3Key,
               error: error.message,
             }
           );
-          return null;
         }
-      })
-    );
+      }
 
-    // Filter out any failed URL generations
-    const validImageUrls = imageUrls.filter((url) => url !== null);
+      appendPhotoGroup(documentType, processedPhotos);
+    }
 
-    const fieldExecutive = verification.fieldExecutive?.name || "";
+    let imagesData = "";
 
-    const imagesData = await this.loanService.formatImages(
-      validImageUrls,
-      bankName,
-      fieldExecutive
-    );
+    if (photoGroups.length > 0) {
+      imagesData = photoGroups
+        .map((group) => {
+          const photosHtml = group.photos
+            .map((photo) => {
+              const hasCoordinates = photo.latitude && photo.longitude;
+              return `
+                <div style="width:48%;margin:1%;border:1px solid #ddd;padding:10px;text-align:center;display:inline-block;vertical-align:top;box-sizing:border-box;page-break-inside:avoid;">
+                  <img src="${photo.url}" alt="${group.documentType}" style="width:100%;height:260px;object-fit:contain;margin-bottom:8px;" />
+                  <div style="font-size:12px;color:#555;text-align:left;">
+                    ${
+                      hasCoordinates
+                        ? `<div><strong>Geo Tag:</strong> ${photo.latitude}, ${photo.longitude}</div>`
+                        : ""
+                    }
+                    ${
+                      photo.timestamp
+                        ? `<div><strong>Captured:</strong> ${photo.timestamp}</div>`
+                        : ""
+                    }
+                    ${
+                      photo.remarks
+                        ? `<div><strong>Remarks:</strong> ${photo.remarks}</div>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+
+          return `
+            <div style="margin-bottom:16px;page-break-inside:avoid;">
+              <div style="font-size:14px;font-weight:bold;margin-bottom:8px;text-transform:uppercase;">${group.documentType}</div>
+              <div style="display:flex;flex-wrap:wrap;justify-content:flex-start;">
+                ${photosHtml}
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    } else if (uploadedItems.length > 0) {
+      // Fallback to previous rendering if new structure not matched
+      const imageUrls = await Promise.all(
+        uploadedItems.map(async (item: any) => {
+          if (!item?.s3ImageUrl) {
+            return null;
+          }
+          try {
+            return await this.s3Service.generatePresignedDownloadUrl(
+              item.s3ImageUrl
+            );
+          } catch (error) {
+            await this.loggingService.error(
+              "Failed to generate presigned URL for image",
+              {
+                s3ImageUrl: item.s3ImageUrl,
+                error: error.message,
+              }
+            );
+            return null;
+          }
+        })
+      );
+
+      const validImageUrls = imageUrls.filter((url) => url !== null);
+
+      imagesData = await this.loanService.formatImages(
+        validImageUrls,
+        bankName,
+        fieldExecutive
+      );
+    }
+
+    const loanDetails = loan
+      ? {
+          applicationNumber: loan.applicationNumber ?? null,
+          applicantName: loan.applicantName ?? null,
+          applicantMobile: loan.applicantMobile ?? null,
+          applicantAddress: loan.applicantAddress ?? null,
+          loanAmount: loan.loanAmount ?? null,
+          loanType: loan.loanType ?? null,
+          loanPurpose: loan.loanPurpose ?? loan.purposeOfLoan ?? null,
+          businessName:
+            loan.businessName ??
+            loan.companyName ??
+            verification?.applicantDetails?.nameOfConcern ??
+            null,
+        }
+      : undefined;
 
     return {
       bankName: bankName,
@@ -77,6 +302,7 @@ export class PDTemplateService {
       imageDataUri: imageDataUri,
       imagesData: imagesData,
       fieldExecutive: fieldExecutive,
+      loanDetails,
     };
   }
 
@@ -96,7 +322,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return axisFinanceUBLTemplate(verificationData, html_data);
     }
@@ -108,9 +335,139 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return rblTemplate(verificationData, html_data);
+    }
+
+    if (bankName == "ICICI") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return iciciTemplate(verification, html_data);
+    }
+
+    if (bankName == "Chola") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return cholaTemplate(verification, html_data);
+    }
+
+    if (bankName == "Hero Fincorp") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return heroFincorpTemplate(verification, html_data);
+    }
+
+    if (bankName == "IIFL") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return iiflTemplate(verification, html_data);
+    }
+
+    if (bankName == "Yes Bank") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return yesBankTemplate(verification, html_data);
+    }
+
+    if (bankName == "Tata Ubl") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return tataUblTemplate(verification, html_data);
+    }
+
+    if (bankName == "Axis Bank") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return axisBankTemplate(verification, html_data);
+    }
+
+    if (bankName == "Axis Finance") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return axisFinanceTemplate(verification, html_data);
+    }
+
+    if (bankName == "Arka Fincap") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return arkaFincapTemplate(verification, html_data);
+    }
+
+    if (bankName == "HeroHousing-Self") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return heroHousingSelfTemplate(verification, html_data);
+    }
+
+    if (bankName == "IDFC HL & ML") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return idfcHlMlTemplate(verification, html_data);
     }
 
     // Generic template for all other banks (uses schema-driven approach)
@@ -226,7 +583,8 @@ export class PDTemplateService {
         schema
       );
 
-      const pdfBuffer = await this.loanService.PDFBufferGeneration(htmlTemplate);
+      const pdfBuffer =
+        await this.loanService.PDFBufferGeneration(htmlTemplate);
 
       await this.loggingService.info(
         "Verification PDF generated successfully",

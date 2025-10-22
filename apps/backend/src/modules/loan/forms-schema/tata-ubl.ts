@@ -8,12 +8,12 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfApplicant: {
+          applicantName: {
             type: "string",
             title: "Name of Applicant",
             readOnly: true,
           },
-          nameOfEntity: {
+          businessName: {
             type: "string",
             title: "Name of Entity",
             readOnly: true,
@@ -21,30 +21,8 @@ export const tataUblSchema = {
           nameOfCoApplicants: {
             type: "string",
             title: "Name of Co-Applicant(s)",
-            readOnly: true,
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
           },
         },
-        required: ["nameOfApplicant", "nameOfEntity"],
       },
       required: true,
     },
@@ -71,12 +49,12 @@ export const tataUblSchema = {
             },
           },
           tenure: {
-            type: "string",
-            title: "Tenure",
+            type: "number",
+            title: "Tenure (months)",
           },
           repaymentFrom: {
             type: "string",
-            title: "Repayment from",
+            title: "Repayment from (Bank name)",
           },
           bankName: {
             type: "string",
@@ -84,11 +62,13 @@ export const tataUblSchema = {
             readOnly: true,
           },
           typeSAAccount: {
-            type: "string",
+            type: "enum",
             title: "Type (SA A/C)",
+            enum: ["Savings", "Current", "Fixed Deposit"],
+            default: "Savings",
           },
           accountNo: {
-            type: "string",
+            type: "number",
             title: "Account No.",
           },
         },
@@ -101,9 +81,9 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          add: {
+          address: {
             type: "string",
-            title: "Add",
+            title: "Address",
           },
           rentedOwned: {
             type: "string",
@@ -136,9 +116,9 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          add: {
+          address: {
             type: "string",
-            title: "Add",
+            title: "Address",
           },
           rentedOwned: {
             type: "string",
@@ -192,6 +172,15 @@ export const tataUblSchema = {
                 qualification: {
                   type: "string",
                   title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "Under graduate",
+                    "Graduate",
+                    "Post Graduate",
+                    "Professional",
+                  ],
+                  default: "Below 10th",
                 },
                 profession: {
                   type: "string",
@@ -200,6 +189,17 @@ export const tataUblSchema = {
                 relation: {
                   type: "string",
                   title: "Relation",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
+                  default: "Father",
                 },
                 monthlyIncome: {
                   type: "number",
@@ -221,6 +221,7 @@ export const tataUblSchema = {
           currentBusinessDetails: {
             type: "string",
             title: "Current Business Details",
+            ui: { widget: "textarea", rows: 6 },
           },
           stockAsOnDate: {
             type: "string",
@@ -237,12 +238,18 @@ export const tataUblSchema = {
         type: "object",
         properties: {
           currentEmployees: {
-            type: "string",
+            type: "number",
             title: "Current Employees",
           },
           salaryRange: {
-            type: "string",
+            type: "number",
             title: "Salary Range",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 0,
+              minDecimalPlaces: 0,
+            },
           },
           keyEmployeeName: {
             type: "string",
@@ -433,14 +440,26 @@ export const tataUblSchema = {
                 amount: {
                   type: "number",
                   title: "Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 0,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 emi: {
                   type: "number",
                   title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 tenure: {
-                  type: "string",
-                  title: "Tenure",
+                  type: "number",
+                  title: "Tenure (Months)",
                 },
                 outstandingBalance: {
                   type: "number",
@@ -515,7 +534,7 @@ export const tataUblSchema = {
           utilityBillDetails: {
             type: "string",
             title:
-              "Utility bill (Clear Photo to be Taken) last 2 months & present month units consumption to be written",
+              "Take Utility bill photo of last 2 months towards end & present month units consumption to be written",
           },
           lossSufferedInBusiness: {
             type: "string",
@@ -593,24 +612,6 @@ export const tataUblSchema = {
           thirdPartyConfirmation: {
             type: "string",
             title: "Third Party Confirmation",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "документы",
-      label: "Documents",
-      schema: {
-        type: "object",
-        properties: {
-          panCard: {
-            type: "string",
-            title: "Pan Card",
-          },
-          otherDocumentSeen: {
-            type: "string",
-            title: "other Document Seen",
           },
         },
       },
