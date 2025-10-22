@@ -831,7 +831,9 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                         fieldSchema.items?.properties?.[requiredField]?.title ||
                         requiredField;
                       validationErrors.push(
-                        `${section.label} → ${fieldSchema.title} [${index + 1}] → ${itemFieldTitle}: Required field is empty`,
+                        `${section.label} → ${fieldSchema.title} [${
+                          index + 1
+                        }] → ${itemFieldTitle}: Required field is empty`,
                       );
                     }
                   });
@@ -1168,7 +1170,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#ddd',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3443ff',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',

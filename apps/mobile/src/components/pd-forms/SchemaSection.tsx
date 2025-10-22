@@ -41,6 +41,17 @@ interface JsonSchemaProperty {
     showCurrency?: boolean;
     currency?: string;
   };
+  maxLength?: number;
+  ui?: {
+    widget?: string;
+    rows?: number;
+    maxLength?: number;
+  };
+  ['ui:options']?: {
+    widget?: string;
+    rows?: number;
+    maxLength?: number;
+  };
   dependencies?: {
     show?: Record<string, any>;
     required?: Record<string, any>;
@@ -59,6 +70,47 @@ interface SchemaSectionProps {
   initialData?: AnyObject;
   onSubmit: (data: AnyObject) => void;
 }
+
+const getUiSettings = (property: JsonSchemaProperty) => {
+  return property?.ui || (property as AnyObject)?.['ui:options'] || {};
+};
+
+const shouldUseTextArea = (property: JsonSchemaProperty): boolean => {
+  const ui = getUiSettings(property);
+  if (ui?.widget === 'textarea' || ui?.widget === 'richtext') {
+    return true;
+  }
+
+  const title = property.title?.toLowerCase() || '';
+  return (
+    title.includes('about') ||
+    title.includes('address') ||
+    title.includes('description') ||
+    title.includes('remark') ||
+    title.includes('details') ||
+    title.includes('background') ||
+    title.includes('notes')
+  );
+};
+
+const getTextAreaLines = (property: JsonSchemaProperty): number | undefined => {
+  const ui = getUiSettings(property);
+  if (typeof ui?.rows === 'number') {
+    return ui.rows;
+  }
+  return undefined;
+};
+
+const getMaxLength = (property: JsonSchemaProperty): number | undefined => {
+  if (typeof property.maxLength === 'number') {
+    return property.maxLength;
+  }
+  const ui = getUiSettings(property);
+  if (typeof ui?.maxLength === 'number') {
+    return ui.maxLength;
+  }
+  return undefined;
+};
 
 const SchemaSection: React.FC<SchemaSectionProps> = ({
   title,
@@ -367,14 +419,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 }
 
                 // Handle textarea in nested objects
-                const isTextArea =
-                  subProperty.title.toLowerCase().includes('about') ||
-                  subProperty.title.toLowerCase().includes('address') ||
-                  subProperty.title.toLowerCase().includes('description') ||
-                  subProperty.title.toLowerCase().includes('remark') ||
-                  subProperty.title.toLowerCase().includes('details');
-
-                if (isTextArea) {
+                if (shouldUseTextArea(subProperty)) {
                   return (
                     <TextAreaFormItem
                       key={subFieldKey}
@@ -385,6 +430,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         required: false,
                         disabled: subProperty.readOnly,
                         defaultValue: subFieldValue ?? '',
+                        numberOfLines: getTextAreaLines(subProperty),
+                        maxLength: getMaxLength(subProperty),
                       }}
                     />
                   );
@@ -555,16 +602,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         );
                       }
 
-                      const isTextArea =
-                        subProperty.title.toLowerCase().includes('about') ||
-                        subProperty.title.toLowerCase().includes('address') ||
-                        subProperty.title
-                          .toLowerCase()
-                          .includes('description') ||
-                        subProperty.title.toLowerCase().includes('remark') ||
-                        subProperty.title.toLowerCase().includes('details');
-
-                      if (isTextArea) {
+                      if (shouldUseTextArea(subProperty)) {
                         return (
                           <TextAreaFormItem
                             key={subFieldKey}
@@ -575,6 +613,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                               required: isSubFieldRequired,
                               disabled: subProperty.readOnly,
                               defaultValue: item?.[subFieldId] ?? '',
+                              numberOfLines: getTextAreaLines(subProperty),
+                              maxLength: getMaxLength(subProperty),
                             }}
                           />
                         );
@@ -675,14 +715,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         }
 
         // Check if it should be a textarea
-        const isTextArea =
-          property.title.toLowerCase().includes('about') ||
-          property.title.toLowerCase().includes('address') ||
-          property.title.toLowerCase().includes('description') ||
-          property.title.toLowerCase().includes('remark') ||
-          property.title.toLowerCase().includes('details');
-
-        if (isTextArea) {
+        if (shouldUseTextArea(property)) {
           return (
             <TextAreaFormItem
               data={{
@@ -694,6 +727,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 defaultValue: formData[fieldId] ?? '',
                 placeholder: property.title,
                 trigger,
+                numberOfLines: getTextAreaLines(property),
+                maxLength: getMaxLength(property),
               }}
             />
           );
