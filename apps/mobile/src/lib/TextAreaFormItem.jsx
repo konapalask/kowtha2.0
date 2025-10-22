@@ -32,7 +32,11 @@ export const TextAreaFormItem = ({data}) => (
 
         return (
           <TextInput
-            style={[styles.textArea, error && styles.errorBorder]}
+            style={[
+              styles.textArea,
+              {minHeight: Math.max(80, (data?.numberOfLines ?? 5) * 24)},
+              error && styles.errorBorder,
+            ]}
             value={value}
             onChangeText={text => {
               onChange(text);
@@ -42,10 +46,11 @@ export const TextAreaFormItem = ({data}) => (
             }}
             onBlur={handleBlur}
             multiline
-            numberOfLines={5}
+            numberOfLines={data?.numberOfLines ?? 5}
             textAlignVertical="top" // keeps text at top-left
             placeholder={data?.placeholder || ''}
             editable={data?.disabled !== true}
+            maxLength={data?.maxLength}
           />
         );
       }}

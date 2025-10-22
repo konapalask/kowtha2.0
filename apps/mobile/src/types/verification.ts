@@ -18,6 +18,7 @@ export type UploadedItem = {
   locality?: string;
   pincode?: string;
   isCamera?: boolean;
+  documentType?: string;
 };
 
 export interface BasicDetailsFormData {

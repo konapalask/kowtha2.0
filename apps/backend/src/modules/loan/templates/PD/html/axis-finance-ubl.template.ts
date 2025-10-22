@@ -3,7 +3,7 @@ import { category } from "google-play-scraper";
 import * as path from "path";
 import * as fs from "fs";
 import { AxisFinanceUBLInterface } from "../interface/axis-finance-ubl.interface";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 
 export const axisFinanceUBLTemplate = (
   verificationData: AxisFinanceUBLInterface,
@@ -19,7 +19,7 @@ export const axisFinanceUBLTemplate = (
   const finalRecommendationHtml = recommendationStyles[html_data.status] || "";
 
   return `
-    ${pdBaseTemplate()}
+    ${pdBaseTemplate(html_data)}
 
       <div class="report-title">PERSONAL DISCUSSION SHEET</div>
     
@@ -32,9 +32,9 @@ export const axisFinanceUBLTemplate = (
           <th>Ref No/Application No</th>
         </tr>
         <tr style="text-align: center;">
-          <td><span class="var-value">${verificationData.basicDetails.region || ""}</span></td>
-          <td><span class="var-value">${verificationData.basicDetails.location || ""}</span></td>
-          <td><span class="var-value">${verificationData.basicDetails.branch || ""}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails?.region || ""}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails?.location || ""}</span></td>
+          <td><span class="var-value">${verificationData.basicDetails?.branch || ""}</span></td>
           <td><span class="var-value">${html_data.applicationNumber || ""}</span></td>
         </tr>
         </table>
@@ -44,7 +44,7 @@ export const axisFinanceUBLTemplate = (
         <table class="section-table">
           <tr>
             <th>Name of the Customer</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.applicantName || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ""}</span></td>
           </tr>
           <tr>
             <th>Date of Report</th>
@@ -52,39 +52,39 @@ export const axisFinanceUBLTemplate = (
           </tr>
           <tr>
             <th>Name of Concern</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.nameOfConcern || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.nameOfConcern || ""}</span></td>
           </tr>
           <tr>
             <th>Constitution</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.constitution || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.constitution || ""}</span></td>
           </tr>
           <tr>
             <th>Initiated Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.initiatedAddress || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.initiatedAddress || ""}</span></td>
           </tr>
           <tr>
             <th>Visited Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.visitedAddress || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.visitedAddress || ""}</span></td>
           </tr>
           <tr>
           <th>Phone No</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.phoneNo || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.phoneNo || ""}</span></td>
           </tr>
           <tr>
             <th>Appointment Fixed</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.appointmentFixed || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.appointmentFixed || ""}</span></td>
           </tr>
           <tr>
             <th>Structure of Loan</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.structureOfLoan || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.structureOfLoan || ""}</span></td>
           </tr>
           <tr>
             <th>No of Visit</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.noOfVisit || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.noOfVisit || ""}</span></td>
           </tr>
           <tr>
             <th>Person Met</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.personMet || ""}</span></td>
+            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMet || ""}</span></td>
           </tr>
           <tr>
             <th>Visited By</th>
@@ -299,39 +299,39 @@ export const axisFinanceUBLTemplate = (
         <tr><td colspan="7" class="section-header">Salaries & Wages</td></tr>
         <tr>
           <th>No of Employees</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.numberOfEmployees || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.numberOfEmployees || ""}</span></td>
         </tr>
         <tr>
           <th>Salary Per month per employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.salaryPerMonthPerEmployee || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.salaryPerMonthPerEmployee || ""}</span></td>
         </tr>
         <tr>
           <th>Status of Employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.statusOfEmployee || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.statusOfEmployee || ""}</span></td>
         </tr>
         <tr>
           <th>No. of Labours</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.numberOfLabours || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.numberOfLabours || ""}</span></td>
         </tr>
         <tr>
           <th>Wages per month/per day</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.wagesPerMonthPerDay || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.wagesPerMonthPerDay || ""}</span></td>
         </tr>
         <tr>
           <th>Status of Labour</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.statusOfLabour || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.statusOfLabour || ""}</span></td>
         </tr>
         <tr>
           <th>Remarks</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.remarks || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.remarks || ""}</span></td>
         </tr>
         <tr>
           <th>Working Hours</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.workingHoursEnd || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.workingHoursEnd || ""}</span></td>
         </tr>
         <tr>
           <th>Other Major Expenditure</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages.otherMajorExpenditure || ""}</span></td>
+          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.otherMajorExpenditure || ""}</span></td>
         </tr>
         <tr><td colspan="7" class="section-header">Asset Details</td></tr>
         <tr><td colspan="7" class="section-header">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure</td></tr>
@@ -534,10 +534,7 @@ export const axisFinanceUBLTemplate = (
     </table>
     </div>
     <br>
-    <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${"Bank of India"}</span><br>
-      Generated on ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-    </footer>
+    
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };
