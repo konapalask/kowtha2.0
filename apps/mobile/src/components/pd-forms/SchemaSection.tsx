@@ -118,6 +118,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   initialData = {},
   onSubmit,
 }) => {
+  console.log('schema', schema);
   // Helper function to convert numbers to strings for TextInput compatibility
   const normalizeFormData = (data: AnyObject): AnyObject => {
     const normalized: AnyObject = {};
@@ -130,8 +131,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           typeof item === 'object' && item !== null
             ? normalizeFormData(item)
             : typeof item === 'number'
-              ? item.toString()
-              : item,
+            ? item.toString()
+            : item,
         );
       } else if (value && typeof value === 'object') {
         // Handle nested objects - preserve _id if present
@@ -241,7 +242,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
 
-  const showDatePicker = (fieldKey: string, mode: 'date' | 'time' | 'datetime' = 'date') => {
+  const showDatePicker = (
+    fieldKey: string,
+    mode: 'date' | 'time' | 'datetime' = 'date',
+  ) => {
     setDatePickerState({visible: true, fieldKey, mode});
   };
 
@@ -275,7 +279,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   const handleDateConfirm = (date: Date) => {
     if (datePickerState.fieldKey) {
       let formattedValue: string;
-      
+
       switch (datePickerState.mode) {
         case 'time':
           formattedValue = dayjs(date).format('hh:mm A');
@@ -288,7 +292,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           formattedValue = dayjs(date).format('DD-MM-YYYY');
           break;
       }
-      
+
       setValue(datePickerState.fieldKey, formattedValue);
     }
     hideDatePicker();
@@ -380,7 +384,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 const subFieldValue = formData[fieldId]?.[subFieldId];
 
                 // Handle date/time fields in nested objects
-                const isDateField = subProperty?.format === 'date' || subProperty?.format === 'time' || subProperty?.format === 'date-time';
+                const isDateField =
+                  subProperty?.format === 'date' ||
+                  subProperty?.format === 'time' ||
+                  subProperty?.format === 'date-time';
                 if (isDateField) {
                   console.log('subProperty', subProperty);
                   return (
@@ -565,7 +572,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         property.items?.required?.includes(subFieldId) ?? false;
 
                       // Handle date/time fields in arrays
-                      const isDateField = subProperty.format === 'date' || subProperty.format === 'time' || subProperty.format === 'date-time';
+                      const isDateField =
+                        subProperty.format === 'date' ||
+                        subProperty.format === 'time' ||
+                        subProperty.format === 'date-time';
                       if (isDateField) {
                         return (
                           <View key={subFieldKey}>
@@ -703,7 +713,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
       case 'string':
         // Check if it should be a date/time field
-        const isDateField = property.format === 'date' || property.format === 'time' || property.format === 'date-time';
+        const isDateField =
+          property.format === 'date' ||
+          property.format === 'time' ||
+          property.format === 'date-time';
         if (isDateField) {
           return renderDateField(
             fieldId,

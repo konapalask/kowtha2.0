@@ -32,7 +32,10 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const extractPlainText = (html: string = "") =>
-  html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+  html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .trim();
 
 const RichTextEditor: React.FC<{
   value?: string;
@@ -40,7 +43,13 @@ const RichTextEditor: React.FC<{
   readOnly?: boolean;
   placeholder?: string;
   minHeight?: number;
-}> = ({ value = "", onChange, readOnly = false, placeholder, minHeight = 120 }) => {
+}> = ({
+  value = "",
+  onChange,
+  readOnly = false,
+  placeholder,
+  minHeight = 120,
+}) => {
   const editorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -194,13 +203,11 @@ const ArrayEditForm: React.FC<{
       case "select":
         return (
           <Select {...commonProps} style={{ width: "100%" }}>
-            {(fieldDef.options || fieldDef.enum || []).map(
-              (option: string) => (
-                <Select.Option key={option} value={option}>
-                  {option}
-                </Select.Option>
-              )
-            )}
+            {(fieldDef.options || fieldDef.enum || []).map((option: string) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
           </Select>
         );
       case "boolean":
@@ -367,7 +374,11 @@ const shouldFieldBeRequired = (
   formValues: Record<string, any>
 ): boolean => {
   if (field?.dependencies?.required) {
-    return evaluateDependencies(field.dependencies.required, sectionId, formValues);
+    return evaluateDependencies(
+      field.dependencies.required,
+      sectionId,
+      formValues
+    );
   }
 
   return !!field?.required;
@@ -490,7 +501,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
               field.formatter
                 ? (value) => {
                     const parsed = parseFormattedNumber(value ?? "");
-                    return parsed === "" ? undefined : Number(parsed);
+                    return parsed === "" ? 0 : Number(parsed);
                   }
                 : undefined
             }
@@ -542,9 +553,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       case "boolean":
-        return (
-          <Switch disabled={field.readOnly || !editMode} />
-        );
+        return <Switch disabled={field.readOnly || !editMode} />;
 
       case "array":
         return renderArrayField(field, sectionId || "");
@@ -705,10 +714,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             if (itemField.type === "boolean") return "boolean";
             if (itemField.type === "array") return "array";
             if (itemField.type === "object") return "object";
-            if (
-              itemField.type === "number" ||
-              itemField.type === "integer"
-            ) {
+            if (itemField.type === "number" || itemField.type === "integer") {
               return "number";
             }
             const title = (itemField.title || itemField.label || key)
@@ -825,7 +831,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
       if (!editMode || field.readOnly) {
         return;
       }
-      const newItem = { _id: uuidv4() };
+      const newItem: any = { _id: uuidv4() };
       itemFields.forEach((itemField: any) => {
         const key = itemField.id || itemField.key;
         if (!key) return;
@@ -887,7 +893,9 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
                   {itemFields.map((itemField: any) => {
                     const key = itemField.id || itemField.key;
                     const value = item[key] ?? "";
-                    if (!checkItemDependencies(itemField.dependencies?.show, item)) {
+                    if (
+                      !checkItemDependencies(itemField.dependencies?.show, item)
+                    ) {
                       return null;
                     }
 

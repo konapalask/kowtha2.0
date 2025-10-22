@@ -27,6 +27,7 @@ interface LoanInfoFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   fetchLoanDetails: () => void;
+  pdBankOptions: any;
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
@@ -306,8 +307,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 }
                 filterOption={(input, option) =>
                   (option?.label ?? "")
+                    .toString()
                     .toLowerCase()
-                    .includes(input.toLowerCase())
+                    .includes(input.toString().toLowerCase())
                 }
                 disabled={isVerificationCompleted}
               />
