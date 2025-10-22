@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 
 export const iciciTemplate = (verificationData: any, html_data: any) => {
   const date = new Date();
@@ -8,7 +8,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
   return `
-    ${pdBaseTemplate()}
+    ${pdBaseTemplate(html_data)}
 
     <div class="report-title">PERSONAL DISCUSSION REPORT - ICICI</div>
 
@@ -338,10 +338,6 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
     <p style="margin:20px;"><strong>Business Photos:</strong></p>
 
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${html_data.bankName || "ICICI"}</span><br>
-      Generated on ${istDate}
-    </footer>
-    ${html_data.imagesData || ""}
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };

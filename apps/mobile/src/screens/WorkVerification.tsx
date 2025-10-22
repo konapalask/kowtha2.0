@@ -14,13 +14,13 @@ import WorkEmploymentDetails from '../components/forms/WorkEmploymentDetails';
 import ColleagueReferences from '../components/forms/ColleagueReferences';
 import PastEmployment from '../components/forms/PastEmployment';
 import ExistingLoans from '../components/forms/ExistingLoans';
-import PhotoCapture from '../components/forms/PhotoCapture';
 import {UploadedItem} from '../types/verification';
 import {submitVerification} from '../services/field.services';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {getItem, setItem, clearItem} from '../helpers/utility';
 import Investigable from '../components/forms/Investigable';
+import PhotoCaptureFi from '../components/forms/PhotoCaptureFi';
 
 interface WorkVerificationFormData {
   basicDetails: {
@@ -465,7 +465,7 @@ const WorkVerification = () => {
               isExpanded={expandedSections.photoCapture}
               onToggle={() => toggleSection('photoCapture')}
               isValid={validSections.photoCapture}>
-              <PhotoCapture
+              <PhotoCaptureFi
                 onUploadedItemsChange={handleUploadedItemsChange}
                 initialItems={formData.uploadedItems}
                 loanId={item.verificationId}

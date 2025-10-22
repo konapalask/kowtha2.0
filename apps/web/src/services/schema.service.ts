@@ -36,6 +36,13 @@ export const getSchemaFromBackend = async (
   }
 };
 
+export const getPdBanksApi = async () => {
+  const response = await axiosInstance.get(`/loans/get-bank-forms`, {
+    params: { department: "PD", type: "banks" },
+  });
+  return response.data.data;
+};
+
 /**
  * Fetch list of all supported bank names
  */
@@ -89,6 +96,8 @@ const convertSchemaPropertiesToFields = (
   const fields: any[] = [];
 
   Object.entries(properties).forEach(([fieldId, property]: [string, any]) => {
+    const uiSettings = property.ui || property["ui:options"] || {};
+
     const field: any = {
       id: fieldId,
       label: property.title || fieldId,
@@ -99,6 +108,25 @@ const convertSchemaPropertiesToFields = (
       formatter: property.formatter,
       dependencies: property.dependencies,
     };
+
+    if (Object.keys(uiSettings).length > 0) {
+      field.ui = uiSettings;
+    }
+
+    if (uiSettings.widget === "textarea") {
+      field.type = "textarea";
+    }
+    if (uiSettings.widget === "richtext") {
+      field.type = "richtext";
+    }
+
+    if (typeof uiSettings.rows === "number") {
+      field.textAreaRows = uiSettings.rows;
+    }
+
+    if (typeof uiSettings.maxLength === "number") {
+      field.maxLength = uiSettings.maxLength;
+    }
 
     // Handle enum (select dropdown)
     if (property.enum && Array.isArray(property.enum)) {
@@ -137,6 +165,10 @@ const convertSchemaPropertiesToFields = (
  * Map JSON schema types to our field types
  */
 const mapJsonSchemaTypeToFieldType = (property: any): string => {
+  if (property.ui?.widget === "richtext") return "richtext";
+  if (property["ui:options"]?.widget === "richtext") return "richtext";
+  if (property.ui?.widget === "textarea") return "textarea";
+  if (property["ui:options"]?.widget === "textarea") return "textarea";
   if (property.enum) return "select";
   if (property.format === "date") return "date";
   if (property.type === "boolean") return "boolean";

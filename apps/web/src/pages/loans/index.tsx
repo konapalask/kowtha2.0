@@ -38,7 +38,14 @@ import BulkImportDrawer from "@/components/loans/BulkImportDrawer";
 import ImportCsvModal from "@/components/loans/ImportCsvModal";
 import FilterOverlay, { FilterValue } from "@/components/loans/FilterOverlay";
 import dynamic from "next/dynamic";
-import { getUserDetails, getCurrentDepartment, getCurrentDepartmentOfficeId, getCurrentDepartmentRole, useDepartmentChange } from "@/utils/utility";
+import {
+  getUserDetails,
+  getCurrentDepartment,
+  getCurrentDepartmentOfficeId,
+  getCurrentDepartmentRole,
+  useDepartmentChange,
+} from "@/utils/utility";
+import { getPdBanksApi } from "@/services/schema.service";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -72,7 +79,9 @@ export default function Loans() {
     useState<boolean>(false);
   const [bulkImportForm] = Form.useForm();
   const [currentOffice, setCurrentOffice] = useState<string>(
-    getCurrentDepartmentOfficeId()?.toString() || userDetails?.officeId?.toString() || ""
+    getCurrentDepartmentOfficeId()?.toString() ||
+      userDetails?.officeId?.toString() ||
+      ""
   );
   const [fieldExecutives, setFieldExecutives] = useState<FieldExecutive[]>([]);
   const [offices, setOffices] = useState<Office[]>([]);
@@ -90,6 +99,7 @@ export default function Loans() {
     fieldExecutiveEmployeeCode: undefined,
     fieldExecutiveName: undefined,
   });
+  const [pdBankOptions, setPdBankOptions] = useState<any[]>([]);
 
   // Update currentOffice when department changes
   useEffect(() => {
@@ -120,7 +130,13 @@ export default function Loans() {
 
   useEffect(() => {
     fetchLoans(pagination.current, pagination.pageSize);
-  }, [refresh, pagination.current, pagination.pageSize, filters, currentDepartment]); // Add currentDepartment as dependency
+  }, [
+    refresh,
+    pagination.current,
+    pagination.pageSize,
+    filters,
+    currentDepartment,
+  ]); // Add currentDepartment as dependency
 
   useEffect(() => {
     getOfficesApi()
@@ -148,6 +164,18 @@ export default function Loans() {
       .catch((err) => {
         console.log(err);
         // message.error("Failed to fetch verifiers");
+      });
+    getPdBanksApi()
+      .then((res) => {
+        const options =
+          res?.map((item: any) => ({
+            label: item,
+            value: item,
+          })) ?? [];
+        setPdBankOptions(options);
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }, []);
 
@@ -228,7 +256,7 @@ export default function Loans() {
   };
 
   // Define columns based on department
-  console.log('Current department:', currentDepartment);
+  // console.log("Current department:", currentDepartment);
   const getColumns = () => {
     const baseColumns = [
       {
@@ -283,12 +311,13 @@ export default function Loans() {
         title: "Closed At",
         dataIndex: "closedAt",
         key: "closedAt",
-        render: (date: string) => date ? dayjs(date).format("DD-MM-YYYY") : "-",
+        render: (date: string) =>
+          date ? dayjs(date).format("DD-MM-YYYY") : "-",
         width: 120,
       },
     ];
 
-    if (currentDepartment === 'PD') {
+    if (currentDepartment === "PD") {
       baseColumns.push({
         title: "Bank Name",
         dataIndex: "bankName",
@@ -298,7 +327,7 @@ export default function Loans() {
     }
 
     // If current department is 'PD', only show Business column
-    if (currentDepartment === 'PD') {
+    if (currentDepartment === "PD") {
       return [
         ...baseColumns,
         {
@@ -320,13 +349,13 @@ export default function Loans() {
                   {business?.fieldExecutive?.name}
                 </div>
                 <Tooltip title={business?.fieldExecutive?.employeeCode}>
-                  <Tag 
-                    color="blue" 
-                    style={{ 
+                  <Tag
+                    color="blue"
+                    style={{
                       maxWidth: "180px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {business?.fieldExecutive?.employeeCode}
@@ -387,7 +416,7 @@ export default function Loans() {
                     >
                       Edit
                     </Button>
-                    {(getCurrentDepartmentRole() === "Admin" ) && (
+                    {getCurrentDepartmentRole() === "Admin" && (
                       <Popconfirm
                         title="Are you sure you want to delete this loan?"
                         onConfirm={async () => {
@@ -436,7 +465,15 @@ export default function Loans() {
                 (v: any) => v.type === "AddressOne"
               );
               return pav ? (
-                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
                   <div>{pav?.fieldExecutive?.name}</div>
                   <Tag color="blue">{pav?.fieldExecutive?.employeeCode}</Tag>
                 </div>
@@ -489,7 +526,15 @@ export default function Loans() {
                 (v: any) => v.type === "AddressTwo"
               );
               return cav ? (
-                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
                   <div>{cav?.fieldExecutive?.name}</div>
                   <Tag color="blue">{cav?.fieldExecutive?.employeeCode}</Tag>
                 </div>
@@ -542,7 +587,15 @@ export default function Loans() {
                 (v: any) => v.type === "Work"
               );
               return wv ? (
-                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
                   <div>{wv?.fieldExecutive?.name}</div>
                   <Tag color="blue">{wv?.fieldExecutive?.employeeCode}</Tag>
                 </div>
@@ -588,16 +641,28 @@ export default function Loans() {
               const business = record?.verifications?.find(
                 (v: any) => v.type === "Business"
               );
-              return business?.fieldExecutive?.employeeCode === value.toString();
+              return (
+                business?.fieldExecutive?.employeeCode === value.toString()
+              );
             },
             render: (_: any, record: Loan) => {
               const business = record?.verifications?.find(
                 (v: any) => v.type === "Business"
               );
               return business ? (
-                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
                   <div>{business?.fieldExecutive?.name}</div>
-                  <Tag color="blue">{business?.fieldExecutive?.employeeCode}</Tag>
+                  <Tag color="blue">
+                    {business?.fieldExecutive?.employeeCode}
+                  </Tag>
                 </div>
               ) : (
                 "-"
@@ -631,7 +696,7 @@ export default function Loans() {
           },
         ],
       },
-              ...(!(getCurrentDepartmentRole() === "Verifier")
+      ...(!(getCurrentDepartmentRole() === "Verifier")
         ? [
             {
               title: "Actions",
@@ -655,7 +720,7 @@ export default function Loans() {
                   >
                     Edit
                   </Button>
-                  {(getCurrentDepartmentRole() === "Admin" )&& (
+                  {getCurrentDepartmentRole() === "Admin" && (
                     <Popconfirm
                       title="Are you sure you want to delete this loan?"
                       onConfirm={async () => {
@@ -746,7 +811,8 @@ export default function Loans() {
           onChange={handleTableChange}
           pagination={
             // Hide pagination if filters are applied and results are <= 10
-            (Object.values(filters).some((v) => v !== undefined && v !== "") && loans.length <= 20)
+            Object.values(filters).some((v) => v !== undefined && v !== "") &&
+            loans.length <= 20
               ? false
               : {
                   current: pagination.current,
@@ -788,6 +854,7 @@ export default function Loans() {
           fetchLoans={refreshLoans} // Pass the helper instead
           setRefresh={setRefresh}
           fetchExecutives={fetchExecutives}
+          pdBankOptions={pdBankOptions}
         />
       )}
 

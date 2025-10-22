@@ -1,5 +1,9 @@
 import axiosInstance from "@/config/axios.config";
-import { getWithDepartment, postWithDepartment, patchWithDepartment } from "./api.services";
+import {
+  getWithDepartment,
+  postWithDepartment,
+  patchWithDepartment,
+} from "./api.services";
 
 export const getVerificationData = async (id: string) => {
   const response = await getWithDepartment(`/loans/${id}/verification-data`);
@@ -26,7 +30,7 @@ export const generatePreviewReport = async (
 
 export const generateFinalReport = (id: string, type: string) => {
   return getWithDepartment(`/loans/${id}/generate-final-report`, {
-    params: { type }
+    params: { type },
   });
 };
 
@@ -48,7 +52,7 @@ export const getPresignedDownloadUrl = async (path: string) => {
 
 export const getEditRequestsApi = async (status: string, loanId: string) => {
   return await getWithDepartment(`/edit-requests`, {
-    params: { status, loanId }
+    params: { status, loanId },
   });
 };
 
@@ -66,7 +70,7 @@ export const updateEditRequestApi = async (id: string, payload: any) => {
 
 export const getAllEditRequestsApi = async () => {
   return await getWithDepartment(`/edit-requests`, {
-    params: { status: "Pending" }
+    params: { status: "Pending" },
   });
 };
 
@@ -89,35 +93,33 @@ export const patchFinalVerdict = async (
   );
 };
 
-export const submitFinancialAnalysis = async (
-  id: string,
-  payload: any
-) => {
+export const submitFinancialAnalysis = async (id: string, payload: any) => {
   return await postWithDepartment(
     `/loans/verification/${id}/financial-analysis`,
     payload,
-    { params: { department: 'PD' } }
+    { params: { department: "PD" } }
   );
 };
 
-export const updateFinancialAnalysis = async (
-  id: string,
-  payload: any
-) => {
+export const updateFinancialAnalysis = async (id: string, payload: any) => {
   return await patchWithDepartment(
     `/loans/verification/${id}/financial-analysis`,
     payload,
-    { params: { department: 'PD' } }
+    { params: { department: "PD" } }
   );
 };
 
-export const updateSynopsis = async (
-  id: string,
-  synopsis: string
-) => {
+export const updateSynopsis = async (id: string, synopsis: string) => {
   return await patchWithDepartment(
     `/loans/verification/${id}/financial-analysis`,
     { synopsis },
-    { params: { department: 'PD' } }
+    { params: { department: "PD" } }
+  );
+};
+
+export const asstVerifierSubmitApi = async (id: string, payload: any) => {
+  return await postWithDepartment(
+    `/loans/${id}/submit-verification-executive`,
+    payload
   );
 };

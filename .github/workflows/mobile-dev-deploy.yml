@@ -2,8 +2,8 @@ name: CI/CD - Revopush
 
 on:
   push:
-    branches: [ revopush-cicd,development ]      # or whichever branch triggers deployments
-  #workflow_dispatch:        # allows manual workflow runs from the Actions tab
+    branches: [ revopush-cicd, development ]
+  #workflow_dispatch:  # Uncomment if you want manual runs
 
 jobs:
   build-and-deploy:
@@ -19,8 +19,8 @@ jobs:
     - name: Cache Node modules
       uses: actions/cache@v4
       with:
-        path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        path: apps/mobile/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('apps/mobile/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
@@ -29,11 +29,21 @@ jobs:
       with:
         node-version: '20'
 
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v2.0
+      with:
+        envkey_REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
+        envkey_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        file_name: .env
+        fail_on_empty: false
+        directory: apps/mobile
+        sort_keys: false
+
+    - name: Verify .env file
+      run: cat .env | grep REACT_APP_BASE_URL
+
     - name: Install dependencies
       run: npm install --force
-
-    - name: Add missing module
-      run: npm install react-native-uuid
 
     - name: Clear Metro cache
       run: npx react-native start --reset-cache & sleep 5; kill $!
@@ -45,7 +55,4 @@ jobs:
         accessKey: ${{ secrets.REVOPUSH_ACCESS_KEY }}
 
     - name: Release Android bundle
-      run: revopush release-react kowtha-app android -d Staging # customize app name and env
-
-    #- name: Release iOS bundle
-    #  run: revopush release-react MyAwesomeApp ios -d Staging        # customize app name and env
+      run: revopush release-react kowtha-app android -d Staging

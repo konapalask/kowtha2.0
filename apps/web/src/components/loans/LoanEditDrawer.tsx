@@ -13,9 +13,14 @@ import {
   Row,
   Col,
 } from "antd";
-import { CloseOutlined, DeleteOutlined, EditOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import { bankOptions, loanTypeOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, pdBankOptions } from "@/utils/options";
 import FieldAssignmentForm from "./FieldAssignmentForm";
 import LoanInformationEditForm from "./LoanInformationEditForm";
 import {
@@ -59,6 +64,7 @@ interface LoanEditProps {
   fetchLoans: () => void;
   setRefresh: (refresh: boolean) => void;
   fetchExecutives: any;
+  pdBankOptions: any;
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
@@ -78,12 +84,15 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   fetchLoans,
   setRefresh,
   fetchExecutives,
+  pdBankOptions,
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
-  const [currentDepartment, setCurrentDepartment] = useState(getCurrentDepartment());
-  console.log('LoanEditDrawer - Current department:', currentDepartment);
-  
+  const [currentDepartment, setCurrentDepartment] = useState(
+    getCurrentDepartment()
+  );
+  console.log("LoanEditDrawer - Current department:", currentDepartment);
+
   // Watch for department changes
   useEffect(() => {
     const checkDepartment = () => {
@@ -92,13 +101,13 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
         setCurrentDepartment(dept);
       }
     };
-    
+
     // Check immediately
     checkDepartment();
-    
+
     // Set up interval to check for changes
     const interval = setInterval(checkDepartment, 1000);
-    
+
     return () => clearInterval(interval);
   }, [currentDepartment]);
   const [selectedLoan, setSelectedLoan] = useState<string | null>(loanId);
@@ -110,7 +119,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   const [fieldExecutiveEdit, setFieldExecutiveEdit] = useState<
     Record<string, boolean>
   >(
-    currentDepartment === 'PD' 
+    currentDepartment === "PD"
       ? { Business: false }
       : {
           Address1: false,
@@ -175,7 +184,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
 
   const handleReassign = async () => {
     if (!loanDetails?.id) return;
-    
+
     try {
       setLoading(true);
       console.log("Reassigning loan:", loanDetails.id);
@@ -198,7 +207,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     setEditLoanInfo(false);
     setLoanDetails(null);
     setFieldExecutiveEdit(
-      currentDepartment === 'PD' 
+      currentDepartment === "PD"
         ? { Business: false }
         : {
             Address1: false,
@@ -207,7 +216,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
             Business: false,
           }
     );
-    fetchLoans(); 
+    fetchLoans();
   };
 
   const handleDelete = async (
@@ -234,7 +243,14 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
     <div>
       <Drawer
         title={
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
             <span>
               {loanDetails?.id
                 ? `Loan Details - ${loanDetails.applicationNumber}`
@@ -277,7 +293,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                 </Tag>
               )}
             </span>
-            {loanDetails?.id && currentDepartment === 'PD' && (
+            {loanDetails?.id && currentDepartment === "PD" && (
               <Button
                 type="primary"
                 icon={<ReloadOutlined />}
@@ -360,6 +376,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   loading={loading}
                   setLoading={setLoading}
                   fetchLoanDetails={fetchLoanDetails}
+                  pdBankOptions={pdBankOptions}
                 />
               ) : (
                 <Descriptions
@@ -398,7 +415,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
             {loanDetails?.id && (
               <>
                 <Row style={{ display: "flex" }} gutter={[8, 8]}>
-                  {(currentDepartment === 'PD' 
+                  {(currentDepartment === "PD"
                     ? [{ type: "Business", label: "Business" }]
                     : [
                         { type: "AddressOne", label: "Address 1" },

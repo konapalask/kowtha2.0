@@ -1,5 +1,5 @@
-export const pdBaseTemplate = () => {
-    return `
+export const pdBaseTemplate = (html_data?: any) => {
+  return `
     <!DOCTYPE html>
       <html>
       <head>
@@ -9,12 +9,14 @@ export const pdBaseTemplate = () => {
               font-family: Arial, sans-serif;
               margin: 0;
               padding: 0;
+              padding-bottom: 140px;
               background: #fff;
               color: #222;
               position: relative;
               min-height: 60vh;
               width: 100%;
               height: 100%;
+              box-sizing: border-box;
             }
             .header {
               text-align: left;
@@ -69,6 +71,8 @@ export const pdBaseTemplate = () => {
               margin: 0 auto;
               width: 100%;
               height: 100%;
+              padding: 0 40px;
+              box-sizing: border-box;
             }
             .branch-box {
               width: 100%;
@@ -140,6 +144,10 @@ export const pdBaseTemplate = () => {
               width: 220px;
               height: 100%;
             }
+            .template-content {
+              padding: 24px 40px 0 40px;
+              box-sizing: border-box;
+            }
             .highlight {
               font-weight: bold;
               color: #1a237e;
@@ -160,8 +168,8 @@ export const pdBaseTemplate = () => {
               color: #7f8c8d;
               font-size: 12px;
               border-top: 1px solid #eee;
-              padding: 8px 0 6px 0;
-              background-color: transparent;
+              padding: 12px 40px;
+              background-color: #fff;
               z-index: 1000;
             }
             .logo {
@@ -173,6 +181,55 @@ export const pdBaseTemplate = () => {
             .var-value {
               font-weight: bold;
               height: 100%;
+            }
+            .photos-section {
+              margin: 24px 0;
+              page-break-inside: avoid;
+            }
+            .photos-title {
+              font-size: 16px;
+              font-weight: bold;
+              margin-bottom: 16px;
+              text-transform: uppercase;
+              color: #1a237e;
+            }
+            .photo-grid {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: flex-start;
+              gap: 16px;
+            }
+            .photo-item {
+              width: 48%;
+              border: 1px solid #ddd;
+              padding: 10px;
+              text-align: center;
+              vertical-align: top;
+              box-sizing: border-box;
+              page-break-inside: avoid;
+            }
+            .photo-item img {
+              width: 100%;
+              height: 260px;
+              object-fit: contain;
+              margin-bottom: 8px;
+            }
+            .photo-metadata {
+              font-size: 12px;
+              color: #555;
+              text-align: left;
+            }
+            .photo-metadata div {
+              margin-bottom: 4px;
+            }
+            .signature-section {
+              margin: 24px 0;
+              text-align: left;
+            }
+            .signature-section img {
+              max-width: 240px;
+              height: auto;
+              margin-top: 6px;
             }
         </style>
       </head>
@@ -188,5 +245,51 @@ export const pdBaseTemplate = () => {
           Mail ID: opspd@gmail.com
         </div>
       </div>
+    `;
+};
+
+export const pdBaseTemplateFooter = (html_data?: any) => {
+  const currentDate = new Date();
+  const timeZone = "Asia/Kolkata";
+  const istDate = currentDate.toLocaleString("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  return `
+      ${
+        html_data?.imagesData
+          ? `
+        <div class="photos-section">
+          <div class="photos-title">PHOTOS</div>
+          ${html_data.imagesData}
+        </div>
+      `
+          : ""
+      }
+      
+      ${
+        html_data?.imageDataUri
+          ? `
+        <div class="signature-section">
+          <p style="margin:8px 0;line-height:1.5"><strong>Agency Name & Seal:</strong> Kowtha & Co.</p>
+          <img src="${html_data.imageDataUri}" alt="Kowtha Signature" />
+        </div>
+      `
+          : ""
+      }
+      
+      <footer class="pdf-footer">
+        <span style="color:rgb(8, 136, 36);">${html_data?.bankName || ""}</span><br>
+        Generated on ${istDate}
+      </footer>
+    </body>
+    </html>
     `;
 };
