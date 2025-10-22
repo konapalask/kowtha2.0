@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Kowtha</string>
+     <string moduleConfig="true" name="CodePushServerUrl">https://api.revopush.org</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">BYneeFfgIcFbUCkZyuEzSzr0ZjUuN1gf9oHafg</string>
 </resources>

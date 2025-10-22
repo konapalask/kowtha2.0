@@ -5,7 +5,7 @@ import { PrismaService } from "../../prisma.service";
 import { LoggingService } from "../common/logging/logging.service";
 import { S3Module } from "../common/s3utils/s3.module";
 import { CreateLoanController } from "./create-loan.controller";
-import { PDTemplateModule } from "./templates/pd-template.module";
+import { PDTemplateModule } from "./pd-template.module";
 import { ArrayValidationService } from "./services/array-validation.service";
 
 @Module({

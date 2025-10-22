@@ -107,8 +107,8 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.release
-            minifyEnabled true  // Enable code shrinking
-            shrinkResources true
+            minifyEnabled false  // Enable code shrinking
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'}
     }
 }
@@ -125,3 +125,4 @@ implementation 'androidx.activity:activity-ktx:1.7.0'
         implementation jscFlavor
     }
 }
+apply from: "../../node_modules/@revopush/react-native-code-push/android/codepush.gradle"

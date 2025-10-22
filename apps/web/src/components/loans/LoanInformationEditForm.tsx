@@ -14,7 +14,6 @@ import { createLoanApi, updateLoanApi } from "@/services/loans.services";
 import {
   applicantTypeOptions,
   bankOptions,
-  pdBankOptions,
   loanTypeOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
@@ -28,6 +27,7 @@ interface LoanInfoFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   fetchLoanDetails: () => void;
+  pdBankOptions: any;
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
@@ -38,6 +38,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   loading,
   setLoading,
   fetchLoanDetails,
+  pdBankOptions,
 }) => {
   const userDetails = getUserDetails();
   const currentDepartment = getCurrentDepartment();
@@ -45,7 +46,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   // console.log(form.getFieldsValue());
 
   const loanType = Form.useWatch("loanType", form);
-  
+
   // Check if mobile verification is completed to disable bank name field
   const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
 
@@ -159,11 +160,13 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 { whitespace: true, message: "Cannot be empty" },
                 {
                   validator: (_, value) => {
-                    if (value && value.startsWith(' ')) {
-                      return Promise.reject('Cannot start with a space.');
+                    if (value && value.startsWith(" ")) {
+                      return Promise.reject("Cannot start with a space.");
                     }
                     if (value && /[^A-Za-z0-9 ]/.test(value)) {
-                      return Promise.reject('Special characters are not allowed.');
+                      return Promise.reject(
+                        "Special characters are not allowed."
+                      );
                     }
                     return Promise.resolve();
                   },
@@ -198,19 +201,26 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 {
                   validator: (_, value) => {
                     // Allow empty values - field is not required
-                    if (value === undefined || value === null || value === "" || value === 0) {
+                    if (
+                      value === undefined ||
+                      value === null ||
+                      value === "" ||
+                      value === 0
+                    ) {
                       return Promise.resolve();
                     }
-                    
+
                     const numValue = Number(value);
                     if (isNaN(numValue)) {
                       return Promise.reject("Please enter a valid amount");
                     }
-                    
+
                     if (numValue < 100 || numValue > 9999999999) {
-                      return Promise.reject("Please enter min of 3 digits and max of 10 digits");
+                      return Promise.reject(
+                        "Please enter min of 3 digits and max of 10 digits"
+                      );
                     }
-                    
+
                     return Promise.resolve();
                   },
                 },
@@ -222,24 +232,32 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 onKeyDown={(e) => {
                   // Allow only numbers, backspace, delete, tab, arrows, home, end
                   const allowedKeys = [
-                    'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight',
-                    'ArrowUp', 'ArrowDown', 
+                    "Backspace",
+                    "Delete",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "ArrowUp",
+                    "ArrowDown",
                   ];
-                  
+
                   const isNumber = /^[0-9]$/.test(e.key);
-                  
+
                   if (!isNumber && !allowedKeys.includes(e.key)) {
                     e.preventDefault();
                   }
                 }}
                 onChange={(e) => {
                   // Remove any non-numeric characters that might have been pasted
-                  const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                  const numericValue = e.target.value.replace(/[^0-9]/g, "");
                   if (numericValue !== e.target.value) {
                     e.target.value = numericValue;
                   }
-                  
-                  form.setFieldValue('loanAmount', numericValue ? Number(numericValue) : undefined);
+
+                  form.setFieldValue(
+                    "loanAmount",
+                    numericValue ? Number(numericValue) : undefined
+                  );
                 }}
               />
             </Form.Item>
@@ -284,11 +302,14 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               <Select
                 showSearch
                 placeholder="Select bank"
-                options={currentDepartment === 'PD' ? pdBankOptions : bankOptions}
+                options={
+                  currentDepartment === "PD" ? pdBankOptions : bankOptions
+                }
                 filterOption={(input, option) =>
                   (option?.label ?? "")
+                    .toString()
                     .toLowerCase()
-                    .includes(input.toLowerCase())
+                    .includes(input.toString().toLowerCase())
                 }
                 disabled={isVerificationCompleted}
               />

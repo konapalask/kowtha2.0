@@ -33,6 +33,7 @@ import {getPlaystoreVersion} from './src/services/auth';
 import DeviceInfo from 'react-native-device-info';
 import PD from './src/screens/PD';
 import QAFormTesting from './src/screens/QAFormTesting';
+import {UserProvider} from './src/contexts/UserContext';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -72,7 +73,7 @@ function isVersionLess(current: string, latest: string) {
 
 const APP_VERSION = DeviceInfo.getVersion();
 
-const App = () => {
+const AppContent = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -296,5 +297,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+const App = () => {
+  return (
+    <UserProvider>
+      <AppContent />
+    </UserProvider>
+  );
+};
 
 export default App;

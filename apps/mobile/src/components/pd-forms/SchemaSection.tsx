@@ -41,6 +41,17 @@ interface JsonSchemaProperty {
     showCurrency?: boolean;
     currency?: string;
   };
+  maxLength?: number;
+  ui?: {
+    widget?: string;
+    rows?: number;
+    maxLength?: number;
+  };
+  ['ui:options']?: {
+    widget?: string;
+    rows?: number;
+    maxLength?: number;
+  };
   dependencies?: {
     show?: Record<string, any>;
     required?: Record<string, any>;
@@ -60,12 +71,54 @@ interface SchemaSectionProps {
   onSubmit: (data: AnyObject) => void;
 }
 
+const getUiSettings = (property: JsonSchemaProperty) => {
+  return property?.ui || (property as AnyObject)?.['ui:options'] || {};
+};
+
+const shouldUseTextArea = (property: JsonSchemaProperty): boolean => {
+  const ui = getUiSettings(property);
+  if (ui?.widget === 'textarea' || ui?.widget === 'richtext') {
+    return true;
+  }
+
+  const title = property.title?.toLowerCase() || '';
+  return (
+    title.includes('about') ||
+    title.includes('address') ||
+    title.includes('description') ||
+    title.includes('remark') ||
+    title.includes('details') ||
+    title.includes('background') ||
+    title.includes('notes')
+  );
+};
+
+const getTextAreaLines = (property: JsonSchemaProperty): number | undefined => {
+  const ui = getUiSettings(property);
+  if (typeof ui?.rows === 'number') {
+    return ui.rows;
+  }
+  return undefined;
+};
+
+const getMaxLength = (property: JsonSchemaProperty): number | undefined => {
+  if (typeof property.maxLength === 'number') {
+    return property.maxLength;
+  }
+  const ui = getUiSettings(property);
+  if (typeof ui?.maxLength === 'number') {
+    return ui.maxLength;
+  }
+  return undefined;
+};
+
 const SchemaSection: React.FC<SchemaSectionProps> = ({
   title,
   schema,
   initialData = {},
   onSubmit,
 }) => {
+  console.log('schema', schema);
   // Helper function to convert numbers to strings for TextInput compatibility
   const normalizeFormData = (data: AnyObject): AnyObject => {
     const normalized: AnyObject = {};
@@ -78,8 +131,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           typeof item === 'object' && item !== null
             ? normalizeFormData(item)
             : typeof item === 'number'
-              ? item.toString()
-              : item,
+            ? item.toString()
+            : item,
         );
       } else if (value && typeof value === 'object') {
         // Handle nested objects - preserve _id if present
@@ -189,7 +242,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, onSubmit]);
 
-  const showDatePicker = (fieldKey: string, mode: 'date' | 'time' | 'datetime' = 'date') => {
+  const showDatePicker = (
+    fieldKey: string,
+    mode: 'date' | 'time' | 'datetime' = 'date',
+  ) => {
     setDatePickerState({visible: true, fieldKey, mode});
   };
 
@@ -223,7 +279,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   const handleDateConfirm = (date: Date) => {
     if (datePickerState.fieldKey) {
       let formattedValue: string;
-      
+
       switch (datePickerState.mode) {
         case 'time':
           formattedValue = dayjs(date).format('hh:mm A');
@@ -236,7 +292,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           formattedValue = dayjs(date).format('DD-MM-YYYY');
           break;
       }
-      
+
       setValue(datePickerState.fieldKey, formattedValue);
     }
     hideDatePicker();
@@ -328,7 +384,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 const subFieldValue = formData[fieldId]?.[subFieldId];
 
                 // Handle date/time fields in nested objects
-                const isDateField = subProperty?.format === 'date' || subProperty?.format === 'time' || subProperty?.format === 'date-time';
+                const isDateField =
+                  subProperty?.format === 'date' ||
+                  subProperty?.format === 'time' ||
+                  subProperty?.format === 'date-time';
                 if (isDateField) {
                   console.log('subProperty', subProperty);
                   return (
@@ -367,14 +426,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 }
 
                 // Handle textarea in nested objects
-                const isTextArea =
-                  subProperty.title.toLowerCase().includes('about') ||
-                  subProperty.title.toLowerCase().includes('address') ||
-                  subProperty.title.toLowerCase().includes('description') ||
-                  subProperty.title.toLowerCase().includes('remark') ||
-                  subProperty.title.toLowerCase().includes('details');
-
-                if (isTextArea) {
+                if (shouldUseTextArea(subProperty)) {
                   return (
                     <TextAreaFormItem
                       key={subFieldKey}
@@ -385,6 +437,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         required: false,
                         disabled: subProperty.readOnly,
                         defaultValue: subFieldValue ?? '',
+                        numberOfLines: getTextAreaLines(subProperty),
+                        maxLength: getMaxLength(subProperty),
                       }}
                     />
                   );
@@ -518,7 +572,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         property.items?.required?.includes(subFieldId) ?? false;
 
                       // Handle date/time fields in arrays
-                      const isDateField = subProperty.format === 'date' || subProperty.format === 'time' || subProperty.format === 'date-time';
+                      const isDateField =
+                        subProperty.format === 'date' ||
+                        subProperty.format === 'time' ||
+                        subProperty.format === 'date-time';
                       if (isDateField) {
                         return (
                           <View key={subFieldKey}>
@@ -555,16 +612,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         );
                       }
 
-                      const isTextArea =
-                        subProperty.title.toLowerCase().includes('about') ||
-                        subProperty.title.toLowerCase().includes('address') ||
-                        subProperty.title
-                          .toLowerCase()
-                          .includes('description') ||
-                        subProperty.title.toLowerCase().includes('remark') ||
-                        subProperty.title.toLowerCase().includes('details');
-
-                      if (isTextArea) {
+                      if (shouldUseTextArea(subProperty)) {
                         return (
                           <TextAreaFormItem
                             key={subFieldKey}
@@ -575,6 +623,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                               required: isSubFieldRequired,
                               disabled: subProperty.readOnly,
                               defaultValue: item?.[subFieldId] ?? '',
+                              numberOfLines: getTextAreaLines(subProperty),
+                              maxLength: getMaxLength(subProperty),
                             }}
                           />
                         );
@@ -663,7 +713,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
 
       case 'string':
         // Check if it should be a date/time field
-        const isDateField = property.format === 'date' || property.format === 'time' || property.format === 'date-time';
+        const isDateField =
+          property.format === 'date' ||
+          property.format === 'time' ||
+          property.format === 'date-time';
         if (isDateField) {
           return renderDateField(
             fieldId,
@@ -675,14 +728,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         }
 
         // Check if it should be a textarea
-        const isTextArea =
-          property.title.toLowerCase().includes('about') ||
-          property.title.toLowerCase().includes('address') ||
-          property.title.toLowerCase().includes('description') ||
-          property.title.toLowerCase().includes('remark') ||
-          property.title.toLowerCase().includes('details');
-
-        if (isTextArea) {
+        if (shouldUseTextArea(property)) {
           return (
             <TextAreaFormItem
               data={{
@@ -694,6 +740,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 defaultValue: formData[fieldId] ?? '',
                 placeholder: property.title,
                 trigger,
+                numberOfLines: getTextAreaLines(property),
+                maxLength: getMaxLength(property),
               }}
             />
           );

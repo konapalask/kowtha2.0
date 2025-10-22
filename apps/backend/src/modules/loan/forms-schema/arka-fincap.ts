@@ -23,7 +23,7 @@ export const arkaFincapSchema = {
             title: "Name of Co-Applicant",
           },
           phoneNumber: {
-            type: "integer",
+            type: "string",
             title: "Phone Number",
             readOnly: true,
           },
@@ -79,6 +79,10 @@ export const arkaFincapSchema = {
           aboutTheApplicant: {
             type: "string",
             title: "About the Applicant",
+            ui: {
+              widget: "textarea",
+              rows: 5,
+            },
           },
         },
         required: ["applicationNo", "nameOfApplicant", "nameOfConcern"],
@@ -277,13 +281,17 @@ export const arkaFincapSchema = {
       id: "aboutTheBusiness",
       label: "About the Business",
       schema: {
-        type: "array",
-        title: "About the Business",
-        items: {
-          type: "string",
-          title: "Business Detail",
+        type: "object",
+        properties: {
+          businessSummary: {
+            type: "string",
+            title: "Business Summary",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
+        required: ["businessSummary"],
       },
       required: true,
     },
@@ -304,7 +312,7 @@ export const arkaFincapSchema = {
                   title: "Customer Name",
                 },
                 contactNumber: {
-                  type: "integer",
+                  type: "string",
                   title: "Contact Number",
                 },
               },
@@ -331,7 +339,7 @@ export const arkaFincapSchema = {
                   title: "Supplier Name",
                 },
                 contactNumber: {
-                  type: "number",
+                  type: "string",
                   title: "Contact Number",
                 },
               },
@@ -349,7 +357,8 @@ export const arkaFincapSchema = {
         properties: {
           businessActivityAndStockLevelObserved: {
             type: "string",
-            title: "Business Activity and Stock Level observed at the time of visit",
+            title:
+              "Business Activity and Stock Level observed at the time of visit",
           },
         },
       },
@@ -376,7 +385,7 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           gstRegistered: {
-            type: "string",
+            type: "boolean",
             title: "Whether Business Registered under GST?",
           },
         },
@@ -464,7 +473,7 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           netMargin: {
-            type: "number",
+            type: "string",
             title: "Net Margin",
           },
         },
@@ -480,7 +489,6 @@ export const arkaFincapSchema = {
           familyExpenses: {
             type: "string",
             title: "Family Expenses",
-
           },
         },
       },
@@ -504,13 +512,17 @@ export const arkaFincapSchema = {
       id: "concerns",
       label: "Concerns",
       schema: {
-        type: "array",
-        title: "Concerns",
-        items: {
-          type: "string",
-          title: "Concerns",
+        type: "object",
+        properties: {
+          concernsSummary: {
+            type: "string",
+            title: "Concerns",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
+        required: ["concernsSummary"],
       },
       required: true,
     },
@@ -519,12 +531,15 @@ export const arkaFincapSchema = {
       label: "Other Observations",
       schema: {
         type: "array",
-        title: "Other Observations",
-        items: {
-          type: "string",
-          title: "Other Observations",
+        properties: {
+          otherObservations: {
+            type: "string",
+            title: "Other Observations",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
       },
       required: true,
     },
@@ -533,12 +548,15 @@ export const arkaFincapSchema = {
       label: "Other Incomes",
       schema: {
         type: "array",
-        title: "Other Incomes",
-        items: {
-          type: "string",
-          title: "Other Incomes",
+        properties: {
+          otherIncomes: {
+            type: "string",
+            title: "Other Incomes",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
       },
       required: true,
     },
@@ -548,9 +566,22 @@ export const arkaFincapSchema = {
       schema: {
         type: "object",
         properties: {
-          neighborCheck: {
-            type: "string",
-            title: "Neighbor Check Feedback",
+          neighbors: {
+            type: "array",
+            title: "Neighbor Feedback",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Neighbor Name",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                },
+              },
+            },
           },
         },
       },
@@ -570,7 +601,6 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
-
   ],
 } as const;
 export default arkaFincapSchema;

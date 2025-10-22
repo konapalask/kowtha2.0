@@ -1,6 +1,6 @@
 "use client";
 import EditRequestLogs from "@/components/verify/EditRequestLogs";
-import { getMobileSchemaByBank } from "@/utils/mobileSchemaLoader";
+import { getSchemaFromBackend } from "@/services/schema.service";
 import {
   getEditRequestsById,
   getVerificationData,
@@ -27,14 +27,15 @@ const EditRequestDetails = () => {
           if (res?.data?.verification?.verificationData) {
             setCurrentData(res?.data?.verification?.verificationData);
           }
-          
+
           if (res?.data?.changes) {
             setChangedData(res?.data?.changes);
           }
-          
-    
+
           if (res?.data?.verification?.verificationData?.department) {
-            setCurrentDepartment(res?.data?.verification?.verificationData?.department);
+            setCurrentDepartment(
+              res?.data?.verification?.verificationData?.department
+            );
           } else if (res?.data?.loan?.department) {
             setCurrentDepartment(res?.data?.loan?.department);
           } else {
@@ -46,13 +47,12 @@ const EditRequestDetails = () => {
             }
           }
 
-    
           const bankName =
             res?.data?.verification?.bankName ||
             res?.data?.loan?.bankName ||
             "";
           if (bankName) {
-            const schema = getMobileSchemaByBank(bankName);
+            const schema = getSchemaFromBackend(bankName);
             if (schema) setDynamicSchema(schema);
           }
         })
@@ -62,14 +62,13 @@ const EditRequestDetails = () => {
     }
   }, [id, loanid]);
 
-
   return (
     <div>
       <EditRequestLogs
         verificationType={editRequestData?.verification?.addressType}
         currentData={currentData}
         changedData={changedData}
-        fetchEditRequests={()=>{}}
+        fetchEditRequests={() => {}}
         disabled={false}
         admin={true}
         verificationId={id as string}

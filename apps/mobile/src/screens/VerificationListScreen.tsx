@@ -24,6 +24,7 @@ import AttendanceCard from '../components/AttendanceCard';
 import {getItem, setItem} from '../helpers/utility';
 import dayjs from 'dayjs';
 import DeptModal from '../components/DeptModal';
+import {useUser} from '../contexts/UserContext';
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -53,6 +54,7 @@ interface VerificationItem {
 
 const VerificationListScreen = () => {
   const navigation = useNavigation<VerificationListScreenNavigationProp>();
+  const {currentDept, setCurrentDept, hasMultipleDepartments} = useUser();
   const [data, setData] = useState<VerificationItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('Pending');
   const [refreshing, setRefreshing] = useState(false);
@@ -65,7 +67,6 @@ const VerificationListScreen = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const disabled = !isLoggedIn;
   const [testUser, setTestUser] = useState(false);
-  const [currentDept, setCurrentDept] = useState('FI');
   const [openDeptModal, setOpenDeptModal] = useState(false);
   // const disabled = false;
   // const testUser = await getItem('testUser');
@@ -112,16 +113,6 @@ const VerificationListScreen = () => {
     setCurrentDept(dept);
     setOpenDeptModal(false);
     // fetchData(1, false, dept);
-  };
-
-  const fetchDept = async () => {
-    try {
-      const dept = await getItem('dept');
-      updateCurrentDept(dept ?? 'FI');
-    } catch (error) {
-      console.error('Error fetching dept:', error);
-      updateCurrentDept('FI');
-    }
   };
 
   useEffect(() => {
@@ -172,7 +163,6 @@ const VerificationListScreen = () => {
       }
     };
     checkTestUserAndSetData();
-    fetchDept();
   }, []);
 
   const checkAttendance = async () => {
@@ -201,7 +191,6 @@ const VerificationListScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchDept();
       fetchData(1, false, currentDept);
       checkAttendance();
     }, [currentDept]),
@@ -513,8 +502,8 @@ const VerificationListScreen = () => {
                   item?.status === 'Pending'
                     ? '#FFA500'
                     : item?.status === 'Completed'
-                      ? '#32CD32'
-                      : 'transparent',
+                    ? '#32CD32'
+                    : 'transparent',
               },
             ]}
           />
@@ -642,19 +631,21 @@ const VerificationListScreen = () => {
             elevation: 1000,
             zIndex: 1000,
           }}>
-          <Pressable
-            onPress={() => {
-              setOpenDeptModal(true);
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+          {hasMultipleDepartments && (
+            <Pressable
+              onPress={() => {
+                setOpenDeptModal(true);
               }}>
-              <Text>{currentDept}</Text>
-              <Icon name="repeat" size={24} color="#666" />
-            </View>
-          </Pressable>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Text>{currentDept}</Text>
+                <Icon name="repeat" size={24} color="#666" />
+              </View>
+            </Pressable>
+          )}
           <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
         </View>
       </View>

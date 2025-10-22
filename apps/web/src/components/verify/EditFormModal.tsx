@@ -44,51 +44,61 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       const currentVerification = initialValues?.verifications?.find(
         (v: any) => v.type === currentTab
       );
-      
+
       // Handle financial analysis data differently since it's not nested under verificationData
       if (formKey === "financialAnalysis") {
         const financialData = currentVerification?.financialAnalysis;
         if (financialData) {
           const formValues = {
-            toOpeningStock: financialData.openingStock?.toString() || '',
-            toPurchase: financialData.purchase?.toString() || '',
-            toCostOfServices: financialData.costOfServices?.toString() || '',
-            toWages: financialData.wages?.toString() || '',
-            toHamaliCharges: financialData.hamaliCharges?.toString() || '',
-            toManufacturingExpenses: financialData.manufacturingExpenses?.toString() || '',
-            toPackingCharges: financialData.packingCharges?.toString() || '',
-            bySales: financialData.sales?.toString() || '',
-            byServices: financialData.services?.toString() || '',
-            byClosingStock: financialData.closingStock?.toString() || '',
-            toSalaries: financialData.salaries?.toString() || '',
-            toRent: financialData.rent?.toString() || '',
-            toElectricityCharges: financialData.electricityCharges?.toString() || '',
-            toPrintingStationery: financialData.printingStationery?.toString() || '',
-            toTelephoneCharges: financialData.telephoneCharges?.toString() || '',
-            toPostageTelegram: financialData.postageTelegram?.toString() || '',
-            toOfficeMaintenance: financialData.officeMaintenance?.toString() || '',
-            toRepairsMaintenance: financialData.repairsMaintenance?.toString() || '',
-            toSadarExpenses: financialData.sadarExpenses?.toString() || '',
-            toAuditFee: financialData.auditFee?.toString() || '',
-            toAdvertisement: financialData.advertisement?.toString() || '',
-            toBankCharges: financialData.bankCharges?.toString() || '',
-            toInsurance: financialData.insurance?.toString() || '',
-            toDepreciation: financialData.depreciation?.toString() || '',
-            toInterestOnLoan: financialData.interestOnLoan?.toString() || '',
-            byRentReceived: financialData.rentReceived?.toString() || '',
-            byCommissionReceived: financialData.commissionReceived?.toString() || '',
+            toOpeningStock: financialData.openingStock?.toString() || "",
+            toPurchase: financialData.purchase?.toString() || "",
+            toCostOfServices: financialData.costOfServices?.toString() || "",
+            toWages: financialData.wages?.toString() || "",
+            toHamaliCharges: financialData.hamaliCharges?.toString() || "",
+            toManufacturingExpenses:
+              financialData.manufacturingExpenses?.toString() || "",
+            toPackingCharges: financialData.packingCharges?.toString() || "",
+            bySales: financialData.sales?.toString() || "",
+            byServices: financialData.services?.toString() || "",
+            byClosingStock: financialData.closingStock?.toString() || "",
+            toSalaries: financialData.salaries?.toString() || "",
+            toRent: financialData.rent?.toString() || "",
+            toElectricityCharges:
+              financialData.electricityCharges?.toString() || "",
+            toPrintingStationery:
+              financialData.printingStationery?.toString() || "",
+            toTelephoneCharges:
+              financialData.telephoneCharges?.toString() || "",
+            toPostageTelegram: financialData.postageTelegram?.toString() || "",
+            toOfficeMaintenance:
+              financialData.officeMaintenance?.toString() || "",
+            toRepairsMaintenance:
+              financialData.repairsMaintenance?.toString() || "",
+            toSadarExpenses: financialData.sadarExpenses?.toString() || "",
+            toAuditFee: financialData.auditFee?.toString() || "",
+            toAdvertisement: financialData.advertisement?.toString() || "",
+            toBankCharges: financialData.bankCharges?.toString() || "",
+            toInsurance: financialData.insurance?.toString() || "",
+            toDepreciation: financialData.depreciation?.toString() || "",
+            toInterestOnLoan: financialData.interestOnLoan?.toString() || "",
+            byRentReceived: financialData.rentReceived?.toString() || "",
+            byCommissionReceived:
+              financialData.commissionReceived?.toString() || "",
           };
           form.setFieldsValue(formValues);
         }
-      } else if (currentDepartment === 'PD') {
+      } else if (currentDepartment === "PD") {
         // Handle PD department data structure
         if (formKey === "applicantDetails") {
-          const applicantData = currentVerification?.verificationData?.applicantDetails;
+          const applicantData =
+            currentVerification?.verificationData?.applicantDetails;
           if (applicantData) {
             form.setFieldsValue(applicantData);
           }
         } else if (formKey === "familyDetails") {
-          const familyData = currentVerification?.verificationData?.familyMemberDetails || currentVerification?.verificationData?.familyDetails;
+          const familyData =
+            currentVerification?.verificationData?.familyMemberDetails ||
+            currentVerification?.verificationData?.familyDetails;
           if (familyData) {
             form.setFieldsValue({ familyMemberDetails: familyData });
           }
@@ -98,25 +108,30 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             form.setFieldsValue(basicData);
           }
         } else if (formKey === "businessDetails") {
-          const businessData = currentVerification?.verificationData?.businessDetails;
+          const businessData =
+            currentVerification?.verificationData?.businessDetails;
           if (businessData) {
             form.setFieldsValue(businessData);
           }
         } else if (formKey === "shareholdingDetails") {
-          const shareData = currentVerification?.verificationData?.shareholdingDetails;
+          const shareData =
+            currentVerification?.verificationData?.shareholdingDetails;
           if (shareData) {
             // Form expects { shareholders: [...] }
             form.setFieldsValue(shareData);
           }
         } else if (formKey === "suppliersCreditors") {
-          const supData = currentVerification?.verificationData?.suppliersCreditors;
+          const supData =
+            currentVerification?.verificationData?.suppliersCreditors;
           if (supData) {
             form.setFieldsValue({ suppliersCreditors: supData });
           }
         } else if (formKey === "clientsDebtors") {
           const cliData = currentVerification?.verificationData?.clientsDebtors;
           if (cliData) {
-            const customers = Array.isArray(cliData.customers) ? cliData.customers : [];
+            const customers = Array.isArray(cliData.customers)
+              ? cliData.customers
+              : [];
             const mappedCustomers = {
               customer1Name: customers[0]?.name,
               customer1Phone: customers[0]?.phone,
@@ -131,7 +146,9 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
               customer3Location: customers[2]?.location,
               customer3Review: customers[2]?.review,
             };
-            form.setFieldsValue({ clientsDebtors: { ...cliData, ...mappedCustomers } });
+            form.setFieldsValue({
+              clientsDebtors: { ...cliData, ...mappedCustomers },
+            });
           }
         } else if (formKey === "salariesWages") {
           const salData = currentVerification?.verificationData?.salariesWages;
@@ -139,93 +156,155 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             form.setFieldsValue({ salariesWages: salData });
           }
         } else if (formKey === "documentsObserved") {
-          const docData = currentVerification?.verificationData?.documentsObserved;
+          const docData =
+            currentVerification?.verificationData?.documentsObserved;
           if (docData) {
             form.setFieldsValue({ documentsObserved: docData });
           }
-        // Tata UBL specific form handling
-        } else if (formKey === "basicDetails" && currentVerification?.bankName === "Tata Ubl") {
+          // Tata UBL specific form handling
+        } else if (
+          formKey === "basicDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
           const basicData = currentVerification?.verificationData?.basicDetails;
           if (basicData) {
             form.setFieldsValue({ basicDetails: basicData });
           }
-        } else if (formKey === "proposedLoanDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const loanData = currentVerification?.verificationData?.proposedLoanDetails;
+        } else if (
+          formKey === "proposedLoanDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const loanData =
+            currentVerification?.verificationData?.proposedLoanDetails;
           if (loanData) {
             form.setFieldsValue({ proposedLoanDetails: loanData });
           }
-        } else if (formKey === "officeAddress" && currentVerification?.bankName === "Tata Ubl") {
-          const officeData = currentVerification?.verificationData?.officeAddress;
+        } else if (
+          formKey === "officeAddress" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const officeData =
+            currentVerification?.verificationData?.officeAddress;
           if (officeData) {
             form.setFieldsValue({ officeAddress: officeData });
           }
-        } else if (formKey === "residentialAddress" && currentVerification?.bankName === "Tata Ubl") {
-          const resData = currentVerification?.verificationData?.residentialAddress;
+        } else if (
+          formKey === "residentialAddress" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const resData =
+            currentVerification?.verificationData?.residentialAddress;
           if (resData) {
             form.setFieldsValue({ residentialAddress: resData });
           }
-        } else if (formKey === "employeeDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const empData = currentVerification?.verificationData?.employeeDetails;
+        } else if (
+          formKey === "employeeDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const empData =
+            currentVerification?.verificationData?.employeeDetails;
           if (empData) {
             form.setFieldsValue({ employeeDetails: empData });
           }
-        } else if (formKey === "bankDetails" && currentVerification?.bankName === "Tata Ubl") {
+        } else if (
+          formKey === "bankDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
           const bankData = currentVerification?.verificationData?.bankDetails;
           if (bankData) {
             form.setFieldsValue({ bankDetails: bankData });
           }
-        } else if (formKey === "salesAndProfitDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const salesData = currentVerification?.verificationData?.salesAndProfitDetails;
+        } else if (
+          formKey === "salesAndProfitDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const salesData =
+            currentVerification?.verificationData?.salesAndProfitDetails;
           if (salesData) {
             form.setFieldsValue({ salesAndProfitDetails: salesData });
           }
-        } else if (formKey === "customersDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const custData = currentVerification?.verificationData?.customersDetails;
+        } else if (
+          formKey === "customersDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const custData =
+            currentVerification?.verificationData?.customersDetails;
           if (custData) {
             form.setFieldsValue({ customersDetails: custData });
           }
-        } else if (formKey === "supplierDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const suppData = currentVerification?.verificationData?.supplierDetails;
+        } else if (
+          formKey === "supplierDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const suppData =
+            currentVerification?.verificationData?.supplierDetails;
           if (suppData) {
             form.setFieldsValue({ supplierDetails: suppData });
           }
-        } else if (formKey === "additionalBusinessDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const addBizData = currentVerification?.verificationData?.additionalBusinessDetails;
+        } else if (
+          formKey === "additionalBusinessDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const addBizData =
+            currentVerification?.verificationData?.additionalBusinessDetails;
           if (addBizData) {
             form.setFieldsValue({ additionalBusinessDetails: addBizData });
           }
-        } else if (formKey === "existingLoans" && currentVerification?.bankName === "Tata Ubl") {
+        } else if (
+          formKey === "existingLoans" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
           const loanData = currentVerification?.verificationData?.existingLoans;
           if (loanData) {
             form.setFieldsValue({ existingLoans: loanData });
           }
-        } else if (formKey === "miscelleanousDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const miscData = currentVerification?.verificationData?.miscelleanousDetails;
+        } else if (
+          formKey === "miscelleanousDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const miscData =
+            currentVerification?.verificationData?.miscelleanousDetails;
           if (miscData) {
             form.setFieldsValue({ miscelleanousDetails: miscData });
           }
-        } else if (formKey === "valueAddedDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const valueData = currentVerification?.verificationData?.valueAddedDetails;
+        } else if (
+          formKey === "valueAddedDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const valueData =
+            currentVerification?.verificationData?.valueAddedDetails;
           if (valueData) {
             form.setFieldsValue({ valueAddedDetails: valueData });
           }
-        } else if (formKey === "siteVisitDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const siteData = currentVerification?.verificationData?.siteVisitDetails;
+        } else if (
+          formKey === "siteVisitDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const siteData =
+            currentVerification?.verificationData?.siteVisitDetails;
           if (siteData) {
             form.setFieldsValue({ siteVisitDetails: siteData });
           }
-        } else if (formKey === "thirdPartyCheck" && currentVerification?.bankName === "Tata Ubl") {
-          const tpcData = currentVerification?.verificationData?.thirdPartyCheck;
+        } else if (
+          formKey === "thirdPartyCheck" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const tpcData =
+            currentVerification?.verificationData?.thirdPartyCheck;
           if (tpcData) {
             form.setFieldsValue({ thirdPartyCheck: tpcData });
           }
-        } else if (formKey === "additionalDetails" && currentVerification?.bankName === "Tata Ubl") {
-          const addData = currentVerification?.verificationData?.additionalDetails;
+        } else if (
+          formKey === "additionalDetails" &&
+          currentVerification?.bankName === "Tata Ubl"
+        ) {
+          const addData =
+            currentVerification?.verificationData?.additionalDetails;
           if (addData) {
             form.setFieldsValue({ additionalDetails: addData });
           }
-      }
-      if (formKey === "assetDetails") {
+        }
+        if (formKey === "assetDetails") {
           const assetData = currentVerification?.verificationData?.assetDetails;
           if (assetData) {
             form.setFieldsValue({ assetDetails: assetData });
@@ -245,19 +324,24 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
     const currentVerification = initialValues?.verifications?.find(
       (v: any) => v.addressType === currentTab
     );
-    
+
     // Handle financial analysis data differently
     if (formKey === "financialAnalysis") {
       return currentVerification?.financialAnalysis;
     }
-    
+
     // For PD department, handle data structure differently
-    if (currentDepartment === 'PD') {
+    if (currentDepartment === "PD") {
       if (formKey === "applicantDetails") {
         return currentVerification?.verificationData?.applicantDetails;
       }
       if (formKey === "familyDetails") {
-        return { familyMemberDetails: (currentVerification?.verificationData?.familyMemberDetails || currentVerification?.verificationData?.familyDetails || []) };
+        return {
+          familyMemberDetails:
+            currentVerification?.verificationData?.familyMemberDetails ||
+            currentVerification?.verificationData?.familyDetails ||
+            [],
+        };
       }
       if (formKey === "businessBasicDetails") {
         return currentVerification?.verificationData?.basicDetails;
@@ -275,37 +359,52 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
         return currentVerification?.verificationData?.shareholdingDetails;
       }
       if (formKey === "suppliersCreditors") {
-        return { suppliersCreditors: currentVerification?.verificationData?.suppliersCreditors };
+        return {
+          suppliersCreditors:
+            currentVerification?.verificationData?.suppliersCreditors,
+        };
       }
       if (formKey === "clientsDebtors") {
-        return { clientsDebtors: currentVerification?.verificationData?.clientsDebtors };
+        return {
+          clientsDebtors: currentVerification?.verificationData?.clientsDebtors,
+        };
       }
       if (formKey === "salariesWages") {
-        return { documentsObserved: currentVerification?.verificationData?.documentsObserved };
+        return {
+          documentsObserved:
+            currentVerification?.verificationData?.documentsObserved,
+        };
       }
       if (formKey === "documentsObserved") {
-        return { documentsObserved: currentVerification?.verificationData?.documentsObserved };
+        return {
+          documentsObserved:
+            currentVerification?.verificationData?.documentsObserved,
+        };
       }
       if (formKey === "assetDetails") {
-        return { assetDetails: currentVerification?.verificationData?.assetDetails };
+        return {
+          assetDetails: currentVerification?.verificationData?.assetDetails,
+        };
       }
       if (formKey === "additionalDetails") {
         return currentVerification?.verificationData?.additionalDetails;
       }
     }
-    
+
     // Handle other forms normally
-    return currentVerification?.verificationData?.[formKeyMapping[formKey] || formKey];
+    return currentVerification?.verificationData?.[
+      formKeyMapping[formKey] || formKey
+    ];
   };
 
   // Helper function to validate non-empty strings
   const validateNonEmpty = (value: any): boolean => {
     if (value === null || value === undefined) return false;
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Check if string has at least one non-whitespace character
       return value.trim().length > 0;
     }
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return !isNaN(value);
     }
     return true; // For other types, consider them valid
@@ -313,13 +412,15 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
   // Helper function to clean whitespace-only values
   const cleanWhitespaceValues = (obj: any): any => {
-    if (typeof obj === 'string') {
-      return obj.trim() === '' ? undefined : obj.trim();
+    if (typeof obj === "string") {
+      return obj.trim() === "" ? undefined : obj.trim();
     }
     if (Array.isArray(obj)) {
-      return obj.map(cleanWhitespaceValues).filter(item => item !== undefined);
+      return obj
+        .map(cleanWhitespaceValues)
+        .filter((item) => item !== undefined);
     }
-    if (typeof obj === 'object' && obj !== null) {
+    if (typeof obj === "object" && obj !== null) {
       const cleaned: any = {};
       for (const key in obj) {
         const cleanedValue = cleanWhitespaceValues(obj[key]);
@@ -337,22 +438,28 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
       setLoading(true);
       // Validate form first. If invalid, this will throw and skip the rest.
       const values = await form.validateFields();
-      
+
       // Additional validation for empty strings/spaces - only save if at least one non-whitespace character
       const validationErrors: string[] = [];
       Object.entries(values).forEach(([key, value]) => {
-        if (typeof value === 'string' && value.trim() === '') {
+        if (typeof value === "string" && value.trim() === "") {
           validationErrors.push(key);
         }
-        
+
         // Check nested objects and arrays
-        if (typeof value === 'object' && value !== null) {
-          const checkNestedValues = (obj: any, path: string = '') => {
+        if (typeof value === "object" && value !== null) {
+          const checkNestedValues = (obj: any, path: string = "") => {
             Object.entries(obj).forEach(([nestedKey, nestedValue]) => {
               const currentPath = path ? `${path}.${nestedKey}` : nestedKey;
-              if (typeof nestedValue === 'string' && nestedValue.trim() === '') {
+              if (
+                typeof nestedValue === "string" &&
+                nestedValue.trim() === ""
+              ) {
                 validationErrors.push(currentPath);
-              } else if (typeof nestedValue === 'object' && nestedValue !== null) {
+              } else if (
+                typeof nestedValue === "object" &&
+                nestedValue !== null
+              ) {
                 checkNestedValues(nestedValue, currentPath);
               }
             });
@@ -360,18 +467,18 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
           checkNestedValues(value, key);
         }
       });
-      
+
       if (validationErrors.length > 0) {
-        message.error(validationErrors.join(', '));
+        message.error(validationErrors.join(", "));
         setLoading(false);
         return;
       }
-      
+
       // Only proceed if validation passes
 
       // Clean whitespace-only values before processing
       const cleanedValues = cleanWhitespaceValues(values);
-      
+
       const formValues =
         formKey === "familyMemberDetails"
           ? Object.values(cleanedValues?.familyMemberDetails)
@@ -397,19 +504,24 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             const costOfServices = parseFloat(values.toCostOfServices) || 0;
             const wages = parseFloat(values.toWages) || 0;
             const hamaliCharges = parseFloat(values.toHamaliCharges) || 0;
-            const manufacturingExpenses = parseFloat(values.toManufacturingExpenses) || 0;
+            const manufacturingExpenses =
+              parseFloat(values.toManufacturingExpenses) || 0;
             const packingCharges = parseFloat(values.toPackingCharges) || 0;
             const sales = parseFloat(values.bySales) || 0;
             const services = parseFloat(values.byServices) || 0;
             const closingStock = parseFloat(values.byClosingStock) || 0;
             const salaries = parseFloat(values.toSalaries) || 0;
             const rent = parseFloat(values.toRent) || 0;
-            const electricityCharges = parseFloat(values.toElectricityCharges) || 0;
-            const printingStationery = parseFloat(values.toPrintingStationery) || 0;
+            const electricityCharges =
+              parseFloat(values.toElectricityCharges) || 0;
+            const printingStationery =
+              parseFloat(values.toPrintingStationery) || 0;
             const telephoneCharges = parseFloat(values.toTelephoneCharges) || 0;
             const postageTelegram = parseFloat(values.toPostageTelegram) || 0;
-            const officeMaintenance = parseFloat(values.toOfficeMaintenance) || 0;
-            const repairsMaintenance = parseFloat(values.toRepairsMaintenance) || 0;
+            const officeMaintenance =
+              parseFloat(values.toOfficeMaintenance) || 0;
+            const repairsMaintenance =
+              parseFloat(values.toRepairsMaintenance) || 0;
             const sadarExpenses = parseFloat(values.toSadarExpenses) || 0;
             const auditFee = parseFloat(values.toAuditFee) || 0;
             const advertisement = parseFloat(values.toAdvertisement) || 0;
@@ -418,20 +530,43 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             const depreciation = parseFloat(values.toDepreciation) || 0;
             const interestOnLoan = parseFloat(values.toInterestOnLoan) || 0;
             const rentReceived = parseFloat(values.byRentReceived) || 0;
-            const commissionReceived = parseFloat(values.byCommissionReceived) || 0;
+            const commissionReceived =
+              parseFloat(values.byCommissionReceived) || 0;
 
             // Calculate Gross Profit
             // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-            const grossProfit = (sales + services + closingStock) - (openingStock + purchase + costOfServices + wages + hamaliCharges + manufacturingExpenses + packingCharges);
+            const grossProfit =
+              sales +
+              services +
+              closingStock -
+              (openingStock +
+                purchase +
+                costOfServices +
+                wages +
+                hamaliCharges +
+                manufacturingExpenses +
+                packingCharges);
 
             // Calculate Net Profit
             // Net Profit = (Gross Profit + Other Incomes) - (Indirect Expenses)
             // Other Incomes = Rent Received + Commission Received
             // Indirect Expenses = Salaries + Rent + Electricity + Printing & Stationery + Telephone + Postage + Office Maintenance + Repairs & Maintenance + Sadar Expenses + Audit Fee + Advertisement + Bank Charges + Insurance + Depreciation + Interest on Loan
-            const indirectExpenses = salaries + rent + electricityCharges + printingStationery + 
-              telephoneCharges + postageTelegram + officeMaintenance + repairsMaintenance + 
-              sadarExpenses + auditFee + advertisement + bankCharges + insurance + 
-              depreciation + interestOnLoan;
+            const indirectExpenses =
+              salaries +
+              rent +
+              electricityCharges +
+              printingStationery +
+              telephoneCharges +
+              postageTelegram +
+              officeMaintenance +
+              repairsMaintenance +
+              sadarExpenses +
+              auditFee +
+              advertisement +
+              bankCharges +
+              insurance +
+              depreciation +
+              interestOnLoan;
             const otherIncomes = rentReceived + commissionReceived;
             const netProfit = grossProfit + otherIncomes - indirectExpenses;
 
@@ -465,7 +600,7 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
               rentReceived,
               commissionReceived,
               grossProfit,
-              netProfit
+              netProfit,
             };
 
             // Call the PATCH API for financial analysis
@@ -485,10 +620,10 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
 
         // Handle other forms normally
         const mappedKey = formKeyMapping[formKey] || formKey;
-        
+
         // For PD department, handle data structure differently
         let finalData: Record<string, any>;
-        if (currentDepartment === 'PD') {
+        if (currentDepartment === "PD") {
           if (formKey === "businessBasicDetails") {
             finalData = {
               basicDetails: formValues,
@@ -689,51 +824,61 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
                 )?.verificationData?.[formKeyMapping[formKey] || formKey],
               }
             : formKey === "financialAnalysis"
-            ? {
-                // For financial analysis, we'll set initial values in useEffect
-                // since the data structure is different
-              }
-            : currentDepartment === 'PD' && formKey === "familyDetails"
-            ? {
-                familyMemberDetails: initialValues?.verifications?.find(
-                  (v: any) => v.addressType === currentTab
-                )?.verificationData?.familyMemberDetails || [],
-              }
-            : currentDepartment === 'PD' && formKey === "applicantDetails"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.applicantDetails
-            : currentDepartment === 'PD' && formKey === "businessBasicDetails"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.basicDetails
-            : currentDepartment === 'PD' && formKey === "businessDetails"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.businessDetails
-            : currentDepartment === 'PD' && formKey === "shareholdingDetails"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.shareholdingDetails
-            : currentDepartment === 'PD' && formKey === "suppliersCreditors"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.suppliersCreditors
-            : currentDepartment === 'PD' && formKey === "clientsDebtors"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.clientsDebtors
-            : currentDepartment === 'PD' && formKey === "salariesWages"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.salariesWages
-            : currentDepartment === 'PD' && formKey === "assetDetails"
-            ? initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.assetDetails
-            : initialValues?.verifications?.find(
-                (v: any) => v.addressType === currentTab
-              )?.verificationData?.[formKeyMapping[formKey] || formKey]
+              ? {
+                  // For financial analysis, we'll set initial values in useEffect
+                  // since the data structure is different
+                }
+              : currentDepartment === "PD" && formKey === "familyDetails"
+                ? {
+                    familyMemberDetails:
+                      initialValues?.verifications?.find(
+                        (v: any) => v.addressType === currentTab
+                      )?.verificationData?.familyMemberDetails || [],
+                  }
+                : currentDepartment === "PD" && formKey === "applicantDetails"
+                  ? initialValues?.verifications?.find(
+                      (v: any) => v.addressType === currentTab
+                    )?.verificationData?.applicantDetails
+                  : currentDepartment === "PD" &&
+                      formKey === "businessBasicDetails"
+                    ? initialValues?.verifications?.find(
+                        (v: any) => v.addressType === currentTab
+                      )?.verificationData?.basicDetails
+                    : currentDepartment === "PD" &&
+                        formKey === "businessDetails"
+                      ? initialValues?.verifications?.find(
+                          (v: any) => v.addressType === currentTab
+                        )?.verificationData?.businessDetails
+                      : currentDepartment === "PD" &&
+                          formKey === "shareholdingDetails"
+                        ? initialValues?.verifications?.find(
+                            (v: any) => v.addressType === currentTab
+                          )?.verificationData?.shareholdingDetails
+                        : currentDepartment === "PD" &&
+                            formKey === "suppliersCreditors"
+                          ? initialValues?.verifications?.find(
+                              (v: any) => v.addressType === currentTab
+                            )?.verificationData?.suppliersCreditors
+                          : currentDepartment === "PD" &&
+                              formKey === "clientsDebtors"
+                            ? initialValues?.verifications?.find(
+                                (v: any) => v.addressType === currentTab
+                              )?.verificationData?.clientsDebtors
+                            : currentDepartment === "PD" &&
+                                formKey === "salariesWages"
+                              ? initialValues?.verifications?.find(
+                                  (v: any) => v.addressType === currentTab
+                                )?.verificationData?.salariesWages
+                              : currentDepartment === "PD" &&
+                                  formKey === "assetDetails"
+                                ? initialValues?.verifications?.find(
+                                    (v: any) => v.addressType === currentTab
+                                  )?.verificationData?.assetDetails
+                                : initialValues?.verifications?.find(
+                                    (v: any) => v.addressType === currentTab
+                                  )?.verificationData?.[
+                                    formKeyMapping[formKey] || formKey
+                                  ]
         }
         // onValuesChange={() => setDirty(true)}
         // preserve={false}
@@ -744,8 +889,6 @@ export const EditFormModal: React.FC<ExtendedEditFormModalProps> = ({
             formKey={formKey}
             currentTab={currentTab}
             getMaritalStatus={getMaritalStatus}
-            currentDepartment={currentDepartment}
-            bankName={initialValues?.verifications?.find((v: any) => v.addressType === currentTab)?.bankName}
           />
         </Row>
       </Form>

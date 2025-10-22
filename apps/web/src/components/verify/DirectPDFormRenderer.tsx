@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Form,
   Input,
@@ -31,6 +31,93 @@ import {
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
+const extractPlainText = (html: string = "") =>
+  html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+
+const RichTextEditor: React.FC<{
+  value?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  placeholder?: string;
+  minHeight?: number;
+}> = ({
+  value = "",
+  onChange,
+  readOnly = false,
+  placeholder,
+  minHeight = 120,
+}) => {
+  const editorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
+
+  if (readOnly) {
+    const display = extractPlainText(value)
+      ? value
+      : "<span style='color:#999;'>Not Provided</span>";
+
+    return (
+      <div
+        style={{
+          border: "1px solid #f0f0f0",
+          borderRadius: 4,
+          padding: 8,
+          minHeight,
+          background: "#fafafa",
+          whiteSpace: "pre-wrap",
+        }}
+        dangerouslySetInnerHTML={{ __html: display }}
+      />
+    );
+  }
+
+  const handleInput = () => {
+    if (!editorRef.current) return;
+    onChange?.(editorRef.current.innerHTML);
+  };
+
+  const showPlaceholder = !extractPlainText(value);
+
+  return (
+    <div style={{ position: "relative" }}>
+      {showPlaceholder && placeholder && (
+        <div
+          style={{
+            position: "absolute",
+            top: 8,
+            left: 12,
+            color: "#bfbfbf",
+            pointerEvents: "none",
+          }}
+        >
+          {placeholder}
+        </div>
+      )}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleInput}
+        style={{
+          minHeight,
+          border: "1px solid #d9d9d9",
+          borderRadius: 4,
+          padding: 8,
+          background: "#fff",
+        }}
+      />
+    </div>
+  );
+};
+
 // Array Edit Form Component
 const ArrayEditForm: React.FC<{
   field: any;
@@ -59,9 +146,24 @@ const ArrayEditForm: React.FC<{
       placeholder: `Enter ${fieldDef.label || fieldKey}`,
     };
 
-    switch (fieldDef.type) {
-      case "text":
-        return <Input {...commonProps} />;
+    const uiSettings = fieldDef.ui || fieldDef["ui:options"] || {};
+    const targetType = (() => {
+      if (fieldDef.enum || fieldDef.options) return "select";
+      if (uiSettings.widget === "textarea") return "textarea";
+      if (fieldDef.type === "number" || fieldDef.type === "integer")
+        return "number";
+      if (fieldDef.type === "boolean") return "boolean";
+      return "text";
+    })();
+
+    const rows =
+      typeof uiSettings.rows === "number" ? uiSettings.rows : undefined;
+    const maxLength =
+      fieldDef.maxLength !== undefined
+        ? fieldDef.maxLength
+        : uiSettings.maxLength;
+
+    switch (targetType) {
       case "number":
         return (
           <InputNumber
@@ -86,28 +188,37 @@ const ArrayEditForm: React.FC<{
           />
         );
       case "textarea":
-        return <TextArea {...commonProps} rows={3} />;
+        return (
+          <TextArea
+            {...commonProps}
+            rows={rows ?? 3}
+            autoSize={
+              rows
+                ? { minRows: rows, maxRows: rows }
+                : { minRows: 3, maxRows: 6 }
+            }
+            maxLength={maxLength}
+          />
+        );
       case "select":
         return (
           <Select {...commonProps} style={{ width: "100%" }}>
-            {(fieldDef.options || fieldDef.enum || []).map(
-              (option: string) => (
+            {(fieldDef.options || fieldDef.enum || []).map((option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
-              )
-            )}
+            ))}
           </Select>
         );
       case "boolean":
         return (
           <Switch
-            checked={value}
+            checked={!!value}
             onChange={(checked) => handleFieldChange(fieldKey, checked)}
           />
         );
       default:
-        return <Input {...commonProps} />;
+        return <Input {...commonProps} maxLength={maxLength} />;
     }
   };
 
@@ -263,7 +374,11 @@ const shouldFieldBeRequired = (
   formValues: Record<string, any>
 ): boolean => {
   if (field?.dependencies?.required) {
-    return evaluateDependencies(field.dependencies.required, sectionId, formValues);
+    return evaluateDependencies(
+      field.dependencies.required,
+      sectionId,
+      formValues
+    );
   }
 
   return !!field?.required;
@@ -356,6 +471,10 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
 
   // Render field based on type
   const renderFieldControl = (field: any, sectionId?: string) => {
+    const uiSettings = field.ui || {};
+    const rows = field.textAreaRows ?? uiSettings.rows;
+    const maxLength = field.maxLength ?? uiSettings.maxLength;
+
     const commonProps = {
       placeholder: `Enter ${field.label}`,
       disabled: field.readOnly || !editMode,
@@ -363,7 +482,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
 
     switch (field.type) {
       case "text":
-        return <Input {...commonProps} />;
+        return <Input {...commonProps} maxLength={maxLength} />;
 
       case "number":
         return (
@@ -382,15 +501,36 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
               field.formatter
                 ? (value) => {
                     const parsed = parseFormattedNumber(value ?? "");
-                    return parsed === "" ? undefined : Number(parsed);
+                    return parsed === "" ? 0 : Number(parsed);
                   }
                 : undefined
             }
           />
         );
 
+      case "richtext":
+        return (
+          <RichTextEditor
+            readOnly={field.readOnly || !editMode}
+            placeholder={`Enter ${field.label}`}
+            minHeight={(rows ?? 3) * 40}
+          />
+        );
+
       case "textarea":
-        return <TextArea {...commonProps} rows={3} />;
+        return (
+          <TextArea
+            {...commonProps}
+            rows={rows ?? 3}
+            autoSize={
+              uiSettings.autoSize ||
+              (rows
+                ? { minRows: rows, maxRows: rows }
+                : { minRows: 3, maxRows: 6 })
+            }
+            maxLength={maxLength}
+          />
+        );
 
       case "select":
         return (
@@ -413,9 +553,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       case "boolean":
-        return (
-          <Switch disabled={field.readOnly || !editMode} />
-        );
+        return <Switch disabled={field.readOnly || !editMode} />;
 
       case "array":
         return renderArrayField(field, sectionId || "");
@@ -442,6 +580,10 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
       normalizedValue = dayjs(value);
     }
 
+    const uiSettings = field.ui || {};
+    const rows = field.textAreaRows ?? uiSettings.rows;
+    const maxLength = field.maxLength ?? uiSettings.maxLength;
+
     const commonProps = {
       value: normalizedValue,
       placeholder: `Enter ${field.label}`,
@@ -453,6 +595,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         return (
           <Input
             {...commonProps}
+            maxLength={maxLength}
             onChange={(e) => onChange(e.target.value)}
             size="small"
           />
@@ -484,11 +627,29 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
           />
         );
 
+      case "richtext":
+        return (
+          <TextArea
+            {...commonProps}
+            rows={rows ?? 3}
+            autoSize={{ minRows: rows ?? 3, maxRows: rows ?? 6 }}
+            maxLength={maxLength}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        );
+
       case "textarea":
         return (
           <TextArea
             {...commonProps}
-            rows={2}
+            rows={rows ?? 2}
+            autoSize={
+              uiSettings.autoSize ||
+              (rows
+                ? { minRows: rows, maxRows: rows }
+                : { minRows: 2, maxRows: 6 })
+            }
+            maxLength={maxLength}
             onChange={(e) => onChange(e.target.value)}
           />
         );
@@ -531,7 +692,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       default:
-        return <Input {...commonProps} size="small" />;
+        return <Input {...commonProps} size="small" maxLength={maxLength} />;
     }
   };
 
@@ -543,16 +704,17 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     if (field.items?.properties) {
       return Object.entries(field.items.properties).map(
         ([key, itemField]: [string, any]) => {
+          const uiSettings = itemField.ui || itemField["ui:options"] || {};
+
           const inferredType = (() => {
             if (itemField.enum) return "select";
+            if (uiSettings.widget === "richtext") return "richtext";
+            if (uiSettings.widget === "textarea") return "textarea";
             if (itemField.format === "date") return "date";
             if (itemField.type === "boolean") return "boolean";
             if (itemField.type === "array") return "array";
             if (itemField.type === "object") return "object";
-            if (
-              itemField.type === "number" ||
-              itemField.type === "integer"
-            ) {
+            if (itemField.type === "number" || itemField.type === "integer") {
               return "number";
             }
             const title = (itemField.title || itemField.label || key)
@@ -571,6 +733,13 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             return "text";
           })();
 
+          const rows =
+            typeof uiSettings.rows === "number" ? uiSettings.rows : undefined;
+          const maxLength =
+            itemField.maxLength !== undefined
+              ? itemField.maxLength
+              : uiSettings.maxLength;
+
           return {
             id: key,
             label: itemField.label || itemField.title || key,
@@ -582,6 +751,9 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             span: itemField.span || 8,
             formatter: itemField.formatter,
             dependencies: itemField.dependencies,
+            ui: Object.keys(uiSettings).length ? uiSettings : undefined,
+            textAreaRows: rows,
+            maxLength,
           };
         }
       );
@@ -659,7 +831,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
       if (!editMode || field.readOnly) {
         return;
       }
-      const newItem = { _id: uuidv4() };
+      const newItem: any = { _id: uuidv4() };
       itemFields.forEach((itemField: any) => {
         const key = itemField.id || itemField.key;
         if (!key) return;
@@ -721,7 +893,9 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
                   {itemFields.map((itemField: any) => {
                     const key = itemField.id || itemField.key;
                     const value = item[key] ?? "";
-                    if (!checkItemDependencies(itemField.dependencies?.show, item)) {
+                    if (
+                      !checkItemDependencies(itemField.dependencies?.show, item)
+                    ) {
                       return null;
                     }
 

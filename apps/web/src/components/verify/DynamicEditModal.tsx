@@ -241,7 +241,6 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
               title: "",
               dataIndex: "__actions",
               key: "actions",
-              width: 60,
               render: (_: any, row: any) => {
                 const index = dataSource.findIndex((r) => r.key === row.key);
                 if (fields.length <= 1 || index < 0) {

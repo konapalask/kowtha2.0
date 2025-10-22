@@ -6,6 +6,7 @@ export class CreateFinancialAnalysisDto {
   @IsOptional()
   @IsString()
   synopsis?: string;
+  
   @ApiProperty({ description: 'Opening Stock amount', required: false })
   @IsOptional()
   @IsNumber()

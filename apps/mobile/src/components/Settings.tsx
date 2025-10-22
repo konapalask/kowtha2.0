@@ -15,6 +15,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import AttendanceCard from './AttendanceCard';
 import dayjs from 'dayjs';
+import {useUser} from '../contexts/UserContext';
 
 type SettingsListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -30,51 +31,20 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
   setIsLoggedIn,
 }) => {
   const navigation = useNavigation<SettingsListScreenNavigationProp>();
+  const {userDetails, currentDept} = useUser();
   const [visible, setVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
-  // const userDetails: any = fetchUserDetails();
-  // console.log(userDetails);
-  const [userDetails, setUserDetails] = useState<any>({});
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [testUser, setTestUser] = useState(false);
 
   useLayoutEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const details = await getItem('userDetails');
-        setUserDetails(details);
-        console.log(details);
-      } catch (error) {
-        if (testUser) {
-          setUserDetails({
-            name: 'Test',
-            employeeCode: 'Test123',
-            role: 'Field Executive',
-          });
-        }
-        console.log(error);
-      }
-    };
-
     const checkTestUser = async () => {
       const testUser = await getItem('testUser');
       setTestUser(testUser);
     };
 
-    // const checkAttendance = async () => {
-    //   try {
-    //     const details = await getItem('attendance');
-    //     const isLoggedIn = details?.date === dayjs().format('YYYY-MM-DD');
-    //     setIsLoggedIn(isLoggedIn);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
     if (profileModalVisible) {
       checkTestUser();
-      fetchUserDetails();
     }
-    // checkAttendance();
   }, [profileModalVisible]);
 
   const toggleMenu = () => setVisible(!visible);
@@ -154,14 +124,21 @@ const Settings: React.FC<{isLoggedIn: boolean; setIsLoggedIn: any}> = ({
               <View style={styles.profileFieldRow}>
                 <Text style={styles.profileFieldLabel}>Role:</Text>
                 <Text style={styles.profileFieldValue}>
-                  {userDetails?.role}
+                  {testUser ? 'Test User' : 'Field Executive'}
                 </Text>
+              </View>
+              <View style={styles.profileFieldRow}>
+                <Text style={styles.profileFieldLabel}>
+                  Current Department:
+                </Text>
+                <Text style={styles.profileFieldValue}>{currentDept}</Text>
               </View>
             </View>
             <AttendanceCard
               setVisible={setProfileModalVisible}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
+              dept={currentDept}
             />
           </Pressable>
         </Pressable>
