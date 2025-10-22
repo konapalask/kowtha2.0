@@ -531,12 +531,15 @@ export const arkaFincapSchema = {
       label: "Other Observations",
       schema: {
         type: "array",
-        title: "Other Observations",
-        items: {
-          type: "string",
-          title: "Other Observations",
+        properties: {
+          otherObservations: {
+            type: "string",
+            title: "Other Observations",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
       },
       required: true,
     },
@@ -545,12 +548,15 @@ export const arkaFincapSchema = {
       label: "Other Incomes",
       schema: {
         type: "array",
-        title: "Other Incomes",
-        items: {
-          type: "string",
-          title: "Other Incomes",
+        properties: {
+          otherIncomes: {
+            type: "string",
+            title: "Other Incomes",
+            ui: {
+              widget: "richtext",
+            },
+          },
         },
-        minItems: 1,
       },
       required: true,
     },
