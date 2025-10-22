@@ -36,6 +36,13 @@ export const getSchemaFromBackend = async (
   }
 };
 
+export const getPdBanksApi = async () => {
+  const response = await axiosInstance.get(`/loans/get-bank-forms`, {
+    params: { department: "PD", type: "banks" },
+  });
+  return response.data.data;
+};
+
 /**
  * Fetch list of all supported bank names
  */

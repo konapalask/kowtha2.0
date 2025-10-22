@@ -15,7 +15,12 @@ import {
   Input,
   Typography,
   Space,
+  Collapse,
+  InputNumber,
+  Radio,
 } from "antd";
+
+const { TextArea } = Input;
 import React, { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
@@ -25,6 +30,7 @@ import dayjs from "dayjs";
 
 import FinalVerdict from "./FinalVerdict";
 import Feedback from "./Feedback";
+import { RightColumn } from "./RightColumn";
 import {
   patchFinalVerdict,
   verifierEditApi,
@@ -43,6 +49,8 @@ import BusinessDetailsDescription from "./Descriptions/BusinessDetailsDescriptio
 import BusinessMiscellaneousDescription from "./Descriptions/BusinessMiscellaneousDescription";
 import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
+import { USER_DETAILS } from "@/constants/defaultKeys";
+import { getItem } from "@/helpers/localStorage";
 
 const serializeFormValues = (value: any): any => {
   if (dayjs.isDayjs(value)) {
@@ -122,6 +130,12 @@ export const BusinessVerificationDetails: React.FC<
   applicationNumber,
   loanId,
 }) => {
+  const curDept = getItem("currentDepartment");
+  const userDetails = getItem(USER_DETAILS, true) as any;
+  const role = userDetails?.departmentRoles?.find(
+    (role: any) => role.department === curDept
+  )?.role;
+  // console.log(role);
   const router = useRouter();
   const { id } = router.query;
   const { activeTab } = useTabContext();
@@ -323,30 +337,30 @@ export const BusinessVerificationDetails: React.FC<
 
             setDynamicFormData(formData);
 
-            console.log(
-              "✓ PD schema loaded from backend successfully:",
-              schema.name
-            );
+            // console.log(
+            //   "✓ PD schema loaded from backend successfully:",
+            //   schema.name
+            // );
 
             // Debug: Log the data being passed to GenericVerificationDisplay
-            console.log("🎯 Data passed to GenericVerificationDisplay:");
-            console.log("  formData:", formData);
-            console.log(
-              "  schema sections:",
-              schema.sections?.map((s: any) => s.id)
-            );
-            console.log("✓ Form data initialized:", formData);
+            // console.log("🎯 Data passed to GenericVerificationDisplay:");
+            // console.log("  formData:", formData);
+            // console.log(
+            //   "  schema sections:",
+            //   schema.sections?.map((s: any) => s.id)
+            // );
+            // console.log("✓ Form data initialized:", formData);
           } else {
-            console.log(
-              `Bank "${bankName}" schema could not be converted to web format`
-            );
+            // console.log(
+            //   `Bank "${bankName}" schema could not be converted to web format`
+            // );
             setUseNewApproach(false);
           }
         } catch (schemaError: any) {
-          console.log(
-            `Bank "${bankName}" does not have PD forms or error loading:`,
-            schemaError.message
-          );
+          // console.log(
+          //   `Bank "${bankName}" does not have PD forms or error loading:`,
+          //   schemaError.message
+          // );
           setUseNewApproach(false);
           setUseGenericApproach(false);
         }
@@ -551,9 +565,7 @@ export const BusinessVerificationDetails: React.FC<
       );
 
       const verificationType =
-        verificationData?.type ||
-        completeVerificationData?.type ||
-        "Business";
+        verificationData?.type || completeVerificationData?.type || "Business";
       const findings =
         verificationData?.findings ||
         completeVerificationData?.findings ||
@@ -586,7 +598,7 @@ export const BusinessVerificationDetails: React.FC<
   // Calculate profits whenever financial form values change
   useEffect(() => {
     if (financialFormValues) {
-      console.log("Financial form values:", financialFormValues);
+      // console.log("Financial form values:", financialFormValues);
       const calculateProfits = () => {
         // Gross Profit Calculation
         const openingStock =
@@ -680,12 +692,12 @@ export const BusinessVerificationDetails: React.FC<
         // Net Profit = Gross Profit + Other Incomes - Indirect Expenses
         const netProfit = grossProfit + otherIncomes - indirectExpenses;
 
-        console.log("Calculated values:", {
-          grossProfit,
-          netProfit,
-          indirectExpenses,
-          otherIncomes,
-        });
+        // console.log("Calculated values:", {
+        //   grossProfit,
+        //   netProfit,
+        //   indirectExpenses,
+        //   otherIncomes,
+        // });
 
         setCalculatedGrossProfit(grossProfit);
         setCalculatedNetProfit(netProfit);
@@ -697,8 +709,8 @@ export const BusinessVerificationDetails: React.FC<
 
   // Load existing financial data when component mounts
   useEffect(() => {
-    console.log("verificationData received:", verificationData);
-    console.log("completeVerificationData received:", completeVerificationData);
+    // console.log("verificationData received:", verificationData);
+    // console.log("completeVerificationData received:", completeVerificationData);
 
     // Now verificationData is the entire verification object, so financialAnalysis is directly under it
     let financialData = null;
@@ -706,20 +718,20 @@ export const BusinessVerificationDetails: React.FC<
     // Try to get financial data from the correct path
     if (verificationData?.financialAnalysis) {
       financialData = verificationData.financialAnalysis;
-      console.log(
-        "Financial data found in verificationData.financialAnalysis:",
-        financialData
-      );
+      // console.log(
+      //   "Financial data found in verificationData.financialAnalysis:",
+      //   financialData
+      // );
     } else if (verificationData?.verificationData?.financialAnalysis) {
       financialData = verificationData.verificationData.financialAnalysis;
-      console.log(
-        "Financial data found in verificationData.verificationData.financialAnalysis:",
-        financialData
-      );
+      // console.log(
+      //   "Financial data found in verificationData.verificationData.financialAnalysis:",
+      //   financialData
+      // );
     }
 
     if (financialData) {
-      console.log("Loading financial data:", financialData);
+      // console.log("Loading financial data:", financialData);
 
       // Set form values based on the API response structure
       const formValues = {
@@ -757,22 +769,22 @@ export const BusinessVerificationDetails: React.FC<
           financialData.commissionReceived?.toString() || "",
       };
 
-      console.log("Setting form values:", formValues);
+      // console.log("Setting form values:", formValues);
 
       // Set form values immediately
       financialForm.setFieldsValue(formValues);
-      console.log("Form values set successfully");
+      // console.log("Form values set successfully");
 
       // Set calculated values
       setCalculatedGrossProfit(financialData.grossProfit || 0);
       setCalculatedNetProfit(financialData.netProfit || 0);
 
-      console.log(
-        "Calculated values set - Gross Profit:",
-        financialData.grossProfit,
-        "Net Profit:",
-        financialData.netProfit
-      );
+      // console.log(
+      //   "Calculated values set - Gross Profit:",
+      //   financialData.grossProfit,
+      //   "Net Profit:",
+      //   financialData.netProfit
+      // );
     } else {
       console.log(
         "No financial data found in verificationData.financialAnalysis"
@@ -886,7 +898,7 @@ export const BusinessVerificationDetails: React.FC<
         netProfit: computedNetProfit,
       };
 
-      console.log("Submitting financial data:", financialData);
+      // console.log("Submitting financial data:", financialData);
 
       // Call the financial analysis API with department parameter
       await submitFinancialAnalysis(id as string, financialData);
@@ -913,11 +925,11 @@ export const BusinessVerificationDetails: React.FC<
   const data = rawApiData;
 
   // Debug logging
-  console.log("🔍 BusinessVerificationDetails Debug:");
-  console.log("  verificationData:", verificationData);
-  console.log("  rawApiData:", rawApiData);
-  console.log("  data:", data);
-  console.log("  bankName:", bankName);
+  // console.log("🔍 BusinessVerificationDetails Debug:");
+  // console.log("  verificationData:", verificationData);
+  // console.log("  rawApiData:", rawApiData);
+  // console.log("  data:", data);
+  // console.log("  bankName:", bankName);
 
   // For legacy FI components, wrap the data correctly
   // The description components expect data with nested structure like data.basicDetails
@@ -1031,22 +1043,621 @@ export const BusinessVerificationDetails: React.FC<
 
   const { Text } = Typography;
 
-  // Helper function to create non-negative validation rule
-  const createNonNegativeRule = (fieldName: string) => ({
-    validator: (_: any, value: any) => {
-      if (value === "" || value === undefined || value === null)
-        return Promise.resolve();
-      const numValue = parseFloat(value);
-      if (isNaN(numValue) || numValue < 0) {
-        return Promise.reject(new Error(`${fieldName} must be non-negative`));
+  // Helper function to check conditional visibility (from SchemaSection.tsx)
+  const checkConditionalVisibility = (
+    dependencies: Record<string, any>,
+    formData: any
+  ) => {
+    for (const [fieldName, expectedValue] of Object.entries(dependencies)) {
+      const actualValue = formData[fieldName];
+
+      if (Array.isArray(expectedValue)) {
+        // Multiple allowed values
+        if (!expectedValue.includes(actualValue)) {
+          return false;
+        }
+      } else {
+        // Single expected value
+        if (actualValue !== expectedValue) {
+          return false;
+        }
       }
-      return Promise.resolve();
-    },
-  });
+    }
+
+    return true;
+  };
+
+  // Create a new component for collapsible form sections
+  const CollapsibleFormSections = ({
+    schema,
+    formData,
+    onEdit,
+    readOnly,
+  }: {
+    schema: any;
+    formData: any;
+    onEdit: (sectionId: string) => void;
+    readOnly: boolean;
+  }) => {
+    const [activeSections, setActiveSections] = useState<string[]>([]);
+
+    const toggleSection = (sectionId: string) => {
+      setActiveSections((prev) =>
+        prev.includes(sectionId)
+          ? prev.filter((id) => id !== sectionId)
+          : [...prev, sectionId]
+      );
+    };
+    return (
+      <div>
+        {schema?.sections?.map((section: any) => (
+          // <Card
+          //   key={section.id}
+          //   title={section.label}
+          //   extra={
+          //     <Button
+          //       type="text"
+          //       icon={<EditOutlined />}
+          //       onClick={() => onEdit(section.id)}
+          //       disabled={readOnly}
+          //     />
+          //   }
+          //   style={{ marginBottom: 16 }}
+          // >
+          <Collapse
+            activeKey={activeSections}
+            onChange={(keys) => setActiveSections(keys as string[])}
+            accordion
+          >
+            <Collapse.Panel key={section.id} header={section.label}>
+              {/* <Form layout="vertical"> */}
+              {/* Render form fields based on section schema */}
+              <FormSectionRenderer
+                section={section}
+                data={formData[section.id] || {}}
+                readOnly={readOnly}
+              />
+              {/* </Form> */}
+            </Collapse.Panel>
+          </Collapse>
+          // </Card>
+        ))}
+      </div>
+    );
+  };
+
+  // Form Section Renderer - Based on SchemaSection.tsx pattern
+  const FormSectionRenderer = ({
+    section,
+    data,
+    readOnly,
+  }: {
+    section: any;
+    data: any;
+    readOnly: boolean;
+  }) => {
+    // console.log(section, data);
+    const [form] = Form.useForm();
+
+    // Set initial form values
+    React.useEffect(() => {
+      form.setFieldsValue(data);
+    }, [data, form]);
+
+    const renderField = (fieldId: string, property: any) => {
+      // Check conditional visibility
+      if (property.dependencies?.show) {
+        const shouldShow = checkConditionalVisibility(
+          property.dependencies.show,
+          data
+        );
+        if (!shouldShow) {
+          return null; // Hide field if conditions not met
+        }
+      }
+
+      // Check if field is required
+      const isRequired =
+        (Array.isArray(section?.required) &&
+          section.required.includes(fieldId)) ??
+        property?.required ??
+        false;
+
+      // Handle nested object fields
+      if (property.type === "object" && property.properties) {
+        return (
+          <Card key={fieldId} size="small" style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
+              <Text strong>
+                {property.title}
+                {isRequired ? " *" : ""}
+              </Text>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {Object.entries(property.properties).map(
+                ([subFieldId, subProperty]: [string, any]) => {
+                  const subFieldKey = `${fieldId}.${subFieldId}`;
+                  const subFieldValue = data[fieldId]?.[subFieldId];
+
+                  // Handle date fields in nested objects
+                  const isDateField = subProperty?.format === "date";
+                  if (isDateField) {
+                    return (
+                      <Form.Item
+                        key={subFieldKey}
+                        name={subFieldKey}
+                        label={subProperty.title ?? subProperty.label}
+                      >
+                        <Input
+                          disabled={readOnly || subProperty.readOnly}
+                          placeholder="Select date"
+                        />
+                      </Form.Item>
+                    );
+                  }
+
+                  // Handle enum in nested objects
+                  if (subProperty.enum && subProperty.enum.length > 0) {
+                    return (
+                      <Form.Item
+                        key={subFieldKey}
+                        name={subFieldKey}
+                        label={subProperty.title ?? subProperty.label}
+                      >
+                        <Radio.Group
+                          disabled={readOnly || subProperty.readOnly}
+                        >
+                          {subProperty.enum.map((option: string) => (
+                            <Radio key={option} value={option}>
+                              {option}
+                            </Radio>
+                          ))}
+                        </Radio.Group>
+                      </Form.Item>
+                    );
+                  }
+
+                  // Handle textarea in nested objects
+                  const isTextArea =
+                    subProperty.title.toLowerCase().includes("about") ||
+                    subProperty.title.toLowerCase().includes("address") ||
+                    subProperty.title.toLowerCase().includes("description") ||
+                    subProperty.title.toLowerCase().includes("remark") ||
+                    subProperty.title.toLowerCase().includes("details");
+
+                  if (isTextArea) {
+                    return (
+                      <Form.Item
+                        key={subFieldKey}
+                        name={subFieldKey}
+                        label={subProperty.title ?? subProperty.label}
+                      >
+                        <TextArea
+                          disabled={readOnly || subProperty.readOnly}
+                          placeholder={subProperty.title}
+                          rows={3}
+                        />
+                      </Form.Item>
+                    );
+                  }
+
+                  // Handle number/integer in nested objects
+                  if (
+                    subProperty.type === "number" ||
+                    subProperty.type === "integer"
+                  ) {
+                    return (
+                      <Form.Item
+                        key={subFieldKey}
+                        name={subFieldKey}
+                        label={subProperty.title ?? subProperty.label}
+                      >
+                        <InputNumber
+                          disabled={readOnly || subProperty.readOnly}
+                          style={{ width: "100%" }}
+                          placeholder={subProperty.title}
+                        />
+                      </Form.Item>
+                    );
+                  }
+
+                  // Default to Input for nested objects
+                  return (
+                    <Form.Item
+                      key={subFieldKey}
+                      name={subFieldKey}
+                      label={subProperty.title ?? subProperty.label}
+                    >
+                      <Input
+                        disabled={readOnly || subProperty.readOnly}
+                        placeholder={subProperty.title}
+                      />
+                    </Form.Item>
+                  );
+                }
+              )}
+            </div>
+          </Card>
+        );
+      }
+
+      // Handle array fields
+      if (
+        property.type === "array" &&
+        (property.items || property.arrayItemFields)
+      ) {
+        return (
+          <div key={fieldId} style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 8 }}>
+              <Text strong>
+                {property.title ?? property.label}
+                {isRequired ? " *" : ""}
+              </Text>
+            </div>
+            <ArrayFieldRenderer
+              field={property}
+              data={data[fieldId] || []}
+              readOnly={readOnly}
+            />
+          </div>
+        );
+      }
+
+      // Handle enum fields (select dropdown)
+      if (property.enum && property.enum.length > 0) {
+        return (
+          <Form.Item
+            key={fieldId}
+            name={fieldId}
+            label={property.title ?? property.label}
+          >
+            <Radio.Group disabled={readOnly || property.readOnly}>
+              {property.enum.map((option: string) => (
+                <Radio key={option} value={option}>
+                  {option}
+                </Radio>
+              ))}
+            </Radio.Group>
+          </Form.Item>
+        );
+      }
+
+      // Handle different field types
+      switch (property.type) {
+        case "boolean":
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={property.title ?? property.label}
+            >
+              <Radio.Group disabled={readOnly || property.readOnly}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+              </Radio.Group>
+            </Form.Item>
+          );
+
+        case "string":
+          // Check if it should be a date field
+          const isDateField = property.format === "date";
+          if (isDateField) {
+            return (
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={property.title ?? property.label}
+              >
+                <Input
+                  disabled={readOnly || property.readOnly}
+                  placeholder="Select date"
+                />
+              </Form.Item>
+            );
+          }
+
+          // Check if it should be a textarea
+          const isTextArea =
+            property.title.toLowerCase().includes("about") ||
+            property.title.toLowerCase().includes("address") ||
+            property.title.toLowerCase().includes("description") ||
+            property.title.toLowerCase().includes("remark") ||
+            property.title.toLowerCase().includes("details");
+
+          if (isTextArea) {
+            return (
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={property.title ?? property.label}
+              >
+                <TextArea
+                  disabled={readOnly || property.readOnly}
+                  placeholder={property.title}
+                  rows={3}
+                />
+              </Form.Item>
+            );
+          }
+
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={property.title ?? property.label}
+            >
+              <Input
+                disabled={readOnly || property.readOnly}
+                placeholder={property.title}
+              />
+            </Form.Item>
+          );
+
+        case "number":
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={property.title ?? property.label}
+            >
+              <InputNumber
+                disabled={readOnly || property.readOnly}
+                style={{ width: "100%" }}
+                placeholder={property.title}
+              />
+            </Form.Item>
+          );
+
+        case "integer":
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={property.title ?? property.label}
+            >
+              <InputNumber
+                disabled={readOnly || property.readOnly}
+                style={{ width: "100%" }}
+                placeholder={property.title}
+                precision={0}
+              />
+            </Form.Item>
+          );
+
+        default:
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={property.title ?? property.label}
+            >
+              <Input
+                disabled={readOnly || property.readOnly}
+                placeholder={property.title}
+              />
+            </Form.Item>
+          );
+      }
+    };
+
+    return (
+      <Form form={form} layout="vertical">
+        {section.fields?.map((field: any) => renderField(field.id, field))}
+      </Form>
+    );
+  };
+
+  // Array Field Renderer - Updated to handle arrayItemFields structure
+  const ArrayFieldRenderer = ({
+    field,
+    data,
+    readOnly,
+  }: {
+    field: any;
+    data: any;
+    readOnly: boolean;
+  }) => {
+    // console.log("ArrayFieldRenderer - field:", field);
+    // console.log("ArrayFieldRenderer - data:", data);
+
+    // Ensure data is an array and add unique IDs if missing
+    const ensureArrayWithIds = (arrayData: any[]) => {
+      if (!Array.isArray(arrayData)) return [];
+      return arrayData.map((item, index) => ({
+        ...item,
+        _id: item._id || `item-${index}-${Date.now()}`,
+      }));
+    };
+
+    const [items, setItems] = useState(() => ensureArrayWithIds(data));
+    const [form] = Form.useForm();
+
+    const addItem = () => {
+      const newItem: any = {
+        _id: `item-${items.length}-${Date.now()}`,
+      };
+
+      // Handle both old schema (items.properties) and new schema (arrayItemFields)
+      if (field.arrayItemFields) {
+        // New schema structure
+        field.arrayItemFields.forEach((itemField: any) => {
+          newItem[itemField.id] = "";
+        });
+      } else if (field.items?.properties) {
+        // Old schema structure
+        Object.keys(field.items.properties).forEach((key) => {
+          newItem[key] = "";
+        });
+      }
+
+      setItems([...items, newItem]);
+    };
+
+    const removeItem = (index: number) => {
+      setItems(items.filter((_: any, i: number) => i !== index));
+    };
+
+    const renderArrayItemField = (
+      itemField: any,
+      itemValue: any,
+      itemIndex: number
+    ) => {
+      const fieldKey = `${field.id}[${itemIndex}].${itemField.id}`;
+
+      // Handle different field types within array items
+      switch (itemField.type) {
+        case "number":
+        case "integer":
+          return (
+            <Form.Item
+              key={itemField.id}
+              name={fieldKey}
+              label={itemField.label ?? itemField.title}
+            >
+              <InputNumber
+                disabled={readOnly || itemField.readOnly}
+                style={{ width: "100%" }}
+                placeholder={itemField.placeholder}
+                precision={itemField.type === "integer" ? 0 : undefined}
+              />
+            </Form.Item>
+          );
+
+        case "text":
+        case "string":
+          // Check if it should be a textarea
+          const isTextArea =
+            itemField.label?.toLowerCase().includes("about") ||
+            itemField.label?.toLowerCase().includes("address") ||
+            itemField.label?.toLowerCase().includes("description") ||
+            itemField.label?.toLowerCase().includes("remark") ||
+            itemField.label?.toLowerCase().includes("details");
+
+          if (isTextArea) {
+            return (
+              <Form.Item
+                key={itemField.id}
+                name={fieldKey}
+                label={itemField.label ?? itemField.title}
+              >
+                <TextArea
+                  disabled={readOnly || itemField.readOnly}
+                  placeholder={itemField.placeholder}
+                  rows={3}
+                />
+              </Form.Item>
+            );
+          }
+
+          return (
+            <Form.Item
+              key={itemField.id}
+              name={fieldKey}
+              label={itemField.label ?? itemField.title}
+            >
+              <Input
+                disabled={readOnly || itemField.readOnly}
+                placeholder={itemField.placeholder}
+              />
+            </Form.Item>
+          );
+
+        case "boolean":
+          return (
+            <Form.Item
+              key={itemField.id}
+              name={fieldKey}
+              label={itemField.label ?? itemField.title}
+            >
+              <Radio.Group disabled={readOnly || itemField.readOnly}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+              </Radio.Group>
+            </Form.Item>
+          );
+
+        default:
+          return (
+            <Form.Item
+              key={itemField.id}
+              name={fieldKey}
+              label={itemField.label ?? itemField.title}
+            >
+              <Input
+                disabled={readOnly || itemField.readOnly}
+                placeholder={itemField.placeholder}
+              />
+            </Form.Item>
+          );
+      }
+    };
+
+    return (
+      <Form form={form} layout="vertical">
+        {items.map((item: any, index: number) => (
+          <Card
+            key={item._id || index}
+            size="small"
+            style={{ marginBottom: 8 }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+            >
+              <Text strong>Item {index + 1}</Text>
+              {!readOnly && (
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  onClick={() => removeItem(index)}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+
+            {/* Render fields based on schema structure */}
+            {field.arrayItemFields
+              ? // New schema structure with arrayItemFields
+                field.arrayItemFields.map((itemField: any) =>
+                  renderArrayItemField(itemField, item[itemField.id], index)
+                )
+              : field.items?.properties
+                ? // Old schema structure with items.properties
+                  Object.entries(field.items.properties).map(
+                    ([itemFieldId, itemField]: [string, any]) => (
+                      <Form.Item
+                        key={itemFieldId}
+                        name={`${field.id}[${index}].${itemFieldId}`}
+                        label={itemField.title ?? itemField.label}
+                      >
+                        <Input
+                          disabled={readOnly || itemField.readOnly}
+                          placeholder={itemField.title ?? itemField.label}
+                        />
+                      </Form.Item>
+                    )
+                  )
+                : null}
+          </Card>
+        ))}
+        {!readOnly && (
+          <Button type="dashed" onClick={addItem} style={{ width: "100%" }}>
+            + Add {field.label ?? field.title}
+          </Button>
+        )}
+      </Form>
+    );
+  };
 
   return (
     <div>
-      {/* Dynamic Form Status removed as requested */}
+      {/* Bank Name Header */}
       {currentDepartment === "PD" &&
         (verificationData?.bankName || verificationData?.loan?.bankName) && (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
@@ -1069,70 +1680,6 @@ export const BusinessVerificationDetails: React.FC<
         </Card>
       )}
 
-      {/* New Dynamic Form Approach */}
-      {useNewApproach && schemaForm && !formLoading && (
-        <div style={{ marginBottom: 24 }}>
-          <EnhancedDynamicFormRenderer
-            schema={schemaForm}
-            initialData={dynamicFormData}
-            onSubmit={handleDynamicFormSubmit}
-            onDataChange={handleDynamicFormDataChange}
-            readOnly={!!verificationData?.approvedStatus || hasEditRequest}
-            showValidation={true}
-            autoSave={true}
-            onEdit={handleDynamicSectionEdit}
-            hasEditRequest={hasEditRequest}
-            sideBySideSections={["businessDetails"]}
-          />
-
-          {/* Photo Capture Section for Dynamic Form */}
-          <section style={{ marginBottom: 24 }}>
-            <Card title="Photo Capture">
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: "16px",
-                }}
-              >
-                {(dynamicFormData?.uploadedItems || []).map(
-                  (item: any, idx: number) => {
-                    return (
-                      <div key={item.id} style={{ position: "relative" }}>
-                        <Image
-                          src={imageUrls[item.id] || ""}
-                          alt={`Photo ${idx + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "200px",
-                            objectFit: "cover",
-                            borderRadius: "4px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            background: "rgba(0, 0, 0, 0.6)",
-                            color: "white",
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </Card>
-          </section>
-        </div>
-      )}
-
       {/* Dynamic Edit Modal */}
       {editModalVisible && currentSectionSchema && (
         <DynamicEditModal
@@ -1145,666 +1692,210 @@ export const BusinessVerificationDetails: React.FC<
         />
       )}
 
-      {/* Enhanced Dynamic Form (for PD forms with schema) */}
-      {useGenericApproach && !formLoading && schemaForm && (
-        <div>
-          <div
-            style={{
-              background: "#e6f7ff",
-              padding: 8,
-              marginBottom: 16,
-              borderRadius: 4,
-            }}
-          >
-            ✅ Using DirectPDFormRenderer - Direct Form Fields
-          </div>
-          <DirectPDFormRenderer
-            schema={schemaForm}
-            initialData={verificationData?.verificationData}
-            onSave={handleDirectFormSave}
+      {/* {console.log(useGenericApproach, schemaForm, formLoading)} */}
+
+      {/* Main Two-Column Layout */}
+      <div style={{ display: "flex", gap: "24px", minHeight: "80vh" }}>
+        {/* Left Column - Form Sections */}
+        <div style={{ flex: "2", overflow: "auto", padding: "0 12px" }}>
+          {useGenericApproach && schemaForm && !formLoading ? (
+            <CollapsibleFormSections
+              schema={schemaForm}
+              formData={dynamicFormData}
+              onEdit={handleDynamicSectionEdit}
+              readOnly={!!verificationData?.approvedStatus || hasEditRequest}
+            />
+          ) : // : !formLoading ? (
+          //   // Fallback to legacy display if no schema
+          //   <div style={{ marginBottom: 24 }}>
+          //     <BusinessBasicDetailsDescription
+          //       data={mergedLegacyData}
+          //       extra={
+          //         <Button
+          //           type="text"
+          //           icon={<EditOutlined />}
+          //           onClick={() =>
+          //             currentDepartment === "PD"
+          //               ? handleDynamicSectionEdit("basicDetails")
+          //               : onEdit("basicDetails")
+          //           }
+          //           disabled={hasEditRequest}
+          //         />
+          //       }
+          //       logs={false}
+          //       currentDepartment={currentDepartment}
+          //     />
+
+          //     <BusinessDetailsDescription
+          //       data={mergedLegacyData}
+          //       extra={
+          //         <Button
+          //           type="text"
+          //           icon={<EditOutlined />}
+          //           onClick={() =>
+          //             currentDepartment === "PD"
+          //               ? handleDynamicSectionEdit("businessDetails")
+          //               : onEdit("businessDetails")
+          //           }
+          //           disabled={hasEditRequest}
+          //         />
+          //       }
+          //       logs={false}
+          //       currentDepartment={currentDepartment}
+          //     />
+
+          //     <BusinessMiscellaneousDescription
+          //       data={mergedLegacyData}
+          //       extra={
+          //         <Button
+          //           type="text"
+          //           icon={<EditOutlined />}
+          //           onClick={() =>
+          //             currentDepartment === "PD"
+          //               ? handleDynamicSectionEdit("miscellaneous")
+          //               : onEdit("miscellaneous")
+          //           }
+          //           disabled={hasEditRequest}
+          //         />
+          //       }
+          //       logs={false}
+          //     />
+
+          //     <ExistingLoansDescription
+          //       data={legacyFormattedData}
+          //       extra={
+          //         <Button
+          //           type="text"
+          //           icon={<EditOutlined />}
+          //           onClick={() =>
+          //             currentDepartment === "PD"
+          //               ? handleDynamicSectionEdit("existingLoans")
+          //               : onEdit("existingLoans")
+          //           }
+          //           disabled={hasEditRequest}
+          //         />
+          //       }
+          //       logs={false}
+          //     />
+
+          //     <ThirdPartyCheckDescription
+          //       data={legacyFormattedData}
+          //       extra={
+          //         <Button
+          //           type="text"
+          //           icon={<EditOutlined />}
+          //           onClick={() =>
+          //             currentDepartment === "PD"
+          //               ? handleDynamicSectionEdit("thirdPartyCheck")
+          //               : onEdit("thirdPartyCheck")
+          //           }
+          //           disabled={hasEditRequest}
+          //         />
+          //       }
+          //       logs={false}
+          //     />
+
+          //     <section style={{ marginBottom: 24 }}>
+          //       <Card title="Photo Capture">
+          //         <div
+          //           style={{
+          //             display: "grid",
+          //             gridTemplateColumns:
+          //               "repeat(auto-fill, minmax(200px, 1fr))",
+          //             gap: "16px",
+          //           }}
+          //         >
+          //           {legacyFormattedData?.uploadedItems?.map(
+          //             (item: any, idx: number) => {
+          //               return (
+          //                 <div key={item.id} style={{ position: "relative" }}>
+          //                   <Image
+          //                     src={imageUrls[item.id] || ""}
+          //                     alt={`Photo ${idx + 1}`}
+          //                     style={{
+          //                       width: "100%",
+          //                       height: "200px",
+          //                       objectFit: "cover",
+          //                       borderRadius: "4px",
+          //                     }}
+          //                   />
+          //                   <div
+          //                     style={{
+          //                       position: "absolute",
+          //                       bottom: 0,
+          //                       left: 0,
+          //                       right: 0,
+          //                       background: "rgba(0, 0, 0, 0.6)",
+          //                       color: "white",
+          //                       padding: "4px 8px",
+          //                       fontSize: "12px",
+          //                     }}
+          //                   >
+          //                     Photo {idx + 1}{" "}
+          //                     {item?.isCamera ? null : "(Gallery)"}
+          //                   </div>
+          //                 </div>
+          //               );
+          //             }
+          //           )}
+          //         </div>
+          //       </Card>
+          //     </section>
+          //   </div>
+          // )
+          null}
+        </div>
+
+        {/* Right Column - Financial Analysis & Synopsis */}
+        <div style={{ flex: "1", overflow: "auto", padding: "0 12px" }}>
+          <RightColumn
+            financialForm={financialForm}
+            calculatedGrossProfit={calculatedGrossProfit}
+            calculatedNetProfit={calculatedNetProfit}
+            handleFinancialSubmit={handleFinancialSubmit}
+            loading={loading}
+            verificationData={verificationData}
             readOnly={!!verificationData?.approvedStatus || hasEditRequest}
+            verdict={verdict}
+            setVerdict={setVerdict}
+            editorContent={editorContent}
+            setEditorContent={setEditorContent}
+            handleSave={handleSave}
+            currentDepartment={currentDepartment}
+            hasEditRequest={hasEditRequest}
           />
         </div>
-      )}
+      </div>
 
-      {/* Legacy FI-style Business Data Display (for banks without PD forms) */}
-      {!useGenericApproach &&
-        !useNewApproach &&
-        !formLoading &&
-        verificationData && (
-          <div style={{ marginBottom: 24 }}>
-            <BusinessBasicDetailsDescription
-              data={mergedLegacyData}
-              extra={
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() =>
-                    currentDepartment === "PD"
-                      ? handleDynamicSectionEdit("basicDetails")
-                      : onEdit("basicDetails")
-                  }
-                  disabled={hasEditRequest}
-                />
-              }
-              logs={false}
-              currentDepartment={currentDepartment}
-            />
-
-            <BusinessDetailsDescription
-              data={mergedLegacyData}
-              extra={
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() =>
-                    currentDepartment === "PD"
-                      ? handleDynamicSectionEdit("businessDetails")
-                      : onEdit("businessDetails")
-                  }
-                  disabled={hasEditRequest}
-                />
-              }
-              logs={false}
-              currentDepartment={currentDepartment}
-            />
-
-            <BusinessMiscellaneousDescription
-              data={mergedLegacyData}
-              extra={
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() =>
-                    currentDepartment === "PD"
-                      ? handleDynamicSectionEdit("miscellaneous")
-                      : onEdit("miscellaneous")
-                  }
-                  disabled={hasEditRequest}
-                />
-              }
-              logs={false}
-            />
-
-            <ExistingLoansDescription
-              data={legacyFormattedData}
-              extra={
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() =>
-                    currentDepartment === "PD"
-                      ? handleDynamicSectionEdit("existingLoans")
-                      : onEdit("existingLoans")
-                  }
-                  disabled={hasEditRequest}
-                />
-              }
-              logs={false}
-            />
-
-            <ThirdPartyCheckDescription
-              data={legacyFormattedData}
-              extra={
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() =>
-                    currentDepartment === "PD"
-                      ? handleDynamicSectionEdit("thirdPartyCheck")
-                      : onEdit("thirdPartyCheck")
-                  }
-                  disabled={hasEditRequest}
-                />
-              }
-              logs={false}
-            />
-
-            {/* Photo Capture Section */}
-            <section style={{ marginBottom: 24 }}>
-              <Card title="Photo Capture">
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(200px, 1fr))",
-                    gap: "16px",
-                  }}
-                >
-                  {legacyFormattedData?.uploadedItems?.map(
-                    (item: any, idx: number) => {
-                      return (
-                        <div key={item.id} style={{ position: "relative" }}>
-                          <Image
-                            src={imageUrls[item.id] || ""}
-                            alt={`Photo ${idx + 1}`}
-                            style={{
-                              width: "100%",
-                              height: "200px",
-                              objectFit: "cover",
-                              borderRadius: "4px",
-                            }}
-                          />
-                          <div
-                            style={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              background: "rgba(0, 0, 0, 0.6)",
-                              color: "white",
-                              padding: "4px 8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            Photo {idx + 1}{" "}
-                            {item?.isCamera ? null : "(Gallery)"}
-                          </div>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              </Card>
-            </section>
-          </div>
-        )}
-
-      <section style={{ marginBottom: 24 }}>
-        <EditRequestLogs
-          currentData={data}
-          changedData={changedData}
-          verificationId={verificationId}
-          fetchEditRequests={fetchEditRequests}
-          disabled={hasEditRequest}
-          admin={false}
-          verificationType={activeTab}
-          currentDepartment={currentDepartment}
-          dynamicSchema={schemaForm}
-        />
-      </section>
-
-      {/* Financial Analysis Section - Only for PD department */}
-      {currentDepartment === "PD" && (
+      {/* Edit Request Logs */}
+      {role !== "VerificationExecutive" && (
         <section style={{ marginBottom: 24 }}>
-          <Card
-            title="Financial Analysis"
-            extra={
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() =>
-                  currentDepartment === "PD"
-                    ? handleDynamicSectionEdit("financialAnalysis")
-                    : onEdit("financialAnalysis")
-                }
-                disabled={hasEditRequest}
-              />
-            }
-          >
-            <Form
-              form={financialForm}
-              layout="vertical"
-              disabled={
-                !!(
-                  verificationData?.financialAnalysis ||
-                  verificationData?.verificationData?.financialAnalysis
-                )
-              }
-            >
-              {/* Gross Profit Section */}
-              <Card
-                title={`To Gross Profit - ₹${calculatedGrossProfit.toLocaleString()}`}
-                size="small"
-                style={{ marginBottom: 16 }}
-              >
-                <Row gutter={[16, 8]}>
-                  {/* Left side - All "To" fields */}
-                  <Col span={12}>
-                    <Row gutter={[8, 8]}>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toOpeningStock"
-                          label="To Opening Stock"
-                          rules={[createNonNegativeRule("Opening Stock")]}
-                        >
-                          <Input
-                            placeholder="Opening Stock"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toPurchase"
-                          label="To Purchase"
-                          rules={[createNonNegativeRule("Purchase")]}
-                        >
-                          <Input placeholder="Purchase" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toCostOfServices"
-                          label="To Cost of Services"
-                          rules={[createNonNegativeRule("Cost of Services")]}
-                        >
-                          <Input
-                            placeholder="Cost of Services"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toWages"
-                          label="To Wages"
-                          rules={[createNonNegativeRule("Wages")]}
-                        >
-                          <Input placeholder="Wages" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toHamaliCharges"
-                          label="To Hamali Charges"
-                          rules={[createNonNegativeRule("Hamali Charges")]}
-                        >
-                          <Input
-                            placeholder="Hamali Charges"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toManufacturingExpenses"
-                          label="To Manufacturing Expenses"
-                          rules={[
-                            createNonNegativeRule("Manufacturing Expenses"),
-                          ]}
-                        >
-                          <Input
-                            placeholder="Manufacturing Expenses"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toPackingCharges"
-                          label="To Packing Charges"
-                          rules={[createNonNegativeRule("Packing Charges")]}
-                        >
-                          <Input
-                            placeholder="Packing Charges"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Col>
-                  {/* Right side - All "By" fields */}
-                  <Col span={12}>
-                    <Row gutter={[8, 8]}>
-                      <Col span={24}>
-                        <Form.Item
-                          name="bySales"
-                          label="By Sales"
-                          rules={[createNonNegativeRule("Sales")]}
-                        >
-                          <Input placeholder="Sales" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="byServices"
-                          label="By Services"
-                          rules={[createNonNegativeRule("Services")]}
-                        >
-                          <Input placeholder="Services" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="byClosingStock"
-                          label="By Closing Stock"
-                          rules={[createNonNegativeRule("Closing Stock")]}
-                        >
-                          <Input
-                            placeholder="Closing Stock"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </Card>
-              {/* Net Profit Section */}
-              <Card
-                title={`To Net Profit - ₹${calculatedNetProfit.toLocaleString()}`}
-                size="small"
-                style={{ marginBottom: 16 }}
-              >
-                <Row gutter={[16, 8]}>
-                  {/* Left side - All "To" fields */}
-                  <Col span={12}>
-                    <Row gutter={[8, 8]}>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toSalaries"
-                          label="To Salaries"
-                          rules={[createNonNegativeRule("Salaries")]}
-                        >
-                          <Input placeholder="Salaries" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toRent"
-                          label="To Rent"
-                          rules={[createNonNegativeRule("Rent")]}
-                        >
-                          <Input placeholder="Rent" type="number" min={0} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toElectricityCharges"
-                          label="To Electricity Charges"
-                          rules={[createNonNegativeRule("Electricity Charges")]}
-                        >
-                          <Input
-                            placeholder="Electricity Charges"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toPrintingStationery"
-                          label="To Printing & Stationery"
-                          rules={[
-                            createNonNegativeRule("Printing & Stationery"),
-                          ]}
-                        >
-                          <Input
-                            placeholder="Printing & Stationery"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toTelephoneCharges"
-                          label="To Telephone Charges"
-                          rules={[createNonNegativeRule("Telephone Charges")]}
-                        >
-                          <Input
-                            placeholder="Telephone Charges"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toPostageTelegram"
-                          label="To Postage & Telegram"
-                          rules={[createNonNegativeRule("Postage & Telegram")]}
-                        >
-                          <Input
-                            placeholder="Postage & Telegram"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toOfficeMaintenance"
-                          label="To Office Maintenance"
-                          rules={[createNonNegativeRule("Office Maintenance")]}
-                        >
-                          <Input
-                            placeholder="Office Maintenance"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toRepairsMaintenance"
-                          label="To Repairs & Maintenance"
-                          rules={[
-                            createNonNegativeRule("Repairs & Maintenance"),
-                          ]}
-                        >
-                          <Input
-                            placeholder="Repairs & Maintenance"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toSadarExpenses"
-                          label="To Sadar Expenses"
-                          rules={[createNonNegativeRule("Sadar Expenses")]}
-                        >
-                          <Input
-                            placeholder="Sadar Expenses"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toAuditFee"
-                          label="To Audit Fee"
-                          rules={[createNonNegativeRule("Audit Fee")]}
-                        >
-                          <Input
-                            placeholder="Audit Fee"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toAdvertisement"
-                          label="To Advertisement"
-                          rules={[createNonNegativeRule("Advertisement")]}
-                        >
-                          <Input
-                            placeholder="Advertisement"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toBankCharges"
-                          label="To Bank Charges"
-                          rules={[createNonNegativeRule("Bank Charges")]}
-                        >
-                          <Input
-                            placeholder="Bank Charges"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toInsurance"
-                          label="To Insurance"
-                          rules={[createNonNegativeRule("Insurance")]}
-                        >
-                          <Input
-                            placeholder="Insurance"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toDepreciation"
-                          label="To Depreciation"
-                          rules={[createNonNegativeRule("Depreciation")]}
-                        >
-                          <Input
-                            placeholder="Depreciation"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="toInterestOnLoan"
-                          label="To Interest on Loan"
-                          rules={[createNonNegativeRule("Interest on Loan")]}
-                        >
-                          <Input
-                            placeholder="Interest on Loan"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Col>
-                  {/* Right side - All "By" fields */}
-                  <Col span={12}>
-                    <Row gutter={[8, 8]}>
-                      <Col span={24}>
-                        <Form.Item
-                          name="byRentReceived"
-                          label="By Rent Received"
-                          rules={[createNonNegativeRule("Rent Received")]}
-                        >
-                          <Input
-                            placeholder="Rent Received"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item
-                          name="byCommissionReceived"
-                          label="By Commission Received"
-                          rules={[createNonNegativeRule("Commission Received")]}
-                        >
-                          <Input
-                            placeholder="Commission Received"
-                            type="number"
-                            min={0}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </Card>
-            </Form>
-          </Card>
+          <EditRequestLogs
+            currentData={data}
+            changedData={changedData}
+            verificationId={verificationId}
+            fetchEditRequests={fetchEditRequests}
+            disabled={hasEditRequest}
+            admin={false}
+            verificationType={activeTab}
+            currentDepartment={currentDepartment}
+            dynamicSchema={schemaForm}
+          />
         </section>
       )}
 
-      {/* Submit Financial Analysis Button - Only for PD department */}
-      {currentDepartment === "PD" && (
-        <section style={{ marginBottom: 24 }}>
-          <Card>
-            <Row justify="end">
-              <Col>
-                <Button
-                  type="primary"
-                  size="small"
-                  onClick={handleFinancialSubmit}
-                  loading={loading}
-                  disabled={loading || !!verificationData?.financialAnalysis}
-                  style={{
-                    background:
-                      loading || !!verificationData?.financialAnalysis
-                        ? "#9ca3af"
-                        : "#1e40af",
-                    border: "none",
-                    borderRadius: "6px",
-                    height: "32px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    boxShadow:
-                      loading || !!verificationData?.financialAnalysis
-                        ? "none"
-                        : "0 2px 8px rgba(30, 64, 175, 0.3)",
-                    color: "#ffffff",
-                  }}
-                >
-                  {loading
-                    ? "Submitting..."
-                    : !!verificationData?.financialAnalysis
-                      ? "Financial Analysis Already Submitted"
-                      : "Submit Financial Analysis"}
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </section>
-      )}
-
-      {/* <Card style={{marginBottom:24, textAlign:"center"}}> */}
-      {/* <section style={{marginBottom:24, textAlign:"center", padding:8}}> */}
-      {/* <Button icon={<EyeOutlined />} onClick={()=>{
-          setOpen(true)
-        }}>Preview</Button> */}
-      {currentDepartment === "PD" ? (
-        <Feedback
-          disabled={hasEditRequest}
-          verdict={verdict}
-          setVerdict={setVerdict}
+      {/* Footer */}
+      {role !== "VerificationExecutive" && (
+        <Footer
           editorContent={editorContent}
-          setEditorContent={setEditorContent}
-          handleSave={handleSave}
-          verificationData={verificationData}
-          currentDepartment={currentDepartment}
-          hasEditRequest={hasEditRequest}
-        />
-      ) : (
-        <FinalVerdict
           disabled={hasEditRequest}
-          verdict={verdict}
-          setVerdict={setVerdict}
-          editorContent={editorContent}
-          setEditorContent={setEditorContent}
           handleSave={handleSave}
+          verdict={completeVerificationData?.approvedStatus}
+          open={open}
+          setOpen={setOpen}
+          verificationType="Business"
         />
       )}
-      <Footer
-        editorContent={editorContent}
-        disabled={hasEditRequest}
-        handleSave={handleSave}
-        verdict={completeVerificationData?.approvedStatus}
-        open={open}
-        setOpen={setOpen}
-        verificationType="Business"
-      />
     </div>
   );
 };

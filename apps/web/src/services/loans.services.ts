@@ -1,5 +1,10 @@
 import axiosInstance from "../config/axios.config";
-import { getWithDepartment, postWithDepartment, patchWithDepartment, deleteWithDepartment } from "./api.services";
+import {
+  getWithDepartment,
+  postWithDepartment,
+  patchWithDepartment,
+  deleteWithDepartment,
+} from "./api.services";
 
 export interface Verification {
   id: number;
@@ -67,7 +72,7 @@ export const getLoansApi = (
 
 export const getLoansByIdApi = (id: string) => {
   return getWithDepartment(`/loans`, {
-    params: { id }
+    params: { id },
   });
 };
 
@@ -105,22 +110,16 @@ export const getVerifierLoansApi = () => {
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {
-  return postWithDepartment(
-    `/loans/${loanId}/assign-loan-executive`,
-    payload
-  );
+  return postWithDepartment(`/loans/${loanId}/assign-loan-executive`, payload);
 };
 
 export const updateExecutivesApi = (loanId: number, payload: any) => {
-  return patchWithDepartment(
-    `/loans/${loanId}/update-executive`,
-    payload
-  );
+  return patchWithDepartment(`/loans/${loanId}/update-executive`, payload);
 };
 
 export const getExecutivesApi = () => {
   return getWithDepartment(`/accounts/users`, {
-    params: { role: "FieldExecutive" }
+    params: { role: "FieldExecutive" },
   });
 };
 
