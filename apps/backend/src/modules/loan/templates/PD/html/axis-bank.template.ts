@@ -374,15 +374,6 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         
         <p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name: Field Executive</strong></p>
         <p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature: </strong></p>
-        <div style="margin:8px 0;">
-          <p style="margin:0 0 4px 0;line-height:1.5"><strong>Agency Name & Seal:</strong> Kowtha & Co.</p>
-          ${
-            html_data.imageDataUri
-              ? `<img src="${html_data.imageDataUri}" alt="Kowtha Signature" style="max-width:240px;height:auto;margin-top:6px;" />`
-              : ""
-          }
-        </div>
-        <p style="margin:8px 0;line-height:1.5"><strong></strong></p>
         <p style="margin:8px 0;line-height:1.5"><strong>Geo Tagging & Photographs of business premises: -</strong></p>
         
         <p style="margin:8px 0;line-height:1.5"><strong>ANNEXURE1: Income assessment for Asha Home Loans</strong></p>

@@ -293,6 +293,72 @@ export class PDTemplateService {
         }
       : undefined;
 
+    const fieldVisitTime =
+      verification?.fieldVisitTime ||
+      verification?.applicantDetails?.appointmentFixed ||
+      verification?.visitTime ||
+      null;
+
+    const pdVerifiedBy =
+      verification?.pdOfficer?.name ||
+      verification?.pdOfficerName ||
+      verification?.verifiedBy ||
+      verification?.fieldExecutive?.name ||
+      loan?.operationsExecutive?.name ||
+      fieldExecutive ||
+      null;
+
+    const pdVerifiedDate =
+      verification?.pdVerifiedDate ||
+      verification?.verificationDate ||
+      verification?.applicantDetails?.dateOfVisit ||
+      loan?.updatedAt ||
+      null;
+
+    const extractCoordinate = (...candidates: any[]) => {
+      for (const candidate of candidates) {
+        if (candidate === null || candidate === undefined) {
+          continue;
+        }
+
+        const text = String(candidate).trim();
+
+        if (text.length) {
+          return text;
+        }
+      }
+
+      return "";
+    };
+
+    const latitude = extractCoordinate(
+      verification?.applicantDetails?.latitude,
+      verification?.basicInformation?.latitude,
+      verification?.locationDetails?.latitude,
+      verification?.geoTag?.latitude,
+      verification?.latitude,
+      loan?.applicantLatitude,
+      loan?.latitude
+    );
+
+    const longitude = extractCoordinate(
+      verification?.applicantDetails?.longitude,
+      verification?.basicInformation?.longitude,
+      verification?.locationDetails?.longitude,
+      verification?.geoTag?.longitude,
+      verification?.longitude,
+      loan?.applicantLongitude,
+      loan?.longitude
+    );
+
+    const geoCoordinates =
+      latitude || longitude
+        ? {
+            latitude,
+            longitude,
+          }
+        : undefined;
+
     return {
       bankName: bankName,
       applicationNumber: applicationNumber,
@@ -303,6 +369,10 @@ export class PDTemplateService {
       imagesData: imagesData,
       fieldExecutive: fieldExecutive,
       loanDetails,
+      fieldVisitTime,
+      pdVerifiedBy,
+      pdVerifiedDate,
+      geoCoordinates,
     };
   }
 
@@ -315,8 +385,12 @@ export class PDTemplateService {
     schema?: any
   ): Promise<any> {
     // Banks with custom templates
-    if (bankName == "Axis Bank") {
-      let verificationData = loan.verificationData as AxisFinanceUBLInterface;
+    if (
+      bankName === "Axis Finance UBL Above 10L" ||
+      bankName === "Axis Finance UBL Below 10L"
+    ) {
+      const verificationData =
+        (verification?.verificationData || verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
         verificationData,
         bankName,

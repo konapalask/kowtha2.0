@@ -73,7 +73,7 @@ export async function getGenericPDTemplate() {
 export async function getRBLTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/rbl.template"
+      "modules/loan/templates/PD/html/rbl.template"
     );
     return module.rblTemplate || module.default;
   } catch (error) {
@@ -88,7 +88,7 @@ export async function getRBLTemplate() {
 export async function getAxisFinanceUBLTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/axis-finance-ubl.template"
+      "modules/loan/templates/PD/html/axis-finance-ubl.template"
     );
     return module.axisFinanceUBLTemplate || module.default;
   } catch (error) {

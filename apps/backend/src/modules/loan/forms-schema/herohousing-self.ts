@@ -3,8 +3,8 @@ export const herohousingSelfSchema = {
   bankName: "HeroHousing-Self",
   sections: [
     {
-      id: "generalLoanVisitDetails",
-      label: "General Loan & Visit Details",
+      id: "loanSummary",
+      label: "Loan & Visit Summary",
       schema: {
         type: "object",
         properties: {
@@ -26,65 +26,131 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Relationship with customer",
           },
-          reasonIfCustomerNotAvailableDuringVisit: {
+          reasonIfCustomerNotAvailable: {
             type: "string",
             title: "Reason if customer not available during visit",
           },
+          pdVisitDate: {
+            type: "string",
+            format: "date",
+            title: "PD visit date",
+          },
+          pdVisitTime: {
+            type: "string",
+            title: "PD visit time",
+          },
           pdVisitDateAndTime: {
             type: "string",
-            format: "date-time",
-            title: "PD Visit date and time",
+            title: "PD visit date and time (legacy field)",
           },
           pdAddress: {
             type: "string",
-            title: "PD address",
+            title: "PD address & location",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          latitude: {
+            type: "string",
+            title: "Latitude of business address",
+          },
+          longitude: {
+            type: "string",
+            title: "Longitude of business address",
           },
           latOfOfficeAddress: {
             type: "string",
-            title: "Latitude of office address",
+            title: "Latitude of office address (legacy)",
           },
           longOfOfficeAddress: {
             type: "string",
-            title: "Longitude of office address",
+            title: "Longitude of office address (legacy)",
+          },
+          latLongOfOfficeAddress: {
+            type: "string",
+            title: "Lat/Long of office address (legacy)",
           },
           requestedLoanAmount: {
             type: "number",
             title: "Requested loan amount",
-            format:{
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }
+            },
           },
         },
-        required: ["loanAccountNo", "nameOfCustomer", "personMetInPd", "relationshipWithCustomer", "pdVisitDateAndTime", "latLongOfOfficeAddress", "requestedLoanAmount"],
       },
-       
+      required: [
+        "loanAccountNo",
+        "nameOfCustomer",
+        "personMetInPd",
+        "pdAddress",
+        "requestedLoanAmount",
+      ],
     },
     {
-      id: "borrowerDetails",
-      label: "Borrower details",
+      id: "borrowerProfile",
+      label: "Borrower profile",
       schema: {
         type: "object",
         properties: {
+          qualificationAndJourney: {
+            type: "string",
+            title:
+              "Borrower details – includes qualification & professional journey",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
+          },
           qualificationAndProfessionalJourney: {
             type: "string",
-            title: "Borrower details- includes qualification & professional journey(service/ business details of each activity post qualification to till date)",
+            title:
+              "Borrower details (legacy) – qualification & professional journey",
           },
-        },
-      },
-       
-    },
-    {
-      id: "familyDetails",
-      label: "Family details (Including dependents) - Family background (Parents and siblings including all dependents)",
-      schema: {
-        type: "object",
-        properties: {
+          familyMembers: {
+            type: "array",
+            title: "Family details (including dependents)",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationshipWithApplicant: {
+                  type: "string",
+                  title: "Relationship with applicant",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation (Job/Business)",
+                },
+                incomeDetails: {
+                  type: "string",
+                  title: "Income details / dependent",
+                },
+                incomeDetailsDependent: {
+                  type: "string",
+                  title: "Income details / dependent (legacy)",
+                },
+              },
+            },
+          },
           familyDetails: {
             type: "array",
-            title: "Family Details",
+            title: "Family details (legacy)",
             items: {
               type: "object",
               properties: {
@@ -110,18 +176,29 @@ export const herohousingSelfSchema = {
                 },
                 incomeDetailsDependent: {
                   type: "string",
-                  title: "Income Details / dependent",
+                  title: "Income details / dependent",
                 },
               },
             },
           },
+          totalDependants: {
+            type: "integer",
+            title: "No. of dependants",
+          },
+          familyBackgroundNotes: {
+            type: "string",
+            title: "Family background notes",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
         },
       },
-       
     },
     {
       id: "currentBusinessDetails",
-      label: "Current Business Details",
+      label: "Current business details",
       schema: {
         type: "object",
         properties: {
@@ -129,171 +206,242 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Current business name",
           },
+          businessName: {
+            type: "string",
+            title: "Business name (legacy)",
+          },
           constitution: {
             type: "string",
-            title: "Constitution", 
+            title: "Constitution",
+            enum: [
+              "Proprietorship",
+              "Partnership",
+              "Private Limited",
+              "Public Limited",
+              "LLP",
+              "Other",
+            ],
           },
           natureOfBusiness: {
             type: "string",
-            title: "Nature of business/product or services details",
+            title: "Nature of business / product or services details",
           },
           runningSince: {
             type: "string",
             title: "Running since",
           },
+          industryExperienceYears: {
+            type: "number",
+            title: "Years of experience in the same line of business",
+          },
           detailspartnersDirectorsShareholdersWithFamilyBackground: {
             type: "string",
-            title: "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
+            title:
+              "Details of partners / directors / shareholders & family background",
           },
         },
       },
-       
     },
     {
-      id: "detailsOfBusinessPremises",
-      label: "Details of Business Premises",
+      id: "businessPremises",
+      label: "Business premises",
       schema: {
         type: "object",
         properties: {
           addressOfBusinessPremises: {
             type: "string",
-            title: "Address of business premises and additional places of business",
+            title:
+              "Address of business premises and additional places of business",
+          },
+          ownershipDetails: {
+            type: "string",
+            title:
+              "Ownership of business premises (mention rent amount and landlord name in case rented)",
           },
           ownershipOfAllAboveBusinessPremises: {
             type: "string",
-            title: "Ownership of all above business premises (Also mention rent amount and landlord name in case rented)",
+            title: "Ownership of business premises (legacy)",
+          },
+          businessPremisesSize: {
+            type: "string",
+            title: "Size / area of business premises",
           },
           sizeAreaOfBusinessPremises: {
             type: "string",
-            title: "Size/area of business premises",
-          }, 
+            title: "Size / area of business premises (legacy)",
+          },
+          operationsAndFootfallObservation: {
+            type: "string",
+            title:
+              "Comment on business operations / footfall / stock & other observations",
+          },
           commentOnBusinessOperationsFootfallOfCustomerStock: {
             type: "string",
-            title: "Comment on the business operations/footfall of customer/stock etc and share observations if any",
+            title:
+              "Comment on business operations / footfall / stock (legacy)",
           },
         },
       },
-       
     },
     {
-      id: "detailsaboutbusinessdetails",
-      label: "Details about business",
+      id: "businessOperations",
+      label: "Business operations & performance",
       schema: {
         type: "object",
         properties: {
-          briefAboutTheProductServicesDealing: {
+          productServiceDetails: {
             type: "string",
-            title: "Brief about the product/services dealing",
+            title: "Brief about the products / services dealing",
           },
           noOfEmployeeAndSalaryDetails: {
             type: "string",
-            title: "No. of employee and salary details",
+            title: "No. of employees and salary details",
           },
-          quantumOfStock: {
+          stockQuantum: {
             type: "string",
             title: "Quantum of stock",
           },
-          noOfMachineryAndAssetsSeen: {
+          quantumOfStock: {
             type: "string",
-            title: "No. of Machinery and assets seen",
+            title: "Quantum of stock (legacy)",
           },
-          turnoverOfLastThreeYears: {
+          machineryAndAssets: {
             type: "string",
-            title: "Turnover of last three  till date (Total actual turnover of customer)",
+            title: "No. of machinery and assets seen",
+          },
+          turnoverHistory: {
+            type: "string",
+            title:
+              "Turnover of last three years and current year till date (actual)",
           },
           productServiceGrossMarginRatio: {
             type: "string",
-            title: "Product/service Gross Margin ratio",
+            title: "Product / service gross margin ratio",
           },
           productServiceNetMarginRatio: {
             type: "string",
-            title: "Product/service Net Margin ratio",
+            title: "Product / service net margin ratio",
           },
-          anyExpansionOrNewProductServices: {
+          expansionOrChanges: {
             type: "string",
-            title: "Any expansion or new product/services introduced in last 2 years includimg change in business premises and any expected impact on the current revenue",
+            title:
+              "Expansion or new products/services introduced in last 2 years (impact on revenue)",
           },
           briefAboutTheLocalityOfBusiness: {
             type: "string",
-            title: "Brief about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
+            title:
+              "Brief about the locality, competitors, prospects & negative feedback",
           },
-         
-        },
-      }, 
-    },
-    {
-      id: "detailsOfSupplierAndCustomer",
-      label: "Details of Supplier and Customer",
-      schema: {
-        type: "object",
-        properties: {
-          briefAboutSupplierAndCustomer: {
-            type: "string",
-            title: "Brief about supplier and customer and geographic reach/presence",
-          },
-          noOfTotalSuppliersAndCustomers: {
-            type: "number",
-            title: "No. of total suppliers and details of terms for credit period",
-          },
-          noOfTotalCustomers: {
-            type: "number",
-            title: "No. of total customers and details of terms for credit period",
-          },
-          billingPeriodAndReceiptMode:{
-            type: "string",
-            title: "Billing period/cycle and receipt mode (Billing on cosignment basis/ monthly basis/ progress of work basis) also co",
-          },
-          totalDebtorsAndCreditors: {
-            type: "string",
-            title: "Total debtors and creditors as on date and any default/write off in past",
-          },
-          referenceOfMin2SuppliersAnd2Customers: {
-            type: "string",
-            title: "Please collect Reference of min 2 suppliers and 2 customers with their phone no. and business name",
-          },
-
         },
       },
     },
     {
-      id: "detailsOfProperty",
-      label: "Details of Property",
+      id: "supplierCustomerDetails",
+      label: "Details of supplier and customer",
       schema: {
         type: "object",
         properties: {
-          whetherCustomerVisitedTheProperty: {
+          supplierCustomerOverview: {
             type: "string",
-            title: "Whether Customer visited the property",
+            title:
+              "Brief about supplier and customer and geographic reach/presence",
           },
-          typeOfProperty: {
+          noOfTotalSuppliersAndCustomers: {
+            type: "integer",
+            title: "No. of total suppliers",
+          },
+          supplierCreditTerms: {
             type: "string",
-            title: "Type of property (Ready/Plot/Self Construction/Under Construction/Vacant etc)",
+            title: "Supplier credit period details",
           },
-          propertyIsOccupiedByWhom:{
+          noOfTotalCustomers: {
+            type: "integer",
+            title: "No. of total customers",
+          },
+          customerCreditTerms: {
             type: "string",
-            title: "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)",
+            title: "Customer credit period details",
           },
-          sourceOfPropertyPurchase: {
+          billingCycleAndReceiptMode: {
             type: "string",
-            title: "Source of property purchase (Through Dealer/Builder/Reference/Relative)",
+            title:
+              "Billing period/cycle and receipt mode (comment if any advance received)",
           },
-          nameOfSellerAndRelationshipWithCustomer: {
+          totalDebtorsAndCreditors: {
+            type: "string",
+            title:
+              "Total debtors and creditors as on date (mention defaults/write offs)",
+          },
+          tradeReferences: {
+            type: "array",
+            title: "References of suppliers/customers (min 2 each)",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                businessName: {
+                  type: "string",
+                  title: "Business name",
+                },
+                relation: {
+                  type: "string",
+                  title: "Relation (Supplier / Customer)",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact number",
+                  pattern: "^[0-9]{10}$",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "propertyDetails",
+      label: "Details of property",
+      schema: {
+        type: "object",
+        properties: {
+          customerVisitedProperty: {
+            type: "string",
+            title: "Whether customer visited the property",
+          },
+          propertyType: {
+            type: "string",
+            title:
+              "Type of property (Ready/Plot/Self Construction/Under Construction/Vacant etc)",
+          },
+          propertyOccupancy: {
+            type: "string",
+            title:
+              "Property is occupied by whom & reason if not self-occupied (include rent / tenancy / construction stage)",
+          },
+          propertyPurchaseSource: {
+            type: "string",
+            title: "Source of property purchase (Dealer/Builder/Reference)",
+          },
+          sellerDetails: {
             type: "string",
             title: "Name of seller and relationship with customer",
           },
-          typeOfPropertyAndStructureArea: {
+          structureAndArea: {
             type: "string",
-            title: "Type of property/structure and area",
+            title: "Type of property / structure and area",
           },
-          actualDealValueAndSaleDeedValue: {
+          dealAndSaleDeedValue: {
             type: "string",
-            title: "What is actual deal value and sale deed value, OCR source",
+            title: "Actual deal value vs sale deed value (OCR source)",
           },
-          whetherSellerIsHavingAnyLoanOnTheProperty: {
-            type: "number",
+          sellerExistingLoan: {
+            type: "string",
             title: "Whether seller is having any loan on the property",
           },
-          whenSellerBoughtTheProperty: {
+          sellerPurchaseTimeline: {
             type: "string",
             title: "When seller bought the property",
           },
@@ -301,343 +449,246 @@ export const herohousingSelfSchema = {
       },
     },
     {
-      id: "investmentAndProperties",
-      label: "Investment & Properties",
+      id: "investmentAndAssets",
+      label: "Investment & properties",
       schema: {
         type: "object",
         properties: {
-          customerInvestmentHabitsAndMonthlySavings: {
+          investmentHabits: {
             type: "string",
-            title: "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
+            title:
+              "Investment habits & monthly savings (schemes / properties / FD etc)",
           },
-          currentResidenceOwnership: {
+          residenceOwnership: {
             type: "string",
-            title: "Whether current residence is owned or rented and rent amount if any",
+            title: "Whether current residence is owned or rented (mention rent)",
           },
-          detailsOfAssetsBuiltTillDate: {
+          assetsBuilt: {
             type: "string",
-            title: "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
+            title:
+              "Details of assets built till date (immovable, movable, gold, FD, equity, other savings)",
           },
         },
       },
-       
     },
     {
-      id: "endUseOfPropertyFund",
-      label: "End Use of Property/Fund",
+      id: "endUseDetails",
+      label: "End use of property/fund",
       schema: {
         type: "object",
         properties: {
-          endUseOfProperty: {
+          propertyEndUse: {
             type: "string",
-            title: "Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases",
+            title:
+              "Proposed end use of property (self-occupation/investment etc.)",
           },
-          detailedEndUseOfFundInLapCases: {
+          fundUtilisation: {
             type: "string",
-            title: "Clear and detailed end use of fund in LAP cases ",
+            title: "Clear and detailed end use of fund",
           },
         },
       },
-       
     },
     {
-      id: "detailsOfLoans",
-      label: "Details of Loans",
+      id: "loanObligations",
+      label: "Details of loans",
       schema: {
         type: "object",
         properties: {
-          checkAndProvideDetailsOfLoanPresentlyServicing: {
+          currentLoansServiced: {
             type: "string",
-            title: "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue, ",
+            title:
+              "Loans presently servicing (mention if closing / continuing)",
           },
-          repaymentAccountDetails: {
+          repaymentAccount: {
             type: "string",
-            title: "Repayment account from which all these EMI are getting paid ",
+            title:
+              "Repayment account from which EMIs are being paid",
           },
-          endUseOfFundsForPastLoans: {
+          pastLoanEndUse: {
             type: "string",
-            title:"What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
+            title:
+              "End use of loans taken in last 3 years / exceptional borrowings",
           },
-          checkIfAnyHomeLoanLap: {
+          mortgageOrFacilities: {
             type: "string",
-            title: "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any OD limit or any other facility in the name of customer",
-            },
-          anyBouncingInLoans: {
+            title:
+              "Any home loan/LAP/CC/OD facility (mention mortgage property and usage)",
+          },
+          repaymentBehaviour: {
             type: "string",
-            title: "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
+            title:
+              "Repayment behaviour – bouncing details with period and reason",
           },
         },
       },
-       
     },
     {
       id: "bankingDetails",
-      label: "Banking Details",
+      label: "Banking details",
       schema: {
         type: "object",
         properties: {
-          allBankAccountsDetailsOpeningDate: {
+          businessBanking: {
             type: "string",
-            title: "Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening",
+            title:
+              "Details of business bank accounts (account open date, major transaction accounts)",
           },
-          savingsAccountDetails: {
+          savingsAccounts: {
             type: "string",
-            title: "Please check any saving account of applicant and co applicant and provide the details of these accounts",
+            title:
+              "Savings accounts of applicant and co-applicant",
           },
-          percentageOfTotalReceiptRoutedThroughBanking: {
+          receiptsRoutedThroughBanking: {
             type: "number",
-            title: "% of total receipt routed through banking",
-          },
-        },
-      },
-       
-    },
-    {
-      id: "documentVerificationOtherChecks",
-      label: "Document Verification & Other Checks",
-      schema: {
-        type: "object",
-        properties: {
-          relevantSalePurchaseRegisterBillsKutchaRecordsAndInventory: {
-            type: "string",
-            title: "Please check all relevant sale/purchase register/ bills/ kutcha records and inventory in line with those recored, payroll register and share observations",
-          },
-          thirdPartyCheck: {
-            type: "string",
-            title: "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period",
-          }, 
-          otherPersonOrFamilyMemberInvolvedInTheBusiness: {
-            type: "string",
-            title: "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
-          }, 
-          checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer:
-            {
-              type: "string",
-              title: "Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations",
+            title: "% of total receipts routed through banking",
+            formatter: {
+              useIndianFormat: false,
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
-          googleCheckAnyNegativeObservationsFeedbackDedupeMatch: {
-            type: "string",
-            title: "Google check and any negative observation/feedback/dedupe match", 
-          },
-        },
-      },
-       
-    },
-    {
-      id:"finalPDStaus",
-      label: "Final PD Status",
-      schema: {
-        type: "object",
-        properties: {
-          finalPDStatus: {
-            type: "string",
-            title: "Final PD Status (Positive/Negative) with comment for reason of status",
           },
         },
       },
     },
     {
-      id:"incomeAssessmentDetails",
-      label: "Income Assessment Details",
+      id: "documentVerificationChecks",
+      label: "Document verification & other checks",
       schema: {
         type: "object",
         properties: {
-          salesReceiptsMonthlyAverage: {
-            type: "object",
-            title: "Sales/receipts (monthly average)",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
+          recordsAndInventoryObservation: {
+            type: "string",
+            title:
+              "Sale/purchase registers, bills, kutcha records, inventory observations",
+          },
+          thirdPartyChecks: {
+            type: "string",
+            title:
+              "Neighbour / independent reference check (ownership, existence period)",
+          },
+          additionalInvolvementCheck: {
+            type: "string",
+            title:
+              "Check if any family member involved in managing the business",
+          },
+          complianceAndBranding: {
+            type: "string",
+            title:
+              "Verification of QR codes, licenses, permits, name board, contact number etc.",
+          },
+          externalFeedback: {
+            type: "string",
+            title: "Google / external checks & negative feedback (if any)",
+          },
+          supportingDocumentsCollected: {
+            type: "string",
+            title: "Supporting documents collected",
+          },
+        },
+      },
+    },
+    {
+      id: "finalStatus",
+      label: "Final PD status",
+      schema: {
+        type: "object",
+        properties: {
+          pdStatus: {
+            type: "string",
+            title: "Final PD status",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+          statusComments: {
+            type: "string",
+            title: "Comments / reasons for status",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "incomeAssessment",
+      label: "Income assessment details",
+      schema: {
+        type: "object",
+        properties: {
+          lineItems: {
+            type: "array",
+            title: "Income assessment line items",
+            items: {
+              type: "object",
+              properties: {
+                particular: {
+                  type: "string",
+                  title: "Particular",
+                },
+                monthlyAmount: {
+                  type: "number",
+                  title: "Amount (Rs.) Monthly",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                comments: {
+                  type: "string",
+                  title: "Comments / Mode of validation",
+                },
               },
             },
           },
-          otherIncome: {
-            type: "object",
-            title: "Other income",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          totalMonthlyIncome: {
-            type: "object",
-            title: "Total monthly income",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          costOfMaterialService: {
-            type: "object",
-            title: "Cost of material/cost of service",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          directExpenses: {
-            type: "object",
-            title: "Direct expenses",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          salary: {
-            type: "object",
-            title: "Salary",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          rent: {
-            type: "object",
-            title: "Rent",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          electricity: {
-            type: "object",
-            title: "Electricity expenses",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          otherMiscellaneousExpenses: {
-            type: "object",
-            title: "Other miscellaneous expenses",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          otherFamilyExpenses: {
-            type: "object",
-            title: "Other family expenses (school fees, house rent, household expenses etc)",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
-            },
-          },
-          netMonthlyAppraisalIncome: {
-            type: "object",
+          monthlyNetIncome: {
+            type: "number",
             title: "Net monthly appraisal income",
-            properties: {
-              amount: { 
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
-          monthlyObligationsEMIs: {
-            type: "object",
-            title: "Less:- Monthly obligations/EMI which are not getting closed",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-                minimum: 0,
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
+          monthlyNetIncomeComments: {
+            type: "string",
+            title: "Net monthly income comments",
+          },
+          monthlyObligations: {
+            type: "number",
+            title: "Less: Monthly obligations / EMIs not getting closed",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
+          },
+          monthlyObligationsComments: {
+            type: "string",
+            title: "Obligations comments",
           },
           netResidualIncome: {
-            type: "object",
+            type: "number",
             title: "Net residual income (monthly)",
-            properties: {
-              amount: {
-                type: "number",
-                title: "Amount (Rs.) Monthly",
-              },
-              comments: {
-                type: "string",
-                title: "Comments",
-              },
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
+          },
+          netResidualIncomeComments: {
+            type: "string",
+            title: "Residual income comments",
           },
         },
       },
     },
   ],
 } as const;
+
 export default herohousingSelfSchema;

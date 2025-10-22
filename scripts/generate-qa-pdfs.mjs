@@ -199,6 +199,16 @@ async function generateFormatPDImagesData(
         verificationData?.applicantDetails?.nameOfConcern ??
         "",
     },
+    fieldVisitTime:
+      verificationData?.applicantDetails?.appointmentFixed ||
+      new Date().toISOString(),
+    pdVerifiedBy:
+      verificationData?.pdOfficer?.name ||
+      verificationData?.fieldExecutive?.name ||
+      "QA Test Officer",
+    pdVerifiedDate:
+      verificationData?.applicantDetails?.dateOfVisit ||
+      new Date().toISOString(),
   };
 }
 

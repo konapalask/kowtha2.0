@@ -1,669 +1,594 @@
-import { format, toZonedTime } from "date-fns-tz";
-import { category } from "google-play-scraper";
-import * as path from "path";
-import * as fs from "fs";
 import { RBLInterface } from "../interface/rbl.interface";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
-// import { displayFieldValue } from "./schema-pdf-mapper";
+
+type KeyValueRow = {
+  label: string;
+  value: any;
+  formatter?: (value: any) => string;
+};
+
+type ColumnDefinition = {
+  header: string;
+  key?: string;
+  formatter?: (value: any, item?: any) => string;
+  valueGetter?: (item: any) => any;
+};
+
+const paragraphStyle = "margin:8px 0;line-height:1.5";
+const headingStyle =
+  "font-size:24px;font-weight:bold;margin:16px 0 8px 0;color:#333";
+const subHeadingStyle =
+  "font-size:20px;font-weight:bold;margin:14px 0 6px 0;color:#333";
+const tableStyle =
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
+const cellStyle = "border:1px solid #ccc;padding:8px";
+const headerCellStyle = `${cellStyle};font-weight:bold`;
+
+const displayValue = (value: any): string => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "";
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => displayValue(entry))
+      .filter((entry) => entry.length > 0)
+      .join(", ");
+  }
+  return String(value);
+};
+
+const formatMultiline = (value: any): string => {
+  const rendered = displayValue(value);
+  return rendered.replace(/\n/g, "<br>");
+};
+
+const formatCurrency = (value: any): string => {
+  if (value === null || value === undefined || value === "") return "";
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return displayValue(value);
+  return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
+};
+
+const formatDate = (value: any): string => {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString("en-GB");
+  }
+  return displayValue(value);
+};
+
+const renderParagraph = (content: string) =>
+  `<p style="${paragraphStyle}">${content}</p>`;
+
+const renderHeading = (text: string) =>
+  `<h1 style="${headingStyle}">${text}</h1>`;
+
+const renderSubHeading = (text: string) =>
+  `<p style="${paragraphStyle}"><strong>${text}</strong></p>`;
+
+const renderTwoColumnTable = (rows: KeyValueRow[]) => {
+  if (!rows.length) return "";
+  return `
+    <table style="${tableStyle}">
+      ${rows
+        .map(({ label, value, formatter }) => {
+          const resolved =
+            formatter !== undefined ? formatter(value) : formatMultiline(value);
+          return `
+          <tr>
+            <td style="${cellStyle}"><p style="${paragraphStyle}">${label}</p></td>
+            <td style="${cellStyle}"><p style="${paragraphStyle}">${
+              resolved || ""
+            }</p></td>
+          </tr>`;
+        })
+        .join("")}
+    </table>
+  `;
+};
+
+const renderSingleColumnTable = (values: string[]) => {
+  if (!values.length) return "";
+  return `
+    <table style="${tableStyle}">
+      ${values
+        .map(
+          (value) => `
+        <tr>
+          <td style="${cellStyle}"><p style="${paragraphStyle}">${value}</p></td>
+        </tr>`
+        )
+        .join("")}
+    </table>
+  `;
+};
+
+const renderMultiColumnTable = (
+  columns: ColumnDefinition[],
+  items: any[] | undefined,
+  emptyMessage: string
+) => {
+  const headerRow = `
+    <tr>
+      ${columns
+        .map(
+          ({ header }) =>
+            `<td style="${headerCellStyle}"><p style="${paragraphStyle}">${header}</p></td>`
+        )
+        .join("")}
+    </tr>`;
+
+  const bodyRows =
+    Array.isArray(items) && items.length > 0
+      ? items
+          .map((item) => {
+            return `
+              <tr>
+                ${columns
+                  .map((column) => {
+                    const rawValue = column.valueGetter
+                      ? column.valueGetter(item)
+                      : column.key
+                      ? item?.[column.key]
+                      : undefined;
+                    const rendered =
+                      column.formatter !== undefined
+                        ? column.formatter(rawValue, item)
+                        : formatMultiline(rawValue);
+                    return `<td style="${cellStyle}"><p style="${paragraphStyle}">${
+                      rendered || ""
+                    }</p></td>`;
+                  })
+                  .join("")}
+              </tr>
+            `;
+          })
+          .join("")
+      : `<tr><td colspan="${columns.length}" style="${cellStyle}"><p style="${paragraphStyle}">${emptyMessage}</p></td></tr>`;
+
+  return `
+    <table style="${tableStyle}">
+      ${headerRow}
+      ${bodyRows}
+    </table>
+  `;
+};
+
+const combineTextSegments = (segments: Array<{ label?: string; value?: any }>) => {
+  return segments
+    .map(({ label, value }) => {
+      if (!value) return "";
+      const rendered = formatMultiline(value);
+      return label ? `${label} ${rendered}` : rendered;
+    })
+    .filter(Boolean)
+    .join(" ");
+};
+
+const hasMeaningfulValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "number") return true;
+  if (typeof value === "boolean") return true;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some((entry) => hasMeaningfulValue(entry));
+  if (typeof value === "object") {
+    return Object.values(value).some((entry) => hasMeaningfulValue(entry));
+  }
+  return false;
+};
+
+const hasAnyField = (record: any, fields: string[]): boolean => {
+  if (!record || typeof record !== "object") return false;
+  return fields.some((field) => hasMeaningfulValue(record[field]));
+};
 
 export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
-  // => {
-  // // Helper function to display field values - schema-driven
-  // const displayValue = (value: any): string => {
-  //   return displayFieldValue(value, {}, "", "");
-  // };
+  const source = verificationData as any;
+  const caseDetails = source.caseDetails ?? {};
+  const meetingDetails = source.meetingDetails ?? caseDetails ?? {};
+  const businessOwnerEntries =
+    source.businessOwnerDetails?.businessOwnerDetails ?? [];
+  const familyDetails = source.familyDetails ?? {};
+  const businessDetails = source.businessDetails ?? {};
+  const inputsPurchases = source.inputsPurchases ?? {};
+  const outputsSupply = source.outputsSupply ?? {};
+  const employeeDetails = source.employeeDetails ?? {};
+  const tradeReferencesSuppliers = source.tradeReferences?.suppliers ?? [];
+  const tradeReferencesCustomers = source.tradeReferences?.customers ?? [];
+  const otherSources =
+    source.otherSourcesOfIncome?.otherSourcesOfIncome ?? [];
+  const loanEntries = source.loansDetails?.loansDetails ?? [];
+  const netWorthEntries = source.netWorth?.netWorth ?? [];
+  const applicantsMainBankingDetails =
+    source.applicantsMainBankingDetails ?? {};
+  const rawBankingDetails = applicantsMainBankingDetails?.bankingDetails;
+  const bankingEntries =
+    Array.isArray(rawBankingDetails) && rawBankingDetails.length > 0
+      ? rawBankingDetails
+      : hasAnyField(applicantsMainBankingDetails, [
+          "bankName",
+          "accountHolderName",
+          "accountHoldername",
+          "accountType",
+          "noOfYear",
+          "limitOfCCOD",
+          "limitOfCcOd",
+          "remarks",
+        ])
+      ? [applicantsMainBankingDetails]
+      : [];
 
-  const recommendationStyles: Record<string, string> = {
-    Positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-    Negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    CreditRefer:
-      '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
-  };
+  const rawOwnContribution = source.ownContributions;
+  const ownContributionEntries =
+    Array.isArray(rawOwnContribution?.ownContributions) &&
+    rawOwnContribution?.ownContributions.length > 0
+      ? rawOwnContribution.ownContributions
+      : hasAnyField(rawOwnContribution, [
+          "particulars",
+          "Particulars",
+          "remarks",
+          "Remarks",
+        ])
+      ? [rawOwnContribution]
+      : [];
 
-  const finalRecommendationHtml = recommendationStyles[html_data.status] || "";
+  const losId =
+    caseDetails.applicationNumber ||
+    caseDetails.referenceNumber ||
+    html_data?.applicationNumber ||
+    html_data?.loanDetails?.applicationNumber ||
+    "";
 
-  const date = new Date();
-  const timeZone = "Asia/Kolkata";
-  const zonedDate = toZonedTime(date, timeZone);
+  const dateOfVisit =
+    meetingDetails.dateOfVisit ||
+    html_data?.pdVerifiedDate ||
+    html_data?.loanDetails?.dateOfVisit ||
+    "";
 
-  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
+  const applicantName =
+    caseDetails.applicantName ||
+    caseDetails.nameOfApplicant ||
+    html_data?.loanDetails?.applicantName ||
+    "";
+
+  const clientAddress =
+    meetingDetails.addressVisited ||
+    caseDetails.addressVisited ||
+    businessDetails.shopAddress ||
+    html_data?.loanDetails?.applicantAddress ||
+    "";
+
+  const amountPurposeText =
+    html_data?.loanDetails?.loanAmount &&
+    html_data?.loanDetails?.purposeOfLoan
+      ? `He wants Loan amount of ${
+          formatCurrency(html_data.loanDetails.loanAmount) ||
+          formatMultiline(html_data.loanDetails.loanAmount)
+        } for purpose of ${formatMultiline(
+          html_data.loanDetails.purposeOfLoan
+        )}.`
+      : formatMultiline(source?.amountAndPurposeOfLoan);
+
+  const geoCoordinates = html_data?.geoCoordinates || {};
+
+  const familySummary = combineTextSegments([
+    { label: "About Applicant:", value: familyDetails.aboutApplicant },
+    { label: "About Co-applicant:", value: familyDetails.aboutCoApplicant },
+    {
+      label: "And their family details:",
+      value: familyDetails.andTheirFamilyDetails,
+    },
+  ]);
+
+  const ownContributionTable =
+    ownContributionEntries.length > 0
+      ? renderMultiColumnTable(
+          [
+            { header: "Particulars", valueGetter: (item) => item?.particulars || item?.Particulars },
+            { header: "Remarks", valueGetter: (item) => item?.remarks || item?.Remarks },
+          ],
+          ownContributionEntries,
+          "No own contribution details provided"
+        )
+      : "";
+
+  const applicantBankingTable =
+    bankingEntries.length > 0
+      ? renderMultiColumnTable(
+          [
+            { header: "Bank Name", valueGetter: (item) => item?.bankName },
+            {
+              header: "Account Holder name",
+              valueGetter: (item) => item?.accountHolderName || item?.accountHoldername,
+            },
+            {
+              header: "Account type",
+              valueGetter: (item) => item?.accountType,
+            },
+            {
+              header: "No of year",
+              valueGetter: (item) => item?.noOfYear,
+            },
+            {
+              header: "Limit of CC/OD",
+              formatter: (value) => formatCurrency(value),
+              valueGetter: (item) => item?.limitOfCCOD || item?.limitOfCcOd,
+            },
+            {
+              header: "Remarks",
+              valueGetter: (item) => item?.remarks,
+            },
+          ],
+          bankingEntries,
+          "No banking details provided"
+        )
+      : "";
 
   return `
     ${pdBaseTemplate(html_data)}
+    <div class="template-content">
+      ${renderParagraph(
+        `<strong>LOS ID:</strong> ${losId || ""}${
+          dateOfVisit ? `&nbsp;&nbsp;Dated: ${formatDate(dateOfVisit)}` : ""
+        }`
+      )}
+      ${renderParagraph(`Client Name: ${applicantName || ""}`)}
+      ${renderParagraph(`Client Address: ${clientAddress || ""}`)}
 
-      <div class="report-title">PERSONAL DISCUSSION SHEET</div>
-    
-      <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="7" class="section-header">Case Details</td></tr>
-          <tr>
-            <th>Reference Number(LOS ID)</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.referenceNumber || ""}</span></td>
-           </tr>
-           <tr>
-             <th>Name of the Applicant</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.nameOfApplicant || ""}</span></td>
-           </tr>
-           <tr>
-             <th>Co - Applicant</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.coApplicant || ""}</span></td>
-           </tr>
-           <tr>
-             <th>Type of Borrower</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.typeOfBorrower || ""}</span></td>
-          </tr>
-        </table>
-      </div>
+      <h2 style="${subHeadingStyle}">Sub:&nbsp;LIP Visit(s) Report</h2>
+      ${renderParagraph("Sir,")}
+      ${renderParagraph(
+        "Please refer to your instructions on the captioned matter. In this connection, we submit our report as under:"
+      )}
 
-       <div class="align-wrapper">
-        <table class="section-table">
-        <tr><td colspan="7" class="section-header">Meeting Details</td></tr>
-          <tr>
-            <th>Address Visited</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.addressVisited || ""}</span></td>
-           </tr>
-           <tr>
-             <th>Person Met</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.personMet || ""}</span></td>
-           </tr>
-           <tr>
-             <th>Contact Number</th>
-             <td colspan="5"><span class="var-value">${verificationData.caseDetails?.contactNo || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Date of Visit</th>
-            <td colspan="5"><span class="var-value">${""}</span></td>
-          </tr>
-        </table>
-      </div>
+      ${renderHeading("Case Details")}
+      ${renderTwoColumnTable([
+        {
+          label: "Reference Number (LOS ID)",
+          value: losId,
+        },
+        {
+          label: "Name of Applicant",
+          value: applicantName,
+        },
+        {
+          label: "Co – Applicant",
+          value: caseDetails.coApplicant,
+        },
+        {
+          label: "Type of Borrower",
+          value: caseDetails.typeOfBorrower,
+        },
+      ])}
 
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Business Owner Details</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Age</th>
-          <th>Qualification</th>
-          <th>Occupation</th>
-          <th>Relation</th>
-          <th>Remarks</th>
-        </tr>
-         ${
-           Array.isArray(
-             verificationData.businessOwnerDetails?.businessOwnerDetails
-           ) &&
-           verificationData.businessOwnerDetails?.businessOwnerDetails.length >
-             0
-             ? verificationData.businessOwnerDetails?.businessOwnerDetails
-                 .map(
-                   (businessOwner) => `
-            <tr>
-              <td><span class="var-value">${businessOwner.name || ""}</span></td>
-              <td><span class="var-value">${businessOwner.age || ""}</span></td>
-              <td><span class="var-value">${businessOwner.qualification || ""}</span></td>
-              <td><span class="var-value">${businessOwner.occupation || ""}</span></td>
-              <td><span class="var-value">${businessOwner.relation || ""}</span></td>
-              <td><span class="var-value">${businessOwner.remarks || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="6" style="text-align: center;">No business owner details available</td></tr>'
-         }
-      </table>
+      ${renderSubHeading("Meeting Details")}
+      ${renderTwoColumnTable([
+        {
+          label: "Address Visited",
+          value: meetingDetails.addressVisited,
+        },
+      ])}
+      ${renderTwoColumnTable([
+        {
+          label: "Person Met",
+          value: meetingDetails.personMet,
+        },
+        {
+          label: "Contact No",
+          value: meetingDetails.contactNo || caseDetails.contactNo,
+        },
+        {
+          label: "Date of Visit",
+          value: formatDate(meetingDetails.dateOfVisit),
+        },
+      ])}
+
+      ${renderSubHeading("Business owner Details")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Name", key: "name" },
+          { header: "Age", key: "age" },
+          { header: "Qualification", key: "qualification" },
+          { header: "Occupation", key: "occupation" },
+          { header: "Relation", key: "relation" },
+          { header: "Remarks", key: "remarks" },
+        ],
+        businessOwnerEntries,
+        "No business owner details provided"
+      )}
+
+      ${renderSubHeading("Family Details")}
+      ${familySummary
+        ? renderSingleColumnTable([familySummary])
+        : renderSingleColumnTable(["Family details not provided"])}
+
+      ${renderSubHeading("Business Details (Separate for additional business)")}
+      ${renderTwoColumnTable([
+        { label: "Business Name", value: businessDetails.businessName },
+        { label: "Type of Entity", value: businessDetails.typeOfEntity },
+        { label: "GST Number", value: businessDetails.gstNumber },
+        { label: "Legal Name", value: businessDetails.legalName },
+        { label: "Trade Name", value: businessDetails.tradeName },
+        {
+          label: "Last GST Return (As per GST records)",
+          value: businessDetails.lastGSTReturn,
+        },
+        { label: "Establishment", value: businessDetails.establishment },
+        { label: "Shop Address", value: businessDetails.shopAddress },
+        { label: "Shop Ownership", value: businessDetails.shopOwnership },
+        { label: "Godown", value: businessDetails.godownAddress },
+        { label: "Godown Ownership", value: businessDetails.godownOwnership },
+        { label: "Nature of Business", value: businessDetails.natureOfBusiness },
+        {
+          label:
+            "Product Details (please also comment on Vintage of the product deals by the firm & Future changes if any)",
+          value: businessDetails.productDetails,
+        },
+        { label: "Business Process", value: businessDetails.businessProcess },
+        { label: "Margins", value: businessDetails.margins },
+        {
+          label: "Documents Observed",
+          value: businessDetails.documentsObserved,
+        },
+        { label: "Activity Observed", value: businessDetails.activityObserved },
+      ])}
+
+      ${renderSubHeading("Inputs/Purchases")}
+      ${renderTwoColumnTable([
+        { label: "Details of Inputs", value: inputsPurchases.detailsOfInputs },
+        { label: "Purchase Details", value: inputsPurchases.purchaseDetails },
+        { label: "Order Cycle", value: inputsPurchases.orderCycle },
+        { label: "Avg Order Qnty", value: inputsPurchases.avgOrderQnty },
+        { label: "Credit Terms", value: inputsPurchases.creditTerms },
+        { label: "Other Remarks", value: inputsPurchases.otherRemarks },
+      ])}
+
+      ${renderSubHeading("Outputs/Supply")}
+      ${renderTwoColumnTable([
+        { label: "Market for Output", value: outputsSupply.marketForOutput },
+        { label: "Mode of Marketing", value: outputsSupply.modeOfMarketing },
+        { label: "Type of Customers", value: outputsSupply.typeOfCustomers },
+        { label: "Credit Terms", value: outputsSupply.creditTerms },
+        {
+          label: "Stock of Finished Goods",
+          value: outputsSupply.stockOfFinishedGoods,
+        },
+      ])}
+
+      ${renderSubHeading("Employee Details")}
+      ${renderTwoColumnTable([
+        { label: "No. of Employees", value: employeeDetails.noOfEmployees },
+        { label: "Salary Details", value: employeeDetails.salaryDetails },
+        { label: "PF/ESI Applied", value: employeeDetails.pfEsiApplied },
+      ])}
+
+      ${renderSubHeading("Trade References - Suppliers")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Name of Suppliers", key: "nameOfSuppliers" },
+          { header: "Contact Details", key: "contactDetails" },
+        ],
+        tradeReferencesSuppliers,
+        "No trade references (suppliers) provided"
+      )}
+
+      ${renderSubHeading("Trade References - Customers")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Name of Customer", key: "nameOfCustomer" },
+          { header: "Contact Details", key: "contactDetails" },
+        ],
+        tradeReferencesCustomers,
+        "No trade references (customers) provided"
+      )}
+
+      ${renderSubHeading("Other sources of Income")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Source of Income", key: "sourceOfIncome" },
+          { header: "Details", key: "details" },
+        ],
+        otherSources,
+        "No other sources of income provided"
+      )}
+
+      ${renderSubHeading("Loans Details")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Name of Bank / Institution", key: "nameOfBankInstitution" },
+          { header: "Product", key: "product" },
+          { header: "Loan amount", key: "loanAmount", formatter: formatCurrency },
+          { header: "EMI", key: "emi", formatter: formatCurrency },
+          {
+            header: "POS",
+            formatter: (value, item) =>
+              formatMultiline(value || item?.pos || item?.os),
+            valueGetter: (item) => item?.pos || item?.os,
+          },
+          { header: "Remarks", key: "remarks" },
+        ],
+        loanEntries,
+        "No loan details provided"
+      )}
+
+      ${renderSubHeading("Applicant's main Banking Details")}
+      ${applicantBankingTable ||
+      renderSingleColumnTable(["Applicant banking details not provided"])}
+      ${
+        applicantsMainBankingDetails.endUse
+          ? renderParagraph(
+              `<strong>End Use:</strong> ${formatMultiline(
+                applicantsMainBankingDetails.endUse
+              )}`
+            )
+          : ""
+      }
+
+      ${
+        amountPurposeText
+          ? renderSingleColumnTable([amountPurposeText])
+          : ""
+      }
+
+      ${renderSubHeading("Own contribution")}
+      ${
+        ownContributionTable ||
+        renderMultiColumnTable(
+          [
+            { header: "Particulars", valueGetter: () => "" },
+            { header: "Remarks", valueGetter: () => "" },
+          ],
+          [],
+          "No own contribution details provided"
+        )
+      }
+
+      ${renderSubHeading("Net Worth")}
+      ${renderMultiColumnTable(
+        [
+          { header: "Sr. No", key: "srNo" },
+          { header: "Type of property / Other investments like gold , LIC , FC etc.,", key: "typeOfProperty" },
+          { header: "Owner name", key: "ownerName" },
+          {
+            header: "Approx. Market value",
+            key: "approxMarketValue",
+            formatter: formatCurrency,
+          },
+          { header: "Years of ownership", key: "yearsOfOwnership" },
+        ],
+        netWorthEntries.map((entry, index) => ({
+          ...entry,
+          srNo: index + 1,
+        })),
+        "No net worth details provided"
+      )}
+
+      ${renderMultiColumnTable(
+        [
+          { header: "Particulars", key: "label" },
+          { header: "Coordinates", key: "value" },
+        ],
+        [
+          {
+            label: "Latitude",
+            value: geoCoordinates.latitude || "",
+          },
+          {
+            label: "Longitude",
+            value: geoCoordinates.longitude || "",
+          },
+        ],
+        "Geo-coordinates not available"
+      )}
+
+      ${renderSubHeading("Disclaimer:")}
+      ${renderParagraph(
+        "The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions."
+      )}
+
+      ${renderSubHeading("Photographs taken during visit")}
     </div>
-
-    <div class="align-wrapper">
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Family Details</td></tr>
-        <tr>
-          <th>About the Applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutApplicant || ""}</span></td>
-        </tr>
-        <tr>
-          <th>About the Co - Applicant</th>
-          <td colspan="5"><span class="var-value">${verificationData.familyDetails?.aboutCoApplicant || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Business Details</td></tr>
-        <tr>
-          <th>Business Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessName || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Type of Entity</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.typeOfEntity || ""}</span></td>
-        </tr>
-        <tr>
-          <th>GST Number</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.gstNumber}</span></td>
-        </tr>
-         <tr>
-          <th>Legal Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.legalName}</span></td>
-        </tr>
-        <tr>
-          <th>Trade Name</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.tradeName}</span></td>
-        </tr>      
-        <tr>
-          <th>Last GST Return(As per GST records)</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.lastGSTReturn || ""}</span></td>
-        </tr> 
-        <tr>
-          <th>Establishment</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.establishment || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Shop Address</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopAddress || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Shop Ownership</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.shopOwnership || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Godown</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownAddress || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Godown Ownership</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.godownOwnership || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Nature of Business</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.natureOfBusiness || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Product Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.productDetails || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Business Process</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.businessProcess || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Margins</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.margins || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Documents Observed</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.documentsObserved || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Activity Observed</th>
-          <td colspan="5"><span class="var-value">${verificationData.businessDetails?.activityObserved || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Inputs/Purchases</td></tr>
-        <tr>
-          <th>Details of Inputs</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.detailsOfInputs || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Purchase Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.purchaseDetails || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Order Cycle</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.orderCycle || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Avg Order Qnty</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.avgOrderQnty || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Credit Terms</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.creditTerms || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Other Remarks</th>
-          <td colspan="5"><span class="var-value">${verificationData.inputsPurchases?.otherRemarks || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-    <div style="page-break-before: always;"></div>
-
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Outputs/Supply</td></tr>
-        <tr>
-          <th>Market for Output</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.marketForOutput || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Mode of Marketing</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.modeOfMarketing || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Type of Customers</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.typeOfCustomers || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Credit Terms</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.creditTerms || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Stock of Finished Goods</th>
-          <td colspan="5"><span class="var-value">${verificationData.outputsSupply?.stockOfFinishedGoods || ""}</span></td>
-        </tr>
-        <tr><td colspan="6" class="section-header">Employee Details</td></tr>
-        <tr>
-          <th>No of Employees</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.noOfEmployees || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Salary Details</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.salaryDetails || ""}</span></td>
-        </tr>
-        <tr>
-          <th>PF/ESI Applied</th>
-          <td colspan="5"><span class="var-value">${verificationData.employeeDetails?.pfEsiApplied || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Trade References - Suppliers</td></tr>
-        <tr>
-          <th>Name of Suppliers</th>
-          <th>Contact Details</th>
-        </tr>
-        </tr>
-         ${
-           Array.isArray(verificationData.tradeReferences?.suppliers) &&
-           verificationData.tradeReferences?.suppliers.length > 0
-             ? verificationData.tradeReferences?.suppliers
-                 .map(
-                   (supplier) => `
-            <tr>
-              <td><span class="var-value">${supplier.nameOfSuppliers || ""}</span></td>
-              <td><span class="var-value">${supplier.contactDetails || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No trade references suppliers listed</td></tr>'
-         }
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Trade References - Customers</td></tr>
-        <tr>
-          <th>Name of Customers</th>
-          <th>Contact Details</th>
-        </tr>
-        </tr>
-         ${
-           Array.isArray(verificationData.tradeReferences?.customers) &&
-           verificationData.tradeReferences?.customers.length > 0
-             ? verificationData.tradeReferences?.customers
-                 .map(
-                   (customer) => `
-            <tr>
-              <td><span class="var-value">${customer.nameOfCustomer || ""}</span></td>
-              <td><span class="var-value">${customer.contactDetails || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No trade references customers listed</td></tr>'
-         }
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Other Sources of Income</td></tr>
-        <tr>
-          <th>Source of Income</th>
-          <th>Details</th>
-        </tr>
-        </tr>
-         ${
-           Array.isArray(
-             verificationData.otherSourcesOfIncome?.otherSourcesOfIncome
-           ) &&
-           verificationData.otherSourcesOfIncome?.otherSourcesOfIncome.length >
-             0
-             ? verificationData.otherSourcesOfIncome?.otherSourcesOfIncome
-                 .map(
-                   (customer) => `
-            <tr>
-              <td><span class="var-value">${customer.sourceOfIncome || ""}</span></td>
-              <td><span class="var-value">${customer.details || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No other sources of income listed</td></tr>'
-         }
-      </table>
-    </div>
-
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Loan Details</td></tr>
-        <tr>
-          <th>Name of Bank/Institution</th>
-          <th>Product</th>
-          <th>Loan Amount</th>
-          <th>EMI</th>
-          <th>POS</th>
-          <th>Remarks</th>
-        </tr>
-         ${
-           Array.isArray(verificationData.loansDetails?.loansDetails) &&
-           verificationData.loansDetails?.loansDetails.length > 0
-             ? verificationData.loansDetails?.loansDetails
-                 .map(
-                   (loan) => `
-            <tr>
-              <td><span class="var-value">${loan.nameOfBankInstitution || ""}</span></td>
-              <td><span class="var-value">${loan.product || ""}</span></td>
-              <td><span class="var-value">${loan.loanAmount || ""}</span></td>
-              <td><span class="var-value">${loan.emi || ""}</span></td>
-              <td><span class="var-value">${loan.pos || ""}</span></td>
-              <td><span class="var-value">${loan.remarks || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'
-         }
-        </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Applicants Main Banking Details</td></tr>
-        <tr>
-          <th>Bank Name</th>
-          <th>Account Holder Name</th>
-          <th>Account Type</th>
-          <th>No of Year</th>
-          <th>Limit of CC/OD</th>
-          <th>Remarks</th>
-        </tr>
-         ${
-           Array.isArray(
-             verificationData.applicantsMainBankingDetails?.bankingDetails
-           ) &&
-           verificationData.applicantsMainBankingDetails?.bankingDetails
-             .length > 0
-             ? verificationData.applicantsMainBankingDetails?.bankingDetails
-                 .map(
-                   (loan) => `
-            <tr>
-              <td><span class="var-value">${loan.bankName || ""}</span></td>
-              <td><span class="var-value">${loan.accountHolderName || ""}</span></td>
-              <td><span class="var-value">${loan.accountType || ""}</span></td>
-              <td><span class="var-value">${loan.noOfYear || ""}</span></td>
-              <td><span class="var-value">${loan.limitOfCCOD || ""}</span></td>
-              <td><span class="var-value">${loan.remarks || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No applicants main banking details available</td></tr>'
-         }
-        </table>
-    </div>
-    
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr>
-          <th>End Use</th>
-          <td colspan="6"><span class="var-value">${verificationData.applicantsMainBankingDetails?.endUse || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Own Contribution</td></tr>
-        <tr>
-          <th>Particulars</th>
-          <th>Remarks</th>
-        </tr>
-        </tr>
-         ${
-           Array.isArray(verificationData.ownContributions?.ownContributions) &&
-           verificationData.ownContributions?.ownContributions.length > 0
-             ? verificationData.ownContributions?.ownContributions
-                 .map(
-                   (customer) => `
-            <tr>
-              <td><span class="var-value">${customer.particulars || ""}</span></td>
-              <td><span class="var-value">${customer.remarks || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No own contributions listed</td></tr>'
-         }
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Net Worth</td></tr>
-        <tr>
-          <th>Type of Property/Other investments</th>
-          <th>Owner Name</th>
-          <th>Years of Ownership</th>
-          <th>Approx Market Value</th>
-        </tr>
-        </tr>
-         ${
-           Array.isArray(verificationData.netWorth?.netWorth) &&
-           verificationData.netWorth?.netWorth.length > 0
-             ? verificationData.netWorth?.netWorth
-                 .map(
-                   (customer) => `
-            <tr>
-              <td><span class="var-value">${customer.typeOfProperty || ""}</span></td>
-              <td><span class="var-value">${customer.ownerName || ""}</span></td>
-              <td><span class="var-value">${customer.yearsOfOwnership || ""}</span></td>
-              <td><span class="var-value">${customer.approxMarketValue || ""}</span></td>
-            </tr>
-          `
-                 )
-                 .join("")
-             : '<tr><td colspan="7" style="text-align: center;">No net worth listed</td></tr>'
-         }
-      </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr>
-          <th>Particulars</th>
-          <td colspan="5"><span class="var-value">${verificationData.particulars?.coordinates || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-
-  <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">FINANCIAL ANALYSIS</td></tr>
-        <tr>
-          <th>Particulars</th>
-          <th>Estimations</th>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Opening Stock</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.openingStock || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Purchase</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.purchase || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Cost of Services</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.costOfServices || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Wages</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.wages || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Hamali Charges</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.hamaliCharges || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Manufacturing Expenses</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.manufacturingExpenses || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Packing Charges</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.packingCharges || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Sales</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.sales || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Services</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.services || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Closing Stock</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.closingStock || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Salaries</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.salaries || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Rent</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.rent || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Electricity Charges</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.electricityCharges || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Printing Stationery</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.printingStationery || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Telephone Charges</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.telephoneCharges || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Postage Telegram</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.postageTelegram || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Office Maintenance</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.officeMaintenance || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Repairs Maintenance</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.repairsMaintenance || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Sadar Expenses</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.sadarExpenses || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Audit Fee</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.auditFee || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Advertisement</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.advertisement || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Bank Charges</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.bankCharges || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Insurance</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.insurance || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Depreciation</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.depreciation || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Interest On Loan</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.interestOnLoan || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Rent Received</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.rentReceived || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Commission Received</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.commissionReceived || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Net Profit</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.netProfit || 0}</span></td>
-        </tr>
-        <tr>
-          <td><span class="var-value">To Gross Profit</span></td>
-          <td><span class="var-value">${html_data.financialAnalysis?.grossProfit || 0}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Final Remarks</td></tr>
-        <tr>
-          <th>Synopsis</th>
-          <td colspan="5">
-            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              ${html_data.path || ""}
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <th>Final Recommendation</th>
-          <td colspan="5">
-            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-              ${finalRecommendationHtml}
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <br>
-    <br>
-    <br>
-    Disclaimer: 
-    <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-        The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions.
-    </ul>
-
-
-    <br>
-    
     ${pdBaseTemplateFooter(html_data)}
   `;
 };
