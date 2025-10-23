@@ -21,7 +21,14 @@ import { axisBankTemplate } from "./templates/PD/html/axis-bank.template";
 import { axisFinanceTemplate } from "./templates/PD/html/axis-finance.template";
 import { arkaFincapTemplate } from "./templates/PD/html/arka-fincap.template";
 import { heroHousingSelfTemplate } from "./templates/PD/html/hero-housing-self.template";
+import { herohousingSalariedTemplate } from "./templates/PD/html/herohousing-salaried.template";
 import { idfcHlMlTemplate } from "./templates/PD/html/idfc-hl-ml.template";
+import { idfcPlTemplate } from "./templates/PD/html/idfc-pl.template";
+import { indiaShelterSalariedTemplate } from "./templates/PD/html/india-shelter-salaried.template";
+import { indiaShelterSenpTemplate } from "./templates/PD/html/india-shelter-senp.template";
+import { axisAgriTemplate } from "./templates/PD/html/axis-agri.template";
+import { smfgSmeTemplate } from "./templates/PD/html/smfg-sme.template";
+import { adityaBirlaTemplate } from "./templates/PD/html/aditya-birla.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
 import { formSchema } from "./forms-schema";
 import {
@@ -511,6 +518,29 @@ export class PDTemplateService {
       return axisFinanceTemplate(verification, html_data);
     }
 
+    if (bankName == "Axis Agri") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return axisAgriTemplate(verification, html_data);
+    }
+
+    if (bankName == "SMFG SME") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return smfgSmeTemplate(verification, html_data);
+    }
+
     if (bankName == "Arka Fincap") {
       const html_data = await this.FormatPDImages(
         verification,
@@ -533,6 +563,50 @@ export class PDTemplateService {
       return heroHousingSelfTemplate(verification, html_data);
     }
 
+    if (bankName == "HeroHousing-Salaried") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return herohousingSalariedTemplate(verification, html_data);
+    }
+
+    if (bankName == "India Shelter SENP") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return indiaShelterSenpTemplate(verification, html_data);
+    }
+
+    if (bankName == "India Shelter Salaried") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return indiaShelterSalariedTemplate(verification, html_data);
+    }
+
+    if (bankName == "IDFC PL") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return idfcPlTemplate(verification, html_data);
+    }
+
     if (bankName == "IDFC HL & ML") {
       const html_data = await this.FormatPDImages(
         verification,
@@ -542,6 +616,17 @@ export class PDTemplateService {
         financialAnalysis
       );
       return idfcHlMlTemplate(verification, html_data);
+    }
+
+    if (bankName == "Aditya Birla") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return adityaBirlaTemplate(verification, html_data);
     }
 
     // Generic template for all other banks (uses schema-driven approach)

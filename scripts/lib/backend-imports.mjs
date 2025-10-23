@@ -3,8 +3,8 @@
  * Handles importing TypeScript backend modules for PDF generation
  */
 
+import fs from "fs";
 import { createRequire } from "module";
-import { pathToFileURL } from "url";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -12,28 +12,39 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-// Path to backend dist (compiled JS)
-const backendDistPath = path.resolve(__dirname, "../../apps/backend/dist");
+// Register ts-node so we can import backend TypeScript directly
+const tsNode = require("ts-node");
+tsNode.register({
+  transpileOnly: true,
+  project: path.resolve(__dirname, "../../apps/backend/tsconfig.json"),
+});
+
+// Path to backend source (TypeScript)
+const backendSrcPath = path.resolve(__dirname, "../../apps/backend/src");
+
+function resolveModulePath(modulePath) {
+  const tsPath = path.resolve(backendSrcPath, `${modulePath}.ts`);
+  if (fs.existsSync(tsPath)) {
+    return tsPath;
+  }
+  const indexTsPath = path.resolve(backendSrcPath, modulePath, "index.ts");
+  if (fs.existsSync(indexTsPath)) {
+    return indexTsPath;
+  }
+  throw new Error(`Cannot resolve module path for ${modulePath}`);
+}
 
 /**
  * Import compiled JavaScript module from dist folder
  */
 async function importCompiledModule(modulePath) {
   try {
-    // Import from compiled JS in dist folder
-    const fullPath = path.resolve(backendDistPath, modulePath + ".js");
-    const module = await import(fullPath);
-    return module;
+    const fullPath = resolveModulePath(modulePath);
+    return require(fullPath);
   } catch (error) {
-    try {
-      // Try requiring with CommonJS for some modules
-      const fullPath = path.resolve(backendDistPath, modulePath + ".js");
-      return require(fullPath);
-    } catch (error2) {
-      throw new Error(
-        `Failed to import module ${modulePath}: ${error.message} | ${error2.message}`
-      );
-    }
+    throw new Error(
+      `Failed to import module ${modulePath}: ${error.message}`
+    );
   }
 }
 
@@ -58,7 +69,7 @@ export async function getFormSchemas() {
 export async function getGenericPDTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/generic.template"
+      "modules/loan/templates/PD/html/generic.template"
     );
     return module.genericPDTemplate || module.default;
   } catch (error) {
@@ -103,7 +114,7 @@ export async function getAxisFinanceUBLTemplate() {
 export async function getICICITemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/icici.template"
+      "modules/loan/templates/PD/html/icici.template"
     );
     return module.iciciTemplate || module.default;
   } catch (error) {
@@ -148,7 +159,7 @@ export async function getHeroFincorpTemplate() {
 export async function getIIFLTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/iifl.template"
+      "modules/loan/templates/PD/html/iifl.template"
     );
     return module.iiflTemplate || module.default;
   } catch (error) {
@@ -160,7 +171,7 @@ export async function getIIFLTemplate() {
 export async function getYesBankTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/yes-bank.template"
+      "modules/loan/templates/PD/html/yes-bank.template"
     );
     return module.yesBankTemplate || module.default;
   } catch (error) {
@@ -177,6 +188,45 @@ export async function getTataUblTemplate() {
     return module.tataUblTemplate || module.default;
   } catch (error) {
     console.error("Failed to load Tata UBL template:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get IDFC PL template
+ */
+export async function getIdfcPlTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/idfc-pl.template"
+    );
+    return module.idfcPlTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load IDFC PL template:", error);
+    throw error;
+  }
+}
+
+export async function getIndiaShelterSalariedTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/india-shelter-salaried.template"
+    );
+    return module.indiaShelterSalariedTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load India Shelter Salaried template:", error);
+    throw error;
+  }
+}
+
+export async function getIndiaShelterSenpTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/india-shelter-senp.template"
+    );
+    return module.indiaShelterSenpTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load India Shelter SENP template:", error);
     throw error;
   }
 }
@@ -205,6 +255,42 @@ export async function getAxisFinanceTemplate() {
   }
 }
 
+export async function getAxisAgriTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/axis-agri.template"
+    );
+    return module.axisAgriTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load Axis Agri template:", error);
+    throw error;
+  }
+}
+
+export async function getSmfgSmeTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/smfg-sme.template"
+    );
+    return module.smfgSmeTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load SMFG SME template:", error);
+    throw error;
+  }
+}
+
+export async function getAdityaBirlaTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/aditya-birla.template"
+    );
+    return module.adityaBirlaTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load Aditya Birla template:", error);
+    throw error;
+  }
+}
+
 export async function getArkaFincapTemplate() {
   try {
     const module = await importCompiledModule(
@@ -229,6 +315,18 @@ export async function getHeroHousingSelfTemplate() {
   }
 }
 
+export async function getHeroHousingSalariedTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/herohousing-salaried.template"
+    );
+    return module.herohousingSalariedTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load Hero Housing Salaried template:", error);
+    throw error;
+  }
+}
+
 export async function getIdfcHlMlTemplate() {
   try {
     const module = await importCompiledModule(
@@ -247,7 +345,7 @@ export async function getIdfcHlMlTemplate() {
 export async function getPDBaseTemplate() {
   try {
     const module = await importCompiledModule(
-      "modules/loan/templates/PD/pd-base.tempate"
+      "modules/loan/templates/PD/html/pd-base.tempate"
     );
     return module.pdBaseTemplate || module.default;
   } catch (error) {
@@ -272,13 +370,20 @@ export async function loadBackendModules() {
       cholaTemplate,
       heroFincorpTemplate,
       heroHousingSelfTemplate,
+      heroHousingSalariedTemplate,
       iiflTemplate,
       yesBankTemplate,
       tataUblTemplate,
       axisBankTemplate,
       axisFinanceTemplate,
+      axisAgriTemplate,
       arkaFincapTemplate,
       idfcHlMlTemplate,
+      idfcPlTemplate,
+      indiaShelterSalariedTemplate,
+      indiaShelterSenpTemplate,
+      smfgSmeTemplate,
+      adityaBirlaTemplate,
       pdBaseTemplate,
     ] = await Promise.all([
       getFormSchemas(),
@@ -289,13 +394,20 @@ export async function loadBackendModules() {
       getCholaTemplate(),
       getHeroFincorpTemplate(),
       getHeroHousingSelfTemplate(),
+      getHeroHousingSalariedTemplate(),
       getIIFLTemplate(),
       getYesBankTemplate(),
       getTataUblTemplate(),
       getAxisBankTemplate(),
       getAxisFinanceTemplate(),
+      getAxisAgriTemplate(),
       getArkaFincapTemplate(),
       getIdfcHlMlTemplate(),
+      getIdfcPlTemplate(),
+      getIndiaShelterSalariedTemplate(),
+      getIndiaShelterSenpTemplate(),
+      getSmfgSmeTemplate(),
+      getAdityaBirlaTemplate(),
       getPDBaseTemplate(),
     ]);
 
@@ -308,13 +420,20 @@ export async function loadBackendModules() {
       cholaTemplate,
       heroFincorpTemplate,
       heroHousingSelfTemplate,
+      heroHousingSalariedTemplate,
       iiflTemplate,
       yesBankTemplate,
       tataUblTemplate,
       axisBankTemplate,
       axisFinanceTemplate,
+      axisAgriTemplate,
       arkaFincapTemplate,
       idfcHlMlTemplate,
+      idfcPlTemplate,
+      indiaShelterSalariedTemplate,
+      indiaShelterSenpTemplate,
+      smfgSmeTemplate,
+      adityaBirlaTemplate,
       pdBaseTemplate,
     };
   } catch (error) {

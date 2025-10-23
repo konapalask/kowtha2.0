@@ -3,22 +3,18 @@ export const indiaShelterSalariedSchema = {
   bankName: "India Shelter Salaried",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "generalInfo",
+      label: "General Information",
       schema: {
         type: "object",
         properties: {
+          loanNumber: {
+            type: "string",
+            title: "Loan Number",
+          },
           branch: {
             type: "string",
             title: "Branch",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
           },
           region: {
             type: "string",
@@ -28,366 +24,264 @@ export const indiaShelterSalariedSchema = {
             type: "string",
             title: "Location",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanProductHlLap",
-      label: "Loan Product (HL / LAP)",
-      schema: {
-        type: "object",
-        properties: {
-          toWhomYouMeet: {
+          latitude: {
             type: "string",
-            title: "To Whom you meet?",
+            title: "Latitude",
           },
-          nameOfTheApplicantWithDob: {
+          longitude: {
             type: "string",
-            title: "Name of the Applicant with DOB",
-          },
-          name: {
-            type: "string",
-            title: "Name",
-          },
-          dob: {
-            type: "string",
-            title: "DOB",
+            title: "Longitude",
           },
         },
       },
       required: true,
     },
     {
-      id: "maritalStatusSingleMarriedDivorcedOther",
-      label: "Marital Status (Single / Married / Divorced / Other)",
+      id: "basicDetails",
+      label: "Basic Details",
       schema: {
         type: "object",
         properties: {
-          nameOfTheSpouseWithDob: {
+          loanProduct: {
             type: "string",
-            title: "Name of the Spouse with DOB",
+            title: "Loan Product",
+            enum: ["HL", "LAP", "HL/LAP"],
           },
-          name: {
+          meetingPerson: {
             type: "string",
-            title: "Name",
+            title: "To whom you meet?",
           },
-          dob: {
+          applicantName: {
             type: "string",
-            title: "DOB",
+            title: "Applicant Name",
           },
-          doesTheSpouseWorkIfYesThenGiveBrief: {
+          applicantDob: {
             type: "string",
-            title: "Does the Spouse Work (If yes then give brief)",
+            title: "Applicant DOB",
+            format: "date",
           },
-          qualificationBelow1010thPass12thPassDiplomaItiCertificationGraduatePgProfessionalCertification:
-            {
-              type: "string",
-              title:
-                "Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
+          maritalStatus: {
+            type: "string",
+            title: "Marital Status",
+            enum: ["Single", "Married", "Divorced", "Other"],
+          },
+          spouseName: {
+            type: "string",
+            title: "Spouse Name",
+          },
+          spouseDob: {
+            type: "string",
+            title: "Spouse DOB",
+            format: "date",
+          },
+          spouseWorkDetails: {
+            type: "string",
+            title: "Does the spouse work? (If yes, brief details)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
+          },
+          qualification: {
+            type: "string",
+            title: "Qualification",
+            enum: [
+              "Below 10",
+              "10th Pass",
+              "12th Pass",
+              "Diploma",
+              "ITI Certification",
+              "Graduate",
+              "PG",
+              "Professional Certification",
+            ],
+          },
+          category: {
+            type: "string",
+            title: "Category",
+            enum: ["General", "SC", "ST", "OBC", "Others"],
+          },
+          totalFamilyMembers: {
+            type: "integer",
+            title: "Total No. of Family Members",
+            minimum: 0,
+          },
+          nonEarningMembers: {
+            type: "integer",
+            title: "No. of non-earning members / dependents",
+            minimum: 0,
+          },
+          dependentsChildren: {
+            type: "integer",
+            title: "Dependents - Children",
+            minimum: 0,
+          },
+          dependentsAdults: {
+            type: "integer",
+            title: "Dependents - Adults",
+            minimum: 0,
+          },
+          dependentsOthers: {
+            type: "integer",
+            title: "Dependents - Others",
+            minimum: 0,
+          },
         },
       },
       required: true,
     },
     {
-      id: "totalNoOfFamilyMembers",
-      label: "Total No. of Family Members",
+      id: "residenceDetails",
+      label: "Residence Details",
       schema: {
         type: "object",
         properties: {
-          noOfNonEarningMembersDependants: {
-            type: "integer",
-            title: "No of non-earning members / dependants",
-          },
-          numberOfDependents: {
-            type: "integer",
-            title: "Number of Dependents",
-          },
-          children: {
+          residenceAddress: {
             type: "string",
-            title: "Children",
+            title: "Residence Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          adults: {
-            type: "string",
-            title: "Adults",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "address",
-      label: "Address",
-      schema: {
-        type: "object",
-        properties: {
-          noOfYearsAtCurrentResidence: {
+          yearsAtCurrentResidence: {
             type: "number",
-            title: "No of Years at Current Residence",
+            title: "Years at Current Residence",
+            minimum: 0,
           },
-          areaInSqFt: {
+          areaSqft: {
             type: "string",
             title: "Area (in Sq ft)",
           },
-          monthlyRentSecurityDepositIfRented: {
+          monthlyRentDeposit: {
             type: "number",
-            title: "Monthly Rent & Security Deposit (if Rented)",
+            title: "Monthly Rent & Security Deposit (if rented)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          purchasePriceMvIfOwned: {
+          purchasePriceMv: {
             type: "number",
-            title: "Purchase Price & MV (if owned)",
+            title: "Purchase price & MV (if owned)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          numberOfYearsInCurrentCity3Years3Years: {
-            type: "number",
-            title: "Number of Years in Current City (<=3 Years / >3 Years)",
+          yearsInCurrentCity: {
+            type: "string",
+            title: "Years in Current City",
+            enum: ["<=3 Years", ">3 Years"],
           },
         },
       },
       required: true,
     },
     {
-      id: "creditCardDetails",
-      label: "Credit Card details",
+      id: "financialProfile",
+      label: "Financial Profile",
       schema: {
         type: "object",
         properties: {
-          monthlyHouseholdExpensesRs: {
+          otherIncome: {
             type: "string",
-            title: "Monthly Household expenses (Rs.)",
+            title: "Other Income",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          netWorth: {
+            type: "string",
+            title: "Net Worth (Car / Property / Investments)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           existingRelationshipWithIndiashelter: {
             type: "string",
             title: "Existing Relationship with Indiashelter",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "employerDetails",
-      label: "Employer Details",
-      schema: {
-        type: "object",
-        properties: {
-          employerName: {
+          creditCardDetails: {
             type: "string",
-            title: "Employer Name",
+            title: "Credit Card Details",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "employerAddress",
-      label: "Employer Address",
-      schema: {
-        type: "object",
-        properties: {
-          designation: {
-            type: "string",
-            title: "Designation",
-          },
-          currentMonthlySalary: {
+          monthlyHouseholdExpenses: {
             type: "number",
-            title: "Current Monthly Salary",
-          },
-          gross: {
-            type: "string",
-            title: "Gross",
-          },
-          net: {
-            type: "string",
-            title: "Net",
-          },
-          noOfYrsInPresentEmployment: {
-            type: "integer",
-            title: "No of yrs in present employment",
+            title: "Monthly Household expenses (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "applicantSJobProfile",
-      label: "Applicant's Job Profile",
+      id: "loanPurpose",
+      label: "Loan Purpose & Requirement",
       schema: {
         type: "object",
         properties: {
-          aboutTheCompany: {
+          purposes: {
+            type: "array",
+            title: "Purpose of Loan",
+            uniqueItems: true,
+            items: {
+              type: "string",
+              enum: [
+                "Flat Purchase",
+                "House Purchase",
+                "Plot Purchase",
+                "Construction of Residential House Property",
+                "Business Development",
+                "Improvement / Extension",
+                "Balance Transfer",
+                "Plot + Construction",
+              ],
+            },
+          },
+          otherPurpose: {
             type: "string",
-            title: "About the company",
+            title: "Other Purpose (if any)",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "customerLocationOfficeBusinessGeoTagLatitudeLongitude",
-      label:
-        "Customer Location (Office / Business GEO Tag) (Latitude & Longitude)",
-      schema: {
-        type: "object",
-        properties: {
-          previousEmployment: {
-            type: "string",
-            title: "Previous Employment",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "familyMemberDetails",
-      label: "Family Member Details",
-      schema: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            title: "Name",
-          },
-          relationWithApplicant: {
-            type: "string",
-            title: "Relation with Applicant",
-          },
-          ageYrs: {
-            type: "integer",
-            title: "Age (yrs)",
-          },
-          occupationJobBusiness: {
-            type: "string",
-            title: "Occupation (Job / Business)",
-          },
-          educationalQualificationAlsoMentionIfGovtOrPrivateInstitution: {
-            type: "string",
-            title:
-              "Educational Qualification (Also mention if Govt. or Private institution)",
-          },
-          contactNo: {
-            type: "string",
-            title: "Contact no",
-            pattern: "^[0-9]{10}$",
-          },
-          stayingWithApplicantYesNo: {
-            type: "integer",
-            title: "Staying with Applicant (yes/no)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanType",
-      label: "Loan Type",
-      schema: {
-        type: "object",
-        properties: {
-          sanctionAmt: {
-            type: "string",
-            title: "Sanction Amt.",
-          },
-          emi: {
+          minimumLoanAmount: {
             type: "number",
-            title: "EMI",
+            title: "Minimum Loan Amount Required (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          noOfEmiPaid: {
-            type: "number",
-            title: "No. of EMI Paid",
-          },
-          balTenure: {
-            type: "integer",
-            title: "Bal. Tenure",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "bankName",
-      label: "Bank Name",
-      schema: {
-        type: "object",
-        properties: {
-          accountNo: {
-            type: "integer",
-            title: "Account no.",
-          },
-          accountTypeSavingCurrent: {
-            type: "number",
-            title: "Account Type (Saving / Current)",
-          },
-          branchName: {
-            type: "string",
-            title: "Branch Name",
-          },
-          operatingSinceYrs: {
-            type: "string",
-            title: "Operating Since (Yrs)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "purposeOfLoan",
-      label: "Purpose of Loan",
-      schema: {
-        type: "object",
-        properties: {
-          flatPurchase: {
-            type: "string",
-            title: "Flat Purchase",
-          },
-          housePurchase: {
-            type: "string",
-            title: "House Purchase",
-          },
-          plotPurchase: {
-            type: "string",
-            title: "Plot Purchase",
-          },
-          constructionOfResidentialHouseProperty: {
-            type: "string",
-            title: "Construction of Residential House Property",
-          },
-          businessDevelopment: {
-            type: "string",
-            title: "Business development",
-          },
-          improvementExtension: {
-            type: "string",
-            title: "Improvement/Extension",
-          },
-          balanceTransfer: {
-            type: "number",
-            title: "Balance Transfer",
-          },
-          plotConstruction: {
-            type: "string",
-            title: "Plot + Construction",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "minimumLoanAmountRequiredRs",
-      label: "Minimum Loan Amount Required (Rs.)",
-      schema: {
-        type: "object",
-        properties: {
           tenureRequired: {
-            type: "integer",
+            type: "string",
             title: "Tenure required",
           },
           comfortableEmi: {
             type: "number",
             title: "Comfortable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
       id: "collateralDetails",
@@ -395,229 +289,474 @@ export const indiaShelterSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          statusOfPropertyToBePurchasedReadyToMoveUnderConstructionConstructionYetToStart:
-            {
+          propertyStatus: {
+            type: "string",
+            title: "Status of Property to be Purchased",
+            enum: [
+              "Ready to Move",
+              "Under Construction",
+              "Construction Yet to Start",
+            ],
+          },
+          usageAfterPurchase: {
+            type: "array",
+            title: "Usage of Property After Purchase",
+            uniqueItems: true,
+            items: {
               type: "string",
-              title:
-                "Status of Property to be Purchased (Ready to move / Under Construction / Construction Yet to Start)",
+              enum: ["Self-Occupancy", "Investment", "Renting Purpose", "Others"],
             },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "propertyAddress",
-      label: "Property Address",
-      schema: {
-        type: "object",
-        properties: {
-          areaInSqft: {
+          },
+          usageOtherNotes: {
+            type: "string",
+            title: "If Others, specify usage",
+          },
+          propertyAddress: {
+            type: "string",
+            title: "Property Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          propertyAreaSqft: {
             type: "string",
             title: "Area (in Sqft)",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "agreementValue",
-      label: "Agreement value",
-      schema: {
-        type: "object",
-        properties: {
+          ownershipDuration: {
+            type: "string",
+            title: "Ownership of the property from how many years?",
+          },
+          agreementValue: {
+            type: "number",
+            title: "Agreement value",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
           ownContribution: {
-            type: "string",
+            type: "number",
             title: "Own Contribution",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "referencesDetails",
-      label: "References Details",
+      id: "references",
+      label: "Reference Details",
       schema: {
         type: "object",
         properties: {
-          reference1: {
-            type: "string",
-            title: "Reference 1",
-          },
-          name: {
-            type: "string",
-            title: "Name",
+          references: {
+            type: "array",
+            minItems: 1,
+            title: "References",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                address: {
+                  type: "string",
+                  title: "Address",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                  pattern: "^[0-9]{10}$",
+                },
+                email: {
+                  type: "string",
+                  title: "Email Address",
+                  format: "email",
+                },
+                yearsKnown: {
+                  type: "number",
+                  title: "Years Known",
+                  minimum: 0,
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "address",
-      label: "Address",
+      id: "employerDetails",
+      label: "Employer Details",
       schema: {
         type: "object",
         properties: {
-          relationship: {
+          existingRelationshipWithIndiashelter: {
             type: "string",
-            title: "Relationship",
+            title: "Existing Relationship with Indiashelter",
           },
-          contactNumber: {
+          employerName: {
             type: "string",
-            title: "Contact Number",
-            pattern: "^[0-9]{10}$",
+            title: "Employer Name",
+          },
+          employerAddress: {
+            type: "string",
+            title: "Employer Address",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          designation: {
+            type: "string",
+            title: "Designation",
+          },
+          salaryGross: {
+            type: "number",
+            title: "Current Monthly Salary - Gross",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          salaryNet: {
+            type: "number",
+            title: "Current Monthly Salary - Net",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          yearsInPresentEmployment: {
+            type: "number",
+            title: "No. of years in present employment",
+            minimum: 0,
+          },
+          jobProfile: {
+            type: "string",
+            title: "Applicant's Job Profile",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          companyOverview: {
+            type: "string",
+            title: "About the company",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          officeGeoTag: {
+            type: "string",
+            title: "Customer Location (Office / Business GEO Tag)",
+          },
+          previousEmployment: {
+            type: "string",
+            title: "Previous Employment",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "emailAddress",
-      label: "Email address",
+      id: "familyMembers",
+      label: "Family Member Details",
       schema: {
         type: "object",
         properties: {
-          noOfYearKnownTheApplicant: {
-            type: "integer",
-            title: "No of Year known the applicant",
-          },
-          reference2: {
-            type: "string",
-            title: "Reference 2",
-          },
-          name: {
-            type: "string",
-            title: "Name",
+          familyMembers: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationWithApplicant: {
+                  type: "string",
+                  title: "Relation with Applicant",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age (yrs)",
+                  minimum: 0,
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation (Job / Business)",
+                },
+                educationalQualification: {
+                  type: "string",
+                  title: "Educational Qualification (incl. Govt/Private)",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                  pattern: "^[0-9]{10}$",
+                },
+                stayingWithApplicant: {
+                  type: "string",
+                  title: "Staying with Applicant",
+                  enum: ["Yes", "No"],
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "address",
-      label: "Address",
+      id: "currentLoanDetails",
+      label: "Current Loan Details",
       schema: {
         type: "object",
         properties: {
-          relationship: {
-            type: "string",
-            title: "Relationship",
-          },
-          contactNumber: {
-            type: "string",
-            title: "Contact Number",
-            pattern: "^[0-9]{10}$",
+          currentLoans: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank / FI Name",
+                },
+                loanType: {
+                  type: "string",
+                  title: "Loan Type",
+                },
+                sanctionAmount: {
+                  type: "number",
+                  title: "Sanction Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                emisPaid: {
+                  type: "number",
+                  title: "No. of EMI Paid",
+                  minimum: 0,
+                },
+                balanceTenor: {
+                  type: "string",
+                  title: "Balance Tenor",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "emailAddress",
-      label: "Email address",
+      id: "bankingDetails",
+      label: "Banking Details",
       schema: {
         type: "object",
         properties: {
-          noOfYearKnownTheApplicant: {
-            type: "integer",
-            title: "No of Year known the applicant",
+          bankingAccounts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountNumber: {
+                  type: "string",
+                  title: "Account Number",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
+                  enum: ["Savings", "Current"],
+                },
+                branchName: {
+                  type: "string",
+                  title: "Branch Name",
+                },
+                operatingSinceYears: {
+                  type: "string",
+                  title: "Operating Since (Years)",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "tpcThirdPartyCheckDetails",
-      label: "TPC (Third Party check) Details",
+      id: "tpcDetails",
+      label: "TPC (Third Party Check) Details",
       schema: {
         type: "object",
         properties: {
-          officeReferenceCheck: {
-            type: "string",
-            title: "Office Reference check",
-          },
-          name: {
-            type: "string",
-            title: "Name",
-          },
-          mobileNo: {
-            type: "string",
-            title: "Mobile No.",
-            pattern: "^[0-9]{10}$",
-          },
-          knowingSinceMonthsYears: {
-            type: "integer",
-            title: "Knowing since (Months / Years)",
-          },
-          feedbackPositiveNegative: {
-            type: "string",
-            title: "Feedback (Positive / Negative)",
-          },
-          documentVerified: {
-            type: "string",
-            title: "Document Verified",
-          },
-          documentType: {
-            type: "string",
-            title: "Document Type",
-          },
-          originalCopyNotProvided: {
-            type: "integer",
-            title: "Original / Copy / Not Provided",
+          officeReferences: {
+            type: "array",
+            title: "Office Reference Checks",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                mobileNumber: {
+                  type: "string",
+                  title: "Mobile Number",
+                  pattern: "^[0-9]{10}$",
+                },
+                knowingSince: {
+                  type: "string",
+                  title: "Knowing Since (Months / Years)",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative", "Neutral"],
+                },
+                comments: {
+                  type: "string",
+                  title: "Comments",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "detailsCrossCheckedYesNo",
-      label: "Details Cross - Checked (Yes / No)",
+      id: "documentVerification",
+      label: "Document Verification",
       schema: {
         type: "object",
         properties: {
-          commentsIfAny: {
-            type: "string",
-            title: "Comments (If any)",
-          },
-          toBeFilledByPdOfficer: {
-            type: "string",
-            title: "To be filled by PD Officer",
+          documents: {
+            type: "array",
+            title: "Documents Checked",
+            items: {
+              type: "object",
+              properties: {
+                documentType: {
+                  type: "string",
+                  title: "Document Type",
+                },
+                documentStatus: {
+                  type: "string",
+                  title: "Original / Copy / Not Provided",
+                  enum: ["Original", "Copy", "Not Provided"],
+                },
+                crossChecked: {
+                  type: "string",
+                  title: "Details Cross Checked",
+                  enum: ["Yes", "No"],
+                },
+                comments: {
+                  type: "string",
+                  title: "Comments",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "caseWeakness",
-      label: "Case Weakness",
+      id: "pdOfficerReview",
+      label: "PD Officer Review",
       schema: {
         type: "object",
         properties: {
-          pdStatusPositiveNegativeCreditRefer: {
+          majorObservations: {
             type: "string",
-            title: "PD status (Positive / Negative / Credit Refer)",
+            title: "Major Observations / Comments / Concerns",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          nameOfPdOfficer: {
+          caseStrengths: {
+            type: "string",
+            title: "Case Strengths",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          caseWeakness: {
+            type: "string",
+            title: "Case Weakness",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          pdStatus: {
+            type: "string",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Referred"],
+          },
+          pdOfficerName: {
             type: "string",
             title: "Name of PD Officer",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "dateTimeOfVisit",
-      label: "Date & Time of Visit",
-      schema: {
-        type: "object",
-        properties: {
-          signatureOfThePdOfficer: {
+          visitDate: {
+            type: "string",
+            title: "Date of Visit",
+            format: "date",
+          },
+          visitTime: {
+            type: "string",
+            title: "Time of Visit",
+          },
+          officerSignature: {
             type: "string",
             title: "Signature of the PD Officer",
           },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default indiaShelterSalariedSchema;

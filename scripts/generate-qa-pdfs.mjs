@@ -251,13 +251,20 @@ async function generateBankPDF(bankName, backendModules) {
       cholaTemplate,
       heroFincorpTemplate,
       heroHousingSelfTemplate,
+      heroHousingSalariedTemplate,
       iiflTemplate,
       yesBankTemplate,
       tataUblTemplate,
       axisBankTemplate,
       axisFinanceTemplate,
+      axisAgriTemplate,
+      smfgSmeTemplate,
+      adityaBirlaTemplate,
       arkaFincapTemplate,
       idfcHlMlTemplate,
+      idfcPlTemplate,
+      indiaShelterSalariedTemplate,
+      indiaShelterSenpTemplate,
     } = backendModules;
 
     if (bankName === "RBL" || bankName === "Rbl") {
@@ -292,6 +299,9 @@ async function generateBankPDF(bankName, backendModules) {
       // Axis Bank uses custom template
       console.log(`  Using Axis Bank custom template`);
       htmlTemplate = axisBankTemplate(verificationData, html_data);
+    } else if (bankName === "Axis Agri") {
+      console.log(`  Using Axis Agri custom template`);
+      htmlTemplate = axisAgriTemplate(verificationData, html_data);
     } else if (bankName === "Axis Finance UBL Above 10L") {
       // Axis Finance UBL Above 10L uses custom template
       console.log(`  Using Axis Finance UBL custom template`);
@@ -318,6 +328,24 @@ async function generateBankPDF(bankName, backendModules) {
       // Hero Housing Self Employed uses custom template
       console.log(`  Using Hero Housing Self custom template`);
       htmlTemplate = heroHousingSelfTemplate(verificationData, html_data);
+    } else if (bankName === "HeroHousing-Salaried") {
+      console.log(`  Using Hero Housing Salaried custom template`);
+      htmlTemplate = heroHousingSalariedTemplate(verificationData, html_data);
+    } else if (bankName === "India Shelter SENP") {
+      console.log(`  Using India Shelter SENP custom template`);
+      htmlTemplate = indiaShelterSenpTemplate(verificationData, html_data);
+    } else if (bankName === "India Shelter Salaried") {
+      console.log(`  Using India Shelter Salaried custom template`);
+      htmlTemplate = indiaShelterSalariedTemplate(verificationData, html_data);
+    } else if (bankName === "SMFG SME") {
+      console.log(`  Using SMFG SME custom template`);
+      htmlTemplate = smfgSmeTemplate(verificationData, html_data);
+    } else if (bankName === "Aditya Birla") {
+      console.log(`  Using Aditya Birla custom template`);
+      htmlTemplate = adityaBirlaTemplate(verificationData, html_data);
+    } else if (bankName === "IDFC PL") {
+      console.log(`  Using IDFC PL custom template`);
+      htmlTemplate = idfcPlTemplate(verificationData, html_data);
     } else if (bankName === "IDFC HL & ML") {
       // IDFC HL & ML uses custom template
       console.log(`  Using IDFC HL & ML custom template`);
