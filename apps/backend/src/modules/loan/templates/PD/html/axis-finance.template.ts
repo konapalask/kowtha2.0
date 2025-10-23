@@ -1,4 +1,4 @@
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 type KeyValueRow = {
   label: string;

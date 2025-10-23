@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 export const iciciTemplate = (verificationData: any, html_data: any) => {
   const date = new Date();

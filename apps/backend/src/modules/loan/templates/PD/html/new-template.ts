@@ -1,6 +1,6 @@
 import { format, toZonedTime } from 'date-fns-tz';
 import { NewTemplateInterface } from '../interface/new-template.interface';
-import { pdBaseTemplate } from './pd-base.tempate';
+import { pdBaseTemplate } from './pd-base.template';
 
 export const newTemplate = (verificationData: NewTemplateInterface, html_data: any) => {
 

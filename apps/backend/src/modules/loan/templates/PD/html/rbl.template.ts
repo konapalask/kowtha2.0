@@ -1,5 +1,5 @@
 import { RBLInterface } from "../interface/rbl.interface";
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 type KeyValueRow = {
   label: string;

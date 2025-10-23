@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate } from "./pd-base.template";
 
 export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const date = new Date();

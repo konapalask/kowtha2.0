@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate } from "./pd-base.template";
 
 export const herohousingSelfTemplate = (
   verificationData: any,

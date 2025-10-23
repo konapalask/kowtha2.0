@@ -116,6 +116,7 @@ model Verification {
   verifierId          Int?
   businessName        String?
   isPostponed         Boolean?
+  initialSubmitted      Boolean? @default(false)
   postponedDate       DateTime?
   postponedReason     String?
   currentOfficeName   String?

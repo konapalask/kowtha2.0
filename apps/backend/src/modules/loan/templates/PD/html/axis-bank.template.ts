@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 export const axisBankTemplate = (verificationData: any, html_data: any) => {
   console.log("=== AXIS BANK TEMPLATE FUNCTION CALLED ===");

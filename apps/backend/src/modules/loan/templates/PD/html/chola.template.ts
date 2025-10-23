@@ -1,4 +1,4 @@
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
