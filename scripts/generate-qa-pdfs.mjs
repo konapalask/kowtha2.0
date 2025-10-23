@@ -260,6 +260,8 @@ async function generateBankPDF(bankName, backendModules) {
       axisAgriTemplate,
       smfgSmeTemplate,
       adityaBirlaTemplate,
+      niwasSalariedTemplate,
+      niwasSenpTemplate,
       arkaFincapTemplate,
       idfcHlMlTemplate,
       idfcPlTemplate,
@@ -331,6 +333,12 @@ async function generateBankPDF(bankName, backendModules) {
     } else if (bankName === "HeroHousing-Salaried") {
       console.log(`  Using Hero Housing Salaried custom template`);
       htmlTemplate = heroHousingSalariedTemplate(verificationData, html_data);
+    } else if (bankName === "Niwas Salaried") {
+      console.log(`  Using Niwas Salaried custom template`);
+      htmlTemplate = niwasSalariedTemplate(verificationData, html_data);
+    } else if (bankName === "Niwas Senp") {
+      console.log(`  Using Niwas Senp custom template`);
+      htmlTemplate = niwasSenpTemplate(verificationData, html_data);
     } else if (bankName === "India Shelter SENP") {
       console.log(`  Using India Shelter SENP custom template`);
       htmlTemplate = indiaShelterSenpTemplate(verificationData, html_data);
