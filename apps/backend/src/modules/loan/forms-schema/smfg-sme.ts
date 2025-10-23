@@ -3,14 +3,14 @@ export const smfgSmeSchema = {
   bankName: "SMFG SME",
   sections: [
     {
-      id: "basicDetails",
-      label: "Basic Details",
+      id: "generalInfo",
+      label: "General Information",
       schema: {
         type: "object",
         properties: {
-          branchCode: {
+          branchName: {
             type: "string",
-            title: "Branch Code",
+            title: "Branch Name",
           },
           applicationReferenceNo: {
             type: "string",
@@ -25,7 +25,7 @@ export const smfgSmeSchema = {
           applicantOfficeAddress: {
             type: "string",
             title: "Applicant Office Address",
-            readOnly: true,
+            ui: { widget: "textarea", rows: 2 },
           },
           personMetName: {
             type: "string",
@@ -39,26 +39,6 @@ export const smfgSmeSchema = {
             type: "string",
             title: "Person Met - Mobile No",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
       },
       required: true,
@@ -71,26 +51,16 @@ export const smfgSmeSchema = {
         properties: {
           familyMembers: {
             type: "array",
-            title:
-              "Details of Family Members (Name, Age, Occupation - Tick on Dependents)",
+            title: "Family Members (Name / Age / Occupation)",
             items: {
               type: "object",
               properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                age: {
-                  type: "integer",
-                  title: "Age",
-                },
-                occupation: {
-                  type: "string",
-                  title: "Occupation",
-                },
+                name: { type: "string", title: "Name" },
+                age: { type: "integer", title: "Age" },
+                occupation: { type: "string", title: "Occupation" },
                 isDependent: {
                   type: "string",
-                  title: "Is Dependent",
+                  title: "Dependent",
                   enum: ["Yes", "No"],
                 },
               },
@@ -99,49 +69,50 @@ export const smfgSmeSchema = {
           residenceAddress: {
             type: "string",
             title: "Residence Address",
+            ui: { widget: "textarea", rows: 2 },
           },
           ownershipStatus: {
             type: "string",
-            title: "Whether Self Owned / Parental / Rented",
+            title: "Residence Ownership",
             enum: ["Self Owned", "Parental", "Rented"],
           },
-          areaOfHouseProperty: {
+          houseArea: {
             type: "string",
             title: "Area of the House Property",
           },
-          estimatedMarketValue: {
+          houseMarketValue: {
             type: "number",
             title: "Estimated Market Value",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "residenceAndPropertyDetails",
-      label: "Residence and Property Details",
-      schema: {
-        type: "object",
-        properties: {
-          noOfYearsInSameCity: {
-            type: "integer",
-            title: "No. of Years in Same City",
+          yearsAtResidence: {
+            type: "string",
+            title: "Years at Same Residence",
+          },
+          yearsInCity: {
+            type: "string",
+            title: "Years in Same City",
           },
           permanentAddress: {
             type: "string",
             title: "Permanent Address",
+            ui: { widget: "textarea", rows: 2 },
           },
-          detailsOfOtherOwnedProperty: {
+          otherOwnedProperty: {
             type: "string",
-            title: "Details of Other Owned Property in the City",
+            title: "Other Owned Property in City",
           },
-          anyOtherSourceOfIncome: {
-            type: "number",
-            title: "Any Other Source of Income Apart from This Business",
+          otherIncomeSources: {
+            type: "string",
+            title: "Any other source of income apart from this business",
+            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
-      required: true,
     },
     {
       id: "businessInformation",
@@ -149,15 +120,8 @@ export const smfgSmeSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfBusiness: {
-            type: "string",
-            title: "Name of Business",
-            readOnly: true,
-          },
-          natureOfBusiness: {
-            type: "string",
-            title: "Nature of Business",
-          },
+          businessName: { type: "string", title: "Name of Business" },
+          natureOfBusiness: { type: "string", title: "Nature of Business" },
           constitution: {
             type: "string",
             title: "Constitution",
@@ -165,251 +129,302 @@ export const smfgSmeSchema = {
               "Proprietorship",
               "Partnership",
               "Private Limited",
-              "Limited Liability Partnership",
+              "LLP",
+              "Other",
             ],
           },
-          partnersDirectorsDetails: {
-            type: "array",
-            title: "Name of Partners/Directors and Share %",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                sharePercentage: {
-                  type: "number",
-                  title: "Share %",
-                },
-              },
-            },
+          partners: {
+            type: "string",
+            title: "Partners / Directors and Share %",
+            ui: { widget: "textarea", rows: 2 },
           },
-          typeOfCustomer: {
+          customerType: {
             type: "string",
             title: "Type of Customer",
           },
-          stabilityInSameBusinessYears: {
+          businessStartDate: {
+            type: "string",
+            title: "Business Started Since",
+          },
+          promoterExperience: {
+            type: "string",
+            title: "Promoter Experience (Years)",
+          },
+          stabilityYears: {
             type: "integer",
-            title: "Stability in Same Business - No. of Years",
+            title: "Stability in Same Business (Years)",
           },
           stabilityVerifiedBy: {
             type: "string",
             title:
-              "Stability Verified By (Registration Certificate / Distribution / Dealership Letter)",
+              "Stability Verified By (Registration / Distribution / Dealership Letter)",
           },
-          familyStructureInvolvedInBusiness: {
+          familyInvolved: {
             type: "string",
             title: "Family Structure Involved in Business",
           },
-          businessPremisesOwnership: {
+          premisesOwnership: {
             type: "string",
-            title: "Business Premises Whether Owned or Rented",
-            enum: ["Owned", "Rented"],
+            title: "Business Premises Ownership",
+            enum: ["Owned", "Rented", "Parental"],
+          },
+          premiseType: {
+            type: "string",
+            title: "Locality of Business / Office",
+          },
+          isResidenceCumOffice: {
+            type: "string",
+            title: "Residence cum Office setup",
+            enum: ["Yes", "No"],
+          },
+          nameBoardSeen: {
+            type: "string",
+            title: "Name Board Seen? What was written",
           },
         },
       },
-      required: true,
     },
     {
-      id: "salesAndFinancials",
-      label: "Sales and Financials",
+      id: "financials",
+      label: "Financials & Operations",
       schema: {
         type: "object",
         properties: {
-          actualMonthlySales: {
+          monthlySales: {
             type: "number",
-            title: "Actual Monthly Sales/Receipts as Per Customer",
+            title: "Actual Monthly Sales / Receipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           percentSalesOnCredit: {
             type: "number",
-            title: "What % Sales is Done on Credit",
+            title: "Sales on Credit (%)",
           },
-          majorCustomers: {
+          manufacturingProcess: {
             type: "string",
-            title: "Major Customers",
+            title: "Manufacturing Process / Trading Details",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          salesConcentration: {
+            type: "string",
+            title: "Is sales concentration >50% on one party?",
+          },
+          businessCycleDebtors: {
+            type: "string",
+            title: "Business Cycle - Debtors (credit days & amount)",
+          },
+          businessCycleCreditors: {
+            type: "string",
+            title: "Business Cycle - Creditors (credit days & amount)",
+          },
+          stockValuation: {
+            type: "string",
+            title: "Stock valuation as on date",
+          },
+          grossMargin: {
+            type: "string",
+            title: "Gross & Net Margins in Business",
+          },
+          netSavings: {
+            type: "number",
+            title: "Monthly Net Saving after Expenses (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          numberOfEmployees: {
+            type: "integer",
+            title: "Number of Employees",
           },
           majorSuppliers: {
-            type: "string",
+            type: "array",
             title: "Major Suppliers",
+            items: {
+              type: "string",
+              title: "Supplier",
+            },
+          },
+          majorCustomers: {
+            type: "array",
+            title: "Major Customers",
+            items: {
+              type: "string",
+              title: "Customer",
+            },
+          },
+          registrationCertifications: {
+            type: "string",
+            title: "Registration / Certification Details",
+          },
+          taxApplicability: {
+            type: "string",
+            title: "Applicability of VAT / Excise / Service Tax",
+          },
+          latestTaxReturn: {
+            type: "string",
+            title: "Latest Quarter VAT / Service Tax Paid",
           },
         },
       },
-      required: true,
     },
     {
-      id: "customersAndSuppliers",
-      label: "Customers and Suppliers",
+      id: "essChecklist",
+      label: "Environmental and Social Safeguards (ESS)",
       schema: {
         type: "object",
         properties: {
-          customers: {
+          essResponses: {
             type: "array",
-            title: "Regular Customers",
+            title: "ESS Checklist Responses",
             items: {
               type: "object",
               properties: {
-                name: {
+                question: { type: "string", title: "Question" },
+                response: {
                   type: "string",
-                  title: "Name",
-                },
-                contactNo: {
-                  type: "string",
-                  title: "Contact No",
-                },
-                feedback: {
-                  type: "string",
-                  title: "Feedback",
+                  title: "Response",
+                  enum: ["Yes", "No"],
                 },
               },
             },
           },
-          suppliers: {
-            type: "array",
-            title: "Regular Suppliers",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                contactNo: {
-                  type: "string",
-                  title: "Contact No",
-                },
-                feedback: {
-                  type: "string",
-                  title: "Feedback",
-                },
-              },
-            },
+          essOthers: {
+            type: "string",
+            title: "Other ESS notes",
+            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
-      required: true,
-    },
-    {
-      id: "assets",
-      label: "Assets",
-      schema: {
-        type: "object",
-        properties: {
-          assets: {
-            type: "array",
-            title: "Assets Owned",
-            items: {
-              type: "object",
-              properties: {
-                assetType: {
-                  type: "string",
-                  title: "Asset Type",
-                },
-                description: {
-                  type: "string",
-                  title: "Description",
-                },
-                marketValue: {
-                  type: "string",
-                  title: "Market Value",
-                },
-                ownerName: {
-                  type: "string",
-                  title: "Owner Name",
-                },
-              },
-            },
-          },
-        },
-      },
-      required: true,
     },
     {
       id: "existingLoans",
-      label: "Existing Loans",
+      label: "Existing Loan Details",
       schema: {
         type: "object",
         properties: {
           existingLoans: {
             type: "array",
-            title: "Existing Loans",
             items: {
               type: "object",
               properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                typeOfLoan: {
-                  type: "string",
-                  title: "Type of Loan",
-                },
+                loanType: { type: "string", title: "Type of Loan" },
+                bankName: { type: "string", title: "Bank Name" },
                 loanAmount: {
-                  type: "string",
+                  type: "number",
                   title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
                 },
                 emi: {
-                  type: "string",
+                  type: "number",
                   title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
                 },
-                status: {
-                  type: "string",
-                  title: "Status",
-                  enum: ["Open", "Closed"],
-                },
+                tenureRemaining: { type: "string", title: "Tenure Remaining" },
               },
             },
           },
         },
       },
-      required: true,
     },
     {
-      id: "bankingDetails",
-      label: "Banking Details",
+      id: "bankingBehaviour",
+      label: "Banking Behaviour",
       schema: {
         type: "object",
         properties: {
-          bankingDetails: {
+          bankingAccounts: {
             type: "array",
-            title: "Banking Details",
             items: {
               type: "object",
               properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
+                bankName: { type: "string", title: "Bank Name" },
+                accountNumber: { type: "string", title: "Account Number" },
                 accountType: {
                   type: "string",
                   title: "Account Type",
-                  enum: ["Savings", "Current", "CC/OD"],
+                  enum: ["Current", "Savings", "CC/OD"],
                 },
-                noOfYears: {
-                  type: "integer",
-                  title: "No. of Years",
+                operatingSince: {
+                  type: "string",
+                  title: "Operating Since",
+                },
+                vintage: { type: "string", title: "Vintage of account" },
+                minBalance: { type: "string", title: "CC/OD Min Balance" },
+                customerBehaviour: {
+                  type: "string",
+                  title: "Customer Behaviour",
                 },
               },
             },
           },
         },
       },
-      required: true,
     },
     {
-      id: "observation",
-      label: "Observation",
+      id: "loanPurposeAndUse",
+      label: "Loan Purpose & Usage",
       schema: {
         type: "object",
         properties: {
-          observation: {
+          detailedPurpose: {
             type: "string",
-            title: "Final Observation and Comments",
+            title: "Detailed Purpose / End Use of Loan Amount",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          appliedLoanAmount: {
+            type: "number",
+            title: "Applied Loan Amount",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
+    },
+    {
+      id: "observations",
+      label: "Observations & Conclusion",
+      schema: {
+        type: "object",
+        properties: {
+          positiveObservations: {
+            type: "string",
+            title: "Detailed Observations (Positive & Negative)",
+            ui: { widget: "textarea", rows: 6 },
+          },
+          concerns: {
+            type: "string",
+            title: "Concerns",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          pdStatus: {
+            type: "string",
+            title: "Status of PD",
+            enum: ["Positive", "Negative", "Referred"],
+          },
+          pdConductedBy: {
+            type: "string",
+            title: "PD Conducted By (Name & Designation)",
+          },
+        },
+      },
     },
   ],
 } as const;
+
 export default smfgSmeSchema;

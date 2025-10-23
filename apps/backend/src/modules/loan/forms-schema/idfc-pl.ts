@@ -21,7 +21,6 @@ export const idfcPlSchema = {
           personContacted: {
             type: "string",
             title: "Person Contacted",
-            pattern: "^[0-9]{10}$",
           },
           visitedAddress: {
             type: "string",
@@ -30,17 +29,29 @@ export const idfcPlSchema = {
           },
           dateOfVisitTimeOfVisit: {
             type: "string",
-            title: "Date of Visit / Time of Visit",
+            title: "Date / Time of Visit",
           },
           alternateContactNumberOfTheCustomerMobileLandline: {
             type: "string",
-            title: "Alternate Contact Number of the Customer (Mobile/Landline)",
+            title: "Alternate Contact Number (Mobile / Landline)",
             pattern: "^[0-9]{10}$",
           },
           maritalStatusMarriedDivorcedBachelor: {
             type: "string",
-            title: "Marital Status (Married/Divorced/Bachelor)",
+            title: "Marital Status",
             enum: ["Married", "Divorced", "Bachelor"],
+          },
+          branch: {
+            type: "string",
+            title: "Branch",
+          },
+          location: {
+            type: "string",
+            title: "Location",
+          },
+          region: {
+            type: "string",
+            title: "Region",
           },
           latitude: {
             type: "string",
@@ -50,20 +61,8 @@ export const idfcPlSchema = {
             type: "string",
             title: "Longitude",
           },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
-        required: ["nameOfTheApplicant", "sdfcId"],
+        required: ["nameOfTheApplicant", "sdfcId", "visitedAddress"],
       },
       required: true,
     },
@@ -83,7 +82,7 @@ export const idfcPlSchema = {
               "Type of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)",
           },
           numberOfEmployees: {
-            type: "integer",
+            type: "string",
             title: "Number of Employees",
           },
           department: {
@@ -95,23 +94,24 @@ export const idfcPlSchema = {
             title: "Designation",
           },
           yearsInCurrentCompany: {
-            type: "integer",
+            type: "string",
             title: "Years in Current Company",
           },
           previousJobDetailsWorkExperienceTotalYearsOfExperience: {
-            type: "integer",
+            type: "string",
             title:
               "Previous Job Details / Work Experience / Total Years of Experience",
           },
-          levelOfActivityStocksObservations: {
+          levelOfActivityStocksAlongWithObservations: {
             type: "string",
             title: "Level of Activity & Stocks (Observations)",
           },
-          companyProfileServiceManufacturingSmallScaleFinanceOther: {
-            type: "string",
-            title:
-              "Company Profile (Service / Manufacturing / Small Scale / Finance / Other)",
-          },
+          companyProfileServiceManufacturingSmallScaleFinanceOtherPleaseSpecify:
+            {
+              type: "string",
+              title:
+                "Company Profile (Service / Manufacturing / Small Scale / Finance / Other)",
+            },
           thirdPartyCheck: {
             type: "string",
             title: "Third Party Check",
@@ -133,7 +133,6 @@ export const idfcPlSchema = {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
           netSalary: {
@@ -143,7 +142,6 @@ export const idfcPlSchema = {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
           overtimeDetailsIfAny: {
@@ -157,7 +155,6 @@ export const idfcPlSchema = {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
           monthlyNetIncome: {
@@ -167,11 +164,10 @@ export const idfcPlSchema = {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
           totalNoOfFamilyMembers: {
-            type: "string",
+            type: "integer",
             title: "Total No. of Family Members",
           },
           earningFamilyMembersIncomeDetails: {
@@ -181,30 +177,99 @@ export const idfcPlSchema = {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
           noOfDependents: {
-            type: "string",
+            type: "integer",
             title: "No. of Dependents",
           },
           anyOtherSourceOfIncomeMonthlyAnnual: {
             type: "number",
-            title: "Any Other Source of Income (Monthly/Annual)",
+            title: "Any Other Source of Income (Monthly / Annual)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
-          familyMembersRelationshipAgeNameSalary: {
+          salaryAccountBank: {
             type: "string",
-            title: "Family Members(Relationship, Age, Name, Salary)",
+            title: "Salary Account Bank",
+          },
+          salaryAccountNumber: {
+            type: "string",
+            title: "Salary Account Number",
+          },
+          salaryCreditMode: {
+            type: "string",
+            title: "Salary Credit Mode",
+            enum: ["Bank Transfer", "Cheque", "Cash", "Other"],
+          },
+          incomeObservation: {
+            type: "string",
+            title: "Income Observation / Remarks",
+          },
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationshipWithApplicant: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+                incomeDetailsDependent: {
+                  type: "string",
+                  title: "Income Details / Dependent",
+                },
+              },
+            },
           },
         },
       },
       required: true,
+    },
+    {
+      id: "documentsObserved",
+      label: "Documents Observed",
+      schema: {
+        type: "object",
+        properties: {
+          residenceDocuments: {
+            type: "array",
+            title: "Residence Documents",
+            items: {
+              type: "string",
+              title: "Document",
+            },
+          },
+          officeDocuments: {
+            type: "array",
+            title: "Office Documents",
+            items: {
+              type: "string",
+              title: "Document",
+            },
+          },
+        },
+      },
     },
     {
       id: "bankingDetails",
@@ -219,25 +284,84 @@ export const idfcPlSchema = {
           cashCreditLimit: {
             type: "number",
             title: "Cash Credit Limit",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           overdraftLimit: {
             type: "number",
             title: "Overdraft Limit",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "loanAmount",
-      label: "Loan Amount",
+      id: "obligationsLoans",
+      label: "Obligations / Loans",
       schema: {
         type: "object",
         properties: {
-          residenceAssets: {
-            type: "string",
-            title: "Residence & Assets",
+          loans: {
+            type: "array",
+            title: "Existing Loans",
+            items: {
+              type: "object",
+              properties: {
+                institutionBankNbfcName: {
+                  type: "string",
+                  title: "Institution / NBFC Name",
+                },
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
+                },
+                monthlyPrincipalEmi: {
+                  type: "number",
+                  title: "Monthly Principal / EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
+          totalMonthlyCommitment: {
+            type: "number",
+            title: "Total Monthly Commitment",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "residenceDetails",
+      label: "Residence & Assets",
+      schema: {
+        type: "object",
+        properties: {
           currentResidenceOwnedRentedParentsHouseRelativesHouseCompanyProvided:
             {
               type: "string",
@@ -248,17 +372,29 @@ export const idfcPlSchema = {
             type: "integer",
             title: "Years at Current Residence",
           },
+          residenceObservation: {
+            type: "string",
+            title: "Residence Observation / Notes",
+          },
+          assetsOwnedList: {
+            type: "array",
+            title: "Assets Owned",
+            items: {
+              type: "string",
+              title: "Asset Detail",
+            },
+          },
           assetsOwned: {
             type: "string",
-            title: "Assets Owned",
+            title: "Assets Owned (Summary)",
           },
           fourWheelerMakeModel: {
             type: "string",
-            title: "Four Wheeler (Make/Model)",
+            title: "Four Wheeler (Make / Model)",
           },
           twoWheelerMakeModel: {
             type: "string",
-            title: "Two Wheeler (Make/Model)",
+            title: "Two Wheeler (Make / Model)",
           },
         },
       },
@@ -273,6 +409,11 @@ export const idfcPlSchema = {
           loanAmountApplied: {
             type: "number",
             title: "Loan Amount Applied",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           endUse: {
             type: "string",
@@ -292,11 +433,11 @@ export const idfcPlSchema = {
           },
           statusOfThisCasePositiveNegativeCreditRefer: {
             type: "string",
-            title: "Status of this Case - Positive/Negative/Credit Refer",
+            title: "Status of this Case (Positive / Negative / Credit Refer)",
           },
           interviewerSRemarks: {
             type: "string",
-            title: "Interviewer’s Remarks",
+            title: "Interviewer's Remarks",
           },
         },
       },
@@ -304,4 +445,5 @@ export const idfcPlSchema = {
     },
   ],
 } as const;
+
 export default idfcPlSchema;

@@ -3,13 +3,13 @@ export const axisAgriSchema = {
   bankName: "Axis Agri",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "generalInfo",
+      label: "General Information",
       schema: {
         type: "object",
         properties: {
           referenceNumber: {
-            type: "integer",
+            type: "string",
             title: "Reference Number",
             readOnly: true,
           },
@@ -28,6 +28,7 @@ export const axisAgriSchema = {
               "Public Limited",
               "LLP",
               "HUF",
+              "Other",
             ],
           },
           incorporationDate: {
@@ -61,12 +62,17 @@ export const axisAgriSchema = {
       required: true,
     },
     {
-      id: "addressOfTheFirm",
-      label: "Address of the Firm",
+      id: "pdVisitDetails",
+      label: "PD Visit Details",
       schema: {
         type: "object",
         properties: {
-          dateTimeOfPd: {
+          addressOfFirm: {
+            type: "string",
+            title: "Address of the Firm",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          dateAndTimeOfPd: {
             type: "string",
             title: "Date & Time of PD",
           },
@@ -80,7 +86,7 @@ export const axisAgriSchema = {
           },
           designation: {
             type: "string",
-            title: "Designation",
+            title: "Designation of Person Met",
           },
           nameOfPdOfficial: {
             type: "string",
@@ -119,165 +125,198 @@ export const axisAgriSchema = {
               "Other",
             ],
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "residentialAddress",
-      label: "Residential Address",
-      schema: {
-        type: "object",
-        properties: {
-          phoneNumber: {
+          managementDetails: {
             type: "string",
-            title: "Phone Number",
-            pattern: "^[0-9]{10}$",
+            title: "Details on management of business",
+            ui: { widget: "textarea", rows: 3 },
           },
-          totalExperienceInSameLineOfBusiness: {
+          totalExperience: {
             type: "string",
-            title: "Total Experience in Same Line of Business",
+            title: "Total Experience in Same Line Business",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "shareholdingDetails",
-      label: "Shareholding Details",
-      schema: {
-        type: "object",
-        properties: {
+          shareholdingDetails: {
+            type: "string",
+            title: "Shareholding Details",
+            ui: { widget: "textarea", rows: 2 },
+          },
           businessLocality: {
             type: "string",
             title: "Business Locality",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessPremiseSetupOwnershipNameplateStaff",
-      label: "Business Premise setup / Ownership / Nameplate / Staff",
-      schema: {
-        type: "object",
-        properties: {
+          premiseSetup: {
+            type: "string",
+            title: "Business Premise setup / Ownership / Nameplate / Staff",
+            ui: { widget: "textarea", rows: 3 },
+          },
           financialBrief: {
             type: "string",
             title: "Financial Brief",
+            ui: { widget: "textarea", rows: 3 },
           },
-          turnover: {
+          financeTurnover: {
             type: "number",
-            title: "Turnover",
+            title: "Annual Turnover (Rs.)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "bankName",
-      label: "Bank Name",
-      schema: {
-        type: "object",
-        properties: {
-          limitType: {
+          collateralSecurityDetails: {
             type: "string",
-            title: "Limit Type",
+            title: "Collateral Security Details",
+            ui: { widget: "textarea", rows: 2 },
           },
-          limitAmount: {
-            type: "number",
-            title: "Limit Amount",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "stateAdditionalDetailsConductTodIfAvailed",
-      label: "State Additional Details Conduct/TOD if availed",
-      schema: {
-        type: "object",
-        properties: {
-          isItATakeover: {
-            type: "string",
-            title: "Is it a Takeover",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "anyOtherLoanObligationsOfTheFirm",
-      label: "Any other Loan Obligations of the Firm",
-      schema: {
-        type: "object",
-        properties: {
           currentAccountIfAny: {
-            type: "number",
-            title: "Current Account if any",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
+            type: "string",
+            title: "Current Account (if any)",
+          },
+          existingBankingRelationsWithAxisIfAny: {
+            type: "string",
+            title: "Existing Banking Relations with Axis (if any)",
+            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
       required: true,
     },
     {
-      id: "familyBackgroundNetWorth",
-      label: "Family Background & Net-worth",
+      id: "bankingAndWorkingCapital",
+      label: "Banking & Working Capital Limits",
       schema: {
         type: "object",
         properties: {
+          facilities: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                limitType: {
+                  type: "string",
+                  title: "Limit Type",
+                },
+                limitAmount: {
+                  type: "number",
+                  title: "Limit Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
+          },
+          additionalDetails: {
+            type: "string",
+            title: "Additional Details / Conduct / TOD if availed",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          takeoverRemarks: {
+            type: "string",
+            title: "Is it a Takeover?",
+          },
+          otherLoanObligations: {
+            type: "string",
+            title: "Other Loan Obligations of the Firm",
+            ui: { widget: "textarea", rows: 2 },
+          },
+        },
+      },
+    },
+    {
+      id: "suppliersClients",
+      label: "Major Suppliers & Clients",
+      schema: {
+        type: "object",
+        properties: {
+          suppliersClients: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                suppliers: {
+                  type: "string",
+                  title: "Suppliers (Creditors)",
+                },
+                clients: {
+                  type: "string",
+                  title: "Clients (Debtors)",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "observations",
+      label: "Observations, Risks & Succession",
+      schema: {
+        type: "object",
+        properties: {
+          stocksRawMaterialObservations: {
+            type: "string",
+            title: "Stocks / Raw material related observations",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          covidImpact: {
+            type: "string",
+            title: "COVID-19 Impact & Recovery period / Other Business Risks",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          familyBackgroundNetWorth: {
+            type: "string",
+            title: "Family Background & Net-worth",
+            ui: { widget: "textarea", rows: 2 },
+          },
           businessSuccessionPlan: {
             type: "string",
             title: "Business Succession Plan",
+            ui: { widget: "textarea", rows: 2 },
           },
-          qualificationOfProprietorPartnersDirectors: {
+          qualificationOfPromoters: {
             type: "string",
             title: "Qualification of Proprietor / Partners / Directors",
+            ui: { widget: "textarea", rows: 2 },
           },
           thirdPartyChecks: {
             type: "string",
             title: "Third Party Checks",
+            ui: { widget: "textarea", rows: 2 },
           },
           leaseLandVerification: {
             type: "string",
             title: "Lease land Verification",
+            ui: { widget: "textarea", rows: 2 },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "observationsConcerns",
-      label: "Observations & Concerns",
-      schema: {
-        type: "object",
-        properties: {
-          briefDescriptionOfBusiness: {
+          remarksObservations: {
             type: "string",
-            title: "Brief Description of Business",
+            title: "Remarks & Observations",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          pdFinalStatus: {
+            type: "string",
+            title: "PD Final Status",
+            enum: ["Positive", "Negative", "Referred", "Pending"],
+          },
+          pdVendorDetails: {
+            type: "string",
+            title: "PD Vendor Name & Address",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          pdVendorStamp: {
+            type: "string",
+            title: "PD Vendor Stamp & Signature",
           },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default axisAgriSchema;

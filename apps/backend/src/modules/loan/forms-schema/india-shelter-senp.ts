@@ -3,22 +3,18 @@ export const indiaShelterSenpSchema = {
   bankName: "India Shelter SENP",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "generalInfo",
+      label: "General Information",
       schema: {
         type: "object",
         properties: {
+          loanNumber: {
+            type: "string",
+            title: "Loan Number",
+          },
           branch: {
             type: "string",
             title: "Branch",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
           },
           region: {
             type: "string",
@@ -27,6 +23,14 @@ export const indiaShelterSenpSchema = {
           location: {
             type: "string",
             title: "Location",
+          },
+          latitude: {
+            type: "string",
+            title: "Latitude",
+          },
+          longitude: {
+            type: "string",
+            title: "Longitude",
           },
         },
       },
@@ -38,367 +42,476 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfThePersonMet: {
+          personMet: {
             type: "string",
             title: "Name of the Person Met",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanProductHlLap",
-      label: "Loan Product (HL / LAP)",
-      schema: {
-        type: "object",
-        properties: {
-          nameOfTheApplicant: {
+          loanProduct: {
+            type: "string",
+            title: "Loan Product",
+            enum: ["HL", "LAP", "HL/LAP"],
+          },
+          applicantName: {
             type: "string",
             title: "Name of the Applicant",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "maritalStatusSingleMarriedDivorcedOther",
-      label: "Marital Status (Single / Married / Divorced / Other)",
-      schema: {
-        type: "object",
-        properties: {
-          educationalQualificationBelow1010thPass12thPassDiplomaItiCertificationGraduatePgProfessionalCertification:
-            {
-              type: "string",
-              title:
-                "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
-            },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "totalNoOfFamilyMembers",
-      label: "Total No. of Family Members",
-      schema: {
-        type: "object",
-        properties: {
-          numberOfDependents: {
+          maritalStatus: {
+            type: "string",
+            title: "Marital Status",
+            enum: ["Single", "Married", "Divorced", "Other"],
+          },
+          educationalQualification: {
+            type: "string",
+            title:
+              "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
+          },
+          category: {
+            type: "string",
+            title: "Category",
+            enum: ["General", "SC", "ST", "OBC", "Others"],
+          },
+          totalFamilyMembers: {
             type: "integer",
-            title: "Number of Dependents",
+            title: "Total No. of Family Members",
+            minimum: 0,
           },
-          children: {
-            type: "string",
-            title: "Children",
+          dependentsChildren: {
+            type: "integer",
+            title: "Dependents - Children",
+            minimum: 0,
           },
-          adults: {
-            type: "string",
-            title: "Adults",
+          dependentsAdults: {
+            type: "integer",
+            title: "Dependents - Adults",
+            minimum: 0,
+          },
+          dependentsOthers: {
+            type: "integer",
+            title: "Dependents - Others",
+            minimum: 0,
           },
         },
       },
       required: true,
     },
     {
-      id: "address",
-      label: "Address",
+      id: "residenceDetails",
+      label: "Residence Details",
       schema: {
         type: "object",
         properties: {
-          noOfYearsAtCurrentResidence: {
-            type: "number",
-            title: "No of Years at Current Residence",
+          residenceAddress: {
+            type: "string",
+            title: "Residence Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          areaInSqFt: {
+          yearsAtCurrentResidence: {
+            type: "number",
+            title: "No. of Years at Current Residence",
+            minimum: 0,
+          },
+          areaSqft: {
             type: "string",
             title: "Area (in Sq ft)",
           },
-          monthlyRentSecurityDepositIfRented: {
+          monthlyRentDeposit: {
             type: "number",
-            title: "Monthly Rent & Security Deposit (if Rented)",
+            title: "Monthly Rent & Security Deposit (if rented)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
             },
           },
-          purchasePriceMvIfOwned: {
+          purchasePriceMv: {
             type: "number",
             title: "Purchase price & MV (if owned)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          numberOfYearsInCurrentCity3Years3Years: {
-            type: "number",
-            title: "Number of Years in Current City (<=3 Years / >3 Years)",
+          yearsInCurrentCity: {
+            type: "string",
+            title: "Number of Years in Current City",
+            enum: ["<=3 Years", ">3 Years"],
           },
-          parentsStayingWithSelfSeparateExpired: {
-            type: "number",
-            title: "Parents Staying with? (Self / Separate / Expired)",
+          parentsStayingWith: {
+            type: "string",
+            title: "Parents Staying with?",
+            enum: ["Self", "Separate", "Expired"],
           },
           nativePlace: {
             type: "string",
             title: "Native Place",
           },
+          electricityBillInCustomerName: {
+            type: "string",
+            title: "If LAP—Electricity bill in customer name availability?",
+            enum: ["Yes", "No"],
+          },
         },
       },
       required: true,
     },
     {
-      id: "assetsAndInvestmentDetails",
+      id: "assetChecklist",
       label: "Assets and Investment Details",
       schema: {
         type: "object",
         properties: {
           assetsOwned: {
             type: "string",
-            title: "Assets Owned",
+            title: "Assets Owned (Summary)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          smartphoneYesNo: {
+          smartphone: {
             type: "string",
-            title: "Smartphone (Yes/No)",
-            pattern: "^[0-9]{10}$",
+            title: "Smartphone",
+            enum: ["Yes", "No"],
           },
-          washingMachineYesNo: {
-            type: "integer",
-            title: "Washing Machine (Yes/No)",
-          },
-          carYesNo: {
-            type: "integer",
-            title: "Car (Yes/No)",
-          },
-          twoWheelerYesNo: {
-            type: "integer",
-            title: "Two-Wheeler (Yes/No)",
-          },
-          computerLaptopYesNo: {
-            type: "integer",
-            title: "Computer/Laptop (Yes/No)",
-          },
-          acYesNo: {
-            type: "integer",
-            title: "AC (Yes/No)",
-          },
-          fridgeYesNo: {
-            type: "integer",
-            title: "Fridge (Yes/No)",
-          },
-          inductionYesNo: {
-            type: "integer",
-            title: "Induction (Yes/No)",
-          },
-          financialAssets: {
+          washingMachine: {
             type: "string",
-            title: "Financial Assets",
+            title: "Washing Machine",
+            enum: ["Yes", "No"],
           },
-          investments: {
+          car: {
             type: "string",
-            title: "Investments",
+            title: "Car",
+            enum: ["Yes", "No"],
           },
-          fixedDepositsAmountMaturity: {
-            type: "number",
-            title: "Fixed Deposits (amount/maturity)",
+          twoWheeler: {
+            type: "string",
+            title: "Two Wheeler",
+            enum: ["Yes", "No"],
+          },
+          computerLaptop: {
+            type: "string",
+            title: "Computer / Laptop",
+            enum: ["Yes", "No"],
+          },
+          ac: {
+            type: "string",
+            title: "AC",
+            enum: ["Yes", "No"],
+          },
+          fridge: {
+            type: "string",
+            title: "Fridge",
+            enum: ["Yes", "No"],
+          },
+          induction: {
+            type: "string",
+            title: "Induction",
+            enum: ["Yes", "No"],
           },
         },
       },
-      required: true,
     },
     {
-      id: "sharesStocksCompaniesValue",
-      label: "Shares/Stocks (companies/value)",
+      id: "financialAssets",
+      label: "Financial Assets",
       schema: {
         type: "object",
         properties: {
-          insuranceTypeSumAssured: {
+          fixedDeposits: {
+            type: "string",
+            title: "Fixed Deposits (amount/maturity)",
+          },
+          mutualFunds: {
+            type: "string",
+            title: "Mutual Funds (type/value)",
+          },
+          sharesStocks: {
+            type: "string",
+            title: "Shares / Stocks (companies/value)",
+          },
+          insurance: {
             type: "string",
             title: "Insurance (type/sum assured)",
           },
+          otherInvestments: {
+            type: "string",
+            title: "Other investments?",
+          },
+          postOfficeSavings: {
+            type: "string",
+            title: "Is Post Office savings monthly?",
+            enum: ["Yes", "No"],
+          },
+          recurringDeposit: {
+            type: "string",
+            title: "Any Recurring Deposit?",
+            enum: ["Yes", "No"],
+          },
         },
       },
-      required: true,
     },
     {
-      id: "otherInvestments",
-      label: "Other investments",
+      id: "landAssets",
+      label: "Land Details",
       schema: {
         type: "object",
         properties: {
-          isPostOfficeSavingsMonthlyYesNo: {
-            type: "integer",
-            title: "Is Post Office savings monthly (Yes / No)",
-          },
-          anyRecurringDepositYesNo: {
-            type: "integer",
-            title: "Any Recurring Deposit (Yes / No)",
-          },
-          land: {
-            type: "string",
-            title: "Land",
-          },
-          totalAreaOfPlot: {
-            type: "string",
-            title: "Total area of plot",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          typeAgriculturalCommercialResidentialIndustrial: {
-            type: "string",
-            title:
-              "Type (Agricultural / Commercial / Residential / Industrial)",
+          plots: {
+            type: "array",
+            title: "Land Holdings",
+            items: {
+              type: "object",
+              properties: {
+                totalArea: {
+                  type: "string",
+                  title: "Total area of plot",
+                },
+                location: {
+                  type: "string",
+                  title: "Location",
+                },
+                landType: {
+                  type: "string",
+                  title:
+                    "Type (Agricultural / Commercial / Residential / Industrial)",
+                },
+                marketValue: {
+                  type: "number",
+                  title: "Current market value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "currentMarketValue",
-      label: "Current market value",
+      id: "houseAssets",
+      label: "House Details",
       schema: {
         type: "object",
         properties: {
-          house: {
-            type: "string",
-            title: "House",
-          },
-          builtUpAreaInSqFt: {
-            type: "string",
-            title: "Built-up area (in Sq ft)",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          selfOccupiedOrRented: {
-            type: "number",
-            title: "Self-occupied or rented",
-          },
-          ifRentedMonthlyIncome: {
-            type: "number",
-            title: "If rented, monthly income",
+          houses: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                builtUpArea: {
+                  type: "string",
+                  title: "Built-up area (in Sq ft)",
+                },
+                location: {
+                  type: "string",
+                  title: "Location",
+                },
+                occupancyStatus: {
+                  type: "string",
+                  title: "Self-occupied or rented",
+                },
+                monthlyIncomeIfRented: {
+                  type: "number",
+                  title: "Monthly income (if rented)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                marketValue: {
+                  type: "number",
+                  title: "Current market value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "currentMarketValue",
-      label: "Current market value",
+      id: "shopAssets",
+      label: "Shop / Commercial Space",
       schema: {
         type: "object",
         properties: {
-          shopCommercialSpace: {
-            type: "string",
-            title: "Shop/Commercial Space",
-          },
-          areaOfShopSpaceInSqFt: {
-            type: "string",
-            title: "Area of shop/space (in Sq ft)",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          selfOccupiedOrRented: {
-            type: "number",
-            title: "Self-occupied or rented",
-          },
-          ifRentedMonthlyIncome: {
-            type: "number",
-            title: "If rented, monthly income",
+          shops: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                area: {
+                  type: "string",
+                  title: "Area of shop/space (in Sq ft)",
+                },
+                location: {
+                  type: "string",
+                  title: "Location",
+                },
+                occupancyStatus: {
+                  type: "string",
+                  title: "Self-occupied or rented",
+                },
+                monthlyIncomeIfRented: {
+                  type: "number",
+                  title: "Monthly income (if rented)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                marketValue: {
+                  type: "number",
+                  title: "Current market value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "currentMarketValue",
-      label: "Current market value",
+      id: "vehicleAssets",
+      label: "Vehicle Details",
       schema: {
         type: "object",
         properties: {
           vehicles: {
-            type: "string",
-            title: "Vehicles",
-          },
-          "4Wheelers": {
-            type: "string",
-            title: "4-Wheelers",
-          },
-          makeAndModel: {
-            type: "string",
-            title: "Make and model",
-          },
-          purposePersonalCommercial: {
-            type: "string",
-            title: "Purpose (Personal/Commercial)",
-          },
-          preciousMetals: {
-            type: "string",
-            title: "Precious Metals",
-          },
-          goldJewellery: {
-            type: "string",
-            title: "Gold & Jewellery",
-          },
-          totalQuantityGrams: {
-            type: "string",
-            title: "Total quantity (grams)",
-          },
-          formJewelleryCoinsBars: {
-            type: "string",
-            title: "Form (jewellery/coins/bars)",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                makeModel: {
+                  type: "string",
+                  title: "Make and model",
+                },
+                purpose: {
+                  type: "string",
+                  title: "Purpose (Personal / Commercial)",
+                },
+                marketValue: {
+                  type: "number",
+                  title: "Current market value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "currentMarketValue",
-      label: "Current market value",
+      id: "preciousMetals",
+      label: "Precious Metals",
+      schema: {
+        type: "object",
+        properties: {
+          holdings: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                totalQuantity: {
+                  type: "string",
+                  title: "Total quantity (grams)",
+                },
+                form: {
+                  type: "string",
+                  title: "Form (jewellery/coins/bars)",
+                },
+                marketValue: {
+                  type: "number",
+                  title: "Current market value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "livestockAssets",
+      label: "Livestock",
       schema: {
         type: "object",
         properties: {
           livestock: {
-            type: "string",
-            title: "Livestock",
-          },
-          animals: {
-            type: "string",
+            type: "array",
             title: "Animals",
-          },
-          typesOfAnimals: {
-            type: "string",
-            title: "Types of animals",
-          },
-          quantityOfEachType: {
-            type: "string",
-            title: "Quantity of each type",
-          },
-          purposeDairyFarmingBreeding: {
-            type: "string",
-            title: "Purpose (dairy/farming/breeding)",
+            items: {
+              type: "object",
+              properties: {
+                typeOfAnimals: {
+                  type: "string",
+                  title: "Types of animals",
+                },
+                quantity: {
+                  type: "string",
+                  title: "Quantity of each type",
+                },
+                purpose: {
+                  type: "string",
+                  title: "Purpose (dairy/farming/breeding)",
+                },
+                totalValue: {
+                  type: "number",
+                  title: "Total value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                monthlyIncome: {
+                  type: "number",
+                  title: "Monthly income",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                maintenanceCosts: {
+                  type: "number",
+                  title: "Maintenance costs",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+              },
+            },
           },
         },
       },
-      required: true,
-    },
-    {
-      id: "totalValue",
-      label: "Total value",
-      schema: {
-        type: "object",
-        properties: {
-          monthlyIncome: {
-            type: "number",
-            title: "Monthly income",
-          },
-          maintenanceCosts: {
-            type: "number",
-            title: "Maintenance costs",
-          },
-        },
-      },
-      required: true,
     },
     {
       id: "businessDetails",
@@ -406,48 +519,59 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfCurrentBusinessFirm: {
-            type: "number",
+          businessName: {
+            type: "string",
             title: "Name of Current Business Firm",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "typeOfBusinessFirmProprietorshipPartnershipLtdPvtLtdOthers",
-      label:
-        "Type of Business Firm (Proprietorship / Partnership / LTD. / PVT LTD. / Others)",
-      schema: {
-        type: "object",
-        properties: {
-          ifPartnershipShareholding: {
-            type: "number",
+          businessFirmType: {
+            type: "string",
+            title: "Type of Business Firm",
+            enum: [
+              "Proprietorship",
+              "Partnership",
+              "LTD",
+              "PVT LTD",
+              "Others",
+            ],
+          },
+          shareholding: {
+            type: "string",
             title: "If Partnership, % shareholding",
           },
-          nameOfThePartnerS: {
-            type: "string",
-            title: "Name of the Partner's",
+          partners: {
+            type: "array",
+            title: "Name of the Partners",
+            items: {
+              type: "string",
+              title: "Partner Name",
+            },
           },
-          dateOfCommencementOfBusinessDdMmYyyy: {
+          commencementDate: {
             type: "string",
-            title: "Date of commencement of Business (DD/MM/YYYY)",
+            title: "Date of commencement of Business",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "addressOfThePd",
-      label: "Address of the PD",
-      schema: {
-        type: "object",
-        properties: {
+          placeOfIncorporation: {
+            type: "string",
+            title: "Place of Incorporation (Address)",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          pdAddress: {
+            type: "string",
+            title: "Address of the PD",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           totalWorkExperienceYears: {
-            type: "integer",
+            type: "number",
             title: "Total Work Experience (Years)",
+            minimum: 0,
           },
-          mobileNo: {
+          mobileNumber: {
             type: "string",
             title: "Mobile No.",
             pattern: "^[0-9]{10}$",
@@ -456,145 +580,196 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title: "Nature of Business",
           },
-          typeOfIndustryManufacturerTradingServices: {
+          industryType: {
             type: "string",
-            title: "Type of Industry (Manufacturer / Trading / Services)",
+            title: "Type of Industry",
+            enum: ["Manufacturer", "Trading", "Services", "Other"],
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessPremisesOwnershipSelfOwnedFamilyOwnedJointOwnershipRented",
-      label:
-        "Business Premises ownership (Self-Owned / Family-Owned / Joint Ownership / Rented)",
-      schema: {
-        type: "object",
-        properties: {
-          stocksAssetsSeenInBusinessPremises: {
-            type: "number",
-            title: "Stocks/Assets Seen in Business Premises",
-          },
-          localityOfBusinessPremisesResidentialCommercialIndustrialCorporateHubOfficeSpace:
-            {
-              type: "number",
-              title:
-                "Locality of Business Premises (Residential / Commercial / Industrial / Corporate Hub/Office Space)",
+          businessProfile: {
+            type: "string",
+            title: "Business Profile",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
-          annualTurnoverRs: {
+          },
+          premisesOwnership: {
+            type: "string",
+            title: "Business Premises Ownership",
+            enum: [
+              "Self-Owned",
+              "Family-Owned",
+              "Joint Ownership",
+              "Rented",
+            ],
+          },
+          stocksAssetsSeen: {
+            type: "string",
+            title: "Stocks/Assets Seen in Business Premises",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          businessLocality: {
+            type: "string",
+            title: "Locality of Business Premises",
+            enum: [
+              "Residential",
+              "Commercial",
+              "Industrial",
+              "Corporate Hub/Office Space",
+              "Other",
+            ],
+          },
+          annualTurnover: {
             type: "number",
             title: "Annual Turnover (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "netProfitMargin",
-      label: "Net Profit Margin",
-      schema: {
-        type: "object",
-        properties: {
-          isBusinessSeasonalYesNo: {
-            type: "integer",
-            title: "Is Business seasonal? (Yes / No)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "numberOfEmployees",
-      label: "Number of Employees",
-      schema: {
-        type: "object",
-        properties: {
-          noOfYearsBusinessRunningInThisPremises: {
-            type: "number",
-            title: "No of Years Business Running in this Premises",
-          },
-          noOfCompetitorsInNearbyMarket: {
-            type: "integer",
-            title: "No of Competitors in Nearby Market",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "customerLocationOfficeBusinessGeoTagLatitudeLongitude",
-      label:
-        "Customer Location (Office / Business GEO Tag) (Latitude & Longitude)",
-      schema: {
-        type: "object",
-        properties: {
-          businessIncomeComputationMonthlyBasis: {
-            type: "number",
-            title: "Business Income Computation (Monthly Basis)",
-          },
-          revenue: {
+          netProfitMargin: {
             type: "string",
-            title: "Revenue",
+            title: "Net Profit Margin",
           },
-          amountInRs: {
-            type: "number",
-            title: "Amount (in Rs)",
-          },
-          expenditure: {
+          businessSeasonal: {
             type: "string",
-            title: "Expenditure",
+            title: "Is Business seasonal?",
+            enum: ["Yes", "No"],
           },
-          amountInRs2: {
+          numberOfEmployees: {
+            type: "integer",
+            title: "Number of Employees",
+            minimum: 0,
+          },
+          yearsAtCurrentPremises: {
             type: "number",
-            title: "Amount (in Rs)",
+            title: "No. of Years Business Running in this Premises",
+            minimum: 0,
+          },
+          competitorsNearby: {
+            type: "integer",
+            title: "No. of Competitors in Nearby Market",
+            minimum: 0,
+          },
+          businessStartedBy: {
+            type: "string",
+            title: "Business started by",
+            enum: ["Self", "Father", "Other Family Members"],
+          },
+          initialFundingSource: {
+            type: "string",
+            title: "If Self Started, source of initial funds",
+            enum: ["Own Funding", "Borrowed from Family", "Loan", "Others"],
+          },
+          customerGeoTag: {
+            type: "string",
+            title: "Customer Location (Office / Business GEO Tag)",
           },
         },
       },
-      required: true,
     },
     {
-      id: "salesReceipts",
-      label: "Sales/Receipts",
+      id: "businessIncome",
+      label: "Business Income Computation (Monthly Basis)",
       schema: {
         type: "object",
         properties: {
+          sales: {
+            type: "number",
+            title: "Sales",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          receipts: {
+            type: "number",
+            title: "Receipts",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
           purchases: {
-            type: "string",
+            type: "number",
             title: "Purchases",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           rent: {
             type: "number",
             title: "Rent",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           electricity: {
-            type: "string",
+            type: "number",
             title: "Electricity",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           transportation: {
-            type: "string",
+            type: "number",
             title: "Transportation",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "otherExpenses",
-      label: "Other Expenses",
-      schema: {
-        type: "object",
-        properties: {
-          totalMonthlyRevenueA: {
-            type: "string",
+          otherExpenses: {
+            type: "number",
+            title: "Other Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          totalMonthlyRevenue: {
+            type: "number",
             title: "Total Monthly Revenue (A)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          totalMonthlyExpensesB: {
-            type: "string",
+          totalMonthlyExpenses: {
+            type: "number",
             title: "Total Monthly Expenses (B)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          netMonthlyProfit: {
+            type: "number",
+            title: "Net Monthly Profit (= A - B)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
       id: "otherMonthlyIncome",
@@ -602,127 +777,138 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          rentalIncome: {
+          rentalIncomeCash: {
             type: "number",
-            title: "Rental Income",
+            title: "Rental Income - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          cashAmount: {
+          rentalIncomeCheque: {
             type: "number",
-            title: "cash amount",
+            title: "Rental Income - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          chqAmount: {
+          incentivesCash: {
             type: "number",
-            title: "chq amount",
+            title: "Incentives / Perks - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          incentivesPerks: {
-            type: "string",
-            title: "Incentives/Perks",
-          },
-          cashAmount2: {
+          incentivesCheque: {
             type: "number",
-            title: "cash amount",
+            title: "Incentives / Perks - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          chqAmount2: {
+          monthlyBonusCash: {
             type: "number",
-            title: "chq amount",
+            title: "Monthly Bonus - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          monthlyBonus: {
-            type: "string",
-            title: "Monthly Bonus",
-          },
-          cashAmount3: {
+          monthlyBonusCheque: {
             type: "number",
-            title: "cash amount",
+            title: "Monthly Bonus - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          chqAmount3: {
+          otherIncomeCash: {
             type: "number",
-            title: "chq amount",
+            title: "Any Other Income - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          otherIncomeCheque: {
+            type: "number",
+            title: "Any Other Income - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "anyOther",
-      label: "Any Other",
+      id: "loanPurpose",
+      label: "Loan Details & Purpose",
       schema: {
         type: "object",
         properties: {
-          cashAmount: {
+          purposes: {
+            type: "array",
+            title: "Purpose of Loan",
+            uniqueItems: true,
+            items: {
+              type: "string",
+              enum: [
+                "Flat Purchase",
+                "House Purchase",
+                "Plot Purchase",
+                "Construction of Residential House Property",
+                "Business development",
+                "Improvement/Extension",
+                "Balance Transfer",
+                "Plot + Construction",
+              ],
+            },
+          },
+          minimumLoanAmount: {
             type: "number",
-            title: "cash amount",
+            title: "Minimum Loan Amount Required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          chqAmount: {
-            type: "number",
-            title: "chq amount",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "purposeOfLoan",
-      label: "Purpose of Loan",
-      schema: {
-        type: "object",
-        properties: {
-          flatPurchase: {
+          tenureRequired: {
             type: "string",
-            title: "Flat Purchase",
-          },
-          housePurchase: {
-            type: "string",
-            title: "House Purchase",
-          },
-          plotPurchase: {
-            type: "string",
-            title: "Plot Purchase",
-          },
-          constructionOfResidentialHouseProperty: {
-            type: "string",
-            title: "Construction of Residential House Property",
-          },
-          businessDevelopment: {
-            type: "string",
-            title: "Business development",
-          },
-          improvementExtension: {
-            type: "string",
-            title: "Improvement/Extension",
-          },
-          balanceTransfer: {
-            type: "number",
-            title: "Balance Transfer",
-          },
-          plotConstruction: {
-            type: "string",
-            title: "Plot + Construction",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "minimumLoanAmountRequiredRs",
-      label: "Minimum Loan Amount Required (Rs.)",
-      schema: {
-        type: "object",
-        properties: {
-          tenureRequiredYears: {
-            type: "integer",
             title: "Tenure Required (years)",
           },
-          monthlyHouseholdExpensesRs: {
-            type: "string",
-            title: "Monthly Household Expenses (Rs.)",
-          },
-          comfortableEmiRs: {
+          monthlyHouseholdExpenses: {
             type: "number",
-            title: "Comfortable EMI (Rs.)",
+            title: "Monthly Household Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          comfortableEmi: {
+            type: "number",
+            title: "Comfortable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
       id: "collateralDetails",
@@ -730,339 +916,409 @@ export const indiaShelterSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          statusOfPropertyToBePurchasedReadyToMoveUnderConstructionConstructionYetToStart:
-            {
+          propertyStatus: {
+            type: "string",
+            title: "Status of Property to be Purchased",
+            enum: ["Ready to move", "Under Construction", "Construction Yet to Start"],
+          },
+          usageAfterPurchase: {
+            type: "array",
+            title: "Usage of Property after Purchase",
+            uniqueItems: true,
+            items: {
               type: "string",
-              title:
-                "Status of Property to be Purchased (Ready to move / Under Construction / Construction Yet to Start)",
+              enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"],
             },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "propertyAddress",
-      label: "Property Address",
-      schema: {
-        type: "object",
-        properties: {
-          areaInSqFt: {
+          },
+          usageOtherNotes: {
+            type: "string",
+            title: "If Others, specify usage",
+          },
+          propertyAddress: {
+            type: "string",
+            title: "Property Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          propertyArea: {
             type: "string",
             title: "Area (in Sq. ft.)",
           },
+          ownershipDuration: {
+            type: "string",
+            title: "Ownership of the property from how many years?",
+          },
+          agreementValue: {
+            type: "number",
+            title: "Agreement value",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          ownContribution: {
+            type: "number",
+            title: "Own Contribution",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
         },
       },
-      required: true,
     },
     {
-      id: "agreementValue",
-      label: "Agreement value",
+      id: "currentLoanDetails",
+      label: "Current Loan Details",
       schema: {
         type: "object",
         properties: {
-          ownContributionRs: {
-            type: "string",
-            title: "Own Contribution (Rs.)",
+          currentLoans: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank / FI Name",
+                },
+                loanType: {
+                  type: "string",
+                  title: "Loan Type",
+                },
+                sanctionAmount: {
+                  type: "number",
+                  title: "Sanction Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                  },
+                },
+                emisPaid: {
+                  type: "number",
+                  title: "No. of EMI Paid",
+                  minimum: 0,
+                },
+                balanceTenor: {
+                  type: "string",
+                  title: "Balance Tenor",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "loanType",
-      label: "Loan Type",
-      schema: {
-        type: "object",
-        properties: {
-          sanctionAmt: {
-            type: "string",
-            title: "Sanction Amt.",
-          },
-          emi: {
-            type: "number",
-            title: "EMI",
-          },
-          noOfEmiPaid: {
-            type: "number",
-            title: "No. of EMI Paid",
-          },
-          balTenure: {
-            type: "integer",
-            title: "Bal. Tenure",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "costAndFundsInformationLoanDetails",
+      id: "costAndFunds",
       label: "Cost and Funds Information (Loan Details)",
       schema: {
         type: "object",
         properties: {
-          fundsRequiredRs: {
-            type: "string",
-            title: "Funds Required (Rs.)",
+          fundsRequired: {
+            type: "number",
+            title: "Funds Required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
-          sourceOfOwnFundsOcr: {
+          ownFundsSource: {
             type: "string",
             title: "Source of Own Funds (OCR)",
           },
           purchaseCost: {
             type: "number",
             title: "Purchase Cost",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           savings: {
-            type: "string",
+            type: "number",
             title: "Savings",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
           constructionEstimate: {
-            type: "string",
-            title: "Construction Estimate",
-          },
-          totalTransactionCostTotalOfAllTheAboveCost: {
             type: "number",
-            title: "Total Transaction Cost (Total of all the above cost)",
+            title: "Construction Estimate",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          totalTransactionCost: {
+            type: "number",
+            title: "Total Transaction Cost",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "bankName",
-      label: "Bank Name",
+      id: "bankingDetails",
+      label: "Banking Details",
       schema: {
         type: "object",
         properties: {
-          accountNo: {
-            type: "integer",
-            title: "Account no.",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
-          accountType: {
-            type: "string",
-            title: "Account Type",
-          },
-          operationSinceYrs: {
-            type: "string",
-            title: "Operation since (Yrs)",
+          bankingAccounts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountNumber: {
+                  type: "string",
+                  title: "Account Number",
+                },
+                branch: {
+                  type: "string",
+                  title: "Branch",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
+                  enum: ["Savings", "Current", "Overdraft", "Other"],
+                },
+                operatingSinceYears: {
+                  type: "string",
+                  title: "Operation since (Years)",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "otherFamilyMemberDetails",
+      id: "otherFamilyMembers",
       label: "Other Family Member Details",
       schema: {
         type: "object",
         properties: {
-          name: {
-            type: "string",
-            title: "Name",
-          },
-          relationWithApplicant: {
-            type: "string",
-            title: "Relation with Applicant",
-          },
-          ageYears: {
-            type: "integer",
-            title: "Age (years)",
-          },
-          occupationJobBusiness: {
-            type: "string",
-            title: "Occupation (Job / Business)",
-          },
-          educationalQualificationAlsoMentionIfGovtOrPrivateInstitution: {
-            type: "string",
-            title:
-              "Educational Qualification (Also mention if Govt. or Private institution)",
-          },
-          contactNo: {
-            type: "string",
-            title: "Contact no",
-            pattern: "^[0-9]{10}$",
-          },
-          stayingWithApplicantYesNo: {
-            type: "integer",
-            title: "Staying with Applicant (Yes/No)",
+          familyMembers: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationWithApplicant: {
+                  type: "string",
+                  title: "Relation with Applicant",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age (years)",
+                  minimum: 0,
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation (Job / Business)",
+                },
+                educationalQualification: {
+                  type: "string",
+                  title:
+                    "Educational Qualification (Also mention if Govt. or Private institution)",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                  pattern: "^[0-9]{10}$",
+                },
+                stayingWithApplicant: {
+                  type: "string",
+                  title: "Staying with Applicant",
+                  enum: ["Yes", "No"],
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "referencesBusinessParties",
+      id: "references",
       label: "References (Business Parties)",
       schema: {
         type: "object",
         properties: {
-          reference1: {
-            type: "string",
-            title: "Reference 1",
-          },
-          name: {
-            type: "string",
-            title: "Name",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "address",
-      label: "Address",
-      schema: {
-        type: "object",
-        properties: {
-          relationship: {
-            type: "string",
-            title: "Relationship",
-          },
-          contactNumber: {
-            type: "string",
-            title: "Contact Number",
-            pattern: "^[0-9]{10}$",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "emailAddress",
-      label: "Email address",
-      schema: {
-        type: "object",
-        properties: {
-          noOfYearKnownTheApplicant: {
-            type: "integer",
-            title: "No of Year known the applicant",
-          },
-          reference2: {
-            type: "string",
-            title: "Reference 2",
-          },
-          name: {
-            type: "string",
-            title: "Name",
+          references: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                referenceName: {
+                  type: "string",
+                  title: "Name",
+                },
+                address: {
+                  type: "string",
+                  title: "Address",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                  pattern: "^[0-9]{10}$",
+                },
+                email: {
+                  type: "string",
+                  title: "Email address",
+                  format: "email",
+                },
+                yearsKnown: {
+                  type: "number",
+                  title: "No. of Years known the applicant",
+                  minimum: 0,
+                },
+                photoWithApplicant: {
+                  type: "string",
+                  title: "Photo with Applicant (Yes/No / Notes)",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "address",
-      label: "Address",
+      id: "tpcDetails",
+      label: "TPC (Third Party Check) Details",
       schema: {
         type: "object",
         properties: {
-          relationship: {
-            type: "string",
-            title: "Relationship",
-          },
-          contactNumber: {
-            type: "string",
-            title: "Contact Number",
-            pattern: "^[0-9]{10}$",
+          businessReferences: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                address: {
+                  type: "string",
+                  title: "Address",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+                mobileNumber: {
+                  type: "string",
+                  title: "Mobile No.",
+                  pattern: "^[0-9]{10}$",
+                },
+                knowingSince: {
+                  type: "string",
+                  title: "Knowing since (Months / Years)",
+                },
+                feedback: {
+                  type: "string",
+                  title: "Feedback",
+                  enum: ["Positive", "Negative", "Neutral"],
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "emailAddress",
-      label: "Email address",
+      id: "pdOfficerReview",
+      label: "PD Officer Review",
       schema: {
         type: "object",
         properties: {
-          noOfYearKnownTheApplicant: {
-            type: "integer",
-            title: "No of Year known the applicant",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "tpcThirdPartyCheckDetails",
-      label: "TPC (Third Party check) Details",
-      schema: {
-        type: "object",
-        properties: {
-          businessReference: {
+          majorObservations: {
             type: "string",
-            title: "Business Reference",
+            title: "Major Observations / Comments / Concerns During PD",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          name: {
+          caseStrengths: {
             type: "string",
-            title: "Name",
+            title: "Case Strengths",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "address",
-      label: "Address",
-      schema: {
-        type: "object",
-        properties: {
-          mobileNo: {
+          caseWeakness: {
             type: "string",
-            title: "Mobile No.",
-            pattern: "^[0-9]{10}$",
+            title: "Case Weakness",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          knowingSinceMonthsYears: {
-            type: "integer",
-            title: "Knowing since (Months / Years)",
-          },
-          feedbackPositiveNegative: {
+          pdStatus: {
             type: "string",
-            title: "Feedback (Positive / Negative)",
+            title: "PD Status",
+            enum: ["Positive", "Negative", "Referred"],
           },
-          toBeFilledByPdOfficer: {
-            type: "string",
-            title: "To be filled by PD officer",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "caseWeakness",
-      label: "Case Weakness",
-      schema: {
-        type: "object",
-        properties: {
-          nameOfPdOfficer: {
+          pdOfficerName: {
             type: "string",
             title: "Name of PD Officer",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "dateTimeOfVisit",
-      label: "Date & Time of Visit",
-      schema: {
-        type: "object",
-        properties: {
-          signatureOfThePdOfficer: {
+          visitDate: {
+            type: "string",
+            title: "Date of Visit",
+            format: "date",
+          },
+          visitTime: {
+            type: "string",
+            title: "Time of Visit",
+          },
+          officerSignature: {
             type: "string",
             title: "Signature of the PD Officer",
           },
-          pdStatusPositiveNegativeCreditRefer: {
-            type: "string",
-            title: "PD Status (Positive / Negative / Credit Refer)",
-          },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default indiaShelterSenpSchema;

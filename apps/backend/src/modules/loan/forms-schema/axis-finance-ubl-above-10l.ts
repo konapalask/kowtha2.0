@@ -8,70 +8,6 @@ export const axisFinanceUblAbove10lSchema = {
       schema: {
         type: "object",
         properties: {
-          applicationNo: {
-            type: "string",
-            title: "Ref No/Application No",
-            readOnly: true,
-          },
-          customerName: {
-            type: "string",
-            title: "Name of the Customer",
-            readOnly: true,
-          },
-          dateOfReport: {
-            type: "string",
-            format: "date",
-            title: "Date of Report",
-          },
-          concernName: {
-            type: "string",
-            title: "Name of the Concern",
-          },
-          constitution: {
-            type: "string",
-            title: "Constitution",
-          },
-          initiatedAddress: {
-            type: "string",
-            title: "Initiated Address",
-          },
-          visitedAddress: {
-            type: "string",
-            title: "Visited Address",
-          },
-          phoneNo: {
-            type: "number",
-            title: "Phone No.",
-          },
-          appointmentFixed: {
-            type: "date",
-            title: "Appointment Fixed",
-            format: "time",
-          },
-          structureOfLoan: {
-            type: "string",
-            title: "Structure of Loan",
-          },
-          noOfVisit: {
-            type: "string",
-            title: "No. of Visit",
-          },
-          personMet: {
-            type: "string",
-            title: "Person Met",
-          },
-          aboutApplicant: {
-            type: "string",
-            title: "About Applicant",
-          },
-          residentialDetails: {
-            type: "string",
-            title: "Residential Details",
-          },
-          coApplicantDetails: {
-            type: "string",
-            title: "Co-Applicant Details",
-          },
           region: {
             type: "string",
             title: "Region",
@@ -84,145 +20,214 @@ export const axisFinanceUblAbove10lSchema = {
             type: "string",
             title: "Branch",
           },
+          applicationNo: {
+            type: "string",
+            title: "Ref No / Application No",
+            readOnly: true,
+          },
+          dateOfReport: {
+            type: "string",
+            title: "Date of Report",
+            format: "date",
+          },
+          customerName: {
+            type: "string",
+            title: "Name of Customer",
+            readOnly: true,
+          },
+          concernName: {
+            type: "string",
+            title: "Name of Concern",
+          },
+          constitution: {
+            type: "string",
+            title: "Constitution",
+          },
+          initiatedAddress: {
+            type: "string",
+            title: "Initiated Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          visitedAddress: {
+            type: "string",
+            title: "Visited Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          phoneNumber: {
+            type: "string",
+            title: "Phone No.",
+          },
+          appointmentFixed: {
+            type: "string",
+            title: "Appointment Fixed",
+          },
+          structureOfLoan: {
+            type: "string",
+            title: "Structure of Loan",
+          },
+          numberOfVisits: {
+            type: "string",
+            title: "No. of Visit",
+          },
+          personMet: {
+            type: "string",
+            title: "Person Met",
+          },
+          visitedBy: {
+            type: "string",
+            title: "Visited By",
+          },
+          aboutApplicant: {
+            type: "string",
+            title: "About Applicant",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
+          residentialDetails: {
+            type: "string",
+            title: "Residential Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          coApplicantDetails: {
+            type: "string",
+            title: "Co-Applicant Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
         },
-        required: ["applicationNo", "customerName", "concernName"],
       },
-      required: true,
     },
-
     {
       id: "familyDetails",
       label: "Family Details",
       schema: {
-        type: "object",
-        properties: {
-          familyDetails: {
-            type: "array",
-            title: "Family Details",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                relation: {
-                  type: "string",
-                  title: "Relation with Applicant",
-                },
-                ageYears: {
-                  type: "integer",
-                  title: "Age (Yrs)",
-                },
-                qualification: {
-                  type: "string",
-                  title: "Qualification",
-                },
-                occupation: {
-                  type: "string",
-                  title: "Occupation",
-                },
-                incomePerMonth: {
-                  type: "number",
-                  title: "Income per month (approx.)",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                dependent: {
-                  type: "string",
-                  title: "Dependent",
-                },
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              title: "Name",
+            },
+            relation: {
+              type: "string",
+              title: "Relation with applicant",
+            },
+            age: {
+              type: "integer",
+              title: "Age",
+            },
+            qualification: {
+              type: "string",
+              title: "Qualification",
+            },
+            occupation: {
+              type: "string",
+              title: "Occupation",
+            },
+            stayingWithApplicant: {
+              type: "string",
+              title: "Staying with applicant",
+            },
+            mobileNumber: {
+              type: "string",
+              title: "Mobile Number",
+            },
+            incomePerMonth: {
+              type: "number",
+              title: "Income per month (approx.)",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
               },
             },
           },
         },
       },
-      required: true,
     },
     {
       id: "shareholdingDetails",
-      label: "Shareholding Details",
+      label: "Constitution / Shareholding Details",
       schema: {
-        type: "object",
-        properties: {
-          shareholdingDetails: {
-            type: "array",
-            title: "Constitution / Shareholding Details",
-            items: {
-              type: "object",
-              properties: {
-                shareholderName: {
-                  type: "string",
-                  title: "Name of the Shareholder",
-                },
-                relationWithMainApplicant: {
-                  type: "string",
-                  title: "Relation with Main Applicant",
-                },
-                designation: {
-                  type: "string",
-                  title: "Designation",
-                },
-                percentShareholding: {
-                  type: "number",
-                  title: "% of Shareholding",
-                },
-                comingIntoLoanStructure: {
-                  type: "string",
-                  title: "Coming into Loan Structure",
-                },
-                functionalRole: {
-                  type: "string",
-                  title: "Functional of Partner / Director",
-                },
-              },
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            shareholderName: {
+              type: "string",
+              title: "Name of the Shareholder",
+            },
+            relationWithMainApplicant: {
+              type: "string",
+              title: "Relation with main applicant",
+            },
+            designation: {
+              type: "string",
+              title: "Designation",
+            },
+            shareholdingPercentage: {
+              type: "number",
+              title: "% of Shareholding",
+            },
+            comingIntoLoanStructure: {
+              type: "string",
+              title: "Coming into loan structure",
+            },
+            functionalRole: {
+              type: "string",
+              title: "Functional role of partner / director",
             },
           },
         },
       },
-      required: true,
     },
     {
-      id: "businessDetails",
-      label: "Business Details",
+      id: "businessOverview",
+      label: "Business Overview",
       schema: {
         type: "object",
         properties: {
           aboutBusiness: {
             type: "array",
             title: "About the Business",
+            items: {
+              type: "object",
+              properties: {
+                detail: {
+                  type: "string",
+                  title: "Detail",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
+              },
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "documentsObserved",
-      label: "Documents Observed",
-      schema: {
-        type: "object",
-        properties: {
           documentsObserved: {
             type: "array",
             title: "Documents Observed",
             items: {
               type: "object",
               properties: {
-                documentCategory: {
-                  type: "string",
-                  title: "Document Category",
-                },
                 documentName: {
                   type: "string",
-                  title: "Document Name",
-                },
-                documentType: {
-                  type: "string",
-                  title: "Document Type",
+                  title: "Document",
                 },
                 remarks: {
                   type: "string",
@@ -233,27 +238,26 @@ export const axisFinanceUblAbove10lSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "suppliersCreditors",
-      label: "Suppliers/Creditors",
+      label: "Suppliers / Creditors",
       schema: {
         type: "object",
         properties: {
-          noOfFixedSuppliers: {
-            type: "integer",
-            title: "No of Fixed Suppliers",
+          numberOfFixedSuppliers: {
+            type: "string",
+            title: "No of fixed suppliers",
           },
-          creditPeriod: {
-            type: "integer",
-            title: "Credit Period",
+          creditPeriodDays: {
+            type: "string",
+            title: "Credit period",
           },
           cashChequeProportion: {
-            type: "number",
-            title: "Cash-Cheque Proportion",
+            type: "string",
+            title: "Cash - Cheque proportion",
           },
-          top3Suppliers: {
+          topSuppliers: {
             type: "array",
             title: "Top 3 Suppliers",
             items: {
@@ -261,17 +265,17 @@ export const axisFinanceUblAbove10lSchema = {
               properties: {
                 name: {
                   type: "string",
-                  title: "Name (top 3 Suppliers)",
+                  title: "Name",
                 },
                 contactDetails: {
-                  type: "number",
-                  title: "Contact Details",
+                  type: "string",
+                  title: "Contact details",
                 },
                 location: {
                   type: "string",
                   title: "Location",
                 },
-                refCheck: {
+                referenceCheck: {
                   type: "string",
                   title: "Ref. Check",
                 },
@@ -280,30 +284,28 @@ export const axisFinanceUblAbove10lSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "clientsDebtors",
-      label: "Clients/Debtors",
+      label: "Clients / Debtors",
       schema: {
         type: "object",
         properties: {
-          noOfFixedCustomers: {
-            type: "integer",
-            title: "No of Fixed Customers",
+          numberOfFixedCustomers: {
+            type: "string",
+            title: "No of fixed customers",
           },
-          clientCreditPeriodDays: {
-            type: "integer",
-            title: "Credit Period",
+          creditPeriodDays: {
+            type: "string",
+            title: "Credit period",
           },
-          clientCashChequeProportion: {
-            type: "number",
-            title: "Cash-Cheque Proportion",
+          cashChequeProportion: {
+            type: "string",
+            title: "Cash - Cheque proportion",
           },
-          top3Customers: {
+          topCustomers: {
             type: "array",
             title: "Top 3 Customers",
-            buttonTitle: "Add Customer",
             items: {
               type: "object",
               properties: {
@@ -313,13 +315,13 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 contactDetails: {
                   type: "string",
-                  title: "Contact Details",
+                  title: "Contact details",
                 },
                 location: {
                   type: "string",
                   title: "Location",
                 },
-                refCheck: {
+                referenceCheck: {
                   type: "string",
                   title: "Ref. Check",
                 },
@@ -327,71 +329,77 @@ export const axisFinanceUblAbove10lSchema = {
             },
           },
           averageStockMaintained: {
-            type: "number",
-            title: "Average Stock Maintained",
+            type: "string",
+            title: "Average stock maintained",
           },
           turnoverAndMargins: {
-            type: "number",
-            title: "Turnover & Margins",
+            type: "string",
+            title: "Turnover & margins",
           },
         },
       },
-      required: true,
     },
     {
       id: "expenditure",
-      label: "Expenditure",
+      label: "Expenditure - Salaries & Wages",
       schema: {
         type: "object",
         properties: {
           salariesAndWages: {
             type: "array",
-            title: "Salaries & Wages",
+            title: "Salaries & Wages Details",
             items: {
               type: "object",
               properties: {
                 noOfEmployees: {
-                  type: "integer",
-                  title: "No. of Employees",
+                  type: "string",
+                  title: "No of Employees",
                 },
                 salaryPerMonthPerEmployee: {
-                  type: "number",
-                  title: "Salary per Month per Employee",
+                  type: "string",
+                  title: "Salary per month per employee",
                 },
                 statusOfEmployee: {
                   type: "string",
-                  title: "Status of Employee",
+                  title: "Status of employee",
                 },
                 noOfLabours: {
-                  type: "integer",
-                  title: "No. of Labours",
+                  type: "string",
+                  title: "No. of labours",
                 },
                 wagesPerMonthOrDay: {
-                  type: "number",
-                  title: "Wages per Month / Per Day",
+                  type: "string",
+                  title: "Wages per month/per day",
                 },
                 statusOfLabour: {
                   type: "string",
-                  title: "Status of Labour",
+                  title: "Status of labour",
                 },
                 remarks: {
                   type: "string",
                   title: "Remarks",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
                 },
               },
             },
           },
           workingHours: {
-            type: "number",
+            type: "string",
             title: "Working Hours",
           },
           otherMajorExpensesAndBasis: {
             type: "string",
-            title: "Other Major Expenses & Basis",
+            title: "Other major expenses & basis",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
-      required: true,
     },
     {
       id: "assetDetails",
@@ -399,9 +407,9 @@ export const axisFinanceUblAbove10lSchema = {
       schema: {
         type: "object",
         properties: {
-          assetDetails: {
+          immovableProperties: {
             type: "array",
-            title: "Asset Details",
+            title: "Immovable Properties",
             items: {
               type: "object",
               properties: {
@@ -411,19 +419,19 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 areaMeasurements: {
                   type: "string",
-                  title: "Area Measurements",
+                  title: "Area measured (Sq.ft)",
                 },
                 purchaseCostLakhs: {
                   type: "number",
-                  title: "Purchase Cost (in Lakhs)",
+                  title: "Purchase cost (in Lakhs)",
                 },
                 purchaseYear: {
-                  type: "integer",
+                  type: "string",
                   title: "Purchase Year",
                 },
                 marketValueLakhs: {
                   type: "number",
-                  title: "Market Value (in Lakhs)",
+                  title: "Market value (in Lakhs)",
                 },
                 ownerName: {
                   type: "string",
@@ -433,112 +441,114 @@ export const axisFinanceUblAbove10lSchema = {
                   type: "string",
                   title: "Mortgaged (Yes/No)",
                 },
-                liquidMoveableMonetary: {
-                  type: "string",
-                  title:
-                    "Any Liquid, Moveable & Monetary Items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities",
-                },
-                insurances: {
-                  type: "string",
-                  title:
-                    "Life Insurance, Mediclaim, Property/Asset Insurance, Medician, Property.Asses Insurance (Premium & Sum Assured)",
-                },
               },
             },
           },
-          capitalInvestedLoansAdvances: {
+          liquidMoveableAssets: {
             type: "string",
-            title: "Capital Invested in any Business, Loans & Advances given",
+            title:
+              "Liquid, moveable & monetary items (Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          insurances: {
+            type: "string",
+            title:
+              "Life insurance, mediclaim, property/asset insurance (premium & sum assured)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          capitalInvestedLoans: {
+            type: "string",
+            title:
+              "Capital invested in any business, loans & advances given",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           vehicles: {
-            type: "string",
-            title: "Car, Bike and Other Vehicles (Company Name and Model)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanDetails",
-      label: "Existing Loans",
-      schema: {
-        type: "object",
-        properties: {
-          loanDetails: {
             type: "array",
-            title: "Loan Details",
+            title: "Vehicles (Company name and model)",
             items: {
-              type: "object",
-              properties: {
-                bankOrNbfcName: {
-                  type: "string",
-                  title: "Name of Bank / NBFC",
-                },
-                typeOfLoan: {
-                  type: "string",
-                  title: "Type of Loan",
-                },
-                sanctionedAmount: {
-                  type: "number",
-                  title: "Sanctioned Amount (in Lakhs)",
-                },
-                osBalance: {
-                  type: "number",
-                  title: "O/S Balance",
-                },
-                emiRs: {
-                  type: "number",
-                  title: "EMI (in Rs.)",
-                },
-                emiPaidBank: {
-                  type: "string",
-                  title: "EMI Paid Bank",
-                },
-                securedAgainstAsset: {
-                  type: "string",
-                  title: "Secured Against which Asset",
-                },
-              },
+              type: "string",
+              title: "Vehicle",
             },
           },
         },
       },
-      required: true,
+    },
+    {
+      id: "existingLoans",
+      label: "Existing Loans",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            bankOrNbfcName: {
+              type: "string",
+              title: "Name of Bank / NBFC",
+            },
+            typeOfLoan: {
+              type: "string",
+              title: "Type of Loan",
+            },
+            sanctionedAmount: {
+              type: "number",
+              title: "Sanctioned Amount (in Lakhs)",
+            },
+            outstandingBalance: {
+              type: "number",
+              title: "O/S Balance",
+            },
+            emiAmount: {
+              type: "number",
+              title: "EMI (in Rs.)",
+            },
+            emiPaidBank: {
+              type: "string",
+              title: "EMI Paid Bank",
+            },
+            securedAgainstAsset: {
+              type: "string",
+              title: "Secured against which asset",
+            },
+          },
+        },
+      },
     },
     {
       id: "bankingDetails",
-      label: "Banking Details",
+      label: "Bank Details",
       schema: {
-        type: "object",
-        properties: {
-          bankDetails: {
-            type: "array",
-            title: "Bank Details",
-            items: {
-              type: "object",
-              properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                branchName: {
-                  type: "string",
-                  title: "Branch Name",
-                },
-                accountType: {
-                  type: "string",
-                  title: "Account Type",
-                },
-                openSinceYear: {
-                  type: "integer",
-                  title: "Open Since (Year)",
-                },
-              },
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            bankName: {
+              type: "string",
+              title: "Bank Name",
+            },
+            branchName: {
+              type: "string",
+              title: "Branch Name",
+            },
+            accountType: {
+              type: "string",
+              title: "Account Type",
+            },
+            openSinceYear: {
+              type: "string",
+              title: "Open since (Year)",
             },
           },
         },
       },
-      required: true,
     },
     {
       id: "thirdPartyCheck",
@@ -546,14 +556,13 @@ export const axisFinanceUblAbove10lSchema = {
       schema: {
         type: "object",
         properties: {
-          thirdPartyCheck: {
+          references: {
             type: "array",
-            title: "Third Party Check",
-            minItems: 2,
+            title: "References",
             items: {
               type: "object",
               properties: {
-                individualOrBusinessName: {
+                name: {
                   type: "string",
                   title: "Individual / Business Name",
                 },
@@ -571,52 +580,131 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 feedbackOnBorrower: {
                   type: "string",
-                  title: "Feedback on Borrower",
+                  title: "Feedback on borrower",
                 },
                 feedbackOnBusiness: {
                   type: "string",
-                  title: "Feedback on Business",
+                  title: "Feedback on business",
                 },
               },
             },
           },
           otherIncome: {
             type: "string",
-            title: "Other Income (Income from other than initiated business)",
+            title: "Other income (income from other than initiated business)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           siteCoordinates: {
             type: "string",
-            title: "Site Coordinates (Latitude, Longitude)",
+            title: "Site coordinates (Latitude, Longitude)",
           },
-          observation: {
+          observations: {
             type: "array",
-            title: "Observation",
+            title: "Observations",
             items: {
               type: "string",
               title: "Observation",
             },
           },
-          Remarks: {
+          remarks: {
             type: "string",
             title: "Remarks",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          AFLVerifierNameAndEmpCode: {
+          verifierNameEmpCode: {
             type: "string",
             title: "AFL Verifier's Name & Emp Code",
           },
-          AFLVerifierSignature: {
+          verifierSignature: {
             type: "string",
             title: "AFL Verifier's Signature",
           },
-          Status: {
+          status: {
             type: "string",
             title: "Status",
           },
         },
       },
-      required: true,
     },
-   
+    {
+      id: "financialSummary",
+      label: "Financial Summary",
+      schema: {
+        type: "object",
+        properties: {
+          totalGrossDisposableIncome: {
+            type: "number",
+            title: "Total Gross disposable Income (A) per month",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalObligations: {
+            type: "number",
+            title: "Total Obligations (B) per month",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netDisposableIncome: {
+            type: "number",
+            title: "Net Disposable Income (C = A – B) per month",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          note: {
+            type: "string",
+            title: "Notes / Comments",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "recommendations",
+      label: "Recommendations",
+      schema: {
+        type: "object",
+        properties: {
+          recommendations: {
+            type: "array",
+            title: "Recommendations",
+            items: {
+              type: "string",
+              title: "Recommendation",
+            },
+          },
+          disclaimer: {
+            type: "string",
+            title: "Disclaimer if any",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
   ],
 } as const;
+
 export default axisFinanceUblAbove10lSchema;

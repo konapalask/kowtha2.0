@@ -1,176 +1,362 @@
-import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 
+const tableStyle =
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
+const cellStyle =
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
+
+const hasValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((entry) => hasValue(entry));
+  if (typeof value === "object") {
+    return Object.values(value).some((entry) => hasValue(entry));
+  }
+  return false;
+};
+
+const formatMultiline = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return String(value).replace(/\n+/g, "<br>");
+};
+
+const formatCurrency = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) {
+    return formatMultiline(value);
+  }
+  return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
+};
+
+const ensureArray = <T,>(value: T | T[] | undefined | null): T[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
+};
+
+const wrapParagraph = (content: string) =>
+  `<p style="${paragraphStyle}">${content}</p>`;
+
+const bulletList = (items: string[]) =>
+  items.length
+    ? `<ul style="margin:4px 0 0 18px;padding-left:18px;">${items
+        .map((item) => `<li>${item}</li>`)
+        .join("")}</ul>`
+    : "";
+
+const renderKeyValueTable = (
+  rows: Array<[string, any, ((value: any) => string)?]>
+) => {
+  if (!rows.length) return "";
+  return `
+    <table style="${tableStyle}">
+      ${rows
+        .map(([label, value, formatter]) => {
+          const rendered = formatter
+            ? formatter(value)
+            : formatMultiline(value);
+          return `
+          <tr>
+            <td style="${cellStyle}">${wrapParagraph(label)}</td>
+            <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
+          </tr>`;
+        })
+        .join("")}
+    </table>
+  `;
+};
+
+const renderInstructionTable = (
+  rows: Array<{ instruction: string; value: any }>
+) => {
+  if (!rows.length) return "";
+  return `
+    <table style="${tableStyle}">
+      ${rows
+        .map(
+          ({ instruction, value }) => `
+        <tr>
+          <td style="${cellStyle}">${instruction}</td>
+          <td style="${cellStyle}">${value}</td>
+        </tr>`
+        )
+        .join("")}
+    </table>
+  `;
+};
+
+const renderInnerTable = (headers: string[], rows: string[][]) => {
+  if (!rows.length) {
+    return wrapParagraph("Not provided");
+  }
+  const headerRow = headers
+    .map(
+      (header) =>
+        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+    )
+    .join("");
+  const rowsHtml = rows
+    .map(
+      (row) =>
+        `<tr>${row
+          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .join("")}</tr>`
+    )
+    .join("");
+  return `
+    <table style="${tableStyle}">
+      <tr>${headerRow}</tr>
+      ${rowsHtml}
+    </table>
+  `;
+};
+
 export const cholaTemplate = (verificationData: any, html_data: any) => {
-  const date = new Date();
-  const timeZone = "Asia/Kolkata";
-  const zonedDate = toZonedTime(date, timeZone);
-  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
+  const basic = verificationData.basicInformation || {};
+  const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || [];
+  const familyMembers = ensureArray(
+    verificationData.applicantsFamilyDetails?.familyMembers
+  ).map((member: any) => [
+    formatMultiline(member?.name || ""),
+    formatMultiline(member?.relation || ""),
+    formatMultiline(member?.age || ""),
+  ]);
 
-  // Helper function to format currency
-  const formatCurrency = (amount: number) => {
-    if (!amount) return "";
-    return `Rs. ${amount.toLocaleString("en-IN")}/-`;
+  const existingLoans = ensureArray(
+    verificationData.existingLoanDetails
+  ).map((loan: any) => [
+    formatMultiline(loan?.bankName || ""),
+    formatMultiline(loan?.typeOfLoan || ""),
+    formatCurrency(loan?.loanAmount),
+    formatCurrency(loan?.emiInterest),
+    formatMultiline(loan?.tenureTotalCompleted || ""),
+  ]);
+
+  const bankingDetails = ensureArray(
+    verificationData.bankingDetails
+  ).map((bank: any) => [
+    formatMultiline(bank?.bankName || ""),
+    formatMultiline(bank?.accountNo || ""),
+    formatMultiline(bank?.accountType || ""),
+    formatMultiline(bank?.relationshipSince || ""),
+    formatMultiline(bank?.averageBalance || ""),
+  ]);
+
+  const assets = ensureArray(verificationData.assets).map(
+    (asset: any) => `<li>${formatMultiline(asset?.assetDetails || "")}</li>`
+  );
+
+  const customerReferences = ensureArray(
+    verificationData.customersReferenceNumbers
+  ).map(
+    (item: any) =>
+      `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
+  );
+
+  const otherIncomes = ensureArray(verificationData.otherIncomes).map(
+    (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
+  );
+
+  const comfortFactors = ensureArray(verificationData.comfortFactor).map(
+    (item: any) => `<li>${formatMultiline(item?.comfortFactor || "")}</li>`
+  );
+
+  const discomfortFactors = ensureArray(verificationData.discomfortFactor).map(
+    (item: any) => `<li>${formatMultiline(item?.discomfortFactor || "")}</li>`
+  );
+
+  const recommendations = ensureArray(verificationData.Recommendations).map(
+    (item: any) => formatMultiline(item?.recommendations || "")
+  );
+
+  const financialStatement = verificationData.financialStatement || {};
+  const expenditure = financialStatement.expenditure || {};
+  const income = financialStatement.income || {};
+
+  const financialAnalysis = verificationData.financialAnalysis || {};
+
+  const businessList = Array.isArray(aboutBusiness)
+    ? aboutBusiness
+        .map((item: any) =>
+          hasValue(item?.aboutTheApplicant)
+            ? `<li>${formatMultiline(item.aboutTheApplicant)}</li>`
+            : ""
+        )
+        .join("")
+    : hasValue(aboutBusiness?.details)
+    ? `<li>${formatMultiline(aboutBusiness.details)}</li>`
+    : hasValue(aboutBusiness)
+    ? `<li>${formatMultiline(aboutBusiness)}</li>`
+    : "";
+
+  const generalSection = renderKeyValueTable([
+    [
+      "Name of the applicant",
+      basic.nameOfTheApplicant || html_data?.loanDetails?.applicantName,
+    ],
+    ["Name of the co-applicant", basic.nameOfTheCoApplicant],
+    ["Business name", basic.businessName],
+    ["Constitution", basic.constitution],
+    ["Visited Address", basic.visitedAddress],
+    ["Loan Requested", formatCurrency(basic.loanRequested)],
+    ["Purpose of loan", basic.purposeOfLoan],
+    ["Date of visit", basic.dateOfVisit],
+    ["Person met", basic.personMet],
+  ]);
+
+  const familyTable =
+    familyMembers.length > 0
+      ? renderInnerTable(["Name", "Relationship", "Age"], familyMembers)
+      : wrapParagraph("Not provided");
+
+  const existingLoanTable = renderInnerTable(
+    [
+      "Bank Name",
+      "Type of Loan",
+      "Loan Amount (In Rs.)",
+      "EMI/Interest (In Rs.)",
+      "Total Tenure / Completed [in months]",
+    ],
+    existingLoans
+  );
+
+  const bankingTable = renderInnerTable(
+    [
+      "Bank Name",
+      "A/c No",
+      "A/c Type",
+      "Relationship since",
+      "Avg balance",
+    ],
+    bankingDetails
+  );
+
+  const financialRows: string[][] = [];
+  const pushFinancialRow = (label: string, rawValue: any) => {
+    if (!hasValue(rawValue)) return;
+    financialRows.push([label, formatCurrency(rawValue)]);
   };
 
-  // Helper function to render existing loans table rows
-  const renderExistingLoans = () => {
-    const loans = verificationData.existingLoanDetails || [];
-    if (loans.length === 0) {
-      return '<tr><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td></tr>';
-    }
+  pushFinancialRow("To purchase of Material", expenditure.toPurchaseOfMaterial);
+  pushFinancialRow("To Electricity", expenditure.toElectricity);
+  pushFinancialRow("To Rent", expenditure.toRent);
+  pushFinancialRow("To Salaries", expenditure.toSalaries);
+  pushFinancialRow("To Transportation", expenditure.toTransportation);
+  pushFinancialRow("To other expenses", expenditure.toOtherExpenses);
+  pushFinancialRow("To Net profit", expenditure.toNetProfit);
+  pushFinancialRow("Total Expenditure", expenditure.totalExpenditure);
+  pushFinancialRow("By Gross Receipts", income.byGrossReceipts);
+  pushFinancialRow("Total Income", income.totalIncome);
 
-    return loans
-      .map(
-        (loan: any) => `
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.bankName || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.typeOfLoan || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(loan.loanAmount) || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(loan.emiInterest) || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${loan.tenureTotalCompleted || ""}</p></td>
-        </tr>`
-      )
-      .join("");
-  };
+  const financialDetailsTable = renderInnerTable(
+    ["Particulars", "Amount"],
+    financialRows
+  );
 
-  // Helper function to render banking details table rows
-  const renderBankingDetails = () => {
-    const bankDetails = verificationData.bankingDetails?.bankingDetails || [];
-    if (bankDetails.length === 0) {
-      return '<tr><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td><td style="border:1px solid #ccc;padding:8px"></td><td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">-</p></td></tr>';
-    }
+  const grossDisposable = hasValue(
+    financialAnalysis.totalGrossDisposableIncome
+  )
+    ? formatCurrency(financialAnalysis.totalGrossDisposableIncome)
+    : "Not provided";
 
-    return bankDetails
-      .map(
-        (bank: any) => `
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.bankName || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.accountNo || ""}</p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.accountType || ""}</p></td>
-        </tr>`
-      )
-      .join("");
-  };
+  const totalObligations = hasValue(financialAnalysis.totalObligations)
+    ? formatCurrency(financialAnalysis.totalObligations)
+    : "Not provided";
 
-  // Render business details list
-  const renderBusinessDetails = () => {
-    return (
-      verificationData.aboutTheApplicantAndItsBusiness
-        ?.map((item: any) => `<li>${item.aboutTheApplicant || ""}</li>`)
-        .join("") ||
-      `<li>MR. ${verificationData.basicInformation?.applicantName || ""} is applicant aged ${verificationData.basicInformation?.age || ""} years, ${verificationData.basicInformation?.education || ""} and native is ${verificationData.basicInformation?.nativePlace || ""}.</li>
-       <li>Applicant started business under the name of ${verificationData.basicInformation?.businessName || ""} since ${verificationData.aboutTheBusiness?.businessVintage || ""}.</li>
-       <li>It is a sole proprietorship business concern, applicant is proprietor of the business and applicant manages all the business activities.</li>`
-    );
-  };
+  const netDisposable = hasValue(financialAnalysis.netDisposableIncome)
+    ? formatCurrency(financialAnalysis.netDisposableIncome)
+    : "Not provided";
 
   return `
     ${pdBaseTemplate(html_data)}
-    
     <div class="template-content">
-            <p style="margin:8px 0;line-height:1.5"></p>
-            <p style="margin:8px 0;line-height:1.5"><strong>LIQUID INCOME PROGRAM REPORT</strong></p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Name of the applicant: </strong>${verificationData.basicInformation?.nameOfTheApplicant || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Name of the co-applicant: </strong>${verificationData.basicInformation?.nameOfTheCoApplicant || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Business name: </strong>${verificationData.basicInformation?.businessName || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Constitution: </strong>${verificationData.basicInformation?.constitution || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Visited Address: </strong>${verificationData.basicInformation?.visitedAddress || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Loan Requested:</strong> ${formatCurrency(verificationData.basicInformation?.loanRequested) || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Purpose of loan: </strong>${verificationData.basicInformation?.purposeOfLoan || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Date of Visit: </strong>${verificationData.basicInformation?.dateOfVisit || istDate.split(" ")[0]}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong>: ${verificationData.basicInformation?.personMet || ""}</p>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>About the applicant and its business:</strong></p>
-            <ul>${renderBusinessDetails()}</ul>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Applicant's family details: </strong></p>
-            <p style="margin:8px 0;line-height:1.5">Co Applicant Name: ${verificationData.applicantsFamilyDetails?.familyMembers?.[0]?.name || ""} - Age - ${verificationData.applicantsFamilyDetails?.familyMembers?.[0]?.age || ""} years Relation – ${verificationData.applicantsFamilyDetails?.familyMembers?.[0]?.relation || ""}.</p>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Assets:</strong></p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.assets?.map((asset) => asset.assetDetails).join(", ") || ""}</p>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Customers – Reference numbers- </strong></p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong>: ${verificationData.otherIncomes?.map((income) => income.otherIncome).join(", ") || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Existing Loan details: </strong></p>
-            
-            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Bank name </strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of Loan</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Loan amount <br />(In Rs.)</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>EMI/Interest <br />(In Rs.)</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Total Tenure<br />/completed <br />[in months]</strong></p></td>
-                </tr>
-                ${renderExistingLoans()}
-            </table>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Banking Details: </strong></p>
-            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Bank name </strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>A/c No</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>A/c Type</strong></p></td>
-                </tr>
-                ${renderBankingDetails()}
-            </table>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
-            <ul>
-              <li>${verificationData.itrFinancialDetails?.itr || ""}</li>
-              <li>${verificationData.itrFinancialDetails?.receipts || ""}</li>
-              <li>${verificationData.itrFinancialDetails?.verification || ""}</li>
-              <li>${verificationData.itrFinancialDetails?.gpMarginAndExpenses || ""}</li>
-            </ul>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Comfort Factor: - </strong></p>
-            <ul>
-                ${
-                  verificationData.comfortFactor
-                    ?.map((factor: any) => `<li>${factor.comfortFactor}</li>`)
-                    .join("") ||
-                  `<li>Business name board seen.</li>
-                 <li>Verified Rental agreement, trade license, Bank statements, kacha records.</li>
-                 <li>He has ${verificationData.aboutTheBusiness?.businessVintage || ""} years of experience in this field.</li>`
-                }
-            </ul>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Discomfort Factor: -</strong></p>
-            <ul>
-                ${
-                  verificationData.discomfortFactor
-                    ?.map(
-                      (factor: any) => `<li>${factor.discomfortFactor}</li>`
-                    )
-                    .join("") ||
-                  `<li>Not provided IT, Bank Statement and Bills.</li>
-                 <li>During the observation, UPI scanner was in the name of different person.</li>`
-                }
-            </ul>
-            
-            <p style="margin:8px 0;line-height:1.5"><strong>Recommendations: </strong>${verificationData.Recommendations?.[0]?.recommendations || html_data.status || ""}</p>
-            <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer if any: </strong>We estimated financials, purely based on the valid documents provided by the applicant.</p>
-            
-            ${
-              verificationData.financialAnalysis
-                ? `
-            <ul>
-                <li>Total Gross disposable Income (A) ${formatCurrency(verificationData.financialAnalysis.totalGrossDisposableIncome) || ""} per month</li>
-                <li>Total Obligations (B) ${formatCurrency(verificationData.financialAnalysis.totalObligations) || ""} per month.</li>
-                <li>Net Disposable Income (C = A – B) ${formatCurrency(verificationData.financialAnalysis.netDisposableIncome) || ""} per month</li>
-            </ul>`
-                : `<ul>
-                <li>Total Gross disposable Income (A) Rs. 3, 00, 000/- per month</li>
-                <li>Total Obligations (B) Rs. 2, 14,000/- per month.</li>
-                <li>Net Disposable Income (C = A – B) Rs. 86,000/- per month</li>
-            </ul>`
-            }
-            
-            <p style="margin:8px 0;line-height:1.5">Gross disposable income is sum of Net profit & interest depreciations</p>
-            <ul><li>Business premises photo with customer& Vendor's Self to be attached in this report.</li></ul>
-            <p style="margin:8px 0;line-height:1.5"><strong>Business Photos:</strong></p>
-        </div>
-    
+      <p style="${paragraphStyle}"><strong>LIQUID INCOME PROGRAM REPORT</strong></p>
+      ${generalSection}
+
+      <p style="${paragraphStyle}"><strong>About the Applicant & Business:</strong></p>
+      <ul>
+        ${businessList || "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Applicant's Family Details:</strong></p>
+      ${familyTable}
+
+      <p style="${paragraphStyle}"><strong>Assets: -</strong></p>
+      <ul>
+        ${assets.length ? assets.join("") : "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
+      <ul>
+        ${
+          customerReferences.length
+            ? customerReferences.join("")
+            : "<li>Not provided</li>"
+        }
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
+      <ul>
+        ${otherIncomes.length ? otherIncomes.join("") : "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Existing Loan Details:</strong></p>
+      ${existingLoanTable}
+
+      <p style="${paragraphStyle}"><strong>Banking Details:</strong></p>
+      ${bankingTable}
+
+      <p style="${paragraphStyle}"><strong>ITR/ Financial Details:</strong></p>
+      ${wrapParagraph(
+        formatMultiline(
+          verificationData.itrFinancialDetails
+            ?.itrReceiptsVerificationInformation || ""
+        )
+      )}
+
+      <p style="${paragraphStyle}"><strong>Comfort Factor: -</strong></p>
+      <ul>
+        ${
+          comfortFactors.length
+            ? comfortFactors.join("")
+            : "<li>Not provided</li>"
+        }
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Discomfort Factor: -</strong></p>
+      <ul>
+        ${
+          discomfortFactors.length
+            ? discomfortFactors.join("")
+            : "<li>Not provided</li>"
+        }
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Recommendations:</strong> ${
+        recommendations.length ? recommendations.join("<br>") : "Not provided"
+      }</p>
+
+      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${
+        verificationData.disclaimer ||
+        "We estimated financials, purely based on the valid documents provided by the applicant."
+      }</p>
+
+      <ul>
+        <li>Total Gross disposable Income (A) ${grossDisposable} per month</li>
+        <li>Total Obligations (B) ${totalObligations} per month</li>
+        <li>Net Disposable Income (C = A – B) ${netDisposable} per month</li>
+      </ul>
+
+      ${financialDetailsTable}
+
+      <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
+      <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
+      <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
+    </div>
     ${pdBaseTemplateFooter(html_data)}
   `;
 };

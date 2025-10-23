@@ -3,22 +3,30 @@ export const idfcHlMlSchema = {
   bankName: "IDFC HL & ML",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "generalDetails",
+      label: "General Details",
       schema: {
         type: "object",
         properties: {
-          nameOfTheApplicant: {
+          nameOfApplicant: {
             type: "string",
             title: "Name of the Applicant",
             readOnly: true,
           },
-          nameOfTheCoApplicantS: {
+          nameOfTheApplicant: {
+            type: "string",
+            title: "Name of the Applicant (legacy)",
+          },
+          nameOfCoApplicants: {
             type: "string",
             title: "Name of the Co-Applicant/s",
           },
+          nameOfTheCoApplicantS: {
+            type: "string",
+            title: "Name of the Co-Applicant/s (legacy)",
+          },
           referenceNumber: {
-            type: "integer",
+            type: "string",
             title: "Reference Number",
             readOnly: true,
           },
@@ -46,7 +54,7 @@ export const idfcHlMlSchema = {
             format: "date",
           },
           numberOfVisitsMade: {
-            type: "integer",
+            type: "string",
             title: "Number of Visits Made",
           },
           personMet: {
@@ -56,15 +64,27 @@ export const idfcHlMlSchema = {
           placeAndAddressOfVisit: {
             type: "string",
             title: "Place and Address of Visit",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          ownershipStatus: {
+            type: "string",
+            title: "Owned/ Rental",
           },
           ownedRental: {
             type: "string",
-            title: "Owned/Rental",
+            title: "Owned/ Rental (legacy)",
           },
-          whetherNameBoardSeen: {
+          nameBoardSeen: {
             type: "string",
             title: "Whether Name Board Seen",
             enum: ["Yes", "No"],
+          },
+          whetherNameBoardSeen: {
+            type: "string",
+            title: "Whether Name Board Seen (legacy)",
           },
           latitude: {
             type: "string",
@@ -87,9 +107,7 @@ export const idfcHlMlSchema = {
             title: "Branch",
           },
         },
-        required: ["nameOfTheApplicant", "referenceNumber"],
       },
-      required: true,
     },
     {
       id: "personalDetails",
@@ -97,16 +115,15 @@ export const idfcHlMlSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfTheApplicant: {
+          applicantName: {
             type: "string",
             title: "Name of the Applicant",
           },
-          phoneNoOfTheApplicant: {
+          phoneNumber: {
             type: "string",
             title: "Phone No. of the Applicant",
-            pattern: "^[0-9]{10}$",
           },
-          panNo: {
+          panNumber: {
             type: "string",
             title: "PAN No.",
           },
@@ -118,16 +135,43 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Role in Business",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "detailsOfFamilyMembers",
-      label: "Details of Family Members",
-      schema: {
-        type: "object",
-        properties: {
+          familyMembers: {
+            type: "array",
+            title: "Details of Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                age: {
+                  type: "string",
+                  title: "Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+              },
+            },
+          },
+          familyDetailsText: {
+            type: "string",
+            title: "Family Details (Narrative)",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
           residenceAddress: {
             type: "string",
             title: "Residence Address",
@@ -136,91 +180,81 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Nature of Residence",
           },
-          noOfYearsInTheSameAddress: {
-            type: "integer",
-            title: "No. of Years in the Same Address",
+          yearsInSameAddress: {
+            type: "string",
+            title: "No. of years in the same address",
           },
-          noOfYearsInTheSameCity: {
-            type: "integer",
-            title: "No. of Years in the Same City",
+          yearsInSameCity: {
+            type: "string",
+            title: "No. of years in the same City",
           },
-          permanentAddressIfDifferentFromAbove: {
+          permanentAddress: {
             type: "string",
             title: "Permanent Address (If different from above)",
           },
+          coApplicantRelationship: {
+            type: "string",
+            title: "Name of the co-applicants and relationship",
+          },
         },
       },
-      required: true,
     },
     {
-      id: "businessWorkDetails",
+      id: "businessDetails",
       label: "Business / Work Details",
       schema: {
         type: "object",
         properties: {
-          nameOfTheEntityEmployerName: {
+          entityName: {
             type: "string",
             title: "Name of the Entity / Employer Name",
           },
           constitution: {
             type: "string",
             title: "Constitution",
-            enum: [
-              "Proprietorship",
-              "Partnership",
-              "Private Limited",
-              "Public Limited",
-              "LLP",
-              "HUF",
-            ],
           },
-          briefOnBusinessModelAndNatureOfBusiness: {
+          businessModel: {
             type: "string",
-            title: "Brief on Business Model and Nature of Business",
+            title: "Brief on business model and nature of business",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
           yearOfIncorporation: {
             type: "integer",
             title: "Year of Incorporation",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessActivelyManagedBySelfOthersIfOthersNameRelationship",
-      label:
-        "Business actively managed by (Self/Others; If others, name & relationship)",
-      schema: {
-        type: "object",
-        properties: {
-          numberOfYearsInBusinessService: {
-            type: "integer",
-            title: "Number of Years in Business / Service",
+          businessManagedBy: {
+            type: "string",
+            title: "Business actively managed by (Self/Others; If others, name & relationship)",
+          },
+          numberOfYearsInBusiness: {
+            type: "string",
+            title: "Number of years in Business/Service",
           },
           totalWorkExperience: {
             type: "string",
-            title: "Total Work Experience",
+            title: "Total work experience",
           },
-          businessStartedBySelfOrFamilyBusiness: {
+          businessStartedBy: {
             type: "string",
-            title: "Business Started by (Self or Family Business)",
+            title: "Business started by (Self or Family Business)",
           },
           previousWorkExperience: {
             type: "string",
-            title: "Previous Work Experience",
+            title: "Previous work experience",
           },
-          ifPvtLtdNameOfDirectorsAndTheirShareholding: {
+          directorShareholding: {
             type: "string",
-            title: "If Pvt. Ltd. – Name of Directors and their Shareholding",
+            title: "If Pvt. Ltd. – Name of Directors and their shareholding",
           },
-          registeredWithShopEstablishmentActYesNoRegnNo: {
+          shopEstablishmentRegistration: {
             type: "string",
-            title:
-              "Registered with Shop & Establishment Act (Yes/No, Regn No.)",
+            title: "Registered with Shop & Establishment act? (Regn No.)",
           },
         },
       },
-      required: true,
     },
     {
       id: "operationalDetails",
@@ -228,73 +262,217 @@ export const idfcHlMlSchema = {
       schema: {
         type: "object",
         properties: {
-          natureOfBusinessLineOfActivity: {
+          natureOfBusiness: {
             type: "string",
-            title: "Nature of Business / Line of Activity",
+            title: "Nature of business / line of activity",
           },
-          relevantExperienceQualification: {
+          relevantExperience: {
             type: "string",
-            title: "Relevant Experience / Qualification",
+            title: "Relevant experience / qualification",
           },
-          describeBusinessProcess: {
+          businessProcess: {
             type: "string",
-            title: "Describe Business Process",
+            title: "Describe business process",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
           },
-          detailsOfProduct: {
+          productDetails: {
             type: "string",
-            title: "Details of Product",
+            title: "Details of product",
           },
-          sourceOfRawMaterial: {
+          rawMaterialSource: {
             type: "string",
-            title: "Source of Raw Material",
+            title: "Source of raw material",
           },
-          namesOfCustomersWithContactNo: {
+          customerNames: {
             type: "string",
-            title: "Names of Customers with Contact No.",
-            pattern: "^[0-9]{10}$",
+            title: "Names of customers with contact No.",
           },
-          namesOfSuppliersWithContactNo: {
+          supplierNames: {
             type: "string",
-            title: "Names of Suppliers with Contact No.",
-            pattern: "^[0-9]{10}$",
+            title: "Names of suppliers with contact No.",
           },
-          employeeStrengthAndActualSeenAtVisit: {
+          employeeStrength: {
             type: "string",
-            title: "Employee Strength and Actual Seen at Visit",
+            title: "Employee strength and actual seen at the time of visit",
           },
-          strengthsAndWeaknessesOfBusiness: {
+          businessStrengthsWeaknesses: {
             type: "string",
-            title: "Strengths and Weaknesses of Business",
+            title: "Strengths and weaknesses of business",
           },
-          activityLevelAtTimeOfVisit: {
+          activityLevelAtVisit: {
             type: "string",
-            title: "Activity Level at Time of Visit",
+            title: "Activity level at the time of visit",
           },
         },
       },
-      required: true,
     },
     {
-      id: "avgBalance",
-      label: "Avg Balance",
+      id: "financialDetails",
+      label: "Financial Details",
       schema: {
         type: "object",
         properties: {
-          otherAssets: {
+          grossIncomePerYearActual: {
             type: "string",
-            title: "Other Assets",
+            title: "Gross income per year (actual)",
           },
-          otherBusinessIfAny: {
+          grossIncomePerYearEstimated: {
             type: "string",
-            title: "Other Business (if any)",
+            title: "Gross income per year (estimation)",
           },
-          rentalIncomeIfAny: {
-            type: "number",
-            title: "Rental Income (if any)",
+          netIncomePerYearActual: {
+            type: "string",
+            title: "Net income per year (actual)",
+          },
+          netIncomePerYearEstimated: {
+            type: "string",
+            title: "Net income per year (estimation)",
+          },
+          netProfitLastTwoYears: {
+            type: "string",
+            title: "Net profit for last 2 years",
+          },
+          grossBusinessMarginPercent: {
+            type: "string",
+            title: "Gross business margin %",
+          },
+          netBusinessMarginPercent: {
+            type: "string",
+            title: "Net business margin %",
+          },
+          yearsFilingItrs: {
+            type: "string",
+            title: "No. of years filing ITRs",
+          },
+          lastTwoYearsItrs: {
+            type: "string",
+            title: "Last 2 years ITRs",
+          },
+          lastTwoYearsForm16: {
+            type: "string",
+            title: "Last 2 years Form 16 (Salaried)",
           },
         },
       },
-      required: true,
+    },
+    {
+      id: "termLoans",
+      label: "Loans & Banking Details - Term Loans",
+      schema: {
+        type: "object",
+        properties: {
+          termLoans: {
+            type: "array",
+            title: "Term Loans",
+            items: {
+              type: "object",
+              properties: {
+                institution: {
+                  type: "string",
+                  title: "Institution / Bank / NBFC Name",
+                },
+                loanType: {
+                  type: "string",
+                  title: "Type of Loan (LAP / HL / CD / CV / AL etc.)",
+                },
+                monthlyEmi: {
+                  type: "string",
+                  title: "Monthly Principal / EMI",
+                },
+                monthlyInterest: {
+                  type: "string",
+                  title: "Monthly Interest (if not in EMI mode)",
+                },
+                loanAmount: {
+                  type: "string",
+                  title: "Loan amount (Rs. lacs)",
+                },
+                mob: {
+                  type: "string",
+                  title: "MOB",
+                },
+                outstanding: {
+                  type: "string",
+                  title: "Outstanding (Rs)",
+                },
+              },
+            },
+          },
+          bankingDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Type of Account",
+                },
+                relationshipSince: {
+                  type: "string",
+                  title: "Relationship since",
+                },
+                averageBalance: {
+                  type: "string",
+                  title: "Avg balance",
+                },
+              },
+            },
+          },
+          otherAssets: {
+            type: "string",
+            title: "Other Assets",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          otherBusiness: {
+            type: "string",
+            title: "Other Business if any",
+          },
+          rentalIncome: {
+            type: "string",
+            title: "Rental Income (if any)",
+          },
+          rentalProperties: {
+            type: "array",
+            title: "Rental property details",
+            items: {
+              type: "object",
+              properties: {
+                propertyAddress: {
+                  type: "string",
+                  title: "Property address",
+                },
+                tenantName: {
+                  type: "string",
+                  title: "Tenant Name",
+                },
+                tenure: {
+                  type: "string",
+                  title: "Since when (no of years)",
+                },
+                rentAgreementAvailable: {
+                  type: "string",
+                  title: "Rent agreement available (Y/N)",
+                },
+                monthlyRent: {
+                  type: "string",
+                  title: "Monthly rent amount (incl. maintenance)",
+                },
+              },
+            },
+          },
+        },
+      },
     },
     {
       id: "loanDetails",
@@ -302,62 +480,55 @@ export const idfcHlMlSchema = {
       schema: {
         type: "object",
         properties: {
-          amountOfLoanApplied: {
-            type: "number",
-            title: "Amount of Loan Applied",
+          loanAmountApplied: {
+            type: "string",
+            title: "Amount of loan applied",
           },
-          purposeOfLoanEndUse: {
-            type: "number",
-            title: "Purpose of Loan (End Use)",
+          purposeOfLoan: {
+            type: "string",
+            title: "Purpose of loan (End use)",
           },
           collateralOffered: {
             type: "string",
-            title: "Collateral Offered",
+            title: "Collateral offered",
           },
-          addressOfThePropertyOfferedAsCollateral: {
+          collateralAddress: {
             type: "string",
-            title: "Address of the Property Offered as Collateral",
+            title: "Address of the property offered as collateral",
           },
-          ownerOfTheProperty: {
+          propertyOwner: {
             type: "string",
-            title: "Owner of the Property",
+            title: "Owner of the property",
           },
-          ifThePropertyIsVacantReason: {
+          propertyVacantReason: {
             type: "string",
-            title: "If the Property is Vacant, Reason",
+            title: "If the property is vacant, reason for the same",
           },
-          areaOfThePropertySqYd: {
+          propertyArea: {
             type: "string",
-            title: "Area of the Property (Sq. yd.)",
+            title: "Area of the property (Sq. yd.)",
           },
-          marketValueOfThePropertyApprox: {
-            type: "number",
-            title: "Market Value of the Property (Approx)",
+          propertyMarketValue: {
+            type: "string",
+            title: "Market value of the property (Approx)",
+          },
+          propertyMortgaged: {
+            type: "string",
+            title: "Is the property presently mortgaged with any Bank / FI?",
+          },
+          existingFinancierDetails: {
+            type: "string",
+            title: "If yes (provide the name of financier and loan details)",
+          },
+          loanEndUse: {
+            type: "string",
+            title: "End use of loan",
           },
         },
       },
-      required: true,
     },
     {
-      id: "isThePropertyMortgagedWithAnyBankFi",
-      label: "Is the Property Mortgaged with any Bank/FI?",
-      schema: {
-        type: "object",
-        properties: {
-          ifYesNameOfFinancierAndLoanDetails: {
-            type: "number",
-            title: "If Yes – Name of Financier and Loan Details",
-          },
-          endUseOfLoan: {
-            type: "number",
-            title: "End Use of Loan",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "personalDiscussionDetails",
+      id: "personalDiscussion",
       label: "Personal Discussion Details",
       schema: {
         type: "object",
@@ -366,14 +537,13 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Strengths",
           },
-          otherObservationEGGstGstReturnsBankStatementItrsFoodLicense: {
+          otherObservation: {
             type: "string",
-            title:
-              "Other Observation (e.g., GST, GST Returns, Bank Statement, ITRs, Food License)",
+            title: "Other observation",
           },
-          statusOfThisCasePositiveNegativeCreditRefer: {
+          overallOutcome: {
             type: "string",
-            title: "Status of this Case - Positive/Negative/Credit Refer",
+            title: "Overall outcome of the personal discussion",
           },
           remarks: {
             type: "string",
@@ -387,10 +557,23 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Signature",
           },
+          pdDate: {
+            type: "string",
+            title: "Date",
+          },
+          detailsMatch: {
+            type: "string",
+            title:
+              "Whether details provided in the application and during discussion are same (Yes/No)",
+          },
+          detailsMismatchNotes: {
+            type: "string",
+            title: "If No, provide details",
+          },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default idfcHlMlSchema;

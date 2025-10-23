@@ -8,12 +8,12 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          applicationNo: {
+          applicationNumber: {
             type: "integer",
             title: "Application No.",
             readOnly: true,
           },
-          nameOfTheApplicant: {
+          applicantName: {
             type: "string",
             title: "Name of the Applicant",
             readOnly: true,
@@ -27,46 +27,25 @@ export const axisFinanceSchema = {
             title: "Person Contacted",
             pattern: "^[0-9]{10}$",
           },
-          date: {
+          pdDate: {
             type: "string",
             title: "Date",
             format: "date",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
+          loanAmount: {
+            type: "number",
+            title: "Loan Amount",
+            readOnly: true,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+            },
           },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanAmountRequest",
-      label: "Loan Amount Request",
-      schema: {
-        type: "object",
-        properties: {
           placeOfInterview: {
             type: "string",
             title: "Place of Interview",
           },
-          contactNumber: {
+          applicantMobile: {
             type: "string",
             title: "Contact Number",
             pattern: "^[0-9]{10}$",
@@ -88,6 +67,17 @@ export const axisFinanceSchema = {
           relation: {
             type: "string",
             title: "Relation",
+            enum: [
+              "Self",
+              "Spouse",
+              "Son",
+              "Daughter",
+              "Father",
+              "Mother",
+              "Brother",
+              "Sister",
+              "Other",
+            ],
           },
           age: {
             type: "integer",
@@ -96,42 +86,57 @@ export const axisFinanceSchema = {
           education: {
             type: "string",
             title: "Education",
+            enum: [
+              "Below 10th",
+              "10th pass",
+              "Under graduate",
+              "Graduate",
+              "Post Graduate",
+              "Professional",
+            ],
           },
           occupation: {
             type: "string",
             title: "Occupation",
           },
-          noOfDependants: {
-            type: "integer",
-            title: "No. of Dependants",
-          },
         },
+        required: true,
       },
-      required: true,
+      noOfDependants: {
+        type: "integer",
+        title: "No. of Dependants",
+      },
+      generalLifestylePersonality: {
+        type: "string",
+        title: "General Lifestyle/Personality",
+        enum: ["Good", "Average", "Bad"],
+      },
     },
     {
-      id: "generalLifestylePersonality",
-      label: "General Lifestyle/Personality",
+      id: "placeOfResidenceOffice",
+      label: "Place of Residence/Office",
       schema: {
         type: "object",
         properties: {
-          placeOfResidenceOffice: {
+          currentAddressDetails: {
             type: "string",
-            title: "Place of Residence/Office",
+            title: "Current Address Details",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "ownershipAndNameOfOwners",
-      label: "Ownership and Name of Owners",
-      schema: {
-        type: "object",
-        properties: {
+          ownershipAndNameOfOwners: {
+            type: "string",
+            title: "Ownership and Name of Owners",
+          },
           collateralDescriptionAndType: {
             type: "string",
             title: "Collateral Description and Type",
+          },
+          officePremisesDetails: {
+            type: "string",
+            title: "Office Premises Details",
+          },
+          ownershipAndNameOfOwnersNaForSalaried: {
+            type: "string",
+            title: "Ownership and Name of Owners (NA for Salaried)",
           },
         },
       },
@@ -143,21 +148,34 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfBusinessEmployment: {
+          detailedProfileOfTheBusiness: {
             type: "string",
-            title: "Name of Business / Employment",
+            title: "Enter details of business",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd",
-      label:
-        "Nature of Business Entity / Employer Details (Proprietory / Partnership / Pvt. Ltd)",
+      id: "Self Employed/Salaried",
+      label: "Self Employed/Salaried",
       schema: {
         type: "object",
         properties: {
+          nameOfBusinessEmployment: {
+            type: "string",
+            title: "Name of Business / Employment",
+          },
+          natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd: {
+            type: "string",
+            title:
+              "Nature of Business Entity / Employer Details (Proprietory / Partnership / Pvt. Ltd)",
+            enum: ["Proprietory", "Partnership", "Pvt. Ltd"],
+          },
           keyManagerToTheBusiness: {
             type: "integer",
             title: "Key Manager to the Business",
@@ -189,11 +207,15 @@ export const axisFinanceSchema = {
       required: true,
     },
     {
-      id: "noOfEmployees",
-      label: "No of Employees",
+      id: "employeotherMajorCost",
+      label: "Employee or Other Major Cost",
       schema: {
         type: "object",
         properties: {
+          numberOfEmployees: {
+            type: "integer",
+            title: "Number of Employees",
+          },
           totalSalariesPerMonth: {
             type: "number",
             title: "Total Salaries per Month",
@@ -208,20 +230,36 @@ export const axisFinanceSchema = {
             type: "integer",
             title: "Accounting Year",
           },
-          businessData: {
-            type: "string",
-            title: "Business Data",
+          estimatedTotalCosts: {
+            type: "number",
+            title: "Estimated Total Costs",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "annualSales",
-      label: "Annual Sales",
+      id: "businessData",
+      label: "Business Data",
       schema: {
         type: "object",
         properties: {
+          annualSales: {
+            type: "number",
+            title: "Annual Sales",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
           overallCosts: {
             type: "number",
             title: "Overall Costs",
@@ -233,14 +271,8 @@ export const axisFinanceSchema = {
             },
           },
           majorCostHeads: {
-            type: "number",
+            type: "string",
             title: "Major Cost Heads",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
           grossMargin: {
             type: "number",
@@ -250,51 +282,35 @@ export const axisFinanceSchema = {
             type: "number",
             title: "PBDIT Margin %",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "creditorsCycle",
-      label: "Creditors Cycle",
-      schema: {
-        type: "object",
-        properties: {
+          debtorsCycle: {
+            type: "integer",
+            title: "Debtors Cycle",
+          },
+          creditorsCycle: {
+            type: "integer",
+            title: "Creditors Cycle",
+          },
           capitalInvested: {
             type: "number",
             title: "Capital Invested",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanFundsInclCcLimit",
-      label: "Loan Funds (incl. CC limit)",
-      schema: {
-        type: "object",
-        properties: {
+          loanFundsInclCcLimit: {
+            type: "string",
+            title: "Loan Funds (incl. CC limit)",
+          },
           stockMaintained: {
             type: "string",
             title: "Stock Maintained",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessBankAccounts",
-      label: "Business Bank Accounts",
-      schema: {
-        type: "object",
-        properties: {
-          incomeAssets: {
-            type: "number",
-            title: "Income & Assets",
-          },
-          coApplicantSIncome: {
-            type: "number",
-            title: "Co-Applicant’s Income",
+          businessBankAccounts: {
+            type: "string",
+            title: "Business Bank Accounts",
           },
         },
       },
@@ -306,6 +322,17 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
+          coApplicantIncome: {
+            type: "number",
+            title: "Co-Applicant Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+
           licPaymentInsuranceMediclaim: {
             type: "string",
             title: "LIC Payment / Insurance / Mediclaim",
@@ -318,6 +345,14 @@ export const axisFinanceSchema = {
             type: "string",
             title: "Cars / Two-Wheelers Owned",
           },
+          otherPropertiesOwned: {
+            type: "string",
+            title: "Other Properties Owned",
+          },
+          otherAssetsOwned: {
+            type: "string",
+            title: "Other Assets Owned",
+          },
         },
       },
       required: true,
@@ -325,7 +360,8 @@ export const axisFinanceSchema = {
     {
       id: "otherLiabilitiesIncludingCcLimitsOwnCoApplicants",
       label: "OTHER LIABILITIES INCLUDING CC LIMITS (OWN/CO APPLICANTS)",
-      schema: {
+      // this is an array of objects
+      items: {
         type: "object",
         properties: {
           from: {
@@ -333,44 +369,51 @@ export const axisFinanceSchema = {
             title: "From",
           },
         },
-      },
-      required: true,
-    },
-    {
-      id: "natureOfLoanAccountNo",
-      label: "Nature of Loan / Account No.",
-      schema: {
-        type: "object",
-        properties: {
-          oSAmount: {
-            type: "number",
-            title: "O/S Amount",
-          },
-          emi: {
-            type: "number",
-            title: "EMI",
-          },
-          willCloseContinue: {
-            type: "string",
-            title: "Will Close / Continue",
-          },
-          budgetAnalysis: {
-            type: "string",
-            title: "Budget Analysis",
-          },
+        natureOfLoan: {
+          type: "string",
+          title: "Nature of Loan",
+          enum: ["Personal Loan", "Home Loan", "Car Loan", "Other"],
+        },
+        amount: {
+          type: "number",
+          title: "O/S Amount",
+        },
+        emi: {
+          type: "number",
+          title: "EMI",
+        },
+        willCloseContinue: {
+          type: "string",
+          title: "Will Close / Continue",
         },
       },
       required: true,
     },
     {
-      id: "otherLoanEmi",
-      label: "Other Loan EMI",
+      id: "budgetAnalysis",
+      label: "Budget Analysis",
       schema: {
         type: "object",
         properties: {
           totalMonthlyExpensesPerMonth: {
             type: "string",
             title: "Total Monthly Expenses per Month",
+          },
+          overAllFamilyExpenses: {
+            type: "string",
+            title: "Over All Family Expenses",
+          },
+          plOrAutoLoanEMI: {
+            type: "number",
+            title: "PL or Auto Loan EMI",
+          },
+          otherLoanEmi: {
+            type: "number",
+            title: "Other Loan EMI",
+          },
+          totalMonthlyIncomePerMonth: {
+            type: "string",
+            title: "Total Monthly Income per Month",
           },
           netSurplus: {
             type: "string",
@@ -380,71 +423,38 @@ export const axisFinanceSchema = {
             type: "number",
             title: "Affordable EMI",
           },
-          endUseOfFunds: {
-            type: "string",
-            title: "End Use of Funds",
+        },
+        endUseOfFunds: {
+          type: "string",
+          title: "End Use of Funds",
+        },
+        otherObservations: {
+          type: "string",
+          title: "Other Observations",
+          ui: {
+            widget: "textarea",
+            rows: 6,
           },
         },
       },
       required: true,
     },
     {
-      id: "otherObservations",
-      label: "Other Observations",
+      id: "tradeReferences",
+      label: "Trade References",
       schema: {
-        type: "object",
-        properties: {
-          tradeReference: {
-            type: "string",
-            title: "Trade Reference",
-          },
-          slNo: {
-            type: "integer",
-            title: "Sl No",
-          },
-          nameOfThePerson: {
-            type: "string",
-            title: "Name of the Person",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "telephoneNoAddressForCommunication",
-      label: "Telephone No / Address for Communication",
-      schema: {
-        type: "object",
-        properties: {
-          estimatedIncome: {
-            type: "number",
-            title: "Estimated Income",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "theGrossSalesAsPerOurAssumptions",
-      label: "The Gross Sales as per our assumptions",
-      schema: {
-        type: "object",
-        properties: {
-          pbditMargin: {
-            type: "number",
-            title: "PBDIT Margin",
-          },
-          thePatOfTheBusinessConcernRs: {
-            type: "string",
-            title: "The PAT of the Business Concern (Rs.)",
-          },
-          overallPositivesNegatives: {
-            type: "string",
-            title: "Overall Positives / Negatives",
-          },
-          acceptReject: {
-            type: "string",
-            title: "Accept / Reject",
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            nameOfThePerson: {
+              type: "string",
+              title: "Name of the Person",
+            },
+            contactDetails: {
+              type: "string",
+              title: "Telephone No. / Address for Communication",
+            },
           },
         },
       },
