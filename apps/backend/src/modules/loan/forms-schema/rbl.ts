@@ -8,12 +8,12 @@ export const rblSchema = {
       schema: {
         type: "object",
         properties: {
-          referenceNumber: {
+          applicationNumber: {
             type: "string",
             title: "Reference Number (LOS ID)",
             readOnly: true,
           },
-          nameOfApplicant: {
+          applicantName: {
             type: "string",
             title: "Name of Applicant",
             readOnly: true,
@@ -22,10 +22,10 @@ export const rblSchema = {
             type: "string",
             title: "Co – Applicant",
           },
-          isExistingCustomer: {
-            type: "boolean",
-            title: "Is Existing Customer?",
-          },
+          // isExistingCustomer: {
+          //   type: "boolean",
+          //   title: "Is Existing Customer?",
+          // },
           typeOfBorrower: {
             type: "string",
             title: "Type of Borrower",
@@ -37,10 +37,16 @@ export const rblSchema = {
               "Sole Proprietorship",
             ],
           },
-          meetingDetails: {
-            type: "string",
-            title: "Meeting Details",
-          },
+        },
+      },
+    },
+    //make meeting details as section and add the fields till date of visit
+    {
+      id: "meetingDetails",
+      label: "Meeting Details",
+      schema: {
+        type: "object",
+        properties: {
           addressVisited: {
             type: "string",
             title: "Address Visited",
@@ -58,30 +64,8 @@ export const rblSchema = {
             title: "Date of Visit",
             format: "date",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
-        required: ["referenceNumber", "nameOfApplicant"],
       },
-      required: true,
     },
     {
       id: "businessOwnerDetails",
@@ -117,10 +101,30 @@ export const rblSchema = {
                 occupation: {
                   type: "string",
                   title: "Occupation",
+                  enum: [
+                    "Business",
+                    "Salaried",
+                    "Farmer/Agriculturist",
+                    "Retired",
+                    "Part Time",
+                    "Student",
+                    "Homemaker",
+                  ],
                 },
                 relation: {
                   type: "string",
                   title: "Relation",
+                  enum: [
+                    "Self",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Other",
+                  ],
                 },
                 remarks: {
                   type: "string",
@@ -153,7 +157,7 @@ export const rblSchema = {
           },
         },
       },
-      required: true,
+      required: false,
     },
     {
       id: "businessDetails",
@@ -252,6 +256,10 @@ export const rblSchema = {
           businessProcess: {
             type: "string",
             title: "Business Process",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
           },
           margins: {
             type: "string",
@@ -260,10 +268,22 @@ export const rblSchema = {
           documentsObserved: {
             type: "string",
             title: "Documents Observed",
+            enum: [
+              "Business License",
+              "GST Registration Certificate",
+              "PAN Card",
+              "Bank Account Details",
+              "Other",
+            ],
+            multiple: true,
           },
           activityObserved: {
             type: "string",
             title: "Activity Observed",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
         },
         required: ["legalName", "tradeName"],
@@ -302,7 +322,7 @@ export const rblSchema = {
           },
         },
       },
-      required: true,
+      required: false,
     },
     {
       id: "outputsSupply",
@@ -332,7 +352,7 @@ export const rblSchema = {
           },
         },
       },
-      required: true,
+      required: false,
     },
     {
       id: "employeeDetails",
@@ -356,7 +376,7 @@ export const rblSchema = {
         },
         required: ["noOfEmployees"],
       },
-      required: true,
+      required: false,
     },
     {
       id: "tradeReferences",
@@ -400,7 +420,7 @@ export const rblSchema = {
           },
         },
       },
-      required: true,
+      required: false,
     },
     {
       id: "otherSourcesOfIncome",
@@ -544,6 +564,32 @@ export const rblSchema = {
       required: true,
     },
     {
+      id: "ownContributions",
+      label: "Own Contributions",
+      schema: {
+        type: "object",
+        properties: {
+          Particulars: {
+            type: "string",
+            title: "Particulars (source of own contribution)",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
+          Remarks: {
+            type: "string",
+            title: "Remarks",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
       id: "netWorth",
       label: "Net Worth",
       schema: {
@@ -575,25 +621,11 @@ export const rblSchema = {
                   },
                 },
                 yearsOfOwnership: {
-                  type: "string",
+                  type: "number",
                   title: "Years of ownership",
                 },
               },
             },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "particulars",
-      label: "Particulars",
-      schema: {
-        type: "object",
-        properties: {
-          coordinates: {
-            type: "string",
-            title: "Coordinates (Latitude, Longitude)",
           },
         },
       },

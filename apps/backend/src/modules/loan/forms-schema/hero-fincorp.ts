@@ -3,17 +3,17 @@ export const heroFincorpSchema = {
   bankName: "Hero Fincorp",
   sections: [
     {
-      id: "general",
-      label: "General",
+      id: "basicDetails",
+      label: "Basic Details",
       schema: {
         type: "object",
         properties: {
-          nameOfApplicantContactPerson: {
+          applicantName: {
             type: "string",
             title: "Name of Applicant / Contact Person",
             readOnly: true,
           },
-          nameOfConcern: {
+          concernName: {
             type: "string",
             title: "Name of Concern",
             readOnly: true,
@@ -22,46 +22,31 @@ export const heroFincorpSchema = {
             type: "string",
             title: "Office Address",
             readOnly: true,
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          latitude: {
+          phoneNumber: {
             type: "string",
-            title: "Latitude",
+            title: "Phone Number",
           },
-          longitude: {
+          appointmentFixed: {
             type: "string",
-            title: "Longitude",
+            title: "Appointment Fixed",
           },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
-        },
-        required: ["nameOfApplicantContactPerson", "nameOfConcern"],
-      },
-      required: true,
-    },
-    {
-      id: "appointmentFixed",
-      label: "Appointment Fixed",
-      schema: {
-        type: "object",
-        properties: {
           dateOfVisit: {
             type: "string",
             title: "Date of Visit",
             format: "date",
           },
           structureOfLoan: {
-            type: "number",
+            type: "string",
             title: "Structure of Loan",
+          },
+          loanAmount: {
+            type: "number",
+            title: "Loan Amount",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -69,52 +54,108 @@ export const heroFincorpSchema = {
               minDecimalPlaces: 0,
             },
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanAmount",
-      label: "Loan Amount",
-      schema: {
-        type: "object",
-        properties: {
-          noOfVisit: {
-            type: "integer",
+          numberOfVisits: {
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
             type: "string",
             title: "Person Met",
           },
-          aboutTheApplicant: {
+          verifierNotes: {
             type: "string",
-            title: "About the Applicant",
+            title:
+              "Verbal declaration / notes based on information provided by applicant",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "applicantFamilyDetailsNumberOfMembersEtc",
-      label: "Applicant Family Details (number of members, etc.)",
+      id: "applicantProfile",
+      label: "About the Applicant",
       schema: {
         type: "object",
         properties: {
-          aboutTheBusiness: {
+          applicantSummary: {
             type: "string",
-            title: "About the Business",
+            title: "Applicant Summary",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
+          },
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            minItems: 1,
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relation: {
+                  type: "string",
+                  title: "Relation",
+                },
+                age: {
+                  type: "string",
+                  title: "Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+                income: {
+                  type: "string",
+                  title: "Income / Dependent",
+                },
+              },
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "ay",
-      label: "AY",
+      id: "businessProfile",
+      label: "About the Business",
+      schema: {
+        type: "array",
+        title: "Business Details",
+        items: {
+          type: "object",
+          properties: {
+            detail: {
+              type: "string",
+              title: "Detail",
+              ui: {
+                widget: "textarea",
+                rows: 3,
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "financialSummary",
+      label: "Financial Summary",
       schema: {
         type: "object",
         properties: {
+          assessmentYear: {
+            type: "string",
+            title: "Assessment Year",
+          },
           turnover: {
             type: "number",
             title: "Turnover",
@@ -135,115 +176,185 @@ export const heroFincorpSchema = {
               minDecimalPlaces: 0,
             },
           },
-          netMargin: {
-            type: "number",
-            title: "Net Margin (%)",
-          },
-          documentsObservedEGGstCertificateItrsBankStatement: {
+          netMarginPercent: {
             type: "string",
-            title:
-              "Documents Observed (e.g., GST Certificate, ITRs, Bank Statement)",
+            title: "Net margin (%)",
           },
-          automationLevelBusinessActivityAndStockSeen: {
+          documentsObserved: {
+            type: "array",
+            title: "Documents Observed",
+            items: {
+              type: "string",
+              title: "Document",
+            },
+          },
+          automationLevel: {
             type: "string",
-            title: "Automation Level (Business Activity and Stock seen)",
+            title: "Automation Level",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "customers",
-      label: "Customers",
+      id: "relationships",
+      label: "Customers & Purchase References",
       schema: {
         type: "object",
         properties: {
-          customerName: {
-            type: "string",
-            title: "Customer Name",
+          customers: {
+            type: "array",
+            title: "Customers",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                },
+              },
+            },
           },
-          customerNumber: {
-            type: "string",
-            title: "Customer Number",
-            pattern: "^[0-9]{10}$",
-          },
-          purchases: {
-            type: "string",
-            title: "Purchases",
-          },
-          supplierName: {
-            type: "string",
-            title: "Supplier Name",
-          },
-          supplierNumber: {
-            type: "string",
-            title: "Supplier Number",
-            pattern: "^[0-9]{10}$",
+          purchaseReferences: {
+            type: "array",
+            title: "Purchase References",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                contactNumber: {
+                  type: "string",
+                  title: "Contact Number",
+                },
+              },
+            },
           },
           margins: {
             type: "string",
             title: "Margins",
           },
-          netMargin: {
-            type: "number",
-            title: "Net Margin (%)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "employees",
-      label: "Employees",
-      schema: {
-        type: "object",
-        properties: {
-          noOfWorkers: {
-            type: "integer",
-            title: "No. of Workers",
+          employeesCount: {
+            type: "string",
+            title: "Employees",
           },
           assets: {
             type: "string",
             title: "Assets",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
-      required: true,
     },
     {
-      id: "emi",
-      label: "EMI",
+      id: "existingLoanDetails",
+      label: "Existing Loans",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            financialInstitution: {
+              type: "string",
+              title: "Financial Institution",
+            },
+            loanAmount: {
+              type: "number",
+              title: "Loan Amount",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            natureOfLoan: {
+              type: "string",
+              title: "Nature of Loan",
+            },
+            emi: {
+              type: "number",
+              title: "EMI",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "loanAnalysis",
+      label: "Loan Analysis",
       schema: {
         type: "object",
         properties: {
-          endUsePurposeOfLoan: {
+          endUse: {
             type: "string",
-            title: "End Use(Purpose of Loan)",
+            title: "End Use (purpose of loan)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          securityOfferedTypeOfSecurityEGOwnHouseProperty: {
-            type: "string",
-            title:
-              "Security Offered(Type of Security (e.g., Own House Property))",
+          securityOffered: {
+            type: "array",
+            title: "Security Offered",
+            items: {
+              type: "string",
+              title: "Security Detail",
+            },
           },
           address: {
             type: "string",
             title: "Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           observations: {
             type: "string",
-            title: "Observations",
+            title: "Observation",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           concerns: {
             type: "string",
             title: "Concerns",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          otherBusinessIncomeDetails: {
-            type: "number",
-            title: "Other Business / Income Details",
+          otherBusinessIncome: {
+            type: "array",
+            title: "Other Business / Income",
+            items: {
+              type: "string",
+              title: "Income Detail",
+            },
           },
-          statusOfThisCasePositiveNegativeCreditRefer: {
+          status: {
             type: "string",
-            title: "Status of this Case - Positive/Negative/Credit Refer",
+            title: "Status of this case - Positive/Negative/Credit Refer",
           },
           place: {
             type: "string",
@@ -251,8 +362,8 @@ export const heroFincorpSchema = {
           },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default heroFincorpSchema;

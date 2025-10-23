@@ -179,7 +179,8 @@ export const pdBaseTemplate = (html_data?: any) => {
               height: 100%;
             }
             .var-value {
-              font-weight: bold;
+              font-weight: normal;
+              color: #333;
               height: 100%;
             }
             .photos-section {
@@ -222,8 +223,26 @@ export const pdBaseTemplate = (html_data?: any) => {
             .photo-metadata div {
               margin-bottom: 4px;
             }
-            .signature-section {
+            .verification-summary {
               margin: 24px 0;
+              font-size: 13px;
+            }
+            .verification-summary table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            .verification-summary td {
+              padding: 6px 8px;
+              border: 1px solid #ccc;
+              vertical-align: top;
+            }
+            .verification-summary td:first-child {
+              width: 220px;
+              font-weight: bold;
+              background: #f5f5f5;
+            }
+            .signature-section {
+              margin: 16px 0 24px;
               text-align: left;
             }
             .signature-section img {
@@ -238,13 +257,14 @@ export const pdBaseTemplate = (html_data?: any) => {
         <div>
           <div class="firm">KOWTHA & CO.</div>
           <div class="subtitle">CHARTERED ACCOUNTANTS</div>
-          <div class="address"></div>
+          <div class="address">26-22-21, Mudunurivari Street, Gandhi Nagar, VIJAYAWADA – 520 003.</div>
         </div>
         <div class="contact">
-          Mobile no: 8332037517<br>
+          Mobile no: 9490008968 (AP), 8330961359 (TS)<br>
           Mail ID: opspd@gmail.com
         </div>
       </div>
+      
     `;
 };
 
@@ -262,6 +282,38 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
     hour12: true,
   });
 
+  const formatDate = (value?: any) => {
+    if (!value) return "Not Provided";
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString("en-GB", {
+        timeZone: "Asia/Kolkata",
+      });
+    }
+    return String(value);
+  };
+
+  const formatTime = (value?: any) => {
+    if (!value) return "Not Provided";
+    const stringValue = String(value).trim();
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/u.test(stringValue)) {
+      return stringValue;
+    }
+    const parsed = new Date(stringValue);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleTimeString("en-GB", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return stringValue;
+  };
+
+  const fieldVisitTimeDisplay = formatTime(html_data?.fieldVisitTime);
+  const pdVerifiedDateDisplay = formatDate(html_data?.pdVerifiedDate);
+  const pdVerifiedByDisplay = html_data?.pdVerifiedBy || "Not Provided";
+
   return `
       ${
         html_data?.imagesData
@@ -273,6 +325,23 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
       `
           : ""
       }
+      
+      <div class="verification-summary">
+        <table>
+          <tr>
+            <td>Field Visit Time</td>
+            <td>${fieldVisitTimeDisplay}</td>
+          </tr>
+          <tr>
+            <td>PD Verified By (Officer)</td>
+            <td>${pdVerifiedByDisplay}</td>
+          </tr>
+          <tr>
+            <td>PD Verified Date</td>
+            <td>${pdVerifiedDateDisplay}</td>
+          </tr>
+        </table>
+      </div>
       
       ${
         html_data?.imageDataUri

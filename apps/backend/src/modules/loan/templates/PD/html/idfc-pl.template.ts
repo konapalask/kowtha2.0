@@ -1,233 +1,363 @@
-import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.tempate";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 
-export const idfcPlTemplate = (verificationData: any, html_data: any) => {
-  const date = new Date();
-  const timeZone = "Asia/Kolkata";
-  const zonedDate = toZonedTime(date, timeZone);
-  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
+const tableStyle =
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
+const cellLabelStyle =
+  "border:1px solid #d0d7de;padding:8px 10px;width:34%;font-weight:600;background:#f5f7fa;vertical-align:top;color:#1f2d3d;line-height:1.5";
+const cellValueStyle =
+  "border:1px solid #d0d7de;padding:8px 10px;vertical-align:top;color:#2f3b52;line-height:1.5";
+const paragraphStyle = "margin:6px 0;line-height:1.55;font-size:12px;color:#2f3b52";
+
+const hasValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((entry) => hasValue(entry));
+  if (typeof value === "object") {
+    return Object.values(value).some((entry) => hasValue(entry));
+  }
+  return false;
+};
+
+const formatMultiline = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return String(value).replace(/\n+/g, "<br>");
+};
+
+const formatCurrency = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) {
+    return formatMultiline(value);
+  }
+  return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
+};
+
+const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
+};
+
+const wrapParagraph = (content: string) =>
+  `<p style="${paragraphStyle}">${content}</p>`;
+
+const sectionTitle = (text: string) =>
+  `<h2 style="margin:22px 0 10px;font-size:18px;font-weight:600;color:#1a237e;text-transform:uppercase;letter-spacing:0.5px;">${text}</h2>`;
+
+const renderKeyValueTable = (
+  rows: Array<[string, any, ((value: any) => string)?]>
+) => {
+  const items = rows.filter(([_, value]) => hasValue(value));
+  if (items.length === 0) return "";
 
   return `
-    ${pdBaseTemplate()}
+    <table style="${tableStyle}">
+      ${items
+        .map(([label, value, formatter]) => {
+          const rendered = formatter
+            ? formatter(value)
+            : formatMultiline(value);
+          return `
+        <tr>
+          <td style="${cellLabelStyle}">${label}</td>
+          <td style="${cellValueStyle}">${wrapParagraph(rendered)}</td>
+        </tr>`;
+        })
+        .join("")}
+    </table>
+  `;
+};
 
-    <div class="report-title">PERSONAL DISCUSSION REPORT</div>
+const renderList = (items: string[], emptyLabel = "Not provided") =>
+  items.length
+    ? `<ul style="margin:6px 0 6px 18px;padding:0;">${items
+        .map(
+          (item) =>
+            `<li style="margin-bottom:4px;font-size:12px;color:#2f3b52;line-height:1.45;">${item}</li>`
+        )
+        .join("")}</ul>`
+    : wrapParagraph(emptyLabel);
 
-    <div class="align-wrapper">
-      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of the Applicant</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.nameOfTheApplicant || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>SDFC ID</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.sdfcId || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Person Contacted</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.personContacted || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Visited Address</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.visitedAddress || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Date of Visit / Time of visit</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.dateOfVisitTimeOfVisit || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Alternate contact number of the customer (Mobile/Landline)</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.alternateContactNumberOfTheCustomerMobileLandline || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Marital Status (Married/Divorced/Bachelor)</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.general?.maritalStatusMarriedDivorcedBachelor || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name Of The Employer</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.nameOfTheEmployer || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Type Of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.typeOfFirmProprietorPartnershipPvtLtdGovtPsuMnc || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Number Of Employees</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.numberOfEmployees || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Department And Designation</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <strong>Department:</strong> ${verificationData.employmentDetails?.department || ""}<br>
-            <strong>Designation:</strong> ${verificationData.employmentDetails?.designation || ""}
-          </td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Years In Current Company</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.yearsInCurrentCompany || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Previous Job Details / Work Experience / Total Years Of Experience</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.previousJobDetailsWorkExperienceTotalYearsOfExperience || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Level of activity & stocks along with observations</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.levelOfActivityStocksAlongWithObservations || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Company Profile (Service / Manufacturing / Small Scale / Finance / Other [Please Specify])</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.companyProfileServiceManufacturingSmallScaleFinanceOtherPleaseSpecify || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Third Party Check</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.employmentDetails?.thirdPartyCheck || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>INCOME DETAILS:</strong></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Gross Salary</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.incomeDetails?.grossSalary || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Net Salary</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.incomeDetails?.netSalary || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Overtime Details, If Any</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.incomeDetails?.overtimeDetailsIfAny || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Monthly Expenses</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.incomeDetails?.monthlyExpenses || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Monthly Net Income</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.incomeDetails?.monthlyNetIncome || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Total no of family members</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.familyDetails?.totalNoOfFamilyMembers || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Earning Family Members income details</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.familyDetails?.earningFamilyMembersIncomeDetails || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>No. Of Dependents</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.familyDetails?.noOfDependents || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Any other source of income Monthly/Annual</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.familyDetails?.anyOtherSourceOfIncomeMonthlyAnnual || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>BANKING DETAILS:</strong></td>
-          <td style="border:1px solid #ccc;padding:8px"></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Banking Relationship with</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.bankingDetails?.bankingRelationshipWith || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Cash Credit Limit</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.bankingDetails?.cashCreditLimit || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Overdraft limit</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.bankingDetails?.overdraftLimit || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px">
-            <strong>OBLIGATIONS/LOANS:</strong>
-            <table style="border-collapse:collapse;width:100%;margin:10px 0">
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px"><strong>Institution / Bank / NBFC Name</strong></td>
-                <td style="border:1px solid #ccc;padding:8px"><strong>Type of Loan</strong></td>
-                <td style="border:1px solid #ccc;padding:8px"><strong>Monthly Principal / EMI</strong></td>
-                <td style="border:1px solid #ccc;padding:8px"><strong>Loan amount (Rs. Lacs)</strong></td>
-              </tr>
-              ${
-                Array.isArray(
-                  verificationData.obligationsLoans?.obligationsLoans
-                ) &&
-                verificationData.obligationsLoans?.obligationsLoans.length > 0
-                  ? verificationData.obligationsLoans.obligationsLoans
-                      .map(
-                        (loan) => `
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px">${loan.institutionBankNbfcName || ""}</td>
-                <td style="border:1px solid #ccc;padding:8px">${loan.typeOfLoan || ""}</td>
-                <td style="border:1px solid #ccc;padding:8px">${loan.monthlyPrincipalEmi || ""}</td>
-                <td style="border:1px solid #ccc;padding:8px">${loan.loanAmount || ""}</td>
-              </tr>
-              `
-                      )
-                      .join("")
-                  : '<tr><td colspan="4" style="border:1px solid #ccc;padding:8px;text-align:center;">No obligations/loans</td></tr>'
-              }
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Current Residence (Owned/Rented/Parents House/Relatives House/Company Provided)</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.residenceDetails?.currentResidenceOwnedRentedParentsHouseRelativesHouseCompanyProvided || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Years At Current Residence</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.residenceDetails?.yearsAtCurrentResidence || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Assets owned:</strong></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Four Wheeler / Two Wheeler</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.assetsOwned?.assetsOwned || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>BIL LOAN DETAILS:</strong></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Loan amount applied</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.bilLoanDetails?.loanAmountApplied || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>End Use</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.bilLoanDetails?.endUse || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of Interviewer</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.interviewerDetails?.nameOfInterviewer || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Designation and signature</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.interviewerDetails?.designationAndSignature || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>PD Status</strong></td>
-          <td style="border:1px solid #ccc;padding:8px"><strong>${verificationData.interviewerDetails?.pdStatus || ""}</strong></td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Interviewers remarks</strong></td>
-          <td style="border:1px solid #ccc;padding:8px">${verificationData.interviewerDetails?.interviewersRemarks || ""}</td>
-        </tr>
-      </table>
+const renderInnerTable = (headers: string[], rows: string[][]) => {
+  if (!rows.length) {
+    return wrapParagraph("Not provided");
+  }
+
+  const headerRow = headers
+    .map(
+      (header) =>
+        `<th style="border:1px solid #d0d7de;padding:8px 10px;background:#e9edf5;font-size:12px;font-weight:600;color:#1f2d3d;text-align:left;">${header}</th>`
+    )
+    .join("");
+
+  const rowMarkup = rows
+    .map(
+      (row) =>
+        `<tr>${row
+          .map(
+            (cell) =>
+              `<td style="border:1px solid #d0d7de;padding:8px 10px;font-size:12px;color:#2f3b52;line-height:1.45;">${cell}</td>`
+          )
+          .join("")}</tr>`
+    )
+    .join("");
+
+  return `
+    <table style="${tableStyle}">
+      <thead><tr>${headerRow}</tr></thead>
+      <tbody>${rowMarkup}</tbody>
+    </table>
+  `;
+};
+
+const renderFamilyTable = (members: any[]) => {
+  const rows = ensureArray(members).map((member: any) => [
+    formatMultiline(member?.name || ""),
+    formatMultiline(member?.relationship || member?.relationshipWithApplicant || ""),
+    formatMultiline(member?.age || ""),
+    formatMultiline(member?.qualification || member?.education || ""),
+    formatMultiline(member?.occupation || ""),
+    formatMultiline(member?.income || member?.incomeDetailsDependent || ""),
+  ]);
+
+  return renderInnerTable(
+    [
+      "Name",
+      "Relationship",
+      "Age",
+      "Qualification",
+      "Occupation",
+      "Income / Dependent",
+    ],
+    rows
+  );
+};
+
+const renderObligationsTable = (loans: any[]) => {
+  const rows = ensureArray(loans).map((loan: any) => [
+    formatMultiline(
+      loan?.institution ||
+        loan?.institutionBankNbfcName ||
+        loan?.financialInstitution ||
+        ""
+    ),
+    formatMultiline(loan?.typeOfLoan || loan?.loanType || ""),
+    formatMultiline(
+      loan?.monthlyPrincipalEmi ||
+        (hasValue(loan?.emi) ? formatCurrency(loan?.emi) : "") ||
+        ""
+    ),
+    formatMultiline(
+      loan?.loanAmount ? formatCurrency(loan?.loanAmount) : ""
+    ),
+  ]);
+
+  return renderInnerTable(
+    [
+      "Institution / NBFC",
+      "Type of Loan",
+      "Monthly EMI / Principal",
+      "Loan Amount",
+    ],
+    rows
+  );
+};
+
+export const idfcPlTemplate = (verificationData: any, html_data: any) => {
+  const general = verificationData.general || {};
+  const employment = verificationData.employmentDetails || {};
+  const income = verificationData.incomeDetails || {};
+  const banking = verificationData.bankingDetails || {};
+  const residence = verificationData.residenceDetails || verificationData.loanAmount || {};
+  const assets = verificationData.assetsOwned || {};
+  const bil = verificationData.bilLoanDetails || verificationData.loanDetailsBil || {};
+  const interviewer =
+    verificationData.interviewerDetails || verificationData.loanDetailsBil || {};
+
+  const latitude = general.latitude || verificationData.general?.lat || "";
+  const longitude = general.longitude || verificationData.general?.lng || "";
+  const coordinateDisplay =
+    hasValue(latitude) || hasValue(longitude)
+      ? `${latitude || "N/A"}, ${longitude || "N/A"}`
+      : "";
+
+  const residenceDocuments = ensureArray(
+    income?.documentsSeenAtResidence ||
+      verificationData.documentsObserved?.residenceDocuments ||
+      []
+  ).map((doc) => formatMultiline(doc));
+
+  const officeDocuments = ensureArray(
+    income?.documentsSeenAtOffice ||
+      verificationData.documentsObserved?.officeDocuments ||
+      []
+  ).map((doc) => formatMultiline(doc));
+
+  const assetsOwned = ensureArray(
+    assets?.assets ||
+      residence?.assetsOwnedList ||
+      (assets?.assetsOwned ? [assets.assetsOwned] : []) ||
+      []
+  ).map((entry: any) => formatMultiline(entry));
+
+  const generalRows: Array<[string, any, ((value: any) => string)?]> = [
+    ["Name of the Applicant", general.nameOfTheApplicant],
+    ["SDFC ID", general.sdfcId],
+    ["Person Contacted", general.personContacted],
+    ["Visited Address", general.visitedAddress],
+    ["Date / Time of Visit", general.dateOfVisitTimeOfVisit],
+    [
+      "Alternate Contact Number",
+      general.alternateContactNumberOfTheCustomerMobileLandline,
+    ],
+    ["Marital Status", general.maritalStatusMarriedDivorcedBachelor],
+    ["Branch", general.branch],
+    ["Location", general.location],
+    ["Region", general.region],
+    ["Coordinates", coordinateDisplay],
+  ];
+
+  const employmentRows: Array<[string, any, ((value: any) => string)?]> = [
+    ["Name of the Employer", employment.nameOfTheEmployer],
+    [
+      "Type of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)",
+      employment.typeOfFirmProprietorPartnershipPvtLtdGovtPsuMnc,
+    ],
+    ["Number of Employees", employment.numberOfEmployees],
+    ["Department", employment.department],
+    ["Designation", employment.designation],
+    ["Years in Current Company", employment.yearsInCurrentCompany],
+    [
+      "Previous Job Details / Total Experience",
+      employment.previousJobDetailsWorkExperienceTotalYearsOfExperience,
+    ],
+    [
+      "Level of activity & stocks (observations)",
+      employment.levelOfActivityStocksAlongWithObservations,
+    ],
+    [
+      "Company Profile (Service / Manufacturing / Small Scale / Finance / Other)",
+      employment.companyProfileServiceManufacturingSmallScaleFinanceOtherPleaseSpecify,
+    ],
+    ["Third Party Check", employment.thirdPartyCheck],
+  ];
+
+  const incomeRows: Array<[string, any, ((value: any) => string)?]> = [
+    ["Gross Salary", income.grossSalary, formatCurrency],
+    ["Net Salary", income.netSalary, formatCurrency],
+    ["Overtime Details (if any)", income.overtimeDetailsIfAny],
+    ["Monthly Expenses", income.monthlyExpenses, formatCurrency],
+    ["Monthly Net Income", income.monthlyNetIncome, formatCurrency],
+    ["Total No. of Family Members", income.totalNoOfFamilyMembers],
+    [
+      "Earning Family Members Income",
+      income.earningFamilyMembersIncomeDetails,
+      formatCurrency,
+    ],
+    ["No. of Dependents", income.noOfDependents],
+    [
+      "Any Other Source of Income (Monthly/Annual)",
+      income.anyOtherSourceOfIncomeMonthlyAnnual,
+      formatCurrency,
+    ],
+  ];
+
+  const bankingRows: Array<[string, any, ((value: any) => string)?]> = [
+    ["Banking Relationship With", banking.bankingRelationshipWith],
+    ["Cash Credit Limit", banking.cashCreditLimit, formatCurrency],
+    ["Overdraft Limit", banking.overdraftLimit, formatCurrency],
+  ];
+
+  const residenceRows: Array<[string, any, ((value: any) => string)?]> = [
+    [
+      "Current Residence (Owned / Rented / Parents House / Relatives House / Company Provided)",
+      residence.currentResidenceOwnedRentedParentsHouseRelativesHouseCompanyProvided ||
+        residence.currentResidence,
+    ],
+    [
+      "Years at Current Residence",
+      residence.yearsAtCurrentResidence || residence.yearsAtResidence,
+    ],
+    ["Four Wheeler (Make/Model)", residence.fourWheelerMakeModel],
+    ["Two Wheeler (Make/Model)", residence.twoWheelerMakeModel],
+  ];
+
+  const loans =
+    verificationData.obligations?.loans ||
+    verificationData.obligationsLoans?.obligationsLoans ||
+    verificationData.obligationsLoans ||
+    [];
+
+  const disclaimer = `This report (including any attachments) has been prepared based on verbal information provided by the person contacted. IDFC FIRST BANK will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Kowtha &amp; Co. will not be held liable in any case.`;
+
+  return `
+    ${pdBaseTemplate(html_data)}
+    <style>
+      .idfc-pl-template ul li strong { color: #1f2d3d; }
+      .idfc-pl-template .grid-two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+    </style>
+    <div class="template-content idfc-pl-template">
+      ${sectionTitle("Personal Discussion Report")}
+      ${renderKeyValueTable(generalRows)}
+
+      ${sectionTitle("Employment Details")}
+      ${renderKeyValueTable(employmentRows)}
+
+      ${sectionTitle("Income Details")}
+      ${renderKeyValueTable(incomeRows)}
+
+      ${renderFamilyTable(
+        income.familyMembers ||
+          income.familyMembersRelationshipAgeNameSalary ||
+          []
+      )}
+
+      ${sectionTitle("Documents Observed")}
+      <div class="grid-two">
+        <div>
+          <h3 style="margin:8px 0;font-size:14px;font-weight:600;color:#1f2d3d;">Residence</h3>
+          ${renderList(residenceDocuments)}
+        </div>
+        <div>
+          <h3 style="margin:8px 0;font-size:14px;font-weight:600;color:#1f2d3d;">Office</h3>
+          ${renderList(officeDocuments)}
+        </div>
+      </div>
+
+      ${sectionTitle("Banking Details")}
+      ${renderKeyValueTable(bankingRows)}
+
+      ${sectionTitle("Existing Obligations / Loans")}
+      ${renderObligationsTable(loans)}
+
+      ${sectionTitle("Residence & Assets")}
+      ${renderKeyValueTable(residenceRows)}
+      ${
+        assetsOwned.length
+          ? `<div>${renderList(assetsOwned, "Assets not reported")}</div>`
+          : ""
+      }
+
+      ${sectionTitle("Loan Assessment")}
+      ${renderKeyValueTable([
+        ["Loan Amount Applied", bil.loanAmountApplied, formatCurrency],
+        ["End Use", bil.endUse],
+        ["Interview Details", bil.interviewDetails],
+        ["Status of this Case", bil.statusOfThisCasePositiveNegativeCreditRefer || interviewer.pdStatus],
+        ["Interviewer's Remarks", bil.interviewerSRemarks || interviewer.interviewersRemarks],
+        ["Name of Interviewer", bil.nameOfInterviewer || interviewer.nameOfInterviewer],
+        ["Designation & Signature", bil.designationSignature || interviewer.designationAndSignature],
+      ])}
+
+      ${sectionTitle("Disclaimer Clause")}
+      ${wrapParagraph(disclaimer)}
     </div>
-
-    <p style="margin:20px;"><strong>Disclaimer Clause:</strong></p>
-    <p style="margin:20px;">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. IDFC FIRST BANK will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.</p>
-
-    <p style="margin:20px;"><strong>Photos:</strong></p>
-
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${html_data.bankName || "IDFC PL"}</span><br>
-      Generated on ${istDate}
-    </footer>
-    ${html_data.imagesData || ""}
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };

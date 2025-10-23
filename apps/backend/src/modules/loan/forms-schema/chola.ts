@@ -54,7 +54,16 @@ export const cholaSchema = {
             title: "Person Met",
           },
         },
-          required: ["nameOfTheApplicant", "nameOfTheCoApplicant", "constitution", "visitedAddress", "loanRequested", "purposeOfLoan", "dateOfVisit", "personMet"],
+        required: [
+          "nameOfTheApplicant",
+          "nameOfTheCoApplicant",
+          "constitution",
+          "visitedAddress",
+          "loanRequested",
+          "purposeOfLoan",
+          "dateOfVisit",
+          "personMet",
+        ],
       },
     },
     {
@@ -68,9 +77,13 @@ export const cholaSchema = {
             aboutTheApplicant: {
               type: "string",
               title: "About the Applicant & Business",
+              ui: {
+                widget: "textarea",
+                rows: 8,
+              },
             },
           },
-        },  
+        },
       },
     },
     {
@@ -108,16 +121,16 @@ export const cholaSchema = {
       label: "Assets",
       schema: {
         type: "array",
-          items: {
-            type: "object",
-            properties: {
-              assetDetails: {
-                type: "string",
-                title: "Asset details",
-              },
+        items: {
+          type: "object",
+          properties: {
+            assetDetails: {
+              type: "string",
+              title: "Asset details",
             },
+          },
         },
-      }, 
+      },
     },
     {
       id: "customersReferenceNumbers",
@@ -130,7 +143,7 @@ export const cholaSchema = {
             customerReferenceNumber: {
               type: "string",
               title: "Customer Reference Number",
-            }
+            },
           },
         },
       },
@@ -176,20 +189,20 @@ export const cholaSchema = {
                 maxDecimalPlaces: 2,
                 minDecimalPlaces: 0,
               },
-              emiInterest: {
-                type: "number",
-                title: "EMI/Interest (In Rs.)",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
+            },
+            emiInterest: {
+              type: "number",
+              title: "EMI/Interest (In Rs.)",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
               },
-              tenureTotalCompleted: {
-                type: "string",
-                title: "Total Tenure / Completed [in months]",
-              }, 
+            },
+            tenureTotalCompleted: {
+              type: "string",
+              title: "Total Tenure / Completed [in months]",
             },
           },
         },
@@ -199,27 +212,29 @@ export const cholaSchema = {
       id: "bankingDetails",
       label: "Banking Details",
       schema: {
-        type: "object",
-        properties: {
-          bankingDetails: {
-            type: "array",
-            title: "Banking Details",
-            items: {
-              type: "object",
-              properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                accountNo: {
-                  type: "string",
-                  title: "A/c No",
-                },
-                accountType: {
-                  type: "string",
-                  title: "A/c Type",
-                },
-              },
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            bankName: {
+              type: "string",
+              title: "Bank Name",
+            },
+            accountNo: {
+              type: "string",
+              title: "A/c No",
+            },
+            accountType: {
+              type: "string",
+              title: "A/c Type",
+            },
+            relationshipSince: {
+              type: "string",
+              title: "Relationship since",
+            },
+            averageBalance: {
+              type: "string",
+              title: "Avg balance",
             },
           },
         },
@@ -231,23 +246,14 @@ export const cholaSchema = {
       schema: {
         type: "object",
         properties: {
-          itr: {
+          itrReceiptsVerificationInformation: {
             type: "string",
-            title: "ITR",
+            title: "ITR, Receipts, Verification, GP Margin & Expenses Details",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
           },
-          receipts: {
-            type: "string",
-            title: "Receipts",
-          },
-          verification: {
-            type: "string",
-            title: "Verification",
-          },
-          gpMarginAndExpenses: {
-            type: "string",
-            title: "GP Margin & Expenses Details",
-          },
-
         },
       },
     },
@@ -262,14 +268,19 @@ export const cholaSchema = {
             comfortFactor: {
               type: "string",
               title: "Comfort Factor",
-            }
+              ui: {
+                widget: "textarea",
+                rows: 6,
+              },
+            },
           },
         },
       },
     },
     {
       id: "discomfortFactor",
-      label: "Discomfort Factor(e.g., Mismatch name board, Not filing ITR, not provided bank statements, etc.)",
+      label:
+        "Discomfort Factor(e.g., Mismatch name board, Not filing ITR, not provided bank statements, etc.)",
       schema: {
         type: "array",
         items: {
@@ -278,7 +289,11 @@ export const cholaSchema = {
             discomfortFactor: {
               type: "string",
               title: "Discomfort Factor",
-            }
+              ui: {
+                widget: "textarea",
+                rows: 6,
+              },
+            },
           },
         },
       },
@@ -293,184 +308,136 @@ export const cholaSchema = {
           properties: {
             recommendations: {
               type: "string",
-              title: "Recommendations",
-            }
+              title: "Enter Details",
+              ui: {
+                widget: "textarea",
+                rows: 6,
+              },
+            },
           },
         },
       },
     },
     {
-      id: "disclaimer",
-      label: "Disclaimer if any",
+      id: "financialStatement",
+      label: "Financial Statement",
       schema: {
         type: "object",
         properties: {
-          disclaimer: {
-            type: "string",
-            title: "Disclaimer if any",
-          },
-        },
-      },
-    },
-     {
-       id: "financialStatement",
-       label: "Financial Statement",
-       schema: {
-         type: "object",
-         properties: {
-           expenditure: {
-             type: "object",
-             title: "EXPENDITURE",
-             properties: {
-               toPurchaseOfMaterial: {
-                 type: "number",
-                 title: "To purchase of Material",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toElectricity: {
-                 type: "number",
-                 title: "To Electricity",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toRent: {
-                 type: "number",
-                 title: "To Rent",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toSalaries: {
-                 type: "number",
-                 title: "To Salaries",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toTransportation: {
-                 type: "number",
-                 title: "To Transportation",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toOtherExpenses: {
-                 type: "number",
-                 title: "To other expenses",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               toNetProfit: {
-                 type: "number",
-                 title: "To Net profit",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               totalExpenditure: {
-                 type: "number",
-                 title: "Total",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-             },
-           },
-           income: {
-             type: "object",
-             title: "INCOME",
-             properties: {
-               byGrossReceipts: {
-                 type: "number",
-                 title: "By Gross Receipts",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-               totalIncome: {
-                 type: "number",
-                 title: "Total",
-                 formatter: {
-                   useIndianFormat: true,
-                   locale: "en-IN",
-                   maxDecimalPlaces: 2,
-                   minDecimalPlaces: 0,
-                 },
-               },
-             },
-           },
-         },
-         required: ["expenditure", "income"],
-       },
-     },
-    {
-      id: "financialAnalysis",
-      label: "Financial Analysis",
-      schema: {
-        type: "object",
-        properties: {
-          totalGrossDisposableIncome: {
-            type: "number",
-            title: "Total Gross Disposable Income (A)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          expenditure: {
+            type: "object",
+            title: "EXPENDITURE",
+            properties: {
+              toPurchaseOfMaterial: {
+                type: "number",
+                title: "To purchase of Material",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toElectricity: {
+                type: "number",
+                title: "To Electricity",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toRent: {
+                type: "number",
+                title: "To Rent",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toSalaries: {
+                type: "number",
+                title: "To Salaries",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toTransportation: {
+                type: "number",
+                title: "To Transportation",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toOtherExpenses: {
+                type: "number",
+                title: "To other expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              toNetProfit: {
+                type: "number",
+                title: "To Net profit",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              totalExpenditure: {
+                type: "number",
+                title: "Total",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
             },
           },
-          totalObligations: {
-            type: "number",
-            title: "Total Obligations (B)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          netDisposableIncome: {
-            type: "number",
-            title: "Net Disposable Income (C = A – B)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          income: {
+            type: "object",
+            title: "INCOME",
+            properties: {
+              byGrossReceipts: {
+                type: "number",
+                title: "By Gross Receipts",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              totalIncome: {
+                type: "number",
+                title: "Total",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
             },
           },
         },
+        required: ["expenditure", "income"],
       },
     },
   ],

@@ -1,540 +1,519 @@
-import { format, toZonedTime } from "date-fns-tz";
-import { category } from "google-play-scraper";
-import * as path from "path";
-import * as fs from "fs";
-import { AxisFinanceUBLInterface } from "../interface/axis-finance-ubl.interface";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.tempate";
 
-export const axisFinanceUBLTemplate = (
-  verificationData: AxisFinanceUBLInterface,
-  html_data: any
-) => {
-  const recommendationStyles: Record<string, string> = {
-    positive: '<li style="color: green; font-weight: bold;">POSITIVE</li>',
-    negative: '<li style="color: red; font-weight: bold;">NEGATIVE</li>',
-    credit_refer:
-      '<li style="color: orange; font-weight: bold;">CREDIT REFER</li>',
-  };
+const tableStyle =
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
+const cellStyle =
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
-  const finalRecommendationHtml = recommendationStyles[html_data.status] || "";
+const hasValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((entry) => hasValue(entry));
+  if (typeof value === "object") {
+    return Object.values(value).some((entry) => hasValue(entry));
+  }
+  return false;
+};
+
+const formatMultiline = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return String(value).replace(/\n+/g, "<br>");
+};
+
+const formatCurrency = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) {
+    return formatMultiline(value);
+  }
+  return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
+};
+
+const ensureArray = <T,>(value: T | T[] | undefined | null): T[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
+};
+
+const wrapParagraph = (content: string) =>
+  `<p style="${paragraphStyle}">${content}</p>`;
+
+const renderKeyValueTable = (
+  rows: Array<[string, any, ((value: any) => string)?]>
+) => {
+  if (!rows.length) return "";
+  return `
+    <table style="${tableStyle}">
+      ${rows
+        .map(([label, value, formatter]) => {
+          const rendered = formatter
+            ? formatter(value)
+            : formatMultiline(value);
+          return `
+          <tr>
+            <td style="${cellStyle}">${wrapParagraph(label)}</td>
+            <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
+          </tr>`;
+        })
+        .join("")}
+    </table>
+  `;
+};
+
+const renderInnerTable = (headers: string[], rows: string[][]) => {
+  if (!rows.length) {
+    return wrapParagraph("Not provided");
+  }
+  const headerRow = headers
+    .map(
+      (header) =>
+        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+    )
+    .join("");
+  const rowsHtml = rows
+    .map(
+      (row) =>
+        `<tr>${row
+          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .join("")}</tr>`
+    )
+    .join("");
+  return `
+    <table style="${tableStyle}">
+      <tr>${headerRow}</tr>
+      ${rowsHtml}
+    </table>
+  `;
+};
+
+export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) => {
+  const basic = verificationData.basicDetails || {};
+  const familyMembers = ensureArray(verificationData.familyDetails).map(
+    (member: any) => [
+      formatMultiline(member?.name || ""),
+      formatMultiline(member?.relation || ""),
+      formatMultiline(member?.age || ""),
+      formatMultiline(member?.qualification || ""),
+      formatMultiline(member?.occupation || ""),
+      formatMultiline(member?.stayingWithApplicant || ""),
+      formatMultiline(member?.mobileNumber || ""),
+      hasValue(member?.incomePerMonth)
+        ? formatCurrency(member?.incomePerMonth)
+        : "Not provided",
+    ]
+  );
+
+  const shareholding = ensureArray(verificationData.shareholdingDetails).map(
+    (item: any) => [
+      formatMultiline(item?.shareholderName || ""),
+      formatMultiline(item?.relationWithMainApplicant || ""),
+      formatMultiline(item?.designation || ""),
+      formatMultiline(item?.shareholdingPercentage || ""),
+      formatMultiline(item?.comingIntoLoanStructure || ""),
+      formatMultiline(item?.functionalRole || ""),
+    ]
+  );
+
+  const businessPoints = ensureArray(
+    verificationData.businessOverview?.aboutBusiness
+  )
+    .map((entry: any) =>
+      hasValue(entry?.detail)
+        ? `<li>${formatMultiline(entry.detail)}</li>`
+        : ""
+    )
+    .join("");
+
+  const documentsObserved = ensureArray(
+    verificationData.businessOverview?.documentsObserved
+  )
+    .map((doc: any) => {
+      if (!hasValue(doc?.documentName) && !hasValue(doc?.remarks)) {
+        return "";
+      }
+      const base = hasValue(doc?.documentName)
+        ? formatMultiline(doc.documentName)
+        : "Document";
+      const extra = hasValue(doc?.remarks)
+        ? ` – ${formatMultiline(doc.remarks)}`
+        : "";
+      return `<li>${base}${extra}</li>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  const suppliersSection = verificationData.suppliersCreditors || {};
+
+  const suppliers = ensureArray(suppliersSection.topSuppliers).map(
+    (supplier: any) =>
+    [supplier?.name, supplier?.contactDetails, supplier?.location, supplier?.referenceCheck]
+      .map(formatMultiline)
+      .join(" - ")
+  );
+
+  const customersSection = verificationData.clientsDebtors || {};
+
+  const customers = ensureArray(customersSection.topCustomers).map(
+    (customer: any) =>
+    [customer?.name, customer?.contactDetails, customer?.location, customer?.referenceCheck]
+      .map(formatMultiline)
+      .join(" - ")
+  );
+
+  const expenditureSection = verificationData.expenditure || {};
+
+  const salaries = ensureArray(
+    expenditureSection.salariesAndWages
+  ).map((item: any) => [
+    formatMultiline(item?.noOfEmployees || ""),
+    formatMultiline(item?.salaryPerMonthPerEmployee || ""),
+    formatMultiline(item?.statusOfEmployee || ""),
+    formatMultiline(item?.noOfLabours || ""),
+    formatMultiline(item?.wagesPerMonthOrDay || ""),
+    formatMultiline(item?.statusOfLabour || ""),
+    formatMultiline(item?.remarks || ""),
+  ]);
+
+  const assetSection = verificationData.assetDetails || {};
+
+  const immovableProperties = ensureArray(
+    assetSection.immovableProperties
+  ).map((property: any) => [
+    formatMultiline(property?.address || ""),
+    formatMultiline(property?.areaMeasurements || ""),
+    formatCurrency(property?.purchaseCostLakhs),
+    formatMultiline(property?.purchaseYear || ""),
+    formatCurrency(property?.marketValueLakhs),
+    formatMultiline(property?.ownerName || ""),
+    formatMultiline(property?.mortgaged || ""),
+  ]);
+
+  const vehicles = ensureArray(assetSection.vehicles || []).map(
+    (vehicle: any) => `<li>${formatMultiline(vehicle || "")}</li>`
+  );
+
+  const existingLoans = ensureArray(verificationData.existingLoans).map(
+    (loan: any) => [
+      formatMultiline(loan?.bankOrNbfcName || ""),
+      formatMultiline(loan?.typeOfLoan || ""),
+      formatCurrency(loan?.sanctionedAmount),
+      formatCurrency(loan?.outstandingBalance),
+      formatCurrency(loan?.emiAmount),
+      formatMultiline(loan?.emiPaidBank || ""),
+      formatMultiline(loan?.securedAgainstAsset || ""),
+    ]
+  );
+
+  const bankingAccounts = ensureArray(verificationData.bankingDetails).map(
+    (account: any) => [
+      formatMultiline(account?.bankName || ""),
+      formatMultiline(account?.branchName || ""),
+      formatMultiline(account?.accountType || ""),
+      formatMultiline(account?.openSinceYear || ""),
+    ]
+  );
+
+  const thirdPartySection = verificationData.thirdPartyCheck || {};
+
+  const thirdPartyReferences = ensureArray(
+    thirdPartySection.references
+  ).map((ref: any) => [
+    formatMultiline(ref?.name || ""),
+    formatMultiline(ref?.address || ""),
+    formatMultiline(ref?.contactNo || ""),
+    formatMultiline(ref?.knowingSince || ""),
+    formatMultiline(ref?.feedbackOnBorrower || ""),
+    formatMultiline(ref?.feedbackOnBusiness || ""),
+  ]);
+
+  const observations = ensureArray(thirdPartySection.observations)
+    .map((item: any) => `<li>${formatMultiline(item || "")}</li>`)
+    .join("");
+
+  const recommendations = ensureArray(
+    verificationData.recommendations?.recommendations
+  )
+    .map((item: any) => `<li>${formatMultiline(item || "")}</li>`)
+    .join("");
+
+  const generalTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td colspan="21" style="${cellStyle}"><p style="${paragraphStyle}"><strong>PERSONAL DISCUSSION SHEET</strong></p></td>
+      </tr>
+      <tr>
+        <td colspan="6" style="${cellStyle}"><strong>Region</strong></td>
+        <td colspan="5" style="${cellStyle}"><strong>Location</strong></td>
+        <td colspan="5" style="${cellStyle}"><strong>Branch</strong></td>
+        <td colspan="5" style="${cellStyle}"><strong>Ref No/Application No</strong></td>
+      </tr>
+      <tr>
+        <td colspan="6" style="${cellStyle}">${formatMultiline(basic.region)}</td>
+        <td colspan="5" style="${cellStyle}">${formatMultiline(basic.location)}</td>
+        <td colspan="5" style="${cellStyle}">${formatMultiline(basic.branch)}</td>
+        <td colspan="5" style="${cellStyle}">${formatMultiline(
+          basic.applicationNo || html_data.applicationNumber
+        )}</td>
+      </tr>
+      ${[
+        ["Name of Customer", basic.customerName],
+        ["Date of Report", basic.dateOfReport],
+        ["Name of Concern", basic.concernName],
+        ["Constitution", basic.constitution],
+        ["Initiated Address", basic.initiatedAddress],
+        ["Visited Address", basic.visitedAddress],
+        ["Phone no.", basic.phoneNumber],
+        ["Appointment Fixed", basic.appointmentFixed],
+        ["Structure of Loan", basic.structureOfLoan],
+        ["No. of Visit", basic.numberOfVisits],
+        ["Person Met", basic.personMet],
+        ["Visited By", basic.visitedBy],
+        ["About Applicant", basic.aboutApplicant],
+        ["Residential Details", basic.residentialDetails],
+        ["Co-Applicant Details", basic.coApplicantDetails],
+      ]
+        .map(
+          ([label, value]) => `
+        <tr>
+          <td style="${cellStyle}"><strong>${label}</strong></td>
+          <td colspan="20" style="${cellStyle}">${formatMultiline(value)}</td>
+        </tr>`
+        )
+        .join("")}
+    </table>
+  `;
 
   return `
     ${pdBaseTemplate(html_data)}
+    <div class="template-content">
+      ${generalTable}
 
-      <div class="report-title">PERSONAL DISCUSSION SHEET</div>
-    
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr>
-          <th>Region</th>
-          <th>Location</th>
-          <th>Branch</th>
-          <th>Ref No/Application No</th>
-        </tr>
-        <tr style="text-align: center;">
-          <td><span class="var-value">${verificationData.basicDetails?.region || ""}</span></td>
-          <td><span class="var-value">${verificationData.basicDetails?.location || ""}</span></td>
-          <td><span class="var-value">${verificationData.basicDetails?.branch || ""}</span></td>
-          <td><span class="var-value">${html_data.applicationNumber || ""}</span></td>
-        </tr>
-        </table>
-      </div>
+      <p style="${paragraphStyle}"><strong>Family Details</strong></p>
+      ${renderInnerTable(
+        [
+          "Name",
+          "Relation with applicant",
+          "Age",
+          "Qualification",
+          "Occupation",
+          "Staying with applicant",
+          "Mobile No.",
+          "Income per month",
+        ],
+        familyMembers
+      )}
 
-      <div class="align-wrapper">
-        <table class="section-table">
-          <tr>
-            <th>Name of the Customer</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.applicantName || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Date of Report</th>
-            <td colspan="5"><span class="var-value">${html_data.dateOfReport || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Name of Concern</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.nameOfConcern || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Constitution</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.constitution || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Initiated Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.initiatedAddress || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Visited Address</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.visitedAddress || ""}</span></td>
-          </tr>
-          <tr>
-          <th>Phone No</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.phoneNo || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Appointment Fixed</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.appointmentFixed || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Structure of Loan</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.structureOfLoan || ""}</span></td>
-          </tr>
-          <tr>
-            <th>No of Visit</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.noOfVisit || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Person Met</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails?.personMet || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Visited By</th>
-            <td colspan="5"><span class="var-value">${html_data.pd_officer || ""}</span></td>
-          </tr>
-          <tr>
-            <th>About Applicant</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Residential Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.residentialDetails || ""}</span></td>
-          </tr>
-          <tr>
-            <th>Co-Applicant Details</th>
-            <td colspan="5"><span class="var-value">${verificationData.basicDetails.coApplicantDetails || ""}</span></td>
-          </tr>
-        </table>
-      </div>
+      <p style="${paragraphStyle}"><strong>Constitution / Shareholding Details</strong></p>
+      ${renderInnerTable(
+        [
+          "Name of Shareholder",
+          "Relation with applicant",
+          "Designation",
+          "% of Shareholding",
+          "Coming into loan structure",
+          "Functional role",
+        ],
+        shareholding
+      )}
 
-    <div style="page-break-before: always;"></div>
+      <p style="${paragraphStyle}"><strong>About the Business</strong></p>
+      <ul>
+        ${businessPoints || "<li>Not provided</li>"}
+      </ul>
 
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Family Details</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Relation with Applicant</th>
-          <th>Age</th>
-          <th>Qualification</th>
-          <th>Occupation</th>
-          <th>Staying With Applicant</th>
-          <th>Mobile Number</th>
-        </tr>
-        ${
-          Array.isArray(verificationData.familyDetails) &&
-          verificationData.familyDetails.length > 0
-            ? verificationData.familyDetails
-                .map(
-                  (familyMember) => `
-            <tr>
-              <td><span class="var-value">${familyMember.name || ""}</span></td>
-              <td><span class="var-value">${familyMember.relation || ""}</span></td>
-              <td><span class="var-value">${familyMember.age || ""}</span></td>
-              <td><span class="var-value">${familyMember.educationalQualification || ""}</span></td>
-              <td><span class="var-value">${familyMember.employmentType || ""}</span></td>
-              <td><span class="var-value">${familyMember.stayingWithApplicant || ""}</span></td>
-              <td><span class="var-value">${familyMember.mobileNumber || ""}</span></td>
-            </tr>
-          `
-                )
-                .join("")
-            : '<tr><td colspan="6" style="text-align: center;">No family members details available</td></tr>'
-        }
-        <tr>
-          <th>About the Business</th>
-          <td colspan="6"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Documents Observed</th>
-          <td colspan="6">
-            ${
-              Array.isArray(verificationData.uploadedItems) &&
-              verificationData.uploadedItems.length > 0
-                ? verificationData.uploadedItems
-                    .map(
-                      (doc) => `
-                <span class="var-value">${doc.uri || ""} (${doc.type || ""}) - ${doc.timestamp || ""}</span><br>
-              `
-                    )
-                    .join("")
-                : '<span class="var-value">No documents observed</span>'
-            }
-          </td>
-        </tr>
-      </table>
+      <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
+      <ul>
+        ${documentsObserved || "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
+     ${renderKeyValueTable([
+       [
+         "No of fixed suppliers",
+          suppliersSection.numberOfFixedSuppliers,
+        ],
+        [
+          "Credit period",
+          suppliersSection.creditPeriodDays,
+        ],
+        [
+          "Cash - Cheque proportion",
+          suppliersSection.cashChequeProportion,
+        ],
+      ])}
+     <ul>
+        ${suppliers.length ? suppliers.map((item) => `<li>${item}</li>`).join("") : "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Clients / Debtors</strong></p>
+     ${renderKeyValueTable([
+       [
+         "No of fixed customers",
+          customersSection.numberOfFixedCustomers,
+        ],
+        [
+          "Credit period",
+          customersSection.creditPeriodDays,
+        ],
+        [
+          "Cash - Cheque proportion",
+          customersSection.cashChequeProportion,
+        ],
+        [
+          "Average stock maintained",
+          customersSection.averageStockMaintained,
+        ],
+        [
+          "Turnover & margins",
+          customersSection.turnoverAndMargins,
+        ],
+      ])}
+      <ul>
+        ${customers.length ? customers.map((item) => `<li>${item}</li>`).join("") : "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Expenditure - Salaries & Wages</strong></p>
+      ${renderInnerTable(
+        [
+          "No. of Employees",
+          "Salary per month per employee",
+          "Status of employee",
+          "No. of labours",
+          "Wages per month/per day",
+          "Status of labour",
+          "Remarks",
+        ],
+        salaries
+      )}
+      ${renderKeyValueTable([
+        ["Working Hours", expenditureSection.workingHours],
+        [
+          "Other major expenses & basis",
+          expenditureSection.otherMajorExpensesAndBasis,
+        ],
+      ])}
+
+      <p style="${paragraphStyle}"><strong>Asset Details</strong></p>
+      ${renderInnerTable(
+        [
+          "Address",
+          "Area measured (Sq.ft)",
+          "Purchase cost (in Lakhs)",
+          "Purchase Year",
+          "Market value (in Lakhs)",
+          "Owner Name",
+          "Mortgaged",
+        ],
+        immovableProperties
+      )}
+      ${renderKeyValueTable([
+        [
+          "Liquid, moveable & monetary items",
+          assetSection.liquidMoveableAssets,
+        ],
+        [
+          "Life insurance, mediclaim, property/asset insurance",
+          assetSection.insurances,
+        ],
+        [
+          "Capital invested in any business, Loans & Advances given",
+          assetSection.capitalInvestedLoans,
+        ],
+      ])}
+      <p style="${paragraphStyle}"><strong>Vehicles:</strong></p>
+      <ul>
+        ${vehicles.length ? vehicles.join("") : "<li>Not provided</li>"}
+      </ul>
+
+      <p style="${paragraphStyle}"><strong>Existing Loans</strong></p>
+      ${renderInnerTable(
+        [
+          "Name of Bank / NBFC",
+          "Type of Loan",
+          "Sanctioned Amount (in Lakhs)",
+          "O/S Balance",
+          "EMI (in Rs.)",
+          "EMI Paid Bank",
+          "Secured against which asset",
+        ],
+        existingLoans
+      )}
+
+      <p style="${paragraphStyle}"><strong>Bank Details</strong></p>
+      ${renderInnerTable(
+        ["Bank Name", "Branch Name", "Account Type", "Open since (Year)"],
+        bankingAccounts
+      )}
+
+      <p style="${paragraphStyle}"><strong>Third Party Check</strong></p>
+      ${renderInnerTable(
+        [
+          "Individual / Business Name",
+          "Address",
+          "Contact No.",
+          "Knowing Since",
+          "Feedback on borrower",
+          "Feedback on business",
+        ],
+        thirdPartyReferences
+      )}
+      ${renderKeyValueTable([
+        ["Other income", thirdPartySection.otherIncome],
+        ["Site coordinates", thirdPartySection.siteCoordinates],
+      ])}
+      <p style="${paragraphStyle}"><strong>Observations:</strong></p>
+      <ul>${observations || "<li>Not provided</li>"}</ul>
+      ${renderKeyValueTable([
+        ["Remarks", thirdPartySection.remarks],
+        ["AFL Verifier's Name & Emp Code", thirdPartySection.verifierNameEmpCode],
+        ["AFL Verifier's Signature", thirdPartySection.verifierSignature],
+        ["Status", thirdPartySection.status],
+      ])}
+
+      <p style="${paragraphStyle}"><strong>Financial Summary</strong></p>
+      ${(() => {
+        const summary =
+          verificationData.financialSummary ||
+          verificationData.financialAnalysis ||
+          {};
+        const grossIncome = hasValue(summary.totalGrossDisposableIncome)
+          ? formatCurrency(summary.totalGrossDisposableIncome)
+          : "Not provided";
+        const obligations = hasValue(summary.totalObligations)
+          ? formatCurrency(summary.totalObligations)
+          : "Not provided";
+        const netIncome = hasValue(summary.netDisposableIncome)
+          ? formatCurrency(summary.netDisposableIncome)
+          : "Not provided";
+        const noteRow = hasValue(summary.note)
+          ? renderKeyValueTable([["Notes / Comments", summary.note]])
+          : "";
+        return `
+      <ul>
+        <li>Total Gross disposable Income (A) ${grossIncome} per month</li>
+        <li>Total Obligations (B) ${obligations} per month</li>
+        <li>Net Disposable Income (C = A – B) ${netIncome} per month</li>
+      </ul>
+      ${noteRow}
+        `;
+      })()}
+
+      <p style="${paragraphStyle}"><strong>Recommendations:</strong></p>
+      <ul>
+        ${recommendations || "<li>Not provided</li>"}
+      </ul>
+      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${formatMultiline(
+        verificationData.recommendations?.disclaimer ||
+          "We estimated financials, purely based on the valid documents provided by the applicant."
+      )}</p>
+
+      <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
+      <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
+      <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Shareholding Details</td></tr>
-        <tr>
-          <th>Name of Shareholder</th>
-          <th>Percentage of Shareholding</th>
-          <th>Relationship with Applicant</th>
-          <th>Designation</th>
-          <th>Coming into Loan Structure</th>
-          <th>Functional of Partner/Director</th>
-        </tr>
-        ${
-          Array.isArray(verificationData.shareholdingDetails) &&
-          verificationData.shareholdingDetails.length > 0
-            ? verificationData.shareholdingDetails
-                .map(
-                  (shareholder) => `
-            <tr>
-              <td><span class="var-value">${shareholder.name || ""}</span></td>
-              <td><span class="var-value">${shareholder.shareholdingPercentage || ""}%</span></td>
-              <td><span class="var-value">${shareholder.relationshipWithApplicant || ""}</span></td>
-              <td><span class="var-value">${shareholder.designation || ""}</span></td>
-              <td><span class="var-value">${shareholder.comingIntoLoanStructure || ""}</span></td>
-              <td><span class="var-value">${shareholder.functionOfPartnerOrDirector || ""}</span></td>
-            </tr>
-          `
-                )
-                .join("")
-            : '<tr><td colspan="6" style="text-align: center;">No shareholding details available</td></tr>'
-        }
-        <tr>
-          <th>About the Business</th>
-          <td colspan="5"><span class="var-value">${verificationData.basicDetails.aboutApplicant || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Documents Observed</th>
-          <td colspan="5">
-            ${
-              Array.isArray(verificationData.uploadedItems) &&
-              verificationData.uploadedItems.length > 0
-                ? verificationData.uploadedItems
-                    .map(
-                      (doc) => `
-                <span class="var-value">${doc.uri || ""} (${doc.type || ""}) - ${doc.timestamp || ""}</span><br>
-              `
-                    )
-                    .join("")
-                : '<span class="var-value">No documents observed</span>'
-            }
-          </td>
-        </tr>
-      </table>
-    </div>
-
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Suppliers/Creditors</td></tr>
-        <tr>
-          <th>No of Fixed Suppliers</th>
-          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.numberOfFixedSuppliers || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Credit Period</th>
-          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.creditPeriod || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Cash-Cheque Proportion</th>
-          <td colspan="5"><span class="var-value">${verificationData.suppliersCreditors.cashChequeProportions || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Top 3 Suppliers</th>
-          <td colspan="5">
-            ${
-              Array.isArray(verificationData.suppliersCreditors?.suppliers) &&
-              verificationData.suppliersCreditors?.suppliers.length > 0
-                ? verificationData.suppliersCreditors?.suppliers
-                    .map(
-                      (supplier) => `
-                <span class="var-value">${supplier.name || ""} - ${supplier.phone || ""} (${supplier.location || ""}) - ${supplier.review || ""}</span><br>
-              `
-                    )
-                    .join("")
-                : '<span class="var-value">No suppliers listed</span>'
-            }
-          </td>
-        </tr>
-        <tr><td colspan="6" class="section-header">Clients/Debtors</td></tr>
-        <tr>
-          <th>No of Fixed Customers</th>
-          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.numberOfFixedCustomers || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Credit Period</th>
-          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.creditPeriod || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Cash-Cheque Proportion</th>
-          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.cashChequeProportions || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Top 3 Customers</th>
-          <td colspan="5">
-            ${
-              Array.isArray(verificationData.clientsDebtors?.customers) &&
-              verificationData.clientsDebtors?.customers.length > 0
-                ? verificationData.clientsDebtors?.customers
-                    .map(
-                      (customer) => `
-                <span class="var-value">${customer.name || ""} - ${customer.phone || ""} (${customer.location || ""}) - ${customer.review || ""}</span><br>
-              `
-                    )
-                    .join("")
-                : '<span class="var-value">No customers listed</span>'
-            }
-          </td>
-        </tr>
-        <tr>
-          <th>Average Stock Maintainance</th>
-          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.averageStockMaintenance || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Turnover & Margins</th>
-          <td colspan="5"><span class="var-value">${verificationData.clientsDebtors.turnover || ""}</span></td>
-        </tr>
-      </table>
-    </div>
-
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Expenditure</td></tr>
-        <tr><td colspan="7" class="section-header">Salaries & Wages</td></tr>
-        <tr>
-          <th>No of Employees</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.numberOfEmployees || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Salary Per month per employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.salaryPerMonthPerEmployee || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Status of Employee</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.statusOfEmployee || ""}</span></td>
-        </tr>
-        <tr>
-          <th>No. of Labours</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.numberOfLabours || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Wages per month/per day</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.wagesPerMonthPerDay || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Status of Labour</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.statusOfLabour || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Remarks</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.remarks || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Working Hours</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.workingHoursEnd || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Other Major Expenditure</th>
-          <td colspan="6"><span class="var-value">${verificationData.salariesWages?.otherMajorExpenditure || ""}</span></td>
-        </tr>
-        <tr><td colspan="7" class="section-header">Asset Details</td></tr>
-        <tr><td colspan="7" class="section-header">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure</td></tr>
-        <tr>
-          <th>Address</th>
-          <th>Area Measured in Sq.ft</th>
-          <th>Purchase Cost in Lakhs</th>
-          <th>Purchase Year</th>
-          <th>Market Value in Lakhs</th>
-          <th>Owner Name</th>
-          <th>Mortgaged</th>
-        </tr>
-        ${
-          Array.isArray(verificationData.assetDetails?.assets) &&
-          verificationData.assetDetails?.assets.length > 0
-            ? verificationData.assetDetails?.assets
-                .map(
-                  (property) => `
-            <tr>
-              <td><span class="var-value">${property.address || ""}</span></td>
-              <td><span class="var-value">${property.areaMeasured || ""}</span></td>
-              <td><span class="var-value">${property.purchaseCost || ""}</span></td>
-              <td><span class="var-value">${property.purchaseYear || ""}</span></td>
-              <td><span class="var-value">${property.marketValue || ""}</span></td>
-              <td><span class="var-value">${property.ownerName || ""}</span></td>
-              <td><span class="var-value">${property.mortgaged || ""}</span></td>
-            </tr>
-          `
-                )
-                .join("")
-            : '<tr><td colspan="7" style="text-align: center;">No immovable properties listed</td></tr>'
-        }
-      </table>
-    </div>
-
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr>
-          <th>Any Liquid, Moveable & Monetary items such as Cash,Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds,Securities </th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.liquidMoveableMonetaryItems || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Life Insurance, Mediclaim, Property/Asset Insurance(Premium & Sum Assured) </th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.lifeInsuranceMediclaim || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Capital invested in any business, Loans & Advances given</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.capitalInvestedBusiness || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Car, Bike and any other vehicle (Company Name and Model)</th>
-          <td colspan="6">
-            ${
-              Array.isArray(verificationData.assetDetails?.vehicles) &&
-              verificationData.assetDetails?.vehicles.length > 0
-                ? verificationData.assetDetails?.vehicles
-                    .map(
-                      (vehicle) => `
-                <span class="var-value">${vehicle.companyName || ""} ${vehicle.model || ""}</span><br>
-              `
-                    )
-                    .join("")
-                : '<span class="var-value">No vehicles listed</span>'
-            }
-          </td>
-        </tr>
-        </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Existing EMI's/Loans</td></tr>
-        <tr>
-          <th>Bank Name</th>
-          <th>Purpose</th>
-          <th>Loan Amount</th>
-          <th>EMI</th>
-          <th>Tenure</th>
-        </tr>
-        ${
-          Array.isArray(verificationData.existingLoans?.loans) &&
-          verificationData.existingLoans?.loans.length > 0
-            ? verificationData.existingLoans?.loans
-                .map(
-                  (loan) => `
-            <tr>
-              <td><span class="var-value">${loan.bankName || ""}</span></td>
-              <td><span class="var-value">${loan.purpose || ""}</span></td>
-              <td><span class="var-value">${loan.tenure || ""}</span></td>
-              <td><span class="var-value">${loan.loanAmount || ""}</span></td>
-              <td><span class="var-value">${loan.emi || ""}</span></td>
-            </tr>
-          `
-                )
-                .join("")
-            : '<tr><td colspan="7" style="text-align: center;">No existing loans details available</td></tr>'
-        }
-        </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="7" class="section-header">Bank Details</td></tr>
-        <tr>
-          <th>Name</th>
-          <th>Branch Name</th>
-          <th>Account Type</th>
-          <th>Open Since Year</th>
-        </tr>
-        ${
-          Array.isArray(verificationData.existingLoans) &&
-          verificationData.existingLoans.length > 0
-            ? verificationData.existingLoans
-                .map(
-                  (loan) => `
-            <tr>
-              <td><span class="var-value">${loan.bankName || ""}</span></td>
-              <td><span class="var-value">${loan.purpose || ""}</span></td>
-              <td><span class="var-value">${loan.tenure || ""}</span></td>
-              <td><span class="var-value">${loan.sanctionedAmount || ""}</span></td>
-              <td><span class="var-value">${loan.outstandingBalance || ""}</span></td>
-              <td><span class="var-value">${loan.emi || ""}</span></td>
-              <td><span class="var-value">${loan.bankName || ""}</span></td>
-              <td><span class="var-value">${loan.securedAgainst || ""}</span></td>
-            </tr>
-          `
-                )
-                .join("")
-            : '<tr><td colspan="7" style="text-align: center;">No bank details available</td></tr>'
-        }
-        </table>
-    </div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr><td colspan="6" class="section-header">Third Party Check</td></tr>
-        <tr>
-          <th>Individual/Business Name</th>
-          <th>Mobile Number</th>
-          <th>Relationship</th>
-          <th>Comments</th>
-          <th>Feedback Status</th>
-        </tr>
-          ${
-            Array.isArray(verificationData.thirdPartyCheck?.checks) &&
-            verificationData.thirdPartyCheck?.checks.length > 0
-              ? verificationData.thirdPartyCheck?.checks
-                  .map(
-                    (tpc) => `
-              <tr>
-                <td><span class="var-value">${tpc.tpcName || ""}</span></td>
-                <td><span class="var-value">${tpc.mobileNumber || ""}</span></td>
-                <td><span class="var-value">${tpc.relationship || ""}</span></td>
-                <td><span class="var-value">${tpc.comments || ""}</span></td>
-                <td><span class="var-value">${tpc.feedbackStatus || ""}</span></td>
-              </tr>
-            `
-                  )
-                  .join("")
-              : '<tr><td colspan="6" style="text-align: center;">No third party checks details available</td></tr>'
-          }
-
-      </table>
-    </div>
-
-    <div style="page-break-before: always;"></div>
-
-    <div class="align-wrapper">
-      <table class="section-table">
-        <tr>
-          <th>Observations</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.observations || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Other Income: (Income from other than initiated business)</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.otherIncome || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Site Coordinates</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.siteCoordinates || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Remarks</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.remarks || ""}</span></td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td colspan="6"><span class="var-value">${verificationData.assetDetails.status || ""}</span></td>
-        </tr>
-        <tr>
-          <th>AFL Verifier's Name & Emp Code</th>
-          <td colspan="6"><span class="var-value"> - </span></td>
-        </tr>
-        <tr>
-          <th>AFL Verifier's Signature</th>
-          <td colspan="6"><span class="var-value"> - </span></td>
-        </tr>
-    </table>
-    </div>
-    <br>
-    
     ${pdBaseTemplateFooter(html_data)}
   `;
 };
