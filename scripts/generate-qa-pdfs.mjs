@@ -71,7 +71,7 @@ function sanitizeBankName(bankName) {
 /**
  * Generate PDF from HTML using Puppeteer (matching backend configuration)
  */
-async function generatePDF(htmlContent, outputPath) {
+async function generatePDF(htmlContent, outputPath, bankName = "Kowtha") {
   console.log(`  Generating PDF: ${path.basename(outputPath)}`);
 
   const browser = await puppeteer.launch({
@@ -81,6 +81,8 @@ async function generatePDF(htmlContent, outputPath) {
       "--disable-setuid-sandbox",
       "--lang=en-IN",
       "--intl.accept_languages=en-IN",
+      "--disable-web-security",
+      "--disable-features=VizDisplayCompositor",
     ],
   });
 
@@ -92,18 +94,80 @@ async function generatePDF(htmlContent, outputPath) {
       waitUntil: "networkidle0",
     });
 
+    // Wait a bit more to ensure content is fully loaded
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Generate current IST date
+    const istDate = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Debug logging
+    console.log("Footer template variables:", {
+      bankName: bankName || "Kowtha",
+      istDate: istDate,
+    });
+
+    // Create footer template with proper string interpolation
+    const footerTemplate = `
+      <div style="
+          font-size: 10px;
+          width: 100%;
+          padding: 6px 16px;
+          color: #7f8c8d;
+          border-top: 1px solid #eee;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          line-height: 1.4;
+          height: 50px;
+          box-sizing: border-box;
+        ">
+        <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
+        <div>
+          Generated on ${istDate} —
+          Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+        </div>
+      </div>
+    `;
+
+    console.log("Footer template HTML:", footerTemplate);
+
     // Generate PDF with same settings as backend
+    console.log("Starting PDF generation with header/footer...");
     const pdfBuffer = await page.pdf({
       format: "a4",
       margin: {
-        top: "20px",
+        top: "60px", // Increased to accommodate header
         right: "20px",
-        bottom: "20px",
+        bottom: "80px", // Increased further to prevent content overlap
         left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: true,
+      preferCSSPageSize: false, // Changed to false to ensure consistent page sizing
+      displayHeaderFooter: true,
+      headerTemplate: `
+        <div style="
+            font-size: 8px;
+            width: 100%;
+            padding: 4px 16px;
+            color: #999;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+          ">
+          ${bankName || "Kowtha"} - Verification Report
+        </div>
+      `,
+      footerTemplate: footerTemplate,
     });
+
+    console.log("PDF generation completed. Buffer size:", pdfBuffer.length);
 
     // Write PDF to file
     await fs.writeFile(outputPath, pdfBuffer);
@@ -126,10 +190,7 @@ async function generateFormatPDImagesData(
   try {
     const signaturePath = process.env.SIGNATURE_PATH
       ? path.resolve(process.cwd(), process.env.SIGNATURE_PATH)
-      : path.resolve(
-          __dirname,
-          "../apps/backend/src/images/new_sign.jpg"
-        );
+      : path.resolve(__dirname, "../apps/backend/src/images/new_sign.jpg");
     const imageBuffer = await fs.readFile(signaturePath);
     signatureDataUri = `data:image/jpeg;base64,${imageBuffer.toString(
       "base64"
@@ -369,7 +430,7 @@ async function generateBankPDF(bankName, backendModules) {
     const outputPath = path.join(OUTPUT_DIR, `${sanitizedName}.pdf`);
 
     // Generate and save PDF
-    await generatePDF(htmlTemplate, outputPath);
+    await generatePDF(htmlTemplate, outputPath, bankName);
 
     return { success: true, outputPath, bankName };
   } catch (error) {

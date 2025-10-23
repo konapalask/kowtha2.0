@@ -157,9 +157,7 @@ export class PDTemplateService {
 
         try {
           const presignedUrl =
-            await this.s3Service.generatePresignedDownloadUrl(
-              possibleS3Key
-            );
+            await this.s3Service.generatePresignedDownloadUrl(possibleS3Key);
           if (!presignedUrl) {
             continue;
           }
@@ -398,8 +396,8 @@ export class PDTemplateService {
       bankName === "Axis Finance UBL Above 10L" ||
       bankName === "Axis Finance UBL Below 10L"
     ) {
-      const verificationData =
-        (verification?.verificationData || verification) as AxisFinanceUBLInterface;
+      const verificationData = (verification?.verificationData ||
+        verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
         verificationData,
         bankName,
@@ -768,8 +766,10 @@ export class PDTemplateService {
         schema
       );
 
-      const pdfBuffer =
-        await this.loanService.PDFBufferGeneration(htmlTemplate);
+      const pdfBuffer = await this.loanService.PDFBufferGeneration(
+        htmlTemplate,
+        bankName
+      );
 
       await this.loggingService.info(
         "Verification PDF generated successfully",
