@@ -46,6 +46,14 @@ const faker = {
       const pincode = Math.floor(Math.random() * 399999) + 400001;
       return `${Math.floor(Math.random() * 999) + 1}, ${street}, ${city} - ${pincode}`;
     },
+    latitude: () =>
+      Number(
+        (8 + Math.random() * (37 - 8)).toFixed(6) // Roughly India latitude range
+      ),
+    longitude: () =>
+      Number(
+        (68 + Math.random() * (98 - 68)).toFixed(6) // Roughly India longitude range
+      ),
   },
   internet: {
     email: () => `test${Math.floor(Math.random() * 999)}@example.com`,
@@ -65,6 +73,26 @@ const faker = {
       Math.floor(Math.random() * Math.pow(10, length))
         .toString()
         .padStart(length, "0"),
+    alphanumeric: (options = {}) => {
+      const length =
+        typeof options === "number"
+          ? options
+          : typeof options.length === "number"
+            ? options.length
+            : 10;
+      const casing =
+        typeof options === "object" && options.casing
+          ? options.casing.toLowerCase()
+          : "mixed";
+      const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+      }
+      if (casing === "upper") return result.toUpperCase();
+      if (casing === "lower") return result.toLowerCase();
+      return result;
+    },
   },
   datatype: { boolean: () => Math.random() > 0.5 },
   lorem: {
@@ -2623,6 +2651,903 @@ export const generateMockDataFromSchema = (schema) => {
             concerns: "Dependence on few bulk buyers",
             statusOfPd: faker.helpers.arrayElement(["Positive", "Referred"]),
             pdConductedBy: `${faker.person.fullName()} – PD Executive`,
+          };
+          break;
+        }
+      }
+    }
+
+    if (schema.bankName === "IIFL") {
+      switch (section.id) {
+        case "basicDetails": {
+          sectionData = {
+            prospectNo: `IF${faker.string.numeric(8)}`,
+            nameOfApplicant: faker.person.fullName(),
+            maritalStatus: faker.helpers.arrayElement([
+              "Single",
+              "Married",
+              "Divorced",
+              "Others",
+            ]),
+            educationalQualification: faker.helpers.arrayElement([
+              "Graduate",
+              "Post Graduate",
+              "Diploma",
+            ]),
+            category: faker.helpers.arrayElement([
+              "General",
+              "OBC",
+              "SC",
+              "ST",
+            ]),
+            dependentsChildren: `${faker.number.int({ min: 0, max: 3 })}`,
+            dependentsAdults: `${faker.number.int({ min: 0, max: 2 })}`,
+            dependentsOthers: `${faker.number.int({ min: 0, max: 1 })}`,
+            yearsInCurrentResidence: faker.helpers.arrayElement([
+              "<=1 Year",
+              "1-3 Years",
+              "3-5 Years",
+              ">5 Years",
+            ]),
+            currentResidenceHouseSize: faker.helpers.arrayElement([
+              "1 RK",
+              "1 BHK",
+              "2 BHK",
+              ">2 BHK",
+            ]),
+            previousAddress: generateIndianAddress(faker.location.city()),
+            yearsStayedPreviousAddress: `${faker.number.int({
+              min: 1,
+              max: 6,
+            })}`,
+            yearsInCurrentCity: `${faker.number.int({ min: 2, max: 10 })}`,
+            previousCity: faker.location.city(),
+            yearsInPreviousCity: `${faker.number.int({ min: 1, max: 5 })}`,
+            reasonForChange:
+              "Relocated for better employment opportunities and schooling.",
+            parentsStayingWith: faker.helpers.arrayElement([
+              "Self",
+              "Separate",
+              "Expired",
+            ]),
+            propertyUsage: faker.helpers.arrayElement([
+              "Self-Occupancy",
+              "Investment",
+              "Renting Purpose",
+            ]),
+            comments:
+              "Applicant cooperative during PD. Residence located in gated community; good neighbourhood profile.",
+          };
+          break;
+        }
+        case "caseDetails": {
+          sectionData = {
+            dateOfCaseInitiated: faker.date
+              .recent({ days: 30 })
+              .toISOString()
+              .split("T")[0],
+            dateOfAppointmentProvided: faker.date
+              .recent({ days: 30 })
+              .toISOString()
+              .split("T")[0],
+            initiatedAddress: generateIndianAddress(faker.location.city()),
+            visitedAddress: generateIndianAddress(faker.location.city()),
+            residentialAddress: generateIndianAddress(faker.location.city()),
+            contactInformation: generateIndianPhone(),
+            loanAmountRequired: faker.number.int({
+              min: 1000000,
+              max: 3500000,
+            }),
+            purposeOfLoan: faker.helpers.arrayElement([
+              "Home renovation",
+              "Plot purchase",
+              "Business expansion",
+            ]),
+            profileInitiated: `${faker.person.fullName()} – ${faker.company.name()}`,
+            securityOffered: faker.helpers.arrayElement([
+              "Residential property",
+              "Collateral free",
+              "Co-borrower property",
+            ]),
+            familyMembersDescription:
+              "Lives with spouse and two children. Parents stay in hometown and visit occasionally.",
+            latitude: faker.location.latitude().toFixed(6),
+            longitude: faker.location.longitude().toFixed(6),
+            region: faker.helpers.arrayElement(["South", "North", "West"]),
+            location: faker.location.city(),
+            branch: `${faker.company.name()} Branch`,
+          };
+          break;
+        }
+        case "familyDetails": {
+          sectionData.familyMembers = [
+            {
+              name: faker.person.fullName(),
+              relationship: "Spouse",
+              age: `${faker.number.int({ min: 26, max: 40 })}`,
+              qualification: faker.helpers.arrayElement([
+                "Graduate",
+                "Post Graduate",
+              ]),
+              occupation: faker.helpers.arrayElement([
+                "Teacher",
+                "Self-employed",
+                "Homemaker",
+              ]),
+            },
+            {
+              name: faker.person.fullName(),
+              relationship: "Child",
+              age: `${faker.number.int({ min: 4, max: 14 })}`,
+              qualification: "Student",
+              occupation: "Student",
+            },
+            {
+              name: faker.person.fullName(),
+              relationship: "Parent",
+              age: `${faker.number.int({ min: 55, max: 70 })}`,
+              qualification: "Retired",
+              occupation: "Retired",
+            },
+          ];
+          break;
+        }
+        case "applicantProfile": {
+          sectionData = {
+            applicantEducation: faker.helpers.arrayElement([
+              "Graduate",
+              "Post Graduate",
+            ]),
+            nativePlace: `${faker.location.city()}, ${faker.location.state()}`,
+            businessName: `${faker.person.lastName()} Traders`,
+            businessType: faker.helpers.arrayElement([
+              "Proprietorship",
+              "Partnership",
+              "Private Limited",
+            ]),
+            yearsOfExperience: `${faker.number.int({ min: 5, max: 18 })} Years`,
+            machineryUsed: "Industrial sewing machines and packaging equipment",
+            natureOfBusiness:
+              "Manufactures uniforms and workwear supplied to corporate contracts.",
+            dailyOutputRates: "40 sets per day @ Rs. 850 per set",
+            materialsPurchased:
+              "Fabric, buttons, lining material sourced from wholesale market.",
+            workersAndSalaries:
+              "8 tailors and 2 helpers with monthly wage bill of Rs. 85,000/-",
+            customers:
+              "Local schools, security agencies, corporate housekeeping vendors",
+            businessPremises: faker.helpers.arrayElement([
+              "Owned",
+              "Rented",
+              "Relative's premises",
+            ]),
+            rentPaid: `Rs. ${faker.number
+              .int({ min: 15000, max: 35000 })
+              .toLocaleString("en-IN")}/-`,
+            neighborEnquiryResult:
+              "Neighbours confirm long-standing operations and timely staff payments.",
+          };
+          break;
+        }
+        case "observations": {
+          sectionData = {
+            businessVintageDocumentsProvided: faker.helpers.arrayElement([
+              "Yes",
+              "No",
+            ]),
+            businessNameBoard: faker.helpers.arrayElement([
+              "Permanent",
+              "Temporary",
+              "Not Available",
+            ]),
+            workersPresentAtVisit: faker.helpers.arrayElement([
+              "Workers present and engaged",
+              "Only supervisor available",
+              "Premises closed",
+            ]),
+            kachaRecordsProvided: faker.helpers.arrayElement(["Yes", "No"]),
+            upiPaymentsProvided: faker.helpers.arrayElement(["Yes", "No"]),
+            addressMatch: faker.helpers.arrayElement([
+              "Matches initiated address",
+              "Minor discrepancy observed",
+            ]),
+            otherObservations:
+              "Production activity observed. Stock of finished goods maintained. Hygiene acceptable.",
+          };
+          break;
+        }
+        case "incomeReferences": {
+          sectionData = {
+            netMarginPercent: `${faker.number.int({ min: 20, max: 35 })}%`,
+            otherIncomes: "Rental income Rs. 15,000/- per month",
+            spouseIncome: `Rs. ${faker.number
+              .int({ min: 25000, max: 45000 })
+              .toLocaleString("en-IN")}/-`,
+            referencesSummary:
+              "Spoken to business supplier and neighbouring vendor; feedback positive.",
+            referenceContacts: `${faker.person.fullName()} - ${generateIndianPhone()}, ${faker.person.fullName()} - ${generateIndianPhone()}`,
+          };
+          break;
+        }
+        case "assetsDetails": {
+          sectionData.assets = [
+            {
+              assetType: "Residential Property",
+              description: "2 BHK apartment at city outskirts",
+              marketValue: `Rs. ${faker.number
+                .int({ min: 3200000, max: 5200000 })
+                .toLocaleString("en-IN")}`,
+              ownerName: faker.person.fullName(),
+            },
+            {
+              assetType: "Commercial Equipment",
+              description: "8 industrial sewing machines",
+              marketValue: `Rs. ${faker.number
+                .int({ min: 400000, max: 750000 })
+                .toLocaleString("en-IN")}`,
+              ownerName: faker.person.fullName(),
+            },
+          ];
+          break;
+        }
+        case "existingLoans": {
+          sectionData.existingLoans = [
+            {
+              bankName: "HDFC Bank",
+              typeOfLoan: "Home Loan",
+              loanAmount: `Rs. ${faker.number
+                .int({ min: 1500000, max: 2800000 })
+                .toLocaleString("en-IN")}`,
+              emi: `Rs. ${faker.number
+                .int({ min: 18000, max: 28000 })
+                .toLocaleString("en-IN")}`,
+              status: "Open",
+            },
+            {
+              bankName: "Axis Bank",
+              typeOfLoan: "Business Loan",
+              loanAmount: `Rs. ${faker.number
+                .int({ min: 500000, max: 1200000 })
+                .toLocaleString("en-IN")}`,
+              emi: `Rs. ${faker.number
+                .int({ min: 12000, max: 22000 })
+                .toLocaleString("en-IN")}`,
+              status: faker.helpers.arrayElement(["Open", "Closed"]),
+            },
+          ];
+          break;
+        }
+        case "bankingDetails": {
+          sectionData.bankingDetails = [
+            {
+              bankName: "State Bank of India",
+              accountType: "Current",
+              relationshipSinceYears: `${faker.number.int({
+                min: 2,
+                max: 10,
+              })} Years`,
+            },
+            {
+              bankName: "ICICI Bank",
+              accountType: "Savings",
+              relationshipSinceYears: `${faker.number.int({
+                min: 4,
+                max: 12,
+              })} Years`,
+            },
+          ];
+          break;
+        }
+        case "pdOfficerDetails": {
+          sectionData = {
+            pdOfficerName: faker.person.fullName(),
+            dateOfDiscussion: faker.date.recent({ days: 15 }).toISOString(),
+            pdOfficerSignature: faker.person.fullName(),
+          };
+          break;
+        }
+      }
+    }
+
+    if (schema.bankName === "Niwas Salaried") {
+      switch (section.id) {
+        case "generalInfo": {
+          sectionData = {
+            prospectNo: `NI${faker.string.numeric(8)}`,
+            nameOfApplicant: faker.person.fullName(),
+            maritalStatus: faker.helpers.arrayElement([
+              "Single",
+              "Married",
+              "Divorced",
+              "Others",
+            ]),
+            educationalQualification: faker.helpers.arrayElement([
+              "Graduate",
+              "Post Graduate",
+              "Diploma",
+            ]),
+            category: faker.helpers.arrayElement([
+              "General",
+              "OBC",
+              "SC",
+              "ST",
+            ]),
+            dependentsChildren: `${faker.number.int({ min: 0, max: 3 })}`,
+            dependentsAdults: `${faker.number.int({ min: 0, max: 2 })}`,
+            dependentsOthers: `${faker.number.int({ min: 0, max: 1 })}`,
+            yearsInCurrentResidence: faker.helpers.arrayElement([
+              "<=1 Year",
+              "1-3 Years",
+              "3-5 Years",
+              ">5 Years",
+            ]),
+            houseSize: faker.helpers.arrayElement([
+              "1 BHK",
+              "2 BHK",
+              ">2 BHK",
+            ]),
+            previousAddress: generateIndianAddress(faker.location.city()),
+            yearsAtPreviousAddress: `${faker.number.int({ min: 1, max: 6 })}`,
+            yearsInCurrentCity: `${faker.number.int({ min: 2, max: 12 })}`,
+            previousCity: faker.location.city(),
+            yearsInPreviousCity: `${faker.number.int({ min: 1, max: 5 })}`,
+            reasonForChange: "Career opportunity and better schooling",
+            parentsStayingWith: faker.helpers.arrayElement([
+              "Self",
+              "Separate",
+              "Expired",
+            ]),
+          };
+          break;
+        }
+        case "assetsInvestments": {
+          sectionData = {
+            smartphone: faker.helpers.arrayElement(["Yes", "No"]),
+            washingMachine: faker.helpers.arrayElement(["Yes", "No"]),
+            carRcNo: faker.helpers.arrayElement(["Yes", "No"]),
+            twoWheeler: faker.helpers.arrayElement(["Yes", "No"]),
+            autoCab: faker.helpers.arrayElement(["Yes", "No"]),
+            computerLaptop: faker.helpers.arrayElement(["Yes", "No"]),
+            ac: faker.helpers.arrayElement(["Yes", "No"]),
+            fridge: faker.helpers.arrayElement(["Yes", "No"]),
+            induction: faker.helpers.arrayElement(["Yes", "No"]),
+            investments: "Mutual funds worth Rs. 2,40,000 and PPF",
+            insurance: "LIC Jeevan Anand – Rs. 10 Lakhs",
+            fixedDeposit: "Rs. 3,50,000",
+            chitFunds: faker.helpers.arrayElement(["Active", "Not Member"]),
+            postOfficeSavings: "Rs. 75,000",
+            postOfficeSavingsMonthly: faker.helpers.arrayElement([
+              "Yes",
+              "No",
+            ]),
+            recurringDeposit: faker.helpers.arrayElement(["Yes", "No"]),
+            consumptionHabits: faker.helpers.arrayElement(["Yes", "No"]),
+          };
+          break;
+        }
+        case "employmentDetails": {
+          sectionData = {
+            employerName: `${faker.company.name()} Pvt. Ltd.`,
+            yearsInCurrentJob: `${faker.number.int({ min: 1, max: 8 })} Years`,
+            totalWorkExperience: `${faker.number.int({ min: 4, max: 15 })} Years`,
+            officialEmail: faker.internet
+              .email({ firstName: "contact" })
+              .toLowerCase(),
+            contactNumber: generateIndianPhone(),
+            numberOfEmployeesInFirm: `${faker.number.int({
+              min: 50,
+              max: 800,
+            })}`,
+          };
+          break;
+        }
+        case "companyDetails": {
+          sectionData = {
+            companyHeadOffice: faker.location.city(),
+            promotersNames: `${faker.person.fullName()}, ${faker.person.fullName()}`,
+            numberOfCompanyEmployees: `${faker.number.int({
+              min: 200,
+              max: 5000,
+            })}`,
+            constitution: faker.helpers.arrayElement([
+              "Private Limited",
+              "Public Limited",
+              "LLP",
+            ]),
+            citiesPresent: `${faker.number.int({ min: 5, max: 60 })} cities`,
+            natureOfBusiness: faker.helpers.arrayElement([
+              "Information technology services",
+              "Pharmaceutical manufacturing",
+              "Automotive components",
+            ]),
+            typeOfCustomers: faker.helpers.arrayElement([
+              "Retail consumers",
+              "B2B Enterprises",
+              "Dealers and distributors",
+            ]),
+            yearsSinceIncorporation: `${faker.number.int({
+              min: 5,
+              max: 25,
+            })}`,
+            gstRegistered: faker.helpers.arrayElement(["Yes", "No"]),
+            gstNumber: `29${faker.string.alphanumeric({
+              length: 13,
+              casing: "upper",
+            })}`,
+            branchesAcrossIndia: `${faker.number.int({ min: 3, max: 20 })}`,
+            shareHoldingPattern: "Promoters 65%, Investors 35%",
+            managementTeam: `${faker.person.fullName()} (CEO), ${faker.person.fullName()} (CFO)`,
+            bankingRelationship:
+              "Working capital with HDFC Bank, term loan with Axis Bank",
+          };
+          break;
+        }
+        case "businessPremises": {
+          sectionData = {
+            businessPremiseOwnership: faker.helpers.arrayElement([
+              "Owned",
+              "Rented",
+            ]),
+            monthlySalesReceipts: "Rs. 5,40,000 (payroll inflows)",
+            percentSalesOnCredit: "10%",
+            manufacturingTradingDetails:
+              "Service industry – salary credited on 28th monthly",
+            salesConcentration:
+              "Major revenue from two large US-based clients",
+            businessCycleDebtors: "Invoices cleared within 30 days",
+            businessCycleCreditors: "Corporate credit card bill 45 days",
+            stockValuation: "Service industry – NA",
+            grossNetMargins: "Gross 32%, Net 18%",
+            monthlyNetSaving: "Rs. 95,000",
+            majorSuppliers: "NA – salaried employee",
+            majorCustomers: "NA – salaried employee",
+            numberOfEmployees: "NA",
+            nameBoardSeen: "Corporate signage at tech park",
+            localityOfOffice: `${faker.location.city()} IT district`,
+            residenceCumOffice: "No",
+            vatExciseApplicability: "Not applicable",
+            latestTaxReturn: "ITR FY24 acknowledged",
+          };
+          break;
+        }
+        case "essChecklist": {
+          sectionData.essResponses = [
+            {
+              question: "Is the employer compliant with labour laws?",
+              response: "Yes",
+            },
+            {
+              question: "Does the applicant have any occupational hazards?",
+              response: "No",
+            },
+            {
+              question:
+                "Any environmental or social concerns observed at residence?",
+              response: "No",
+            },
+          ];
+          break;
+        }
+        case "existingLoans": {
+          sectionData.existingLoans = [
+            {
+              typeOfLoan: "Home Loan",
+              bankName: "HDFC Bank",
+              loanAmount: faker.number.int({ min: 1200000, max: 3000000 }),
+              emi: faker.number.int({ min: 18000, max: 32000 }),
+              tenureRemaining: `${faker.number.int({ min: 36, max: 120 })} months`,
+            },
+            {
+              typeOfLoan: "Car Loan",
+              bankName: "ICICI Bank",
+              loanAmount: faker.number.int({ min: 400000, max: 900000 }),
+              emi: faker.number.int({ min: 9000, max: 16000 }),
+              tenureRemaining: `${faker.number.int({ min: 12, max: 48 })} months`,
+            },
+          ];
+          break;
+        }
+        case "loanPurpose": {
+          sectionData = {
+            purposeOfLoan: faker.helpers.arrayElement([
+              "Home renovation",
+              "Plot purchase",
+              "Home extension",
+            ]),
+            minimumLoanAmountRequired: `Rs. ${faker.number
+              .int({ min: 800000, max: 2500000 })
+              .toLocaleString("en-IN")}`,
+            tenureRequired: `${faker.number.int({ min: 60, max: 180 })} months`,
+            monthlyHouseholdExpenses: `Rs. ${faker.number
+              .int({ min: 35000, max: 70000 })
+              .toLocaleString("en-IN")}`,
+            comfortableEmi: `Rs. ${faker.number
+              .int({ min: 20000, max: 35000 })
+              .toLocaleString("en-IN")}`,
+            fundsRequired: `Rs. ${faker.number
+              .int({ min: 1500000, max: 3000000 })
+              .toLocaleString("en-IN")}`,
+            sourceOfOwnFunds: "Savings and maturity of FD",
+            purchaseCost: `Rs. ${faker.number
+              .int({ min: 2500000, max: 4500000 })
+              .toLocaleString("en-IN")}`,
+            savings: `Rs. ${faker.number
+              .int({ min: 500000, max: 1200000 })
+              .toLocaleString("en-IN")}`,
+            constructionEstimate: `Rs. ${faker.number
+              .int({ min: 800000, max: 1800000 })
+              .toLocaleString("en-IN")}`,
+            registrationCharges: `Rs. ${faker.number
+              .int({ min: 150000, max: 400000 })
+              .toLocaleString("en-IN")}`,
+            otherLoanAmountTaken: `Rs. ${faker.number
+              .int({ min: 300000, max: 700000 })
+              .toLocaleString("en-IN")}`,
+            totalAmountSpent: `Rs. ${faker.number
+              .int({ min: 2800000, max: 5200000 })
+              .toLocaleString("en-IN")}`,
+            totalTransactionCost: `Rs. ${faker.number
+              .int({ min: 3000000, max: 5500000 })
+              .toLocaleString("en-IN")}`,
+          };
+          break;
+        }
+        case "familyMembers": {
+          sectionData.familyMembers = [
+            {
+              name: faker.person.fullName(),
+              relation: "Spouse",
+              age: `${faker.number.int({ min: 28, max: 40 })}`,
+              employmentType: faker.helpers.arrayElement([
+                "Salaried",
+                "Self-employed",
+              ]),
+              education: faker.helpers.arrayElement([
+                "Graduate",
+                "Post Graduate",
+              ]),
+              contactNumber: generateIndianPhone(),
+              stayingWithApplicant: "Yes",
+            },
+            {
+              name: faker.person.fullName(),
+              relation: "Child",
+              age: `${faker.number.int({ min: 4, max: 14 })}`,
+              employmentType: "Student",
+              education: faker.helpers.arrayElement([
+                "Primary School",
+                "High School",
+              ]),
+              contactNumber: "-",
+              stayingWithApplicant: "Yes",
+            },
+          ];
+          break;
+        }
+        case "references": {
+          sectionData.references = [
+            {
+              name: faker.person.fullName(),
+              address: generateIndianAddress(faker.location.city()),
+              designation: faker.person.jobTitle(),
+              yearsKnown: `${faker.number.int({ min: 3, max: 10 })}`,
+              contactNumber: generateIndianPhone(),
+              email: faker.internet.email().toLowerCase(),
+              photoWithApplicant: faker.helpers.arrayElement(["Yes", "No"]),
+            },
+            {
+              name: faker.person.fullName(),
+              address: generateIndianAddress(faker.location.city()),
+              designation: faker.person.jobTitle(),
+              yearsKnown: `${faker.number.int({ min: 2, max: 8 })}`,
+              contactNumber: generateIndianPhone(),
+              email: faker.internet.email().toLowerCase(),
+              photoWithApplicant: faker.helpers.arrayElement(["Yes", "No"]),
+            },
+          ];
+          break;
+        }
+        case "employerFirmCheck": {
+          sectionData.checks = [
+            {
+              name: faker.person.fullName(),
+              businessName: `${faker.company.name()} (HR)`,
+              address: faker.location.streetAddress(),
+              yearsKnown: `${faker.number.int({ min: 1, max: 6 })}`,
+              contactNumber: generateIndianPhone(),
+              feedback: faker.helpers.arrayElement([
+                "Positive",
+                "Neutral",
+              ]),
+              businessCardCollected: faker.helpers.arrayElement([
+                "Yes",
+                "No",
+              ]),
+            },
+            {
+              name: faker.person.fullName(),
+              businessName: `${faker.company.name()} (Colleague)`,
+              address: faker.location.streetAddress(),
+              yearsKnown: `${faker.number.int({ min: 1, max: 5 })}`,
+              contactNumber: generateIndianPhone(),
+              feedback: faker.helpers.arrayElement([
+                "Positive",
+                "Neutral",
+              ]),
+              businessCardCollected: faker.helpers.arrayElement([
+                "Yes",
+                "No",
+              ]),
+            },
+          ];
+          break;
+        }
+        case "pdOfficerComments": {
+          sectionData = {
+            comments:
+              "Applicant employed with reputed MNC. Salary credits verified in bank statements. Residence owned and well maintained.",
+            pdOfficerName: faker.person.fullName(),
+            discussionDate: faker.date.recent({ days: 20 }).toISOString(),
+            pdOfficerSignature: faker.person.fullName(),
+          };
+          break;
+        }
+      }
+    }
+
+    if (schema.bankName === "Niwas Senp") {
+      switch (section.id) {
+        case "generalInfo": {
+          sectionData = {
+            prospectNo: `DL${faker.string.numeric(10)}`,
+            name: faker.person.fullName(),
+            maritalStatus: faker.helpers.arrayElement([
+              "Single",
+              "Married",
+            ]),
+            educationalQualification: faker.helpers.arrayElement([
+              "Graduate",
+              "Diploma",
+              "PG",
+            ]),
+            category: faker.helpers.arrayElement([
+              "General",
+              "OBC",
+              "SC",
+            ]),
+            dependentsChildren: `${faker.number.int({ min: 0, max: 3 })}`,
+            dependentsAdults: `${faker.number.int({ min: 0, max: 4 })}`,
+            dependentsOthers: "0",
+            yearsInCurrentResidence: faker.helpers.arrayElement([
+              "<=1 Year",
+              "1-3 Years",
+              "3-5 Years",
+              ">5 Years",
+            ]),
+            currentResidenceHouseSize: faker.helpers.arrayElement([
+              "1 BHK",
+              "2 BHK",
+              ">2 BHK",
+            ]),
+            previousAddress: "NA",
+            yearsAtPreviousAddress: "NA",
+            yearsInCurrentCity: faker.helpers.arrayElement([
+              "<=3 Years",
+              ">3 Years",
+            ]),
+            previousCity: "NA",
+            yearsInPreviousCity: "NA",
+            reasonForChange: "NA",
+            parentsStayingWith: faker.helpers.arrayElement([
+              "Self",
+              "Separate",
+            ]),
+          };
+          break;
+        }
+        case "assetsInvestments": {
+          sectionData = {
+            smartphone: "Yes",
+            washingMachine: faker.helpers.arrayElement(["Yes", "No"]),
+            carRcNo: "Yes",
+            twoWheeler: "Yes",
+            autoCab: "No",
+            computerLaptop: faker.helpers.arrayElement(["Yes", "No"]),
+            ac: "Yes",
+            fridge: "Yes",
+            induction: "Yes",
+            insurance: "2 LIC policies worth Rs. 3 Lakhs",
+            fixedDeposit: "Rs. 1,50,000",
+            chitFunds: "Active",
+            postOfficeSavings: "Rs. 50,000",
+            postOfficeSavingsMonthly: "Yes",
+            recurringDeposit: "Yes",
+            consumptionHabits: faker.helpers.arrayElement(["Yes", "No"]),
+          };
+          break;
+        }
+        case "businessEmployment": {
+          sectionData = {
+            businessName: "M/s. Auto Driver",
+            businessConstitution: "Proprietorship",
+            partnershipShare: "NA",
+            businessCommencementDate: "2014",
+            placeOfIncorporation: generateIndianAddress(faker.location.city()),
+            previousBusinessName: "NA",
+            previousBusinessYears: "NA",
+            reasonForChange: "NA",
+            totalWorkExperience: "11 Years",
+            officialEmail: "-",
+            contactNumber: generateIndianPhone(),
+          };
+          break;
+        }
+        case "businessOperations": {
+          sectionData = {
+            typeOfIndustry: "Transport Services",
+            natureOfBusiness: "Passenger auto services",
+            constitution: "Proprietorship",
+            typeOfCustomer: "General passengers",
+            businessSince: "2014",
+            promoterExperience: "11 Years",
+            stabilityYears: "11 Years",
+            stabilityVerifiedBy: "Driving licence and RC",
+            familyStructureInBusiness: "Self managed",
+            premisesOwnership: "Self-Owned",
+            actualMonthlySales: "Rs. 75,000",
+            percentSalesOnCredit: "0%",
+            manufacturingTradingDetails:
+              "Provides daily transport service routes covering local colonies with own auto.",
+            salesConcentration: "No single party",
+            businessCycleDebtors: "Cash business",
+            businessCycleCreditors: "Fuel and maintenance payments weekly",
+            stockValuation: "Not applicable",
+            grossNetMargins: "Approx net margin Rs. 35,000 per month",
+            monthlyNetSaving: "Rs. 20,000",
+            majorSuppliers: "Fuel stations and mechanics",
+            majorCustomers: "Daily commuters",
+            numberOfEmployees: "Self",
+            nameBoardSeen: "Auto with permit number displayed",
+            localityOfBusiness: "City outskirts stand",
+            residenceCumOffice: "No",
+            vatExciseApplicability: "Not applicable",
+            latestTaxReturnValue: "-",
+          };
+          break;
+        }
+        case "essChecklist": {
+          sectionData.essResponses = [
+            {
+              question:
+                "Is the entity involved in hazardous or ozone depleting substances?",
+              response: "No",
+            },
+            {
+              question:
+                "Does the entity involve child or forced labour or displacement?",
+              response: "No",
+            },
+            {
+              question:
+                "Does the entity require consent from pollution control board / protected areas?",
+              response: "No",
+            },
+            {
+              question:
+                "Does the entity have proper mechanism for waste disposal without pollution?",
+              response: "Yes",
+            },
+            {
+              question: "Does the entity comply with ESS guidelines?",
+              response: "Yes",
+            },
+          ];
+          break;
+        }
+        case "existingLoanDetails": {
+          sectionData.existingLoans = [
+            {
+              typeOfLoan: "BL",
+              bankName: "City Union Bank",
+              loanAmount: "Rs. 8,00,000/-",
+              emi: "Rs. 28,000/-",
+              tenureRemaining: "30 months",
+            },
+          ];
+          break;
+        }
+        case "costAndFunds": {
+          sectionData = {
+            fundsRequired: "Rs. 10,00,000/-",
+            sourceOfOwnFunds: "Savings",
+            purchaseCost: "Rs. 5,00,000/-",
+            savings: "Rs. 1,50,000/-",
+            constructionEstimate: "NA",
+            totalTransactionCost: "Rs. 12,50,000/-",
+          };
+          break;
+        }
+        case "bankingDetails": {
+          sectionData.bankingAccounts = [
+            {
+              bankName: "City Union Bank",
+              accountNumber: faker.finance.accountNumber(),
+              accountType: "Current",
+              branch: "City Centre",
+              operatingSinceYears: "6 Years",
+            },
+          ];
+          break;
+        }
+        case "familyMembers": {
+          sectionData.familyMembers = [
+            {
+              name: faker.person.fullName(),
+              relationship: "Spouse",
+              age: "35",
+              occupation: "Housewife",
+              education: "Undergraduate",
+              contactNumber: generateIndianPhone(),
+              stayingWithApplicant: "Yes",
+            },
+            {
+              name: faker.person.fullName(),
+              relationship: "Daughter",
+              age: "13",
+              occupation: "Student",
+              education: "9th class",
+              contactNumber: "-",
+              stayingWithApplicant: "Yes",
+            },
+          ];
+          break;
+        }
+        case "references": {
+          sectionData.references = [
+            {
+              name: faker.person.fullName(),
+              address: generateIndianAddress(faker.location.city()),
+              relationship: "Business Partner",
+              contactNumber: generateIndianPhone(),
+              email: faker.internet.email().toLowerCase(),
+              yearsKnown: "5",
+              photoWithApplicant: "Yes",
+            },
+          ];
+          break;
+        }
+        case "businessFirmCheck": {
+          sectionData.checks = [
+            {
+              name: faker.person.fullName(),
+              businessName: "Sri Auto Works",
+              address: generateIndianAddress(faker.location.city()),
+              yearsKnown: "6",
+              contactNumber: generateIndianPhone(),
+              feedback: "Positive",
+              businessCardCollected: "Yes",
+            },
+          ];
+          break;
+        }
+        case "pdOfficerComments": {
+          sectionData = {
+            comments:
+              "Applicant cooperative, documents provided on best effort basis. Income primarily cash based.",
+            initiatedAddress: generateIndianAddress(faker.location.city()),
+            visitedAddress: generateIndianAddress(faker.location.city()),
+            residentialAddress: generateIndianAddress(faker.location.city()),
+            otherObservations:
+              "Vehicle observed in good condition; route permits displayed.",
+            concerns:
+              "Limited documentation available. Recommend cross-checking bank statements.",
+            statusOfCase: faker.helpers.arrayElement([
+              "Positive",
+              "Credit Refer",
+            ]),
+            pdOfficerName: faker.person.fullName(),
+            discussionDate: faker.date.recent({ days: 30 }).toISOString(),
+            pdOfficerSignature: faker.person.fullName(),
           };
           break;
         }

@@ -29,6 +29,8 @@ import { indiaShelterSenpTemplate } from "./templates/PD/html/india-shelter-senp
 import { axisAgriTemplate } from "./templates/PD/html/axis-agri.template";
 import { smfgSmeTemplate } from "./templates/PD/html/smfg-sme.template";
 import { adityaBirlaTemplate } from "./templates/PD/html/aditya-birla.template";
+import { niwasSenpTemplate } from "./templates/PD/html/niwas-senp.template";
+import { niwasSalariedTemplate } from "./templates/PD/html/niwas-salaried.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
 import { formSchema } from "./forms-schema";
 import {
@@ -539,6 +541,30 @@ export class PDTemplateService {
         financialAnalysis
       );
       return smfgSmeTemplate(verification, html_data);
+    }
+
+    if (bankName == "Niwas Salaried") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return niwasSalariedTemplate(verification, html_data);
+    }
+
+    if (bankName == "Niwas Senp") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return niwasSenpTemplate(verification, html_data);
     }
 
     if (bankName == "Arka Fincap") {
