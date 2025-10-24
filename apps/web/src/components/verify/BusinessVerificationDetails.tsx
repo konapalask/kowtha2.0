@@ -22,9 +22,10 @@ import {
 } from "antd";
 
 const { TextArea } = Input;
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
+import PDRequestLogs from "./PDRequestLogs";
 import Footer from "./Footer";
 import AssistantVerifierFooter from "./AssistantVerifierFooter";
 import { useRouter } from "next/router";
@@ -170,6 +171,9 @@ export const BusinessVerificationDetails: React.FC<
   const [currentEditSection, setCurrentEditSection] = useState<string>("");
   const [currentSectionSchema, setCurrentSectionSchema] = useState<any>(null);
   const [localEditLogsUpdated, setLocalEditLogsUpdated] = useState(0);
+
+  // Collapse state - moved to parent level to persist across re-renders
+  const [activeSections, setActiveSections] = useState<string[]>([]);
 
   const handleSave = async () => {
     patchFinalVerdict(id as string, "Business", {
@@ -831,21 +835,169 @@ export const BusinessVerificationDetails: React.FC<
     formData,
     onEdit,
     readOnly,
+    activeSections,
+    setActiveSections,
+    role,
+    verificationData,
+    changedData,
+    setChangedData,
+    setLocalEditLogsUpdated,
   }: {
     schema: any;
     formData: any;
     onEdit: (sectionId: string) => void;
     readOnly: boolean;
+    activeSections: string[];
+    setActiveSections: (sections: string[]) => void;
+    role: string;
+    verificationData: any;
+    changedData: any;
+    setChangedData: (data: any) => void;
+    setLocalEditLogsUpdated: (fn: (prev: number) => number) => void;
   }) => {
-    const [activeSections, setActiveSections] = useState<string[]>([]);
+    // Section-level uncommitted changes state
+    const [sectionUncommittedChanges, setSectionUncommittedChanges] =
+      useState<any>({});
 
     const toggleSection = (sectionId: string) => {
-      setActiveSections((prev) =>
-        prev.includes(sectionId)
-          ? prev.filter((id) => id !== sectionId)
-          : [...prev, sectionId]
-      );
+      // Check if there are uncommitted changes before closing
+      if (
+        activeSections.includes(sectionId) &&
+        sectionUncommittedChanges[sectionId]
+      ) {
+        Modal.confirm({
+          title: "Unsaved Changes",
+          content:
+            "You have unsaved changes in this section. Do you want to save them before closing?",
+          okText: "Save & Close",
+          cancelText: "Discard",
+          onOk: () => {
+            handleSectionSave(sectionId);
+            setActiveSections(activeSections.filter((id) => id !== sectionId));
+          },
+          onCancel: () => {
+            // Discard changes
+            setSectionUncommittedChanges((prev: any) => {
+              const newChanges = { ...prev };
+              delete newChanges[sectionId];
+              return newChanges;
+            });
+            setActiveSections(activeSections.filter((id) => id !== sectionId));
+          },
+        });
+      } else {
+        setActiveSections(
+          activeSections.includes(sectionId)
+            ? activeSections.filter((id) => id !== sectionId)
+            : [...activeSections, sectionId]
+        );
+      }
     };
+
+    // Check if there are uncommitted changes in a section
+    const hasUncommittedChanges = (sectionId: string) => {
+      const sectionChanges = sectionUncommittedChanges[sectionId];
+      if (!sectionChanges) return false;
+
+      // Check if there are any non-empty values in the section changes
+      return Object.keys(sectionChanges).some((key) => {
+        const value = sectionChanges[key];
+        if (Array.isArray(value)) {
+          return value.length > 0;
+        }
+        return value !== undefined && value !== null && value !== "";
+      });
+    };
+
+    // Handle save for a specific section
+    const handleSectionSave = async (sectionId: string) => {
+      try {
+        const sectionData = sectionUncommittedChanges[sectionId];
+
+        if (!sectionData) {
+          message.warning("No changes to save");
+          return;
+        }
+
+        // Save to IndexedDB
+        const request = indexedDB.open("editLogs", 1);
+
+        request.onerror = (event: any) => {
+          console.error("Database error:", request.error);
+        };
+
+        request.onsuccess = (event: any) => {
+          const db = event.target.result;
+
+          try {
+            const transaction = db.transaction("logs", "readwrite");
+            const store = transaction.objectStore("logs");
+
+            const getRequest = store.get(`${id}_${activeTab}`);
+
+            getRequest.onsuccess = () => {
+              const existingData = getRequest.result || {};
+
+              const logEntry = {
+                id: `${id}_${activeTab}`,
+                ...existingData,
+                [sectionId]: sectionData,
+                timestamp: new Date().toISOString(),
+              };
+
+              const putRequest = store.put(logEntry);
+
+              putRequest.onsuccess = () => {
+                console.log(`Section ${sectionId} saved successfully`);
+                message.success(
+                  `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
+                );
+
+                // Move uncommitted changes to committed changes
+                setChangedData((prev: any) => ({
+                  ...prev,
+                  [sectionId]: sectionData,
+                }));
+
+                // Clear section uncommitted changes
+                setSectionUncommittedChanges((prev: any) => {
+                  const newChanges = { ...prev };
+                  delete newChanges[sectionId];
+                  return newChanges;
+                });
+
+                setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+              };
+
+              putRequest.onerror = () => {
+                console.error("Error saving section:", putRequest.error);
+                message.error("Failed to save section");
+              };
+            };
+
+            getRequest.onerror = () => {
+              console.error("Error fetching existing log:", getRequest.error);
+            };
+
+            transaction.oncomplete = () => {
+              db.close();
+            };
+
+            transaction.onerror = () => {
+              console.error("Transaction error:", transaction.error);
+              db.close();
+            };
+          } catch (error) {
+            console.error("Error in transaction:", error);
+            db.close();
+          }
+        };
+      } catch (error) {
+        console.error("Error saving section:", error);
+        message.error("Failed to save section");
+      }
+    };
+
     return (
       <div>
         {schema?.sections?.map((section: any) => (
@@ -867,13 +1019,62 @@ export const BusinessVerificationDetails: React.FC<
             onChange={(keys) => setActiveSections(keys as string[])}
             accordion
           >
-            <Collapse.Panel key={section.id} header={section.label}>
+            <Collapse.Panel
+              key={section.id}
+              header={
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{section.label}</span>
+                  {role === "Verifier" &&
+                    activeSections.includes(section.id) &&
+                    hasUncommittedChanges(section.id) && (
+                      <Button
+                        type="primary"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent collapse toggle
+                          handleSectionSave(section.id);
+                        }}
+                        style={{
+                          marginLeft: "8px",
+                          fontSize: "12px",
+                          height: "24px",
+                          padding: "0 8px",
+                        }}
+                      >
+                        Save
+                      </Button>
+                    )}
+                </div>
+              }
+            >
               {/* <Form layout="vertical"> */}
               {/* Render form fields based on section schema */}
               <FormSectionRenderer
                 section={section}
-                data={formData[section.id] || {}}
+                data={useMemo(
+                  () => ({
+                    ...(dynamicFormData[section.id] ||
+                      formData[section.id] ||
+                      {}),
+                    ...(changedData[section.id] || {}), // Include committed changes
+                    ...(sectionUncommittedChanges[section.id] || {}),
+                  }),
+                  [
+                    dynamicFormData[section.id],
+                    formData[section.id],
+                    changedData[section.id], // Add changedData to dependencies
+                    sectionUncommittedChanges[section.id],
+                  ]
+                )}
                 readOnly={readOnly}
+                setSectionUncommittedChanges={setSectionUncommittedChanges}
+                changedData={changedData}
               />
               {/* </Form> */}
             </Collapse.Panel>
@@ -889,23 +1090,34 @@ export const BusinessVerificationDetails: React.FC<
     section,
     data,
     readOnly,
+    setSectionUncommittedChanges,
+    changedData,
   }: {
     section: any;
     data: any;
     readOnly: boolean;
+    setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
+    changedData: any;
   }) => {
     const [form] = Form.useForm();
+    const initialValuesSet = React.useRef(false);
 
     // Set initial form values
     React.useEffect(() => {
-      console.log(
-        "Setting form values for section:",
-        section.label,
-        "data:",
-        data
-      );
       form.setFieldsValue(data);
-    }, [data, form, section.label]);
+    }, [data, form]);
+
+    // Form change handler - update section-level uncommitted changes
+    const handleFormChange = useCallback(
+      (changedValues: any, allValues: any) => {
+        // Update section-level uncommitted changes
+        setSectionUncommittedChanges((prev: any) => ({
+          ...prev,
+          [section.id]: allValues,
+        }));
+      },
+      [section.id, setSectionUncommittedChanges]
+    );
 
     const renderField = (fieldId: string, field: any) => {
       // Check conditional visibility
@@ -934,8 +1146,18 @@ export const BusinessVerificationDetails: React.FC<
             </div>
             <ArrayFieldRenderer
               field={field}
-              data={data[fieldId] || []}
+              data={useMemo(() => {
+                const baseData = data[fieldId] || [];
+                const committedChanges =
+                  changedData[section.id]?.[fieldId] || [];
+                // Note: uncommitted changes for arrays are handled differently
+                return committedChanges.length > 0
+                  ? committedChanges
+                  : baseData;
+              }, [data[fieldId], changedData[section.id]])}
               readOnly={readOnly}
+              setSectionUncommittedChanges={setSectionUncommittedChanges}
+              sectionId={section.id}
             />
           </div>
         );
@@ -1054,7 +1276,7 @@ export const BusinessVerificationDetails: React.FC<
     }
 
     return (
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
         {section.fields.map((field: any) => renderField(field.id, field))}
       </Form>
     );
@@ -1065,10 +1287,14 @@ export const BusinessVerificationDetails: React.FC<
     field,
     data,
     readOnly,
+    setSectionUncommittedChanges,
+    sectionId,
   }: {
     field: any;
     data: any;
     readOnly: boolean;
+    setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
+    sectionId: string;
   }) => {
     // Ensure data is an array and add unique IDs if missing
     const ensureArrayWithIds = (arrayData: any[]) => {
@@ -1081,13 +1307,14 @@ export const BusinessVerificationDetails: React.FC<
 
     const [items, setItems] = useState(() => ensureArrayWithIds(data));
     const [form] = Form.useForm();
+    const initialValuesSet = React.useRef(false);
 
     // Update items when data changes
     React.useEffect(() => {
       const newItems = ensureArrayWithIds(data);
       setItems(newItems);
 
-      // Set form values for all items
+      // Set form values
       const formValues: any = {};
       newItems.forEach((item: any, index: number) => {
         Object.keys(item).forEach((key) => {
@@ -1098,6 +1325,40 @@ export const BusinessVerificationDetails: React.FC<
       });
       form.setFieldsValue(formValues);
     }, [data, field.id, form]);
+
+    // Array form change handler - update section-level uncommitted changes
+    const handleArrayFormChange = useCallback(
+      (changedValues: any, allValues: any) => {
+        // Convert form values back to array format
+        const arrayData: any[] = [];
+        Object.keys(allValues).forEach((key) => {
+          if (key.startsWith(`${field.id}[`)) {
+            const match = key.match(
+              new RegExp(`${field.id}\\[(\\d+)\\]\\.(.+)`)
+            );
+            if (match) {
+              const index = parseInt(match[1]);
+              const fieldKey = match[2];
+
+              if (!arrayData[index]) {
+                arrayData[index] = {};
+              }
+              arrayData[index][fieldKey] = allValues[key];
+            }
+          }
+        });
+
+        // Update section-level uncommitted changes
+        setSectionUncommittedChanges((prev: any) => ({
+          ...prev,
+          [sectionId]: {
+            ...prev[sectionId],
+            [field.id]: arrayData,
+          },
+        }));
+      },
+      [field.id, sectionId, setSectionUncommittedChanges]
+    );
 
     const addItem = () => {
       const newItem: any = {
@@ -1221,7 +1482,11 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     return (
-      <Form form={form} layout="vertical">
+      <Form
+        form={form}
+        layout="vertical"
+        onValuesChange={handleArrayFormChange}
+      >
         {items.map((item: any, index: number) => (
           <Card
             key={item._id || index}
@@ -1319,6 +1584,13 @@ export const BusinessVerificationDetails: React.FC<
               formData={dynamicFormData}
               onEdit={handleDynamicSectionEdit}
               readOnly={!!verificationData?.approvedStatus || hasEditRequest}
+              activeSections={activeSections}
+              setActiveSections={setActiveSections}
+              role={role}
+              verificationData={verificationData}
+              changedData={changedData}
+              setChangedData={setChangedData}
+              setLocalEditLogsUpdated={setLocalEditLogsUpdated}
             />
 
             {/* Photo Capture Section - Grouped by Document Type */}
@@ -1461,20 +1733,58 @@ export const BusinessVerificationDetails: React.FC<
         ) : null}
       </div>
 
-      {/* Edit Request Logs */}
+      {/* Edit Request Logs - Conditional rendering based on department */}
       {role !== "VerificationExecutive" && (
         <section style={{ marginBottom: 24 }}>
-          <EditRequestLogs
-            currentData={data}
-            changedData={changedData}
-            verificationId={verificationId}
-            fetchEditRequests={fetchEditRequests}
-            disabled={hasEditRequest}
-            admin={false}
-            verificationType={activeTab}
-            currentDepartment={currentDepartment}
-            dynamicSchema={schemaForm}
-          />
+          {currentDepartment === "PD"
+            ? useMemo(
+                () => (
+                  <PDRequestLogs
+                    currentData={data}
+                    changedData={changedData}
+                    verificationId={verificationId}
+                    fetchEditRequests={fetchEditRequests}
+                    disabled={hasEditRequest}
+                    admin={false}
+                    verificationType={activeTab}
+                    currentDepartment={currentDepartment}
+                    dynamicSchema={schemaForm}
+                  />
+                ),
+                [
+                  data,
+                  changedData,
+                  verificationId,
+                  hasEditRequest,
+                  activeTab,
+                  currentDepartment,
+                  schemaForm,
+                ]
+              )
+            : useMemo(
+                () => (
+                  <EditRequestLogs
+                    currentData={data}
+                    changedData={changedData}
+                    verificationId={verificationId}
+                    fetchEditRequests={fetchEditRequests}
+                    disabled={hasEditRequest}
+                    admin={false}
+                    verificationType={activeTab}
+                    currentDepartment={currentDepartment}
+                    dynamicSchema={schemaForm}
+                  />
+                ),
+                [
+                  data,
+                  changedData,
+                  verificationId,
+                  hasEditRequest,
+                  activeTab,
+                  currentDepartment,
+                  schemaForm,
+                ]
+              )}
         </section>
       )}
 
