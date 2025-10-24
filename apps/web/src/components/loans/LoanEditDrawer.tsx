@@ -408,6 +408,11 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   <Descriptions.Item label="Applicant Type">
                     {loanDetails?.applicantType}
                   </Descriptions.Item>
+                  {currentDepartment === "PD" && (
+                    <Descriptions.Item label="Template Name">
+                      {loanDetails?.templateName}
+                    </Descriptions.Item>
+                  )}
                 </Descriptions>
               )}
             </div>

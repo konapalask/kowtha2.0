@@ -24,6 +24,7 @@ export interface Loan {
   loanType: string;
   bankName: string;
   applicantType: string;
+  templateName?: string;
   status: string;
   verifierId?: string;
   verifications?: any[];
