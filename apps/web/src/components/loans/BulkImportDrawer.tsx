@@ -15,7 +15,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
-import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions, templateNameOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
 import { getUserDetails, getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
@@ -193,6 +193,29 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                           />
                         </Form.Item>
                       </Col>
+                      {currentDepartment === "PD" && (
+                        <Col xs={24} md={4} lg={3} xl={3} style={{ padding: 4 }}>
+                          <Form.Item
+                            {...restField}
+                            labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                            name={[name, "templateName"]}
+                            label="Template Name"
+                            rules={[{ required: true, message: "Required" }]}
+                          >
+                            <Select
+                              showSearch
+                              placeholder="Select Template Name"
+                              options={templateNameOptions}
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              style={{ height: "32px" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      )}
                       <Col xs={24} md={4} lg={4} xl={3} style={{ padding: 4 }}>
                         <Form.Item
                           {...restField}

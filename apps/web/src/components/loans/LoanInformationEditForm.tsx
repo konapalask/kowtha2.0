@@ -15,6 +15,7 @@ import {
   applicantTypeOptions,
   bankOptions,
   loanTypeOptions,
+  templateNameOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
 import { isMobileVerificationCompleted } from "@/utils/loanCompletionChecker";
@@ -75,6 +76,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 specifyLoanType: selectedLoan?.loanType,
                 bankName: selectedLoan?.bankName,
                 applicantType: selectedLoan?.applicantType,
+                ...(currentDepartment === "PD" && { templateName: selectedLoan?.templateName }),
               }
         }
         onFinish={async (values) => {
@@ -94,6 +96,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               applicantAddress: values.applicantAddress?.trim(),
               loanType: loanTypeFinal,
               bankName: values.bankName,
+              ...(currentDepartment === "PD" && { templateName: values.templateName }),
               loanAmount: Number(values.loanAmount),
             };
 
@@ -332,6 +335,28 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               />
             </Form.Item>
           </Col>
+          {currentDepartment === "PD" && (
+            <Col xs={24} sm={6} style={{ padding: 4 }}>
+              <Form.Item
+                labelCol={{ span: 24, style: { marginBottom: 0 } }}
+                label="Template Name"
+                name="templateName"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Select Template Name"
+                  options={templateNameOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toString()
+                      .toLowerCase()
+                      .includes(input.toString().toLowerCase())
+                  }
+                />
+              </Form.Item>
+            </Col>
+          )}
         </Row>
         <Form.Item>
           <Space>

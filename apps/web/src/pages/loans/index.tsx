@@ -324,6 +324,12 @@ export default function Loans() {
         key: "bankName",
         width: 120,
       });
+      baseColumns.push({
+        title: "Template Name",
+        dataIndex: "templateName",
+        key: "templateName",
+        width: 150,
+      });
     }
 
     // If current department is 'PD', only show Business column
