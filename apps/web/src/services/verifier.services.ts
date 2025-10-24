@@ -123,3 +123,16 @@ export const asstVerifierSubmitApi = async (id: string, payload: any) => {
     payload
   );
 };
+
+export const exportFinancialAnalysis = async (id: string) => {
+  const response = await getWithDepartment(
+    `/loans/${id}/export-financial-analysis`,
+    {
+      responseType: "blob",
+      headers: {
+        Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    }
+  );
+  return response.data;
+};

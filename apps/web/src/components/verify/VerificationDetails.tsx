@@ -510,6 +510,7 @@ export const VerificationDetails: React.FC<VerificationDetailsProps> = ({
         open={open}
         setOpen={setOpen}
         verificationType={verificationType}
+        currentDepartment={undefined}
       />
 
       {/* <Modal
