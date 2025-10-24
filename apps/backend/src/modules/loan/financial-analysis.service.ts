@@ -19,10 +19,7 @@ export class FinancialAnalysisTemplatesService {
   /**
    * Main export function that routes to the appropriate template based on bank
    */
-  async exportFinancialAnalysisToExcel(
-    loanId: number,
-    bankName: string
-  ): Promise<Buffer> {
+  async exportFinancialAnalysisToExcel( loanId: number, bankName: string ): Promise<Buffer> {
     const ExcelJS = await import('exceljs');
 
     try {
@@ -84,7 +81,6 @@ export class FinancialAnalysisTemplatesService {
           loan
         );
       } else {
-        // Default to standard format
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,

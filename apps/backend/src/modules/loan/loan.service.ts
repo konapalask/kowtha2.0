@@ -58,9 +58,8 @@ export class LoanService {
   // Lazy loading to avoid circular dependencies
   private async getFinancialAnalysisTemplatesService() {
     if (!this.financialAnalysisTemplatesService) {
-      const { FinancialAnalysisTemplatesService } = await import(
-        './financial-analysis.service'
-      );
+      const { FinancialAnalysisTemplatesService } = await import('./financial-analysis.service');
+
       this.financialAnalysisTemplatesService = new FinancialAnalysisTemplatesService(
         this.prisma,
         this.loggingService
@@ -2910,10 +2909,7 @@ export class LoanService {
     }
   }
 
-  async exportFinancialAnalysisToExcel(
-    loanId: number,
-    bankName?: string
-  ): Promise<Buffer> {
+  async exportFinancialAnalysisToExcel( loanId: number, bankName?: string ): Promise<Buffer> {
     try {
       // If no bankName provided, fetch it from the loan
       if (!bankName) {
@@ -2929,10 +2925,7 @@ export class LoanService {
 
       // Delegate to the financial analysis templates service
       const templatesService = await this.getFinancialAnalysisTemplatesService();
-      return await templatesService.exportFinancialAnalysisToExcel(
-        loanId,
-        bankName
-      );
+      return await templatesService.exportFinancialAnalysisToExcel( loanId, bankName );
     } catch (error) {
       await this.loggingService.error(
         'Failed to export financial analysis to Excel',
