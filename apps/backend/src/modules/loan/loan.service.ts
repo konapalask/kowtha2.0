@@ -97,7 +97,7 @@ export class LoanService {
     });
 
     // Wait a bit more to ensure content is fully loaded
-    await page.waitForTimeout(1000);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Generate current IST date
     const istDate = new Date().toLocaleString("en-IN", {
