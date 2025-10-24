@@ -398,7 +398,10 @@ export default function Loans() {
           width: 120,
           align: "center",
         },
-        ...(!(getCurrentDepartmentRole() === "Verifier")
+        ...(!(
+          getCurrentDepartmentRole() === "Verifier" ||
+          getCurrentDepartmentRole() === "VerificationExecutive"
+        )
           ? [
               {
                 title: "Actions",
@@ -778,7 +781,10 @@ export default function Loans() {
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
           />
-          {!(getCurrentDepartmentRole() === "Verifier") && (
+          {!(
+            getCurrentDepartmentRole() === "Verifier" ||
+            getCurrentDepartmentRole() === "VerificationExecutive"
+          ) && (
             <Button
               type="primary"
               icon={<PlusOutlined style={{ fontSize: 16 }} />}

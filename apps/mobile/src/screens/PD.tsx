@@ -40,6 +40,8 @@ const populateInitialDataFromSchema = (
     applicantName:
       userData?.loan?.applicantName || userData?.applicantName || '',
     businessName: userData?.businessName || userData?.loan?.businessName || '',
+    applicantMobile:
+      userData?.loan?.applicantMobile || userData?.contactNumber || '',
     phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
     applicationNumber:
       userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
