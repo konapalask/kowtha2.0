@@ -31,6 +31,8 @@ import { indiaShelterSenpTemplate } from "./templates/PD/html/india-shelter-senp
 import { axisAgriTemplate } from "./templates/PD/html/axis-agri.template";
 import { smfgSmeTemplate } from "./templates/PD/html/smfg-sme.template";
 import { adityaBirlaTemplate } from "./templates/PD/html/aditya-birla.template";
+import { niwasSenpTemplate } from "./templates/PD/html/niwas-senp.template";
+import { niwasSalariedTemplate } from "./templates/PD/html/niwas-salaried.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
 import {
   validateVerificationData,
@@ -158,9 +160,7 @@ export class PDTemplateService {
 
         try {
           const presignedUrl =
-            await this.s3Service.generatePresignedDownloadUrl(
-              possibleS3Key
-            );
+            await this.s3Service.generatePresignedDownloadUrl(possibleS3Key);
           if (!presignedUrl) {
             continue;
           }
@@ -399,8 +399,8 @@ export class PDTemplateService {
       bankName === "Axis Finance UBL Above 10L" ||
       bankName === "Axis Finance UBL Below 10L"
     ) {
-      const verificationData =
-        (verification?.verificationData || verification) as AxisFinanceUBLInterface;
+      const verificationData = (verification?.verificationData ||
+        verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
         verificationData,
         bankName,
@@ -542,6 +542,30 @@ export class PDTemplateService {
         financialAnalysis
       );
       return smfgSmeTemplate(verification, html_data);
+    }
+
+    if (bankName == "Niwas Salaried") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return niwasSalariedTemplate(verification, html_data);
+    }
+
+    if (bankName == "Niwas Senp") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis,
+        loan
+      );
+      return niwasSenpTemplate(verification, html_data);
     }
 
     if (bankName == "Arka Fincap") {
@@ -745,8 +769,10 @@ export class PDTemplateService {
         schema
       );
 
-      const pdfBuffer =
-        await this.loanService.PDFBufferGeneration(htmlTemplate);
+      const pdfBuffer = await this.loanService.PDFBufferGeneration(
+        htmlTemplate,
+        bankName
+      );
 
       await this.loggingService.info(
         "Verification PDF generated successfully",

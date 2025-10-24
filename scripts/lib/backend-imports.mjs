@@ -291,6 +291,30 @@ export async function getAdityaBirlaTemplate() {
   }
 }
 
+export async function getNiwasSalariedTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/niwas-salaried.template"
+    );
+    return module.niwasSalariedTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load Niwas Salaried template:", error);
+    throw error;
+  }
+}
+
+export async function getNiwasSenpTemplate() {
+  try {
+    const module = await importCompiledModule(
+      "modules/loan/templates/PD/html/niwas-senp.template"
+    );
+    return module.niwasSenpTemplate || module.default;
+  } catch (error) {
+    console.error("Failed to load Niwas SENP template:", error);
+    throw error;
+  }
+}
+
 export async function getArkaFincapTemplate() {
   try {
     const module = await importCompiledModule(
@@ -384,6 +408,8 @@ export async function loadBackendModules() {
       indiaShelterSenpTemplate,
       smfgSmeTemplate,
       adityaBirlaTemplate,
+      niwasSalariedTemplate,
+      niwasSenpTemplate,
       pdBaseTemplate,
     ] = await Promise.all([
       getFormSchemas(),
@@ -408,6 +434,8 @@ export async function loadBackendModules() {
       getIndiaShelterSenpTemplate(),
       getSmfgSmeTemplate(),
       getAdityaBirlaTemplate(),
+      getNiwasSalariedTemplate(),
+      getNiwasSenpTemplate(),
       getPDBaseTemplate(),
     ]);
 
@@ -434,6 +462,8 @@ export async function loadBackendModules() {
       indiaShelterSenpTemplate,
       smfgSmeTemplate,
       adityaBirlaTemplate,
+      niwasSalariedTemplate,
+      niwasSenpTemplate,
       pdBaseTemplate,
     };
   } catch (error) {

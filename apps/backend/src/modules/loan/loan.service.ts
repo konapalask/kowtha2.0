@@ -1,9 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as XLSX from "xlsx";
+import pLimit from "p-limit";
 import { Buffer } from "buffer"; // Import the Buffer type
 import * as puppeteer from "puppeteer";
 import { Logger } from "@nestjs/common";
+import { Worker } from "worker_threads";
 import { format, toZonedTime } from "date-fns-tz";
 import { GetLoansDto } from "./dto/get-loans.dto";
 import { EditLoanDto } from "./dto/edit-loan.dto";
@@ -22,7 +23,6 @@ import { businessTemplate } from "./templates/FI/business.template";
 import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
-import { PDBusinessVerificationData } from "./templates/PD/interface/pd-business.interface";
 import {
   Prisma,
   LoanStatus,
@@ -41,20 +41,32 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { baseTemplate } from "./templates/FI/base.template";
-import { Worker } from "worker_threads";
-import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
-import pLimit from "p-limit";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
 export class LoanService {
+  private financialAnalysisTemplatesService: any;
+
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService,
     private logger: Logger,
     private s3Service: S3Service
   ) {}
+
+  // Lazy loading to avoid circular dependencies
+  private async getFinancialAnalysisTemplatesService() {
+    if (!this.financialAnalysisTemplatesService) {
+      const { FinancialAnalysisTemplatesService } = await import('./financial-analysis.service');
+
+      this.financialAnalysisTemplatesService = new FinancialAnalysisTemplatesService(
+        this.prisma,
+        this.loggingService
+      );
+    }
+    return this.financialAnalysisTemplatesService;
+  }
 
   async runWorker(data: any) {
     return new Promise((resolve, reject) => {
@@ -72,7 +84,10 @@ export class LoanService {
     });
   }
 
-  async PDFBufferGeneration(htmlTemplate: string): Promise<Buffer> {
+  async PDFBufferGeneration(
+    htmlTemplate: string,
+    bankName?: string
+  ): Promise<Buffer> {
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -80,29 +95,93 @@ export class LoanService {
         "--disable-setuid-sandbox",
         "--lang=en-IN",
         "--intl.accept_languages=en-IN",
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor",
       ],
     });
 
     // Create a new page
     const page = await browser.newPage();
 
-    // Set content to the HTML template
+    // ßSet content to the HTML template
     await page.setContent(htmlTemplate, {
       waitUntil: "networkidle0",
     });
 
+    // Wait a bit more to ensure content is fully loaded
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Generate current IST date
+    const istDate = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Debug logging
+    console.log("Footer template variables:", {
+      bankName: bankName || "Kowtha",
+      istDate: istDate,
+    });
+
+    // Create footer template with proper string interpolation
+    const footerTemplate = `
+      <div style="
+          font-size: 10px;
+          width: 100%;
+          padding: 6px 16px;
+          color: #7f8c8d;
+          border-top: 1px solid #eee;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          line-height: 1.4;
+          height: 50px;
+          box-sizing: border-box;
+        ">
+        <div style="color: rgb(8, 136, 36); font-weight: 600;">${bankName || "Kowtha"}</div>
+        <div>
+          Generated on ${istDate} —
+          Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+        </div>
+      </div>
+    `;
+
+    console.log("Footer template HTML:", footerTemplate);
+
     // Generate PDF
+    console.log("Starting PDF generation with header/footer...");
     const pdfArray = await page.pdf({
       format: "a4",
       margin: {
-        top: "20px",
+        top: "60px", // Increased to accommodate header
         right: "20px",
-        bottom: "20px",
+        bottom: "80px", // Increased further to prevent content overlap
         left: "20px",
       },
       printBackground: true,
-      preferCSSPageSize: true,
+      preferCSSPageSize: false, // Changed to false to ensure consistent page sizing
+      displayHeaderFooter: true,
+      headerTemplate: `
+        <div style="
+            font-size: 8px;
+            width: 100%;
+            padding: 4px 16px;
+            color: #999;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+          ">
+          ${bankName || "Kowtha"} - Verification Report
+        </div>
+      `,
+      footerTemplate: footerTemplate,
     });
+
+    console.log("PDF generation completed. Buffer size:", pdfArray.length);
     const pdfBuffer: Buffer = Buffer.from(pdfArray);
 
     // Close the browser
@@ -743,7 +822,6 @@ export class LoanService {
         }
         where.initialSubmitted = false;
       } else {
-        
       }
 
       const verifications = await this.prisma.verification.findMany({
@@ -1577,8 +1655,8 @@ export class LoanService {
       const verificationData = await Promise.all(
         loan.verifications.map(async (verification) => {
           // For PD forms, handle both old hardcoded format and new schema format
-          const rawVerificationData = verification
-            .verificationData as Prisma.JsonValue;
+          const rawVerificationData =
+            verification.verificationData as Prisma.JsonValue;
           const parsedVerificationData =
             typeof rawVerificationData === "string"
               ? this.safeParseJson(rawVerificationData)
@@ -1593,12 +1671,16 @@ export class LoanService {
             department === "PD" &&
             this.isJsonObject(parsedVerificationData)
           ) {
-            const verificationDataObject =
-              parsedVerificationData as Record<string, any>;
+            const verificationDataObject = parsedVerificationData as Record<
+              string,
+              any
+            >;
 
-            const hasLegacyShape = ["basicDetails", "businessDetails", "applicantDetails"].some(
-              (key) => verificationDataObject[key]
-            );
+            const hasLegacyShape = [
+              "basicDetails",
+              "businessDetails",
+              "applicantDetails",
+            ].some((key) => verificationDataObject[key]);
 
             await this.loggingService.info(
               `PD verification ${verification.id}: legacyShape = ${hasLegacyShape}`,
@@ -2652,8 +2734,11 @@ export class LoanService {
         },
       });
 
-      if (updatedVerification.initialSubmitted === false && updatedVerification.financialAnalysis !== null && updatedVerification.synopsis !== null) {
-
+      if (
+        updatedVerification.initialSubmitted === false &&
+        updatedVerification.financialAnalysis !== null &&
+        updatedVerification.synopsis !== null
+      ) {
         await this.prisma.verification.update({
           where: { id: verification.id },
           data: { initialSubmitted: true },
@@ -2824,231 +2909,288 @@ export class LoanService {
     }
   }
 
-  async exportFinancialAnalysisToExcel(loanId: number): Promise<Buffer> {
-    const ExcelJS = await import('exceljs');
-    
+  async exportFinancialAnalysisToExcel( loanId: number, bankName?: string ): Promise<Buffer> {
     try {
-      // Fetch verification with financial analysis
-      const verification = await this.prisma.verification.findFirst({
-        where: {
-          loanId,
-          department: Department.PD,
-          type: VerificationType.Business,
-        },
-        include: {
-          loan: true,
-        },
-      });
-
-      if (!verification) {
-        throw new NotFoundException("Verification not found");
-      }
-
-      const financialAnalysis = (verification.financialAnalysis as any) || {};
-
-      // Create workbook and worksheet
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Financial Analysis');
-
-      // Set column widths
-      worksheet.columns = [
-        { width: 25 }, // A - Left Particulars
-        { width: 15 }, // B - Left Actuals
-        { width: 15 }, // C - Left Estimations
-        { width: 25 }, // D - Right Particulars
-        { width: 15 }, // E - Right Actuals
-        { width: 15 }, // F - Right Estimations
-      ];
-
-      // Add title
-      const titleRow = worksheet.addRow(['Trading and Profit & Loss Account for the year ending 31.03.2026']);
-      worksheet.mergeCells('A1:F1');
-      titleRow.font = { bold: true, size: 14 };
-      titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
-      titleRow.height = 30;
-
-      // Add header row
-      const headerRow = worksheet.addRow([
-        'Particulars', 'Actuals', 'Estimations',
-        'Particulars', 'Actuals', 'Estimations'
-      ]);
-      headerRow.font = { bold: true };
-      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-      headerRow.eachCell((cell) => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFE0E0E0' }
-        };
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
-        };
-      });
-
-      // Define the rows structure based on the screenshot
-      const leftItems = [
-        { label: 'To Opening Stock', key: 'openingStock' },
-        { label: 'To Purchase', key: 'purchase' },
-        { label: 'To Cost of Services', key: 'costOfServices' },
-        { label: 'To Wages', key: 'wages' },
-        { label: 'To Hamali Charges', key: 'hamaliCharges' },
-        { label: 'To Manufacturing Expenses', key: 'manufacturingExpenses' },
-        { label: 'To Packing Charges', key: 'packingCharges' },
-        { label: '', key: '' }, // Empty row
-        { label: 'To Gross Profit', key: 'grossProfit', isBold: true },
-        { label: '', key: '' }, // Empty row
-        { label: 'To Salaries', key: 'salaries' },
-        { label: 'To Rent', key: 'rent' },
-        { label: 'To Electricity Charges', key: 'electricityCharges' },
-        { label: 'To Printing & Stationery', key: 'printingStationery' },
-        { label: 'To Telephone Charges', key: 'telephoneCharges' },
-        { label: 'To Postage & Telegram', key: 'postageTelegram' },
-        { label: 'To Office Maintenance', key: 'officeMaintenance' },
-        { label: 'To Repairs & Maintenance', key: 'repairsMaintenance' },
-        { label: 'To Sadar Expenses', key: 'sadarExpenses' },
-        { label: 'To Audit Fee', key: 'auditFee' },
-        { label: 'To Advertisement', key: 'advertisement' },
-        { label: 'To Bank Charges', key: 'bankCharges' },
-        { label: 'To Insurance', key: 'insurance' },
-        { label: 'To Depreciation', key: 'depreciation' },
-        { label: 'To Interest on Loan', key: 'interestOnLoan' },
-        { label: '', key: '' }, // Empty row
-        { label: 'To Net Profit', key: 'netProfit', isBold: true },
-        { label: '', key: '' }, // Empty row
-      ];
-
-      const rightItems = [
-        { label: 'By Sales', key: 'sales' },
-        { label: 'By Services', key: 'services' },
-        { label: 'By Closing Stock', key: 'closingStock' },
-        { label: '', key: '' }, // Empty row
-        { label: '', key: '' }, // Empty row
-        { label: '', key: '' }, // Empty row
-        { label: '', key: '' }, // Empty row
-        { label: '', key: '' }, // Empty row
-        { label: 'By Gross Profit', key: 'grossProfit', isBold: true },
-        { label: 'By Rent Received', key: 'rentReceived' },
-        { label: 'By Commission Received', key: 'commissionReceived' },
-        // Fill rest with empty rows to match left side
-        ...Array(17).fill({ label: '', key: '' }),
-      ];
-
-      // Add data rows
-      let lastRowNumber = 2; // Start after header
-      for (let i = 0; i < Math.max(leftItems.length, rightItems.length); i++) {
-        const leftItem = leftItems[i] || { label: '', key: '' };
-        const rightItem = rightItems[i] || { label: '', key: '' };
-
-        const row = worksheet.addRow([
-          leftItem.label,
-          leftItem.key ? (financialAnalysis[leftItem.key] || '') : '',
-          '', // Estimations column - left empty for now
-          rightItem.label,
-          rightItem.key ? (financialAnalysis[rightItem.key] || '') : '',
-          '', // Estimations column - left empty for now
-        ]);
-
-        // Apply bold formatting to gross profit and net profit rows
-        if (leftItem.isBold || rightItem.isBold) {
-          row.font = { bold: true };
-        }
-
-        // Apply borders
-        row.eachCell((cell) => {
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.alignment = { vertical: 'middle' };
+      // If no bankName provided, fetch it from the loan
+      if (!bankName) {
+        const loan = await this.prisma.loan.findUnique({
+          where: { id: loanId },
+          select: { bankName: true },
         });
-
-        // Align numbers to the right
-        if (row.getCell(2).value) {
-          row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
+        if (!loan) {
+          throw new NotFoundException('Loan not found');
         }
-        if (row.getCell(3).value) {
-          row.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
-        }
-        if (row.getCell(5).value) {
-          row.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
-        }
-        if (row.getCell(6).value) {
-          row.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
-        }
-        
-        lastRowNumber++;
+        bankName = loan.bankName;
       }
 
-      // Add signature at the end
-      try {
-        const signaturePath = path.resolve(process.cwd(), process.env.SIGNATURE_PATH || '');
-        if (fs.existsSync(signaturePath)) {
-          // Add some spacing
-          worksheet.addRow([]);
-          worksheet.addRow([]);
-          lastRowNumber += 3;
-
-          // Add signature label
-          const signatureRow = worksheet.addRow([]);
-          signatureRow.getCell(1).font = { bold: true };
-          signatureRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
-          lastRowNumber++;
-
-          // Read signature image
-          const imageBuffer = fs.readFileSync(signaturePath);
-          
-          // Add image to workbook
-          const imageId = workbook.addImage({
-            buffer: imageBuffer as any,
-            extension: 'jpeg',
-          });
-
-          // Position the image (left-aligned, below the signature label)
-          worksheet.addImage(imageId, {
-            tl: { col: 0, row: lastRowNumber }, // top-left position (column A, left-aligned)
-            ext: { width: 350, height: 250 } // image dimensions
-          });
-
-          // Add extra rows to make space for the image
-          worksheet.addRow([]);
-          worksheet.addRow([]);
-          worksheet.addRow([]);
-          worksheet.addRow([]);
-        }
-      } catch (signatureError) {
-        // Log error but don't fail the export if signature is missing
-        await this.loggingService.warn(
-          "Failed to add signature to Excel export",
-          {
-            loanId,
-            error: signatureError.message,
-          }
-        );
-      }
-
-      // Generate buffer
-      const buffer = await workbook.xlsx.writeBuffer();
-      
-      await this.loggingService.info(
-        "Financial analysis exported to Excel successfully",
-        { loanId }
-      );
-
-      return Buffer.from(buffer);
+      // Delegate to the financial analysis templates service
+      const templatesService = await this.getFinancialAnalysisTemplatesService();
+      return await templatesService.exportFinancialAnalysisToExcel( loanId, bankName );
     } catch (error) {
-      await this.loggingService.error("Failed to export financial analysis to Excel", {
-        loanId,
-        error: error.message,
-        stack: error.stack,
-      });
+      await this.loggingService.error(
+        'Failed to export financial analysis to Excel',
+        {
+          loanId,
+          bankName,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
       throw error;
     }
   }
 
+  // DEPRECATED: Old implementation kept for reference
+  // async exportFinancialAnalysisToExcelOld(loanId: number): Promise<Buffer> {
+  //   const ExcelJS = await import("exceljs");
 
+  //   try {
+  //     // Fetch verification with financial analysis
+  //     const verification = await this.prisma.verification.findFirst({
+  //       where: {
+  //         loanId,
+  //         department: Department.PD,
+  //         type: VerificationType.Business,
+  //       },
+  //       include: {
+  //         loan: true,
+  //       },
+  //     });
+
+  //     if (!verification) {
+  //       throw new NotFoundException("Verification not found");
+  //     }
+
+  //     const financialAnalysis = (verification.financialAnalysis as any) || {};
+
+  //     // Create workbook and worksheet
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet("Financial Analysis");
+
+  //     // Set column widths
+  //     worksheet.columns = [
+  //       { width: 25 }, // A - Left Particulars
+  //       { width: 15 }, // B - Left Actuals
+  //       { width: 15 }, // C - Left Estimations
+  //       { width: 25 }, // D - Right Particulars
+  //       { width: 15 }, // E - Right Actuals
+  //       { width: 15 }, // F - Right Estimations
+  //     ];
+
+  //     // Add title
+  //     const titleRow = worksheet.addRow([
+  //       "Trading and Profit & Loss Account for the year ending 31.03.2026",
+  //     ]);
+  //     worksheet.mergeCells("A1:F1");
+  //     titleRow.font = { bold: true, size: 14 };
+  //     titleRow.alignment = { horizontal: "center", vertical: "middle" };
+  //     titleRow.height = 30;
+
+  //     // Add header row
+  //     const headerRow = worksheet.addRow([
+  //       "Particulars",
+  //       "Actuals",
+  //       "Estimations",
+  //       "Particulars",
+  //       "Actuals",
+  //       "Estimations",
+  //     ]);
+  //     headerRow.font = { bold: true };
+  //     headerRow.alignment = { horizontal: "center", vertical: "middle" };
+  //     headerRow.eachCell((cell) => {
+  //       cell.fill = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "FFE0E0E0" },
+  //       };
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //     });
+
+  //     // Define the rows structure based on the screenshot
+  //     const leftItems = [
+  //       { label: "To Opening Stock", key: "openingStock" },
+  //       { label: "To Purchase", key: "purchase" },
+  //       { label: "To Cost of Services", key: "costOfServices" },
+  //       { label: "To Wages", key: "wages" },
+  //       { label: "To Hamali Charges", key: "hamaliCharges" },
+  //       { label: "To Manufacturing Expenses", key: "manufacturingExpenses" },
+  //       { label: "To Packing Charges", key: "packingCharges" },
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "To Gross Profit", key: "grossProfit", isBold: true },
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "To Salaries", key: "salaries" },
+  //       { label: "To Rent", key: "rent" },
+  //       { label: "To Electricity Charges", key: "electricityCharges" },
+  //       { label: "To Printing & Stationery", key: "printingStationery" },
+  //       { label: "To Telephone Charges", key: "telephoneCharges" },
+  //       { label: "To Postage & Telegram", key: "postageTelegram" },
+  //       { label: "To Office Maintenance", key: "officeMaintenance" },
+  //       { label: "To Repairs & Maintenance", key: "repairsMaintenance" },
+  //       { label: "To Sadar Expenses", key: "sadarExpenses" },
+  //       { label: "To Audit Fee", key: "auditFee" },
+  //       { label: "To Advertisement", key: "advertisement" },
+  //       { label: "To Bank Charges", key: "bankCharges" },
+  //       { label: "To Insurance", key: "insurance" },
+  //       { label: "To Depreciation", key: "depreciation" },
+  //       { label: "To Interest on Loan", key: "interestOnLoan" },
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "To Net Profit", key: "netProfit", isBold: true },
+  //       { label: "", key: "" }, // Empty row
+  //     ];
+
+  //     const rightItems = [
+  //       { label: "By Sales", key: "sales" },
+  //       { label: "By Services", key: "services" },
+  //       { label: "By Closing Stock", key: "closingStock" },
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "", key: "" }, // Empty row
+  //       { label: "By Gross Profit", key: "grossProfit", isBold: true },
+  //       { label: "By Rent Received", key: "rentReceived" },
+  //       { label: "By Commission Received", key: "commissionReceived" },
+  //       // Fill rest with empty rows to match left side
+  //       ...Array(17).fill({ label: "", key: "" }),
+  //     ];
+
+  //     // Add data rows
+  //     let lastRowNumber = 2; // Start after header
+  //     for (let i = 0; i < Math.max(leftItems.length, rightItems.length); i++) {
+  //       const leftItem = leftItems[i] || { label: "", key: "" };
+  //       const rightItem = rightItems[i] || { label: "", key: "" };
+
+  //       const row = worksheet.addRow([
+  //         leftItem.label,
+  //         leftItem.key ? financialAnalysis[leftItem.key] || "" : "",
+  //         "", // Estimations column - left empty for now
+  //         rightItem.label,
+  //         rightItem.key ? financialAnalysis[rightItem.key] || "" : "",
+  //         "", // Estimations column - left empty for now
+  //       ]);
+
+  //       // Apply bold formatting to gross profit and net profit rows
+  //       if (leftItem.isBold || rightItem.isBold) {
+  //         row.font = { bold: true };
+  //       }
+
+  //       // Apply borders
+  //       row.eachCell((cell) => {
+  //         cell.border = {
+  //           top: { style: "thin" },
+  //           left: { style: "thin" },
+  //           bottom: { style: "thin" },
+  //           right: { style: "thin" },
+  //         };
+  //         cell.alignment = { vertical: "middle" };
+  //       });
+
+  //       // Align numbers to the right
+  //       if (row.getCell(2).value) {
+  //         row.getCell(2).alignment = {
+  //           horizontal: "right",
+  //           vertical: "middle",
+  //         };
+  //       }
+  //       if (row.getCell(3).value) {
+  //         row.getCell(3).alignment = {
+  //           horizontal: "right",
+  //           vertical: "middle",
+  //         };
+  //       }
+  //       if (row.getCell(5).value) {
+  //         row.getCell(5).alignment = {
+  //           horizontal: "right",
+  //           vertical: "middle",
+  //         };
+  //       }
+  //       if (row.getCell(6).value) {
+  //         row.getCell(6).alignment = {
+  //           horizontal: "right",
+  //           vertical: "middle",
+  //         };
+  //       }
+
+  //       lastRowNumber++;
+  //     }
+
+  //     // Add signature at the end
+  //     try {
+  //       const signaturePath = path.resolve(
+  //         process.cwd(),
+  //         process.env.SIGNATURE_PATH || ""
+  //       );
+  //       if (fs.existsSync(signaturePath)) {
+  //         // Add some spacing
+  //         worksheet.addRow([]);
+  //         worksheet.addRow([]);
+  //         lastRowNumber += 3;
+
+  //         // Add signature label
+  //         const signatureRow = worksheet.addRow([]);
+  //         signatureRow.getCell(1).font = { bold: true };
+  //         signatureRow.getCell(1).alignment = {
+  //           horizontal: "right",
+  //           vertical: "middle",
+  //         };
+  //         lastRowNumber++;
+
+  //         // Read signature image
+  //         const imageBuffer = fs.readFileSync(signaturePath);
+
+  //         // Add image to workbook
+  //         const imageId = workbook.addImage({
+  //           buffer: imageBuffer as any,
+  //           extension: "jpeg",
+  //         });
+
+  //         // Position the image (left-aligned, below the signature label)
+  //         worksheet.addImage(imageId, {
+  //           tl: { col: 0, row: lastRowNumber }, // top-left position (column A, left-aligned)
+  //           ext: { width: 350, height: 250 }, // image dimensions
+  //         });
+
+  //         // Add extra rows to make space for the image
+  //         worksheet.addRow([]);
+  //         worksheet.addRow([]);
+  //         worksheet.addRow([]);
+  //         worksheet.addRow([]);
+  //       }
+  //     } catch (signatureError) {
+  //       // Log error but don't fail the export if signature is missing
+  //       await this.loggingService.warn(
+  //         "Failed to add signature to Excel export",
+  //         {
+  //           loanId,
+  //           error: signatureError.message,
+  //         }
+  //       );
+  //     }
+
+  //     // Generate buffer
+  //     const buffer = await workbook.xlsx.writeBuffer();
+
+  //     await this.loggingService.info(
+  //       "Financial analysis exported to Excel successfully",
+  //       { loanId }
+  //     );
+
+  //     return Buffer.from(buffer);
+  //   } catch (error) {
+  //     await this.loggingService.error(
+  //       "Failed to export financial analysis to Excel",
+  //       {
+  //         loanId,
+  //         error: error.message,
+  //         stack: error.stack,
+  //       }
+  //     );
+  //     throw error;
+  //   }
+  // }
 }

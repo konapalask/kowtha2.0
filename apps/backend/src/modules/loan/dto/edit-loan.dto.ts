@@ -51,4 +51,9 @@ export class EditLoanDto {
   @IsNumber()
   @IsOptional()
   loanAmount?: number;
+
+  @ApiProperty({ description: 'Template name', required: false })
+  @IsString()
+  @IsOptional()
+  templateName?: string;
 } 

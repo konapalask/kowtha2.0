@@ -3,142 +3,127 @@ export const iiflSchema = {
   bankName: "IIFL",
   sections: [
     {
-      id: "prospectNo",
-      label: "Prospect No.",
+      id: "basicDetails",
+      label: "Basic Details",
       schema: {
         type: "object",
         properties: {
-          name: {
+          prospectNo: { type: "string", title: "Prospect No." },
+          nameOfApplicant: { type: "string", title: "Name of Applicant" },
+          maritalStatus: {
             type: "string",
-            title: "Name",
-            readOnly: true,
-          },
-          maritalStatusSingleMarriedDivorcedOthers: {
-            type: "string",
-            title: "Marital Status (Single / Married / Divorced / Others)",
+            title: "Marital Status",
             enum: ["Single", "Married", "Divorced", "Others"],
           },
-          educationalQualificationBelow10th10thPass12thPassDiplomaItiGraduatePgProfessionalCertification:
-            {
-              type: "string",
-              title:
-                "Educational Qualification (Below 10th / 10th Pass / 12th Pass / Diploma/ITI / Graduate / PG/Professional Certification)",
-            },
-        },
-        required: ["name"],
-      },
-      required: true,
-    },
-    {
-      id: "categoryGeneralScStObcOthers",
-      label: "Category (General / SC / ST / OBC / Others)",
-      schema: {
-        type: "object",
-        properties: {
-          numberOfDependents: {
-            type: "integer",
-            title: "Number of Dependents",
-          },
-          children: {
+          educationalQualification: {
             type: "string",
-            title: "Children",
-          },
-          adults: {
-            type: "string",
-            title: "Adults",
-          },
-          others: {
-            type: "string",
-            title: "Others",
-          },
-          numberOfYearsInCurrentResidence113355Years: {
-            type: "integer",
             title:
-              "Number of Years in Current Residence (<=1 / 1–3 / 3–5 / >5 Years)",
+              "Educational Qualification (Below 10th / 10th Pass / 12th Pass / Diploma / Graduate / PG / Professional Certification)",
           },
-          currentResidenceHouseSize1rk1bhk2bhk2bhk: {
+          category: {
             type: "string",
-            title: "Current Residence House Size (1RK / 1BHK / 2BHK / >2BHK)",
+            title: "Category",
+            enum: ["General", "SC", "ST", "OBC", "Others"],
           },
-          if1YearThenPreviousAddress: {
+          dependentsChildren: {
             type: "string",
-            title: "If <1 Year, then Previous Address",
+            title: "Number of Dependents - Children",
           },
-          numberOfYearsStayedAtThatAddress: {
-            type: "integer",
-            title: "Number of Years Stayed at that Address",
+          dependentsAdults: {
+            type: "string",
+            title: "Number of Dependents - Adults",
           },
-          numberOfYearsInCurrentCity3Years3Years: {
-            type: "integer",
-            title: "Number of Years in Current City (<=3 Years / >3 Years)",
+          dependentsOthers: {
+            type: "string",
+            title: "Number of Dependents - Others",
           },
-          if3YearsPreviousCity: {
-            type: "integer",
-            title: "If <=3 Years – Previous City",
+          yearsInCurrentResidence: {
+            type: "string",
+            title: "Years in Current Residence",
           },
-          numberOfYearsInThatCity: {
-            type: "integer",
-            title: "Number of Years in that City",
+          currentResidenceHouseSize: {
+            type: "string",
+            title: "Current Residence House Size",
+          },
+          previousAddress: {
+            type: "string",
+            title: "Previous Address (if < 1 year)",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          yearsStayedPreviousAddress: {
+            type: "string",
+            title: "Years Stayed at Previous Address",
+          },
+          yearsInCurrentCity: {
+            type: "string",
+            title: "Years in Current City",
+          },
+          previousCity: {
+            type: "string",
+            title: "Previous City (if ≤ 3 years)",
+          },
+          yearsInPreviousCity: {
+            type: "string",
+            title: "Years in Previous City",
           },
           reasonForChange: {
             type: "string",
             title: "Reason for Change",
+            ui: { widget: "textarea", rows: 2 },
           },
-          parentsStayingWithSelfSeparateExpired: {
+          parentsStayingWith: {
             type: "string",
             title: "Parents Staying With? (Self / Separate / Expired)",
           },
-          usageOfPropertyAfterPurchaseSelfOccupancyInvestmentRentingPurposeOthers:
-            {
-              type: "string",
-              title:
-                "Usage of Property after Purchase (Self-Occupancy / Investment / Renting Purpose / Others)",
-            },
-          briefCommentsObservationOfTheCase: {
+          propertyUsage: {
             type: "string",
-            title: "Brief Comments / Observation of the Case",
+            title:
+              "Property Usage after Purchase (Self-Occupancy / Investment / Renting / Others)",
+          },
+          comments: {
+            type: "string",
+            title: "Comments / Observations of the Case",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
-      required: true,
     },
     {
-      id: "dateOfCaseInitiated",
-      label: "Date of Case Initiated",
+      id: "caseDetails",
+      label: "Case Details",
       schema: {
         type: "object",
         properties: {
+          dateOfCaseInitiated: {
+            type: "string",
+            title: "Date of Case Initiated",
+          },
           dateOfAppointmentProvided: {
             type: "string",
             title: "Date of Appointment Provided",
-            format: "date",
           },
           initiatedAddress: {
             type: "string",
             title: "Initiated Address",
+            ui: { widget: "textarea", rows: 2 },
           },
           visitedAddress: {
             type: "string",
             title: "Visited Address",
+            ui: { widget: "textarea", rows: 2 },
           },
           residentialAddress: {
             type: "string",
             title: "Residential Address",
+            ui: { widget: "textarea", rows: 2 },
           },
           contactInformation: {
             type: "string",
             title: "Contact Information",
-            pattern: "^[0-9]{10}$",
           },
           loanAmountRequired: {
-            type: "number",
+            type: "string",
             title: "Loan Amount Required",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
           purposeOfLoan: {
             type: "string",
@@ -152,107 +137,69 @@ export const iiflSchema = {
             type: "string",
             title: "Security Offered",
           },
-          familyMembersApplicantSpouseChildrenParentsInLawsEtcDescriptive: {
+          familyMembersDescription: {
             type: "string",
-            title:
-              "Family Members (Applicant, Spouse, Children, Parents, In-laws, etc. — descriptive)",
+            title: "Family Members (Narrative)",
+            ui: { widget: "textarea", rows: 3 },
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
+          latitude: { type: "string", title: "Latitude" },
+          longitude: { type: "string", title: "Longitude" },
+          region: { type: "string", title: "Region" },
+          location: { type: "string", title: "Location" },
+          branch: { type: "string", title: "Branch" },
         },
       },
-      required: true,
     },
     {
       id: "familyDetails",
-      label: "Family Details (Structured)",
+      label: "Family Details",
       schema: {
         type: "object",
         properties: {
           familyMembers: {
             type: "array",
-            title: "Family Members",
             items: {
               type: "object",
               properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                relationship: {
-                  type: "string",
-                  title: "Relationship",
-                },
-                age: {
-                  type: "integer",
-                  title: "Age",
-                },
-                qualification: {
-                  type: "string",
-                  title: "Qualification",
-                },
-                occupation: {
-                  type: "string",
-                  title: "Occupation",
-                },
+                name: { type: "string", title: "Name" },
+                relationship: { type: "string", title: "Relationship" },
+                age: { type: "string", title: "Age" },
+                qualification: { type: "string", title: "Qualification" },
+                occupation: { type: "string", title: "Occupation" },
               },
             },
           },
         },
       },
-      required: true,
     },
     {
-      id: "applicantSProfile",
-      label: "Applicant’s Profile",
+      id: "applicantProfile",
+      label: "Applicant Profile",
       schema: {
         type: "object",
         properties: {
-          applicantSEducation: {
+          applicantEducation: {
             type: "string",
             title: "Applicant’s Education",
           },
-          nativePlace: {
+          nativePlace: { type: "string", title: "Native Place" },
+          businessName: { type: "string", title: "Business / Employer Name" },
+          businessType: {
             type: "string",
-            title: "Native Place",
-          },
-          businessName: {
-            type: "string",
-            title: "Business Name",
-          },
-          businessTypeProprietorshipEtc: {
-            type: "string",
-            title: "Business Type (Proprietorship, etc.)",
+            title: "Business Type / Constitution",
           },
           yearsOfExperience: {
-            type: "integer",
+            type: "string",
             title: "Years of Experience",
           },
-          machineryUsedEGSewingMachines: {
+          machineryUsed: {
             type: "string",
-            title: "Machinery Used (e.g., Sewing Machines)",
+            title: "Machinery / Equipment Used",
           },
-          natureOfBusinessServices: {
+          natureOfBusiness: {
             type: "string",
             title: "Nature of Business / Services",
+            ui: { widget: "textarea", rows: 3 },
           },
           dailyOutputRates: {
             type: "string",
@@ -262,94 +209,92 @@ export const iiflSchema = {
             type: "string",
             title: "Materials Purchased",
           },
-          noOfWorkersSalary: {
+          workersAndSalaries: {
             type: "string",
-            title: "No. of Workers & Salary",
+            title: "Number of Workers & Salaries",
           },
-          customers: {
+          customers: { type: "string", title: "Customers" },
+          businessPremises: {
             type: "string",
-            title: "Customers",
+            title: "Business Premises (Owned / Rented / Relative)",
           },
-          businessPremisesOwnedRentedRelativeS: {
-            type: "string",
-            title: "Business Premises (Owned/Rented/Relative’s)",
-          },
-          rentPaidIfAny: {
-            type: "number",
-            title: "Rent Paid (if any)",
-          },
+          rentPaid: { type: "string", title: "Rent Paid (if any)" },
           neighborEnquiryResult: {
             type: "string",
-            title: "Neighbor Enquiry Result",
+            title: "Neighbour Enquiry Result",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
-      required: true,
     },
     {
-      id: "concernsObservations",
-      label: "Concerns / Observations",
+      id: "observations",
+      label: "Observations & Concerns",
       schema: {
         type: "object",
         properties: {
-          businessVintageDocumentsProvidedYN: {
+          businessVintageDocumentsProvided: {
             type: "string",
-            title: "Business Vintage Documents Provided (Y/N)",
+            title: "Business Vintage Documents Provided (Yes/No)",
           },
-          businessNameBoardPermanentTemporary: {
+          businessNameBoard: {
             type: "string",
-            title: "Business Name Board (Permanent/Temporary)",
+            title: "Business Name Board (Permanent / Temporary)",
           },
-          workersPresentAtTimeOfVisit: {
+          workersPresentAtVisit: {
             type: "string",
             title: "Workers Present at Time of Visit",
           },
-          kachaRecordsProvidedYN: {
+          kachaRecordsProvided: {
             type: "string",
-            title: "Kacha Records Provided (Y/N)",
+            title: "Kacha Records Provided (Yes/No)",
           },
-          upiPaymentsProvidedYN: {
+          upiPaymentsProvided: {
             type: "string",
-            title: "UPI Payments Provided (Y/N)",
+            title: "UPI Payments Provided (Yes/No)",
           },
-          addressMatchMismatchInitiatedVsVisited: {
+          addressMatch: {
             type: "string",
-            title: "Address Match/Mismatch (Initiated vs. Visited)",
+            title: "Address Match (Initiated vs. Visited)",
           },
-          otherObservationsBusinessActivityStockMachines: {
+          otherObservations: {
             type: "string",
             title: "Other Observations (Business Activity, Stock, Machines)",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
-      required: true,
     },
     {
-      id: "netMargin",
-      label: "Net Margin %",
+      id: "incomeReferences",
+      label: "Income & References",
       schema: {
         type: "object",
         properties: {
+          netMarginPercent: {
+            type: "string",
+            title: "Net Margin %",
+          },
           otherIncomes: {
             type: "string",
             title: "Other Incomes",
           },
-          spouseIncomeAutoDrivingEtc: {
-            type: "number",
-            title: "Spouse Income (Auto Driving, etc.)",
+          spouseIncome: {
+            type: "string",
+            title: "Spouse Income",
           },
-          referenceDetails: {
+          referencesSummary: {
             type: "string",
             title: "Reference Details",
+            ui: { widget: "textarea", rows: 2 },
           },
-          referencesNameContactNo: {
+          referenceContacts: {
             type: "string",
             title: "References (Name & Contact No.)",
-            pattern: "^[0-9]{10}$",
+            ui: { widget: "textarea", rows: 2 },
           },
         },
       },
-      required: true,
     },
     {
       id: "assetsDetails",
@@ -359,32 +304,18 @@ export const iiflSchema = {
         properties: {
           assets: {
             type: "array",
-            title: "Assets Owned",
             items: {
               type: "object",
               properties: {
-                assetType: {
-                  type: "string",
-                  title: "Asset Type",
-                },
-                description: {
-                  type: "string",
-                  title: "Description",
-                },
-                marketValue: {
-                  type: "string",
-                  title: "Market Value",
-                },
-                ownerName: {
-                  type: "string",
-                  title: "Owner Name",
-                },
+                assetType: { type: "string", title: "Asset Type" },
+                description: { type: "string", title: "Description" },
+                marketValue: { type: "string", title: "Market Value" },
+                ownerName: { type: "string", title: "Owner Name" },
               },
             },
           },
         },
       },
-      required: true,
     },
     {
       id: "existingLoans",
@@ -394,26 +325,13 @@ export const iiflSchema = {
         properties: {
           existingLoans: {
             type: "array",
-            title: "Existing Loans",
             items: {
               type: "object",
               properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                typeOfLoan: {
-                  type: "string",
-                  title: "Type of Loan",
-                },
-                loanAmount: {
-                  type: "string",
-                  title: "Loan Amount",
-                },
-                emi: {
-                  type: "string",
-                  title: "EMI",
-                },
+                bankName: { type: "string", title: "Bank Name" },
+                typeOfLoan: { type: "string", title: "Type of Loan" },
+                loanAmount: { type: "string", title: "Loan Amount" },
+                emi: { type: "string", title: "EMI" },
                 status: {
                   type: "string",
                   title: "Status",
@@ -424,7 +342,6 @@ export const iiflSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "bankingDetails",
@@ -434,21 +351,17 @@ export const iiflSchema = {
         properties: {
           bankingDetails: {
             type: "array",
-            title: "Banking Details",
             items: {
               type: "object",
               properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
+                bankName: { type: "string", title: "Bank Name" },
                 accountType: {
                   type: "string",
                   title: "Account Type",
                   enum: ["Savings", "Current", "CC/OD"],
                 },
-                noOfYears: {
-                  type: "integer",
+                relationshipSinceYears: {
+                  type: "string",
                   title: "No. of Years",
                 },
               },
@@ -456,7 +369,6 @@ export const iiflSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "pdOfficerDetails",
@@ -464,22 +376,16 @@ export const iiflSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfPdOfficer: {
-            type: "string",
-            title: "Name of PD Officer",
-          },
-          dateOfDiscussion: {
-            type: "string",
-            title: "Date of Discussion",
-          },
-          signatureOfPdOfficer: {
+          pdOfficerName: { type: "string", title: "Name of PD Officer" },
+          dateOfDiscussion: { type: "string", title: "Date of Discussion" },
+          pdOfficerSignature: {
             type: "string",
             title: "Signature of PD Officer",
           },
         },
       },
-      required: true,
     },
   ],
 } as const;
+
 export default iiflSchema;
