@@ -1,5 +1,6 @@
 "use client";
 import EditRequestLogs from "@/components/verify/EditRequestLogs";
+import PDRequestLogs from "@/components/verify/PDRequestLogs";
 import { getSchemaFromBackend } from "@/services/schema.service";
 import {
   getEditRequestsById,
@@ -18,12 +19,16 @@ const EditRequestDetails = () => {
   const [changedData, setChangedData] = useState<any>({});
   const [currentDepartment, setCurrentDepartment] = useState<string>("");
   const [dynamicSchema, setDynamicSchema] = useState<any>(null);
+  console.log(dynamicSchema);
+  console.log(editRequestData);
 
   useEffect(() => {
-    if (id && loanid) {
-      getEditRequestsById(id as string)
-        .then((res) => {
+    const fetchData = async () => {
+      if (id && loanid) {
+        try {
+          const res = await getEditRequestsById(id as string);
           setEditRequestData(res?.data);
+
           if (res?.data?.verification?.verificationData) {
             setCurrentData(res?.data?.verification?.verificationData);
           }
@@ -32,49 +37,69 @@ const EditRequestDetails = () => {
             setChangedData(res?.data?.changes);
           }
 
+          let department = "";
           if (res?.data?.verification?.verificationData?.department) {
-            setCurrentDepartment(
-              res?.data?.verification?.verificationData?.department
-            );
+            department = res?.data?.verification?.verificationData?.department;
           } else if (res?.data?.loan?.department) {
-            setCurrentDepartment(res?.data?.loan?.department);
+            department = res?.data?.loan?.department;
           } else {
             const changes = res?.data?.changes;
             if (changes?.basicDetails?.applicationNumber) {
-              setCurrentDepartment("PD");
+              department = "PD";
             } else {
-              setCurrentDepartment("FI");
+              department = "FI";
             }
           }
+          setCurrentDepartment(department);
 
           const bankName =
             res?.data?.verification?.bankName ||
             res?.data?.loan?.bankName ||
             "";
           if (bankName) {
-            const schema = getSchemaFromBackend(bankName);
-            if (schema) setDynamicSchema(schema);
+            try {
+              const schema = await getSchemaFromBackend(bankName, department);
+              if (schema?.schema) setDynamicSchema(schema?.schema);
+            } catch (schemaError) {
+              console.error("Error loading schema:", schemaError);
+            }
           }
-        })
-        .catch((err) => {
+        } catch (err) {
           console.error(err);
-        });
-    }
+        }
+      }
+    };
+
+    fetchData();
   }, [id, loanid]);
 
   return (
     <div>
-      <EditRequestLogs
-        verificationType={editRequestData?.verification?.addressType}
-        currentData={currentData}
-        changedData={changedData}
-        fetchEditRequests={() => {}}
-        disabled={false}
-        admin={true}
-        verificationId={id as string}
-        currentDepartment={currentDepartment}
-        dynamicSchema={dynamicSchema}
-      />
+      {currentDepartment === "PD" ? (
+        <PDRequestLogs
+          verificationType={editRequestData?.verification?.addressType}
+          currentData={currentData}
+          changedData={changedData}
+          fetchEditRequests={() => {}}
+          disabled={false}
+          admin={true}
+          verificationId={id as string}
+          currentDepartment={currentDepartment}
+          dynamicSchema={dynamicSchema}
+        />
+      ) : (
+        <EditRequestLogs
+          verificationType={editRequestData?.verification?.addressType}
+          currentData={currentData}
+          changedData={changedData}
+          fetchEditRequests={() => {}}
+          disabled={false}
+          admin={true}
+          verificationId={id as string}
+          currentDepartment={currentDepartment}
+          dynamicSchema={dynamicSchema}
+        />
+      )}
     </div>
   );
 };
