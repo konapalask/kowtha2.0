@@ -546,6 +546,7 @@ export const WorkVerificationDetails: React.FC<
         open={open}
         setOpen={setOpen}
         verificationType="Work"
+        currentDepartment={undefined}
       />
       {/* </Card> */}
       {/* 
