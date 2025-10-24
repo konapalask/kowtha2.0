@@ -8,11 +8,7 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          applicationNumber: {
-            type: "integer",
-            title: "Application No.",
-            readOnly: true,
-          },
+  
           applicantName: {
             type: "string",
             title: "Name of the Applicant",
@@ -32,13 +28,14 @@ export const axisFinanceSchema = {
             title: "Date",
             format: "date",
           },
-          loanAmount: {
+          loaAmountRequest: {
             type: "number",
-            title: "Loan Amount",
-            readOnly: true,
+            title: "Loan Amount Request",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
           },
           placeOfInterview: {
@@ -316,23 +313,30 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
+    { id: "coApplicantIncome", 
+      label: "Co-Applicant Income", 
+      schema: {
+      type: "object",
+      properties: {
+        coApplicantIncome: {
+          type: "number",
+          title: "Co-Applicant Income",
+          formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          },
+        },
+      },
+    },
+    },
     {
       id: "otherIncome",
       label: "Other Income",
       schema: {
         type: "object",
         properties: {
-          coApplicantIncome: {
-            type: "number",
-            title: "Co-Applicant Income",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-
           licPaymentInsuranceMediclaim: {
             type: "string",
             title: "LIC Payment / Insurance / Mediclaim",
@@ -424,20 +428,40 @@ export const axisFinanceSchema = {
             title: "Affordable EMI",
           },
         },
-        endUseOfFunds: {
-          type: "string",
-          title: "End Use of Funds",
+      
+      },
+      required: true,
+    },
+    
+    {
+      id: "endUseOfFunds",
+      label: "End Use of Funds",
+      schema: {
+        type: "object",
+        properties: {
+          endUseOfFunds: {
+            type: "string",
+            title: "End Use of Funds",
+          },
         },
-        otherObservations: {
-          type: "string",
-          title: "Other Observations",
-          ui: {
-            widget: "textarea",
-            rows: 6,
+      },    
+    },
+    {
+      id: "otherObservations",
+      label: "Other Observations",
+      schema: {
+        type: "object",
+        properties: {
+          otherObservations: {
+            type: "string",
+            title: "Other Observations",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
           },
         },
       },
-      required: true,
     },
     {
       id: "tradeReferences",

@@ -584,10 +584,7 @@ export const newTemplate = (verificationData: NewTemplateInterface, html_data: a
 
     <br>
     <img src="${html_data.imageDataUri}" width="50%" height="40%" style="margin-left: 2%;" />
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${html_data.bankName}</span><br>
-      Generated on ${istDate}
-    </footer>
+
     ${html_data.imagesData}
   `;
 }

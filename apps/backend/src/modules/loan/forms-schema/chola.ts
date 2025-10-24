@@ -242,7 +242,7 @@ export const cholaSchema = {
     },
     {
       id: "itrFinancialDetails",
-      label: "ITR / Financial Details",
+      label: "ITR, Receipts, Verification, GP Margin & Expenses Details",
       schema: {
         type: "object",
         properties: {

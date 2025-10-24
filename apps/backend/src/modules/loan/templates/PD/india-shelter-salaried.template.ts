@@ -1,5 +1,5 @@
 import { format, toZonedTime } from 'date-fns-tz';
-import { pdBaseTemplate } from './pd-base.tempate';
+import { pdBaseTemplate } from './html/pd-base.tempate';
 
 
 export const indiaShelterSalariedTemplate = (verificationData1: any, html_data: any) => {

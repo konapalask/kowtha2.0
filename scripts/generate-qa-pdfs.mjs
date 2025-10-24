@@ -369,17 +369,12 @@ async function generateBankPDF(bankName, backendModules) {
       // Axis Finance UBL Above 10L uses custom template
       console.log(`  Using Axis Finance UBL custom template`);
       htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
-      console.log(
-        `  Template HTML preview for Axis Bank (first 300 chars):`,
-        htmlTemplate.substring(0, 300) + "..."
-      );
-      console.log(
-        `  Search for family in HTML:`,
-        htmlTemplate.includes("Mother -")
-          ? "Found family data"
-          : "No family data in HTML"
-      );
-    } else if (bankName === "Axis Finance") {
+    } 
+    else if(bankName=== "Axis Finance UBL Below 10L"){
+      console.log(`  Using Axis Finance UBL Below 10L custom template`);
+      htmlTemplate = axisFinanceUBLTemplate(verificationData, html_data);
+    }
+    else if (bankName === "Axis Finance") {
       // Axis Finance uses custom template
       console.log(`  Using Axis Finance custom template`);
       htmlTemplate = axisFinanceTemplate(verificationData, html_data);
