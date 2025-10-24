@@ -354,10 +354,7 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
           : ""
       }
       
-      <footer class="pdf-footer">
-        <span style="color:rgb(8, 136, 36);">${html_data?.bankName || ""}</span><br>
-        Generated on ${istDate}
-      </footer>
+    
     </body>
     </html>
     `;
