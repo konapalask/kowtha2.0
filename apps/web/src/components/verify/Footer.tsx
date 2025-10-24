@@ -2,8 +2,9 @@ import { useTabContext } from "@/pages/verify/[id]";
 import {
   generateFinalReport,
   generatePreviewReport,
+  exportFinancialAnalysis,
 } from "@/services/verifier.services";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Popconfirm } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ const Footer: React.FC<{
   open: boolean;
   setOpen: any;
   verificationType: string;
+  currentDepartment?: string;
 }> = ({
   editorContent,
   disabled,
@@ -24,6 +26,7 @@ const Footer: React.FC<{
   open,
   setOpen,
   verificationType,
+  currentDepartment,
 }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
@@ -68,6 +71,41 @@ const Footer: React.FC<{
       console.error("Error generating final report:", error);
       message.error(
         error?.response?.data?.message ?? "Failed to generate final report"
+      );
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const excelResponse = await exportFinancialAnalysis(id as string);
+
+      // Check if we have valid data
+      if (!excelResponse) {
+        throw new Error("No Excel data received");
+      }
+
+      // Create a blob URL for Excel file
+      const blob = new Blob([excelResponse], { 
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element to trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `financial-analysis-${id}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+      
+      message.success("Excel file downloaded successfully");
+    } catch (error: any) {
+      console.error("Error exporting Excel:", error);
+      message.error(
+        error?.response?.data?.message ?? "Failed to export Excel file"
       );
     }
   };
@@ -160,6 +198,19 @@ const Footer: React.FC<{
         >
           Generate Preview
         </Button>
+        {currentDepartment === "PD" && (
+          <Button
+            size="small"
+            icon={<DownloadOutlined />}
+            onClick={handleExportExcel}
+            style={{
+              height: "32px",
+              fontSize: "14px",
+            }}
+          >
+            Export Excel
+          </Button>
+        )}
       </div>
       <Modal
         open={open}

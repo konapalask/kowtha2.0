@@ -1799,6 +1799,7 @@ export const BusinessVerificationDetails: React.FC<
             open={open}
             setOpen={setOpen}
             verificationType="Business"
+            currentDepartment={currentDepartment}
           />
         </>
       )}
