@@ -190,7 +190,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // }, [screens]);
 
   const menuItems = [
-    ...(!(getCurrentDepartmentRole() === "Verifier")
+    ...(!(
+      getCurrentDepartmentRole() === "Verifier" ||
+      getCurrentDepartmentRole() === "VerificationExecutive"
+    )
       ? [
           {
             key: "dashboard",
@@ -610,7 +613,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onClick={handleSettingsClick}
               style={{
                 backgroundColor: avatarColor,
-                color: "var(--primary-800)",
+                color: "#fff",
                 fontWeight: 700,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
                 fontSize: 18,

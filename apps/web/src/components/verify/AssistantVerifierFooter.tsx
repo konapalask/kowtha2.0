@@ -20,7 +20,7 @@ const AssistantVerifierFooter: React.FC<AssistantVerifierFooterProps> = ({
         left: 0,
         right: 0,
         background: "#fff",
-        padding: "16px 24px",
+        padding: "8px 16px",
         borderTop: "1px solid #f0f0f0",
         display: "flex",
         justifyContent: "center",
@@ -30,15 +30,15 @@ const AssistantVerifierFooter: React.FC<AssistantVerifierFooterProps> = ({
     >
       <Button
         type="primary"
-        size="large"
+        size="small"
         onClick={onSave}
         loading={loading}
         disabled={disabled}
         style={{
-          minWidth: "200px",
-          height: "48px",
-          fontSize: "16px",
-          fontWeight: "600",
+          minWidth: "140px",
+          height: "32px",
+          fontSize: "14px",
+          fontWeight: "500",
         }}
       >
         Submit Verification

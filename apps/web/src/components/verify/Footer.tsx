@@ -136,23 +136,26 @@ const Footer: React.FC<{
           left: 120,
           right: 40,
           background: "#fff",
-          padding: "16px 24px",
+          padding: "8px 16px",
           borderTop: "1px solid #f0f0f0",
           display: "flex",
           justifyContent: "center",
-          gap: "16px",
+          gap: "12px",
           zIndex: 1000,
           boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.06)",
-          // paddingBottom: 0,
-          // marginBottom: 24,
         }}
       >
         <Button
+          size="small"
           icon={<EyeOutlined />}
           onClick={() => {
             // submitFinalVerdict();
             setOpen(true);
             fetchPdf();
+          }}
+          style={{
+            height: "32px",
+            fontSize: "14px",
           }}
         >
           Generate Preview
@@ -221,7 +224,16 @@ const Footer: React.FC<{
               title="Are you sure you want to submit this final verdict?"
               onConfirm={handleFinalReport}
             >
-              <Button type="primary">Generate Final Report</Button>
+              <Button
+                type="primary"
+                size="small"
+                style={{
+                  height: "32px",
+                  fontSize: "14px",
+                }}
+              >
+                Generate Final Report
+              </Button>
             </Popconfirm>
             {/* </Space> */}
           </div>

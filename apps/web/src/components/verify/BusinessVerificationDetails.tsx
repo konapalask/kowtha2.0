@@ -18,6 +18,7 @@ import {
   Collapse,
   InputNumber,
   Radio,
+  Select,
 } from "antd";
 
 const { TextArea } = Input;
@@ -31,12 +32,12 @@ import dayjs from "dayjs";
 
 import FinalVerdict from "./FinalVerdict";
 import Feedback from "./Feedback";
-import { RightColumn } from "./RightColumn";
 import {
   patchFinalVerdict,
   verifierEditApi,
-  submitFinancialAnalysis,
   asstVerifierSubmitApi,
+  submitFinancialAnalysis,
+  updateSynopsis,
 } from "@/services/verifier.services";
 
 // Import new dynamic form system
@@ -53,6 +54,7 @@ import ExistingLoansDescription from "./Descriptions/ExistingLoansDescription";
 import ThirdPartyCheckDescription from "./Descriptions/ThirdPartyCheckDescription";
 import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getItem } from "@/helpers/localStorage";
+import dynamic from "next/dynamic";
 
 const serializeFormValues = (value: any): any => {
   if (dayjs.isDayjs(value)) {
@@ -154,9 +156,6 @@ export const BusinessVerificationDetails: React.FC<
         ? "negative"
         : null
   );
-  const [financialForm] = Form.useForm();
-  const [calculatedGrossProfit, setCalculatedGrossProfit] = useState<number>(0);
-  const [calculatedNetProfit, setCalculatedNetProfit] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
   // New dynamic form states
@@ -335,8 +334,44 @@ export const BusinessVerificationDetails: React.FC<
               return obj;
             };
 
-            const formData = cleanEmptyStrings(rawFormData, schema);
+            // Transform the data structure to match the schema
+            const transformDataForSchema = (rawData: any, schema: any) => {
+              console.log("rawData: ", rawData);
+              console.log("schema: ", schema);
+              const transformed: any = {};
 
+              // Process each section in the schema
+              schema.sections?.forEach((section: any) => {
+                const sectionId = section.id;
+                const sectionData = rawData[sectionId];
+
+                if (sectionData) {
+                  // Handle the actual schema structure with fields array
+                  if (section.fields && Array.isArray(section.fields)) {
+                    const sectionTransformed: any = {};
+
+                    section.fields.forEach((field: any) => {
+                      const fieldData = sectionData[field.id];
+                      if (fieldData !== undefined) {
+                        sectionTransformed[field.id] = fieldData;
+                      }
+                    });
+
+                    transformed[sectionId] = sectionTransformed;
+                  } else {
+                    transformed[sectionId] = sectionData;
+                  }
+                }
+              });
+
+              console.log("transformed data: ", transformed);
+              return transformed;
+            };
+
+            const transformedData = transformDataForSchema(rawFormData, schema);
+            const formData = cleanEmptyStrings(transformedData, schema);
+
+            console.log("Final form data being set:", formData);
             setDynamicFormData(formData);
 
             // console.log(
@@ -537,6 +572,7 @@ export const BusinessVerificationDetails: React.FC<
         findings: "Business Verification Findings",
         addressType: "Business",
         verificationData: formData,
+        uploadedItems: data?.uploadedItems || [], // Include photo capture data
       };
 
       // Submit verification data
@@ -581,6 +617,7 @@ export const BusinessVerificationDetails: React.FC<
         findings,
         verificationData: mergedVerificationData,
         approvedStatus,
+        uploadedItems: data?.uploadedItems || [], // Include photo capture data
       });
 
       fetchVerificationData?.();
@@ -594,338 +631,10 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
-  // Watch financial form values for automatic calculation
-  const financialFormValues = Form.useWatch([], financialForm);
-
-  // Calculate profits whenever financial form values change
-  useEffect(() => {
-    if (financialFormValues) {
-      // console.log("Financial form values:", financialFormValues);
-      const calculateProfits = () => {
-        // Gross Profit Calculation
-        const openingStock =
-          parseFloat((financialFormValues as any).toOpeningStock) || 0;
-        const purchase =
-          parseFloat((financialFormValues as any).toPurchase) || 0;
-        const costOfServices =
-          parseFloat((financialFormValues as any).toCostOfServices) || 0;
-        const wages = parseFloat((financialFormValues as any).toWages) || 0;
-        const hamaliCharges =
-          parseFloat((financialFormValues as any).toHamaliCharges) || 0;
-        const manufacturingExpenses =
-          parseFloat((financialFormValues as any).toManufacturingExpenses) || 0;
-        const packingCharges =
-          parseFloat((financialFormValues as any).toPackingCharges) || 0;
-        const sales = parseFloat((financialFormValues as any).bySales) || 0;
-        const services =
-          parseFloat((financialFormValues as any).byServices) || 0;
-        const closingStock =
-          parseFloat((financialFormValues as any).byClosingStock) || 0;
-
-        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-        const grossProfit =
-          sales +
-          services +
-          closingStock -
-          (openingStock +
-            purchase +
-            costOfServices +
-            wages +
-            hamaliCharges +
-            manufacturingExpenses +
-            packingCharges);
-
-        // Net Profit Calculation
-        const salaries =
-          parseFloat((financialFormValues as any).toSalaries) || 0;
-        const rent = parseFloat((financialFormValues as any).toRent) || 0;
-        const electricityCharges =
-          parseFloat((financialFormValues as any).toElectricityCharges) || 0;
-        const printingStationery =
-          parseFloat((financialFormValues as any).toPrintingStationery) || 0;
-        const telephoneCharges =
-          parseFloat((financialFormValues as any).toTelephoneCharges) || 0;
-        const postageTelegram =
-          parseFloat((financialFormValues as any).toPostageTelegram) || 0;
-        const officeMaintenance =
-          parseFloat((financialFormValues as any).toOfficeMaintenance) || 0;
-        const repairsMaintenance =
-          parseFloat((financialFormValues as any).toRepairsMaintenance) || 0;
-        const sadarExpenses =
-          parseFloat((financialFormValues as any).toSadarExpenses) || 0;
-        const auditFee =
-          parseFloat((financialFormValues as any).toAuditFee) || 0;
-        const advertisement =
-          parseFloat((financialFormValues as any).toAdvertisement) || 0;
-        const bankCharges =
-          parseFloat((financialFormValues as any).toBankCharges) || 0;
-        const insurance =
-          parseFloat((financialFormValues as any).toInsurance) || 0;
-        const depreciation =
-          parseFloat((financialFormValues as any).toDepreciation) || 0;
-        const interestOnLoan =
-          parseFloat((financialFormValues as any).toInterestOnLoan) || 0;
-        const rentReceived =
-          parseFloat((financialFormValues as any).byRentReceived) || 0;
-        const commissionReceived =
-          parseFloat((financialFormValues as any).byCommissionReceived) || 0;
-
-        // Indirect Expenses = All "To" fields in net profit section
-        const indirectExpenses =
-          salaries +
-          rent +
-          electricityCharges +
-          printingStationery +
-          telephoneCharges +
-          postageTelegram +
-          officeMaintenance +
-          repairsMaintenance +
-          sadarExpenses +
-          auditFee +
-          advertisement +
-          bankCharges +
-          insurance +
-          depreciation +
-          interestOnLoan;
-
-        // Other Incomes = Rent Received + Commission Received
-        const otherIncomes = rentReceived + commissionReceived;
-
-        // Net Profit = Gross Profit + Other Incomes - Indirect Expenses
-        const netProfit = grossProfit + otherIncomes - indirectExpenses;
-
-        // console.log("Calculated values:", {
-        //   grossProfit,
-        //   netProfit,
-        //   indirectExpenses,
-        //   otherIncomes,
-        // });
-
-        setCalculatedGrossProfit(grossProfit);
-        setCalculatedNetProfit(netProfit);
-      };
-
-      calculateProfits();
-    }
-  }, [financialFormValues]);
-
-  // Load existing financial data when component mounts
-  useEffect(() => {
-    // console.log("verificationData received:", verificationData);
-    // console.log("completeVerificationData received:", completeVerificationData);
-
-    // Now verificationData is the entire verification object, so financialAnalysis is directly under it
-    let financialData = null;
-
-    // Try to get financial data from the correct path
-    if (verificationData?.financialAnalysis) {
-      financialData = verificationData.financialAnalysis;
-      // console.log(
-      //   "Financial data found in verificationData.financialAnalysis:",
-      //   financialData
-      // );
-    } else if (verificationData?.verificationData?.financialAnalysis) {
-      financialData = verificationData.verificationData.financialAnalysis;
-      // console.log(
-      //   "Financial data found in verificationData.verificationData.financialAnalysis:",
-      //   financialData
-      // );
-    }
-
-    if (financialData) {
-      // console.log("Loading financial data:", financialData);
-
-      // Set form values based on the API response structure
-      const formValues = {
-        toOpeningStock: financialData.openingStock?.toString() || "",
-        toPurchase: financialData.purchase?.toString() || "",
-        toCostOfServices: financialData.costOfServices?.toString() || "",
-        toWages: financialData.wages?.toString() || "",
-        toHamaliCharges: financialData.hamaliCharges?.toString() || "",
-        toManufacturingExpenses:
-          financialData.manufacturingExpenses?.toString() || "",
-        toPackingCharges: financialData.packingCharges?.toString() || "",
-        bySales: financialData.sales?.toString() || "",
-        byServices: financialData.services?.toString() || "",
-        byClosingStock: financialData.closingStock?.toString() || "",
-        toSalaries: financialData.salaries?.toString() || "",
-        toRent: financialData.rent?.toString() || "",
-        toElectricityCharges:
-          financialData.electricityCharges?.toString() || "",
-        toPrintingStationery:
-          financialData.printingStationery?.toString() || "",
-        toTelephoneCharges: financialData.telephoneCharges?.toString() || "",
-        toPostageTelegram: financialData.postageTelegram?.toString() || "",
-        toOfficeMaintenance: financialData.officeMaintenance?.toString() || "",
-        toRepairsMaintenance:
-          financialData.repairsMaintenance?.toString() || "",
-        toSadarExpenses: financialData.sadarExpenses?.toString() || "",
-        toAuditFee: financialData.auditFee?.toString() || "",
-        toAdvertisement: financialData.advertisement?.toString() || "",
-        toBankCharges: financialData.bankCharges?.toString() || "",
-        toInsurance: financialData.insurance?.toString() || "",
-        toDepreciation: financialData.depreciation?.toString() || "",
-        toInterestOnLoan: financialData.interestOnLoan?.toString() || "",
-        byRentReceived: financialData.rentReceived?.toString() || "",
-        byCommissionReceived:
-          financialData.commissionReceived?.toString() || "",
-      };
-
-      // console.log("Setting form values:", formValues);
-
-      // Set form values immediately
-      financialForm.setFieldsValue(formValues);
-      // console.log("Form values set successfully");
-
-      // Set calculated values
-      setCalculatedGrossProfit(financialData.grossProfit || 0);
-      setCalculatedNetProfit(financialData.netProfit || 0);
-
-      // console.log(
-      //   "Calculated values set - Gross Profit:",
-      //   financialData.grossProfit,
-      //   "Net Profit:",
-      //   financialData.netProfit
-      // );
-    } else {
-      console.log(
-        "No financial data found in verificationData.financialAnalysis"
-      );
-    }
-  }, [verificationData, financialForm]);
-
-  const handleFinancialSubmit = async () => {
+  // Handle Verification Executive Submit
+  const handleVerificationExecutiveSubmit = async () => {
     try {
       setLoading(true);
-      const values = await financialForm.validateFields();
-
-      // Recalculate Gross and Net Profit at submit time to avoid stale zero values
-      const openingStockVal = parseFloat(values.toOpeningStock) || 0;
-      const purchaseVal = parseFloat(values.toPurchase) || 0;
-      const costOfServicesVal = parseFloat(values.toCostOfServices) || 0;
-      const wagesVal = parseFloat(values.toWages) || 0;
-      const hamaliChargesVal = parseFloat(values.toHamaliCharges) || 0;
-      const manufacturingExpensesVal =
-        parseFloat(values.toManufacturingExpenses) || 0;
-      const packingChargesVal = parseFloat(values.toPackingCharges) || 0;
-      const salesVal = parseFloat(values.bySales) || 0;
-      const servicesVal = parseFloat(values.byServices) || 0;
-      const closingStockVal = parseFloat(values.byClosingStock) || 0;
-
-      const salariesVal = parseFloat(values.toSalaries) || 0;
-      const rentVal = parseFloat(values.toRent) || 0;
-      const electricityChargesVal =
-        parseFloat(values.toElectricityCharges) || 0;
-      const printingStationeryVal =
-        parseFloat(values.toPrintingStationery) || 0;
-      const telephoneChargesVal = parseFloat(values.toTelephoneCharges) || 0;
-      const postageTelegramVal = parseFloat(values.toPostageTelegram) || 0;
-      const officeMaintenanceVal = parseFloat(values.toOfficeMaintenance) || 0;
-      const repairsMaintenanceVal =
-        parseFloat(values.toRepairsMaintenance) || 0;
-      const sadarExpensesVal = parseFloat(values.toSadarExpenses) || 0;
-      const auditFeeVal = parseFloat(values.toAuditFee) || 0;
-      const advertisementVal = parseFloat(values.toAdvertisement) || 0;
-      const bankChargesVal = parseFloat(values.toBankCharges) || 0;
-      const insuranceVal = parseFloat(values.toInsurance) || 0;
-      const depreciationVal = parseFloat(values.toDepreciation) || 0;
-      const interestOnLoanVal = parseFloat(values.toInterestOnLoan) || 0;
-      const rentReceivedVal = parseFloat(values.byRentReceived) || 0;
-      const commissionReceivedVal =
-        parseFloat(values.byCommissionReceived) || 0;
-
-      const computedGrossProfit =
-        salesVal +
-        servicesVal +
-        closingStockVal -
-        (openingStockVal +
-          purchaseVal +
-          costOfServicesVal +
-          wagesVal +
-          hamaliChargesVal +
-          manufacturingExpensesVal +
-          packingChargesVal);
-
-      const indirectExpensesVal =
-        salariesVal +
-        rentVal +
-        electricityChargesVal +
-        printingStationeryVal +
-        telephoneChargesVal +
-        postageTelegramVal +
-        officeMaintenanceVal +
-        repairsMaintenanceVal +
-        sadarExpensesVal +
-        auditFeeVal +
-        advertisementVal +
-        bankChargesVal +
-        insuranceVal +
-        depreciationVal +
-        interestOnLoanVal;
-
-      const otherIncomesVal = rentReceivedVal + commissionReceivedVal;
-      const computedNetProfit =
-        computedGrossProfit + otherIncomesVal - indirectExpensesVal;
-
-      // Prepare the complete financial analysis data
-      const financialData = {
-        openingStock: openingStockVal,
-        purchase: purchaseVal,
-        costOfServices: costOfServicesVal,
-        wages: wagesVal,
-        hamaliCharges: hamaliChargesVal,
-        manufacturingExpenses: manufacturingExpensesVal,
-        packingCharges: packingChargesVal,
-        sales: salesVal,
-        services: servicesVal,
-        closingStock: closingStockVal,
-        salaries: salariesVal,
-        rent: rentVal,
-        electricityCharges: electricityChargesVal,
-        printingStationery: printingStationeryVal,
-        telephoneCharges: telephoneChargesVal,
-        postageTelegram: postageTelegramVal,
-        officeMaintenance: officeMaintenanceVal,
-        repairsMaintenance: repairsMaintenanceVal,
-        sadarExpenses: sadarExpensesVal,
-        auditFee: auditFeeVal,
-        advertisement: advertisementVal,
-        bankCharges: bankChargesVal,
-        insurance: insuranceVal,
-        depreciation: depreciationVal,
-        interestOnLoan: interestOnLoanVal,
-        rentReceived: rentReceivedVal,
-        commissionReceived: commissionReceivedVal,
-        grossProfit: computedGrossProfit,
-        netProfit: computedNetProfit,
-      };
-
-      // console.log("Submitting financial data:", financialData);
-
-      // Call the financial analysis API with department parameter
-      await submitFinancialAnalysis(id as string, financialData);
-
-      message.success("Financial analysis submitted successfully!");
-
-      // Refresh the verification data to show updated values
-      fetchVerificationData();
-    } catch (error) {
-      console.error("Error submitting financial analysis:", error);
-      message.error("Failed to submit financial analysis");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle Assistant Verifier Submit
-  const handleAssistantVerifierSubmit = async () => {
-    try {
-      setLoading(true);
-
-      // Get financial form values
-      const financialValues = await financialForm
-        .validateFields()
-        .catch(() => ({}));
 
       // Prepare verification data
       const verificationDataPayload = {
@@ -937,50 +646,12 @@ export const BusinessVerificationDetails: React.FC<
       const synopsis =
         editorContent || "Business verification completed successfully";
 
-      // Prepare financial analysis data
-      const financialData = {
-        openingStock: parseFloat(financialValues.toOpeningStock) || 0,
-        purchase: parseFloat(financialValues.toPurchase) || 0,
-        costOfServices: parseFloat(financialValues.toCostOfServices) || 0,
-        wages: parseFloat(financialValues.toWages) || 0,
-        hamaliCharges: parseFloat(financialValues.toHamaliCharges) || 0,
-        manufacturingExpenses:
-          parseFloat(financialValues.toManufacturingExpenses) || 0,
-        packingCharges: parseFloat(financialValues.toPackingCharges) || 0,
-        sales: parseFloat(financialValues.bySales) || 0,
-        services: parseFloat(financialValues.byServices) || 0,
-        closingStock: parseFloat(financialValues.byClosingStock) || 0,
-        salaries: parseFloat(financialValues.toSalaries) || 0,
-        rent: parseFloat(financialValues.toRent) || 0,
-        electricityCharges:
-          parseFloat(financialValues.toElectricityCharges) || 0,
-        printingStationery:
-          parseFloat(financialValues.toPrintingStationery) || 0,
-        telephoneCharges: parseFloat(financialValues.toTelephoneCharges) || 0,
-        postageTelegram: parseFloat(financialValues.toPostageTelegram) || 0,
-        officeMaintenance: parseFloat(financialValues.toOfficeMaintenance) || 0,
-        repairsMaintenance:
-          parseFloat(financialValues.toRepairsMaintenance) || 0,
-        sadarExpenses: parseFloat(financialValues.toSadarExpenses) || 0,
-        auditFee: parseFloat(financialValues.toAuditFee) || 0,
-        advertisement: parseFloat(financialValues.toAdvertisement) || 0,
-        bankCharges: parseFloat(financialValues.toBankCharges) || 0,
-        insurance: parseFloat(financialValues.toInsurance) || 0,
-        depreciation: parseFloat(financialValues.toDepreciation) || 0,
-        interestOnLoan: parseFloat(financialValues.toInterestOnLoan) || 0,
-        rentReceived: parseFloat(financialValues.byRentReceived) || 0,
-        commissionReceived:
-          parseFloat(financialValues.byCommissionReceived) || 0,
-        grossProfit: calculatedGrossProfit,
-        netProfit: calculatedNetProfit,
-      };
-
       // Prepare the complete payload
       const payload = {
         verificationType: "Business",
         verificationData: verificationDataPayload,
         synopsis,
-        ...financialData,
+        uploadedItems: data?.uploadedItems || [], // Include photo capture data
       };
 
       // Call the assistant verifier API
@@ -991,7 +662,7 @@ export const BusinessVerificationDetails: React.FC<
       // Refresh the verification data
       fetchVerificationData();
     } catch (error: any) {
-      console.error("Error submitting assistant verifier data:", error);
+      console.error("Error submitting verification executive data:", error);
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
@@ -1213,7 +884,7 @@ export const BusinessVerificationDetails: React.FC<
     );
   };
 
-  // Form Section Renderer - Based on SchemaSection.tsx pattern
+  // Form Section Renderer - Updated to handle the actual schema structure
   const FormSectionRenderer = ({
     section,
     data,
@@ -1223,19 +894,24 @@ export const BusinessVerificationDetails: React.FC<
     data: any;
     readOnly: boolean;
   }) => {
-    // console.log(section, data);
     const [form] = Form.useForm();
 
     // Set initial form values
     React.useEffect(() => {
+      console.log(
+        "Setting form values for section:",
+        section.label,
+        "data:",
+        data
+      );
       form.setFieldsValue(data);
-    }, [data, form]);
+    }, [data, form, section.label]);
 
-    const renderField = (fieldId: string, property: any) => {
+    const renderField = (fieldId: string, field: any) => {
       // Check conditional visibility
-      if (property.dependencies?.show) {
+      if (field.dependencies?.show) {
         const shouldShow = checkConditionalVisibility(
-          property.dependencies.show,
+          field.dependencies.show,
           data
         );
         if (!shouldShow) {
@@ -1244,145 +920,20 @@ export const BusinessVerificationDetails: React.FC<
       }
 
       // Check if field is required
-      const isRequired =
-        (Array.isArray(section?.required) &&
-          section.required.includes(fieldId)) ??
-        property?.required ??
-        false;
-
-      // Handle nested object fields
-      if (property.type === "object" && property.properties) {
-        return (
-          <Card key={fieldId} size="small" style={{ marginBottom: 16 }}>
-            <div style={{ marginBottom: 12 }}>
-              <Text strong>
-                {property.title}
-                {isRequired ? " *" : ""}
-              </Text>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {Object.entries(property.properties).map(
-                ([subFieldId, subProperty]: [string, any]) => {
-                  const subFieldKey = `${fieldId}.${subFieldId}`;
-                  const subFieldValue = data[fieldId]?.[subFieldId];
-
-                  // Handle date fields in nested objects
-                  const isDateField = subProperty?.format === "date";
-                  if (isDateField) {
-                    return (
-                      <Form.Item
-                        key={subFieldKey}
-                        name={subFieldKey}
-                        label={subProperty.title ?? subProperty.label}
-                      >
-                        <Input
-                          disabled={readOnly || subProperty.readOnly}
-                          placeholder="Select date"
-                        />
-                      </Form.Item>
-                    );
-                  }
-
-                  // Handle enum in nested objects
-                  if (subProperty.enum && subProperty.enum.length > 0) {
-                    return (
-                      <Form.Item
-                        key={subFieldKey}
-                        name={subFieldKey}
-                        label={subProperty.title ?? subProperty.label}
-                      >
-                        <Radio.Group
-                          disabled={readOnly || subProperty.readOnly}
-                        >
-                          {subProperty.enum.map((option: string) => (
-                            <Radio key={option} value={option}>
-                              {option}
-                            </Radio>
-                          ))}
-                        </Radio.Group>
-                      </Form.Item>
-                    );
-                  }
-
-                  // Handle textarea in nested objects
-                  const isTextArea =
-                    subProperty.title.toLowerCase().includes("about") ||
-                    subProperty.title.toLowerCase().includes("address") ||
-                    subProperty.title.toLowerCase().includes("description") ||
-                    subProperty.title.toLowerCase().includes("remark") ||
-                    subProperty.title.toLowerCase().includes("details");
-
-                  if (isTextArea) {
-                    return (
-                      <Form.Item
-                        key={subFieldKey}
-                        name={subFieldKey}
-                        label={subProperty.title ?? subProperty.label}
-                      >
-                        <TextArea
-                          disabled={readOnly || subProperty.readOnly}
-                          placeholder={subProperty.title}
-                          rows={3}
-                        />
-                      </Form.Item>
-                    );
-                  }
-
-                  // Handle number/integer in nested objects
-                  if (
-                    subProperty.type === "number" ||
-                    subProperty.type === "integer"
-                  ) {
-                    return (
-                      <Form.Item
-                        key={subFieldKey}
-                        name={subFieldKey}
-                        label={subProperty.title ?? subProperty.label}
-                      >
-                        <InputNumber
-                          disabled={readOnly || subProperty.readOnly}
-                          style={{ width: "100%" }}
-                          placeholder={subProperty.title}
-                        />
-                      </Form.Item>
-                    );
-                  }
-
-                  // Default to Input for nested objects
-                  return (
-                    <Form.Item
-                      key={subFieldKey}
-                      name={subFieldKey}
-                      label={subProperty.title ?? subProperty.label}
-                    >
-                      <Input
-                        disabled={readOnly || subProperty.readOnly}
-                        placeholder={subProperty.title}
-                      />
-                    </Form.Item>
-                  );
-                }
-              )}
-            </div>
-          </Card>
-        );
-      }
+      const isRequired = field?.required ?? false;
 
       // Handle array fields
-      if (
-        property.type === "array" &&
-        (property.items || property.arrayItemFields)
-      ) {
+      if (field.type === "array" && field.arrayItemFields) {
         return (
           <div key={fieldId} style={{ marginBottom: 16 }}>
             <div style={{ marginBottom: 8 }}>
               <Text strong>
-                {property.title ?? property.label}
+                {field.label}
                 {isRequired ? " *" : ""}
               </Text>
             </div>
             <ArrayFieldRenderer
-              field={property}
+              field={field}
               data={data[fieldId] || []}
               readOnly={readOnly}
             />
@@ -1391,15 +942,11 @@ export const BusinessVerificationDetails: React.FC<
       }
 
       // Handle enum fields (select dropdown)
-      if (property.enum && property.enum.length > 0) {
+      if (field.enum && field.enum.length > 0) {
         return (
-          <Form.Item
-            key={fieldId}
-            name={fieldId}
-            label={property.title ?? property.label}
-          >
-            <Radio.Group disabled={readOnly || property.readOnly}>
-              {property.enum.map((option: string) => (
+          <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Radio.Group disabled={readOnly || field.readOnly}>
+              {field.enum.map((option: string) => (
                 <Radio key={option} value={option}>
                   {option}
                 </Radio>
@@ -1410,131 +957,110 @@ export const BusinessVerificationDetails: React.FC<
       }
 
       // Handle different field types
-      switch (property.type) {
+      switch (field.type) {
         case "boolean":
           return (
-            <Form.Item
-              key={fieldId}
-              name={fieldId}
-              label={property.title ?? property.label}
-            >
-              <Radio.Group disabled={readOnly || property.readOnly}>
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <Radio.Group disabled={readOnly || field.readOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
             </Form.Item>
           );
 
-        case "string":
-          // Check if it should be a date field
-          const isDateField = property.format === "date";
-          if (isDateField) {
-            return (
-              <Form.Item
-                key={fieldId}
-                name={fieldId}
-                label={property.title ?? property.label}
-              >
-                <Input
-                  disabled={readOnly || property.readOnly}
-                  placeholder="Select date"
-                />
-              </Form.Item>
-            );
-          }
-
-          // Check if it should be a textarea
-          const isTextArea =
-            property.title.toLowerCase().includes("about") ||
-            property.title.toLowerCase().includes("address") ||
-            property.title.toLowerCase().includes("description") ||
-            property.title.toLowerCase().includes("remark") ||
-            property.title.toLowerCase().includes("details");
-
-          if (isTextArea) {
-            return (
-              <Form.Item
-                key={fieldId}
-                name={fieldId}
-                label={property.title ?? property.label}
-              >
-                <TextArea
-                  disabled={readOnly || property.readOnly}
-                  placeholder={property.title}
-                  rows={3}
-                />
-              </Form.Item>
-            );
-          }
-
+        case "date":
           return (
-            <Form.Item
-              key={fieldId}
-              name={fieldId}
-              label={property.title ?? property.label}
-            >
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <Input
-                disabled={readOnly || property.readOnly}
-                placeholder={property.title}
+                disabled={readOnly || field.readOnly}
+                placeholder="Select date"
+              />
+            </Form.Item>
+          );
+
+        case "textarea":
+          return (
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <TextArea
+                disabled={readOnly || field.readOnly}
+                placeholder={field.placeholder}
+                rows={field.textAreaRows || 3}
+              />
+            </Form.Item>
+          );
+
+        case "richtext":
+          return (
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <TextArea
+                disabled={readOnly || field.readOnly}
+                placeholder={field.placeholder}
+                rows={field.textAreaRows || 5}
+              />
+            </Form.Item>
+          );
+
+        case "text":
+        case "string":
+          return (
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <Input
+                disabled={readOnly || field.readOnly}
+                placeholder={field.placeholder}
               />
             </Form.Item>
           );
 
         case "number":
           return (
-            <Form.Item
-              key={fieldId}
-              name={fieldId}
-              label={property.title ?? property.label}
-            >
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <InputNumber
-                disabled={readOnly || property.readOnly}
+                disabled={readOnly || field.readOnly}
                 style={{ width: "100%" }}
-                placeholder={property.title}
+                placeholder={field.placeholder}
               />
             </Form.Item>
           );
 
-        case "integer":
+        case "select":
           return (
-            <Form.Item
-              key={fieldId}
-              name={fieldId}
-              label={property.title ?? property.label}
-            >
-              <InputNumber
-                disabled={readOnly || property.readOnly}
-                style={{ width: "100%" }}
-                placeholder={property.title}
-                precision={0}
-              />
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <Radio.Group disabled={readOnly || field.readOnly}>
+                {field.options?.map((option: string) => (
+                  <Radio key={option} value={option}>
+                    {option}
+                  </Radio>
+                ))}
+              </Radio.Group>
             </Form.Item>
           );
 
         default:
           return (
-            <Form.Item
-              key={fieldId}
-              name={fieldId}
-              label={property.title ?? property.label}
-            >
+            <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <Input
-                disabled={readOnly || property.readOnly}
-                placeholder={property.title}
+                disabled={readOnly || field.readOnly}
+                placeholder={field.placeholder}
               />
             </Form.Item>
           );
       }
     };
 
+    // Handle the actual schema structure from the backend
+    // The backend returns sections with fields array, not schema.properties
+    if (!section.fields || !Array.isArray(section.fields)) {
+      return <div>No fields found for section: {section.label}</div>;
+    }
+
     return (
       <Form form={form} layout="vertical">
-        {section.fields?.map((field: any) => renderField(field.id, field))}
+        {section.fields.map((field: any) => renderField(field.id, field))}
       </Form>
     );
   };
 
-  // Array Field Renderer - Updated to handle arrayItemFields structure
+  // Array Field Renderer - Updated to handle the actual schema structure
   const ArrayFieldRenderer = ({
     field,
     data,
@@ -1544,9 +1070,6 @@ export const BusinessVerificationDetails: React.FC<
     data: any;
     readOnly: boolean;
   }) => {
-    // console.log("ArrayFieldRenderer - field:", field);
-    // console.log("ArrayFieldRenderer - data:", data);
-
     // Ensure data is an array and add unique IDs if missing
     const ensureArrayWithIds = (arrayData: any[]) => {
       if (!Array.isArray(arrayData)) return [];
@@ -1559,21 +1082,32 @@ export const BusinessVerificationDetails: React.FC<
     const [items, setItems] = useState(() => ensureArrayWithIds(data));
     const [form] = Form.useForm();
 
+    // Update items when data changes
+    React.useEffect(() => {
+      const newItems = ensureArrayWithIds(data);
+      setItems(newItems);
+
+      // Set form values for all items
+      const formValues: any = {};
+      newItems.forEach((item: any, index: number) => {
+        Object.keys(item).forEach((key) => {
+          if (key !== "_id") {
+            formValues[`${field.id}[${index}].${key}`] = item[key];
+          }
+        });
+      });
+      form.setFieldsValue(formValues);
+    }, [data, field.id, form]);
+
     const addItem = () => {
       const newItem: any = {
         _id: `item-${items.length}-${Date.now()}`,
       };
 
-      // Handle both old schema (items.properties) and new schema (arrayItemFields)
+      // Handle the actual schema structure from backend
       if (field.arrayItemFields) {
-        // New schema structure
         field.arrayItemFields.forEach((itemField: any) => {
           newItem[itemField.id] = "";
-        });
-      } else if (field.items?.properties) {
-        // Old schema structure
-        Object.keys(field.items.properties).forEach((key) => {
-          newItem[key] = "";
         });
       }
 
@@ -1585,62 +1119,52 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     const renderArrayItemField = (
+      itemFieldId: string,
       itemField: any,
       itemValue: any,
       itemIndex: number
     ) => {
-      const fieldKey = `${field.id}[${itemIndex}].${itemField.id}`;
+      const fieldKey = `${field.id}[${itemIndex}].${itemFieldId}`;
 
       // Handle different field types within array items
       switch (itemField.type) {
         case "number":
-        case "integer":
           return (
             <Form.Item
-              key={itemField.id}
+              key={itemFieldId}
               name={fieldKey}
-              label={itemField.label ?? itemField.title}
+              label={itemField.label}
             >
               <InputNumber
                 disabled={readOnly || itemField.readOnly}
                 style={{ width: "100%" }}
                 placeholder={itemField.placeholder}
-                precision={itemField.type === "integer" ? 0 : undefined}
+              />
+            </Form.Item>
+          );
+
+        case "textarea":
+          return (
+            <Form.Item
+              key={itemFieldId}
+              name={fieldKey}
+              label={itemField.label}
+            >
+              <TextArea
+                disabled={readOnly || itemField.readOnly}
+                placeholder={itemField.placeholder}
+                rows={3}
               />
             </Form.Item>
           );
 
         case "text":
         case "string":
-          // Check if it should be a textarea
-          const isTextArea =
-            itemField.label?.toLowerCase().includes("about") ||
-            itemField.label?.toLowerCase().includes("address") ||
-            itemField.label?.toLowerCase().includes("description") ||
-            itemField.label?.toLowerCase().includes("remark") ||
-            itemField.label?.toLowerCase().includes("details");
-
-          if (isTextArea) {
-            return (
-              <Form.Item
-                key={itemField.id}
-                name={fieldKey}
-                label={itemField.label ?? itemField.title}
-              >
-                <TextArea
-                  disabled={readOnly || itemField.readOnly}
-                  placeholder={itemField.placeholder}
-                  rows={3}
-                />
-              </Form.Item>
-            );
-          }
-
           return (
             <Form.Item
-              key={itemField.id}
+              key={itemFieldId}
               name={fieldKey}
-              label={itemField.label ?? itemField.title}
+              label={itemField.label}
             >
               <Input
                 disabled={readOnly || itemField.readOnly}
@@ -1649,12 +1173,29 @@ export const BusinessVerificationDetails: React.FC<
             </Form.Item>
           );
 
+        case "select":
+          return (
+            <Form.Item
+              key={itemFieldId}
+              name={fieldKey}
+              label={itemField.label}
+            >
+              <Radio.Group disabled={readOnly || itemField.readOnly}>
+                {itemField.options?.map((option: string) => (
+                  <Radio key={option} value={option}>
+                    {option}
+                  </Radio>
+                ))}
+              </Radio.Group>
+            </Form.Item>
+          );
+
         case "boolean":
           return (
             <Form.Item
-              key={itemField.id}
+              key={itemFieldId}
               name={fieldKey}
-              label={itemField.label ?? itemField.title}
+              label={itemField.label}
             >
               <Radio.Group disabled={readOnly || itemField.readOnly}>
                 <Radio value={true}>Yes</Radio>
@@ -1666,9 +1207,9 @@ export const BusinessVerificationDetails: React.FC<
         default:
           return (
             <Form.Item
-              key={itemField.id}
+              key={itemFieldId}
               name={fieldKey}
-              label={itemField.label ?? itemField.title}
+              label={itemField.label}
             >
               <Input
                 disabled={readOnly || itemField.readOnly}
@@ -1710,32 +1251,20 @@ export const BusinessVerificationDetails: React.FC<
 
             {/* Render fields based on schema structure */}
             {field.arrayItemFields
-              ? // New schema structure with arrayItemFields
-                field.arrayItemFields.map((itemField: any) =>
-                  renderArrayItemField(itemField, item[itemField.id], index)
-                )
-              : field.items?.properties
-                ? // Old schema structure with items.properties
-                  Object.entries(field.items.properties).map(
-                    ([itemFieldId, itemField]: [string, any]) => (
-                      <Form.Item
-                        key={itemFieldId}
-                        name={`${field.id}[${index}].${itemFieldId}`}
-                        label={itemField.title ?? itemField.label}
-                      >
-                        <Input
-                          disabled={readOnly || itemField.readOnly}
-                          placeholder={itemField.title ?? itemField.label}
-                        />
-                      </Form.Item>
-                    )
+              ? field.arrayItemFields.map((itemField: any) =>
+                  renderArrayItemField(
+                    itemField.id,
+                    itemField,
+                    item[itemField.id],
+                    index
                   )
-                : null}
+                )
+              : null}
           </Card>
         ))}
         {!readOnly && (
           <Button type="dashed" onClick={addItem} style={{ width: "100%" }}>
-            + Add {field.label ?? field.title}
+            + Add {field.title ?? field.label}
           </Button>
         )}
       </Form>
@@ -1781,177 +1310,155 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* {console.log(useGenericApproach, schemaForm, formLoading)} */}
 
-      {/* Main Two-Column Layout */}
-      <div style={{ display: "flex", gap: "24px", minHeight: "80vh" }}>
-        {/* Left Column - Form Sections */}
-        <div style={{ flex: "2", overflow: "auto", padding: "0 12px" }}>
-          {useGenericApproach && schemaForm && !formLoading ? (
+      {/* Main Single Column Layout */}
+      <div style={{ padding: "0 12px" }}>
+        {useGenericApproach && schemaForm && !formLoading ? (
+          <>
             <CollapsibleFormSections
               schema={schemaForm}
               formData={dynamicFormData}
               onEdit={handleDynamicSectionEdit}
               readOnly={!!verificationData?.approvedStatus || hasEditRequest}
             />
-          ) : // : !formLoading ? (
-          //   // Fallback to legacy display if no schema
-          //   <div style={{ marginBottom: 24 }}>
-          //     <BusinessBasicDetailsDescription
-          //       data={mergedLegacyData}
-          //       extra={
-          //         <Button
-          //           type="text"
-          //           icon={<EditOutlined />}
-          //           onClick={() =>
-          //             currentDepartment === "PD"
-          //               ? handleDynamicSectionEdit("basicDetails")
-          //               : onEdit("basicDetails")
-          //           }
-          //           disabled={hasEditRequest}
-          //         />
-          //       }
-          //       logs={false}
-          //       currentDepartment={currentDepartment}
-          //     />
 
-          //     <BusinessDetailsDescription
-          //       data={mergedLegacyData}
-          //       extra={
-          //         <Button
-          //           type="text"
-          //           icon={<EditOutlined />}
-          //           onClick={() =>
-          //             currentDepartment === "PD"
-          //               ? handleDynamicSectionEdit("businessDetails")
-          //               : onEdit("businessDetails")
-          //           }
-          //           disabled={hasEditRequest}
-          //         />
-          //       }
-          //       logs={false}
-          //       currentDepartment={currentDepartment}
-          //     />
+            {/* Photo Capture Section - Grouped by Document Type */}
+            <section style={{ marginBottom: 24 }}>
+              <Card title="Photo Capture">
+                {(() => {
+                  // Group photos by document type
+                  const groupedPhotos = (data?.uploadedItems || []).reduce(
+                    (acc: any, item: any) => {
+                      const docType = item.documentType || "Other";
+                      if (!acc[docType]) {
+                        acc[docType] = [];
+                      }
+                      acc[docType].push(item);
+                      return acc;
+                    },
+                    {}
+                  );
 
-          //     <BusinessMiscellaneousDescription
-          //       data={mergedLegacyData}
-          //       extra={
-          //         <Button
-          //           type="text"
-          //           icon={<EditOutlined />}
-          //           onClick={() =>
-          //             currentDepartment === "PD"
-          //               ? handleDynamicSectionEdit("miscellaneous")
-          //               : onEdit("miscellaneous")
-          //           }
-          //           disabled={hasEditRequest}
-          //         />
-          //       }
-          //       logs={false}
-          //     />
+                  return Object.entries(groupedPhotos).map(
+                    ([docType, photos]: [string, any]) => (
+                      <div key={docType} style={{ marginBottom: 24 }}>
+                        {/* Document Type Header */}
+                        <div
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            color: "white",
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            marginBottom: "12px",
+                            fontWeight: "600",
+                            fontSize: "14px",
+                            textAlign: "center",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                          }}
+                        >
+                          📄 {docType}
+                        </div>
 
-          //     <ExistingLoansDescription
-          //       data={legacyFormattedData}
-          //       extra={
-          //         <Button
-          //           type="text"
-          //           icon={<EditOutlined />}
-          //           onClick={() =>
-          //             currentDepartment === "PD"
-          //               ? handleDynamicSectionEdit("existingLoans")
-          //               : onEdit("existingLoans")
-          //           }
-          //           disabled={hasEditRequest}
-          //         />
-          //       }
-          //       logs={false}
-          //     />
+                        {/* Photos Grid for this document type */}
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(200px, 1fr))",
+                            gap: "16px",
+                          }}
+                        >
+                          {photos.map((item: any, idx: number) => (
+                            <div key={item.id} style={{ position: "relative" }}>
+                              <Image
+                                src={imageUrls[item.id] || ""}
+                                alt={`${docType} Photo ${idx + 1}`}
+                                style={{
+                                  width: "100%",
+                                  height: "200px",
+                                  objectFit: "cover",
+                                  borderRadius: "4px",
+                                  border: "2px solid #f0f0f0",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  background: "rgba(0, 0, 0, 0.7)",
+                                  color: "white",
+                                  padding: "6px 8px",
+                                  fontSize: "11px",
+                                  borderRadius: "0 0 4px 4px",
+                                }}
+                              >
+                                {docType} - Photo {idx + 1}{" "}
+                                {item?.isCamera ? "📷" : "🖼️"}
+                              </div>
+                              {!(
+                                !!verificationData?.approvedStatus ||
+                                hasEditRequest
+                              ) && (
+                                <Button
+                                  type="text"
+                                  danger
+                                  icon={<CloseCircleOutlined />}
+                                  style={{
+                                    position: "absolute",
+                                    top: 8,
+                                    right: 8,
+                                    background: "rgba(255, 255, 255, 0.9)",
+                                    borderRadius: "50%",
+                                    width: "28px",
+                                    height: "28px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                  }}
+                                  onClick={() => handleDeleteClick(item.id)}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  );
+                })()}
 
-          //     <ThirdPartyCheckDescription
-          //       data={legacyFormattedData}
-          //       extra={
-          //         <Button
-          //           type="text"
-          //           icon={<EditOutlined />}
-          //           onClick={() =>
-          //             currentDepartment === "PD"
-          //               ? handleDynamicSectionEdit("thirdPartyCheck")
-          //               : onEdit("thirdPartyCheck")
-          //           }
-          //           disabled={hasEditRequest}
-          //         />
-          //       }
-          //       logs={false}
-          //     />
+                {/* Show message if no photos */}
+                {(!data?.uploadedItems || data.uploadedItems.length === 0) && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "40px 20px",
+                      color: "#999",
+                      fontSize: "14px",
+                    }}
+                  >
+                    📷 No photos captured yet
+                  </div>
+                )}
+              </Card>
+            </section>
 
-          //     <section style={{ marginBottom: 24 }}>
-          //       <Card title="Photo Capture">
-          //         <div
-          //           style={{
-          //             display: "grid",
-          //             gridTemplateColumns:
-          //               "repeat(auto-fill, minmax(200px, 1fr))",
-          //             gap: "16px",
-          //           }}
-          //         >
-          //           {legacyFormattedData?.uploadedItems?.map(
-          //             (item: any, idx: number) => {
-          //               return (
-          //                 <div key={item.id} style={{ position: "relative" }}>
-          //                   <Image
-          //                     src={imageUrls[item.id] || ""}
-          //                     alt={`Photo ${idx + 1}`}
-          //                     style={{
-          //                       width: "100%",
-          //                       height: "200px",
-          //                       objectFit: "cover",
-          //                       borderRadius: "4px",
-          //                     }}
-          //                   />
-          //                   <div
-          //                     style={{
-          //                       position: "absolute",
-          //                       bottom: 0,
-          //                       left: 0,
-          //                       right: 0,
-          //                       background: "rgba(0, 0, 0, 0.6)",
-          //                       color: "white",
-          //                       padding: "4px 8px",
-          //                       fontSize: "12px",
-          //                     }}
-          //                   >
-          //                     Photo {idx + 1}{" "}
-          //                     {item?.isCamera ? null : "(Gallery)"}
-          //                   </div>
-          //                 </div>
-          //               );
-          //             }
-          //           )}
-          //         </div>
-          //       </Card>
-          //     </section>
-          //   </div>
-          // )
-          null}
-        </div>
-
-        {/* Right Column - Financial Analysis & Synopsis */}
-        <div style={{ flex: "1", overflow: "auto", padding: "0 12px" }}>
-          <RightColumn
-            financialForm={financialForm}
-            calculatedGrossProfit={calculatedGrossProfit}
-            calculatedNetProfit={calculatedNetProfit}
-            handleFinancialSubmit={handleFinancialSubmit}
-            loading={loading}
-            verificationData={verificationData}
-            readOnly={!!verificationData?.approvedStatus || hasEditRequest}
-            verdict={verdict}
-            setVerdict={setVerdict}
-            editorContent={editorContent}
-            setEditorContent={setEditorContent}
-            handleSave={handleSave}
-            currentDepartment={currentDepartment}
-            hasEditRequest={hasEditRequest}
-          />
-        </div>
+            {/* Synopsis Section - Using exact Feedback component from RightColumn */}
+            <Feedback
+              disabled={!!verificationData?.approvedStatus || hasEditRequest}
+              verdict={verdict}
+              setVerdict={setVerdict}
+              editorContent={editorContent}
+              setEditorContent={setEditorContent}
+              handleSave={handleSave}
+              verificationData={verificationData}
+              currentDepartment={currentDepartment}
+              hasEditRequest={hasEditRequest}
+            />
+          </>
+        ) : null}
       </div>
 
       {/* Edit Request Logs */}
@@ -1974,24 +1481,25 @@ export const BusinessVerificationDetails: React.FC<
       {/* Footer */}
       {role !== "VerificationExecutive" && (
         <>
-          {role === "AssistantVerifier" ? (
-            <AssistantVerifierFooter
-              onSave={handleAssistantVerifierSubmit}
-              loading={loading}
-              disabled={hasEditRequest}
-            />
-          ) : (
-            <Footer
-              editorContent={editorContent}
-              disabled={hasEditRequest}
-              handleSave={handleSave}
-              verdict={completeVerificationData?.approvedStatus}
-              open={open}
-              setOpen={setOpen}
-              verificationType="Business"
-            />
-          )}
+          <Footer
+            editorContent={editorContent}
+            disabled={hasEditRequest}
+            handleSave={handleSave}
+            verdict={completeVerificationData?.approvedStatus}
+            open={open}
+            setOpen={setOpen}
+            verificationType="Business"
+          />
         </>
+      )}
+
+      {/* Verification Executive Footer */}
+      {role === "VerificationExecutive" && (
+        <AssistantVerifierFooter
+          onSave={handleVerificationExecutiveSubmit}
+          loading={loading}
+          disabled={hasEditRequest}
+        />
       )}
     </div>
   );
