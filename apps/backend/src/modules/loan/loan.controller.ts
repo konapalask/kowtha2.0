@@ -16,8 +16,6 @@ import { Roles, All } from "../accounts/decorators/roles.decorator";
 import { DeleteVerificationDto } from "./dto/delete-verification.dto";
 import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
 import { CreateVerificationRetryDto } from "./dto/create-verification-retry.dto";
-import { CreateFinancialAnalysisDto } from "./dto/create-financial-analysis.dto";
-import { UpdateFinancialAnalysisDto } from "./dto/update-financial-analysis.dto";
 import { UpdateVerificationStatusDto } from "./dto/update-verification-status.dto";
 import { SubmitVerificationExecutiveDto } from "./dto/submit-verification-executive.dto";
 import {
@@ -648,6 +646,7 @@ export class LoanController {
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({
     summary: "Update financial analysis data for a verification",
+    description: "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format."
   })
   @ApiResponse({
     status: 200,
@@ -684,7 +683,8 @@ export class LoanController {
   })
   async updateFinancialAnalysis(
     @Param("id") loanId: string,
-    @Body() updateFinancialAnalysisDto: UpdateFinancialAnalysisDto
+    @Body() updateFinancialAnalysisDto: any,
+    @Query("bankName") bankName?: string
   ) {
     const { synopsis, ...financialAnalysisData } = updateFinancialAnalysisDto;
     const result = await this.loanService.updateFinancialAnalysis(
@@ -702,7 +702,7 @@ export class LoanController {
   @Get(":id/export-financial-analysis")
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({
-    summary: "Export financial analysis data as Excel file",
+    summary: "Export financial analysis data as Excel file with bank-specific template",
   })
   @ApiResponse({
     status: 200,
@@ -714,11 +714,13 @@ export class LoanController {
   })
   async exportFinancialAnalysis(
     @Param("id") loanId: string,
+    @Query("bankName") bankName: string,
     @Res() res: Response
   ) {
     try {
       const excelBuffer = await this.loanService.exportFinancialAnalysisToExcel(
-        Number(loanId)
+        Number(loanId),
+        bankName
       );
 
       res.set({
@@ -1093,9 +1095,12 @@ export class LoanController {
     };
   }
 
-  @Post("verification/:id/financial-analysis")
+  @Post("verification/:id/ -analysis")
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
-  @ApiOperation({ summary: "Create financial analysis data for a verification" })
+  @ApiOperation({ 
+    summary: "Create financial analysis data for a verification",
+    description: "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format."
+  })
   @ApiResponse({
     status: 201,
     description: "Financial analysis created successfully",
@@ -1131,7 +1136,8 @@ export class LoanController {
   })
   async createFinancialAnalysis(
     @Param("id") loanId: string,
-    @Body() createFinancialAnalysisDto: CreateFinancialAnalysisDto
+    @Body() createFinancialAnalysisDto: any,
+    @Query("bankName") bankName?: string
   ) {
     const { synopsis, ...financialAnalysisData } = createFinancialAnalysisDto;
     const result = await this.loanService.createFinancialAnalysis(
@@ -1306,6 +1312,129 @@ export class LoanController {
       status: 200,
       message: "Bank forms fetched successfully",
       data: result,
+    };
+  }
+
+  @Get("financial-analysis-template-info")
+  @Roles(All)
+  @ApiOperation({ 
+    summary: "Get financial analysis template format information for a specific bank",
+    description: "Returns the template type and required DTO structure for financial analysis based on bank name"
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: "Template information fetched successfully",
+    schema: {
+      type: "object",
+      properties: {
+        status: { type: "number", example: 200 },
+        message: { type: "string", example: "Template information fetched successfully" },
+        data: {
+          type: "object",
+          properties: {
+            bankName: { type: "string" },
+            templateType: { type: "string", enum: ["standard", "service", "detailed", "proprietor-gst", "gp-pbdit", "comprehensive"] },
+            dtoType: { type: "string" },
+            description: { type: "string" },
+            requiredFields: { type: "array", items: { type: "string" } },
+          },
+        },
+      },
+    },
+  })
+  async getFinancialAnalysisTemplateInfo(
+    @Query("bankName") bankName: string
+  ) {
+    if (!bankName) {
+      return {
+        status: 400,
+        message: "Bank name is required",
+        data: null,
+      };
+    }
+
+    const bankNameLower = bankName.toLowerCase();
+    let templateType = "standard";
+    let dtoType = "FinancialAnalysisStandardDto";
+    let description = "Standard Trading and P&L Account Format with Actuals and Estimations";
+    let requiredFields: string[] = [];
+
+    // Determine template type based on bank
+    if (["chola", "cholamandalam"].some(b => bankNameLower.includes(b))) {
+      templateType = "service";
+      dtoType = "FinancialAnalysisServiceDto";
+      description = "Simple Service Business Format with monthly calculations";
+      requiredFields = ["costOfService", "byService", "netProfit", "monthlyTurnover", "monthlyPayments"];
+    } else if (["hdfc", "icici", "axis"].some(b => bankNameLower.includes(b))) {
+      templateType = "detailed";
+      dtoType = "FinancialAnalysisDetailedDto";
+      description = "Detailed Format with Balance Sheet and Audited/Assessed columns";
+      requiredFields = ["grossProfitEstimated", "netProfit", "salesEstimated", "balanceSheet"];
+    } else if (["kotak", "indusind"].some(b => bankNameLower.includes(b))) {
+      templateType = "proprietor-gst";
+      dtoType = "FinancialAnalysisProprietorGstDto";
+      description = "Proprietor Format with Monthly Breakdown and GST Tables";
+      requiredFields = ["grossProfit", "netProfit", "sales", "monthlyTurnover", "gst2023_2024", "gst2024_2025"];
+    } else if (["bajaj", "tata"].some(b => bankNameLower.includes(b))) {
+      templateType = "gp-pbdit";
+      dtoType = "FinancialAnalysisGpPbditDto";
+      description = "GP/PBDIT Format with detailed cost analysis and margin calculations";
+      requiredFields = ["grossReceipts", "costOfMaterialConsumed", "grossProfitAsPerAssumption", "gpRatio", "pbditMargin"];
+    } else if (["sbi", "pnb", "bank of baroda"].some(b => bankNameLower.includes(b))) {
+      templateType = "comprehensive";
+      dtoType = "FinancialAnalysisComprehensiveDto";
+      description = "Comprehensive Actuals vs Estimated Format with multi-year comparison";
+      requiredFields = ["openingStock_2023", "openingStock_2024", "openingStockEstimated", "sales_2023", "sales_2024"];
+    }
+
+    return {
+      status: 200,
+      message: "Template information fetched successfully",
+      data: {
+        bankName,
+        templateType,
+        dtoType,
+        description,
+        requiredFields,
+        availableTemplates: [
+          {
+            type: "standard",
+            dto: "FinancialAnalysisStandardDto",
+            description: "Standard Trading and P&L Account Format",
+            banks: ["Default/Generic"]
+          },
+          {
+            type: "service",
+            dto: "FinancialAnalysisServiceDto",
+            description: "Simple Service Business Format",
+            banks: ["Chola", "Cholamandalam"]
+          },
+          {
+            type: "detailed",
+            dto: "FinancialAnalysisDetailedDto",
+            description: "Detailed Format with Balance Sheet",
+            banks: ["HDFC", "ICICI", "Axis"]
+          },
+          {
+            type: "proprietor-gst",
+            dto: "FinancialAnalysisProprietorGstDto",
+            description: "Proprietor Format with GST Tables",
+            banks: ["Kotak", "IndusInd"]
+          },
+          {
+            type: "gp-pbdit",
+            dto: "FinancialAnalysisGpPbditDto",
+            description: "GP/PBDIT Format with margin calculations",
+            banks: ["Bajaj", "Tata"]
+          },
+          {
+            type: "comprehensive",
+            dto: "FinancialAnalysisComprehensiveDto",
+            description: "Comprehensive multi-year comparison format",
+            banks: ["SBI", "PNB", "Bank of Baroda"]
+          }
+        ],
+      },
     };
   }
 }
