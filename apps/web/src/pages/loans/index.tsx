@@ -45,7 +45,8 @@ import {
   getCurrentDepartmentRole,
   useDepartmentChange,
 } from "@/utils/utility";
-import { getPdBanksApi } from "@/services/schema.service";
+import { pdBankOptions as staticPdBankOptions } from "@/utils/options";
+// import { getPdBanksApi } from "@/services/schema.service"; // Commented out: Using static options
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -99,7 +100,7 @@ export default function Loans() {
     fieldExecutiveEmployeeCode: undefined,
     fieldExecutiveName: undefined,
   });
-  const [pdBankOptions, setPdBankOptions] = useState<any[]>([]);
+  const [pdBankOptions] = useState<any[]>(staticPdBankOptions);
 
   // Update currentOffice when department changes
   useEffect(() => {
@@ -165,18 +166,19 @@ export default function Loans() {
         console.log(err);
         // message.error("Failed to fetch verifiers");
       });
-    getPdBanksApi()
-      .then((res) => {
-        const options =
-          res?.map((item: any) => ({
-            label: item,
-            value: item,
-          })) ?? [];
-        setPdBankOptions(options);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // Commented out: Using static pdBankOptions from options.tsx instead of backend API
+    // getPdBanksApi()
+    //   .then((res) => {
+    //     const options =
+    //       res?.map((item: any) => ({
+    //         label: item,
+    //         value: item,
+    //       })) ?? [];
+    //     setPdBankOptions(options);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   }, []);
 
   const fetchExecutives = async () => {
