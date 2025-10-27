@@ -49,6 +49,7 @@ import {
 } from "@nestjs/common";
 import { PDTemplateService } from "./pd-templates.service";
 import { formSchema, BANK_NAMES } from "./forms-schema";
+import { genericSchema as financialAnalysisSchema } from "./financials-schema/generic";
 
 @ApiTags("loans")
 @Controller("loans")
@@ -1275,6 +1276,15 @@ export class LoanController {
         data: BANK_NAMES,
       };
     }
+
+    // Return Financial Analysis schema (generic for now)
+    if (type === "financial-analysis") {
+      return {
+        status: 200,
+        message: "Financial analysis schema fetched successfully",
+        data: financialAnalysisSchema,
+      };
+    }
     if (
       !bankName ||
       !Object.prototype.hasOwnProperty.call(formSchema, bankName)
@@ -1315,126 +1325,4 @@ export class LoanController {
     };
   }
 
-  @Get("financial-analysis-template-info")
-  @Roles(All)
-  @ApiOperation({
-    summary: "Get financial analysis template format information for a specific bank",
-    description: "Returns the template type and required DTO structure for financial analysis based on bank name"
-  })
-  @ApiResponse({
-    status: 200,
-    description: "Template information fetched successfully",
-    schema: {
-      type: "object",
-      properties: {
-        status: { type: "number", example: 200 },
-        message: { type: "string", example: "Template information fetched successfully" },
-        data: {
-          type: "object",
-          properties: {
-            bankName: { type: "string" },
-            templateType: { type: "string", enum: ["standard", "service", "detailed", "proprietor-gst", "gp-pbdit", "comprehensive"] },
-            dtoType: { type: "string" },
-            description: { type: "string" },
-            requiredFields: { type: "array", items: { type: "string" } },
-          },
-        },
-      },
-    },
-  })
-  async getFinancialAnalysisTemplateInfo(
-    @Query("bankName") bankName: string
-  ) {
-    if (!bankName) {
-      return {
-        status: 400,
-        message: "Bank name is required",
-        data: null,
-      };
-    }
-
-    const bankNameLower = bankName.toLowerCase();
-    let templateType = "standard";
-    let dtoType = "FinancialAnalysisStandardDto";
-    let description = "Standard Trading and P&L Account Format with Actuals and Estimations";
-    let requiredFields: string[] = [];
-
-    // Determine template type based on bank
-    if (["chola", "cholamandalam"].some(b => bankNameLower.includes(b))) {
-      templateType = "service";
-      dtoType = "FinancialAnalysisServiceDto";
-      description = "Simple Service Business Format with monthly calculations";
-      requiredFields = ["costOfService", "byService", "netProfit", "monthlyTurnover", "monthlyPayments"];
-    } else if (["hdfc", "icici", "axis"].some(b => bankNameLower.includes(b))) {
-      templateType = "detailed";
-      dtoType = "FinancialAnalysisDetailedDto";
-      description = "Detailed Format with Balance Sheet and Audited/Assessed columns";
-      requiredFields = ["grossProfitEstimated", "netProfit", "salesEstimated", "balanceSheet"];
-    } else if (["kotak", "indusind"].some(b => bankNameLower.includes(b))) {
-      templateType = "proprietor-gst";
-      dtoType = "FinancialAnalysisProprietorGstDto";
-      description = "Proprietor Format with Monthly Breakdown and GST Tables";
-      requiredFields = ["grossProfit", "netProfit", "sales", "monthlyTurnover", "gst2023_2024", "gst2024_2025"];
-    } else if (["bajaj", "tata"].some(b => bankNameLower.includes(b))) {
-      templateType = "gp-pbdit";
-      dtoType = "FinancialAnalysisGpPbditDto";
-      description = "GP/PBDIT Format with detailed cost analysis and margin calculations";
-      requiredFields = ["grossReceipts", "costOfMaterialConsumed", "grossProfitAsPerAssumption", "gpRatio", "pbditMargin"];
-    } else if (["sbi", "pnb", "bank of baroda"].some(b => bankNameLower.includes(b))) {
-      templateType = "comprehensive";
-      dtoType = "FinancialAnalysisComprehensiveDto";
-      description = "Comprehensive Actuals vs Estimated Format with multi-year comparison";
-      requiredFields = ["openingStock_2023", "openingStock_2024", "openingStockEstimated", "sales_2023", "sales_2024"];
-    }
-
-    return {
-      status: 200,
-      message: "Template information fetched successfully",
-      data: {
-        bankName,
-        templateType,
-        dtoType,
-        description,
-        requiredFields,
-        availableTemplates: [
-          {
-            type: "standard",
-            dto: "FinancialAnalysisStandardDto",
-            description: "Standard Trading and P&L Account Format",
-            banks: ["Default/Generic"]
-          },
-          {
-            type: "service",
-            dto: "FinancialAnalysisServiceDto",
-            description: "Simple Service Business Format",
-            banks: ["Chola", "Cholamandalam"]
-          },
-          {
-            type: "detailed",
-            dto: "FinancialAnalysisDetailedDto",
-            description: "Detailed Format with Balance Sheet",
-            banks: ["HDFC", "ICICI", "Axis"]
-          },
-          {
-            type: "proprietor-gst",
-            dto: "FinancialAnalysisProprietorGstDto",
-            description: "Proprietor Format with GST Tables",
-            banks: ["Kotak", "IndusInd"]
-          },
-          {
-            type: "gp-pbdit",
-            dto: "FinancialAnalysisGpPbditDto",
-            description: "GP/PBDIT Format with margin calculations",
-            banks: ["Bajaj", "Tata"]
-          },
-          {
-            type: "comprehensive",
-            dto: "FinancialAnalysisComprehensiveDto",
-            description: "Comprehensive multi-year comparison format",
-            banks: ["SBI", "PNB", "Bank of Baroda"]
-          }
-        ],
-      },
-    };
-  }
 }
