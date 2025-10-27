@@ -26,14 +26,6 @@ export const iciciSchema = {
             type: "string",
             title: "Branch",
           },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
         },
         required: ["applicationNo"],
       },
@@ -76,14 +68,7 @@ export const iciciSchema = {
             type: "string",
             title: "Distance from HFC Branch",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
+          
         },
       },
       required: true,
@@ -147,39 +132,43 @@ export const iciciSchema = {
       schema: {
         type: "object",
         properties: {
-          currentResidenceOwnedRented: {
-            type: "string",
-            title: "Current Residence – Owned/Rented",
-            enum: ["Owned", "Rented"],
+          residenceDetails: {
+            currentResidenceOwnedRented: {
+              type: "string",
+              title: "Current Residence – Owned/Rented",
+              enum: ["Owned", "Rented"],
+            },
+            ifOwnedOwnerName: {
+              type: "string",
+              title: "If Owned – Owner Name",
+            },
+            ifRentedOwnerNameContactNo: {
+              type: "string",
+              title: "If Rented – Owner Name & Contact No",
+            },
+            ifRentedPermanentResidenceDetails: {
+              type: "string",
+              title: "If Rented – Permanent Residence Details",
+            },
+            noOfYearsInCurrentResidence: {
+              type: "integer",
+              title: "No. of Years in Current Residence",
+            },
+            previousResidenceDetails: {
+              type: "string",
+              title: "Previous Residence Details",
+            },
+            noOfYearsInSameCity: {
+              type: "integer",
+              title: "No. of Years in Same City",
+            },
+            distanceFromCurrentResidenceToBusiness: {
+              type: "string",
+              title: "Distance from Current Residence to Business Premises",
+            },
+
           },
-          ifOwnedOwnerName: {
-            type: "string",
-            title: "If Owned – Owner Name",
-          },
-          ifRentedOwnerNameContactNo: {
-            type: "string",
-            title: "If Rented – Owner Name & Contact No",
-          },
-          ifRentedPermanentResidenceDetails: {
-            type: "string",
-            title: "If Rented – Permanent Residence Details",
-          },
-          noOfYearsInCurrentResidence: {
-            type: "integer",
-            title: "No. of Years in Current Residence",
-          },
-          previousResidenceDetails: {
-            type: "string",
-            title: "Previous Residence Details",
-          },
-          noOfYearsInSameCity: {
-            type: "integer",
-            title: "No. of Years in Same City",
-          },
-          distanceFromCurrentResidenceToBusiness: {
-            type: "string",
-            title: "Distance from Current Residence to Business Premises",
-          },
+          
           familyDetailsWithDependents: {
             type: "string",
             title: "Family Details with No. of Dependents",
@@ -257,23 +246,9 @@ export const iciciSchema = {
             type: "integer",
             title: "Business Vintage as per Document Verified (Years)",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessLocalityMarketCompetition",
-      label: "Business Locality & Market Competition",
-      schema: {
-        type: "object",
-        properties: {
-          businessLocality: {
+          businessLocalityAndMarketCompetition: {
             type: "string",
-            title: "Business Locality Description",
-          },
-          marketCompetition: {
-            type: "string",
-            title: "Market Competition",
+            title: "Business Locality and Market Competition",
           },
         },
       },

@@ -14,12 +14,19 @@ export class FinancialAnalysisTemplatesService {
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService
-  ) {}
-
-  /**
-   * Main export function that routes to the appropriate template based on bank
-   */
-  async exportFinancialAnalysisToExcel( loanId: number, bankName: string ): Promise<Buffer> {
+  ) { }
+  private readonly bankTemplateMappings = {
+    'generic': ["AMBIT-HL", "AMBIT-MSME", "ARKA FINCAP", "CENTRUM", "CENT BANK", "CHOLA-HL", "CHOLA-SME", "CLIX CAPITAL-HL", "CLIX CAPITAL-UBL", "EASY HL", "FED BANK (PD&LIP)", "GODREJ-HL", "GODREJ-UBL", "INDUSIND", "KOTAK", "MUTHOOT-HL", "MUTHOOT FINCORP (PD & LIP)", "NIDO HOME FINANCE", "NORTHERN ARC", "NIPUN", "PIRAMAL (PD, AIP, LIP)", "PNB", "TRUHOME (PD & LIP)", "VERITAS",],
+    'statement-1': [],
+    'statement-2': ["AXIS FINANCE-HL", "INCRED/KKR India Financial Services Limited", "SAMMAAN", "SMFG-ML (MICRO & MASS)", "SMFG-HL", "TATA CAPITAL-FSL", "TATA CAPITAL-HFL"],
+    'statement-3': ["DCB BANK"],
+    'statement-4': ["HERO FINCORP", "RBL BANK (PD & LIP)"],
+    'statement-5': [],
+  };
+  
+   // Main export function that routes to the appropriate template based on bank
+   
+  async exportFinancialAnalysisToExcel(loanId: number, bankName: string): Promise<Buffer> {
     const ExcelJS = await import('exceljs');
 
     try {
@@ -46,35 +53,31 @@ export class FinancialAnalysisTemplatesService {
       const financialAnalysis = (verification.financialAnalysis as any) || {};
       const loan = verification.loan;
 
-      // Route to appropriate template based on bank name
-      const bankNameLower = bankName?.toLowerCase() || '';
-
-      // Define bank template mappings
-      if (this.isServiceBusinessFormat(bankNameLower)) {
+      if (this.isServiceBusinessFormat(bankName)) {
         return await this.generateServiceBusinessFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
-      } else if (this.isDetailedBalanceSheetFormat(bankNameLower)) {
+      } else if (this.isDetailedBalanceSheetFormat(bankName)) {
         return await this.generateDetailedBalanceSheetFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
-      } else if (this.isProprietorGstFormat(bankNameLower)) {
+      } else if (this.isProprietorGstFormat(bankName)) {
         return await this.generateProprietorGstFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
-      } else if (this.isGpPbditFormat(bankNameLower)) {
+      } else if (this.isGpPbditFormat(bankName)) {
         return await this.generateGpPbditFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
-      } else if (this.isComprehensiveFormat(bankNameLower)) {
+      } else if (this.isComprehensiveFormat(bankName)) {
         return await this.generateComprehensiveFormat(
           ExcelJS,
           financialAnalysis,
@@ -105,27 +108,27 @@ export class FinancialAnalysisTemplatesService {
    * Determine which banks use which format
    */
   private isServiceBusinessFormat(bankName: string): boolean {
-    const serviceBanks = ['chola', 'cholamandalam'];
+    const serviceBanks = this.bankTemplateMappings['generic'];
     return serviceBanks.some((bank) => bankName.includes(bank));
   }
 
   private isDetailedBalanceSheetFormat(bankName: string): boolean {
-    const detailedBanks = ['hdfc', 'icici', 'axis'];
+    const detailedBanks = this.bankTemplateMappings['statement-2'];
     return detailedBanks.some((bank) => bankName.includes(bank));
   }
 
   private isProprietorGstFormat(bankName: string): boolean {
-    const gstBanks = ['kotak', 'indusind'];
+    const gstBanks = this.bankTemplateMappings['statement-3'];
     return gstBanks.some((bank) => bankName.includes(bank));
   }
 
   private isGpPbditFormat(bankName: string): boolean {
-    const pbditBanks = ['bajaj', 'tata'];
+    const pbditBanks = this.bankTemplateMappings['statement-4'];
     return pbditBanks.some((bank) => bankName.includes(bank));
   }
 
   private isComprehensiveFormat(bankName: string): boolean {
-    const comprehensiveBanks = ['sbi', 'pnb', 'bank of baroda'];
+    const comprehensiveBanks = this.bankTemplateMappings['statement-5'];
     return comprehensiveBanks.some((bank) => bankName.includes(bank));
   }
 

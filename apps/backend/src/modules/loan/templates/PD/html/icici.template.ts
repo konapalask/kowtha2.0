@@ -338,6 +338,5 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
     <p style="margin:20px;"><strong>Business Photos:</strong></p>
 
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

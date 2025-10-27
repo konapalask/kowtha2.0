@@ -207,11 +207,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       "Whether Name Board Seen",
       general.nameBoardSeen || general.whetherNameBoardSeen,
     ],
-    ["Latitude", general.latitude],
-    ["Longitude", general.longitude],
-    ["Region", general.region],
-    ["Location", general.location],
-    ["Branch", general.branch],
   ]);
 
   const personalRows = [
@@ -347,15 +342,10 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Describe Business Process</strong></p>`,
-      content:
-        wrapParagraph(formatMultiline(operational.businessProcess || "")) +
-        (hasValue(operational.activityLevelAtVisit)
-          ? wrapParagraph(
-              `<strong>Activity level at the time of visit:</strong> ${formatMultiline(
-                operational.activityLevelAtVisit
-              )}`
-            )
-          : ""),
+      content: wrapParagraph(formatMultiline(operational.businessProcess || ""))
+    },
+    {instruction: `<p style="${paragraphStyle}"><strong>Activity level at the time of visit</strong></p>`,
+      content: wrapParagraph(formatMultiline(operational.activityLevelAtVisit || "")),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Details of Product</strong></p>`,
@@ -616,10 +606,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
         formatMultiline(termLoansSection.otherBusiness || "-")
       )}
       ${wrapParagraph("<strong>Rental Income If any:</strong>")}
-      ${wrapParagraph(
-        formatMultiline(termLoansSection.rentalIncome || "-")
-      )}
-      ${wrapParagraph("<strong>Property address</strong>")}
       ${rentalTable}
 
       ${wrapParagraph("<strong>VI] Loan Details:-</strong>")}
@@ -629,8 +615,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ${personalDiscussionTable}
       ${detailsMatchText}
 
-      ${noteBlock}
-    </div>
-    ${pdBaseTemplateFooter(html_data)}
+      <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
+
+      <p>PHOTOS:</P>
+      </div>
   `;
 };
