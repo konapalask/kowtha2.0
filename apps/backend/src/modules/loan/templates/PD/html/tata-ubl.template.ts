@@ -598,18 +598,24 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
             <p style="margin:8px 0;line-height:1.5"><strong>Acknowledgment of Site Visit</strong></p>
             <p style="margin:8px 0;line-height:1.5">(For Tata Capital Limited)</p>
             <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met ${verificationData.basicDetails?.personMet || ""} from (Name of the Agency) on ${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]} at ${verificationData.basicDetails?.pdTime || ""} AM/PM for Personal Discussion.</p>
-            <p style="margin:8px 0;line-height:1.5">I am informed that Executive is not authorized to collect any money. Person Interviewed / Met: ${verificationData.basicDetails?.personMet || ""}</p>
+            <p style="margin:8px 0;line-height:1.5"><b>I am informed that Executive is not authorized to collect any money. </b></p>
+            <p style="margin:8px 0;line-height:1.5">Person Interviewed / Met: ${verificationData.basicDetails?.personMet || ""}</p>
             <p style="margin:8px 0;line-height:1.5">Designation ${verificationData.basicDetails?.personDesignation || ""}</p>
             <p style="margin:8px 0;line-height:1.5">Sign: ${verificationData.basicDetails?.signature || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">Pan Card Photo</p>
-            <p style="margin:8px 0;line-height:1.5">Customer's Photo & Selfie</p>
-            
+
+            <div style="page-break-before: always;"></div>
+            <p style="margin:8px 0;line-height:1.5">Pan Card Photo: ${verificationData.documents?.panCard || ""}</p>
+            <p style="page-break-before: always;"></p>
+            <p style="margin:8px 0;line-height:1.5">Customer's Photo & Selfie: ${verificationData.documents?.customerPhoto || ""}</p>
+
+
             <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
             <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Tata Capital Limited will be absolutely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA &amp; CO</strong> will not be held liable in any cases</p>
             
+            <P>PHOTOS:</P><br />
+            <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
         </div>
     </div>
     
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

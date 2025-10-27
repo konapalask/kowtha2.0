@@ -128,7 +128,7 @@ export const axisFinanceUblAbove10lSchema = {
             },
             age: {
               type: "integer",
-              title: "Age",
+              title: "Age (Yrs)",
             },
             qualification: {
               type: "string",
@@ -137,14 +137,6 @@ export const axisFinanceUblAbove10lSchema = {
             occupation: {
               type: "string",
               title: "Occupation",
-            },
-            stayingWithApplicant: {
-              type: "string",
-              title: "Staying with applicant",
-            },
-            mobileNumber: {
-              type: "string",
-              title: "Mobile Number",
             },
             incomePerMonth: {
               type: "number",
@@ -155,6 +147,10 @@ export const axisFinanceUblAbove10lSchema = {
                 maxDecimalPlaces: 2,
                 minDecimalPlaces: 0,
               },
+            },
+            dependent: {
+              type: "string",
+              title: "Dependent",
             },
           },
         },
@@ -225,9 +221,17 @@ export const axisFinanceUblAbove10lSchema = {
             items: {
               type: "object",
               properties: {
+                documentCategory: {
+                  type: "string",
+                  title: "Document Category",
+                },
                 documentName: {
                   type: "string",
-                  title: "Document",
+                  title: "Document Name",
+                },
+                documentType: {
+                  type: "string",
+                  title: "Document Type",
                 },
                 remarks: {
                   type: "string",
@@ -447,7 +451,7 @@ export const axisFinanceUblAbove10lSchema = {
           liquidMoveableAssets: {
             type: "string",
             title:
-              "Liquid, moveable & monetary items (Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities)",
+              "Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -473,18 +477,18 @@ export const axisFinanceUblAbove10lSchema = {
           },
           vehicles: {
             type: "array",
-            title: "Vehicles (Company name and model)",
-            items: {
-              type: "string",
-              title: "Vehicle",
-            },
+            title: "Car, Bike and any other vehicle (Company Name and Model)",
+              items: {
+                type: "string",
+                title: "Car, Bike and any other vehicle (Company Name and Model)",
+              },
           },
         },
       },
     },
     {
       id: "existingLoans",
-      label: "Existing Loans",
+      label: "Loan Details",
       schema: {
         type: "array",
         items: {
@@ -546,6 +550,18 @@ export const axisFinanceUblAbove10lSchema = {
               type: "string",
               title: "Open since (Year)",
             },
+            endUseOfLoan: {
+              type: "string",
+              title: "End use of loan:(Loan Amount & Detailed End-Use)",
+            },
+            remarks: {
+              type: "string",
+              title: "Remarks",
+              ui: {
+                widget: "textarea",
+                rows: 3,
+              },
+            },
           },
         },
       },
@@ -589,6 +605,14 @@ export const axisFinanceUblAbove10lSchema = {
               },
             },
           },
+          observations: {
+            type: "array",
+            title: "Observations",
+            items: {
+              type: "string",
+              title: "Observation",
+            },
+          },
           otherIncome: {
             type: "string",
             title: "Other income (income from other than initiated business)",
@@ -601,14 +625,6 @@ export const axisFinanceUblAbove10lSchema = {
             type: "string",
             title: "Site coordinates (Latitude, Longitude)",
           },
-          observations: {
-            type: "array",
-            title: "Observations",
-            items: {
-              type: "string",
-              title: "Observation",
-            },
-          },
           remarks: {
             type: "string",
             title: "Remarks",
@@ -617,6 +633,10 @@ export const axisFinanceUblAbove10lSchema = {
               rows: 3,
             },
           },
+          status: {
+            type: "string",
+            title: "Status",
+          },
           verifierNameEmpCode: {
             type: "string",
             title: "AFL Verifier's Name & Emp Code",
@@ -624,10 +644,6 @@ export const axisFinanceUblAbove10lSchema = {
           verifierSignature: {
             type: "string",
             title: "AFL Verifier's Signature",
-          },
-          status: {
-            type: "string",
-            title: "Status",
           },
         },
       },

@@ -162,45 +162,32 @@ const renderTextSection = (title: string, value: any) => {
   `;
 };
 
+const renderBusinessSection = (title: string, content: string) => {
+  if (!content || !content.trim()) return "";
+  return `
+    <div style="margin: 15px 0;">
+      <div style="font-size:14px;font-weight:bold;color:#242424;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #bfbfbf;padding-bottom:4px;margin-bottom:8px;">${title}</div>
+      <div>${content}</div>
+    </div>
+  `;
+};
+
 export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const personal = verificationData.personalDiscussionSheet || {};
   const familySection = verificationData.familyBackground || {};
   const residence = verificationData.placeOfResidenceOffice || {};
   const company = verificationData.companyProfile || {};
-  const employment =
-    verificationData["Self Employed/Salaried"] ||
-    verificationData.selfEmployed ||
-    {};
+  const employment = verificationData["Self Employed/Salaried"] || {};
   const businessDetails = verificationData.businessDetails || {};
   const employeeCosts = verificationData.employeotherMajorCost || {};
   const businessData = verificationData.businessData || {};
-  const additionalIncome = verificationData.otherIncome || {};
-  const liabilitiesRaw =
-    verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
+  const coApplicantIncome = verificationData.coApplicantIncome || {};
+  const otherIncome = verificationData.otherIncome || {};
+  const liabilitiesRaw = verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
   const budget = verificationData.budgetAnalysis || {};
   const tradeReferences = ensureArray(verificationData.tradeReferences);
 
-  const familyMembers = ensureArray(
-    familySection.familyMembers ||
-      verificationData.familyDetails?.familyMembers
-  ).filter((member) => hasValue(member));
-
-  const totalFamilyMembers =
-    familySection.totalFamilyMembers ||
-    verificationData.familyDetails?.totalFamilyMembers ||
-    "";
-
-  const earningMembers =
-    familySection.noOfEarningMembers ||
-    familySection.earningMembers ||
-    verificationData.familyDetails?.earningMembers ||
-    "";
-
   const personalDetailsTable = renderTwoColumnTable([
-    {
-      label: "Application No.",
-      value: personal.applicationNumber,
-    },
     {
       label: "Name of the Applicant",
       value: personal.applicantName,
@@ -219,7 +206,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
     {
       label: "Loan Amount Request",
-      value: personal.loanAmount,
+      value: personal.loaAmountRequest,
       formatter: formatCurrency,
     },
     {
@@ -232,62 +219,51 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const familyTable = renderMultiColumnTable(
+  // Create family members array - handle multiple formats
+  let familyMembers = [];
+  if (Array.isArray(familySection)) {
+    familyMembers = familySection;
+  } else if (familySection && familySection.familyMembers && Array.isArray(familySection.familyMembers)) {
+    familyMembers = familySection.familyMembers;
+  } else if (familySection && Object.keys(familySection).length > 0 && familySection.name) {
+    familyMembers = [familySection];
+  }
+
+  const familyMembersTable = renderMultiColumnTable(
     [
       {
         header: "Name",
-        valueGetter: (item) =>
-          item.name ||
-          item.fullName ||
-          item.memberName ||
-          "",
+        valueGetter: (item) => item.name || item.memberName || "",
       },
       {
         header: "Relation",
-        valueGetter: (item) =>
-          item.relation ||
-          item.relationToApplicant ||
-          "",
+        valueGetter: (item) => item.relation || item.relationToApplicant || "",
       },
       {
         header: "Age",
-        valueGetter: (item) => item.age,
+        valueGetter: (item) => item.age ? `${item.age}yrs` : "",
       },
       {
         header: "Education",
-        valueGetter: (item) =>
-          item.education || item.qualification,
+        valueGetter: (item) => item.education || item.qualification || "-",
       },
       {
         header: "Occupation",
-        valueGetter: (item) => item.occupation,
-      },
-      {
-        header: "Dependent",
-        valueGetter: (item) => item.dependent,
-      },
-      {
-        header: "Income / Month",
-        valueGetter: (item) => item.incomePerMonth,
-        formatter: (value) => formatCurrency(value),
+        valueGetter: (item) => item.occupation || "-",
       },
     ],
     familyMembers,
-    "Family member details not provided"
+    "No family members provided"
   );
 
   const familySummaryTable = renderTwoColumnTable([
     {
-      label: "Total Family Members",
-      value: totalFamilyMembers,
+      label: "NO. OF. DEPENDANTS",
+      value: familySection.noOfDependants || familySection.totalDependants || "",
     },
     {
-      label: "No. of Earning Members",
-      value: earningMembers,
-    },
-    {
-      label: "No. of Dependants",
-      value: familySection.noOfDependants,
+      label: "GENERAL LIFESTYLE/PERSONALITY",
+      value: familySection.generalLifestylePersonality || "",
     },
   ]);
 
@@ -321,9 +297,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
     {
       label: "Nature of Business Entity / Employer Details",
-      value:
-        employment
-          .natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd,
+      value: employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd,
     },
     {
       label: "Key Manager to the Business",
@@ -339,106 +313,113 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const workforceTable = renderTwoColumnTable([
+  const businessDetailsTable = renderTwoColumnTable([
     {
-      label: "Main Clients",
+      label: "MAIN CLIENTS",
       value: businessDetails.mainClients,
     },
+  ]);
+
+  const employeeCostsTable = renderTwoColumnTable([
     {
-      label: "No. of Employees",
-      value: employeeCosts.noOfEmployees,
+      label: "NO. OF EMPLOYEES",
+      value: employeeCosts.numberOfEmployees,
     },
     {
-      label: "Total Salaries per Month",
+      label: "TOTAL SALARIES PER MONTH",
       value: employeeCosts.totalSalariesPerMonth,
       formatter: formatCurrency,
     },
     {
-      label: "Accounting Year",
+      label: "ACCOUNTING YEAR",
       value: employeeCosts.accountingYear,
     },
     {
-      label: "Estimated Total Costs",
+      label: "ESTIMATED TOTAL COSTS",
       value: employeeCosts.estimatedTotalCosts,
       formatter: formatCurrency,
     },
   ]);
 
-  const financialsTable = renderTwoColumnTable([
+  const combinedBusinessTable = renderTwoColumnTable([
     {
-      label: "Annual Sales",
+      label: "ANNUAL SALES",
       value: businessData.annualSales,
       formatter: formatCurrency,
     },
     {
-      label: "Overall Costs",
+      label: "OVERALL COSTS",
       value: businessData.overallCosts,
       formatter: formatCurrency,
     },
     {
-      label: "Major Cost Heads",
+      label: "MAJOR COST HEADS",
       value: businessData.majorCostHeads,
     },
     {
-      label: "Gross Margin %",
+      label: "GROSS MARGIN %",
       value: businessData.grossMargin,
     },
     {
-      label: "PBDIT Margin %",
+      label: "PBDIT MARGIN %",
       value: businessData.pbditMargin,
     },
     {
-      label: "Debtors Cycle",
+      label: "DEBTORS CYCLE",
       value: businessData.debtorsCycle,
     },
     {
-      label: "Creditors Cycle",
+      label: "CREDITORS CYCLE",
       value: businessData.creditorsCycle,
     },
     {
-      label: "Capital Invested",
+      label: "CAPITAL INVESTED",
       value: businessData.capitalInvested,
       formatter: formatCurrency,
     },
     {
-      label: "Loan Funds (incl. CC limit)",
+      label: "LOAN FUNDS (INCL. CC LIMIT)",
       value: businessData.loanFundsInclCcLimit,
     },
     {
-      label: "Stock Maintained",
+      label: "STOCK MAINTAINED",
       value: businessData.stockMaintained,
     },
     {
-      label: "Business Bank Accounts",
+      label: "BUSINESS BANK ACCOUNTS",
       value: businessData.businessBankAccounts,
     },
   ]);
 
-  const incomeAssetsTable = renderTwoColumnTable([
+
+  const coApplicantIncomeTable = renderTwoColumnTable([
     {
       label: "Co-Applicant Income",
-      value: additionalIncome.coApplicantIncome,
+      value: coApplicantIncome.coApplicantIncome,
       formatter: formatCurrency,
     },
+  ]);
+
+  const otherIncomeTable = renderTwoColumnTable([
     {
       label: "LIC / Insurance / Mediclaim",
-      value: additionalIncome.licPaymentInsuranceMediclaim,
+      value: otherIncome.licPaymentInsuranceMediclaim,
     },
     {
       label: "Share / Mutual Fund Investments",
-      value: additionalIncome.shareMutualFundInvestments,
+      value: otherIncome.shareMutualFundInvestments,
     },
     {
       label: "Cars / Two-Wheelers Owned",
-      value: additionalIncome.carsTwoWheelersOwned,
+      value: otherIncome.carsTwoWheelersOwned,
     },
     {
       label: "Other Properties Owned",
-      value: additionalIncome.otherPropertiesOwned,
+      value: otherIncome.otherPropertiesOwned,
     },
     {
       label: "Other Assets Owned",
-      value: additionalIncome.otherAssetsOwned,
+      value: otherIncome.otherAssetsOwned,
     },
   ]);
 
@@ -480,40 +461,70 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     "No other liabilities reported"
   );
 
-  const budgetTable = renderTwoColumnTable([
+  const budgetRows = [
     {
-      label:
-        "Total Monthly Income per month (Business income + Other Income)",
+      sno: 1,
+      label: "Total Monthly Net Income per month (Business income + Other Income)",
       value: budget.totalMonthlyIncomePerMonth,
     },
     {
+      sno: 2,
       label: "Overall Family Expenses per month",
       value: budget.overAllFamilyExpenses,
     },
     {
+      sno: 3,
       label: "PL / Auto Loan EMI",
       value: budget.plOrAutoLoanEMI,
       formatter: formatCurrency,
     },
     {
+      sno: 4,
       label: "Other Loan EMI",
       value: budget.otherLoanEmi,
       formatter: formatCurrency,
     },
     {
+      sno: "",
       label: "Total Monthly Expenses per month",
       value: budget.totalMonthlyExpensesPerMonth,
     },
     {
+      sno: "",
       label: "Net Surplus",
       value: budget.netSurplus,
     },
     {
+      sno: "",
       label: "Affordable EMI",
       value: budget.affordableEmi,
       formatter: formatCurrency,
     },
-  ]);
+  ];
+
+  const budgetTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:10%;">S.NO</td>
+        <td style="${headerCellStyle};width:60%;">PARTICULARS</td>
+        <td style="${headerCellStyle};width:30%;">AMOUNT</td>
+      </tr>
+      ${budgetRows
+        .map((row) => {
+          const rendered = row.formatter
+            ? row.formatter(row.value)
+            : displayValue(row.value);
+          return `
+            <tr>
+              <td style="${cellStyle};text-align:center;">${row.sno}</td>
+              <td style="${cellStyle}">${row.label}</td>
+              <td style="${cellStyle}"><span class="var-value">${rendered}</span></td>
+            </tr>
+          `;
+        })
+        .join("")}
+    </table>
+  `;
 
   const tradeReferenceTable = renderMultiColumnTable(
     [
@@ -546,27 +557,21 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content axis-finance">
       ${renderCenteredTitle("Personal Discussion Sheet")}
       ${renderSection("Personal Details", personalDetailsTable)}
-      ${renderSection("Family Background", familyTable + familySummaryTable)}
-      ${renderTextSection(
-        "General Lifestyle / Personality",
-        familySection.generalLifestylePersonality
-      )}
-      ${renderSection("Residence & Collateral", residenceTable)}
-      ${renderTextSection(
-        "Company Profile",
-        company.detailedProfileOfTheBusiness
-      )}
-      ${renderSection("Business / Employment Overview", employmentTable)}
-      ${renderSection("Business Operations & Workforce", workforceTable)}
-      ${renderSection("Business / Financial Profile", financialsTable)}
-      ${renderSection("Other Income & Assets", incomeAssetsTable)}
-      ${renderSection("Liabilities & Repayment Position", liabilitiesTable)}
+      ${renderSection("Family Background", familyMembersTable + familySummaryTable)}
+      ${renderSection("Place of Residence/Office", residenceTable)}
+      ${renderTextSection("Company Profile", company.detailedProfileOfTheBusiness)}
+      ${renderSection("Self Employed/Salaried", employmentTable)}
+      ${renderBusinessSection("BUSINESS DETAILS", businessDetailsTable)}
+      ${renderBusinessSection("EMPLOYEE/OTHER MAJOR COST", employeeCostsTable)}
+      ${renderBusinessSection("BUSINESS DATA", combinedBusinessTable)}
+      ${renderSection("Co-Applicant Income", coApplicantIncomeTable)}
+      ${renderSection("Other Income", otherIncomeTable)}
+      ${renderSection("Other Liabilities Including CC Limits (Own/Co Applicants)", liabilitiesTable)}
       ${renderSection("Budget Analysis", budgetTable)}
       ${renderTextSection("End Use of Funds", budget.endUseOfFunds)}
       ${renderTextSection("Other Observations", budget.otherObservations)}
       ${renderSection("Trade References", tradeReferenceTable)}
       ${noteBlock}
     </div>
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

@@ -1,3 +1,4 @@
+import { format,  toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
@@ -116,6 +117,11 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 };
 
 export const cholaTemplate = (verificationData: any, html_data: any) => {
+  const date = new Date();
+  const timeZone = "Asia/Kolkata";
+  const zonedDate = toZonedTime(date, timeZone);
+  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
+
   const basic = verificationData.basicInformation || {};
   const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || [];
   const familyMembers = ensureArray(
@@ -142,8 +148,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     formatMultiline(bank?.bankName || ""),
     formatMultiline(bank?.accountNo || ""),
     formatMultiline(bank?.accountType || ""),
-    formatMultiline(bank?.relationshipSince || ""),
-    formatMultiline(bank?.averageBalance || ""),
+    
   ]);
 
   const assets = ensureArray(verificationData.assets).map(
@@ -229,33 +234,99 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       "Bank Name",
       "A/c No",
       "A/c Type",
-      "Relationship since",
-      "Avg balance",
     ],
     bankingDetails
   );
 
-  const financialRows: string[][] = [];
-  const pushFinancialRow = (label: string, rawValue: any) => {
-    if (!hasValue(rawValue)) return;
-    financialRows.push([label, formatCurrency(rawValue)]);
+  // Create unified financial table with EXPENDITURE and INCOME columns
+  const createFinancialTable = () => {
+    const expenditureRows = [];
+    const incomeRows = [];
+    
+    // Expenditure items
+    if (hasValue(expenditure.toPurchaseOfMaterial)) {
+      expenditureRows.push(["To purchases of Material", formatCurrency(expenditure.toPurchaseOfMaterial)]);
+    }
+    if (hasValue(expenditure.toElectricity)) {
+      expenditureRows.push(["To Electricity", formatCurrency(expenditure.toElectricity)]);
+    }
+    if (hasValue(expenditure.toRent)) {
+      expenditureRows.push(["To Rent", formatCurrency(expenditure.toRent)]);
+    }
+    if (hasValue(expenditure.toSalaries)) {
+      expenditureRows.push(["To Salaries", formatCurrency(expenditure.toSalaries)]);
+    }
+    if (hasValue(expenditure.toTransportation)) {
+      expenditureRows.push(["To Transportation", formatCurrency(expenditure.toTransportation)]);
+    }
+    if (hasValue(expenditure.toOtherExpenses)) {
+      expenditureRows.push(["To Other expenses", formatCurrency(expenditure.toOtherExpenses)]);
+    }
+    if (hasValue(expenditure.toNetProfit)) {
+      expenditureRows.push(["To Net Profit", formatCurrency(expenditure.toNetProfit)]);
+    }
+    
+    // Income items
+    if (hasValue(income.byGrossReceipts)) {
+      incomeRows.push(["By Gross Receipts", formatCurrency(income.byGrossReceipts)]);
+    }
+    
+    // Calculate totals
+    const expenditureTotal = hasValue(expenditure.totalExpenditure) 
+      ? formatCurrency(expenditure.totalExpenditure) 
+      : "Not provided";
+    const incomeTotal = hasValue(income.totalIncome) 
+      ? formatCurrency(income.totalIncome) 
+      : "Not provided";
+    
+    // Find the maximum number of rows between expenditure and income
+    const maxRows = Math.max(expenditureRows.length, incomeRows.length);
+    
+    let tableRows = "";
+    
+    // Create table rows
+    for (let i = 0; i < maxRows; i++) {
+      const expenditureRow = expenditureRows[i] || ["", ""];
+      const incomeRow = incomeRows[i] || ["", ""];
+      
+      tableRows += `
+        <tr>
+          <td style="${cellStyle}">${expenditureRow[0]}</td>
+          <td style="${cellStyle}">${expenditureRow[1]}</td>
+          <td style="${cellStyle}">${incomeRow[0]}</td>
+          <td style="${cellStyle}">${incomeRow[1]}</td>
+        </tr>
+      `;
+    }
+    
+    // Add total row that spans both sections
+    tableRows += `
+      <tr>
+        <td style="${cellStyle};font-weight:bold;">Total</td>
+        <td style="${cellStyle};font-weight:bold;">${expenditureTotal}</td>
+        <td style="${cellStyle};font-weight:bold;">Total</td>
+        <td style="${cellStyle};font-weight:bold;">${incomeTotal}</td>
+      </tr>
+    `;
+    
+    return `
+      <table style="${tableStyle}">
+        <tr>
+          <td colspan="2" style="${cellStyle};font-weight:bold;text-align:center;background:#f5f5f5;">EXPENDITURE</td>
+          <td colspan="2" style="${cellStyle};font-weight:bold;text-align:center;background:#f5f5f5;">INCOME</td>
+        </tr>
+        <tr>
+          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">PARTICULARS</td>
+          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">Estimated</td>
+          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">PARTICULARS</td>
+          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">Estimated</td>
+        </tr>
+        ${tableRows}
+      </table>
+    `;
   };
 
-  pushFinancialRow("To purchase of Material", expenditure.toPurchaseOfMaterial);
-  pushFinancialRow("To Electricity", expenditure.toElectricity);
-  pushFinancialRow("To Rent", expenditure.toRent);
-  pushFinancialRow("To Salaries", expenditure.toSalaries);
-  pushFinancialRow("To Transportation", expenditure.toTransportation);
-  pushFinancialRow("To other expenses", expenditure.toOtherExpenses);
-  pushFinancialRow("To Net profit", expenditure.toNetProfit);
-  pushFinancialRow("Total Expenditure", expenditure.totalExpenditure);
-  pushFinancialRow("By Gross Receipts", income.byGrossReceipts);
-  pushFinancialRow("Total Income", income.totalIncome);
-
-  const financialDetailsTable = renderInnerTable(
-    ["Particulars", "Amount"],
-    financialRows
-  );
+  const financialDetailsTable = createFinancialTable();
 
   const grossDisposable = hasValue(
     financialAnalysis.totalGrossDisposableIncome
@@ -310,7 +381,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>Banking Details:</strong></p>
       ${bankingTable}
 
-      <p style="${paragraphStyle}"><strong>ITR/ Financial Details:</strong></p>
+      <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
       ${wrapParagraph(
         formatMultiline(
           verificationData.itrFinancialDetails
@@ -345,18 +416,20 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         "We estimated financials, purely based on the valid documents provided by the applicant."
       }</p>
 
+      ${financialDetailsTable}
+
       <ul>
-        <li>Total Gross disposable Income (A) ${grossDisposable} per month</li>
-        <li>Total Obligations (B) ${totalObligations} per month</li>
-        <li>Net Disposable Income (C = A – B) ${netDisposable} per month</li>
+        <li>Total Gross disposable Income (A)       ${grossDisposable} per month</li>
+        <li>Total Obligations (B)       ${totalObligations} per month</li>
+        <li>Net Disposable Income (C = A – B)       ${netDisposable} per month</li>
       </ul>
 
-      ${financialDetailsTable}
 
       <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
       <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
       <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
-    ${pdBaseTemplateFooter(html_data)}
-  `;
+
+ 
+    `;
 };

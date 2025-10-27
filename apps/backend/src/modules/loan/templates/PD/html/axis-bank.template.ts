@@ -374,8 +374,11 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         
         <p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name: Field Executive</strong></p>
         <p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature: </strong></p>
+        <p style="margin:8px 0;line-height:1.5"><strong>Agency Name & Seal:</strong></p>
+        <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
         <p style="margin:8px 0;line-height:1.5"><strong>Geo Tagging & Photographs of business premises: -</strong></p>
         
+        <div style="page-break-before: always;"></div>
         <p style="margin:8px 0;line-height:1.5"><strong>ANNEXURE1: Income assessment for Asha Home Loans</strong></p>
         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
@@ -495,6 +498,5 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         
     </div>
     
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

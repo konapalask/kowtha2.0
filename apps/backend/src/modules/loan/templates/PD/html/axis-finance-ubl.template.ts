@@ -1,4 +1,5 @@
-import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
+import { format, toZonedTime } from "date-fns-tz";
+import { pdBaseTemplate } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
@@ -70,14 +71,14 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerRow = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;text-align:center;">${header}</td>`
     )
     .join("");
   const rowsHtml = rows
     .map(
       (row) =>
         `<tr>${row
-          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .map((cell) => `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`)
           .join("")}</tr>`
     )
     .join("");
@@ -90,19 +91,22 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 };
 
 export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) => {
+  const date = new Date();
+  const timeZone = "Asia/Kolkata";
+  const zonedDate = toZonedTime(date, timeZone);
+  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
   const basic = verificationData.basicDetails || {};
   const familyMembers = ensureArray(verificationData.familyDetails).map(
     (member: any) => [
       formatMultiline(member?.name || ""),
       formatMultiline(member?.relation || ""),
-      formatMultiline(member?.age || ""),
+      formatMultiline(member?.age ? `${member.age} years` : ""),
       formatMultiline(member?.qualification || ""),
       formatMultiline(member?.occupation || ""),
-      formatMultiline(member?.stayingWithApplicant || ""),
-      formatMultiline(member?.mobileNumber || ""),
       hasValue(member?.incomePerMonth)
         ? formatCurrency(member?.incomePerMonth)
-        : "Not provided",
+        : "",
+      formatMultiline(member?.dependent || ""),
     ]
   );
 
@@ -122,10 +126,11 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
   )
     .map((entry: any) =>
       hasValue(entry?.detail)
-        ? `<li>${formatMultiline(entry.detail)}</li>`
+        ? formatMultiline(entry.detail)
         : ""
     )
-    .join("");
+    .filter(Boolean)
+    .join("<br>");
 
   const documentsObserved = ensureArray(
     verificationData.businessOverview?.documentsObserved
@@ -216,6 +221,8 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
     ]
   );
 
+  const endUseOfLoan = verificationData.bankingDetails?.[0]?.endUseOfLoan || "";
+
   const thirdPartySection = verificationData.thirdPartyCheck || {};
 
   const thirdPartyReferences = ensureArray(
@@ -295,85 +302,119 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
       ${renderInnerTable(
         [
           "Name",
-          "Relation with applicant",
-          "Age",
+          "Relation with Applicant",
+          "Age(Yrs)",
           "Qualification",
           "Occupation",
-          "Staying with applicant",
-          "Mobile No.",
-          "Income per month",
+          "Income per month (approx.)",
+          "Dependent",
         ],
         familyMembers
       )}
 
-      <p style="${paragraphStyle}"><strong>Constitution / Shareholding Details</strong></p>
+      <p style="${paragraphStyle}"><strong>Shareholding Details</strong></p>
       ${renderInnerTable(
         [
-          "Name of Shareholder",
-          "Relation with applicant",
+          "Name of the Shareholder",
+          "Relation with Main Applicant",
           "Designation",
           "% of Shareholding",
-          "Coming into loan structure",
-          "Functional role",
+          "Coming into Loan Structure",
+          "Functional of Partner / Director",
         ],
         shareholding
       )}
 
       <p style="${paragraphStyle}"><strong>About the Business</strong></p>
-      <ul>
-        ${businessPoints || "<li>Not provided</li>"}
-      </ul>
+      ${renderKeyValueTable([
+        ["About the Business", businessPoints || "Not provided"]
+      ])}
 
       <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
-      <ul>
-        ${documentsObserved || "<li>Not provided</li>"}
-      </ul>
+      ${renderInnerTable(
+        [
+          "Document Category",
+          "Document Name", 
+          "Document Type",
+          "Remarks"
+        ],
+        ensureArray(verificationData.businessOverview?.documentsObserved).map((doc: any) => [
+          formatMultiline(doc?.documentCategory || ""),
+          formatMultiline(doc?.documentName || ""),
+          formatMultiline(doc?.documentType || ""),
+          formatMultiline(doc?.remarks || "")
+        ])
+      )}
 
       <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
-     ${renderKeyValueTable([
-       [
-         "No of fixed suppliers",
-          suppliersSection.numberOfFixedSuppliers,
+      ${renderKeyValueTable([
+        [
+          "No of fixed suppliers",
+          suppliersSection.numberOfFixedSuppliers || "Not provided",
         ],
         [
           "Credit period",
-          suppliersSection.creditPeriodDays,
+          suppliersSection.creditPeriodDays || "Not provided",
         ],
         [
           "Cash - Cheque proportion",
-          suppliersSection.cashChequeProportion,
+          suppliersSection.cashChequeProportion || "Not provided",
         ],
       ])}
-     <ul>
-        ${suppliers.length ? suppliers.map((item) => `<li>${item}</li>`).join("") : "<li>Not provided</li>"}
-      </ul>
+      ${renderInnerTable(
+        [
+          "Name (top 3 Suppliers)",
+          "Contact Details",
+          "Location",
+          "Ref. Check"
+        ],
+        ensureArray(suppliersSection.topSuppliers).map((supplier: any) => [
+          formatMultiline(supplier?.name || ""),
+          formatMultiline(supplier?.contactDetails || ""),
+          formatMultiline(supplier?.location || ""),
+          formatMultiline(supplier?.referenceCheck || "")
+        ])
+      )}
 
       <p style="${paragraphStyle}"><strong>Clients / Debtors</strong></p>
-     ${renderKeyValueTable([
-       [
-         "No of fixed customers",
-          customersSection.numberOfFixedCustomers,
+      ${renderKeyValueTable([
+        [
+          "No of fixed customers",
+          customersSection.numberOfFixedCustomers || "Not provided",
         ],
         [
           "Credit period",
-          customersSection.creditPeriodDays,
+          customersSection.creditPeriodDays || "Not provided",
         ],
         [
           "Cash - Cheque proportion",
-          customersSection.cashChequeProportion,
+          customersSection.cashChequeProportion || "Not provided",
         ],
+      ])}
+      ${renderInnerTable(
+        [
+          "Name (top 3 Customers)",
+          "Contact Details",
+          "Location",
+          "Ref. Check"
+        ],
+        ensureArray(customersSection.topCustomers).map((customer: any) => [
+          formatMultiline(customer?.name || ""),
+          formatMultiline(customer?.contactDetails || ""),
+          formatMultiline(customer?.location || ""),
+          formatMultiline(customer?.referenceCheck || "")
+        ])
+      )}
+      ${renderKeyValueTable([
         [
           "Average stock maintained",
-          customersSection.averageStockMaintained,
+          customersSection.averageStockMaintained || "Not provided",
         ],
         [
           "Turnover & margins",
-          customersSection.turnoverAndMargins,
+          customersSection.turnoverAndMargins || "Not provided",
         ],
       ])}
-      <ul>
-        ${customers.length ? customers.map((item) => `<li>${item}</li>`).join("") : "<li>Not provided</li>"}
-      </ul>
 
       <p style="${paragraphStyle}"><strong>Expenditure - Salaries & Wages</strong></p>
       ${renderInnerTable(
@@ -397,6 +438,8 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
       ])}
 
       <p style="${paragraphStyle}"><strong>Asset Details</strong></p>
+      <p style="${paragraphStyle}">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure:</p>
+      
       ${renderInnerTable(
         [
           "Address",
@@ -405,30 +448,30 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           "Purchase Year",
           "Market value (in Lakhs)",
           "Owner Name",
-          "Mortgaged",
+          "Mortgaged (Yes/No)",
         ],
         immovableProperties
       )}
       ${renderKeyValueTable([
         [
-          "Liquid, moveable & monetary items",
-          assetSection.liquidMoveableAssets,
+          "Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities",
+          assetSection.liquidMoveableAssets || "NA",
         ],
         [
-          "Life insurance, mediclaim, property/asset insurance",
-          assetSection.insurances,
+          "Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured)",
+          assetSection.insurances || "NA",
         ],
         [
           "Capital invested in any business, Loans & Advances given",
-          assetSection.capitalInvestedLoans,
+          assetSection.capitalInvestedLoans || "NA",
+        ],
+        [
+          "Car, Bike and any other vehicle (Company Name and Model)",
+          vehicles.length ? vehicles.join(", ") : "NA",
         ],
       ])}
-      <p style="${paragraphStyle}"><strong>Vehicles:</strong></p>
-      <ul>
-        ${vehicles.length ? vehicles.join("") : "<li>Not provided</li>"}
-      </ul>
 
-      <p style="${paragraphStyle}"><strong>Existing Loans</strong></p>
+      <p style="${paragraphStyle}"><strong>Loan Details</strong></p>
       ${renderInnerTable(
         [
           "Name of Bank / NBFC",
@@ -448,6 +491,10 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         bankingAccounts
       )}
 
+      ${renderKeyValueTable([
+        ["End Use of Loan: (Loan Amount & Detailed End-Use)", endUseOfLoan || "Not provided"]
+      ])}
+
       <p style="${paragraphStyle}"><strong>Third Party Check</strong></p>
       ${renderInnerTable(
         [
@@ -461,50 +508,22 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         thirdPartyReferences
       )}
       ${renderKeyValueTable([
-        ["Other income", thirdPartySection.otherIncome],
-        ["Site coordinates", thirdPartySection.siteCoordinates],
+        ["Observation:", observations || "Not provided"],
       ])}
-      <p style="${paragraphStyle}"><strong>Observations:</strong></p>
-      <ul>${observations || "<li>Not provided</li>"}</ul>
       ${renderKeyValueTable([
-        ["Remarks", thirdPartySection.remarks],
-        ["AFL Verifier's Name & Emp Code", thirdPartySection.verifierNameEmpCode],
-        ["AFL Verifier's Signature", thirdPartySection.verifierSignature],
-        ["Status", thirdPartySection.status],
+        ["Other Income: (Income from other than initiated business)", thirdPartySection.otherIncome || "NA"],
+        ["Site Coordinates:", thirdPartySection.siteCoordinates || ""],
+      ])}
+      ${renderKeyValueTable([
+        ["Remarks:", thirdPartySection.remarks || ""],
+        ["Status:", thirdPartySection.status || ""],
+        ["AFL Verifier's Name & Emp Code:", thirdPartySection.verifierNameEmpCode || ""],
+        ["AFL Verifier's Signature:", thirdPartySection.verifierSignature || ""],
       ])}
 
-      <p style="${paragraphStyle}"><strong>Financial Summary</strong></p>
-      ${(() => {
-        const summary =
-          verificationData.financialSummary ||
-          verificationData.financialAnalysis ||
-          {};
-        const grossIncome = hasValue(summary.totalGrossDisposableIncome)
-          ? formatCurrency(summary.totalGrossDisposableIncome)
-          : "Not provided";
-        const obligations = hasValue(summary.totalObligations)
-          ? formatCurrency(summary.totalObligations)
-          : "Not provided";
-        const netIncome = hasValue(summary.netDisposableIncome)
-          ? formatCurrency(summary.netDisposableIncome)
-          : "Not provided";
-        const noteRow = hasValue(summary.note)
-          ? renderKeyValueTable([["Notes / Comments", summary.note]])
-          : "";
-        return `
-      <ul>
-        <li>Total Gross disposable Income (A) ${grossIncome} per month</li>
-        <li>Total Obligations (B) ${obligations} per month</li>
-        <li>Net Disposable Income (C = A – B) ${netIncome} per month</li>
-      </ul>
-      ${noteRow}
-        `;
-      })()}
+      
 
-      <p style="${paragraphStyle}"><strong>Recommendations:</strong></p>
-      <ul>
-        ${recommendations || "<li>Not provided</li>"}
-      </ul>
+
       <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${formatMultiline(
         verificationData.recommendations?.disclaimer ||
           "We estimated financials, purely based on the valid documents provided by the applicant."
@@ -514,6 +533,6 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
       <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
       <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
-    ${pdBaseTemplateFooter(html_data)}
-  `;
+ 
+    `;
 };
