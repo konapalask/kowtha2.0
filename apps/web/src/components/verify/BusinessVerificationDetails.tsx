@@ -57,6 +57,29 @@ import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getItem } from "@/helpers/localStorage";
 import dynamic from "next/dynamic";
 
+// Date format conversion utilities
+const convertDDMMYYYYToYYYYMMDD = (dateString: string): string => {
+  if (!dateString) return "";
+  // Handle DD-MM-YYYY format
+  const parts = dateString.split("-");
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  return dateString;
+};
+
+const convertYYYYMMDDToDDMMYYYY = (dateString: string): string => {
+  if (!dateString) return "";
+  // Handle YYYY-MM-DD format
+  const parts = dateString.split("-");
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    return `${day}-${month}-${year}`;
+  }
+  return dateString;
+};
+
 const serializeFormValues = (value: any): any => {
   if (dayjs.isDayjs(value)) {
     return value.format("DD/MM/YYYY");
@@ -293,6 +316,8 @@ export const BusinessVerificationDetails: React.FC<
           const schema = convertBackendSchemaToWebFormat(
             backendResponse.schema
           );
+
+          console.log("schema: ", schema);
 
           if (schema) {
             console.log("✅ Schema loaded successfully:", schema);
@@ -644,6 +669,7 @@ export const BusinessVerificationDetails: React.FC<
       const verificationDataPayload = {
         ...dynamicFormData,
         ...changedData,
+        uploadedItems: data?.uploadedItems || [], // Include photo capture data inside verificationData
       };
 
       // Get synopsis from editor content
@@ -655,7 +681,6 @@ export const BusinessVerificationDetails: React.FC<
         verificationType: "Business",
         verificationData: verificationDataPayload,
         synopsis,
-        uploadedItems: data?.uploadedItems || [], // Include photo capture data
       };
 
       // Call the assistant verifier API
@@ -664,7 +689,8 @@ export const BusinessVerificationDetails: React.FC<
       message.success("Verification submitted successfully!");
 
       // Refresh the verification data
-      fetchVerificationData();
+      // fetchVerificationData();
+      router.push(`/verify`);
     } catch (error: any) {
       console.error("Error submitting verification executive data:", error);
       const errorMessage =
@@ -1099,6 +1125,7 @@ export const BusinessVerificationDetails: React.FC<
     setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
     changedData: any;
   }) => {
+    console.log(section);
     const [form] = Form.useForm();
     const initialValuesSet = React.useRef(false);
 
@@ -1167,13 +1194,16 @@ export const BusinessVerificationDetails: React.FC<
       if (field.enum && field.enum.length > 0) {
         return (
           <Form.Item key={fieldId} name={fieldId} label={field.label}>
-            <Radio.Group disabled={readOnly || field.readOnly}>
+            <Select
+              disabled={readOnly || field.readOnly}
+              placeholder={`Select ${field.label}`}
+            >
               {field.enum.map((option: string) => (
-                <Radio key={option} value={option}>
+                <Select.Option key={option} value={option}>
                   {option}
-                </Radio>
+                </Select.Option>
               ))}
-            </Radio.Group>
+            </Select>
           </Form.Item>
         );
       }
@@ -1190,56 +1220,114 @@ export const BusinessVerificationDetails: React.FC<
             </Form.Item>
           );
 
-        case "date":
-          return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
-              <Input
-                disabled={readOnly || field.readOnly}
-                placeholder="Select date"
-              />
-            </Form.Item>
-          );
-
-        case "textarea":
-          return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
-              <TextArea
-                disabled={readOnly || field.readOnly}
-                placeholder={field.placeholder}
-                rows={field.textAreaRows || 3}
-              />
-            </Form.Item>
-          );
-
-        case "richtext":
-          return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
-              <TextArea
-                disabled={readOnly || field.readOnly}
-                placeholder={field.placeholder}
-                rows={field.textAreaRows || 5}
-              />
-            </Form.Item>
-          );
-
         case "text":
         case "string":
+          // Check if it should be a date field based on field name or label
+          const isDateField =
+            field.label?.toLowerCase().includes("date") ||
+            field.label?.toLowerCase().includes("visit") ||
+            fieldId.toLowerCase().includes("date");
+
+          if (isDateField) {
+            return (
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={field.label}
+                getValueFromEvent={(e) => {
+                  // Convert YYYY-MM-DD to DD-MM-YYYY when saving
+                  return convertYYYYMMDDToDDMMYYYY(e.target.value);
+                }}
+                getValueProps={(value) => {
+                  // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
+                  return {
+                    value: convertDDMMYYYYToYYYYMMDD(value || ""),
+                  };
+                }}
+              >
+                <Input
+                  disabled={readOnly || field.readOnly}
+                  placeholder={`Select ${field.label}`}
+                  type="date"
+                />
+              </Form.Item>
+            );
+          }
+
+          // Check if it should be a textarea
+          if (
+            field.type === "textarea" ||
+            field.ui?.widget === "textarea" ||
+            field.ui?.widget === "richtext"
+          ) {
+            return (
+              <Form.Item key={fieldId} name={fieldId} label={field.label}>
+                <TextArea
+                  disabled={readOnly || field.readOnly}
+                  placeholder={field.placeholder || field.label}
+                  rows={field.textAreaRows || field.ui?.rows || 3}
+                />
+              </Form.Item>
+            );
+          }
+
           return (
             <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <Input
                 disabled={readOnly || field.readOnly}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder || field.label}
               />
             </Form.Item>
           );
 
+        case "integer":
         case "number":
           return (
             <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <InputNumber
                 disabled={readOnly || field.readOnly}
                 style={{ width: "100%" }}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder || field.label}
+                formatter={
+                  field.formatter?.useIndianFormat
+                    ? (value) => {
+                        if (!value) return "";
+                        const num = parseFloat(String(value));
+                        return new Intl.NumberFormat("en-IN", {
+                          minimumFractionDigits:
+                            field.formatter?.minDecimalPlaces || 0,
+                          maximumFractionDigits:
+                            field.formatter?.maxDecimalPlaces || 2,
+                        }).format(num);
+                      }
+                    : undefined
+                }
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+              />
+            </Form.Item>
+          );
+
+        case "date":
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={field.label}
+              getValueFromEvent={(e) => {
+                // Convert YYYY-MM-DD to DD-MM-YYYY when saving
+                return convertYYYYMMDDToDDMMYYYY(e.target.value);
+              }}
+              getValueProps={(value) => {
+                // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
+                return {
+                  value: convertDDMMYYYYToYYYYMMDD(value || ""),
+                };
+              }}
+            >
+              <Input
+                disabled={readOnly || field.readOnly}
+                placeholder={`Select ${field.label}`}
+                type="date"
               />
             </Form.Item>
           );
@@ -1247,13 +1335,16 @@ export const BusinessVerificationDetails: React.FC<
         case "select":
           return (
             <Form.Item key={fieldId} name={fieldId} label={field.label}>
-              <Radio.Group disabled={readOnly || field.readOnly}>
+              <Select
+                disabled={readOnly || field.readOnly}
+                placeholder={`Select ${field.label}`}
+              >
                 {field.options?.map((option: string) => (
-                  <Radio key={option} value={option}>
+                  <Select.Option key={option} value={option}>
                     {option}
-                  </Radio>
+                  </Select.Option>
                 ))}
-              </Radio.Group>
+              </Select>
             </Form.Item>
           );
 
@@ -1262,7 +1353,7 @@ export const BusinessVerificationDetails: React.FC<
             <Form.Item key={fieldId} name={fieldId} label={field.label}>
               <Input
                 disabled={readOnly || field.readOnly}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder || field.label}
               />
             </Form.Item>
           );
@@ -1270,7 +1361,7 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     // Handle the actual schema structure from the backend
-    // The backend returns sections with fields array, not schema.properties
+    // The backend now returns sections with fields array
     if (!section.fields || !Array.isArray(section.fields)) {
       return <div>No fields found for section: {section.label}</div>;
     }
@@ -1387,9 +1478,28 @@ export const BusinessVerificationDetails: React.FC<
     ) => {
       const fieldKey = `${field.id}[${itemIndex}].${itemFieldId}`;
 
+      // Handle enum fields (select dropdown) in arrays
+      if (itemField.enum && itemField.enum.length > 0) {
+        return (
+          <Form.Item key={itemFieldId} name={fieldKey} label={itemField.label}>
+            <Select
+              disabled={readOnly || itemField.readOnly}
+              placeholder={`Select ${itemField.label}`}
+            >
+              {itemField.enum.map((option: string) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        );
+      }
+
       // Handle different field types within array items
       switch (itemField.type) {
         case "number":
+        case "integer":
           return (
             <Form.Item
               key={itemFieldId}
@@ -1399,28 +1509,104 @@ export const BusinessVerificationDetails: React.FC<
               <InputNumber
                 disabled={readOnly || itemField.readOnly}
                 style={{ width: "100%" }}
-                placeholder={itemField.placeholder}
+                placeholder={itemField.placeholder || itemField.label}
+                formatter={
+                  itemField.formatter?.useIndianFormat
+                    ? (value) => {
+                        if (!value) return "";
+                        const num = parseFloat(String(value));
+                        return new Intl.NumberFormat("en-IN", {
+                          minimumFractionDigits:
+                            itemField.formatter?.minDecimalPlaces || 0,
+                          maximumFractionDigits:
+                            itemField.formatter?.maxDecimalPlaces || 2,
+                        }).format(num);
+                      }
+                    : undefined
+                }
+                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
               />
             </Form.Item>
           );
 
-        case "textarea":
+        case "date":
           return (
             <Form.Item
               key={itemFieldId}
               name={fieldKey}
               label={itemField.label}
+              getValueFromEvent={(e) => {
+                // Convert YYYY-MM-DD to DD-MM-YYYY when saving
+                return convertYYYYMMDDToDDMMYYYY(e.target.value);
+              }}
+              getValueProps={(value) => {
+                // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
+                return {
+                  value: convertDDMMYYYYToYYYYMMDD(value || ""),
+                };
+              }}
             >
-              <TextArea
+              <Input
                 disabled={readOnly || itemField.readOnly}
-                placeholder={itemField.placeholder}
-                rows={3}
+                placeholder={`Select ${itemField.label}`}
+                type="date"
               />
             </Form.Item>
           );
 
-        case "text":
         case "string":
+          // Check if it should be a date field based on field name or label
+          const isArrayItemDateField =
+            itemField.label?.toLowerCase().includes("date") ||
+            itemField.label?.toLowerCase().includes("visit") ||
+            itemFieldId.toLowerCase().includes("date");
+
+          if (isArrayItemDateField) {
+            return (
+              <Form.Item
+                key={itemFieldId}
+                name={fieldKey}
+                label={itemField.label}
+                getValueFromEvent={(e) => {
+                  // Convert YYYY-MM-DD to DD-MM-YYYY when saving
+                  return convertYYYYMMDDToDDMMYYYY(e.target.value);
+                }}
+                getValueProps={(value) => {
+                  // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
+                  return {
+                    value: convertDDMMYYYYToYYYYMMDD(value || ""),
+                  };
+                }}
+              >
+                <Input
+                  disabled={readOnly || itemField.readOnly}
+                  placeholder={`Select ${itemField.label}`}
+                  type="date"
+                />
+              </Form.Item>
+            );
+          }
+
+          // Check if it should be a textarea
+          if (
+            itemField.ui?.widget === "textarea" ||
+            itemField.ui?.widget === "richtext"
+          ) {
+            return (
+              <Form.Item
+                key={itemFieldId}
+                name={fieldKey}
+                label={itemField.label}
+              >
+                <TextArea
+                  disabled={readOnly || itemField.readOnly}
+                  placeholder={itemField.placeholder || itemField.label}
+                  rows={itemField.ui?.rows || 3}
+                />
+              </Form.Item>
+            );
+          }
+
           return (
             <Form.Item
               key={itemFieldId}
@@ -1429,25 +1615,8 @@ export const BusinessVerificationDetails: React.FC<
             >
               <Input
                 disabled={readOnly || itemField.readOnly}
-                placeholder={itemField.placeholder}
+                placeholder={itemField.placeholder || itemField.label}
               />
-            </Form.Item>
-          );
-
-        case "select":
-          return (
-            <Form.Item
-              key={itemFieldId}
-              name={fieldKey}
-              label={itemField.label}
-            >
-              <Radio.Group disabled={readOnly || itemField.readOnly}>
-                {itemField.options?.map((option: string) => (
-                  <Radio key={option} value={option}>
-                    {option}
-                  </Radio>
-                ))}
-              </Radio.Group>
             </Form.Item>
           );
 
@@ -1474,7 +1643,7 @@ export const BusinessVerificationDetails: React.FC<
             >
               <Input
                 disabled={readOnly || itemField.readOnly}
-                placeholder={itemField.placeholder}
+                placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>
           );
@@ -1529,7 +1698,7 @@ export const BusinessVerificationDetails: React.FC<
         ))}
         {!readOnly && (
           <Button type="dashed" onClick={addItem} style={{ width: "100%" }}>
-            + Add {field.title ?? field.label}
+            + Add {field.label}
           </Button>
         )}
       </Form>
