@@ -22,7 +22,7 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBody,
+  ApiBody
 } from "@nestjs/swagger";
 import {
   VerificationType,
@@ -31,7 +31,7 @@ import {
   VerificationStatus,
   AddressType,
   ApprovedStatus,
-  Department,
+  Department
 } from "@prisma/client";
 import {
   Controller,
@@ -45,7 +45,7 @@ import {
   BadRequestException,
   Patch,
   Res,
-  Delete,
+  Delete
 } from "@nestjs/common";
 import { PDTemplateService } from "./pd-templates.service";
 import { formSchema, BANK_NAMES } from "./forms-schema";
