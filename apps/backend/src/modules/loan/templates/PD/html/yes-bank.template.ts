@@ -126,6 +126,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
   return `
     ${pdBaseTemplate(html_data)}
+    <h2 style="margin:24px 0 8px;text-align:center;font-size:20px;font-weight:600;color:#222;"><strong>PERSONAL DISCUSSION REPORT</strong></h2>
     <div class="template-content yes-bank-template">
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Main applicant", general.mainApplicantName)}
@@ -174,6 +175,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </table>
 
       <table style="${tableStyle}">
+            <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">Basic Details of Applicant</h3>
         <tr>
           <td style="${labelCellStyle}">Applicant – Business / Educational background / Past experience</td>
           <td style="${valueCellStyle}">${formatMultiline(
@@ -199,6 +201,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </table>
 
       <table style="${tableStyle}">
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Self Employed Profile – Occupational Details</h2>
         ${renderKeyValue("Name of the Business / Employment", business.businessName)}
         ${renderKeyValue(
           "Constitution of Business Entity",
@@ -259,6 +262,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </table>
 
       <table style="${tableStyle}">
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Residence and Business Address Details</h2>
         <tr><td style="${labelCellStyle}">Residence premise address</td><td style="${valueCellStyle}">${formatMultiline(
           addresses.residencePremiseAddress
         )}</td></tr>
@@ -316,6 +320,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Reference Check Details</h2>
       ${renderArrayTable(
         [
           "Reference",
@@ -342,6 +347,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       )}
 
       <table style="${tableStyle}">
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Final PD Comment</h2>
         ${renderKeyValue(
           "Interviewer’s overall comments",
           finalComment.interviewerComment
@@ -372,7 +378,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
-      <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">Annexure 1 – AFHL Cases</h3>
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 1 – AFHL Cases</h2>
       <table style="${tableStyle}">
         ${renderKeyValue(
           "Source from which property was identified",
@@ -421,7 +427,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
         )}
       </table>
 
-      <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">Annexure 2 – Salaried Profile</h3>
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 2 – Salaried Profile</h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Company", annexureSalaried.companyName)}
         ${renderKeyValue(

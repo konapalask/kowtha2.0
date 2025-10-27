@@ -528,10 +528,80 @@ export const heroHousingSelfTemplate = (
     formatMultiline(item.comments || item.modeOfValidation || ""),
   ]);
 
-  if (hasValue(incomeAssessment.monthlyNetIncome)) {
+  if (hasValue(incomeAssessment.salesReceiptsMonthlyAverage)) {
+    incomeItems.push([
+      "<strong>Sales/receipt (Monthly average)</strong>",
+      formatCurrency(incomeAssessment.salesReceiptsMonthlyAverage),
+      formatMultiline(incomeAssessment.salesReceiptsMonthlyAverageComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.otherIncome)) {
+    incomeItems.push([
+      "<strong>Other income</strong>",
+      formatCurrency(incomeAssessment.otherIncome),
+      formatMultiline(incomeAssessment.otherIncomeComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.totalMonthlyIncome)) {
+    incomeItems.push([
+      "<strong>Total monthly income</strong>",
+      formatCurrency(incomeAssessment.totalMonthlyIncome),
+      formatMultiline(incomeAssessment.totalMonthlyIncomeComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.costOfMaterialService)) {
+    incomeItems.push([
+      "<strong>Cost of material/service</strong>",
+      formatCurrency(incomeAssessment.costOfMaterialService),
+      formatMultiline(incomeAssessment.costOfMaterialServiceComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.directExpenses)) {
+    incomeItems.push([
+      "<strong>Direct expenses</strong>",
+      formatCurrency(incomeAssessment.directExpenses),
+      formatMultiline(incomeAssessment.directExpensesComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.salary)) {
+    incomeItems.push([
+      "<strong>Salary</strong>",
+      formatCurrency(incomeAssessment.salary),
+      formatMultiline(incomeAssessment.salaryComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.rent)) {
+    incomeItems.push([
+      "<strong>Rent</strong>",
+      formatCurrency(incomeAssessment.rent),
+      formatMultiline(incomeAssessment.rentComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.electricityExpenses)) {
+    incomeItems.push([
+      "<strong>Electricity expenses</strong>",
+      formatCurrency(incomeAssessment.electricityExpenses),
+      formatMultiline(incomeAssessment.electricityExpensesComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.otherMiscellaneousExpenses)) {
+    incomeItems.push([
+      "<strong>Other miscellaneous expenses</strong>",
+      formatCurrency(incomeAssessment.otherMiscellaneousExpenses),
+      formatMultiline(incomeAssessment.otherMiscellaneousExpensesComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.otherFamilyExpenses)) {
+    incomeItems.push([
+      "<strong>Other family expenses like school fees/house rent, household expenses etc</strong>",
+      formatCurrency(incomeAssessment.otherFamilyExpenses),
+      formatMultiline(incomeAssessment.otherFamilyExpensesComments || ""),
+    ]);
+  }
+  if (hasValue(incomeAssessment.netMonthlyAppraisalIncome)) {
     incomeItems.push([
       "<strong>Net monthly appraisal income</strong>",
-      formatCurrency(incomeAssessment.monthlyNetIncome),
+      formatCurrency(incomeAssessment.netMonthlyAppraisalIncome),
       formatMultiline(incomeAssessment.monthlyNetIncomeComments || ""),
     ]);
   }
@@ -554,7 +624,7 @@ export const heroHousingSelfTemplate = (
 
   const incomeTable = renderInnerTable(
     ["Particular", "Amount (Rs.) Monthly", "Comments"],
-    incomeItems
+    incomeItems 
   );
 
   const profileRows = [
@@ -600,8 +670,9 @@ export const heroHousingSelfTemplate = (
         "Quantum of stock",
         "No of Machinery and assets seen",
         "Turnover of last three years and current year till date (Total actual turnover of customer)",
-        "Product/service margins",
-        "Any expansion or new product or change in business line in last 2 years",
+        "Product/service Gross Margins ratio ",
+        "Product/service Net Margins ratio",
+        "Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue",
         "Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
       ])}`,
       right: businessOperationsValue,
@@ -621,11 +692,11 @@ export const heroHousingSelfTemplate = (
       left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>${bulletList([
         "Whether customer visited the property",
         "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
-        "Property is occupied by whom and reason if not self-occupied",
-        "Source of property purchase",
+        "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent) ",
+        "Source of property purchase (through dealer, builder/reference/relative)",
         "Name of seller and any relationship with customer",
         "Type of property/structure and area",
-        "Actual deal value and sale deed value, OCR source",
+        "What is actual deal value and sale deed value, OCR source ",
         "Whether seller is having any loan on the property",
         "When seller bought the property",
       ])}`,
@@ -633,7 +704,7 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>${bulletList([
-        "Customer investment habits and monthly saving schemes",
+        "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
         "Whether current residence is owned or rented and rent amount if any",
         "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
       ])}`,
@@ -641,7 +712,7 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>End use of property/fund –</strong></p>${bulletList([
-        "Proposed end use of property (self-occupation/investment etc)",
+        "Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases ",
         "Clear and detailed end use of fund in LAP cases",
       ])}`,
       right: endUseValue,
@@ -650,27 +721,27 @@ export const heroHousingSelfTemplate = (
       left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>${bulletList([
         "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue",
         "Repayment account from which all these EMI are getting paid",
-        "End use of fund of these loans (All BL/PL/LAP loan taken in last 3 years)",
-        "If any home loan/LAP, mention mortgage property and usage",
-        "Comment whether there is any bouncing in loans (period and reason)",
+        "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
+        "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
+        "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
       ])}`,
       right: loanObligationsValue,
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Banking –</strong></p>${bulletList([
-        "Details of all bank account, account open date, major business transaction accounts",
-        "Saving accounts of applicant and co applicant",
+        "Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening ",
+        "Please check any saving account of applicant and co applicant and provide the details of these accounts",
         "% of total receipt routed through banking",
       ])}`,
       right: bankingValue,
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>${bulletList([
-        "Relevant sale/purchase register/bills/kutcha records, inventory observations",
-        "TPC from neighbour and local independent party",
-        "Additional check for other family member involvement",
-        "QR code, license, permits, name board, contact number etc.",
-        "Google check / negative feedback / dedupe match",
+        "Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations",
+        "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period",
+        "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
+        "Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations",
+        "Google check and any negative observation/feedback/dedupe match or any other feedback",
       ])}`,
       right: documentChecksValue,
     },
