@@ -11,6 +11,7 @@ import { EditLoanDto } from "./dto/edit-loan.dto";
 import { PrismaService } from "../../prisma.service";
 import { CreateLoanDto } from "./dto/create-loan.dto";
 import { S3Service } from "../common/s3utils/s3.service";
+import { baseTemplate } from "./templates/FI/base.template";
 import { workTemplate } from "./templates/FI/work.template";
 import { PaginatedResponse } from "../common/dto/pagination.dto";
 import { CreateLambdaLoanDto } from "./dto/create-lamba-loan.dto";
@@ -19,10 +20,12 @@ import { createAssignmentDto } from "./dto/assign-loan-executive";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { EditVerificationDto } from "./dto/edit-verification.dto";
 import { LoggingService } from "../common/logging/logging.service";
+import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
 import { businessTemplate } from "./templates/FI/business.template";
 import { VerificationData } from "./templates/FI/address.interface";
 import { WorkVerificationData } from "./templates/FI/work.interface";
 import { BusinessVerificationData } from "./templates/FI/business.interface";
+import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
 import {
   Prisma,
   LoanStatus,
@@ -33,14 +36,11 @@ import {
   ApprovedStatus,
   Department,
 } from "@prisma/client";
-import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
-import { CreatePDEmailLogDto } from "./dto/create-pd-email-log.dto";
 import {
   Injectable,
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-import { baseTemplate } from "./templates/FI/base.template";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
@@ -53,7 +53,7 @@ export class LoanService {
     private loggingService: LoggingService,
     private logger: Logger,
     private s3Service: S3Service
-  ) {}
+  ) { }
 
   // Lazy loading to avoid circular dependencies
   private async getFinancialAnalysisTemplatesService() {
@@ -2909,7 +2909,7 @@ export class LoanService {
     }
   }
 
-  async exportFinancialAnalysisToExcel( loanId: number, bankName?: string ): Promise<Buffer> {
+  async exportFinancialAnalysisToExcel(loanId: number, bankName?: string): Promise<Buffer> {
     try {
       // If no bankName provided, fetch it from the loan
       if (!bankName) {
@@ -2923,9 +2923,9 @@ export class LoanService {
         bankName = loan.bankName;
       }
 
-      // Delegate to the financial analysis templates service
       const templatesService = await this.getFinancialAnalysisTemplatesService();
-      return await templatesService.exportFinancialAnalysisToExcel( loanId, bankName );
+
+      return await templatesService.exportFinancialAnalysisToExcel(loanId, bankName);
     } catch (error) {
       await this.loggingService.error(
         'Failed to export financial analysis to Excel',

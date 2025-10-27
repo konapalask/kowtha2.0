@@ -57,7 +57,7 @@ export class LoanController {
   constructor(
     private loanService: LoanService,
     private pdTemplateService: PDTemplateService
-  ) {}
+  ) { }
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -1097,7 +1097,7 @@ export class LoanController {
 
   @Post("verification/:id/ -analysis")
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: "Create financial analysis data for a verification",
     description: "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format."
   })
@@ -1204,7 +1204,7 @@ export class LoanController {
     @Body() submitDto: SubmitVerificationExecutiveDto
   ) {
     const { verificationType, verificationData, synopsis, ...financialAnalysisData } = submitDto;
-    
+
     const result = await this.loanService.submitVerificationExecutive(
       Number(loanId),
       verificationType,
@@ -1317,12 +1317,12 @@ export class LoanController {
 
   @Get("financial-analysis-template-info")
   @Roles(All)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: "Get financial analysis template format information for a specific bank",
     description: "Returns the template type and required DTO structure for financial analysis based on bank name"
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: "Template information fetched successfully",
     schema: {
       type: "object",
