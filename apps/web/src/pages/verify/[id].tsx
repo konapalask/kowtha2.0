@@ -265,10 +265,9 @@ export default function LoanVerifyDetails() {
           />
         );
       case "Business":
-        // All banks now use the unified BusinessVerificationDetails component with dynamic forms
         return (
           <BusinessVerificationDetails
-            verificationData={getCompleteVerificationData("Business")}
+            verificationData={getVerificationByType("Business")}
             onEdit={handleEdit}
             editLogsUpdated={editLogsUpdated}
             verificationId={getVerificationId("Business")}
