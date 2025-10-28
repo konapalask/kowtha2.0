@@ -25,371 +25,130 @@ import PhotoCapture from '../components/forms/PhotoCapture';
 import GetLocation from 'react-native-get-location';
 import {colors} from '../constants/colors';
 
-// Function to populate initial data from schema structure
-const populateInitialDataFromSchema = (
+// Field key mappings for automatic data population
+const FIELD_KEY_MAPPINGS = {
+  applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
+  businessName: ['businessName', 'nameOfConcern'],
+  phoneNo: ['applicantMobile'],
+  applicationNumber: [
+    'applicationNumber',
+    'applicationNo',
+    'applicationId',
+    'referenceNumber',
+  ],
+  loanAmount: ['loanAmount'],
+  address: [
+    'applicantAddress',
+    'initiatedAddress',
+    'addressVisited',
+    'businessAddress',
+    'pdAddress',
+    'officeAddress',
+  ],
+  latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
+  longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
+  coordinates: [
+    'coordinates',
+    'geoTag',
+    'geoCoordinates',
+    'siteCoordinates',
+    'latitudeLongitude',
+  ],
+};
+
+// Function to check if a field key matches any pattern in the mapping
+const matchesFieldPattern = (fieldKey: string, patterns: string[]): boolean => {
+  const fieldKeyLower = fieldKey.toLowerCase();
+  return patterns.some(pattern =>
+    fieldKeyLower.includes(pattern.toLowerCase()),
+  );
+};
+
+// Function to get initial data based on schema structure (DYNAMIC APPROACH)
+const getInitialDataByBank = (
   schema: any,
   userData: any,
   loggedInUserName?: string,
 ) => {
-  if (!schema || !schema.sections || !userData) return {};
+  if (!userData || !schema) return {};
 
-  const initialData: any = {};
-
-  // Common data mapping
-  const commonData = {
+  // Extract common data from userData
+  const commonData: Record<string, any> = {
     applicantName:
       userData?.loan?.applicantName || userData?.applicantName || '',
     businessName: userData?.businessName || userData?.loan?.businessName || '',
-    applicantMobile:
-      userData?.loan?.applicantMobile || userData?.contactNumber || '',
     phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
     applicationNumber:
       userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
     loanAmount: userData?.loan?.loanAmount || '',
     address:
       userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+    latitude: '',
+    longitude: '',
+    coordinates: '',
   };
 
-  // Map common data to schema fields
-  schema.sections.forEach((section: any) => {
-    if (!section.fields) return;
+  const initialData: Record<string, any> = {};
 
-    initialData[section.id] = {};
+  // Iterate through schema sections
+  if (schema?.sections) {
+    schema.sections.forEach((section: any) => {
+      initialData[section.id] = {};
 
-    section.fields.forEach((field: any) => {
-      const fieldId = field.id;
+      // Iterate through section fields
+      if (section.schema?.properties) {
+        Object.keys(section.schema.properties).forEach(fieldKey => {
+          // Check each field against our mappings
+          for (const [commonKey, patterns] of Object.entries(
+            FIELD_KEY_MAPPINGS,
+          )) {
+            if (matchesFieldPattern(fieldKey, patterns)) {
+              // Special handling for coordinates
+              if (commonKey === 'coordinates') {
+                // For coordinates field, try to get from commonData or leave empty
+                const coords = commonData.coordinates || '';
+                initialData[section.id][fieldKey] = coords;
+              }
+              // Special handling for geo coordinates (latitude/longitude)
+              else if (commonKey === 'latitude' || commonKey === 'longitude') {
+                // These are usually set dynamically with GetLocation
+                // Leave empty for now, will be populated separately
+                if (!initialData[section.id][fieldKey]) {
+                  initialData[section.id][fieldKey] = commonData[commonKey];
+                }
+              } else {
+                // Regular field mapping
+                initialData[section.id][fieldKey] = commonData[commonKey];
+              }
+              break; // Found a match, move to next field
+            }
+          }
 
-      // Map common data to schema fields
-      switch (fieldId) {
-        case 'nameOfTheApplicant':
-        case 'nameOfApplicant':
-          initialData[section.id][fieldId] = commonData.applicantName;
-          break;
-        case 'businessName':
-        case 'nameOfConcern':
-          initialData[section.id][fieldId] = commonData.businessName;
-          break;
-        case 'phoneNo':
-        case 'contactNo':
-          initialData[section.id][fieldId] = commonData.phoneNo;
-          break;
-        case 'applicationNumber':
-        case 'applicationNo':
-          initialData[section.id][fieldId] = commonData.applicationNumber;
-          break;
-        case 'visitedAddress':
-        case 'currentAddress':
-        case 'initiatedAddress':
-          initialData[section.id][fieldId] = commonData.address;
-          break;
-        case 'loanRequested':
-        case 'loanAmount':
-          initialData[section.id][fieldId] = commonData.loanAmount;
-          break;
-        case 'bankName':
-          initialData[section.id][fieldId] = userData?.loan?.bankName || '';
-          break;
-        case 'pdDoneBy':
-        case 'nameOfPersonMet':
-          initialData[section.id][fieldId] = loggedInUserName || '';
-          break;
-        default:
-          // For other fields, leave empty to be filled by user
-          initialData[section.id][fieldId] = '';
+          // Special case: pdDoneBy or nameOfPersonMet
+          if (
+            fieldKey.includes('pdDone') ||
+            fieldKey.includes('pdDoneBy') ||
+            fieldKey.includes('nameOfPersonMet') ||
+            fieldKey.includes('verifierName')
+          ) {
+            initialData[section.id][fieldKey] = loggedInUserName || '';
+          }
+
+          // Special case: bankName
+          if (fieldKey.includes('bank') && fieldKey.includes('name')) {
+            initialData[section.id][fieldKey] = userData?.loan?.bankName || '';
+          }
+
+          // Ensure field exists in initial data (even if empty)
+          if (!(fieldKey in initialData[section.id])) {
+            initialData[section.id][fieldKey] = '';
+          }
+        });
       }
     });
-  });
+  }
 
   return initialData;
-};
-
-// Function to get initial data based on bank name (DEPRECATED - keeping for fallback)
-const getInitialDataByBank = (
-  bankName: string,
-  userData: any,
-  loggedInUserName?: string,
-) => {
-  if (!userData || !bankName) return {};
-
-  const bankNameLower = bankName.toLowerCase();
-
-  // console.log('userData', userData);
-
-  // Common data mapping
-  const commonData = {
-    applicantName:
-      userData?.loan?.applicantName || userData?.applicantName || '',
-    nameOfConcern: userData?.businessName || userData?.loan?.businessName || '',
-    initiatedAddress:
-      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
-    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
-    applicationNo:
-      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
-    loanAmount: userData?.loan?.loanAmount || '',
-    contactNumber:
-      userData?.loan?.applicantMobile || userData?.contactNumber || '',
-  };
-
-  // console.log('commonData', commonData);
-
-  // Bank-specific mappings
-  if (bankNameLower.includes('axis finance ubl')) {
-    return {
-      basicDetails: {
-        applicationNo: commonData.applicationNo,
-        applicantName: commonData.applicantName,
-        concernName: commonData.nameOfConcern,
-        initiatedAddress: commonData.initiatedAddress,
-        phoneNo: commonData.phoneNo,
-      },
-    };
-  }
-
-  if (bankNameLower.includes('axis bank')) {
-    return {
-      applicantDetails: {
-        applicationId:
-          userData?.loan?.applicationId || commonData.applicationNo,
-        loanAmount: `${commonData.loanAmount}`,
-        customerName: commonData.applicantName,
-        contactNumber: commonData.contactNumber,
-        pdAddress: commonData.initiatedAddress,
-      },
-      businessPlaceVintage: {
-        nameOfFirm: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  if (bankNameLower.includes('arka fincap')) {
-    return {
-      applicantDetails: {
-        applicationNo: commonData.applicationNo,
-        nameOfApplicant: commonData.applicantName,
-        phoneNumber: commonData.phoneNo,
-        nameOfConcern: commonData.nameOfConcern,
-        initiatedAddress: commonData.initiatedAddress,
-        loanAmount: `${commonData.loanAmount}`,
-        purposeOfLoan: userData?.loan?.loanType || '',
-      },
-    };
-  }
-
-  if (bankNameLower.includes('tata ubl')) {
-    return {
-      basicDetails: {
-        nameOfApplicant: commonData.applicantName,
-        nameOfEntity: commonData.nameOfConcern,
-        nameOfCoApplicants: userData?.coApplicantName || '',
-      },
-      proposedLoanDetails: {
-        product: userData?.loan?.product || '',
-        amount: `${commonData.loanAmount}`,
-        tenure: userData?.loan?.tenure || '',
-        repaymentFrom: {
-          bankName: userData?.loan?.bankName || '',
-          typeSAAccount: userData?.loan?.accountType || '',
-          accountNo: userData?.loan?.accountNo || '',
-        },
-      },
-      officeAddress: {
-        address: commonData.initiatedAddress,
-      },
-      finalStatus: {
-        phoneNoOfApplicant: commonData.phoneNo,
-        pdDoneBy: loggedInUserName || '',
-      },
-    };
-  }
-
-  if (bankNameLower.includes('rbl')) {
-    return {
-      caseDetails: {
-        referenceNumber: commonData.applicationNo,
-        nameOfApplicant: commonData.applicantName,
-        addressVisited: commonData.initiatedAddress,
-        contactNo: commonData.phoneNo,
-      },
-      businessDetails: {
-        businessName: commonData.nameOfConcern,
-        shopAddress: commonData.initiatedAddress,
-      },
-    };
-  }
-
-  // Chola
-  if (bankNameLower.includes('chola')) {
-    return {
-      general: {
-        nameOfTheApplicant: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-        loanRequested: commonData.loanAmount,
-      },
-    };
-  }
-
-  // IDFC HL & ML, IDFC PL
-  if (bankNameLower.includes('idfc')) {
-    return {
-      applicantDetails: {
-        nameOfApplicant: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // IIFL
-  if (bankNameLower.includes('iifl')) {
-    return {
-      applicantDetails: {
-        nameOfApplicant: commonData.applicantName,
-      },
-    };
-  }
-
-  // Hero Fincorp
-  if (bankNameLower.includes('hero fincorp')) {
-    return {
-      details: {
-        nameOfTheCustomer: commonData.applicantName,
-        nameOfTheFirm: commonData.nameOfConcern,
-        businessAddress: commonData.initiatedAddress,
-      },
-    };
-  }
-
-  // Hero Housing (Salaried and Self)
-  if (
-    bankNameLower.includes('herohousing') ||
-    bankNameLower.includes('hero housing')
-  ) {
-    return {
-      applicantDetails: {
-        applicantName: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-        nameOfBusiness: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // India Shelter & Niwas
-  if (
-    bankNameLower.includes('india shelter') ||
-    bankNameLower.includes('niwas')
-  ) {
-    return {
-      noOfVisit: {
-        applicantName: commonData.applicantName,
-        nameOfBusiness: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // ICICI
-  if (bankNameLower.includes('icici')) {
-    return {
-      basicDetails: {
-        nameOfApplicant: commonData.applicantName,
-        businessAddress: commonData.initiatedAddress,
-      },
-    };
-  }
-
-  // DCB
-  if (bankNameLower.includes('dcb')) {
-    return {
-      basicDetails: {
-        nameOfApplicant: commonData.applicantName,
-      },
-    };
-  }
-
-  // INCRED
-  if (bankNameLower.includes('incred')) {
-    return {
-      basicDetails: {
-        applicantName: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // Axis Agri
-  if (bankNameLower.includes('axis agri')) {
-    return {
-      personalDetails: {
-        nameOfApplicant: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // Aditya Birla
-  if (bankNameLower.includes('aditya birla')) {
-    return {
-      applicantDetails: {
-        nameOfApplicant: commonData.applicantName,
-        nameOfBusiness: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // Ambit
-  if (bankNameLower.includes('ambit')) {
-    return {
-      applicantDetails: {
-        nameOfApplicant: commonData.applicantName,
-        nameOfBusiness: commonData.nameOfConcern,
-        contactNumber: commonData.phoneNo,
-      },
-    };
-  }
-
-  // Axis Finance (general, not UBL)
-  if (
-    bankNameLower.includes('axis finance') &&
-    !bankNameLower.includes('ubl')
-  ) {
-    return {
-      basicDetails: {
-        applicantName: commonData.applicantName,
-        nameOfEntity: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // Yes Bank
-  if (bankNameLower.includes('yes bank')) {
-    return {
-      applicantDetails: {
-        nameOfApplicant: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // SMFG SME
-  if (bankNameLower.includes('smfg')) {
-    return {
-      basicDetails: {
-        nameOfApplicantOrBusiness: commonData.applicantName,
-        applicantName: commonData.applicantName,
-        businessName: commonData.nameOfConcern,
-      },
-    };
-  }
-
-  // Default fallback for unknown banks
-  return {
-    basicDetails: {
-      applicantName: commonData.applicantName,
-      nameOfConcern: commonData.nameOfConcern,
-      nameOfApplicant: commonData.applicantName,
-      businessName: commonData.nameOfConcern,
-      initiatedAddress: commonData.initiatedAddress,
-      phoneNo: commonData.phoneNo,
-    },
-  };
 };
 
 const PD = ({navigation, route}: {navigation: any; route: any}) => {
@@ -454,9 +213,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // Consolidated effect to update sectionData with all sources
   useEffect(() => {
     const updateSectionData = async () => {
-      // Start with initial data
+      if (!schemaForm) return; // Wait for schema to load
+
+      // Start with initial data using dynamic schema-based approach
       let updatedData = getInitialDataByBank(
-        bankName,
+        schemaForm,
         userData,
         loggedInUserName,
       );
@@ -495,10 +256,10 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       });
     };
 
-    if (bankName) {
+    if (bankName && schemaForm) {
       updateSectionData();
     }
-  }, [loggedInUserName, bankName, userData]);
+  }, [loggedInUserName, bankName, userData, schemaForm]);
 
   // Load uploaded items and investigable separately
   useLayoutEffect(() => {
@@ -607,14 +368,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const schema = await loadMobilePDFormsSchema(bankName);
         if (schema) {
           setSchemaForm(schema);
-
-          // Initialize sectionData with schema structure and userData
-          const initialData = populateInitialDataFromSchema(
-            schema,
-            userData,
-            loggedInUserName,
-          );
-          setSectionData(initialData);
+          // Note: Initial data population is now handled in the consolidated effect
         }
       } catch (e) {
         console.error('Error loading schema:', e);
@@ -622,7 +376,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       }
     };
     loadSchema();
-  }, [bankName, userData, loggedInUserName]);
+  }, [bankName]);
 
   // Watch form values to update formData
   // const watchedValues = watch();

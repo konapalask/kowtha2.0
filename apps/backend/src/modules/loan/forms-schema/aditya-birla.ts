@@ -1,7 +1,10 @@
+import { genericSchema } from "../financials-schema/generic";
+
 export const adityaBirlaSchema = {
   id: 7,
   bankName: "Aditya Birla",
   sections: [
+    genericSchema,
     {
       id: "proposalInfo",
       label: "Proposal Information",
