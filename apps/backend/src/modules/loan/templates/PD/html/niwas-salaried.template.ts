@@ -98,6 +98,9 @@ export const niwasSalariedTemplate = (
   const employerChecks = ensureArray(
     verificationData.employerFirmCheck?.checks
   );
+  const pastEmployments = ensureArray(
+    verificationData.pastEmployment?.employments
+  );
   const pdComments = verificationData.pdOfficerComments || {};
 
   const assetRows = [
@@ -110,17 +113,18 @@ export const niwasSalariedTemplate = (
     ["AC", assets.ac],
     ["Fridge", assets.fridge],
     ["Induction", assets.induction],
+    ["Property", assets.property],
     ["Insurance (LIC)", assets.insurance],
     ["Fixed Deposit", assets.fixedDeposit],
     ["Chit Funds", assets.chitFunds],
     ["Post Office Savings", assets.postOfficeSavings],
     [
-      "Post Office Savings Monthly",
+      "IsPost Office Savings Monthly",
       assets.postOfficeSavingsMonthly,
     ],
-    ["Recurring Deposit", assets.recurringDeposit],
-    ["Consumption (Nicotine / Alcohol)", assets.consumptionHabits],
-    ["Investments", assets.investments],
+    ["Any Recurring Deposit", assets.recurringDeposit],
+
+    ["Do you consumeNicotine Products or Alcohol?", assets.consumptionHabits],
   ].map(([label, value]) => [label, formatMultiline(value)]);
 
   const familyRows = familyMembers.map((member: any) => [
@@ -145,11 +149,10 @@ export const niwasSalariedTemplate = (
     ref.name || "",
     ref.address || "",
     ref.designation || "",
-    ref.yearsKnown || "",
+    ref.noOfYearsKnownTheApplicant || "",
     ref.contactNumber || "",
     ref.email || "",
-    ref.photoWithApplicant || "",
-  ]);
+   ]);
 
   const employerCheckRows = employerChecks.map((check: any) => [
     check.name || "",
@@ -158,7 +161,6 @@ export const niwasSalariedTemplate = (
     check.yearsKnown || "",
     check.contactNumber || "",
     check.feedback || "",
-    check.businessCardCollected || "",
   ]);
 
   const essRows = ess.map((entry: any, index: number) => [
@@ -167,12 +169,25 @@ export const niwasSalariedTemplate = (
     entry.response || "",
   ]);
 
+  const pastEmploymentRows = pastEmployments.map((employment: any) => [
+    employment.employerName || "",
+    employment.designation || "",
+    employment.fromDate || "",
+    employment.toDate || "",
+    `${employment.contactPersonName || ""}${employment.contactPersonNumber ? ` - ${employment.contactPersonNumber}` : ""}`.trim(),
+    employment.reasonForMovement || "",
+  ]);
+
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content niwas-salaried-template">
+    <h1 style="margin:0 0 16px;color:#1f2a37;font-size:24px; text-align:center">PD Sheet - Salaried Applicant</h1>
+    <table style="${tableStyle}">
+      ${renderKeyValue("Prospect No.", general.prospectNo)}
+    </table>
+
       <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Basic Details</h2>
       <table style="${tableStyle}">
-        ${renderKeyValue("Prospect No.", general.prospectNo)}
         ${renderKeyValue("Name of Applicant", general.nameOfApplicant)}
         ${renderKeyValue("Marital Status", general.maritalStatus)}
         ${renderKeyValue(
@@ -180,183 +195,236 @@ export const niwasSalariedTemplate = (
           general.educationalQualification
         )}
         ${renderKeyValue("Category", general.category)}
+        <tr>
+          <td style="${labelCellStyle}">Number of Dependents</td>
+          <td style="${valueCellStyle}" colspan="3">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Children:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.dependentsChildren)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Adults:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.dependentsAdults)}</td>
+                <td style="border:none;padding:0;font-weight:600;color:#333;">Others:</td>
+                <td style="border:none;padding:0;color:#333;">${formatMultiline(general.dependentsOthers)}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
         ${renderKeyValue(
-          "Dependents - Children",
-          general.dependentsChildren
-        )}
-        ${renderKeyValue("Dependents - Adults", general.dependentsAdults)}
-        ${renderKeyValue("Dependents - Others", general.dependentsOthers)}
-        ${renderKeyValue(
-          "Years in Current Residence",
+          "Number of Years in Current Residence",
           general.yearsInCurrentResidence
         )}
-        ${renderKeyValue("House Size", general.houseSize)}
-        ${renderKeyValue("Previous Address", general.previousAddress)}
+        ${renderKeyValue("Current ResidenceHouse Size", general.houseSize)}
+
+        ${renderKeyValue("If <1= Year, then Previous Address", general.previousAddress)}
+        ${renderKeyValue("Number of Years Stayed at that Address", general.yearsAtPreviousAddress)}
+     
         ${renderKeyValue(
-          "Years Stayed at Previous Address",
-          general.yearsAtPreviousAddress
-        )}
-        ${renderKeyValue(
-          "Years in Current City",
+          "Number of Years in Current City",
           general.yearsInCurrentCity
         )}
-        ${renderKeyValue("Previous City", general.previousCity)}
-        ${renderKeyValue(
-          "Years in Previous City",
-          general.yearsInPreviousCity
-        )}
-        ${renderKeyValue("Reason for Change", general.reasonForChange)}
-        ${renderKeyValue(
+        <tr>
+          <td style="${labelCellStyle}">If <=3 Years, then Previous City</td>
+          <td style="${valueCellStyle}" colspan="3">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+               <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Previous City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.previousCity)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Number of Years in that City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsAtPreviousAddress)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Reason for Change:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.reasonForChange)}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+               ${renderKeyValue(
           "Parents Staying With",
           general.parentsStayingWith
         )}
+
+        <tr>
+          <td style="${labelCellStyle}">If parents living separately, then mention</td>
+          <td style="${valueCellStyle}" colspan="3">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Residing City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.residingCity)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Residing Location Ownership Status:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.residingLocationOwnershipStatus)}</td>
+              </tr>
+            </table>
+          </td>
       </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Assets and Investments
       </h2>
-      ${renderArrayTable(["Asset / Investment", "Details"], assetRows)}
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">Assets Owned</td>
+          <td style="${valueCellStyle}" colspan="5">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Smartphone (Yes/No): ${assetRows[0]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Washing Machine (Yes/No): ${assetRows[1]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Car RC No. (Yes/No): ${assetRows[2]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Two-Wheeler (Yes/No): ${assetRows[3]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Auto/Cab (Yes/No): ${assetRows[4]?.[1] || "Not provided"}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Computer / Laptop (Yes/No): ${assetRows[5]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">AC (Yes/No): ${assetRows[6]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fridge (Yes/No): ${assetRows[7]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Induction (Yes/No): ${assetRows[8]?.[1] || "Not provided"}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Investments (Mention Amount if he owns or invest in any instrument)</td>
+          <td style="${valueCellStyle}" colspan="5">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Property: ${assetRows[9]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Insurance (LIC): ${assetRows[10]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fixed Deposit: ${assetRows[11]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Chit Funds: ${assetRows[12]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Post Office Savings: ${assetRows[13]?.[1] || "Not provided"}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Is Post Office savings monthly (Yes/No): ${assetRows[14]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Any recurring deposit (Yes/No): ${assetRows[15]?.[1] || "Not provided"}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Did you consume Nicotine Products or Alcohol?</td>
+          <td style="${valueCellStyle}" colspan="5"> ${assetRows[16]?.[1] || "Not provided"}</td>
+          </tr>
+      </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Employment Details
       </h2>
       <table style="${tableStyle}">
-        ${renderKeyValue("Current Employer", employment.employerName)}
+        ${renderKeyValue("Name of Current Employer/Business Firm", employment.employerName)}
         ${renderKeyValue(
-          "Years in Current Job / Date of Joining",
+          "Years in Current Job / Date",
           employment.yearsInCurrentJob
         )}
         ${renderKeyValue(
-          "Total Work Experience",
+          "Total Work Experience (in years)",
           employment.totalWorkExperience
         )}
-        ${renderKeyValue("Official Email", employment.officialEmail)}
+        ${renderKeyValue("Official/Business Email-ID", employment.officialEmail)}
         ${renderKeyValue("Contact Number", employment.contactNumber)}
         ${renderKeyValue(
           "Number of Employees in Firm",
           employment.numberOfEmployeesInFirm
         )}
+        ${renderKeyValue("Final Product/Service offered by Company", employment.natureOfBusiness)}
+        ${renderKeyValue("Number of Competitors in Nearby Market", employment.numberOfCompetitorsInNearbyMarket)}
+        ${renderKeyValue("Locality of Business Premises", employment.localityOfBusinessPremises)}
+        <tr>
+          <td style="${labelCellStyle}" colspan="2"></td>
+        </tr>
+          ${renderKeyValue("Employee ID (Copy/Photograph Mandatory)", employment.employeeId)}
+          ${renderKeyValue("Designation", employment.designation)}
+        <tr>
+          <td colspan="2" style="padding:0;">
+            <table style="${tableStyle}">
+              <tr>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Mode of Salary</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Type of Employer</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Type of Industry</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Department</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Role</th>
+              </tr>
+              <tr>
+                <td style="${valueCellStyle}">${formatMultiline(employment.modeOfSalary)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.typeOfEmployer)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.typeOfIndustry)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.department)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.role)}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
       </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        Company / Employer Information
+        Past Employment/Business Details
       </h2>
       <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Head Office Location",
-          company.companyHeadOffice
-        )}
-        ${renderKeyValue(
-          "Promoters / Management",
-          company.promotersNames
-        )}
-        ${renderKeyValue(
-          "Number of Company Employees",
-          company.numberOfCompanyEmployees
-        )}
-        ${renderKeyValue("Constitution", company.constitution)}
-        ${renderKeyValue("Presence Across Cities", company.citiesPresent)}
-        ${renderKeyValue("Nature of Business / Services", company.natureOfBusiness)}
-        ${renderKeyValue("Type of Customers", company.typeOfCustomers)}
-        ${renderKeyValue(
-          "Years Since Incorporation",
-          company.yearsSinceIncorporation
-        )}
-        ${renderKeyValue("GST Registered", company.gstRegistered)}
-        ${renderKeyValue("GST Number", company.gstNumber)}
-        ${renderKeyValue(
-          "Branches Across India",
-          company.branchesAcrossIndia
-        )}
-        ${renderKeyValue(
-          "Share Holding Pattern",
-          company.shareHoldingPattern
-        )}
-        ${renderKeyValue("Management Team", company.managementTeam)}
-        ${renderKeyValue(
-          "Banking Relationship",
-          company.bankingRelationship
-        )}
-      </table>
+              <tr>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Employer/Business Name</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Designation</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">From</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">To</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Contact Person Name & Number</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Reason for Movement</th>
+              </tr>
+              <tr>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[0] || "")}</td>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[1] || "")}</td>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[2] || "")}</td>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[3] || "")}</td>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[4] || "")}</td>
+                <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[5] || "")}</td>
+              </tr>
+            </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        Business Premises &amp; Operations
+        Financial Details
       </h2>
       <table style="${tableStyle}">
-        ${renderKeyValue(
-          "Premises Owned / Rented",
-          premises.businessPremiseOwnership
-        )}
-        ${renderKeyValue(
-          "Monthly Sales / Receipts",
-          premises.monthlySalesReceipts
-        )}
-        ${renderKeyValue(
-          "Sales on Credit (%)",
-          premises.percentSalesOnCredit
-        )}
-        ${renderKeyValue(
-          "Manufacturing / Trading Details",
-          premises.manufacturingTradingDetails
-        )}
-        ${renderKeyValue(
-          "Sales Concentration",
-          premises.salesConcentration
-        )}
-        ${renderKeyValue(
-          "Business Cycle – Debtors",
-          premises.businessCycleDebtors
-        )}
-        ${renderKeyValue(
-          "Business Cycle – Creditors",
-          premises.businessCycleCreditors
-        )}
-        ${renderKeyValue("Stock Valuation", premises.stockValuation)}
-        ${renderKeyValue(
-          "Gross & Net Margins",
-          premises.grossNetMargins
-        )}
-        ${renderKeyValue(
-          "Monthly Net Saving (Rs.)",
-          premises.monthlyNetSaving
-        )}
-        ${renderKeyValue("Major Suppliers", premises.majorSuppliers)}
-        ${renderKeyValue("Major Customers", premises.majorCustomers)}
-        ${renderKeyValue("Number of Employees", premises.numberOfEmployees)}
-        ${renderKeyValue("Name Board Seen", premises.nameBoardSeen)}
-        ${renderKeyValue(
-          "Locality of Office / Business",
-          premises.localityOfOffice
-        )}
-        ${renderKeyValue(
-          "Residence cum Office Setup",
-          premises.residenceCumOffice
-        )}
-        ${renderKeyValue(
-          "VAT / Excise / Service Tax Applicability",
-          premises.vatExciseApplicability
-        )}
-        ${renderKeyValue("Latest Tax Return Paid", premises.latestTaxReturn)}
+          <tr>
+            <td style="${labelCellStyle}">Monthly Salary Income</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.chequeAmount || 0)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(employment.otherMonthlyIncome || 0)}</td> 
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Rental Income (In Rs)</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.rentalIncomeCash || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.rentalIncomeCheque || 0)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Incentives/Perks (In Rs)</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.incentivesCash || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.incentivesCheque || 0)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Monthly Bonus (In Rs)</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.monthlyBonusCash || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.monthlyBonusCheque || 0)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Others, please specify source type:</td>
+            <td style="${valueCellStyle}" colspan="2">${formatMultiline(employment.otherMonthlyIncomeSourceType || "")}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Monthly Income (In Rs):</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.monthlyIncomeCash || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.monthlyIncomeCheque || 0)}</td>
+          </tr>
       </table>
 
-      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        ESS Checklist
-      </h2>
-      ${renderArrayTable(
-        ["#", "Question", "Response"],
-        essRows.map((row) => row.map((cell) => cell || ""))
-      )}
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        Existing Loan Details
+        Existing or Past Loan Details
       </h2>
       ${renderArrayTable(
-        ["Type of Loan", "Bank Name", "Loan Amount", "EMI", "Tenure Remaining"],
+        ["Loan Type", "Lending Institution Name", "Loan Amount (in Rs.)", "Tenure Remaining", "EMI"],
         existingLoanRows
       )}
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        Loan Purpose &amp; Cost
+        Loan Details
       </h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Purpose of Loan", loanPurpose.purposeOfLoan)}
@@ -376,34 +444,46 @@ export const niwasSalariedTemplate = (
           "Comfortable EMI",
           loanPurpose.comfortableEmi
         )}
-        ${renderKeyValue("Funds Required", loanPurpose.fundsRequired)}
-        ${renderKeyValue(
-          "Source of Own Funds (OCR)",
-          loanPurpose.sourceOfOwnFunds
-        )}
-        ${renderKeyValue("Purchase Cost", loanPurpose.purchaseCost)}
-        ${renderKeyValue("Savings", loanPurpose.savings)}
-        ${renderKeyValue(
-          "Construction Estimate",
-          loanPurpose.constructionEstimate
-        )}
-        ${renderKeyValue(
-          "Registration / Stamp Duty",
-          loanPurpose.registrationCharges
-        )}
-        ${renderKeyValue(
-          "Other Loan Amount Taken",
-          loanPurpose.otherLoanAmountTaken
-        )}
-        ${renderKeyValue(
-          "Total Amount Spent",
-          loanPurpose.totalAmountSpent
-        )}
-        ${renderKeyValue(
-          "Total Transaction Cost",
-          loanPurpose.totalTransactionCost
-        )}
+        ${renderKeyValue("Status of Property to be Purchased", loanPurpose.statusOfPropertyToBePurchased)}
+        ${renderKeyValue("Usage of Property After Purchase", loanPurpose.usageOfPropertyAfterPurchase)}
+        
       </table>
+
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        cost and Funds Information (Loan Details)
+        </h2>
+        <table style="${tableStyle}">
+          ${renderKeyValue("Funds Required", loanPurpose.fundsRequired)}
+          ${renderKeyValue(
+            "Source of Own Funds (OCR)",
+            loanPurpose.sourceOfOwnFunds
+          )}
+          ${renderKeyValue("Purchase Cost", loanPurpose.purchaseCost)}
+          ${renderKeyValue("Savings", loanPurpose.savings)}
+          ${renderKeyValue(
+            "Construction Estimate",
+            loanPurpose.constructionEstimate
+          )}
+          ${renderKeyValue("Family/Friends", loanPurpose.familyFriends)}
+          ${renderKeyValue(
+            "Registration / Stamp Duty charges",
+            loanPurpose.registrationCharges
+          )}
+          ${renderKeyValue(
+            "Other Loan Amount Taken",
+            loanPurpose.otherLoanAmountTaken
+          )}
+          ${renderKeyValue("Other Expenses", loanPurpose.otherExpenses)}
+          ${renderKeyValue(
+            "Total Amount Spent (Total of all the above)",
+            loanPurpose.totalAmountSpent
+          )}
+          ${renderKeyValue(
+            "Total Transaction Cost (Total of all the above)",
+            loanPurpose.totalTransactionCost
+          )}
+          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)", loanPurpose.modeOfPaymentToSeller)}
+        </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Other Family Member Details
@@ -414,7 +494,7 @@ export const niwasSalariedTemplate = (
           "Relation",
           "Age",
           "Employment Type",
-          "Education",
+          "Educational Qualification(Also mention if Govt. or Private institution)",
           "Contact No.",
           "Staying with Applicant",
         ],
@@ -429,35 +509,33 @@ export const niwasSalariedTemplate = (
           "Name",
           "Address",
           "Designation",
-          "Years Known",
+          "No of Years known the Applicant",
           "Contact Number",
-          "Email",
-          "Photo with Applicant",
+          "Email Address", 
         ],
         referenceRows
       )}
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        Employer Firm Check
+        Employer Firm Check (From Neighbor)
       </h2>
       ${renderArrayTable(
         [
-          "Name",
-          "Business Firm",
+          "Name of the Person",
+          "Name of Business Firm",
           "Address",
-          "Years Known",
+          "Number of Years Known the Firm",
           "Contact Number",
-          "Feedback",
-          "Business Card Collected",
+          "Feedback about Employer/Firm (Positive/Neutral/Negative)",
         ],
         employerCheckRows
       )}
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
-        PD Officer Comments
+        To be Filled by PD Officer
       </h2>
       <table style="${tableStyle}">
-        ${renderKeyValue("Comments", pdComments.comments)}
+        ${renderKeyValue("Brief Comments / Observations of the case", pdComments.comments)}
         ${renderKeyValue(
           "Name of PD Officer",
           pdComments.pdOfficerName

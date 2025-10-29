@@ -130,9 +130,9 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
 
   const generalTable = `
     <table style="${tableStyle}">
-      <tr><th style="${headerStyle}" colspan="4">Personal Discussion Sheet (PD) with Rural Enterprise</th></tr>
-      ${renderKeyValueRow("Reference Number", general.referenceNumber)}
-      ${renderKeyValueRow("Name of Firm", general.nameOfFirm)}
+      <tr><th style="${headerStyle}" colspan="4"><u>Personal Discussion Sheet (PD) with Rural Enterprise</u></th></tr>
+      ${renderKeyValueRow("Reference Number", general.referenceNumber,undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Name of Firm", general.nameOfFirm,undefined, {colSpan: 3})}
       <tr>
         <td style="${labelCellStyle}">Constitution</td>
         <td style="${valueCellStyle}">${formatMultiline(general.constitution)}</td>
@@ -141,28 +141,6 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
           general.incorporationDate
         )}</td>
       </tr>
-      <tr>
-        <td style="${labelCellStyle}">Region</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.region)}</td>
-        <td style="${labelCellStyle}">Branch</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.branch)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Location</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.location)}</td>
-        <td style="${labelCellStyle}">Coordinates</td>
-        <td style="${valueCellStyle}">
-          ${formatMultiline(general.latitude)} , ${formatMultiline(
-    general.longitude
-  )}
-        </td>
-      </tr>
-    </table>
-  `;
-
-  const pdTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">PD Visit Details</th></tr>
       ${renderKeyValueRow("Address of the Firm", pdDetails.addressOfFirm, undefined, {
         colSpan: 3,
       })}
@@ -191,19 +169,13 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
     </table>
   `;
 
+
+
   const profileTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Business Profile</th></tr>
-      <tr>
-        <td style="${labelCellStyle}">Type of Industry</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          profile.typeOfIndustry
-        )}</td>
-        <td style="${labelCellStyle}">Nature of Business</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          profile.natureOfBusiness
-        )}</td>
-      </tr>
+      ${renderKeyValueRow("Type of Industry", profile.typeOfIndustry,undefined, {colSpan: 3})}
+      ${renderKeyValueRow("Nature of Business", profile.natureOfBusiness,undefined, {colSpan: 3})}
       ${renderKeyValueRow(
         "Details on management of business",
         profile.managementDetails,
@@ -241,20 +213,54 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Annual Turnover",
-        profile.financeTurnover,
-        formatCurrency,
+        "End use of the Loan & Loan amount Required", 
+        profile.endUseOfTheLoanAndLoanAmountRequired,
+        undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Collateral Security Details",
-        profile.collateralSecurityDetails,
+        "Other Business / Alternate Income Sources",
+        profile.otherBusinessAlternateIncomeSources,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Business License Related Information",
+        profile.businessLicenseRelatedInformation,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Documnets Provided during Visit",
+        profile.documentsProvidedDuringVisit,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow("Banking & Working Capital Limit Information", renderArrayTable(
+        ["Bank Name", "Limit Type", "Limit Amount"],
+        facilityRows
+      ), undefined, { colSpan: 3 })}
+
+      ${renderKeyValueRow(
+        "Is it a Takeover?", 
+        profile.isItATakeover, 
+        undefined, { colSpan: 3 }
+      )}
+
+      ${renderKeyValueRow(
+        "Any other loan obligations of the firm",
+        profile.anyOtherLoanObligationsOfTheFirm,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Current Account if any",
         profile.currentAccountIfAny,
+        undefined,
+        { colSpan: 3 }
+      )}${renderKeyValueRow(
+        "Collateral Security Details",
+        profile.collateralSecurityDetails,
         undefined,
         { colSpan: 3 }
       )}
@@ -264,34 +270,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-    </table>
-  `;
 
-  const bankingTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="3">Banking & Working Capital Limits</th></tr>
-      ${renderArrayTable(
-        ["Bank Name", "Limit Type", "Limit Amount"],
-        facilityRows
-      )}
-      ${renderKeyValueRow(
-        "Additional Details / Conduct / TOD if availed",
-        banking.additionalDetails,
-        undefined,
-        { colSpan: 2 }
-      )}
-      ${renderKeyValueRow(
-        "Is it a Takeover?",
-        banking.takeoverRemarks,
-        undefined,
-        { colSpan: 2 }
-      )}
-      ${renderKeyValueRow(
-        "Other Loan Obligations of the Firm",
-        banking.otherLoanObligations,
-        undefined,
-        { colSpan: 2 }
-      )}
     </table>
   `;
 
@@ -369,19 +348,15 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">PD Final Status</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          observations.pdFinalStatus
-        )}</td>
-        <td style="${labelCellStyle}">PD Vendor Name & Address</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          observations.pdVendorDetails
-        )}</td>
-      </tr>
       ${renderKeyValueRow(
-        "PD Vendor Stamp & Signature",
-        observations.pdVendorStamp,
+        "PD Final Status",
+        observations.pdFinalStatus,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "PD Vendor Name & Address",
+        observations.pdVendorDetails,
         undefined,
         { colSpan: 3 }
       )}
@@ -392,9 +367,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
     ${pdBaseTemplate(html_data)}
     <div class="template-content axis-agri-template">
       ${generalTable}
-      ${pdTable}
       ${profileTable}
-      ${bankingTable}
       ${supplierClientTable}
       ${observationsTable}
     </div>

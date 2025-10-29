@@ -18,7 +18,8 @@ export const niwasSalariedSchema = {
           educationalQualification: {
             type: "string",
             title:
-              "Educational Qualification (Below 10th / 10th / 12th / Diploma / Graduate / PG)",
+              "Educational Qualification ",
+              enum: ["Below 10th", "10th", "12th", "Diploma", "Graduate", "PG"],
           },
           category: {
             type: "string",
@@ -40,10 +41,12 @@ export const niwasSalariedSchema = {
           yearsInCurrentResidence: {
             type: "string",
             title: "Years in Current Residence",
+            enum: ["<1 Year", "1-3 Years", "3-5 Years", ">5 Years"],
           },
           houseSize: {
             type: "string",
             title: "Current residence house size",
+            enum: ["1 BHK", "2 BHK", ">2 BHK"],
           },
           previousAddress: {
             type: "string",
@@ -72,6 +75,16 @@ export const niwasSalariedSchema = {
           parentsStayingWith: {
             type: "string",
             title: "Parents staying with (Self / Separate / Expired)",
+            enum: ["Self", "Separate", "Expired"],
+          },
+          residingCity: {
+            type: "string",
+            title: "Residing City",
+          },
+          residingLocationOwnershipStatus: {
+            type: "string",
+            title: "Residing location ownership status",
+            enum: ["self-Owned","Paarent-Owned", "Rented"],
           },
         },
       },
@@ -148,6 +161,27 @@ export const niwasSalariedSchema = {
             type: "string",
             title: "Number of employees in firm",
           },
+          finalProductServiceOffered: {
+            type: "string",
+            title: "Final product/service offered by company",
+          },
+          numberOfCompetitorsInNearbyMarket: {
+            type: "string",
+            title: "Number of competitors in nearby market",
+          },
+          localityOfBusinessPremises: {
+            type: "string",
+            title: "Locality of business premises",
+            enum: ["Residential", "Commercial", "Industrial", "Corporate Hub/Office Space", "Other"],
+          },
+          employeeId: {
+            type: "string",
+            title: "Employee ID (Copy/Photograph Mandatory)",
+          },
+          designation: {
+            type: "string",
+            title: "Designation",
+          },
         },
       },
     },
@@ -157,162 +191,188 @@ export const niwasSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          companyHeadOffice: {
+          modeOfSalary: {
             type: "string",
-            title: "Company head office location",
+            title: "Mode of Salary",
+            enum: ["Cash", "Cheque", "Other"],
           },
-          promotersNames: {
+          typeOfEmployer: {
             type: "string",
-            title: "Name of promoters / management",
+            title: "Type of Employer",
+            enum:["Govt/PSU", "Unlisted Pvt. Ltd", "MNC/Listed Pvt. Ltd", "Proprietorship/Partnership/NGO/Trust", "Others,Please Specify:-Civil & Electrical Contractor."],
           },
-          numberOfCompanyEmployees: {
+          typeOfIndustry: {
             type: "string",
-            title: "Number of company employees",
+            title: "Type of Industry",
+            enum: ["Agriculture", "Construction","Education", "FMCG","Healthcare","Manufacturing","Services","Travel & Tourism","E-Commerce","Other,Please Specify"],
           },
-          constitution: {
+          department: {
             type: "string",
-            title: "Constitution",
+            title: "Department",
+            enum: ["Human Resources", "Accounts & Finance", "Marketing", "Sales", "IT", "Operations", "Transportation","Cleaning/Support staff","Other,Please Specify"],
           },
-          citiesPresent: {
+          role: {
             type: "string",
-            title: "Presence in how many cities / towns",
-          },
-          natureOfBusiness: {
-            type: "string",
-            title: "Nature of business / services provided",
-            ui: { widget: "textarea", rows: 2 },
-          },
-          typeOfCustomers: {
-            type: "string",
-            title: "Type of customers",
-          },
-          yearsSinceIncorporation: {
-            type: "string",
-            title: "Years since incorporation",
-          },
-          gstRegistered: {
-            type: "string",
-            title: "GST registered (Yes/No)",
-          },
-          gstNumber: { type: "string", title: "GST number" },
-          branchesAcrossIndia: {
-            type: "string",
-            title: "Branches across India",
-          },
-          shareHoldingPattern: {
-            type: "string",
-            title: "Share holding pattern",
-          },
-          managementTeam: {
-            type: "string",
-            title: "Management team",
-          },
-          bankingRelationship: {
-            type: "string",
-            title: "Banking relationship (working capital, term loans etc.)",
+            title: "Role",
+            enum: [
+              "Accountant",
+              "Administration Executive",
+              "Assistant",
+              "Cab Driver/Auto Driver",
+              "Class 4 Employees of Govt Sector",
+              "Cooks",
+              "Waiters",
+              "Delivery Boy",
+              "Employee of Security Agency",
+              "Factory Manager",
+              "Factory Worker",
+              "Floor Manager/Manager in Store",
+              "House - Keeping / support staff",
+              "Job Worker on Project Basis",
+              "Nurses/Ward boy in medical institution",
+              "Sales Executive",
+              "Supervisor",
+              "Teacher",
+              "Tele-caller/Back Office Executive",
+              "Others, Please Specify"
+            ],
           },
         },
       },
     },
     {
-      id: "businessPremises",
-      label: "Business Premises & Operations",
+      id: "pastEmploymentBusinessDetails",
+      label: "Past Employment/Business Details",
       schema: {
-        type: "object",
-        properties: {
-          businessPremiseOwnership: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+          emplyerorBusinessName: {
             type: "string",
-            title: "Business premises whether owned or rented",
+            title: " Employer/Business Name",
           },
-          monthlySalesReceipts: {
+          designation: {
             type: "string",
-            title: "Actual monthly sales / receipts as per customer",
+            title: "Designation",
           },
-          percentSalesOnCredit: {
+          fromDate: {
             type: "string",
-            title: "What % sales is done on credit",
+            title: "From Date",
           },
-          manufacturingTradingDetails: {
+          toDate: {
             type: "string",
-            title: "Manufacturing / trading details",
-            ui: { widget: "textarea", rows: 2 },
+            title: "To Date",
           },
-          salesConcentration: {
+          contactPersonName: {
             type: "string",
-            title: "Sales concentration >50% on one party (details)",
+            title: "Contact Person Name",
           },
-          businessCycleDebtors: {
+          contactPersonNumber: {
             type: "string",
-            title: "Business cycle – Debtors",
+            title: "Contact Person Number",
           },
-          businessCycleCreditors: {
+          reasonForMovement: {
             type: "string",
-            title: "Business cycle – Creditors",
+            title: "Reason for Movement",
           },
-          stockValuation: {
-            type: "string",
-            title: "Stock valuation as on date",
-          },
-          grossNetMargins: {
-            type: "string",
-            title: "Gross & net margins",
-          },
-          monthlyNetSaving: {
-            type: "string",
-            title: "Monthly net saving (Rs.)",
-          },
-          majorSuppliers: {
-            type: "string",
-            title: "Name & contact of two major suppliers",
-          },
-          majorCustomers: {
-            type: "string",
-            title: "Name & contact of two major buyers",
-          },
-          numberOfEmployees: {
-            type: "string",
-            title: "No. of employees",
-          },
-          nameBoardSeen: {
-            type: "string",
-            title: "Name board seen (details)",
-          },
-          localityOfOffice: {
-            type: "string",
-            title: "Locality of business / office",
-          },
-          residenceCumOffice: {
-            type: "string",
-            title: "Whether residence cum office set up",
-          },
-          vatExciseApplicability: {
-            type: "string",
-            title: "Applicability of VAT / Excise / Service tax",
-          },
-          latestTaxReturn: {
-            type: "string",
-            title: "Latest VAT / Service tax paid",
           },
         },
       },
     },
+
     {
-      id: "essChecklist",
-      label: "ESS Checklist",
+      id: "financialDetails",
+      label: "Financial Details",
       schema: {
         type: "object",
         properties: {
-          essResponses: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                question: { type: "string", title: "Question" },
-                response: {
-                  type: "string",
-                  title: "Response",
-                  enum: ["Yes", "No"],
-                },
+          monthlySalaryIncome: {
+            type: "object",
+            title: "Monthly Salary Income",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
+              },
+            },
+          },
+          otherMonthlyIncome: {
+            type: "number",
+            title: "Other Monthly Income",
+            format: "currency",
+          },
+          rentalIncome: {
+            type: "object",
+            title: "Rental Income (In Rs)",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
+              },
+            },
+          },
+          incentives: {
+            type: "object",
+            title: "Incentives/Perks (In Rs)",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
+              },
+            },
+          },
+          monthlyBonus: {
+            type: "object",
+            title: "Monthly Bonus (In Rs)",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
+              },
+            },
+          },
+          otherMonthlyIncomeSourceType: {
+            type: "string",
+            title: "Others, please specify source type",
+          },
+          monthlyIncome: {
+            type: "object",
+            title: "Monthly Income (In Rs)",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
               },
             },
           },
@@ -321,7 +381,7 @@ export const niwasSalariedSchema = {
     },
     {
       id: "existingLoans",
-      label: "Existing Loan Details",
+      label: "Existing or Past Loan Details",
       schema: {
         type: "object",
         properties: {
@@ -332,8 +392,8 @@ export const niwasSalariedSchema = {
               properties: {
                 typeOfLoan: { type: "string", title: "Type of Loan" },
                 bankName: { type: "string", title: "Bank Name" },
-                loanAmount: { type: "string", title: "Loan Amount" },
-                emi: { type: "string", title: "EMI" },
+                loanAmount: { type: "number", title: "Loan Amount (in Rs.)", format: "currency" },
+                emi: { type: "number", title: "EMI", format: "currency" },
                 tenureRemaining: { type: "string", title: "Tenure remaining" },
               },
             },
@@ -343,7 +403,7 @@ export const niwasSalariedSchema = {
     },
     {
       id: "loanPurpose",
-      label: "Loan Purpose & Cost",
+      label: "Loan Details",
       schema: {
         type: "object",
         properties: {
@@ -352,50 +412,80 @@ export const niwasSalariedSchema = {
             title: "Purpose of loan",
           },
           minimumLoanAmountRequired: {
-            type: "string",
+            type: "number",
             title: "Minimum loan amount required",
+            format: "currency",
           },
           tenureRequired: {
             type: "string",
             title: "Tenure required",
           },
           monthlyHouseholdExpenses: {
-            type: "string",
+            type: "number",
             title: "Monthly household expenses",
+            format: "currency",
           },
           comfortableEmi: {
-            type: "string",
+            type: "number",
             title: "Comfortable EMI",
+            format: "currency",
           },
           fundsRequired: {
-            type: "string",
+            type: "number",
             title: "Funds required",
+            format: "currency",
           },
           sourceOfOwnFunds: {
             type: "string",
             title: "Source of own funds (OCR)",
           },
-          purchaseCost: { type: "string", title: "Purchase cost" },
-          savings: { type: "string", title: "Savings" },
+          purchaseCost: { type: "number", title: "Purchase cost", format: "currency" },
+          savings: { type: "number", title: "Savings", format: "currency" },
           constructionEstimate: {
-            type: "string",
+            type: "number",
             title: "Construction estimate",
+            format: "currency",
           },
           registrationCharges: {
-            type: "string",
+            type: "number",
             title: "Registration / stamp duty charges",
+            format: "currency",
           },
           otherLoanAmountTaken: {
-            type: "string",
+            type: "number",
             title: "Other loan amount taken",
+            format: "currency",
+          },
+          otherExpenses: {
+            type: "number",
+            title: "Other expenses",
+            format: "currency",
           },
           totalAmountSpent: {
-            type: "string",
-            title: "Total amount spent",
+            type: "number",
+            title: "Total amount spent (Total of all the above)",
+            format: "currency",
           },
           totalTransactionCost: {
-            type: "string",
-            title: "Total transaction cost",
+            type: "number",
+            title: "Total transaction cost (Total of all the above)",
+            format: "currency",
+          },
+          modeOfPaymentToSeller: {
+            type: "object",
+            title: "Mode of payment to seller (Cash / Cheque)",
+            properties: {
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                format: "currency",
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                format: "currency",
+              },
+            },
           },
         },
       },

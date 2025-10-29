@@ -16,22 +16,6 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title: "Branch",
           },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
         },
       },
       required: true,
@@ -64,6 +48,16 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title:
               "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
+              enum: [
+                "Below 10",
+                "10th Pass",
+                "12th Pass",
+                "Diploma",
+                "ITI Certification",
+                "Graduate",
+                "PG",
+                "Professional Certification",
+              ],
           },
           category: {
             type: "string",

@@ -156,10 +156,10 @@ const renderObligationsTable = (loans: any[]) => {
 
   return renderInnerTable(
     [
-      "Institution / NBFC",
-      "Type of Loan",
-      "Monthly EMI / Principal",
-      "Loan Amount",
+      "Institution / Bank / NBFC Name",
+      "Type of Loan (LAP / HL / CD / CV / AL etc.)",
+      "Monthly Principal / EMI",
+      "Loan Amount (Rs. Lacs)",
     ],
     rows
   );
@@ -213,13 +213,6 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       general.alternateContactNumberOfTheCustomerMobileLandline,
     ],
     ["Marital Status", general.maritalStatusMarriedDivorcedBachelor],
-    ["Branch", general.branch],
-    ["Location", general.location],
-    ["Region", general.region],
-    ["Coordinates", coordinateDisplay],
-  ];
-
-  const employmentRows: Array<[string, any, ((value: any) => string)?]> = [
     ["Name of the Employer", employment.nameOfTheEmployer],
     [
       "Type of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)",
@@ -228,7 +221,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
     ["Number of Employees", employment.numberOfEmployees],
     ["Department", employment.department],
     ["Designation", employment.designation],
-    ["Years in Current Company", employment.yearsInCurrentCompany],
+    ["Years in Current Company", employment.yearsInCurrentCompany], 
     [
       "Previous Job Details / Total Experience",
       employment.previousJobDetailsWorkExperienceTotalYearsOfExperience,
@@ -244,24 +237,17 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
     ["Third Party Check", employment.thirdPartyCheck],
   ];
 
+
   const incomeRows: Array<[string, any, ((value: any) => string)?]> = [
     ["Gross Salary", income.grossSalary, formatCurrency],
     ["Net Salary", income.netSalary, formatCurrency],
     ["Overtime Details (if any)", income.overtimeDetailsIfAny],
     ["Monthly Expenses", income.monthlyExpenses, formatCurrency],
     ["Monthly Net Income", income.monthlyNetIncome, formatCurrency],
-    ["Total No. of Family Members", income.totalNoOfFamilyMembers],
-    [
-      "Earning Family Members Income",
-      income.earningFamilyMembersIncomeDetails,
-      formatCurrency,
-    ],
+    ["Total No. of Family Members", renderFamilyTable(income.familyMembers || income.familyMembersRelationshipAgeNameSalary || [])],
+    ["Earning Family Members Income Details", income.earningFamilyMembersIncomeDetails, formatCurrency],
     ["No. of Dependents", income.noOfDependents],
-    [
-      "Any Other Source of Income (Monthly/Annual)",
-      income.anyOtherSourceOfIncomeMonthlyAnnual,
-      formatCurrency,
-    ],
+    ["Any Other Source of Income (Monthly/Annual)", income.anyOtherSourceOfIncomeMonthlyAnnual, formatCurrency],
   ];
 
   const bankingRows: Array<[string, any, ((value: any) => string)?]> = [
@@ -280,8 +266,9 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       "Years at Current Residence",
       residence.yearsAtCurrentResidence || residence.yearsAtResidence,
     ],
-    ["Four Wheeler (Make/Model)", residence.fourWheelerMakeModel],
-    ["Two Wheeler (Make/Model)", residence.twoWheelerMakeModel],
+    ["Assets Owned", renderList(assetsOwned, "Assets not reported")],
+    ["Four Wheeler : _____(Make/Model)", residence.fourWheelerMakeModel],
+    ["Two Wheeler : _____(Make/Model)", residence.twoWheelerMakeModel],
   ];
 
   const loans =
@@ -306,53 +293,27 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("Personal Discussion Report")}
       ${renderKeyValueTable(generalRows)}
 
-      ${sectionTitle("Employment Details")}
-      ${renderKeyValueTable(employmentRows)}
 
       ${sectionTitle("Income Details")}
       ${renderKeyValueTable(incomeRows)}
 
-      ${renderFamilyTable(
-        income.familyMembers ||
-          income.familyMembersRelationshipAgeNameSalary ||
-          []
-      )}
-
-      ${sectionTitle("Documents Observed")}
-      <div class="grid-two">
-        <div>
-          <h3 style="margin:8px 0;font-size:14px;font-weight:600;color:#1f2d3d;">Residence</h3>
-          ${renderList(residenceDocuments)}
-        </div>
-        <div>
-          <h3 style="margin:8px 0;font-size:14px;font-weight:600;color:#1f2d3d;">Office</h3>
-          ${renderList(officeDocuments)}
-        </div>
-      </div>
-
       ${sectionTitle("Banking Details")}
       ${renderKeyValueTable(bankingRows)}
 
-      ${sectionTitle("Existing Obligations / Loans")}
+      ${sectionTitle("Obligations / Loans")}
       ${renderObligationsTable(loans)}
 
       ${sectionTitle("Residence & Assets")}
       ${renderKeyValueTable(residenceRows)}
-      ${
-        assetsOwned.length
-          ? `<div>${renderList(assetsOwned, "Assets not reported")}</div>`
-          : ""
-      }
 
-      ${sectionTitle("Loan Assessment")}
+      ${sectionTitle("BIL LOAN DETAILS:")}
       ${renderKeyValueTable([
         ["Loan Amount Applied", bil.loanAmountApplied, formatCurrency],
         ["End Use", bil.endUse],
-        ["Interview Details", bil.interviewDetails],
-        ["Status of this Case", bil.statusOfThisCasePositiveNegativeCreditRefer || interviewer.pdStatus],
-        ["Interviewer's Remarks", bil.interviewerSRemarks || interviewer.interviewersRemarks],
         ["Name of Interviewer", bil.nameOfInterviewer || interviewer.nameOfInterviewer],
         ["Designation & Signature", bil.designationSignature || interviewer.designationAndSignature],
+        ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || interviewer.pdStatus],
+        ["Interviewer's Remarks", bil.interviewerSRemarks || interviewer.interviewersRemarks],
       ])}
 
       ${sectionTitle("Disclaimer Clause")}

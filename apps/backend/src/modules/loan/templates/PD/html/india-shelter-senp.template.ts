@@ -158,126 +158,139 @@ export const indiaShelterSenpTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       <tr><th style="${headerStyle}" colspan="4">PD SHEET - SENP</th></tr>
-      <tr>
-        <td style="${labelCellStyle}">Loan Number</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.loanNumber)}</td>
-        <td style="${labelCellStyle}">Branch</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.branch)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Region</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.region)}</td>
-        <td style="${labelCellStyle}">Location</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.location)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Latitude</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.latitude)}</td>
-        <td style="${labelCellStyle}">Longitude</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.longitude)}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Loan Number",
+        general.loanNumber,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Branch",
+        general.branch,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
   const basicTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Basic Details</th></tr>
-      <tr>
-        <td style="${labelCellStyle}">Name of the Person Met</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.personMet)}</td>
-        <td style="${labelCellStyle}">Loan Product</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.loanProduct)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Name of the Applicant</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.applicantName
-        )}</td>
-        <td style="${labelCellStyle}">Marital Status</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.maritalStatus
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Name of the Person Met",
+        basic.personMet,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Loan Product",
+        basic.loanProduct,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Name of the Applicant",
+        basic.applicantName,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Marital Status",
+        basic.maritalStatus,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Educational Qualification",
         basic.educationalQualification,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Category</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.category)}</td>
-        <td style="${labelCellStyle}">Total No. of Family Members</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.totalFamilyMembers
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Dependents - Children</td>
-        <td style="${valueCellStyle}">${formatMultiline(
+      ${renderKeyValueRow(
+        "Category",
+        basic.category,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Total No. of Family Members",
+        basic.totalFamilyMembers,
+        undefined,
+        { colSpan: 3 }
+      )}
+      <tr colspan="3">
+      <td style="${labelCellStyle}">Number of Dependents</td>
+        <td style="${valueCellStyle}">Children: ${formatMultiline(
           basic.dependentsChildren
         )}</td>
-        <td style="${labelCellStyle}">Dependents - Adults</td>
-        <td style="${valueCellStyle}">${formatMultiline(
+        <td style="${valueCellStyle}">Adults: ${formatMultiline(
           basic.dependentsAdults
         )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Dependents - Others</td>
-        <td style="${valueCellStyle}">${formatMultiline(
+        <td style="${valueCellStyle}">Others: ${formatMultiline(
           basic.dependentsOthers
         )}</td>
-        <td style="${labelCellStyle}"></td>
-        <td style="${valueCellStyle}"></td>
       </tr>
     </table>
   `;
 
   const residenceTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Residence Address & Details</th></tr>
+      <tr>
+      <td style="${subHeaderStyle}" colspan="3">Residence Address & Details</td>
       ${renderKeyValueRow(
-        "Address",
+        "Residence Address",
         residence.residenceAddress,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">No. of Years at Current Residence</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          residence.yearsAtCurrentResidence
-        )}</td>
-        <td style="${labelCellStyle}">Area (in Sq ft)</td>
-        <td style="${valueCellStyle}">${formatMultiline(residence.areaSqft)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Monthly Rent & Security Deposit (if rented)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          residence.monthlyRentDeposit
-        )}</td>
-        <td style="${labelCellStyle}">Purchase price & MV (if owned)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          residence.purchasePriceMv
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Number of Years in Current City</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          residence.yearsInCurrentCity
-        )}</td>
-        <td style="${labelCellStyle}">Parents Staying with?</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          residence.parentsStayingWith
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Native Place</td>
-        <td style="${valueCellStyle}">${formatMultiline(residence.nativePlace)}</td>
-        <td style="${labelCellStyle}">Electricity bill in customer name?</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          residence.electricityBillInCustomerName
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "No. of Years at Current Residence",
+        residence.yearsAtCurrentResidence,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Area (in Sq ft)",
+        residence.areaSqft,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Monthly Rent & Security Deposit (if rented)",
+        residence.monthlyRentDeposit,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Purchase price & MV (if owned)",
+        residence.purchasePriceMv,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Number of Years in Current City",
+        residence.yearsInCurrentCity,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Parents Staying with?",
+        residence.parentsStayingWith,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Native Place",
+        residence.nativePlace,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "If LAP—Electricity bill in customer name availability?",
+        residence.electricityBillInCustomerName,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
@@ -578,6 +591,12 @@ export const indiaShelterSenpTemplate = (
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Business Income Computation</th></tr>
       <tr>
+        <th style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Revenue</th>
+        <th style="${valueCellStyle};font-weight:bold;background:#f5f5f5;">Amount (in Rs)</th>
+        <th style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">Expenditure</th>
+        <th style="${valueCellStyle};font-weight:bold;background:#f5f5f5;">Amount (in Rs)</th>
+      </tr>
+      <tr>
         <td style="${labelCellStyle}">Sales</td>
         <td style="${valueCellStyle}">${formatCurrency(businessIncome.sales)}</td>
         <td style="${labelCellStyle}">Purchases</td>
@@ -594,43 +613,47 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${formatCurrency(businessIncome.rent)}</td>
       </tr>
       <tr>
+        <td style="${labelCellStyle}"></td>
+        <td style="${valueCellStyle}"></td>
         <td style="${labelCellStyle}">Electricity</td>
         <td style="${valueCellStyle}">${formatCurrency(
           businessIncome.electricity
         )}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}"></td>
+        <td style="${valueCellStyle}"></td>
         <td style="${labelCellStyle}">Transportation</td>
         <td style="${valueCellStyle}">${formatCurrency(
           businessIncome.transportation
         )}</td>
       </tr>
-      ${renderKeyValueRow(
-        "Other Expenses",
-        formatCurrency(businessIncome.otherExpenses),
-        undefined,
-        { colSpan: 3 }
-      )}
       <tr>
-        <td style="${labelCellStyle}">Total Monthly Revenue (A)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
+        <td style="${labelCellStyle}"></td>
+        <td style="${valueCellStyle}"></td>
+        <td style="${labelCellStyle}">Other Expenses</td>
+        <td style="${valueCellStyle}">${formatCurrency(businessIncome.otherExpenses)}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle};font-weight:bold;">Total Monthly Revenue (A)</td>
+        <td style="${valueCellStyle};font-weight:bold;">${formatCurrency(
           businessIncome.totalMonthlyRevenue
         )}</td>
-        <td style="${labelCellStyle}">Total Monthly Expenses (B)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
+        <td style="${labelCellStyle};font-weight:bold;">Total Monthly Expenses (B)</td>
+        <td style="${valueCellStyle};font-weight:bold;">${formatCurrency(
           businessIncome.totalMonthlyExpenses
         )}</td>
       </tr>
+      <tr>
+        <td style="${labelCellStyle};font-weight:bold;" colspan="1">Net Monthly Profit (= A - B)</td>
+        <td style="${valueCellStyle};font-weight:bold;" colspan="3">${formatCurrency(businessIncome.netMonthlyProfit)}</td>
+      </tr>
       ${renderKeyValueRow(
-        "Net Monthly Profit (= A - B)",
-        formatCurrency(businessIncome.netMonthlyProfit),
+        "Other Monthly Income",
+        otherMonthlyIncome.otherMonthlyIncome,
         undefined,
         { colSpan: 3 }
       )}
-    </table>
-  `;
-
-  const otherIncomeTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Other Monthly Income</th></tr>
       <tr>
         <td style="${labelCellStyle}">Rental Income - Cash</td>
         <td style="${valueCellStyle}">${formatCurrency(
@@ -674,35 +697,48 @@ export const indiaShelterSenpTemplate = (
     </table>
   `;
 
+  const otherIncomeTable = `
+    <table style="${tableStyle}">
+      <tr><th style="${subHeaderStyle}" colspan="4">Other Monthly Income</th></tr>
+      
+    </table>
+  `;
+
   const loanPurposeTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
-        renderSimpleList(ensureArray(loanPurpose.purposes)),
+        renderSimpleList(loanPurpose.purposes),
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Minimum Loan Amount Required</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          loanPurpose.minimumLoanAmount
-        )}</td>
-        <td style="${labelCellStyle}">Tenure Required (years)</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          loanPurpose.tenureRequired
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Monthly Household Expenses</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          loanPurpose.monthlyHouseholdExpenses
-        )}</td>
-        <td style="${labelCellStyle}">Comfortable EMI</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          loanPurpose.comfortableEmi
-        )}</td>
-      </tr>
+
+      ${renderKeyValueRow(
+        "Minimum Loan Amount Required",
+        formatCurrency(loanPurpose.minimumLoanAmount),
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Tenure Required (years)",
+        formatMultiline(loanPurpose.tenureRequired),
+        undefined,
+        { colSpan: 3 }
+      )}
+
+      ${renderKeyValueRow(
+        "Monthly Household Expenses",
+        formatCurrency(loanPurpose.monthlyHouseholdExpenses),
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Comfortable EMI",
+        formatCurrency(loanPurpose.comfortableEmi),
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
@@ -873,10 +909,10 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Relation with Applicant</td>
         <td style="${labelCellStyle}">Age (years)</td>
-        <td style="${labelCellStyle}">Occupation</td>
-        <td style="${labelCellStyle}">Educational Qualification</td>
+        <td style="${labelCellStyle}">Occupation (Job / Business)</td>
+        <td style="${labelCellStyle}">Educational Qualification (Also mention if Govt. or Private institution)</td>
         <td style="${labelCellStyle}">Contact No.</td>
-        <td style="${labelCellStyle}">Staying with Applicant</td>
+        <td style="${labelCellStyle}">Staying with Applicant (Yes/No)</td>
       </tr>
       ${
         otherFamilyMembers.length
@@ -960,13 +996,14 @@ export const indiaShelterSenpTemplate = (
 
   const tpcTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="5">TPC (Third Party Check) Details</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="6">TPC (Third Party Check) Details</th></tr>
       <tr>
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Address</td>
-        <td style="${labelCellStyle}">Mobile No.</td>
-        <td style="${labelCellStyle}">Knowing since (Months / Years)</td>
-        <td style="${labelCellStyle}">Feedback</td>
+        <td style="${labelCellStyle}">Relationship</td>
+        <td style="${labelCellStyle}">Contact Number</td>
+        <td style="${labelCellStyle}">Email Address</td>
+        <td style="${labelCellStyle}">No of year known the applicant</td>
       </tr>
       ${
         tpcRefs.length
@@ -977,13 +1014,16 @@ export const indiaShelterSenpTemplate = (
             <td style="${valueCellStyle}">${formatMultiline(ref.name)}</td>
             <td style="${valueCellStyle}">${formatMultiline(ref.address)}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.mobileNumber
+              ref.relationship
             )}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.knowingSince
+              ref.contactNumber
             )}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.feedback
+              ref.emailAddress
+            )}</td>
+            <td style="${valueCellStyle}">${formatMultiline(
+              ref.noOfYearKnownTheApplicant
             )}</td>
           </tr>
         `
@@ -1048,7 +1088,6 @@ export const indiaShelterSenpTemplate = (
       ${tangibleAssetsTable}
       ${businessTable}
       ${businessIncomeTable}
-      ${otherIncomeTable}
       ${loanPurposeTable}
       ${collateralTable}
       ${currentLoansTable}
