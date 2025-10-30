@@ -49,7 +49,7 @@ import {
 } from "@nestjs/common";
 import { PDTemplateService } from "./pd-templates.service";
 import { formSchema, BANK_NAMES } from "./forms-schema";
-import { genericSchema as financialAnalysisSchema } from "./financials-schema/generic";
+import { financialsSchema } from "./financials-schema/generic";
 
 @ApiTags("loans")
 @Controller("loans")
@@ -1282,7 +1282,7 @@ export class LoanController {
       return {
         status: 200,
         message: "Financial analysis schema fetched successfully",
-        data: financialAnalysisSchema,
+        data: financialsSchema,
       };
     }
     if (

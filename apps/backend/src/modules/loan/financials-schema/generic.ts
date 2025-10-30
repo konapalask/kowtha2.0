@@ -1,4 +1,4 @@
-export const genericSchema =
+export const financialsSchema =
   {
     id: "financialAnalysis",
     label: "Financial Analysis",
@@ -213,4 +213,4 @@ export const genericSchema =
     },
   } as const;
 
-export default genericSchema;
+export default financialsSchema;

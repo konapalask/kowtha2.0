@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const herohousingSelfSchema = {
   id: 15,
   bankName: "HeroHousing-Self",
   sections: [
+    financialsSchema,
     {
       id: "loanSummary",
       label: "Loan & Visit Summary",

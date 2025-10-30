@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const rblSchema = {
   id: 6,
   bankName: "RBL",
   sections: [
+    financialsSchema,
     {
       id: "caseDetails",
       label: "Case Details",

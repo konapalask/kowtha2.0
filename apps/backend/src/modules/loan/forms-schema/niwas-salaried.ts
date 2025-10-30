@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const niwasSalariedSchema = {
   id: 23,
   bankName: "Niwas Salaried",
   sections: [
+    financialsSchema,
     {
       id: "generalInfo",
       label: "Basic Details",

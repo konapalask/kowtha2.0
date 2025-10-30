@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const idfcHlMlSchema = {
   id: 17,
   bankName: "IDFC HL & ML",
   sections: [
+    financialsSchema,
     {
       id: "generalDetails",
       label: "General Details",

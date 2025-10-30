@@ -1,7 +1,10 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const arkaFincapSchema = {
   id: 4,
   bankName: "Arka Fincap",
   sections: [
+    financialsSchema,
     {
       id: "applicantDetails",
       label: "Applicant Details",

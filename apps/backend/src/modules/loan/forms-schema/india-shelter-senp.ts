@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const indiaShelterSenpSchema = {
   id: 21,
   bankName: "India Shelter SENP",
   sections: [
+    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",
