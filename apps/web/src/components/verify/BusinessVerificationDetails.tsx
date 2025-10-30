@@ -289,9 +289,11 @@ export const BusinessVerificationDetails: React.FC<
       try {
         setFormLoading(true);
 
-        // Get bank name from verification data
+        // Get bank name from completeVerificationData (which has the full verification object)
         const bankName =
-          verificationData?.bankName || verificationData?.loan?.bankName || "";
+          completeVerificationData?.bankName || 
+          verificationData?.bankName || 
+          verificationData?.loan?.bankName || "";
 
         // Skip if no bank name
         if (!bankName) {
@@ -705,8 +707,8 @@ export const BusinessVerificationDetails: React.FC<
 
   if (!verificationData) return null;
 
-  // Get bank name
-  const bankName = verificationData?.bankName || "Axis Finance";
+  // Get bank name from completeVerificationData (which has the full verification object)
+  const bankName = completeVerificationData?.bankName || verificationData?.bankName || "Axis Finance";
 
   // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
@@ -830,6 +832,15 @@ export const BusinessVerificationDetails: React.FC<
   };
 
   const { Text } = Typography;
+
+  const getButton = (formKey: string) => (
+    <Button
+      type="text"
+      icon={<EditOutlined />}
+      onClick={() => onEdit(formKey)}
+      disabled={hasEditRequest}
+    />
+  );
 
   // Helper function to check conditional visibility (from SchemaSection.tsx)
   const checkConditionalVisibility = (
@@ -1709,14 +1720,16 @@ export const BusinessVerificationDetails: React.FC<
     <div>
       {/* Bank Name Header */}
       {currentDepartment === "PD" &&
-        (verificationData?.bankName || verificationData?.loan?.bankName) && (
+        (completeVerificationData?.bankName || verificationData?.bankName || verificationData?.loan?.bankName) && (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
             <Text style={{ color: "#1e40af", fontWeight: 600 }}>
-              {typeof verificationData?.bankName === "string"
-                ? verificationData.bankName
-                : typeof verificationData?.loan?.bankName === "string"
-                  ? verificationData.loan.bankName
-                  : "Unknown Bank"}
+              {typeof completeVerificationData?.bankName === "string"
+                ? completeVerificationData.bankName
+                : typeof verificationData?.bankName === "string"
+                  ? verificationData.bankName
+                  : typeof verificationData?.loan?.bankName === "string"
+                    ? verificationData.loan.bankName
+                    : "Unknown Bank"}
             </Text>
           </section>
         )}
@@ -1746,7 +1759,8 @@ export const BusinessVerificationDetails: React.FC<
 
       {/* Main Single Column Layout */}
       <div style={{ padding: "0 12px" }}>
-        {useGenericApproach && schemaForm && !formLoading ? (
+        {/* PD Department - Use Dynamic Forms Only */}
+        {currentDepartment === "PD" && useGenericApproach && schemaForm && !formLoading ? (
           <>
             <CollapsibleFormSections
               schema={schemaForm}
@@ -1886,7 +1900,7 @@ export const BusinessVerificationDetails: React.FC<
               </Card>
             </section>
 
-            {/* Synopsis Section - Using exact Feedback component from RightColumn */}
+            {/* Synopsis Section - Using Feedback component */}
             <Feedback
               disabled={!!verificationData?.approvedStatus || hasEditRequest}
               verdict={verdict}
@@ -1897,6 +1911,104 @@ export const BusinessVerificationDetails: React.FC<
               verificationData={verificationData}
               currentDepartment={currentDepartment}
               hasEditRequest={hasEditRequest}
+            />
+          </>
+        ) : /* FI Department - Use Static Components */
+        currentDepartment === "FI" ? (
+          <>
+            {/* Legacy FI Static Components */}
+            <BusinessBasicDetailsDescription
+              data={mergedLegacyData}
+              extra={getButton("basicDetails")}
+              logs={false}
+            />
+            <BusinessDetailsDescription
+              data={mergedLegacyData}
+              extra={getButton("businessDetails")}
+              logs={false}
+            />
+            <BusinessMiscellaneousDescription
+              data={mergedLegacyData}
+              extra={getButton("miscellaneous")}
+              logs={false}
+            />
+            <ExistingLoansDescription
+              data={mergedLegacyData}
+              extra={getButton("existingLoans")}
+              logs={false}
+            />
+            <ThirdPartyCheckDescription
+              data={mergedLegacyData}
+              extra={getButton("thirdPartyCheck")}
+              logs={false}
+            />
+
+            {/* Photo Capture Section */}
+            <section style={{ marginBottom: 24 }}>
+              <Card title="Photo Capture">
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  {data?.uploadedItems?.map((item: any, idx: number) => {
+                    return (
+                      <div key={item.id} style={{ position: "relative" }}>
+                        <Image
+                          src={imageUrls[item.id] || ""}
+                          alt={`Photo ${idx + 1}`}
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <Button
+                          type="text"
+                          danger
+                          icon={<CloseCircleOutlined />}
+                          style={{
+                            position: "absolute",
+                            top: 8,
+                            right: 8,
+                            background: "rgba(255, 255, 255, 0.8)",
+                            borderRadius: "50%",
+                            padding: 4,
+                          }}
+                          onClick={() => handleDeleteClick(item.id)}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "rgba(0, 0, 0, 0.6)",
+                            color: "white",
+                            padding: "4px 8px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Photo {idx + 1} {item?.isCamera ? null : "(Gallery)"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </section>
+
+            {/* Final Verdict Section */}
+            <FinalVerdict
+              disabled={hasEditRequest}
+              verdict={verdict}
+              setVerdict={setVerdict}
+              editorContent={editorContent}
+              setEditorContent={setEditorContent}
+              handleSave={handleSave}
             />
           </>
         ) : null}

@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const incredSchema = {
   id: 20,
   bankName: "INCRED",
   sections: [
+    financialsSchema,
     {
       id: "general",
       label: "General",

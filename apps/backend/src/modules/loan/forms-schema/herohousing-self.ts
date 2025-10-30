@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const herohousingSelfSchema = {
   id: 15,
   bankName: "HeroHousing-Self",
   sections: [
+    financialsSchema,
     {
       id: "loanSummary",
       label: "Loan & Visit Summary",
@@ -93,7 +95,7 @@ export const herohousingSelfSchema = {
     },
     {
       id: "borrowerProfile",
-      label: "Borrower profile",
+      label: "Borrower details",
       schema: {
         type: "object",
         properties: {
@@ -199,7 +201,7 @@ export const herohousingSelfSchema = {
     {
       id: "currentBusinessDetails",
       label: "Current business details",
-      schema: {
+      schema: { 
         type: "object",
         properties: {
           currentBusinessName: {
@@ -244,7 +246,7 @@ export const herohousingSelfSchema = {
     },
     {
       id: "businessPremises",
-      label: "Business premises",
+      label: "Details of business premises",
       schema: {
         type: "object",
         properties: {
@@ -258,34 +260,20 @@ export const herohousingSelfSchema = {
             title:
               "Ownership of business premises (mention rent amount and landlord name in case rented)",
           },
-          ownershipOfAllAboveBusinessPremises: {
-            type: "string",
-            title: "Ownership of business premises (legacy)",
-          },
-          businessPremisesSize: {
+          sizeOfBusinessPremises: {
             type: "string",
             title: "Size / area of business premises",
           },
-          sizeAreaOfBusinessPremises: {
-            type: "string",
-            title: "Size / area of business premises (legacy)",
-          },
           operationsAndFootfallObservation: {
             type: "string",
-            title:
-              "Comment on business operations / footfall / stock & other observations",
-          },
-          commentOnBusinessOperationsFootfallOfCustomerStock: {
-            type: "string",
-            title:
-              "Comment on business operations / footfall / stock (legacy)",
+            title: "Comment on business operations / footfall / stock & other observations",
           },
         },
       },
     },
     {
       id: "businessOperations",
-      label: "Business operations & performance",
+      label: "Details about business details",
       schema: {
         type: "object",
         properties: {
@@ -293,17 +281,13 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Brief about the products / services dealing",
           },
-          noOfEmployeeAndSalaryDetails: {
-            type: "string",
-            title: "No. of employees and salary details",
-          },
           stockQuantum: {
             type: "string",
             title: "Quantum of stock",
           },
-          quantumOfStock: {
+          noOfEmployeeAndSalaryDetails: {
             type: "string",
-            title: "Quantum of stock (legacy)",
+            title: "No. of employees and salary details",
           },
           machineryAndAssets: {
             type: "string",
@@ -311,8 +295,7 @@ export const herohousingSelfSchema = {
           },
           turnoverHistory: {
             type: "string",
-            title:
-              "Turnover of last three years and current year till date (actual)",
+            title:"Turnover of last three years and current year till date (Total actual turnover of customer)",
           },
           productServiceGrossMarginRatio: {
             type: "string",
@@ -324,13 +307,11 @@ export const herohousingSelfSchema = {
           },
           expansionOrChanges: {
             type: "string",
-            title:
-              "Expansion or new products/services introduced in last 2 years (impact on revenue)",
+            title:"Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue ",
           },
           briefAboutTheLocalityOfBusiness: {
             type: "string",
-            title:
-              "Brief about the locality, competitors, prospects & negative feedback",
+            title:"Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback ",
           },
         },
       },
@@ -348,24 +329,15 @@ export const herohousingSelfSchema = {
           },
           noOfTotalSuppliersAndCustomers: {
             type: "integer",
-            title: "No. of total suppliers",
-          },
-          supplierCreditTerms: {
-            type: "string",
-            title: "Supplier credit period details",
+            title: "No of total suppliers and details of terms for credit period ",
           },
           noOfTotalCustomers: {
             type: "integer",
-            title: "No. of total customers",
-          },
-          customerCreditTerms: {
-            type: "string",
-            title: "Customer credit period details",
+            title: "No of total customers and details of terms for credit period ",
           },
           billingCycleAndReceiptMode: {
             type: "string",
-            title:
-              "Billing period/cycle and receipt mode (comment if any advance received)",
+            title: "Billing period/cycle and receipt mode (Billing on consignment basis/monthly basis/progress of work basis) also comment if any advance is received",
           },
           totalDebtorsAndCreditors: {
             type: "string",
@@ -374,7 +346,7 @@ export const herohousingSelfSchema = {
           },
           tradeReferences: {
             type: "array",
-            title: "References of suppliers/customers (min 2 each)",
+            title: "Please collect Reference of min 2 suppliers and 2 customers with their phone no. and business name) ",
             items: {
               type: "object",
               properties: {
@@ -413,17 +385,28 @@ export const herohousingSelfSchema = {
           },
           propertyType: {
             type: "string",
-            title:
-              "Type of property (Ready/Plot/Self Construction/Under Construction/Vacant etc)",
+            title: "Type of property (Ready/Plot/Self Construction/Under Construction/Vacant etc)",
+            enum: [
+              "Ready",
+              "Plot",
+              "Self Construction",
+              "Under Construction",
+              "Vacant",
+            ],
           },
           propertyOccupancy: {
             type: "string",
-            title:
-              "Property is occupied by whom & reason if not self-occupied (include rent / tenancy / construction stage)",
+            title:"Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)",
           },
           propertyPurchaseSource: {
             type: "string",
-            title: "Source of property purchase (Dealer/Builder/Reference)",
+            title: "Source of property purchase (through dealer, builder/reference/relative) ",
+            enum: [
+              "Dealer",
+              "Builder",
+              "Reference",
+              "Relative",
+            ],
           },
           sellerDetails: {
             type: "string",
@@ -435,7 +418,7 @@ export const herohousingSelfSchema = {
           },
           dealAndSaleDeedValue: {
             type: "string",
-            title: "Actual deal value vs sale deed value (OCR source)",
+            title: "What is actual deal value and sale deed value, OCR source ",
           },
           sellerExistingLoan: {
             type: "string",
@@ -456,17 +439,15 @@ export const herohousingSelfSchema = {
         properties: {
           investmentHabits: {
             type: "string",
-            title:
-              "Investment habits & monthly savings (schemes / properties / FD etc)",
+            title: "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving ",
           },
           residenceOwnership: {
             type: "string",
-            title: "Whether current residence is owned or rented (mention rent)",
+            title: "Whether current residence is owned or rented and rent amount if any ",
           },
           assetsBuilt: {
             type: "string",
-            title:
-              "Details of assets built till date (immovable, movable, gold, FD, equity, other savings)",
+            title:"Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings) ",
           },
         },
       },
@@ -479,12 +460,11 @@ export const herohousingSelfSchema = {
         properties: {
           propertyEndUse: {
             type: "string",
-            title:
-              "Proposed end use of property (self-occupation/investment etc.)",
+            title:"Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases",
           },
           fundUtilisation: {
             type: "string",
-            title: "Clear and detailed end use of fund",
+            title: "Clear and detailed end use of fund in LAP cases",
           },
         },
       },
@@ -497,8 +477,7 @@ export const herohousingSelfSchema = {
         properties: {
           currentLoansServiced: {
             type: "string",
-            title:
-              "Loans presently servicing (mention if closing / continuing)",
+            title:"Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue",
           },
           repaymentAccount: {
             type: "string",
@@ -507,18 +486,15 @@ export const herohousingSelfSchema = {
           },
           pastLoanEndUse: {
             type: "string",
-            title:
-              "End use of loans taken in last 3 years / exceptional borrowings",
+            title:"What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue ",
           },
           mortgageOrFacilities: {
             type: "string",
-            title:
-              "Any home loan/LAP/CC/OD facility (mention mortgage property and usage)",
+            title:"Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer "
           },
           repaymentBehaviour: {
             type: "string",
-            title:
-              "Repayment behaviour – bouncing details with period and reason",
+            title:"Comment whether there is any bouncing in loans and if yes, period and reason of such bounces "
           },
         },
       },
@@ -531,17 +507,15 @@ export const herohousingSelfSchema = {
         properties: {
           businessBanking: {
             type: "string",
-            title:
-              "Details of business bank accounts (account open date, major transaction accounts)",
+            title:"Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening "
           },
           savingsAccounts: {
             type: "string",
-            title:
-              "Savings accounts of applicant and co-applicant",
+            title:"Please check any saving account of applicant and co applicant and provide the details of these accounts "
           },
           receiptsRoutedThroughBanking: {
             type: "number",
-            title: "% of total receipts routed through banking",
+            title: "% of total receipt routed through banking",
             formatter: {
               useIndianFormat: false,
               maxDecimalPlaces: 2,
@@ -559,27 +533,23 @@ export const herohousingSelfSchema = {
         properties: {
           recordsAndInventoryObservation: {
             type: "string",
-            title:
-              "Sale/purchase registers, bills, kutcha records, inventory observations",
+            title:"Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations "
           },
           thirdPartyChecks: {
             type: "string",
-            title:
-              "Neighbour / independent reference check (ownership, existence period)",
+            title:"TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period "
           },
           additionalInvolvementCheck: {
             type: "string",
-            title:
-              "Check if any family member involved in managing the business",
+            title:"Additional check to be done from reference that any other person or family member involved in the business/manage the business "
           },
           complianceAndBranding: {
             type: "string",
-            title:
-              "Verification of QR codes, licenses, permits, name board, contact number etc.",
+            title:"Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations "
           },
           externalFeedback: {
             type: "string",
-            title: "Google / external checks & negative feedback (if any)",
+            title: "Google check and any negative observation/feedback/dedupe match or any other feedback",
           },
           supportingDocumentsCollected: {
             type: "string",
@@ -643,7 +613,108 @@ export const herohousingSelfSchema = {
               },
             },
           },
-          monthlyNetIncome: {
+          salesReceiptsMonthlyAverage: {
+            type: "number",
+            title: "Sales/receipt (Monthly average)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherIncome: {
+            type: "number",
+            title: "Other income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalMonthlyIncome: {
+            type: "number",
+            title: "Total monthly income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          costOfMaterialService: {
+            type: "number",
+            title: "Cost of material/service",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          directExpenses: {
+            type: "number",
+            title: "Direct expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          salary: {
+            type: "number",
+            title: "Salary",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          rent: {
+            type: "number",
+            title: "Rent",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          electricityExpenses: {
+            type: "number",
+            title: "Electricity Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherMiscellaneousExpenses: {
+            type: "number",
+            title: "Other Miscellaneous Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherFamilyExpenses: {
+            type: "number",
+            title: "Other Family Expenses like school fees/house rent, household expenses etc",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+
+          netMonthlyAppraisalIncome: {
             type: "number",
             title: "Net monthly appraisal income",
             formatter: {
@@ -658,8 +729,8 @@ export const herohousingSelfSchema = {
             title: "Net monthly income comments",
           },
           monthlyObligations: {
-            type: "number",
-            title: "Less: Monthly obligations / EMIs not getting closed",
+            type: "number", 
+            title: "Less: Monthly obligations / EMIs which are not getting closed",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
