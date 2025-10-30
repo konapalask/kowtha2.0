@@ -1,7 +1,9 @@
+import { financialsSchema } from "../financials-schema/generic";
 export const iciciSchema = {
   id: 16,
   bankName: "ICICI",
   sections: [
+    financialsSchema,
     {
       id: "proposal",
       label: "Proposal",

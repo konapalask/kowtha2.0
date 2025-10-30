@@ -1,7 +1,10 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const ambitSchema = {
   id: 8,
   bankName: "Ambit",
   sections: [
+    financialsSchema,
     {
       id: "general",
       label: "General",

@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const yesBankSchema = {
   id: 26,
   bankName: "Yes Bank",
   sections: [
+    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",

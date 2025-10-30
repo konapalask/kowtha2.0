@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const axisAgriSchema = {
   id: 9,
   bankName: "Axis Agri",
   sections: [
+    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",

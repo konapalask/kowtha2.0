@@ -1,7 +1,9 @@
+import financialsSchema from "../financials-schema/generic";
 export const iiflSchema = {
   id: 19,
   bankName: "IIFL",
   sections: [
+    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
