@@ -3,7 +3,6 @@ export const tataUblSchema = {
   id: 5,
   bankName: "Tata Ubl",
   sections: [
-    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
@@ -37,9 +36,9 @@ export const tataUblSchema = {
           product: {
             type: "string",
             title: "Product",
-            readOnly: true,
+            // readOnly: true,
           },
-          amount: {
+          loanAmount: {
             type: "number",
             title: "Amount",
             readOnly: true,
@@ -58,7 +57,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Repayment from (Bank name)",
           },
-          bankName: {
+          repaymentBankName: {
             type: "string",
             title: "Bank name",
             readOnly: true,
@@ -83,9 +82,10 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          address: {
+          officeAddress: {
             type: "string",
             title: "Address",
+            readOnly: true,
           },
           rentedOwned: {
             type: "string",
@@ -619,6 +619,7 @@ export const tataUblSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default tataUblSchema;

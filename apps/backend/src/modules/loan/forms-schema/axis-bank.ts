@@ -3,7 +3,6 @@ export const axisBankSchema = {
   id: 3,
   bankName: "Axis Bank",
   sections: [
-    financialsSchema,
     {
       id: "applicantDetails",
       label: "Applicant Details",
@@ -52,8 +51,7 @@ export const axisBankSchema = {
             title: "Full Address",
             readOnly: true,
           },
-
-          contactNumber: {
+          applicantContactNumber: {
             type: "string",
             title: "Contact Number (Mobile / Landline)",
             readOnly: true,
@@ -435,6 +433,7 @@ export const axisBankSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default axisBankSchema;

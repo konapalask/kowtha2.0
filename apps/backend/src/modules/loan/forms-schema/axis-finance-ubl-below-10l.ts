@@ -1,9 +1,8 @@
 import financialsSchema from "../financials-schema/generic";
 export const axisFinanceUblBelow10lSchema = {
-    id: 2,
-    bankName: "Axis Finance UBL Below 10L",
+  id: 2,
+  bankName: "Axis Finance UBL Below 10L",
   sections: [
-    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
@@ -111,88 +110,103 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "familyDetails",
       label: "Family Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: {
-              type: "string",
-              title: "Name",
-            },
-            relation: {
-              type: "string",
-              title: "Relation with applicant",
-            },
-            age: {
-              type: "integer",
-              title: "Age (Yrs)",
-            },
-            qualification: {
-              type: "string",
-              title: "Qualification",
-            },
-            occupation: {
-              type: "string",
-              title: "Occupation",
-            },
-            incomePerMonth: {
-              type: "number",
-              title: "Income per month (approx.)",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          familyDetails: {
+            type: "array",
+            title: "Family Details",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relation: {
+                  type: "string",
+                  title: "Relation with applicant",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age (Yrs)",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+                incomePerMonth: {
+                  type: "number",
+                  title: "Income per month (approx.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                dependent: {
+                  type: "string",
+                  title: "Dependent",
+                },
               },
-            },
-            dependent: {
-              type: "string",
-              title: "Dependent",
             },
           },
         },
       },
+      required: true,
     },
     {
       id: "shareholdingDetails",
       label: "Constitution / Shareholding Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            shareholderName: {
-              type: "string",
-              title: "Name of the Shareholder",
-            },
-            relationWithMainApplicant: {
-              type: "string",
-              title: "Relation with main applicant",
-            },
-            designation: {
-              type: "string",
-              title: "Designation",
-            },
-            shareholdingPercentage: {
-              type: "number",
-              title: "% of Shareholding",
-            },
-            comingIntoLoanStructure: {
-              type: "string",
-              title: "Coming into loan structure",
-            },
-            functionalRole: {
-              type: "string",
-              title: "Functional role of partner / director",
+        type: "object",
+        properties: {
+          shareholdingDetails: {
+            type: "array",
+            title: "Constitution / Shareholding Details",
+            items: {
+              type: "object",
+              properties: {
+                shareholderName: {
+                  type: "string",
+                  title: "Name of the Shareholder",
+                },
+                relationWithMainApplicant: {
+                  type: "string",
+                  title: "Relation with main applicant",
+                },
+                designation: {
+                  type: "string",
+                  title: "Designation",
+                },
+                shareholdingPercentage: {
+                  type: "number",
+                  title: "% of Shareholding",
+                },
+                comingIntoLoanStructure: {
+                  type: "string",
+                  title: "Coming into loan structure",
+                },
+                functionalRole: {
+                  type: "string",
+                  title: "Functional role of partner / director",
+                },
+              },
             },
           },
         },
       },
+      required: true,
     },
     {
       id: "businessOverview",
@@ -244,6 +258,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "suppliersCreditors",
@@ -290,6 +305,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "clientsDebtors",
@@ -344,6 +360,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "expenditure",
@@ -406,6 +423,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "assetDetails",
@@ -470,8 +488,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
           capitalInvestedLoans: {
             type: "string",
-            title:
-              "Capital invested in any business, loans & advances given",
+            title: "Capital invested in any business, loans & advances given",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -480,93 +497,108 @@ export const axisFinanceUblBelow10lSchema = {
           vehicles: {
             type: "array",
             title: "Car, Bike and any other vehicle (Company Name and Model)",
-              items: {
-                type: "string",
-                title: "Car, Bike and any other vehicle (Company Name and Model)",
-              },
+            items: {
+              type: "string",
+              title: "Car, Bike and any other vehicle (Company Name and Model)",
+            },
           },
         },
       },
+      required: true,
     },
     {
       id: "existingLoans",
       label: "Loan Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankOrNbfcName: {
-              type: "string",
-              title: "Name of Bank / NBFC",
-            },
-            typeOfLoan: {
-              type: "string",
-              title: "Type of Loan",
-            },
-            sanctionedAmount: {
-              type: "number",
-              title: "Sanctioned Amount (in Lakhs)",
-            },
-            outstandingBalance: {
-              type: "number",
-              title: "O/S Balance",
-            },
-            emiAmount: {
-              type: "number",
-              title: "EMI (in Rs.)",
-            },
-            emiPaidBank: {
-              type: "string",
-              title: "EMI Paid Bank",
-            },
-            securedAgainstAsset: {
-              type: "string",
-              title: "Secured against which asset",
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "bankingDetails",
-      label: "Bank Details",
-      schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankName: {
-              type: "string",
-              title: "Bank Name",
-            },
-            branchName: {
-              type: "string",
-              title: "Branch Name",
-            },
-            accountType: {
-              type: "string",
-              title: "Account Type",
-            },
-            openSinceYear: {
-              type: "string",
-              title: "Open since (Year)",
-            },
-            endUseOfLoan: {
-              type: "string",
-              title: "End use of loan:(Loan Amount & Detailed End-Use)",
-            },
-            remarks: {
-              type: "string",
-              title: "Remarks",
-              ui: {
-                widget: "textarea",
-                rows: 3,
+        type: "object",
+        properties: {
+          loans: {
+            type: "array",
+            title: "Loan Details",
+            items: {
+              type: "object",
+              properties: {
+                bankOrNbfcName: {
+                  type: "string",
+                  title: "Name of Bank / NBFC",
+                },
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
+                },
+                sanctionedAmount: {
+                  type: "number",
+                  title: "Sanctioned Amount (in Lakhs)",
+                },
+                outstandingBalance: {
+                  type: "number",
+                  title: "O/S Balance",
+                },
+                emiAmount: {
+                  type: "number",
+                  title: "EMI (in Rs.)",
+                },
+                emiPaidBank: {
+                  type: "string",
+                  title: "EMI Paid Bank",
+                },
+                securedAgainstAsset: {
+                  type: "string",
+                  title: "Secured against which asset",
+                },
               },
             },
           },
         },
       },
+      required: true,
+    },
+    {
+      id: "bankingDetails",
+      label: "Bank Details",
+      schema: {
+        type: "object",
+        properties: {
+          bankingDetails: {
+            type: "array",
+            title: "Bank Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                branchName: {
+                  type: "string",
+                  title: "Branch Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
+                },
+                openSinceYear: {
+                  type: "string",
+                  title: "Open since (Year)",
+                },
+                endUseOfLoan: {
+                  type: "string",
+                  title: "End use of loan:(Loan Amount & Detailed End-Use)",
+                },
+                remarks: {
+                  type: "string",
+                  title: "Remarks",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      required: true,
     },
     {
       id: "thirdPartyCheck",
@@ -649,6 +681,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "financialSummary",
@@ -696,6 +729,7 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
     {
       id: "recommendations",
@@ -721,7 +755,9 @@ export const axisFinanceUblBelow10lSchema = {
           },
         },
       },
+      required: true,
     },
+    financialsSchema,
   ],
 } as const;
-  export default axisFinanceUblBelow10lSchema;
+export default axisFinanceUblBelow10lSchema;
