@@ -57,16 +57,16 @@ const renderArrayTable = (
   headers: string[],
   rows: string[][]
 ): string => {
-  if (!rows.length) {
-    return `<table style="${tableStyle}"><tr><td style="${valueCellStyle}">Not provided</td></tr></table>`;
-  }
   const headerRow = headers
     .map(
       (header) =>
         `<th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">${header}</th>`
     )
     .join("");
-  const bodyRows = rows
+
+  const safeRows = rows && rows.length > 0 ? rows : [headers.map(() => "-")];
+
+  const bodyRows = safeRows
     .map(
       (row) =>
         `<tr>${row
@@ -77,6 +77,7 @@ const renderArrayTable = (
           .join("")}</tr>`
     )
     .join("");
+
   return `<table style="${tableStyle}"><tr>${headerRow}</tr>${bodyRows}</table>`;
 };
 
@@ -121,6 +122,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
     member.contactNumber || "",
     member.stayingWithApplicant || "",
   ]);
+  
 
   const existingLoanRows = existingLoans.map((loan: any) => [
     loan.typeOfLoan || "",
@@ -129,7 +131,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
     loan.emi || "",
     loan.tenureRemaining || "",
   ]);
-
+  const loanPurpose = verificationData.loanPurpose || {};
   const bankingRows = banking.map((account: any) => [
     account.bankName || "",
     account.accountNumber || "",
@@ -167,8 +169,12 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content niwas-senp-template">
+    <h1 style="margin:0 0 16px;color:#1f2a37;font-size:24px; text-align:center">PD Meet - Self Employed Applicant</h1>
       <table style="${tableStyle}">
         ${renderKeyValue("Prospect No.", general.prospectNo)}
+        <tr>
+          <td style="${labelCellStyle} text-align:center;" colspan="2">Basic Details</td>
+        </tr>
         ${renderKeyValue("Name", general.name)}
         ${renderKeyValue("Marital Status", general.maritalStatus)}
         ${renderKeyValue(
@@ -185,168 +191,290 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           )} | Others: ${formatMultiline(general.dependentsOthers)}`
         )}
         ${renderKeyValue(
-          "Years in Current Residence",
+          "Number of years in Current Residence",
           general.yearsInCurrentResidence
         )}
         ${renderKeyValue(
           "Current residence house size",
           general.currentResidenceHouseSize
         )}
-        ${renderKeyValue("Previous address", general.previousAddress)}
+        ${renderKeyValue("If <1= Year, then Previous Address", general.previousAddress)}
+        ${renderKeyValue("Number of Years Stayed at that Address", general.yearsAtPreviousAddress)}
+     
         ${renderKeyValue(
-          "Years stayed at previous address",
-          general.yearsAtPreviousAddress
-        )}
-        ${renderKeyValue(
-          "Years in current city",
+          "Number of Years in Current City",
           general.yearsInCurrentCity
         )}
-        ${renderKeyValue("Previous city", general.previousCity)}
-        ${renderKeyValue(
-          "Years in previous city",
-          general.yearsInPreviousCity
-        )}
-        ${renderKeyValue("Reason for change", general.reasonForChange)}
+        <tr>
+          <td style="${labelCellStyle}">If <=3 Years, then Previous City</td>
+          <td style="${valueCellStyle}" colspan="3">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+               <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Previous City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.previousCity)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Number of Years in that City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.yearsAtPreviousAddress)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Reason for Change:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.reasonForChange)}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
         ${renderKeyValue("Parents staying with", general.parentsStayingWith)}
+        <td style="${labelCellStyle}">If parents living separately, then mention</td>
+          <td style="${valueCellStyle}" colspan="3">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Residing City:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.residingCity)}</td>
+                <td style="border:none;padding:0 16px 0 0;font-weight:600;color:#333;">Residing Location Ownership Status:</td>
+                <td style="border:none;padding:0 16px 0 0;color:#333;">${formatMultiline(general.residingLocationOwnershipStatus)}</td>
+              </tr>
+            </table>
+          </td>
       </table>
 
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Assets and Investments
+      </h2>
       <table style="${tableStyle}">
         <tr>
-          <th style="border:1px solid #c7cdd1;padding:8px;background:#f4f6fb;color:#222;text-align:left;font-weight:600;">Asset</th>
-          <th style="border:1px solid #c7cdd1;padding:8px;background:#f4f6fb;color:#222;text-align:left;font-weight:600;">Status</th>
+          <td style="${labelCellStyle}">Assets Owned</td>
+          <td style="${valueCellStyle}" colspan="5">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Smartphone (Yes/No): ${assetRows[0]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Washing Machine (Yes/No): ${assetRows[1]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Car RC No. (Yes/No): ${assetRows[2]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Two-Wheeler (Yes/No): ${assetRows[3]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Auto/Cab (Yes/No): ${assetRows[4]?.[1] || "Not provided"}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Computer / Laptop (Yes/No): ${assetRows[5]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">AC (Yes/No): ${assetRows[6]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fridge (Yes/No): ${assetRows[7]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Induction (Yes/No): ${assetRows[8]?.[1] || "Not provided"}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
-        ${assetRows
-          .map(
-            ([label, value]) =>
-              `<tr><td style="${labelCellStyle}">${label}</td><td style="${valueCellStyle}">${value}</td></tr>`
-          )
-          .join("")}
-        ${renderKeyValue("Insurance (LIC)", assets.insurance)}
-        ${renderKeyValue("Fixed Deposit", assets.fixedDeposit)}
-        ${renderKeyValue("Chit Funds", assets.chitFunds)}
-        ${renderKeyValue("Post Office Savings", assets.postOfficeSavings)}
-        ${renderKeyValue(
-          "Post Office savings monthly",
-          assets.postOfficeSavingsMonthly
-        )}
-        ${renderKeyValue("Recurring Deposit", assets.recurringDeposit)}
-        ${renderKeyValue(
-          "Consumption of Nicotine / Alcohol",
-          assets.consumptionHabits
-        )}
+        <tr>
+          <td style="${labelCellStyle}">Investments (Mention Amount if he owns or invest in any instrument)</td>
+          <td style="${valueCellStyle}" colspan="5">
+            <table style="border-collapse:collapse;width:100%;margin:0;">
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Property: ${assetRows[9]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Insurance (LIC): ${assetRows[10]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fixed Deposit: ${assetRows[11]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Chit Funds: ${assetRows[12]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Post Office Savings: ${assetRows[13]?.[1] || "Not provided"}</td>
+              </tr>
+              <tr>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Is Post Office savings monthly (Yes/No): ${assetRows[14]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Any recurring deposit (Yes/No): ${assetRows[15]?.[1] || "Not provided"}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Did you consume Nicotine Products or Alcohol?</td>
+          <td style="${valueCellStyle}" colspan="5"> ${assetRows[16]?.[1] || "Not provided"}</td>
+          </tr>
       </table>
 
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Employment Details
+      </h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of Current Business Firm", employment.businessName)}
         ${renderKeyValue("Type of Business Firm", employment.businessConstitution)}
-        ${renderKeyValue("Partnership shareholding %", employment.partnershipShare)}
+        ${renderKeyValue("If Partnership, % shareholding", employment.partnershipShare)}
         ${renderKeyValue(
           "Date of commencement of business",
           employment.businessCommencementDate
         )}
         ${renderKeyValue(
-          "Place of incorporation / address",
-          employment.placeOfIncorporation
+          "Place of incorporation",
+          "Address: " + employment.placeOfIncorporation
         )}
-        ${renderKeyValue("Previous business name", employment.previousBusinessName)}
+        <tr>
+          <td style="${labelCellStyle}" colspan="2">if above less than 3 years, then provide details:-</td>
+        </tr>
+        ${renderKeyValue("Name of the Previous Business", employment.previousBusinessName)}
         ${renderKeyValue(
-          "Years worked in previous business",
+          "Number of Years worked in previous business",
           employment.previousBusinessYears
         )}
         ${renderKeyValue(
-          "Reason for change / closing previous business",
+          "Reason for change / Closing the previous business",
           employment.reasonForChange
         )}
         ${renderKeyValue(
           "Total work experience",
           employment.totalWorkExperience
         )}
-        ${renderKeyValue("Official / Business email ID", employment.officialEmail)}
-        ${renderKeyValue("Contact number", employment.contactNumber)}
+        ${renderKeyValue("Official / Business Email-ID", employment.officialEmail)}
+        ${renderKeyValue("Contact Number", employment.contactNumber)}
       </table>
 
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Business Details
+      </h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Type of industry", business.typeOfIndustry)}
-        ${renderKeyValue("Nature of business", business.natureOfBusiness)}
-        ${renderKeyValue("Constitution", business.constitution)}
-        ${renderKeyValue("Type of customer", business.typeOfCustomer)}
-        ${renderKeyValue("Business since", business.businessSince)}
+        ${renderKeyValue("Business Profile", business.natureOfBusiness)}
+        ${renderKeyValue("Business Premises Ownership", business.constitution)}
+        ${renderKeyValue("Area of office", business.areaOfOffice)}
         ${renderKeyValue(
-          "Promoter experience",
-          business.promoterExperience
-        )}
-        ${renderKeyValue("Stability in same business", business.stabilityYears)}
-        ${renderKeyValue(
-          "Stability verified by",
-          business.stabilityVerifiedBy
+          "Stock/Assets Seen in Business Premises",
+          business.stockAssetsSeen
         )}
         ${renderKeyValue(
-          "Family structure involved in business",
-          business.familyStructureInBusiness
-        )}
-        ${renderKeyValue("Business premises ownership", business.premisesOwnership)}
-        ${renderKeyValue(
-          "Actual monthly sales / receipts",
-          business.actualMonthlySales
+          "Others (Please specify all major assets seen)",
+          business.othersMajorAssetsSeen
         )}
         ${renderKeyValue(
-          "Sales done on credit (%)",
-          business.percentSalesOnCredit
-        )}
-        ${renderKeyValue(
-          "Manufacturing / trading details",
-          business.manufacturingTradingDetails
-        )}
-        ${renderKeyValue(
-          "Sales concentration > 50% on one party",
-          business.salesConcentration
-        )}
-        ${renderKeyValue(
-          "Business cycle – Debtors",
-          business.businessCycleDebtors
-        )}
-        ${renderKeyValue(
-          "Business cycle – Creditors",
-          business.businessCycleCreditors
-        )}
-        ${renderKeyValue("Stock valuation", business.stockValuation)}
-        ${renderKeyValue("Gross & net margins", business.grossNetMargins)}
-        ${renderKeyValue(
-          "Monthly net saving",
-          business.monthlyNetSaving
-        )}
-        ${renderKeyValue("Major suppliers", business.majorSuppliers)}
-        ${renderKeyValue("Major customers", business.majorCustomers)}
-        ${renderKeyValue("Number of employees", business.numberOfEmployees)}
-        ${renderKeyValue("Name board seen", business.nameBoardSeen)}
-        ${renderKeyValue(
-          "Locality of business / office",
+          "Locality of business Premises",
           business.localityOfBusiness
         )}
-        ${renderKeyValue(
-          "Residence cum office setup",
-          business.residenceCumOffice
-        )}
-        ${renderKeyValue(
-          "Applicability of VAT / Excise / Service tax",
-          business.vatExciseApplicability
-        )}
-        ${renderKeyValue(
-          "Latest VAT / Service tax paid",
-          business.latestTaxReturnValue
-        )}
+        ${renderKeyValue("Annual Turnover", business.annualTurnover)}
+        ${renderKeyValue("Net Profit Margin", business.netProfitMargin)}
+        ${renderKeyValue("Is Business seasonal?", business.businessSeasonal)}
+        ${renderKeyValue("Number of Employees", business.numberOfEmployees)}
+        ${renderKeyValue("Profile Description of employee/staff", business.profileDescriptionOfEmployeeStaff)}
+        ${renderKeyValue("Designation of Employee/Staff member", business.designationOfEmployeeStaffMember)}
+        ${renderKeyValue("No. of Employees in that role", business.noOfEmployeesInThatRole)}
+        ${renderKeyValue("No of Years Business Running in this Premises", business.yearsAtCurrentPremises)}
+        ${renderKeyValue("If less than 3 years - Provide address details from where it was operating earlier", business.addressDetailsFromWhereItWasOperatingEarlier)}
+        ${renderKeyValue("Popularity in Local Market", business.popularityInLocalMarket)}
+        ${renderKeyValue("No. of Competitors in Nearby Market", business.noOfCompetitorsInNearbyMarket)}
+        ${renderKeyValue("Final Product/Service of Business", business.finalProductServiceOfBusiness)}
+        ${renderKeyValue("Business Started by", business.businessStartedBy)}
+        ${renderKeyValue("If Self Started, Source of initial Funds", business.sourceOfInitialFunds)}
       </table>
 
-      ${renderArrayTable(
-        ["#", "Question", "Response"],
-        essRows
-      )}
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Past Employment/Business Details
+      </h2>
+      <table style="${tableStyle}">
+              <tr>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Employer/Business Name</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Designation</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">From</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">To</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Contact Person Name & Number</th>
+                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Reason for Movement</th>
+              </tr>
+              <tr>
+                <td style="${valueCellStyle}">${formatMultiline(employment.previousBusinessName)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.designation)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.fromDate)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.toDate)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.contactPersonName)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(employment.reasonForMovement)}</td>
+              </tr>
+        </table>
 
-      ${renderArrayTable(
-        ["Type of Loan", "Bank Name", "Loan Amount", "EMI", "Tenure Remaining"],
-        existingLoanRows
-      )}
+        <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Business Income Computation (Monthly Basis)
+        </h2>
+        <table style="${tableStyle}; text-align:left;">
+          <tr>
+            <th colspan="2" style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:center;color:#222;background:#f4f6fb;">Revenue</th>
+            <th colspan="2" style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:center;color:#222;background:#f4f6fb;">Expenditure</th>
+          </tr>
+          <tr>
+            <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Revenue</th>
+            <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:right;color:#222;background:#f4f6fb;">Amount (in Rs)</th>
+            <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Expenditure</th>
+            <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:right;color:#222;background:#f4f6fb;">Amount (in Rs)</th>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle}">Sales</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(business.salesAmount)}</td>
+            <td style="${labelCellStyle}">Wages</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(business.wagesAmount)}</td>
+          </tr>
+          <tr>
+            <td style="${valueCellStyle}" colspan="2"></td>
+            <td style="${labelCellStyle}">Diesel</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(business.diesel)}</td>
+          </tr>
+          <tr>
+            <td style="${valueCellStyle}" colspan="2"></td>
+            <td style="${labelCellStyle}">Maintenance & Repairs</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(business.maintenanceRepairs)}</td>
+          </tr>
+          <tr>
+            <td style="${valueCellStyle}" colspan="2"></td>
+            <td style="${labelCellStyle}">Other expenses</td>
+            <td style="${valueCellStyle};text-align:right">${formatCurrency(business.otherExpenses)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle};font-weight:600;" colspan="1">Total Monthly Revenue (A)</td>
+            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(business.totalMonthlyRevenue)}</td>
+            <td style="${labelCellStyle};font-weight:600;" colspan="1">Total Monthly Expenses(B)</td>
+            <td style="${valueCellStyle};font-weight:600;text-align:right">${formatCurrency(business.totalMonthlyExpenses)}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle};font-weight:600;" colspan="4"></td>
+          </tr>
+          ${renderKeyValue("Net Monthly Profit (= A - B)", business.netMonthlyProfit, undefined, { colspan: 4 })}
+          ${renderKeyValue("Other Monthly Income", business.otherMonthlyIncome, undefined, { colspan: 4 })}
+          ${renderKeyValue("Rental Income - Cash", business.rentalIncomeCash, undefined, { colspan: 4 })}
+          ${renderKeyValue("Rental Income - Cheque", business.rentalIncomeCheque, undefined, { colspan: 4 })}
+          ${renderKeyValue("Incentives / Perks - Cash", business.incentivesCash, undefined, { colspan: 4 })}
+          ${renderKeyValue("Incentives / Perks - Cheque", business.incentivesCheque, undefined, { colspan: 4 })}
+          ${renderKeyValue("Monthly Bonus - Cash", business.monthlyBonusCash, undefined, { colspan: 4 })}
+          ${renderKeyValue("Monthly Bonus - Cheque", business.monthlyBonusCheque, undefined, { colspan: 4 })}
+          <tr>
+            <td style="${labelCellStyle}">Others, please specify source type:</td>
+            <td style="${valueCellStyle}" colspan="3">${formatMultiline(employment.otherMonthlyIncomeSourceType || "")}</td>
+          </tr>
+          <tr>
+            <td style="${labelCellStyle} colspan="2">Monthly Income (In Rs):</td>
+            <td style="${valueCellStyle}" colspan="1">Cash Amount: ${formatCurrency(employment.monthlyIncomeCash || 0)}</td>
+            <td style="${valueCellStyle}" colspan="2">Cheque Amount: ${formatCurrency(employment.monthlyIncomeCheque || 0)}</td>
+          </tr>
+      </table>
 
+
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+      Existing or Past Loan Details
+      </h2>
+      <table style="${tableStyle}">
+          <tr>
+            <td style="${labelCellStyle}">Loan Type</td>
+            <td style="${labelCellStyle}">Lending Institution Name</td>
+            <td style="${labelCellStyle}">Loan Amount (in Rs.)</td>
+            <td style="${labelCellStyle}">Tenure Remaining</td>
+            <td style="${labelCellStyle}">EMI</td>
+          </tr>
+          <tr>
+            <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[0] || "")}</td>
+            <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[1] || "")}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[2] || 0)}</td>
+            <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[4] || "")}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[3] || 0)}</td>
+      </table>
+
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+      Loan Details
+      </h2>
+      <table style="${tableStyle}">
+        ${renderKeyValue("Purpose of Loan", loanPurpose.purposeOfLoan)}
+        ${renderKeyValue("Minimum Loan Amount Required", loanPurpose.minimumLoanAmountRequired)}
+        ${renderKeyValue("Tenure Required", loanPurpose.tenureRequired)}
+        ${renderKeyValue("Monthly Household Expenses", loanPurpose.monthlyHouseholdExpenses)}
+        ${renderKeyValue("Comfortable EMI", loanPurpose.comfortableEmi)}
+        ${renderKeyValue("Status of Property to be Purchased", loanPurpose.statusOfPropertyToBePurchased)}
+        ${renderKeyValue("Usage of Property After Purchase", loanPurpose.usageOfPropertyAfterPurchase)}
+      </table>
+
+
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+      Cost and Funds Information(Loan Details)
+      </h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Funds required", costFunds.fundsRequired)}
         ${renderKeyValue("Source of own funds (OCR)", costFunds.sourceOfOwnFunds)}
@@ -356,35 +484,43 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           "Construction estimate",
           costFunds.constructionEstimate
         )}
+        ${renderKeyValue("Family/Friends", costFunds.familyFriends)}
+        ${renderKeyValue("Registration/Stamp Duty Charges", costFunds.registrationStampDutyCharges)}
+        ${renderKeyValue("Other Loan Taken", costFunds.otherLoanAmountTaken)}
+        ${renderKeyValue("Other Expenses", costFunds.otherExpenses)}
+        ${renderKeyValue("Total Amount Spent (Total of all the above)", costFunds.totalAmountSpent)}
         ${renderKeyValue(
-          "Total transaction cost",
+          "Total transaction cost (Total of all the above)",
           costFunds.totalTransactionCost
         )}
+        <tr>
+          <td style="${labelCellStyle}" >Mode of Payment to Seller:</td>
+          <td style="${valueCellStyle}" colspan="2">
+          <span>Cash Amount: ${formatCurrency(costFunds.cashAmount || 0)}</span>
+          <span style="margin-left: 16px;">Cheque Amount: ${formatCurrency(costFunds.chequeAmount || 0)}</span>
+          </td>
+        </tr>
       </table>
 
-      ${renderArrayTable(
-        [
-          "Bank Name",
-          "Account Number",
-          "Account Type",
-          "Branch",
-          "Operating since (Years)",
-        ],
-        bankingRows
-      )}
-
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Other Family Member Details
+      </h2>
       ${renderArrayTable(
         [
           "Name",
           "Relationship",
           "Age",
-          "Occupation",
-          "Educational Qualification",
+          "Employment Type",
+          "Educational Qualification(Also mention if Govt. or Private institution)",
           "Contact No.",
           "Staying with Applicant",
         ],
         familyRows
       )}
+
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Reference (Business Parties)
+      </h2>
 
       ${renderArrayTable(
         [
@@ -393,28 +529,34 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           "Relationship",
           "Contact Number",
           "Email Address",
-          "Years Known",
+          "No of Years Known the Applicant",
           "Photo with Applicant",
         ],
         referenceRows
       )}
 
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        Business Firm Check (From Neighbor/ Independent checking/ From existing customer)
+      </h2>
       ${renderArrayTable(
         [
-          "Name of Person",
-          "Business Firm",
+          "Name of the Applicant",
+          "Name of Business Firm",
           "Address",
-          "Years Known",
+          "No of Years Known the Firm",
           "Contact Number",
-          "Feedback",
-          "Business Card Collected",
+          "Feedback about Employer/Firm",
+          "Business Card Collected (Yes/No)",
         ],
         businessCheckRows
       )}
 
+      <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
+        To be Filled by PD Officer
+      </h2>
       <table style="${tableStyle}">
         ${renderKeyValue(
-          "Comments / Observations",
+          "Brief Comments/Observations of the case",
           pdComments.comments
         )}
         ${renderKeyValue("Initiated address", pdComments.initiatedAddress)}

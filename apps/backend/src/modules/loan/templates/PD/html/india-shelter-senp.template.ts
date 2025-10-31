@@ -1000,10 +1000,9 @@ export const indiaShelterSenpTemplate = (
       <tr>
         <td style="${labelCellStyle}">Name</td>
         <td style="${labelCellStyle}">Address</td>
-        <td style="${labelCellStyle}">Relationship</td>
-        <td style="${labelCellStyle}">Contact Number</td>
-        <td style="${labelCellStyle}">Email Address</td>
-        <td style="${labelCellStyle}">No of year known the applicant</td>
+        <td style="${labelCellStyle}">Mobile NO.</td>
+        <td style="${labelCellStyle}">Knowing Since (Months / Years)</td>
+        <td style="${labelCellStyle}">Feedback</td>
       </tr>
       ${
         tpcRefs.length
@@ -1014,66 +1013,62 @@ export const indiaShelterSenpTemplate = (
             <td style="${valueCellStyle}">${formatMultiline(ref.name)}</td>
             <td style="${valueCellStyle}">${formatMultiline(ref.address)}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.relationship
+              ref.mobileNumber
             )}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.contactNumber
+              ref.knowingSince
             )}</td>
             <td style="${valueCellStyle}">${formatMultiline(
-              ref.emailAddress
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              ref.noOfYearKnownTheApplicant
+              ref.feedback
             )}</td>
           </tr>
         `
               )
               .join("")
-          : `<tr><td style="${valueCellStyle}" colspan="5">Not provided</td></tr>`
+          : `<tr><td style="${valueCellStyle}" colspan="4">Not provided</td></tr>`
       }
     </table>
   `;
 
   const pdReviewTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">To be filled by PD Officer</th></tr>
-      ${renderKeyValueRow(
-        "Major Observations / Comments / Concerns During PD",
-        pdReview.majorObservations,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Case Strengths",
-        pdReview.caseStrengths,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Case Weakness",
-        pdReview.caseWeakness,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr><th style="${subHeaderStyle}" colspan="5">To be filled by PD Officer</th></tr>
       <tr>
-        <td style="${labelCellStyle}">PD Status</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.pdStatus)}</td>
-        <td style="${labelCellStyle}">Name of PD Officer</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          pdReview.pdOfficerName
-        )}</td>
+        <td style="${labelCellStyle}">Major Observations / Comments / Concerns During PD</td>
+        <td style="${labelCellStyle}">Case Strengths</td>
+        <td style="${valueCellStyle}">${formatMultiline(pdReview.caseStrengths)}</td>
+        <td style="${labelCellStyle}">Case Weakness</td>
+        <td style="${valueCellStyle}">${formatMultiline(pdReview.caseWeakness)}</td>
       </tr>
-      <tr>
-        <td style="${labelCellStyle}">Date of Visit</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.visitDate)}</td>
-        <td style="${labelCellStyle}">Time of Visit</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.visitTime)}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Name of PD Officer",
+        pdReview.pdOfficerName,
+        undefined,
+        { colSpan: 5 }
+      )}
+      ${renderKeyValueRow(
+        "Date of Visit",
+        pdReview.visitDate,
+        undefined,
+        { colSpan: 5 }
+      )}
+      ${renderKeyValueRow(
+        "Time of Visit",
+        pdReview.visitTime,
+        undefined,
+        { colSpan: 5 }
+      )}
       ${renderKeyValueRow(
         "Signature of the PD Officer",
         pdReview.officerSignature,
         undefined,
-        { colSpan: 3 }
+        { colSpan: 5 }
+      )}
+      ${renderKeyValueRow(
+        "PD Status",
+        pdReview.pdStatus,
+        undefined,
+        { colSpan: 5 }
       )}
     </table>
   `;

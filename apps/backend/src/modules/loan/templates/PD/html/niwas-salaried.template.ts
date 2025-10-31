@@ -243,7 +243,6 @@ export const niwasSalariedTemplate = (
           general.parentsStayingWith
         )}
 
-        <tr>
           <td style="${labelCellStyle}">If parents living separately, then mention</td>
           <td style="${valueCellStyle}" colspan="3">
             <table style="border-collapse:collapse;width:100%;margin:0;">

@@ -529,8 +529,7 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           "We estimated financials, purely based on the valid documents provided by the applicant."
       )}</p>
 
-      <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
-      <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
+      
       <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
  

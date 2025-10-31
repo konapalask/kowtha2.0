@@ -29,19 +29,19 @@ export const niwasSalariedSchema = {
             enum: ["General", "SC", "ST", "OBC", "Others"],
           },
           dependentsChildren: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Children",
           },
           dependentsAdults: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Adults",
           },
           dependentsOthers: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Others",
           },
           yearsInCurrentResidence: {
-            type: "string",
+            type: "number",
             title: "Years in Current Residence",
             enum: ["<1 Year", "1-3 Years", "3-5 Years", ">5 Years"],
           },
@@ -55,11 +55,11 @@ export const niwasSalariedSchema = {
             title: "Previous address (if < 1 year)",
           },
           yearsAtPreviousAddress: {
-            type: "string",
+            type: "number",
             title: "Years stayed at previous address",
           },
           yearsInCurrentCity: {
-            type: "string",
+            type: "number",
             title: "Years in current city",
           },
           previousCity: {
@@ -67,7 +67,7 @@ export const niwasSalariedSchema = {
             title: "Previous city (if ≤ 3 years)",
           },
           yearsInPreviousCity: {
-            type: "string",
+            type: "number",
             title: "Years in previous city",
           },
           reasonForChange: {
@@ -97,38 +97,30 @@ export const niwasSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          smartphone: { type: "string", title: "Smartphone (Yes/No)" },
-          washingMachine: { type: "string", title: "Washing Machine (Yes/No)" },
-          carRcNo: { type: "string", title: "Car RC No. (Yes/No)" },
-          twoWheeler: { type: "string", title: "Two-Wheeler (Yes/No)" },
-          autoCab: { type: "string", title: "Auto/Cab (Yes/No)" },
-          computerLaptop: {
-            type: "string",
-            title: "Computer / Laptop (Yes/No)",
-          },
-          ac: { type: "string", title: "AC (Yes/No)" },
-          fridge: { type: "string", title: "Fridge (Yes/No)" },
-          induction: { type: "string", title: "Induction (Yes/No)" },
+          smartphone: { type: "string", title: "Smartphone (Yes/No)" , enum: ["Yes", "No"]},
+          washingMachine: { type: "string", title: "Washing Machine (Yes/No)" , enum: ["Yes", "No"]},
+          carRcNo: { type: "string", title: "Car RC No. (Yes/No)" , enum: ["Yes", "No"]},
+          twoWheeler: { type: "string", title: "Two-Wheeler (Yes/No)" , enum: ["Yes", "No"]},
+          autoCab: { type: "string", title: "Auto/Cab (Yes/No)" , enum: ["Yes", "No"]},
+          computerLaptop: { type: "string", title: "Computer / Laptop (Yes/No)" , enum: ["Yes", "No"]},
+          ac: { type: "string", title: "AC (Yes/No)" , enum: ["Yes", "No"]},
+          fridge: { type: "string", title: "Fridge (Yes/No)" , enum: ["Yes", "No"]},
+          induction: { type: "string", title: "Induction (Yes/No)" , enum: ["Yes", "No"]},
           investments: {
             type: "string",
             title: "Investments (property, amount etc.)",
             ui: { widget: "textarea", rows: 2 },
           },
-          insurance: { type: "string", title: "Insurance (LIC)" },
+          insurance: { type: "string", title: "Insurance (LIC)" , enum: ["Yes", "No"]},
           fixedDeposit: { type: "string", title: "Fixed Deposit" },
-          chitFunds: { type: "string", title: "Chit Funds" },
-          postOfficeSavings: { type: "string", title: "Post Office Savings" },
-          postOfficeSavingsMonthly: {
-            type: "string",
-            title: "Post Office savings monthly (Yes/No)",
-          },
-          recurringDeposit: {
-            type: "string",
-            title: "Recurring Deposit (Yes/No)",
-          },
+          chitFunds: { type: "string", title: "Chit Funds" , enum: ["Yes", "No"]},
+          postOfficeSavings: { type: "string", title: "Post Office Savings" , enum: ["Yes", "No"]},
+          postOfficeSavingsMonthly: { type: "string", title: "Post Office savings monthly (Yes/No)" , enum: ["Yes", "No"]},
+          recurringDeposit: { type: "string", title: "Recurring Deposit (Yes/No)" , enum: ["Yes", "No"]},
           consumptionHabits: {
             type: "string",
             title: "Consumption of Nicotine / Alcohol (Yes/No)",
+            enum: ["Yes", "No"],
           },
         },
       },
@@ -144,11 +136,11 @@ export const niwasSalariedSchema = {
             title: "Name of Current Employer/Business Firm",
           },
           yearsInCurrentJob: {
-            type: "string",
+            type: "number",
             title: "Years in Current Job / Date of Joining",
           },
           totalWorkExperience: {
-            type: "string",
+            type: "number",
             title: "Total Work Experience (years)",
           },
           officialEmail: {
@@ -156,11 +148,11 @@ export const niwasSalariedSchema = {
             title: "Official / Business Email ID",
           },
           contactNumber: {
-            type: "string",
+            type: "number",
             title: "Contact Number",
           },
           numberOfEmployeesInFirm: {
-            type: "string",
+            type: "number",
             title: "Number of employees in firm",
           },
           finalProductServiceOffered: {
@@ -168,7 +160,7 @@ export const niwasSalariedSchema = {
             title: "Final product/service offered by company",
           },
           numberOfCompetitorsInNearbyMarket: {
-            type: "string",
+            type: "number",
             title: "Number of competitors in nearby market",
           },
           localityOfBusinessPremises: {
@@ -259,11 +251,11 @@ export const niwasSalariedSchema = {
             title: "Designation",
           },
           fromDate: {
-            type: "string",
+            type: "date",
             title: "From Date",
           },
           toDate: {
-            type: "string",
+            type: "date",
             title: "To Date",
           },
           contactPersonName: {
@@ -271,7 +263,7 @@ export const niwasSalariedSchema = {
             title: "Contact Person Name",
           },
           contactPersonNumber: {
-            type: "string",
+            type: "number",
             title: "Contact Person Number",
           },
           reasonForMovement: {
@@ -294,21 +286,36 @@ export const niwasSalariedSchema = {
             title: "Monthly Salary Income",
             properties: {
               cashAmount: {
-                type: "number",
+                type: "number", 
                 title: "Cash Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
                 title: "Cheque Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
           otherMonthlyIncome: {
             type: "number",
             title: "Other Monthly Income",
-            format: "currency",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           rentalIncome: {
             type: "object",
@@ -317,12 +324,22 @@ export const niwasSalariedSchema = {
               cashAmount: {
                 type: "number",
                 title: "Cash Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
                 title: "Cheque Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
@@ -333,12 +350,22 @@ export const niwasSalariedSchema = {
               cashAmount: {
                 type: "number",
                 title: "Cash Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
                 title: "Cheque Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
@@ -349,7 +376,12 @@ export const niwasSalariedSchema = {
               cashAmount: {
                 type: "number",
                 title: "Cash Amount",
-                format: "currency",
+                  formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
@@ -369,12 +401,22 @@ export const niwasSalariedSchema = {
               cashAmount: {
                 type: "number",
                 title: "Cash Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
                 title: "Cheque Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },
@@ -394,8 +436,18 @@ export const niwasSalariedSchema = {
               properties: {
                 typeOfLoan: { type: "string", title: "Type of Loan" },
                 bankName: { type: "string", title: "Bank Name" },
-                loanAmount: { type: "number", title: "Loan Amount (in Rs.)", format: "currency" },
-                emi: { type: "number", title: "EMI", format: "currency" },
+                loanAmount: { type: "number", title: "Loan Amount (in Rs.)", formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                } },
+                emi: { type: "number", title: "EMI", formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                } },
                 tenureRemaining: { type: "string", title: "Tenure remaining" },
               },
             },
@@ -412,6 +464,7 @@ export const niwasSalariedSchema = {
           purposeOfLoan: {
             type: "string",
             title: "Purpose of loan",
+            enum: ["Flat Purchase", "House Purchase", "Plot Purchase", "Plot + Construction", "Improvement/Extension", "Balance Transfer", "Hand Loan Clearance", "Construction","Personal Needs"],
           },
           minimumLoanAmountRequired: {
             type: "number",
@@ -419,8 +472,9 @@ export const niwasSalariedSchema = {
             format: "currency",
           },
           tenureRequired: {
-            type: "string",
+            type: "number",
             title: "Tenure required",
+            format: "currency",
           },
           monthlyHouseholdExpenses: {
             type: "number",
@@ -432,6 +486,25 @@ export const niwasSalariedSchema = {
             title: "Comfortable EMI",
             format: "currency",
           },
+          statusOfPropertyToBePurchased: {
+            type: "string",
+            title: "Status of property to be purchased",
+            enum: ["Ready", "Under Construction", "Construction Yet to Start"],
+          },
+          usageOfPropertyAfterPurchase: {
+            type: "string",
+            title: "Usage of property after purchase",
+            enum: ["Self-Occupancy", "Investment", "Others"],
+          },  
+        },
+      },
+    },
+    {
+      id: "costAndFunds",
+      label: "Cost and Funds",
+      schema: {
+        type: "object",
+        properties: {
           fundsRequired: {
             type: "number",
             title: "Funds required",
@@ -514,7 +587,7 @@ export const niwasSalariedSchema = {
                   type: "string",
                   title: "Educational Qualification",
                 },
-                contactNumber: { type: "string", title: "Contact No." },
+                contactNumber: { type: "number", title: "Contact No." },
                 stayingWithApplicant: {
                   type: "string",
                   title: "Staying with Applicant (Yes/No)",
@@ -543,11 +616,12 @@ export const niwasSalariedSchema = {
                   type: "string",
                   title: "No. of Years known the applicant",
                 },
-                contactNumber: { type: "string", title: "Contact Number" },
+                contactNumber: { type: "number", title: "Contact Number" },
                 email: { type: "string", title: "Email Address" },
                 photoWithApplicant: {
                   type: "string",
                   title: "Photo with Applicant (Yes/No)",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -573,7 +647,7 @@ export const niwasSalariedSchema = {
                   type: "string",
                   title: "Number of years known the firm",
                 },
-                contactNumber: { type: "string", title: "Contact number" },
+                contactNumber: { type: "number", title: "Contact number" },
                 feedback: {
                   type: "string",
                   title: "Feedback (Positive / Neutral / Negative)",
@@ -581,6 +655,7 @@ export const niwasSalariedSchema = {
                 businessCardCollected: {
                   type: "string",
                   title: "Business card collected (Yes/No)",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -600,7 +675,7 @@ export const niwasSalariedSchema = {
             ui: { widget: "textarea", rows: 4 },
           },
           pdOfficerName: { type: "string", title: "Name of PD Officer" },
-          discussionDate: { type: "string", title: "Date of Discussion" },
+          discussionDate: { type: "date", title: "Date of Discussion" },
           pdOfficerSignature: { type: "string", title: "Signature of PD Officer" },
         },
       },
