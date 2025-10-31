@@ -20,7 +20,8 @@ export const niwasSenpSchema = {
           educationalQualification: {
             type: "string",
             title:
-              "Educational Qualification (Below 10th / 10th / 12th / Diploma / Graduate / PG)",
+              "Educational Qualification",
+              enum: ["Below 10th", "10th", "12th", "Diploma", "Graduate", "PG"],
           },
           category: {
             type: "string",
@@ -28,43 +29,46 @@ export const niwasSenpSchema = {
             enum: ["General", "SC", "ST", "OBC", "Others"],
           },
           dependentsChildren: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Children",
           },
           dependentsAdults: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Adults",
           },
           dependentsOthers: {
-            type: "string",
+            type: "number",
             title: "Number of Dependents - Others",
           },
           yearsInCurrentResidence: {
             type: "string",
-            title: "Years in Current Residence",
+            title: "Number of Years in Current Residence",
+            enum: ["<1 Year", "1-3 Years", "3-5 Years", ">5 Years"],
           },
           currentResidenceHouseSize: {
             type: "string",
             title: "Current residence house size",
+            enum: ["1 RK", "1 BHK", "2 BHK", ">2 BHK"],
           },
           previousAddress: {
             type: "string",
             title: "Previous address (if < 1 year)",
           },
           yearsAtPreviousAddress: {
-            type: "string",
+            type: "number",
             title: "Years stayed at previous address",
           },
           yearsInCurrentCity: {
-            type: "string",
-            title: "Years in current city",
+            type: "number",
+            title: "Number of Years in current city",
+            enum: ["<=3 Years", ">3 Years"],
           },
           previousCity: {
             type: "string",
             title: "Previous city (if ≤ 3 years)",
           },
           yearsInPreviousCity: {
-            type: "string",
+            type: "number",
             title: "Years in previous city",
           },
           reasonForChange: {
@@ -75,6 +79,21 @@ export const niwasSenpSchema = {
             type: "string",
             title: "Parents staying with (Self / Separate / Expired)",
           },
+          ifParentsLivingSeparately: {
+            type: "object",
+            title: "If parents living separately, then mention",
+            properties: {
+              residingCity: {
+                type: "string",
+                title: "Residing City",
+              },
+              residingLocationOwnershipStatus: {
+                type: "string",
+                title: "Residing location ownership status",
+                enum: ["Self-Owned", "Prent-Owned", "Rented"],
+              },
+            },
+          },
         },
       },
     },
@@ -84,33 +103,35 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          smartphone: { type: "string", title: "Smartphone (Yes/No)" },
-          washingMachine: { type: "string", title: "Washing Machine (Yes/No)" },
-          carRcNo: { type: "string", title: "Car RC No. (Yes/No)" },
-          twoWheeler: { type: "string", title: "Two Wheeler (Yes/No)" },
-          autoCab: { type: "string", title: "Auto/Cab (Yes/No)" },
+          smartphone: { type: "string", title: "Smartphone (Yes/No)", enum: ["Yes", "No"] },
+          washingMachine: { type: "string", title: "Washing Machine (Yes/No)", enum: ["Yes", "No"] },
+          carRcNo: { type: "string", title: "Car RC No. (Yes/No)", enum: ["Yes", "No"] },
+          twoWheeler: { type: "string", title: "Two Wheeler (Yes/No)", enum: ["Yes", "No"] },
+          autoCab: { type: "string", title: "Auto/Cab (Yes/No)", enum: ["Yes", "No"] },
           computerLaptop: {
             type: "string",
-            title: "Computer / Laptop (Yes/No)",
-          },
-          ac: { type: "string", title: "AC (Yes/No)" },
-          fridge: { type: "string", title: "Fridge (Yes/No)" },
-          induction: { type: "string", title: "Induction (Yes/No)" },
-          insurance: { type: "string", title: "Insurance (LIC)" },
-          fixedDeposit: { type: "string", title: "Fixed Deposit" },
-          chitFunds: { type: "string", title: "Chit Funds" },
-          postOfficeSavings: { type: "string", title: "Post Office Savings" },
+            title: "Computer / Laptop (Yes/No)", enum: ["Yes", "No"] },
+          ac: { type: "string", title: "AC (Yes/No)" ,enum: ["Yes", "No"]},
+          fridge: { type: "string", title: "Fridge (Yes/No)" ,enum: ["Yes", "No"]},
+          induction: { type: "string", title: "Induction (Yes/No)" ,enum: ["Yes", "No"]},
+          insurance: { type: "string", title: "Insurance (LIC)" ,enum: ["Yes", "No"]},
+          fixedDeposit: { type: "string", title: "Fixed Deposit" ,enum: ["Yes", "No"]},
+          chitFunds: { type: "string", title: "Chit Funds" ,enum: ["Yes", "No"]},
+          postOfficeSavings: { type: "string", title: "Post Office Savings" ,enum: ["Yes", "No"]},
           postOfficeSavingsMonthly: {
             type: "string",
             title: "Post Office savings monthly (Yes/No)",
+            enum: ["Yes", "No"],
           },
           recurringDeposit: {
             type: "string",
             title: "Recurring Deposit (Yes/No)",
+            enum: ["Yes", "No"],
           },
           consumptionHabits: {
             type: "string",
             title: "Consumption of Nicotine / Alcohol (Yes/No)",
+            enum: ["Yes", "No"],
           },
         },
       },
@@ -125,13 +146,14 @@ export const niwasSenpSchema = {
           businessConstitution: {
             type: "string",
             title: "Type of Business Firm",
+            enum: ["Proprietorship", "Partnership", "Others"],
           },
           partnershipShare: {
-            type: "string",
+            type: "number",
             title: "If partnership - shareholding %",
           },
           businessCommencementDate: {
-            type: "string",
+            type: "date",
             title: "Date of commencement of business",
           },
           placeOfIncorporation: {
@@ -144,7 +166,7 @@ export const niwasSenpSchema = {
             title: "Previous business name (if applicable)",
           },
           previousBusinessYears: {
-            type: "string",
+            type: "number",
             title: "Years worked in previous business",
           },
           reasonForChange: {
@@ -152,7 +174,7 @@ export const niwasSenpSchema = {
             title: "Reason for change / closing previous business",
           },
           totalWorkExperience: {
-            type: "string",
+            type: "number",
             title: "Total work experience",
           },
           officialEmail: { type: "string", title: "Official / Business email ID" },
@@ -161,143 +183,284 @@ export const niwasSenpSchema = {
       },
     },
     {
-      id: "businessOperations",
-      label: "Business Operations",
+      id: "businessDetails",
+      label: "Business Details",
       schema: {
         type: "object",
         properties: {
           typeOfIndustry: {
             type: "string",
             title: "Type of industry",
+            enum: ["Small Manufacturing Unit from Home/other premises", "Trading", "Services", "Other"],
           },
-          natureOfBusiness: {
+
+          businessProfile: {
             type: "string",
-            title: "Nature of business",
+            title: "Business Profile",
+            enum:[
+              "Car Driver",
+              "Auto Garage",
+              "Two Wheeler Auto Driver",
+              "Carpenter",
+              "Kirana Shop",
+              "Caterers",
+              "Repairing shop",
+              "Coaching Classes",
+              "Computer/Mobile Repairing shop",
+              "Contractors of Diamond Polishing/Job work of Jewelry",
+              "Cyber Café",
+              "Fast Food Outlet",
+              "Labor Contractor",
+              "Milk Pan Shop owner",
+              "Photography/studio",
+              "Spa & Hair Saloon",
+              "Tailor",
+              "Vegetable & Fruit Vendor",
+              "Others, Please Specify",
+            ],
+           
           },
-          constitution: {
+          businessPremisesOwnership: {
             type: "string",
-            title: "Constitution of business",
+            title: "BusinessPremises Ownership",
+            enum: ["Self-Owned", "Family-Owned", "Joint Ownership", "Rented", "NA"],
           },
-          typeOfCustomer: {
+          areaOfOffice: {
             type: "string",
-            title: "Type of customer",
+            title: "Area of office",
+            enum: ["<=250 Sq.ft", "251 to 400 Sq.ft", ">400 Sq.ft","NA"],
           },
-          businessSince: {
+          stocksAssetsSeen: {
             type: "string",
-            title: "Business since (year)",
+            title: "Stocks/Assets Seen in Business Premises",
           },
-          promoterExperience: {
+          otherAssetsSeen: {
             type: "string",
-            title: "Promoter experience (years)",
-          },
-          stabilityYears: {
-            type: "string",
-            title: "Stability in same business (years)",
-          },
-          stabilityVerifiedBy: {
-            type: "string",
-            title:
-              "Stability verified by (registration certificate / dealership etc.)",
-          },
-          familyStructureInBusiness: {
-            type: "string",
-            title: "Family structure involved in business",
-          },
-          premisesOwnership: {
-            type: "string",
-            title: "Business premises ownership",
-          },
-          actualMonthlySales: {
-            type: "string",
-            title: "Actual monthly sales / receipts",
-          },
-          percentSalesOnCredit: {
-            type: "string",
-            title: "Sales done on credit (%)",
-          },
-          manufacturingTradingDetails: {
-            type: "string",
-            title: "Manufacturing / trading details",
-            ui: { widget: "textarea", rows: 3 },
-          },
-          salesConcentration: {
-            type: "string",
-            title: "Is sales concentration > 50% on one party? (details)",
-          },
-          businessCycleDebtors: {
-            type: "string",
-            title: "Business cycle – Debtors days / amount",
-          },
-          businessCycleCreditors: {
-            type: "string",
-            title: "Business cycle – Creditors days / amount",
-          },
-          stockValuation: { type: "string", title: "Stock valuation as on date" },
-          grossNetMargins: { type: "string", title: "Gross & net margins" },
-          monthlyNetSaving: {
-            type: "string",
-            title: "Monthly net saving after expenses",
-          },
-          majorSuppliers: {
-            type: "string",
-            title: "Major suppliers",
-            ui: { widget: "textarea", rows: 2 },
-          },
-          majorCustomers: {
-            type: "string",
-            title: "Major customers",
-            ui: { widget: "textarea", rows: 2 },
-          },
-          numberOfEmployees: {
-            type: "string",
-            title: "Number of employees",
-          },
-          nameBoardSeen: {
-            type: "string",
-            title: "Name board seen (details)",
+            title: "Others (Please specify all major assets seen):",
           },
           localityOfBusiness: {
             type: "string",
-            title: "Locality of business / office",
+            title: "Locality of business Premises",
+            enum: ["Residential", "Commercial", "Industrial", "Corporate Hub/Office Space", "Other"],
           },
-          residenceCumOffice: {
+          annualTurnover: {
+            type: "number",
+            title: "Annual Turnover",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netProfitMargin: {
+            type: "number",
+            title: "Net Profit Margin",
+          },
+          businessSeasonal: {
             type: "string",
-            title: "Residence cum office setup (Yes/No)",
+            title: "Is Business seasonal?",
+            enum: ["Yes", "No"],
           },
-          vatExciseApplicability: {
+          numberOfEmployees: {
+            type: "number",
+            title: "Number of Employees",
+          },
+          profileDescriptionOfEmployeeStaff: {
             type: "string",
-            title: "Applicability of VAT / Excise / Service tax",
+            title: "Profile Description of employee/staff",
           },
-          latestTaxReturnValue: {
+          designationOfEmployeeStaffMember: {
             type: "string",
-            title: "Latest quarter VAT return / Service tax paid",
-          },
+            title: "Designation of Employee/Staff member",
         },
+        noOfEmployeesInThatRole: {
+          type: "number",
+          title: "No. of Employees in that role",
+        },
+        yearsAtCurrentPremises: {
+          type: "number",
+          title: "No. of Years for which Business Running in this Premises",
+        },
+        earlierOperatingAddress: {
+          type: "string",
+          title: "If less than 3 years - Provide address details from where it was operating earlier",
+        },
+        popularityInLocalMarket: {
+          type: "string",
+          title: "Popularity in Local Market",
+          enum: ["Average", "Good", "High"],
+        },
+        noOfCompetitorsInNearbyMarket: {
+          type: "string",
+          title: "No. of Competitors in Nearby Market",
+
+        },
+        finalProductServiceOfBusiness: {
+          type: "string",
+          title: "Final Product/Service of Business",
+        },
+        businessStartedBy: {
+          type: "string",
+          title: "Business Started by",
+          enum: ["Self", "Father/ Other Family member","Mother", "Others"],
+      },
+      sourceOfInitialFunds: {
+        type: "string",
+        title: "If Self Started, Source of initial Funds",
+        enum: ["Own Funding", "Borrowed from Family", "Loan", "Others"],
+      },
+     },
       },
     },
+
     {
-      id: "essChecklist",
-      label: "Environmental & Social Safeguards (ESS)",
+      id: "pastEmploymentBusinessDetails",
+      label: "Past Employment/Business Details",
       schema: {
         type: "object",
         properties: {
-          essResponses: {
+          pastEmployments: {
             type: "array",
             items: {
               type: "object",
               properties: {
-                question: { type: "string", title: "Question" },
-                response: {
-                  type: "string",
-                  title: "Response",
-                  enum: ["Yes", "No"],
-                },
+                employerBusinessName: { type: "string", title: "Employer/Business Name" },
+                designation: { type: "string", title: "Designation" },
+                from: { type: "date", title: "From" },
+                to: { type: "date", title: "To" },
+                reasonForMovement: { type: "string", title: "Reason for Movement" },
+                contactPersonNameNumber: { type: "object", title: "Contact Person Name & Number", properties: {
+                  contactPersonName: { type: "string", title: "Contact Person Name" },
+                  contactPersonNumber: { type: "string", title: "Contact Person Number" },
+                } },
               },
             },
           },
         },
       },
     },
+  
+    {
+      id: "businessIncomeComputationMonthly",
+      label: "Business Income Computation (Monthly Basis)",
+      schema: {
+        type: "object",
+        properties: {
+          revenue: {
+            type: "object",
+            sales: { type: "number", title: "Sales" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            totalMonthlyRevenueA: { type: "number", title: "Total Monthly Revenue (A)" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+          },
+          expenditure: {
+            type: "object",
+            purchases: { type: "number", title: "Purchases" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            rent: { type: "number", title: "Rent" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            electricity: { type: "number", title: "Electricity" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            transportation: { type: "number", title: "Transportation" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            otherExpenses: { type: "number", title: "Other Expenses" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+            totalMonthlyExpensesB: { type: "number", title: "Total Monthly Expenses (B)" , formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            } },
+          },
+          netMonthlyProfitAB: { type: "number", title: "Net Monthly Profit (=A-B)" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          otherMonthlyIncome: { type: "number", title: "Other Monthly Income" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          rentalIncomeCash: { type: "number", title: "Rental Income - Cash" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          rentalIncomeCheque: { type: "number", title: "Rental Income - Cheque" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          incentivesCash: { type: "string", title: "Incentives / Perks - Cash" },
+          incentivesCheque: { type: "number", title: "Incentives / Perks - Cheque" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          monthlyBonusCash: { type: "number", title: "Monthly Bonus - Cash" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          monthlyBonusCheque: { type: "number", title: "Monthly Bonus - Cheque" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          otherMonthlyIncomeSourceType: { type: "string", title: "Others, please specify source type" },
+          otherMonthlyIncomeCash: { type: "number", title: "Other Monthly Income - Cash" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          otherMonthlyIncomeCheque: { type: "number", title: "Other Monthly Income - Cheque" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+        },
+      },
+    },
+
     {
       id: "existingLoanDetails",
       label: "Existing Loan Details",
@@ -311,64 +474,170 @@ export const niwasSenpSchema = {
               properties: {
                 typeOfLoan: { type: "string", title: "Type of Loan" },
                 bankName: { type: "string", title: "Bank Name" },
-                loanAmount: { type: "string", title: "Loan Amount" },
-                emi: { type: "string", title: "EMI" },
-                tenureRemaining: { type: "string", title: "Tenure Remaining" },
+                loanAmount: { type: "number", title: "Loan Amount" , formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                } },
+                emi: { type: "number", title: "EMI" , formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                } },
+                tenureRemaining: { type: "number", title: "Tenure Remaining" , formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                } },
               },
             },
           },
         },
       },
     },
+
+    {
+      id: "loanDetails",
+      label: "Loan Details",
+      schema: {
+        type: "object",
+        properties: {
+          purposeOfLoan: { type: "string", title: "Purpose of Loan", enum: ["Flat Purchase", "House Purchase", "Plot Purchase", "Construction of Residential House Property", "Improvement/Extension", "Balance Transfer", "Plot + Construction", "Hand Loan Clearance"] },
+          minimumLoanAmountRequired: { type: "number", title: "Minimum Loan Amount Required" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          tenureRequired: { type: "number", title: "Tenure Required" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          monthlyHouseholdExpenses: { type: "number", title: "Monthly Household Expenses" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          comfortableEmi: { type: "number", title: "Comfortable EMI" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          statusOfPropertyToBePurchased: { type: "string", title: "Status of Property to be Purchased" , enum: ["Ready", "Under Construction", "Construction Yet to Start"]},
+          usageOfPropertyAfterPurchase: { type: "string", title: "Usage of Property After Purchase" , enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"]},
+   },
+  },
+},
+
     {
       id: "costAndFunds",
       label: "Cost & Funds Information",
       schema: {
         type: "object",
         properties: {
-          fundsRequired: { type: "string", title: "Funds required" },
+          fundsRequired: { type: "number", title: "Funds required" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
           sourceOfOwnFunds: {
             type: "string",
             title: "Source of own funds (OCR)",
           },
-          purchaseCost: { type: "string", title: "Purchase cost" },
-          savings: { type: "string", title: "Savings" },
+          purchaseCost: { type: "number", title: "Purchase cost" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          savings: { type: "number", title: "Savings" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
           constructionEstimate: {
-            type: "string",
+            type: "number",
             title: "Construction estimate",
           },
+          familyFriends: { type: "string", title: "Family/Friends" },
+          registrationStampDutyCharges: { type: "string", title: "Registration/Stamp Duty Charges" },
+          otherLoanAmountTaken: { type: "number", title: "Other Loan Amount Taken" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          otherExpenses: { type: "number", title: "Other Expenses" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
+          totalAmountSpent: { type: "number", title: "Total Amount Spent (Total of all the above)" , formatter: {
+            useIndianFormat: true,
+            locale: "en-IN",
+            maxDecimalPlaces: 2,
+            minDecimalPlaces: 0,
+          } },
           totalTransactionCost: {
-            type: "string",
-            title: "Total transaction cost",
+            type: "number",
+            title: "Total transaction cost (Total of all the above cost)",
           },
-        },
-      },
-    },
-    {
-      id: "bankingDetails",
-      label: "Banking Details",
-      schema: {
-        type: "object",
-        properties: {
-          bankingAccounts: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                bankName: { type: "string", title: "Bank Name" },
-                accountNumber: { type: "string", title: "Account Number" },
-                accountType: { type: "string", title: "Account Type" },
-                branch: { type: "string", title: "Branch" },
-                operatingSinceYears: {
-                  type: "string",
-                  title: "Operating since (years)",
-                },
-              },
+          modeOfPaymentToSeller: {
+            type: "object",
+            title: "Mode of Payment to Seller (Cash / Cheque)",
+            properties: {
+              cashAmount: { type: "number", title: "Cash Amount" , formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              } },
+              chequeAmount: { type: "number", title: "Cheque Amount" , formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              } },
             },
           },
         },
       },
     },
+    // {
+    //   id: "bankingDetails",
+    //   label: "Banking Details",
+    //   schema: {
+    //     type: "object",
+    //     properties: {
+    //       bankingAccounts: {
+    //         type: "array",
+    //         items: {
+    //           type: "object",
+    //           properties: {
+    //             bankName: { type: "string", title: "Bank Name" },
+    //             accountNumber: { type: "string", title: "Account Number" },
+    //             accountType: { type: "string", title: "Account Type" },
+    //             branch: { type: "string", title: "Branch" },
+    //             operatingSinceYears: {
+    //               type: "string",
+    //               title: "Operating since (years)",
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
     {
       id: "familyMembers",
       label: "Other Family Member Details",
@@ -383,16 +652,17 @@ export const niwasSenpSchema = {
                 name: { type: "string", title: "Name" },
                 relationship: { type: "string", title: "Relationship" },
                 age: { type: "string", title: "Age" },
-                occupation: { type: "string", title: "Occupation" },
+                employmentType: { type: "string", title: "Employment Type" },
                 education: {
                   type: "string",
                   title:
-                    "Educational Qualification (mention if Govt. / Private)",
+                    "Educational Qualification (Also mention if Govt. or Private institution)",
                 },
-                contactNumber: { type: "string", title: "Contact No." },
+                contactNumber: { type: "number", title: "Contact No." },
                 stayingWithApplicant: {
                   type: "string",
-                  title: "Staying with Applicant (Yes/No)",
+                  title: "Staying with Applicant",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -414,15 +684,16 @@ export const niwasSenpSchema = {
                 name: { type: "string", title: "Name" },
                 address: { type: "string", title: "Address" },
                 relationship: { type: "string", title: "Relationship" },
-                contactNumber: { type: "string", title: "Contact Number" },
+                contactNumber: { type: "number", title: "Contact Number" },
                 email: { type: "string", title: "Email Address" },
                 yearsKnown: {
-                  type: "string",
+                  type: "number",
                   title: "No. of Years known the applicant",
                 },
                 photoWithApplicant: {
                   type: "string",
                   title: "Photo with Applicant (Yes/No)",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -445,10 +716,10 @@ export const niwasSenpSchema = {
                 businessName: { type: "string", title: "Name of business firm" },
                 address: { type: "string", title: "Address" },
                 yearsKnown: {
-                  type: "string",
+                  type: "number",
                   title: "Number of years known the firm",
                 },
-                contactNumber: { type: "string", title: "Contact number" },
+                contactNumber: { type: "number", title: "Contact number" },
                 feedback: {
                   type: "string",
                   title: "Feedback (Positive / Neutral / Negative)",
@@ -456,6 +727,7 @@ export const niwasSenpSchema = {
                 businessCardCollected: {
                   type: "string",
                   title: "Business card collected (Yes/No)",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -471,7 +743,7 @@ export const niwasSenpSchema = {
         properties: {
           comments: {
             type: "string",
-            title: "Comments / Observations",
+            title: "Comments / Observations of the case",
             ui: { widget: "textarea", rows: 4 },
           },
           initiatedAddress: {
@@ -502,10 +774,10 @@ export const niwasSenpSchema = {
           statusOfCase: {
             type: "string",
             title: "Status of the case",
-            enum: ["Positive", "Negative", "Credit Refer"],
+            enum: ["Positive", "Negative", "Others"],
           },
           pdOfficerName: { type: "string", title: "Name of PD Officer" },
-          discussionDate: { type: "string", title: "Date of Discussion" },
+          discussionDate: { type: "date", title: "Date of Discussion" },
           pdOfficerSignature: { type: "string", title: "Signature of PD Officer" },
         },
       },

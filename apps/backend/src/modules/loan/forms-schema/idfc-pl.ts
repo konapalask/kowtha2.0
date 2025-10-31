@@ -47,22 +47,6 @@ export const idfcPlSchema = {
             type: "string",
             title: "Branch",
           },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
         },
         required: ["nameOfTheApplicant", "sdfcId", "visitedAddress"],
       },

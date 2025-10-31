@@ -555,11 +555,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Pan Card</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.panCard || ""}</p></td>
                 </tr>
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">29</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Document Seen</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.otherDocumentSeen || ""}</p></td>
-                </tr>
+             
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">30</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>

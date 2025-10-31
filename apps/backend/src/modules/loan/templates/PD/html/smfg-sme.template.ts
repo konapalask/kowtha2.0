@@ -141,11 +141,19 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     ensureArray(financials.majorCustomers).map((entry: any) => entry)
   );
 
+  const questionList = [
+    "Is the entity involved in any commercial pest control operation, use any Ozone depleting substance, hazardous chemicals, bio medical waste, Dyes, forest products, tobacco, alcohol, weapons, gambling, radioactive materials, unbounded asbestos, harmful fishing practice, commercial logging.",
+    "Does the entity involve in Child or forced Labour or business involve displacement of people, impact on indigenous people or established in land designated as forest or forest products",
+    "Does the entity have required consent of establishment from State pollution control board and other government authorities on establishment in Wetland Area, near National Park, Sanctuaries or Forest areas, ASI certificate for establishment up to 300 meters near a protected monument or cultural heritage, 500 meters near Coastal Regulation Zone",
+    "Does the entity involves in proper mechanism for treatment or disposal of waste and does not emit air, water or noise pollutants.",
+    "Does the Entity comply with the above ESS guidelines",
+  ]
   const essRows = ensureArray(ess.essResponses).map((item: any, index: number) => [
     String.fromCharCode(97 + index) + ".",
-    item.question || "",
+    questionList[index] || "",
     item.response || "",
   ]);
+
 
   const loanRows = existingLoans.map((loan: any) => [
     loan.loanType || "",
@@ -157,12 +165,10 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
 
   const bankingRows = bankingAccounts.map((account: any) => [
     account.bankName || "",
-    account.accountNumber || "",
     account.accountType || "",
-    formatMultiline(account.operatingSince),
     formatMultiline(account.vintage),
-    formatMultiline(account.minBalance),
-    formatMultiline(account.customerBehaviour),
+    formatMultiline(account.ifCcOdLimitWhatIsLimitMinBal),
+    formatMultiline(account.customerBehavior),
   ]);
 
   const generalTable = `
@@ -191,7 +197,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       <tr>
-        <td style="${labelCellStyle}">Person Met</td>
+        <td style="${labelCellStyle}">Person Met - Name, Designation & Mobile No</td>
         <td style="${valueCellStyle}" colspan="3">
           ${formatMultiline(general.personMetName)} | ${formatMultiline(
     general.personMetDesignation
@@ -205,7 +211,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Personal Information</th></tr>
       ${renderKeyValueRow(
-        "Family Members",
+        "Details of family members name, age and occupation: (pls tick on dependents)",
         familyList,
         undefined,
         { colSpan: 3 }
@@ -217,22 +223,22 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       <tr>
-        <td style="${labelCellStyle}">Residence Ownership</td>
+        <td style="${labelCellStyle}">whether self owned/parental/rented</td>
         <td style="${valueCellStyle}">${formatMultiline(
           personal.ownershipStatus
         )}</td>
-        <td style="${labelCellStyle}">House Area / Market Value</td>
+        <td style="${labelCellStyle}">Area of the house property and estimated market value</td>
         <td style="${valueCellStyle}">
           ${formatMultiline(personal.houseArea)}<br>
           ${formatCurrency(personal.houseMarketValue)}
         </td>
       </tr>
       <tr>
-        <td style="${labelCellStyle}">Years at Residence</td>
+        <td style="${labelCellStyle}">No. of Years at same Residence</td>
         <td style="${valueCellStyle}">${formatMultiline(
           personal.yearsAtResidence
         )}</td>
-        <td style="${labelCellStyle}">Years in Same City</td>
+        <td style="${labelCellStyle}">No. of years in same city</td>
         <td style="${valueCellStyle}">${formatMultiline(personal.yearsInCity)}</td>
       </tr>
       ${renderKeyValueRow(
@@ -242,13 +248,13 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Other Owned Property in City",
+        "Details of other owned property in the city",
         personal.otherOwnedProperty,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Other Income Sources",
+        "Any other source of income apart from this business",
         personal.otherIncomeSources,
         undefined,
         { colSpan: 3 }
@@ -265,18 +271,20 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Nature of Business</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.natureOfBusiness
-        )}</td>
-        <td style="${labelCellStyle}">Constitution</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.constitution
-        )}</td>
-      </tr>
       ${renderKeyValueRow(
-        "Partners / Directors and Share %",
+        "Nature of Business",
+        business.natureOfBusiness,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Constitution",
+        business.constitution,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Name of Partners/Directors and share %",
         business.partners,
         undefined,
         { colSpan: 3 }
@@ -288,139 +296,126 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       <tr>
-        <td style="${labelCellStyle}">Business Started Since</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.businessStartDate
-        )}</td>
-        <td style="${labelCellStyle}">Promoter Experience</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.promoterExperience
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Stability in Same Business</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.stabilityYears
-        )}</td>
-        <td style="${labelCellStyle}">Stability Verified By</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.stabilityVerifiedBy
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Stability in same business - No of Years",
+        business.stabilityYears,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Whether the stability was verified by any Registration certificate / distribution / dealership letter displayed in shop / office / Factory",
+        business.stabilityVerifiedBy,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Family Structure Involved in Business",
         business.familyInvolved,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Business Premises Ownership</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.premisesOwnership
-        )}</td>
-        <td style="${labelCellStyle}">Locality of Business / Office</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.premiseType
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Residence cum Office Setup</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.isResidenceCumOffice
-        )}</td>
-        <td style="${labelCellStyle}">Name Board Seen</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          business.nameBoardSeen
-        )}</td>
-      </tr>
-    </table>
-  `;
-
-  const financialsTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Financials & Operations</th></tr>
-      <tr>
-        <td style="${labelCellStyle}">Actual Monthly Sales / Receipts</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          financials.monthlySales
-        )}</td>
-        <td style="${labelCellStyle}">Sales on Credit (%)</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.percentSalesOnCredit
-        )}</td>
-      </tr>
       ${renderKeyValueRow(
-        "Manufacturing / Trading Details",
+        "Business Premises wherther owned or rented",
+        business.premisesOwnership,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Actual Monthly Sales / Receipts as per customer",
+        financials.monthlySales,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "What % sales is done on credit",
+        financials.percentSalesOnCredit,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Manufacturing process/ Trading details",
         financials.manufacturingProcess,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Sales Concentration",
+        "Whether sales concentration is >50% on one party. If yes name of Party and contact no",
         financials.salesConcentration,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Business Cycle - Debtors",
+        "Business Cycle -How many days credit allowed to Debtors and what are actual debtors amount as on date",
         financials.businessCycleDebtors,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Business Cycle - Creditors",
+        "Business Cycle - How many days credit allowed by creditors to CM and what are actual Creditors amount as on date",
         financials.businessCycleCreditors,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Stock valuation as on date",
+        "Business Cycle – What is stock valuation as on date",
         financials.stockValuation,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Gross & Net Margins</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.grossMargin
-        )}</td>
-        <td style="${labelCellStyle}">Monthly Net Saving (Rs.)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          financials.netSavings
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Number of Employees</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.numberOfEmployees
-        )}</td>
-        <td style="${labelCellStyle}">Registration Certificates</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.registrationCertifications
-        )}</td>
-      </tr>
       ${renderKeyValueRow(
-        "Major Suppliers",
-        suppliersList,
+        "Gross & Net margins % in Business",
+        financials.grossMargin,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Major Customers",
-        customersList,
+        "Monthly Net saving after all expenses in Rs",
+        financials.netSavings,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Name and contact no of two major suppliers",
+        financials.majorSuppliers,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Tax Applicability</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.taxApplicability
-        )}</td>
-        <td style="${labelCellStyle}">Latest Tax Return</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financials.latestTaxReturn
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Number of Employees",
+        financials.numberOfEmployees,
+        undefined,
+        { colSpan: 3 }
+      )}
+       ${renderKeyValueRow(
+        "Name Board Seen if yes what was written",
+        business.nameBoardSeen,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Locality of Business / Office",
+        business.premiseType,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Whether Residence cum Office set up",
+        business.isResidenceCumOffice,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Applicability of VAT / Excise / Service tax and rate of same",
+        financials.taxApplicability,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Latest Qtr VAT return value/Service tax paid",
+        financials.latestTaxReturn,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
@@ -429,13 +424,13 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       <tr><th style="${subHeaderStyle}" colspan="3">Environmental & Social Safeguards (ESS)</th></tr>
       ${renderArrayTable(
         ["#", "Question", "Response"],
-        essRows
+        essRows,
       )}
       ${renderKeyValueRow(
-        "Other ESS Notes",
+        "Others",
         ess.essOthers,
         undefined,
-        { colSpan: 2 }
+        { colSpan: 3 }
       )}
     </table>
   `;
@@ -452,15 +447,13 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
 
   const bankingTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="7">Banking Behaviour</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="7">Banking Details:-</th></tr>
       ${renderArrayTable(
         [
           "Bank Name",
-          "Account Number",
           "Account Type",
-          "Operating Since",
-          "Vintage",
-          "CC/OD Min Bal",
+          "Vintage of account",
+          "If CC/OD limit- what is limit – Min Bal",
           "Customer Behaviour",
         ],
         bankingRows
@@ -472,7 +465,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="2">Loan Purpose & Usage</th></tr>
       ${renderKeyValueRow(
-        "Detailed Purpose / End Use",
+        "Detailed Purpose / End Use of Loan Amount",
         loanPurpose.detailedPurpose,
         undefined,
         { colSpan: 1 }
@@ -488,29 +481,31 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
 
   const observationsTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="2">Observations & Conclusion</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">Observations & Conclusion:-</th></tr>
       ${renderKeyValueRow(
-        "Detailed Observations (Positive & Negative)",
+        "Detailed Observations (Positive and Negative)",
         observations.positiveObservations,
         undefined,
-        { colSpan: 1 }
+        { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Concerns",
         observations.concerns,
         undefined,
-        { colSpan: 1 }
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Status of PD",
+        observations.pdStatus,
+        undefined,
+        { colSpan: 3 }
       )}
       <tr>
-        <td style="${labelCellStyle}">Status of PD</td>
-        <td style="${valueCellStyle}">${formatMultiline(observations.pdStatus)}</td>
+        <td style="${labelCellStyle}">PD Conducted By</td>
+        <td style="${valueCellStyle}">${formatMultiline(observations.pdConductedBy)}</td>
+        <td style="${labelCellStyle}">Designation</td>
+        <td style="${valueCellStyle}">${formatMultiline(observations.pdDesignation)}</td>
       </tr>
-      ${renderKeyValueRow(
-        "PD Conducted By",
-        observations.pdConductedBy,
-        undefined,
-        { colSpan: 1 }
-      )}
     </table>
   `;
 
@@ -520,13 +515,11 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       ${generalTable}
       ${personalTable}
       ${businessTable}
-      ${financialsTable}
       ${essTable}
       ${existingLoansTable}
       ${bankingTable}
       ${loanPurposeTable}
       ${observationsTable}
     </div>
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

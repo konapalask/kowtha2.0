@@ -232,7 +232,7 @@ export const smfgSmeSchema = {
           },
           netSavings: {
             type: "number",
-            title: "Monthly Net Saving after Expenses (Rs.)",
+            title: "Monthly Net Saving after all Expenses (Rs.)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",

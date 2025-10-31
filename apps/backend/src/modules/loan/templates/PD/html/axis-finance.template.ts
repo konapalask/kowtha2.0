@@ -185,6 +185,9 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherIncome = verificationData.otherIncome || {};
   const liabilitiesRaw = verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
   const budget = verificationData.budgetAnalysis || {};
+  const endUseOfFunds = verificationData.endUseOfFunds || {};
+  const otherObservations = verificationData.otherObservations || {};
+  const overallPositivesOrNegatives = verificationData.overallPositivesOrNegatives || {};
   const tradeReferences = ensureArray(verificationData.tradeReferences);
 
   const personalDetailsTable = renderTwoColumnTable([
@@ -259,11 +262,11 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const familySummaryTable = renderTwoColumnTable([
     {
       label: "NO. OF. DEPENDANTS",
-      value: familySection.noOfDependants || familySection.totalDependants || "",
+      value: familySection.noOfDependants || familySection.totalDependants || "-",
     },
     {
       label: "GENERAL LIFESTYLE/PERSONALITY",
-      value: familySection.generalLifestylePersonality || "",
+      value: familySection.generalLifestylePersonality || "-",
     },
   ]);
 
@@ -431,6 +434,20 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     ? ensureArray(liabilitiesRaw)
     : [];
 
+  // Ensure labels and a placeholder row render even when there are no items
+  const liabilitiesItems =
+    Array.isArray(liabilitiesEntries) && liabilitiesEntries.length > 0
+      ? liabilitiesEntries
+      : [
+          {
+            from: "-",
+            natureOfLoan: "-",
+            amount: "-",
+            emi: "-",
+            willCloseContinue: "-",
+          },
+        ];
+
   const liabilitiesTable = renderMultiColumnTable(
     [
       {
@@ -457,7 +474,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
         valueGetter: (item) => item.willCloseContinue,
       },
     ],
-    liabilitiesEntries,
+    liabilitiesItems,
     "No other liabilities reported"
   );
 
@@ -526,6 +543,23 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     </table>
   `;
 
+  const endUseOfFundsTable =    `
+      <div>
+      <p style="${paragraphStyle}"><strong><u>End Use of Funds</u></strong>${formatMultiline(endUseOfFunds)}</p> 
+        
+      </div>`;
+
+  const otherObservationsTable = `
+    <div>
+      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong>${formatMultiline(otherObservations)}</p>
+    </div>
+  `;
+
+  const overallPositivesOrNegativesTable = `
+    <div>
+      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong>${formatMultiline(overallPositivesOrNegatives)}</p>
+    </div>
+  `;
   const tradeReferenceTable = renderMultiColumnTable(
     [
       {
@@ -568,9 +602,10 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Other Income", otherIncomeTable)}
       ${renderSection("Other Liabilities Including CC Limits (Own/Co Applicants)", liabilitiesTable)}
       ${renderSection("Budget Analysis", budgetTable)}
-      ${renderTextSection("End Use of Funds", budget.endUseOfFunds)}
-      ${renderTextSection("Other Observations", budget.otherObservations)}
-      ${renderSection("Trade References", tradeReferenceTable)}
+      ${endUseOfFundsTable}
+      ${renderTextSection("Other Observations:", otherObservations)}
+      ${overallPositivesOrNegativesTable}
+      ${renderSection("Trade References - Not Provided", tradeReferenceTable)}
       ${noteBlock}
     </div>
   `;

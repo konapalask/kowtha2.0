@@ -284,11 +284,6 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
     <p style="margin:20px;"><strong>Residence photos:</strong></p>
     <p style="margin:20px;"><strong>Property Photos:</strong></p>
     <p style="margin:20px;"><strong>Business photos:</strong></p>
-
-    <footer class="pdf-footer">
-      <span style="color:rgb(8, 136, 36);">${html_data.bankName || "AMBIT"}</span><br>
-      Generated on ${istDate}
-    </footer>
     ${html_data.imagesData || ""}
   `;
 };

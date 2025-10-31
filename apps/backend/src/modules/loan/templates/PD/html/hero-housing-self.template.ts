@@ -324,9 +324,7 @@ export const heroHousingSelfTemplate = (
   ].join("");
 
   const familyValue =
-    familyMembers.length
-      ? familyTableHtml + familyAdditionalInfo
-      : familyAdditionalInfo || wrapParagraph("Not provided");
+      familyTableHtml;
 
   const borrowerValue = multiParagraph(
     borrowerProfile.qualificationAndJourney ||
@@ -522,22 +520,18 @@ export const heroHousingSelfTemplate = (
     ["Comments / reason", finalStatus.statusComments],
   ]);
 
-  const incomeItems = ensureArray(incomeAssessment.lineItems).map((item: any) => [
-    formatMultiline(item.particular || ""),
-    formatCurrency(item.monthlyAmount),
-    formatMultiline(item.comments || item.modeOfValidation || ""),
-  ]);
+  const incomeItems = ensureArray(incomeAssessment.lineItems).map((item: any) => [ ]);
 
   if (hasValue(incomeAssessment.salesReceiptsMonthlyAverage)) {
     incomeItems.push([
-      "<strong>Sales/receipt (Monthly average)</strong>",
+      "Sales/receipt (Monthly average)",
       formatCurrency(incomeAssessment.salesReceiptsMonthlyAverage),
       formatMultiline(incomeAssessment.salesReceiptsMonthlyAverageComments || ""),
     ]);
   }
   if (hasValue(incomeAssessment.otherIncome)) {
     incomeItems.push([
-      "<strong>Other income</strong>",
+      "Other income",
       formatCurrency(incomeAssessment.otherIncome),
       formatMultiline(incomeAssessment.otherIncomeComments || ""),
     ]);
@@ -772,6 +766,7 @@ export const heroHousingSelfTemplate = (
       <p style="${paragraphStyle}"><strong>Profile of customer</strong></p>
       ${profileTable}
       <p style="${paragraphStyle}"><strong>Income assessment details</strong></p>
+      <p style="font-size:12px;">(Please provide the monthly net income of applicant and also mention comment/mode of validation under the column “Comments”)</p>
       ${incomeTable}
       ${noteBlock}
       <p style="${paragraphStyle}"><strong>Photos with Geo coordinates of location</strong></p>
