@@ -291,9 +291,10 @@ export const BusinessVerificationDetails: React.FC<
 
         // Get bank name from completeVerificationData (which has the full verification object)
         const bankName =
-          completeVerificationData?.bankName || 
-          verificationData?.bankName || 
-          verificationData?.loan?.bankName || "";
+          completeVerificationData?.bankName ||
+          verificationData?.bankName ||
+          verificationData?.loan?.bankName ||
+          "";
 
         // Skip if no bank name
         if (!bankName) {
@@ -708,7 +709,10 @@ export const BusinessVerificationDetails: React.FC<
   if (!verificationData) return null;
 
   // Get bank name from completeVerificationData (which has the full verification object)
-  const bankName = completeVerificationData?.bankName || verificationData?.bankName || "Axis Finance";
+  const bankName =
+    completeVerificationData?.bankName ||
+    verificationData?.bankName ||
+    "Axis Finance";
 
   // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
@@ -1377,9 +1381,46 @@ export const BusinessVerificationDetails: React.FC<
       return <div>No fields found for section: {section.label}</div>;
     }
 
+    // Filter fields that should be visible
+    const visibleFields = section.fields.filter((field: any) => {
+      if (field.dependencies?.show) {
+        return checkConditionalVisibility(field.dependencies.show, data);
+      }
+      return true;
+    });
+
+    // Separate regular fields from array fields (arrays take full width)
+    const regularFields = visibleFields.filter(
+      (field: any) => field.type !== "array" || !field.arrayItemFields
+    );
+    const arrayFields = visibleFields.filter(
+      (field: any) => field.type === "array" && field.arrayItemFields
+    );
+
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
-        {section.fields.map((field: any) => renderField(field.id, field))}
+        <Row gutter={[16, 16]}>
+          {/* Regular fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
+          {regularFields.map((field: any) => (
+            <Col key={field.id} xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+              {renderField(field.id, field)}
+            </Col>
+          ))}
+          {/* Array fields - always full width */}
+          {arrayFields.map((field: any) => (
+            <Col
+              key={field.id}
+              xs={24}
+              sm={24}
+              md={24}
+              lg={24}
+              xl={24}
+              xxl={24}
+            >
+              {renderField(field.id, field)}
+            </Col>
+          ))}
+        </Row>
       </Form>
     );
   };
@@ -1720,7 +1761,9 @@ export const BusinessVerificationDetails: React.FC<
     <div>
       {/* Bank Name Header */}
       {currentDepartment === "PD" &&
-        (completeVerificationData?.bankName || verificationData?.bankName || verificationData?.loan?.bankName) && (
+        (completeVerificationData?.bankName ||
+          verificationData?.bankName ||
+          verificationData?.loan?.bankName) && (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
             <Text style={{ color: "#1e40af", fontWeight: 600 }}>
               {typeof completeVerificationData?.bankName === "string"
@@ -1760,7 +1803,10 @@ export const BusinessVerificationDetails: React.FC<
       {/* Main Single Column Layout */}
       <div style={{ padding: "0 12px" }}>
         {/* PD Department - Use Dynamic Forms Only */}
-        {currentDepartment === "PD" && useGenericApproach && schemaForm && !formLoading ? (
+        {currentDepartment === "PD" &&
+        useGenericApproach &&
+        schemaForm &&
+        !formLoading ? (
           <>
             <CollapsibleFormSections
               schema={schemaForm}
@@ -1949,7 +1995,8 @@ export const BusinessVerificationDetails: React.FC<
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(200px, 1fr))",
                     gap: "16px",
                   }}
                 >
