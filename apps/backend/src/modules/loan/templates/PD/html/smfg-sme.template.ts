@@ -442,12 +442,8 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         ["Type of Loan", "Bank Name", "Loan Amount", "EMI", "Tenure Remaining"],
         loanRows
       )}
-    </table>
-  `;
-
-  const bankingTable = `
-    <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="7">Banking Details:-</th></tr>
+
       ${renderArrayTable(
         [
           "Bank Name",
@@ -458,14 +454,8 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         ],
         bankingRows
       )}
-    </table>
-  `;
-
-  const loanPurposeTable = `
-    <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="2">Loan Purpose & Usage</th></tr>
-      ${renderKeyValueRow(
-        "Detailed Purpose / End Use of Loan Amount",
+       ${renderKeyValueRow(
+        "Detailed purpose/End use of Loan Amount",
         loanPurpose.detailedPurpose,
         undefined,
         { colSpan: 1 }
@@ -481,7 +471,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
 
   const observationsTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Observations & Conclusion:-</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">Detailed observations (Positive and Negative)-</th></tr>
       ${renderKeyValueRow(
         "Detailed Observations (Positive and Negative)",
         observations.positiveObservations,
@@ -502,10 +492,21 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       )}
       <tr>
         <td style="${labelCellStyle}">PD Conducted By</td>
-        <td style="${valueCellStyle}">${formatMultiline(observations.pdConductedBy)}</td>
-        <td style="${labelCellStyle}">Designation</td>
-        <td style="${valueCellStyle}">${formatMultiline(observations.pdDesignation)}</td>
+        <td style="${valueCellStyle}">Name: ${formatMultiline(observations.pdConductedBy)}</td>
+        <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
       </tr>
+      ${renderKeyValueRow(
+        "Signature",
+        observations.pdSignature,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        `Date: ${observations.pdDate}`,
+        `Time: ${observations.pdTime}`,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
@@ -517,9 +518,8 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       ${businessTable}
       ${essTable}
       ${existingLoansTable}
-      ${bankingTable}
-      ${loanPurposeTable}
       ${observationsTable}
     </div>
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };

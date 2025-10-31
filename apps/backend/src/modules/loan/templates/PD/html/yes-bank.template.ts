@@ -22,6 +22,10 @@ const formatMultiline = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   return String(value).replace(/\n+/g, "<br>");
 };
+const formatDottedList = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return String(value).replace(/\n+/g, "<br>• ");
+};
 
 const formatCurrency = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
@@ -131,13 +135,13 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Main applicant", general.mainApplicantName)}
         ${renderKeyValue(
-          "PD done with and relation with applicant",
-          general.relationWithApplicant
-        )}
+    "PD done with and relation with applicant",
+    general.relationWithApplicant
+  )}
         ${renderKeyValue(
-          "Address of the visit with landmark",
-          general.addressVisited
-        )}
+    "Address of the visit with landmark",
+    general.addressVisited
+  )}
         <tr>
           <td style="${labelCellStyle}">CAS ID</td>
           <td style="${valueCellStyle}">${formatMultiline(general.casId)}</td>
@@ -153,367 +157,389 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
           </td>
           <td style="${labelCellStyle}">Contact number</td>
           <td style="${valueCellStyle}">${formatMultiline(
-            general.contactNumber
-          )}</td>
+    general.contactNumber
+  )}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Loan applied amount</td>
           <td style="${valueCellStyle}">${formatCurrency(
-            general.loanAppliedAmount
-          )}</td>
+    general.loanAppliedAmount
+  )}</td>
           <td style="${labelCellStyle}">Tenor required</td>
           <td style="${valueCellStyle}">${formatMultiline(
-            general.tenorRequired
-          )}</td>
+    general.tenorRequired
+  )}</td>
         </tr>
         ${renderKeyValue(
-          "Address visited type",
-          general.addressVisitedType,
-          undefined,
-          { colspan: 3 }
-        )}
+    "Address visited type",
+    general.addressVisitedType,
+    undefined,
+    { colspan: 3 }
+  )}
       </table>
 
       <table style="${tableStyle}">
-            <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">Basic Details of Applicant</h3>
+            <h3 style="margin:24px 0 8px;font-size:13px;font-weight:600;color:#222;">BASIC DETAILS OF APPLICANT</h3>
         <tr>
-          <td style="${labelCellStyle}">Applicant – Business / Educational background / Past experience</td>
+          <td style="${labelCellStyle}">Applicant <br> &middot; Business <br> &middot; Educational background <br> &middot; Past experience</td>
           <td style="${valueCellStyle}">${formatMultiline(
-            basic.applicantBackground
-          )}</td>
+    basic.applicantBackground
+  )}</td>
         </tr>
         ${renderKeyValue(
-          "Co-Applicant – Business / Employment / Educational background / Past experience",
-          basic.coApplicantBackground
-        )}
+    "Co-Applicant <br> &middot; Business <br> &middot; Employment <br> &middot; Educational background <br> &middot; Past experience",
+    basic.coApplicantBackground
+  )}
         ${renderKeyValue(
-          "Parents occupation / business / employment background",
-          basic.parentsBackground
-        )}
+    "Parents occupation / business / employment background",
+    basic.parentsBackground
+  )}
         ${renderKeyValue(
-          "Details of children (studying / working)",
-          basic.childrenDetails
-        )}
+    "Details of children (studying / working)",
+    basic.childrenDetails
+  )}
         ${renderKeyValue(
-          "Siblings business / employment background (if residing together)",
-          basic.siblingsBackground
-        )}
+    "Siblings business / employment background (if residing together)",
+    basic.siblingsBackground
+  )}
       </table>
 
       <table style="${tableStyle}">
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Self Employed Profile – Occupational Details</h2>
+      <tr>
+        <td style="${labelCellStyle}"><p style="text-align:center;">Particulars</p></td>
+        <td style="${labelCellStyle}"><p style="text-align:center;">Remarks</p></td>
+      </tr>
         ${renderKeyValue("Name of the Business / Employment", business.businessName)}
         ${renderKeyValue(
-          "Constitution of Business Entity",
-          business.businessConstitution
-        )}
+    "Constitution of Business Entity (Proprietorship, Partnership, Ltd. Co.)",
+    business.businessConstitution
+  )}
         ${renderKeyValue(
-          "Proprietor / Partner share details",
-          business.proprietorShareDetails
-        )}
+    "Name of Proprietor / Partners / Shareholders with % share",
+    business.proprietorShareDetails
+  )}
         ${renderKeyValue(
-          "No. of years in current business",
-          business.yearsInBusiness
-        )}
+    "No. of Years in Current Business",
+    business.yearsInBusiness
+  )}
         ${renderKeyValue(
-          "Business profile",
-          business.businessNarrative
-        )}
-        ${renderKeyValue("GST Registration", business.gstRegistration)}
+    "Business profile (to include nature of industry, product preference in the market, competition, seasonality, and other aspects of business",
+    `<u><strong>Business details:</strong>  </u> <br>${formatDottedList(business.businessNarrative)}`
+  )}
+        ${renderKeyValue("Whether GST registered (if Yes, since when GST registration exist)", business.gstRegistration)}
         ${renderKeyValue(
-          "Proof of business existence / stability",
-          business.proofOfBusinessStability
-        )}
+    "Details of any other proof of business existence/stability available/verified during visit",
+    business.proofOfBusinessStability
+  )}
         <tr>
-          <td style="${labelCellStyle}">Average monthly sales / receipts</td>
+          <td style="${labelCellStyle}">Average Monthly sales/receipts</td>
           <td style="${valueCellStyle}">${formatCurrency(
-            business.averageMonthlySales
-          )}</td>
-          <td style="${labelCellStyle}">Average monthly purchase</td>
+    business.averageMonthlySales
+  )}</td>
+          </tr>
+          <tr>
+          <td style="${labelCellStyle}">Average Monthly purchase</td>
           <td style="${valueCellStyle}">${formatCurrency(
-            business.averageMonthlyPurchase
-          )}</td>
+    business.averageMonthlyPurchase
+  )}</td>
         </tr>
-        ${renderKeyValue("Gross margin", business.grossMargin)}
-        ${renderKeyValue("Overheads / Indirect expenses", business.indirectExpenses)}
-        ${renderKeyValue("Net monthly profit", business.netMonthlyProfit)}
+        ${renderKeyValue("Gross margin on the on goods sold", business.grossMargin)}
+        ${renderKeyValue("Overheads to run the business (Indirect expenses)", business.indirectExpenses)}
+        ${renderKeyValue("Net monthly profit from business", business.netMonthlyProfit)}
         ${renderKeyValue("Stock level", business.stockLevel)}
-        ${renderKeyValue("Major customers", business.majorCustomers)}
-        ${renderKeyValue("Major suppliers", business.majorSuppliers)}
+        ${renderKeyValue("Description about major customers alongwith credit terms", business.majorCustomers)}
+        ${renderKeyValue("Description about major suppliers with credit terms", business.majorSuppliers)}
         ${renderKeyValue("Business setup details", business.businessSetupDetails)}
         ${renderKeyValue(
-          "Infrastructure & manpower details",
-          business.infrastructureManpower
-        )}
+    "Infrastructure and manpower details (to include Business / factory details, plant capacity utilization and staff strength etc)",
+    business.infrastructureManpower
+  )}
         ${renderKeyValue(
-          "Other owned assets / Investments",
-          business.otherAssetsInvestments
-        )}
+    "Details of other owned Assets (Property, Land etc) / Investment Details (FD, MF, Share etc)",
+    business.otherAssetsInvestments
+  )}
         ${renderKeyValue(
-          "Other sources of income",
-          business.otherIncomeSources
-        )}
+    "Details of other Source of Income (Rental income, Agri income, Interest income etc)",
+    business.otherIncomeSources
+  )}
         ${renderKeyValue(
-          "Monthly household expenses",
-          business.householdExpenses
-        )}
-        ${renderKeyValue("Collateral details", business.collateralDetails)}
-        ${renderKeyValue("End use (MLAP)", business.mlapEndUse)}
+    "Monthly total household expenses",
+    business.householdExpenses
+  )}
+        ${renderKeyValue("Collateral Details (for MLAP) – Capture Type, Occupancy status, Year of purchase, Parental owned etc", business.collateralDetails)}
+      </table>
+
+
+      <table style="${tableStyle}">
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">End use (MLAP)</h2>
+        <tr><td style="${labelCellStyle}">MLAP (End use in detail), (In case of BT Loan/Loan consolidation, capture end use of earlier loans), (For LCP - capture Cost, AV, source of OCR etc)</td>
+        <td style="${valueCellStyle}">${formatMultiline(
+    business.mlapEndUse
+  )}</td></tr>
       </table>
 
       <table style="${tableStyle}">
-      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Residence and Business Address Details</h2>
-        <tr><td style="${labelCellStyle}">Residence premise address</td><td style="${valueCellStyle}">${formatMultiline(
-          addresses.residencePremiseAddress
-        )}</td></tr>
-        <tr><td style="${labelCellStyle}">Residence ownership status</td><td style="${valueCellStyle}">${formatMultiline(
-          addresses.residenceOwnershipStatus
-        )}</td></tr>
-        <tr><td style="${labelCellStyle}">Residence owned / rented since when</td><td style="${valueCellStyle}">${formatMultiline(
-          addresses.residenceDuration
-        )}</td></tr>
-        ${renderKeyValue(
-          "Residential proof of ownership",
-          addresses.residenceProof
-        )}
-        ${renderKeyValue(
-          "Residence rent per month",
-          addresses.residenceRent
-        )}
-        ${renderKeyValue(
-          "Residence locality comment",
-          addresses.residenceLocality
-        )}
-        ${renderKeyValue("Residence mortgage status", addresses.residenceMortgage)}
-        ${renderKeyValue("Residence QR code check", addresses.residenceQrCheck)}
-        ${renderKeyValue(
-          "Residence visit comments",
-          addresses.residenceVisitComment
-        )}
-        ${renderKeyValue(
-          "Business premise address",
-          addresses.businessPremiseAddress
-        )}
-        ${renderKeyValue(
-          "Business ownership status",
-          addresses.businessOwnershipStatus
-        )}
-        ${renderKeyValue(
-          "Business owned / rented since when",
-          addresses.businessDuration
-        )}
-        ${renderKeyValue("Business proof of ownership", addresses.businessProof)}
-        ${renderKeyValue("Business rent per month", addresses.businessRent)}
-        ${renderKeyValue("Business locality comment", addresses.businessLocality)}
-        ${renderKeyValue(
-          "Business mortgage status",
-          addresses.businessMortgage
-        )}
-        ${renderKeyValue("Business QR code check", addresses.businessQrCheck)}
-        ${renderKeyValue(
-          "Business visit comments",
-          addresses.businessVisitComment
-        )}
-        ${renderKeyValue(
-          "Earlier premises details",
-          addresses.earlierPremiseDetails
-        )}
+      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Residence/Business Address Details</h2>
+      <tr>
+        <td style="${labelCellStyle}"><p style="text-align:center;">Particulars</p></td>
+        <td style="${labelCellStyle}"><p style="text-align:center;">Residence</p></td>
+        <td style="${labelCellStyle}"><p style="text-align:center;">Business place(NA for salaried profile)</p></td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Premise Address</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residencePremiseAddress)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessPremiseAddress || "N/A" )}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Ownership status (Rented/Owned, parental)</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceOwnershipStatus || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessOwnershipStatus || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Owned / rented since when (number of Years)</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceDuration || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessDuration || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Details of Proof of ownership (if available/documented)</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.detailsOfProofOfOwnership || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.detailsOfProofOfBusinessOwnership || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Rented premised verification status</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.rentedPremisedVerificationStatus || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.rentedPremisedVerificationStatus || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Rented per month (if rented)</td> 
+        <td style="${valueCellStyle}">${formatMultiline(addresses.rentPerMonthIfRented || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.rentPerMonthIfRented || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.localityComment || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessLocality || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Whether Property already Mortgage (if same is owned) – mention Bank/NBFC name</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.whetherPropertyAlreadyMortgage || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.whetherPropertyAlreadyMortgage || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">QR code check status (for retail counters on best effort basis) – Positive / Negative</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.qrCodeCheckStatusForRetailCountersOnBestEffortBasis || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.qrCodeCheckStatusForRetailCountersOnBestEffortBasis || "N/A")}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Premise visit comment (whichever visited), also attach visit Pics with selfie</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.premiseVisitComment || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.premiseVisitComment || "N/A")}</td>
+      </tr>
       </table>
+
+      <p style="margin:0 0 10px 0;font-size:12px;color:#333;">*If stability is less than 3 years at current business premises then capture details of earlier premises as applicable</p>
 
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Reference Check Details</h2>
       ${renderArrayTable(
-        [
-          "Reference",
-          "Reference type",
-          "Shop / Business name",
-          "Person spoken to",
-          "Feedback",
-          "Other feedback",
-          "Status",
-        ],
-        businessRefRows
-      )}
+    [
+      "Business Ref check",
+      "Reference type (Nearby business premises, Buyer, Suppliers)",
+      "Name of Shop/Business premises with whom ref check done",
+      "Name of person spoken to",
+      "Feedback on business stability, vintage of business, Volume of business, Payment regularity, Capture contact number of person as well (in case ref check done from Suppliers/Buyer)",
+      "Any other Ref check feedback",
+      "Ref Check status (Positive, Negative, Neutral)",
+    ],
+    businessRefRows
+  )}
 
       ${renderArrayTable(
-        [
-          "Reference",
-          "Reference type",
-          "Person / Shop name",
-          "Feedback",
-          "Other feedback",
-          "Status",
-        ],
-        residenceRefRows
-      )}
+    [
+      "Residence Ref check (if visited)",
+      "Reference type (from neighbors, nearby Grocery stores, sweets shops, Dairy etc.",
+      "Name of Person, Shop/Business premises with whom ref check done",
+      "Name of person spoken to",
+      "Feedback on applicant’s behavior, Involvement in Negative activity, Vintage at residence, involvement in political activity etc",
+      "Any other Ref check feedback",
+      "Ref Check status (Positive, Negative, Neutral)",
+    ],
+    residenceRefRows
+  )}
 
       <table style="${tableStyle}">
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Final PD Comment</h2>
         ${renderKeyValue(
-          "Interviewer’s overall comments",
-          finalComment.interviewerComment
-        )}
+    "Interviewer’s overall comments, along with explanations",
+    finalComment.interviewerComment
+  )}
         ${renderKeyValue(
-          "Level of activity & stocks observed",
-          finalComment.activityAndStocks
-        )}
+    "Level of activity & stocks observed Along with other Observations",
+    finalComment.activityAndStocks
+  )}
         ${renderKeyValue("PD Status", finalComment.pdStatus)}
         ${renderKeyValue(
-          "Remarks for Positive / Negative / Referred cases",
-          finalComment.remarks
-        )}
+    "Remarks for Positive / Negative / Referred cases",
+    finalComment.remarks
+  )}
         ${renderKeyValue(
-          "Name of the YBL employee",
-          finalComment.yblEmployeeName
-        )}
+    "Name of the YBL Employee",
+    finalComment.yblEmployeeName
+  )}
         ${renderKeyValue("Designation", finalComment.yblDesignation)}
-        ${renderKeyValue("Employee ID", finalComment.yblEmpId)}
+        ${renderKeyValue("EMP ID", finalComment.yblEmpId)}
         ${renderKeyValue("Signature", finalComment.yblSignature)}
         ${renderKeyValue(
-          "PD agency interviewer’s name",
-          finalComment.pdAgencyInterviewer
-        )}
+    "PD agency Interviewer’s Name",
+    finalComment.pdAgencyInterviewer
+  )}
         ${renderKeyValue(
-          "Report processed by",
-          finalComment.reportProcessedBy
-        )}
-      </table>
+    "Report processed by",
+    finalComment.reportProcessedBy
+  )}
+  </table>
 
+    
+      <p style="margin:20px 0 8px 0;font-size:12px;font-weight:600;">Disclaimer Clause:</p>
+      <p style="margin:0 0 24px 0;font-size:12px;color:#333;">
+        This report (including any attachments) has been prepared based on verbal information provided by the person contacted. YES BANK will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. Kowtha &amp; Co will not be held liable in any case.
+      </p>
+
+      ${pdBaseTemplateFooter(html_data)}
+
+      <!-- Annexure 1 – AFHL Cases -->
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 1 – AFHL Cases</h2>
       <table style="${tableStyle}">
         ${renderKeyValue(
-          "Source from which property was identified",
-          annexureAfhl.propertyIdentifiedThrough
-        )}
+    "Source from which property was identified",
+    annexureAfhl.propertyIdentifiedThrough
+  )}
         ${renderKeyValue(
-          "Builder / Project / Representative details",
-          annexureAfhl.builderDetails
-        )}
+    "Builder / Project / Representative details",
+    annexureAfhl.builderDetails
+  )}
         ${renderKeyValue("Type of transaction", annexureAfhl.transactionType)}
         ${renderKeyValue("Type of property", annexureAfhl.propertyType)}
         ${renderKeyValue(
-          "Property details",
-          annexureAfhl.propertyDetails
-        )}
+    "Property details",
+    annexureAfhl.propertyDetails
+  )}
         ${renderKeyValue(
-          "Total cost of the property",
-          annexureAfhl.totalPropertyCost,
-          formatCurrency
-        )}
+    "Total cost of the property",
+    annexureAfhl.totalPropertyCost,
+    formatCurrency
+  )}
         ${renderKeyValue("Source of OCR", annexureAfhl.ocrSource)}
         ${renderKeyValue(
-          "Down payment details",
-          annexureAfhl.downPaymentDone
-        )}
+    "Down payment details",
+    annexureAfhl.downPaymentDone
+  )}
         ${renderKeyValue(
-          "Amount of down payment",
-          annexureAfhl.downPaymentAmount,
-          formatCurrency
-        )}
+    "Amount of down payment",
+    annexureAfhl.downPaymentAmount,
+    formatCurrency
+  )}
         ${renderKeyValue(
-          "Source of funds for down payment",
-          annexureAfhl.downPaymentSource
-        )}
+    "Source of funds for down payment",
+    annexureAfhl.downPaymentSource
+  )}
         ${renderKeyValue(
-          "Purpose of purchase",
-          annexureAfhl.purposeOfPurchase
-        )}
+    "Purpose of purchase",
+    annexureAfhl.purposeOfPurchase
+  )}
         ${renderKeyValue(
-          "Distance from current business / residence",
-          annexureAfhl.distanceFromWork
-        )}
+    "Distance from current business / residence",
+    annexureAfhl.distanceFromWork
+  )}
         ${renderKeyValue(
-          "Commute plan / reason for buying in far area",
-          annexureAfhl.commutePlan
-        )}
+    "Commute plan / reason for buying in far area",
+    annexureAfhl.commutePlan
+  )}
       </table>
 
       <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;">Annexure 2 – Salaried Profile</h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Name of the Company", annexureSalaried.companyName)}
         ${renderKeyValue(
-          "Constitution of the Company",
-          annexureSalaried.companyConstitution
-        )}
+    "Constitution of the Company",
+    annexureSalaried.companyConstitution
+  )}
         ${renderKeyValue(
-          "HR & Reporting Authority contact",
-          annexureSalaried.hrAndReportingContact
-        )}
+    "HR & Reporting Authority contact",
+    annexureSalaried.hrAndReportingContact
+  )}
         ${renderKeyValue(
-          "Employer representative",
-          annexureSalaried.employerContact
-        )}
+    "Employer representative",
+    annexureSalaried.employerContact
+  )}
         ${renderKeyValue(
-          "Employer details",
-          annexureSalaried.employerDetails
-        )}
+    "Employer details",
+    annexureSalaried.employerDetails
+  )}
         ${renderKeyValue(
-          "Employment status",
-          annexureSalaried.employmentStatus
-        )}
+    "Employment status",
+    annexureSalaried.employmentStatus
+  )}
         ${renderKeyValue(
-          "Current designation & department",
-          annexureSalaried.currentDesignation
-        )}
+    "Current designation & department",
+    annexureSalaried.currentDesignation
+  )}
         ${renderKeyValue("Employee ID", annexureSalaried.employeeId)}
         ${renderKeyValue(
-          "Salary mode & account details",
-          annexureSalaried.salaryMode
-        )}
+    "Salary mode & account details",
+    annexureSalaried.salaryMode
+  )}
         ${renderKeyValue(
-          "Gross monthly salary",
-          annexureSalaried.grossMonthlySalary,
-          formatCurrency
-        )}
+    "Gross monthly salary",
+    annexureSalaried.grossMonthlySalary,
+    formatCurrency
+  )}
         ${renderKeyValue(
-          "Net monthly salary",
-          annexureSalaried.netMonthlySalary,
-          formatCurrency
-        )}
+    "Net monthly salary",
+    annexureSalaried.netMonthlySalary,
+    formatCurrency
+  )}
         ${renderKeyValue(
-          "Loans from employer",
-          annexureSalaried.employerLoanDetails
-        )}
+    "Loans from employer",
+    annexureSalaried.employerLoanDetails
+  )}
         ${renderKeyValue(
-          "Terms of employment",
-          annexureSalaried.employmentTerms
-        )}
+    "Terms of employment",
+    annexureSalaried.employmentTerms
+  )}
         ${renderKeyValue(
-          "Vintage with current employer",
-          annexureSalaried.currentEmployerVintage
-        )}
+    "Vintage with current employer",
+    annexureSalaried.currentEmployerVintage
+  )}
         ${renderKeyValue(
-          "Previous work experience details",
-          annexureSalaried.previousExperienceDetails
-        )}
+    "Previous work experience details",
+    annexureSalaried.previousExperienceDetails
+  )}
         ${renderKeyValue(
-          "Years worked in previous job",
-          annexureSalaried.previousExperienceYears
-        )}
+    "Years worked in previous job",
+    annexureSalaried.previousExperienceYears
+  )}
         ${renderKeyValue("Other source of income", annexureSalaried.otherIncome)}
         ${renderKeyValue(
-          "Existing residence status",
-          annexureSalaried.residenceStatus
-        )}
+    "Existing residence status",
+    annexureSalaried.residenceStatus
+  )}
         ${renderKeyValue(
-          "Rental expenses per month",
-          annexureSalaried.rentExpenses
-        )}
+    "Rental expenses per month",
+    annexureSalaried.rentExpenses
+  )}
         ${renderKeyValue(
-          "Other family expenses per month",
-          annexureSalaried.familyExpenses
-        )}
+    "Other family expenses per month",
+    annexureSalaried.familyExpenses
+  )}
         ${renderKeyValue(
-          "Third party check for employment",
-          annexureSalaried.employmentTPC
-        )}
+    "Third party check for employment",
+    annexureSalaried.employmentTPC
+  )}
       </table>
-      ${employmentDocs}
 
-      <p style="margin:20px 0 8px 0;font-size:12px;font-weight:600;">Disclaimer Clause:</p>
-      <p style="margin:0 0 24px 0;font-size:12px;color:#333;">
-        This report (including any attachments) has been prepared based on verbal information provided by the person contacted. YES BANK will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. Kowtha &amp; Co will not be held liable in any case.
-      </p>
+
+
     </div>
-    ${pdBaseTemplateFooter(html_data)}
   `;
 };

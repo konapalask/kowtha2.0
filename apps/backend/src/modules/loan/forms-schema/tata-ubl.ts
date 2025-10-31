@@ -226,7 +226,7 @@ export const tataUblSchema = {
             ui: { widget: "textarea", rows: 6 },
           },
           stockAsOnDate: {
-            type: "string",
+            type: "date",
             title: "Stock as on date",
           },
         },
@@ -439,9 +439,9 @@ export const tataUblSchema = {
                   type: "string",
                   title: "Nature of Loan",
                 },
-                amount: {
+                loanAmount: {
                   type: "number",
-                  title: "Amount",
+                  title: "Loan Amount",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
