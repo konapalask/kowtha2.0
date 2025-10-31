@@ -106,13 +106,13 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.proposedLoanDetails?.product || ""}</p></td>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.proposedLoanDetails?.amount)}</p></td>
+                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.proposedLoanDetails?.loanAmount)}</p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.proposedLoanDetails?.tenure || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Repayment from</strong></p></td>
                     <td colspan="5" style="border:1px solid #ccc;padding:8px">
-                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.bankName || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.repaymentBankName || ""}</p>
                         <p style="margin:8px 0;line-height:1.5">Type - ${verificationData.proposedLoanDetails?.typeSAAccount || ""}</p>
                         <p style="margin:8px 0;line-height:1.5">Account No. - ${verificationData.proposedLoanDetails?.accountNo || ""}</p>
                     </td>
@@ -120,7 +120,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">5</p></td>
                     <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Office Address</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.officeAddress?.add || ""}</p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.officeAddress?.officeAddress || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Rented/ Owned</strong></p></td>

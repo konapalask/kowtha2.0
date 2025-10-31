@@ -4,16 +4,27 @@ export const adityaBirlaSchema = {
   id: 7,
   bankName: "Aditya Birla",
   sections: [
-    financialsSchema,
     {
       id: "proposalInfo",
       label: "Proposal Information",
       schema: {
         type: "object",
         properties: {
-          proposalNumber: { type: "string", title: "Proposal No." },
-          dateOfVisit: { type: "string", title: "Date of Visit" },
-          timeOfVisit: { type: "string", title: "Time of Visit" },
+          proposalNumber: {
+            type: "string",
+            title: "Proposal No.",
+            readOnly: true,
+          },
+          dateOfVisit: {
+            type: "string",
+            title: "Date of Visit",
+            format: "date",
+          },
+          timeOfVisit: {
+            type: "string",
+            title: "Time of Visit",
+            format: "time",
+          },
         },
       },
     },
@@ -23,16 +34,25 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfApplicant: { type: "string", title: "Name of Applicant" },
+          nameOfApplicant: {
+            type: "string",
+            title: "Name of Applicant",
+            readOnly: true,
+          },
           nameOfCoApplicant: {
             type: "string",
             title: "Name of Co-applicant",
           },
-          nameOfBusiness: { type: "string", title: "Name of Business" },
+          nameOfBusiness: {
+            type: "string",
+            title: "Name of Business",
+            readOnly: true,
+          },
           businessAddress: {
             type: "string",
             title: "Business Address",
             ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
           },
           yearsInCurrentAddress: {
             type: "string",
@@ -224,6 +244,7 @@ export const adityaBirlaSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

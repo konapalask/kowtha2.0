@@ -4,7 +4,6 @@ export const arkaFincapSchema = {
   id: 4,
   bankName: "Arka Fincap",
   sections: [
-    financialsSchema,
     {
       id: "applicantDetails",
       label: "Applicant Details",
@@ -604,6 +603,7 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default arkaFincapSchema;
