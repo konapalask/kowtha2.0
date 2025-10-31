@@ -131,7 +131,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           typeof item === 'object' && item !== null
             ? normalizeFormData(item)
             : typeof item === 'number'
-            ? item.toString()
+            ? (item as any).toString()
             : item,
         );
       } else if (value && typeof value === 'object') {
@@ -569,7 +569,9 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                       const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
                       // Check if this field is required in the array items
                       const isSubFieldRequired =
-                        property.items?.required?.includes(subFieldId) ?? false;
+                        (property.items as any)?.required?.includes(
+                          subFieldId,
+                        ) ?? false;
 
                       // Handle date/time fields in arrays
                       const isDateField =
@@ -784,6 +786,27 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                     const numValue = parseFloat(value);
                     return !isNaN(numValue) || 'Please enter a valid number';
                   },
+                  nonNegative: (value: string) => {
+                    if (!value) return true;
+                    const numValue = parseFloat(value);
+                    return (
+                      numValue >= 0 ||
+                      'Value must be greater than or equal to 0'
+                    );
+                  },
+                  maxTwoDecimals: (value: string) => {
+                    if (!value) return true;
+                    const maxDp =
+                      (property as any)?.formatter?.maxDecimalPlaces ?? 2;
+                    if (maxDp == null) return true;
+                    const match = value.match(/^(?:-)?\d*(?:\.(\d+))?$/);
+                    if (!match) return 'Please enter a valid number';
+                    const decimals = match[1]?.length || 0;
+                    return (
+                      decimals <= maxDp ||
+                      `Maximum ${maxDp} decimal places allowed`
+                    );
+                  },
                 },
               },
             }}
@@ -814,6 +837,15 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                       (!isNaN(intValue) &&
                         Number.isInteger(parseFloat(value))) ||
                       'Please enter a valid integer'
+                    );
+                  },
+                  nonNegative: (value: string) => {
+                    if (!value) return true;
+                    const intValue = parseInt(value, 10);
+                    if (isNaN(intValue)) return 'Please enter a valid integer';
+                    return (
+                      intValue >= 0 ||
+                      'Value must be greater than or equal to 0'
                     );
                   },
                 },
