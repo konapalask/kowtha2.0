@@ -406,6 +406,7 @@ const VerificationListScreen = () => {
   );
 
   const handleGetStarted = (item: any) => {
+    // console.log('item', item);
     // onPress={() => {
     if (!disabled) {
       if (item?.status === 'Pending') {
@@ -523,12 +524,12 @@ const VerificationListScreen = () => {
         </View>
         {!!item?.loan?.loanAmount && (
           <View>
-            <View style={styles.verticalDivider} />
+            {currentDept === 'FI' && <View style={styles.verticalDivider} />}
             <Text style={styles.details}>
               ₹{formattedLoanAmount(item?.loan?.loanAmount)}
             </Text>
 
-            <View style={styles.verticalDivider} />
+            {currentDept === 'FI' && <View style={styles.verticalDivider} />}
           </View>
         )}
         {currentDept === 'FI' && (
@@ -561,6 +562,11 @@ const VerificationListScreen = () => {
       {item?.loan?.loanType && currentDept === 'FI' && (
         <Text style={[styles.details, styles.addressText]}>
           {item?.loan?.loanType}
+        </Text>
+      )}
+      {item?.businessName && (
+        <Text style={[styles.details, styles.addressText]}>
+          {item?.businessName}
         </Text>
       )}
       {item?.loan?.bankName && (

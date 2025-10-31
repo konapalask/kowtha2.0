@@ -77,20 +77,7 @@ const getUiSettings = (property: JsonSchemaProperty) => {
 
 const shouldUseTextArea = (property: JsonSchemaProperty): boolean => {
   const ui = getUiSettings(property);
-  if (ui?.widget === 'textarea' || ui?.widget === 'richtext') {
-    return true;
-  }
-
-  const title = property.title?.toLowerCase() || '';
-  return (
-    title.includes('about') ||
-    title.includes('address') ||
-    title.includes('description') ||
-    title.includes('remark') ||
-    title.includes('details') ||
-    title.includes('background') ||
-    title.includes('notes')
-  );
+  return ui?.widget === 'textarea' || ui?.widget === 'richtext';
 };
 
 const getTextAreaLines = (property: JsonSchemaProperty): number | undefined => {
@@ -118,7 +105,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   initialData = {},
   onSubmit,
 }) => {
-  console.log('schema', schema);
+  // console.log('schema', schema);
   // Helper function to convert numbers to strings for TextInput compatibility
   const normalizeFormData = (data: AnyObject): AnyObject => {
     const normalized: AnyObject = {};
