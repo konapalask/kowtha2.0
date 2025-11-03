@@ -28,15 +28,18 @@ import {colors} from '../constants/colors';
 // Field key mappings for automatic data population
 const FIELD_KEY_MAPPINGS = {
   applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
-  businessName: ['businessName', 'nameOfConcern'],
-  phoneNo: ['applicantMobile'],
+  businessName: ['businessName', 'nameOfConcern', 'nameOfBusiness'],
+  phoneNo: ['applicantMobile', 'applicantContactNumber'],
   applicationNumber: [
     'applicationNumber',
     'applicationNo',
     'applicationId',
     'referenceNumber',
+    'proposalNumber',
   ],
   loanAmount: ['loanAmount'],
+  purposeOfLoan: ['loanType', 'purposeOfLoan'],
+  bankName: ['repaymentBankName'],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -44,6 +47,7 @@ const FIELD_KEY_MAPPINGS = {
     'businessAddress',
     'pdAddress',
     'officeAddress',
+    'initiatedPremises',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -71,7 +75,7 @@ const getInitialDataByBank = (
   loggedInUserName?: string,
 ) => {
   if (!userData || !schema) return {};
-
+  // console.log('userData', userData);
   // Extract common data from userData
   const commonData: Record<string, any> = {
     applicantName:
@@ -81,6 +85,8 @@ const getInitialDataByBank = (
     applicationNumber:
       userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
     loanAmount: userData?.loan?.loanAmount || '',
+    purposeOfLoan: userData?.loan?.loanType || '',
+    bankName: userData?.loan?.bankName || '',
     address:
       userData?.applicantAddress || userData?.loan?.applicantAddress || '',
     latitude: '',

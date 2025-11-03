@@ -34,6 +34,7 @@ import DeviceInfo from 'react-native-device-info';
 import PD from './src/screens/PD';
 import QAFormTesting from './src/screens/QAFormTesting';
 import {UserProvider} from './src/contexts/UserContext';
+import ErrorBoundary from 'react-native-error-boundary';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -296,13 +297,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#b52424',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 24,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  errorButton: {
+    backgroundColor: '#145886',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  errorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
+
+// Error Fallback Component
+const ErrorFallback = ({error}: {error: Error}) => {
+  return (
+    <View style={[styles.container, styles.centerContent]}>
+      <Text style={styles.errorTitle}>Something went wrong</Text>
+      <Text style={styles.errorText}>{error.message}</Text>
+      <Pressable
+        style={styles.errorButton}
+        onPress={() => {
+          // Optionally restart the app or navigate to a safe screen
+          console.log('Error occurred:', error);
+        }}>
+        <Text style={styles.errorButtonText}>Try Again</Text>
+      </Pressable>
+    </View>
+  );
+};
 
 const App = () => {
   return (
-    <UserProvider>
-      <AppContent />
-    </UserProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <UserProvider>
+        <AppContent />
+      </UserProvider>
+    </ErrorBoundary>
   );
 };
 

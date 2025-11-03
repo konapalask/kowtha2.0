@@ -25,7 +25,6 @@ const { TextArea } = Input;
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
-import PDRequestLogs from "./PDRequestLogs";
 import Footer from "./Footer";
 import AssistantVerifierFooter from "./AssistantVerifierFooter";
 import { useRouter } from "next/router";
@@ -158,6 +157,7 @@ export const BusinessVerificationDetails: React.FC<
   applicationNumber,
   loanId,
 }) => {
+  console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
   const userDetails = getItem(USER_DETAILS, true) as any;
   const role = userDetails?.departmentRoles?.find(
@@ -291,9 +291,10 @@ export const BusinessVerificationDetails: React.FC<
 
         // Get bank name from completeVerificationData (which has the full verification object)
         const bankName =
-          completeVerificationData?.bankName || 
-          verificationData?.bankName || 
-          verificationData?.loan?.bankName || "";
+          completeVerificationData?.bankName ||
+          verificationData?.bankName ||
+          verificationData?.loan?.bankName ||
+          "";
 
         // Skip if no bank name
         if (!bankName) {
@@ -708,7 +709,10 @@ export const BusinessVerificationDetails: React.FC<
   if (!verificationData) return null;
 
   // Get bank name from completeVerificationData (which has the full verification object)
-  const bankName = completeVerificationData?.bankName || verificationData?.bankName || "Axis Finance";
+  const bankName =
+    completeVerificationData?.bankName ||
+    verificationData?.bankName ||
+    "Axis Finance";
 
   // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
@@ -896,6 +900,9 @@ export const BusinessVerificationDetails: React.FC<
     const [sectionUncommittedChanges, setSectionUncommittedChanges] =
       useState<any>({});
 
+    // Store form instances for each section to access current values
+    const formInstancesRef = React.useRef<{ [key: string]: any }>({});
+
     const toggleSection = (sectionId: string) => {
       // Check if there are uncommitted changes before closing
       if (
@@ -932,6 +939,8 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     // Check if there are uncommitted changes in a section
+    // Using useMemo to ensure it updates when sectionUncommittedChanges changes
+    // This ensures the button visibility updates when form values change
     const hasUncommittedChanges = (sectionId: string) => {
       const sectionChanges = sectionUncommittedChanges[sectionId];
       if (!sectionChanges) return false;
@@ -942,6 +951,9 @@ export const BusinessVerificationDetails: React.FC<
         if (Array.isArray(value)) {
           return value.length > 0;
         }
+        if (typeof value === "object" && value !== null) {
+          return Object.keys(value).length > 0;
+        }
         return value !== undefined && value !== null && value !== "";
       });
     };
@@ -949,145 +961,319 @@ export const BusinessVerificationDetails: React.FC<
     // Handle save for a specific section
     const handleSectionSave = async (sectionId: string) => {
       try {
-        const sectionData = sectionUncommittedChanges[sectionId];
+        // Get current form values from the form instance for the section being saved
+        const formInstance = formInstancesRef.current[sectionId];
+        let sectionData: any = {};
 
-        if (!sectionData) {
+        if (formInstance) {
+          // Get all current form values from this section's form
+          sectionData = formInstance.getFieldsValue();
+        } else {
+          // Fallback to uncommitted changes if form instance not available
+          sectionData = sectionUncommittedChanges[sectionId];
+        }
+
+        if (!sectionData || Object.keys(sectionData).length === 0) {
           message.warning("No changes to save");
           return;
         }
 
-        // Save to IndexedDB
-        const request = indexedDB.open("editLogs", 1);
+        // Save to backend API
+        try {
+          // Get all initial data (contains all sections from backend)
+          const rawApiData =
+            verificationData?.verificationData || verificationData || {};
+          const existingVerificationData = rawApiData as Record<string, any>;
 
-        request.onerror = (event: any) => {
-          console.error("Database error:", request.error);
-        };
+          // Collect data from ALL sections to preserve them
+          // 1. Start with all initial verification data (preserves ALL sections from backend)
+          // 2. Merge with formData (dynamicFormData) which may have initial loaded data
+          // 3. Merge committed changes from IndexedDB
+          // 4. Get current values from all form instances
+          // 5. Include uncommitted changes
+          let allSectionsData: Record<string, any> = mergeDeep(
+            existingVerificationData,
+            formData || {}
+          );
 
-        request.onsuccess = (event: any) => {
-          const db = event.target.result;
+          // Merge committed changes
+          allSectionsData = mergeDeep(allSectionsData, changedData || {});
 
-          try {
-            const transaction = db.transaction("logs", "readwrite");
-            const store = transaction.objectStore("logs");
-
-            const getRequest = store.get(`${id}_${activeTab}`);
-
-            getRequest.onsuccess = () => {
-              const existingData = getRequest.result || {};
-
-              const logEntry = {
-                id: `${id}_${activeTab}`,
-                ...existingData,
-                [sectionId]: sectionData,
-                timestamp: new Date().toISOString(),
-              };
-
-              const putRequest = store.put(logEntry);
-
-              putRequest.onsuccess = () => {
-                console.log(`Section ${sectionId} saved successfully`);
-                message.success(
-                  `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
+          // Update with data from all form instances (if available)
+          // Form instances have the most current values, so they take precedence
+          // But preserve all sections that exist in initial data (even without form instances)
+          Object.keys(formInstancesRef.current).forEach((sid) => {
+            const instance = formInstancesRef.current[sid];
+            if (instance) {
+              const formValues = instance.getFieldsValue();
+              if (formValues && Object.keys(formValues).length > 0) {
+                // Merge with existing data to preserve fields not in the form
+                allSectionsData[sid] = mergeDeep(
+                  allSectionsData[sid] || {},
+                  formValues
                 );
+              }
+            }
+          });
 
-                // Move uncommitted changes to committed changes
-                setChangedData((prev: any) => ({
-                  ...prev,
+          // Also include uncommitted changes from other sections that don't have form instances
+          Object.keys(sectionUncommittedChanges).forEach((sid) => {
+            const uncommittedData = sectionUncommittedChanges[sid];
+            if (uncommittedData && Object.keys(uncommittedData).length > 0) {
+              // Merge with existing or form instance data
+              allSectionsData[sid] = mergeDeep(
+                allSectionsData[sid] || {},
+                uncommittedData
+              );
+            }
+          });
+
+          // Ensure the current section's data is included (takes precedence)
+          allSectionsData[sectionId] = mergeDeep(
+            allSectionsData[sectionId] || {},
+            sectionData
+          );
+
+          // IMPORTANT: Preserve ALL sections from initial data, even if they don't have form instances
+          // This ensures sections like commonPoints, familyBackground, etc. are not lost
+          Object.keys(existingVerificationData).forEach((sectionKey) => {
+            // Skip uploadedItems - we'll add it separately at the end
+            if (sectionKey === "uploadedItems") return;
+
+            // If section doesn't exist in allSectionsData, preserve it from initial data
+            if (!allSectionsData[sectionKey]) {
+              allSectionsData[sectionKey] =
+                existingVerificationData[sectionKey];
+            }
+          });
+
+          // Get uploadedItems from existing verification data or from the prop
+          const uploadedItems =
+            existingVerificationData?.uploadedItems ||
+            verificationData?.verificationData?.uploadedItems ||
+            verificationData?.uploadedItems ||
+            [];
+
+          // Remove uploadedItems from allSectionsData if it exists there (we'll add it at the end)
+          const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
+            allSectionsData;
+
+          // Include uploadedItems inside verificationData (at the root level of verificationData)
+          const mergedVerificationData = {
+            ...sectionsWithoutUploadedItems,
+            uploadedItems: uploadedItems,
+          };
+
+          const verificationType =
+            verificationData?.type ||
+            completeVerificationData?.type ||
+            "Business";
+          const findings =
+            verificationData?.findings ||
+            completeVerificationData?.findings ||
+            "Business Verification Findings";
+          const approvedStatus =
+            verificationData?.approvedStatus ||
+            completeVerificationData?.approvedStatus ||
+            "Positive";
+
+          await verifierEditApi(String(id), verificationType, {
+            // findings,
+            verificationData: mergedVerificationData,
+            // approvedStatus,
+          });
+
+          // Also save to IndexedDB for local tracking
+          const request = indexedDB.open("editLogs", 1);
+
+          request.onerror = (event: any) => {
+            console.error("Database error:", request.error);
+          };
+
+          request.onsuccess = (event: any) => {
+            const db = event.target.result;
+
+            try {
+              const transaction = db.transaction("logs", "readwrite");
+              const store = transaction.objectStore("logs");
+
+              const getRequest = store.get(`${id}_${activeTab}`);
+
+              getRequest.onsuccess = () => {
+                const existingData = getRequest.result || {};
+
+                const logEntry = {
+                  id: `${id}_${activeTab}`,
+                  ...existingData,
                   [sectionId]: sectionData,
-                }));
+                  timestamp: new Date().toISOString(),
+                };
 
-                // Clear section uncommitted changes
-                setSectionUncommittedChanges((prev: any) => {
-                  const newChanges = { ...prev };
-                  delete newChanges[sectionId];
-                  return newChanges;
-                });
+                const putRequest = store.put(logEntry);
 
-                setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+                putRequest.onsuccess = () => {
+                  // Move uncommitted changes to committed changes
+                  setChangedData((prev: any) => ({
+                    ...prev,
+                    [sectionId]: sectionData,
+                  }));
+
+                  // Clear section uncommitted changes
+                  setSectionUncommittedChanges((prev: any) => {
+                    const newChanges = { ...prev };
+                    delete newChanges[sectionId];
+                    return newChanges;
+                  });
+
+                  setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+                };
+
+                putRequest.onerror = () => {
+                  console.error("Error saving to IndexedDB:", putRequest.error);
+                };
               };
 
-              putRequest.onerror = () => {
-                console.error("Error saving section:", putRequest.error);
-                message.error("Failed to save section");
+              getRequest.onerror = () => {
+                console.error("Error fetching existing log:", getRequest.error);
               };
-            };
 
-            getRequest.onerror = () => {
-              console.error("Error fetching existing log:", getRequest.error);
-            };
+              transaction.oncomplete = () => {
+                db.close();
+              };
 
-            transaction.oncomplete = () => {
+              transaction.onerror = () => {
+                console.error("Transaction error:", transaction.error);
+                db.close();
+              };
+            } catch (error) {
+              console.error("Error in transaction:", error);
               db.close();
-            };
+            }
+          };
 
-            transaction.onerror = () => {
-              console.error("Transaction error:", transaction.error);
-              db.close();
-            };
-          } catch (error) {
-            console.error("Error in transaction:", error);
-            db.close();
-          }
-        };
+          message.success(
+            `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
+          );
+
+          // Refresh verification data
+          fetchVerificationData?.();
+        } catch (error: any) {
+          console.error("Error saving section to backend:", error);
+          const errorMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to save section";
+          message.error(errorMessage);
+        }
       } catch (error) {
         console.error("Error saving section:", error);
         message.error("Failed to save section");
       }
     };
 
+    // Header component - no memo to ensure it re-renders when state changes
+    const SectionHeader = ({
+      sectionLabel,
+      sectionId,
+      sectionChanges,
+      onSave,
+    }: {
+      sectionLabel: string;
+      sectionId: string;
+      sectionChanges: any;
+      onSave: () => void;
+    }) => {
+      // Calculate hasChanges directly from the state passed as prop
+      // Handle undefined/null sectionChanges properly
+      const hasChanges = (() => {
+        if (!sectionChanges || typeof sectionChanges !== "object") {
+          return false;
+        }
+
+        const keys = Object.keys(sectionChanges);
+        if (keys.length === 0) {
+          return false;
+        }
+
+        // Check if there are any non-empty values
+        return keys.some((key) => {
+          const value = sectionChanges[key];
+
+          // Skip empty strings
+          if (value === "" || value === null || value === undefined) {
+            return false;
+          }
+
+          // Check arrays
+          if (Array.isArray(value)) {
+            return value.length > 0;
+          }
+
+          // Check objects (but not empty objects)
+          if (typeof value === "object" && value !== null) {
+            return Object.keys(value).length > 0;
+          }
+
+          // For other types, if it exists, it's a change
+          return true;
+        });
+      })();
+
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>{sectionLabel}</span>
+          {(role === "Verifier" || role === "Admin") &&
+            activeSections.includes(sectionId) &&
+            hasChanges && (
+              <Button
+                type="primary"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent collapse toggle
+                  onSave();
+                }}
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "12px",
+                  height: "24px",
+                  padding: "0 8px",
+                }}
+              >
+                Save
+              </Button>
+            )}
+        </div>
+      );
+    };
+
     return (
       <div>
-        {schema?.sections?.map((section: any) => (
-          // <Card
-          //   key={section.id}
-          //   title={section.label}
-          //   extra={
-          //     <Button
-          //       type="text"
-          //       icon={<EditOutlined />}
-          //       onClick={() => onEdit(section.id)}
-          //       disabled={readOnly}
-          //     />
-          //   }
-          //   style={{ marginBottom: 16 }}
-          // >
-          <Collapse
-            activeKey={activeSections}
-            onChange={(keys) => setActiveSections(keys as string[])}
-            accordion
-          >
+        <Collapse
+          activeKey={activeSections}
+          onChange={(keys) => {
+            // Only update if user manually changed (not from state updates)
+            setActiveSections(
+              Array.isArray(keys) ? keys : [keys].filter(Boolean)
+            );
+          }}
+          accordion={false}
+        >
+          {schema?.sections?.map((section: any) => (
             <Collapse.Panel
               key={section.id}
               header={
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span>{section.label}</span>
-                  {role === "Verifier" &&
-                    activeSections.includes(section.id) &&
-                    hasUncommittedChanges(section.id) && (
-                      <Button
-                        type="primary"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent collapse toggle
-                          handleSectionSave(section.id);
-                        }}
-                        style={{
-                          marginLeft: "8px",
-                          fontSize: "12px",
-                          height: "24px",
-                          padding: "0 8px",
-                        }}
-                      >
-                        Save
-                      </Button>
-                    )}
-                </div>
+                <SectionHeader
+                  sectionLabel={section.label}
+                  sectionId={section.id}
+                  sectionChanges={sectionUncommittedChanges[section.id] || {}}
+                  onSave={() => handleSectionSave(section.id)}
+                />
               }
             >
               {/* <Form layout="vertical"> */}
@@ -1112,14 +1298,64 @@ export const BusinessVerificationDetails: React.FC<
                 readOnly={readOnly}
                 setSectionUncommittedChanges={setSectionUncommittedChanges}
                 changedData={changedData}
+                onFormInstanceReady={(formInstance) => {
+                  formInstancesRef.current[section.id] = formInstance;
+                }}
+                isActive={activeSections.includes(section.id)}
               />
               {/* </Form> */}
             </Collapse.Panel>
-          </Collapse>
-          // </Card>
-        ))}
+          ))}
+        </Collapse>
       </div>
     );
+  };
+
+  // Formula evaluation utility
+  const evaluateFormula = (
+    formula: string,
+    formValues: Record<string, any>
+  ): number | null => {
+    if (!formula || typeof formula !== "string") return null;
+
+    try {
+      // Extract field references from formula (words that match field names)
+      // Replace field references with their actual values
+      let evaluatedFormula = formula;
+
+      // Find all potential field names (words that appear in formValues)
+      const fieldNames = Object.keys(formValues).filter(
+        (key) =>
+          formValues[key] !== undefined &&
+          formValues[key] !== null &&
+          formValues[key] !== ""
+      );
+
+      // Replace field references with their numeric values
+      for (const fieldName of fieldNames) {
+        const regex = new RegExp(`\\b${fieldName}\\b`, "g");
+        const value = formValues[fieldName];
+        const numValue =
+          typeof value === "number" ? value : parseFloat(String(value));
+        if (!isNaN(numValue)) {
+          evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
+        }
+      }
+
+      // Check if formula still contains field references (meaning some values are missing)
+      // This is a simple check - if the formula contains words that look like field names, we might be missing values
+      // But we'll try to evaluate anyway and return null if it fails
+
+      // Safely evaluate the formula using Function constructor
+      // This allows us to evaluate expressions like "a + b" or "(a + b) * 100"
+      const result = Function(
+        '"use strict"; return (' + evaluatedFormula + ")"
+      )();
+      return typeof result === "number" && !isNaN(result) ? result : null;
+    } catch (error) {
+      // If evaluation fails, return null (field dependencies might not be filled yet)
+      return null;
+    }
   };
 
   // Form Section Renderer - Updated to handle the actual schema structure
@@ -1129,35 +1365,280 @@ export const BusinessVerificationDetails: React.FC<
     readOnly,
     setSectionUncommittedChanges,
     changedData,
+    onFormInstanceReady,
+    isActive,
   }: {
     section: any;
     data: any;
     readOnly: boolean;
     setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
     changedData: any;
+    onFormInstanceReady?: (formInstance: any) => void;
+    isActive?: boolean;
   }) => {
-    console.log(section);
+    // console.log(section);
     const [form] = Form.useForm();
-    const initialValuesSet = React.useRef(false);
+    const previousSectionIdRef = React.useRef<string | null>(null);
+    const previousIsActiveRef = React.useRef<boolean>(false);
+    const lastInitializedDataRef = React.useRef<any>(null);
 
-    // Set initial form values
+    // Register form instance with parent
     React.useEffect(() => {
-      form.setFieldsValue(data);
-    }, [data, form]);
+      if (onFormInstanceReady) {
+        onFormInstanceReady(form);
+      }
+    }, [form, onFormInstanceReady]);
 
-    // Form change handler - update section-level uncommitted changes
+    // Set initial form values when section changes, on first mount, or when section becomes active
+    React.useEffect(() => {
+      const isNewSection = previousSectionIdRef.current !== section.id;
+      const becameActive = isActive && !previousIsActiveRef.current;
+
+      if (isNewSection || previousSectionIdRef.current === null) {
+        // New section or first mount - initialize with data (includes uncommitted changes)
+        form.setFieldsValue(data || {});
+        previousSectionIdRef.current = section.id;
+        previousIsActiveRef.current = isActive || false;
+        lastInitializedDataRef.current = data;
+      } else if (becameActive) {
+        // Section became active - re-initialize with latest data (preserves uncommitted changes)
+        // Only re-initialize if data actually changed to avoid losing user input
+        if (
+          JSON.stringify(data) !==
+          JSON.stringify(lastInitializedDataRef.current)
+        ) {
+          form.setFieldsValue(data || {});
+          lastInitializedDataRef.current = data;
+        }
+        previousIsActiveRef.current = true;
+      } else {
+        previousIsActiveRef.current = isActive || false;
+      }
+      // Intentionally not including 'data' in deps to avoid resetting during typing
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [section.id, form, isActive]);
+
+    // Watch form values to recalculate formulas
+    const formValues = Form.useWatch([], form);
+
+    // Calculate formula fields whenever form values change
+    React.useEffect(() => {
+      if (!isActive || !formValues) return; // Only calculate when section is active
+
+      const calculatedFields: Record<string, any> = {};
+
+      // Find all fields with formulas and calculate them
+      section.fields?.forEach((field: any) => {
+        if (field.formula) {
+          const calculatedValue = evaluateFormula(field.formula, formValues);
+          if (calculatedValue !== null) {
+            calculatedFields[field.id] = calculatedValue;
+          }
+        }
+      });
+
+      // Update form with calculated values only if they differ from current values
+      if (Object.keys(calculatedFields).length > 0) {
+        const fieldsToUpdate: Record<string, any> = {};
+        Object.entries(calculatedFields).forEach(([key, val]) => {
+          const currentValue = formValues[key];
+          const currentNum =
+            typeof currentValue === "number"
+              ? currentValue
+              : parseFloat(String(currentValue));
+          const newNum =
+            typeof val === "number" ? val : parseFloat(String(val));
+
+          // Only update if value has actually changed (avoid infinite loops)
+          if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+            fieldsToUpdate[key] = val;
+          }
+        });
+
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          form.setFieldsValue(fieldsToUpdate);
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formValues, isActive]);
+
+    // Form change handler - update section-level uncommitted changes and recalculate formulas
     const handleFormChange = useCallback(
       (changedValues: any, allValues: any) => {
+        // Recalculate formula fields
+        const calculatedFields: Record<string, any> = {};
+        section.fields?.forEach((field: any) => {
+          if (field.formula) {
+            const calculatedValue = evaluateFormula(field.formula, allValues);
+            if (calculatedValue !== null) {
+              calculatedFields[field.id] = calculatedValue;
+            }
+          }
+        });
+
+        // Update form with calculated values
+        if (Object.keys(calculatedFields).length > 0) {
+          form.setFieldsValue(calculatedFields);
+          // Merge calculated fields into allValues for uncommitted changes
+          Object.assign(allValues, calculatedFields);
+        }
+
         // Update section-level uncommitted changes
         setSectionUncommittedChanges((prev: any) => ({
           ...prev,
           [section.id]: allValues,
         }));
       },
-      [section.id, setSectionUncommittedChanges]
+      [section.id, section.fields, form, setSectionUncommittedChanges]
     );
 
-    const renderField = (fieldId: string, field: any) => {
+    // Helper functions for financial analysis field grouping
+    const isFinancialAnalysisSection = () => {
+      return (
+        section.id === "financialAnalysis" ||
+        section.id === "financialAnalysisComprehensive" ||
+        section.label?.toLowerCase().includes("financial")
+      );
+    };
+
+    // Use side and variant attributes that are set by the schema conversion service
+    // These are determined from the credit/debit arrays in the schema
+    const getFieldSide = (field: any): "debit" | "credit" | null => {
+      // Use the side attribute set by schema service (from credit/debit arrays)
+      return field.side || null;
+    };
+
+    const getFieldVariant = (field: any): "estimated" | "actuals" | null => {
+      // Use the variant attribute set by schema service
+      return field.variant || null;
+    };
+
+    // Extract base name for grouping (removes side/variant suffixes)
+    const getBaseFieldName = (field: any): string => {
+      const fieldId = field.id || "";
+      const title = field.label || field.title || "";
+
+      // Try to extract base from title (remove "To"/"By" and " - Estimated/Actuals")
+      let base = title
+        .replace(/^(To|By)\s+/i, "")
+        .replace(/\s*-\s*(Estimated|Actuals|Estimations)$/i, "")
+        .trim();
+
+      // If title extraction didn't work, use field ID
+      if (!base || base === title) {
+        base = fieldId
+          .replace(/Debit|Credit/gi, "")
+          .replace(/Actuals|Estimations|Estimated/gi, "")
+          .replace(/_2023|_2024/g, "")
+          .replace(/Change$/, "");
+      }
+
+      return base || fieldId;
+    };
+
+    // Group fields for financial analysis display
+    // Groups fields by base name, then organizes into 4 parts: [Debit Estimated, Debit Actuals, Credit Estimated, Credit Actuals]
+    const groupFinancialFields = (
+      fields: any[]
+    ): {
+      grouped: Array<{
+        baseName: string;
+        debitEstimated: any | null;
+        debitActuals: any | null;
+        creditEstimated: any | null;
+        creditActuals: any | null;
+        debitOnly: any | null; // For fields without estimated/actuals variant on debit side
+        creditOnly: any | null; // For fields without estimated/actuals variant on credit side
+      }>;
+      standalone: any[];
+    } => {
+      if (!isFinancialAnalysisSection()) {
+        return { grouped: [], standalone: fields };
+      }
+
+      // Group fields by base name while preserving order
+      // Use Map to store groups and an array to track order of first occurrence
+      const fieldGroups = new Map<
+        string,
+        {
+          baseName: string;
+          debitEstimated: any | null;
+          debitActuals: any | null;
+          creditEstimated: any | null;
+          creditActuals: any | null;
+          debitOnly: any | null;
+          creditOnly: any | null;
+        }
+      >();
+      const groupOrder: string[] = []; // Track the order groups are created
+
+      const processed = new Set<string>();
+      const standalone: any[] = [];
+
+      fields.forEach((field) => {
+        if (processed.has(field.id)) return;
+
+        const baseName = getBaseFieldName(field);
+        const side = getFieldSide(field);
+        const variant = getFieldVariant(field);
+
+        // Initialize group if it doesn't exist and track its order
+        if (!fieldGroups.has(baseName)) {
+          fieldGroups.set(baseName, {
+            baseName,
+            debitEstimated: null,
+            debitActuals: null,
+            creditEstimated: null,
+            creditActuals: null,
+            debitOnly: null,
+            creditOnly: null,
+          });
+          groupOrder.push(baseName); // Track order of first occurrence
+        }
+
+        const group = fieldGroups.get(baseName)!;
+
+        // Categorize field based on side and variant
+        if (side === "debit") {
+          if (variant === "estimated") {
+            group.debitEstimated = field;
+          } else if (variant === "actuals") {
+            group.debitActuals = field;
+          } else {
+            // No variant, goes in debitOnly
+            group.debitOnly = field;
+          }
+        } else if (side === "credit") {
+          if (variant === "estimated") {
+            group.creditEstimated = field;
+          } else if (variant === "actuals") {
+            group.creditActuals = field;
+          } else {
+            // No variant, goes in creditOnly
+            group.creditOnly = field;
+          }
+        } else {
+          // No side determined, treat as standalone
+          standalone.push(field);
+          processed.add(field.id);
+          return;
+        }
+
+        processed.add(field.id);
+      });
+
+      // Convert map to array in the order groups were first encountered
+      const grouped = groupOrder.map((baseName) => fieldGroups.get(baseName)!);
+
+      return { grouped, standalone };
+    };
+
+    // Render a single field (for use in grouped and standalone rendering)
+    const renderSingleField = (
+      fieldId: string,
+      field: any,
+      showLabel = true
+    ) => {
       // Check conditional visibility
       if (field.dependencies?.show) {
         const shouldShow = checkConditionalVisibility(
@@ -1171,6 +1652,10 @@ export const BusinessVerificationDetails: React.FC<
 
       // Check if field is required
       const isRequired = field?.required ?? false;
+
+      // Fields with formulas are read-only
+      const isFormulaField = !!field.formula;
+      const fieldReadOnly = readOnly || field.readOnly || isFormulaField;
 
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
@@ -1204,9 +1689,13 @@ export const BusinessVerificationDetails: React.FC<
       // Handle enum fields (select dropdown)
       if (field.enum && field.enum.length > 0) {
         return (
-          <Form.Item key={fieldId} name={fieldId} label={field.label}>
+          <Form.Item
+            key={fieldId}
+            name={fieldId}
+            label={showLabel ? field.label : undefined}
+          >
             <Select
-              disabled={readOnly || field.readOnly}
+              disabled={fieldReadOnly}
               placeholder={`Select ${field.label}`}
             >
               {field.enum.map((option: string) => (
@@ -1223,8 +1712,12 @@ export const BusinessVerificationDetails: React.FC<
       switch (field.type) {
         case "boolean":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
-              <Radio.Group disabled={readOnly || field.readOnly}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
+              <Radio.Group disabled={fieldReadOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -1244,7 +1737,7 @@ export const BusinessVerificationDetails: React.FC<
               <Form.Item
                 key={fieldId}
                 name={fieldId}
-                label={field.label}
+                label={showLabel ? field.label : undefined}
                 getValueFromEvent={(e) => {
                   // Convert YYYY-MM-DD to DD-MM-YYYY when saving
                   return convertYYYYMMDDToDDMMYYYY(e.target.value);
@@ -1257,7 +1750,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <Input
-                  disabled={readOnly || field.readOnly}
+                  disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
                   type="date"
                 />
@@ -1272,9 +1765,13 @@ export const BusinessVerificationDetails: React.FC<
             field.ui?.widget === "richtext"
           ) {
             return (
-              <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={showLabel ? field.label : undefined}
+              >
                 <TextArea
-                  disabled={readOnly || field.readOnly}
+                  disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
                   rows={field.textAreaRows || field.ui?.rows || 3}
                 />
@@ -1283,7 +1780,11 @@ export const BusinessVerificationDetails: React.FC<
           }
 
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Input
                 disabled={readOnly || field.readOnly}
                 placeholder={field.placeholder || field.label}
@@ -1294,9 +1795,13 @@ export const BusinessVerificationDetails: React.FC<
         case "integer":
         case "number":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <InputNumber
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 style={{ width: "100%" }}
                 placeholder={field.placeholder || field.label}
                 formatter={
@@ -1323,7 +1828,7 @@ export const BusinessVerificationDetails: React.FC<
             <Form.Item
               key={fieldId}
               name={fieldId}
-              label={field.label}
+              label={showLabel ? field.label : undefined}
               getValueFromEvent={(e) => {
                 // Convert YYYY-MM-DD to DD-MM-YYYY when saving
                 return convertYYYYMMDDToDDMMYYYY(e.target.value);
@@ -1336,7 +1841,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
                 type="date"
               />
@@ -1345,9 +1850,13 @@ export const BusinessVerificationDetails: React.FC<
 
         case "select":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Select
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
               >
                 {field.options?.map((option: string) => (
@@ -1361,7 +1870,11 @@ export const BusinessVerificationDetails: React.FC<
 
         default:
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Input
                 disabled={readOnly || field.readOnly}
                 placeholder={field.placeholder || field.label}
@@ -1371,15 +1884,281 @@ export const BusinessVerificationDetails: React.FC<
       }
     };
 
+    // Render all grouped fields for financial analysis
+    // Layout: All groups rendered in a single row with two columns
+    // Left column: All debit fields stacked vertically (Estimated then Actuals for each group)
+    // Right column: All credit fields stacked vertically (Estimated then Actuals for each group)
+    const renderAllGroupedFields = (
+      groups: Array<{
+        baseName: string;
+        debitEstimated: any | null;
+        debitActuals: any | null;
+        creditEstimated: any | null;
+        creditActuals: any | null;
+        debitOnly: any | null;
+        creditOnly: any | null;
+      }>
+    ) => {
+      // Helper to get clean title from a field
+      const getCleanTitle = (field: any | null, baseName: string): string => {
+        if (!field) return baseName;
+        const title = field.title || field.label || baseName;
+        return title
+          .replace(/^(To|By)\s+/i, "")
+          .replace(/\s*-\s*(Estimated|Actuals|Estimations)$/i, "")
+          .trim();
+      };
+
+      // Collect all debit fields and credit fields in order
+      const debitFields: Array<{
+        field: any;
+        title: string;
+        variant: "estimated" | "actuals" | "only";
+      }> = [];
+      const creditFields: Array<{
+        field: any;
+        title: string;
+        variant: "estimated" | "actuals" | "only";
+      }> = [];
+
+      groups.forEach((group) => {
+        const baseTitle = getCleanTitle(
+          group.debitEstimated ||
+            group.debitActuals ||
+            group.debitOnly ||
+            group.creditEstimated ||
+            group.creditActuals ||
+            group.creditOnly,
+          group.baseName
+        );
+
+        const hasDebitVariants =
+          group.debitEstimated !== null || group.debitActuals !== null;
+        const hasCreditVariants =
+          group.creditEstimated !== null || group.creditActuals !== null;
+        const hasVariants = hasDebitVariants || hasCreditVariants;
+
+        // Add debit fields in order (Estimated, then Actuals, or Only if no variants)
+        if (group.debitEstimated) {
+          debitFields.push({
+            field: group.debitEstimated,
+            title: baseTitle,
+            variant: "estimated",
+          });
+        } else if (!hasVariants && group.debitOnly) {
+          debitFields.push({
+            field: group.debitOnly,
+            title: baseTitle,
+            variant: "only",
+          });
+        }
+
+        if (group.debitActuals) {
+          debitFields.push({
+            field: group.debitActuals,
+            title: baseTitle,
+            variant: "actuals",
+          });
+        }
+
+        // Add credit fields in order (Estimated, then Actuals, or Only if no variants)
+        if (group.creditEstimated) {
+          creditFields.push({
+            field: group.creditEstimated,
+            title: baseTitle,
+            variant: "estimated",
+          });
+        } else if (!hasVariants && group.creditOnly) {
+          creditFields.push({
+            field: group.creditOnly,
+            title: baseTitle,
+            variant: "only",
+          });
+        }
+
+        if (group.creditActuals) {
+          creditFields.push({
+            field: group.creditActuals,
+            title: baseTitle,
+            variant: "actuals",
+          });
+        }
+      });
+
+      // Find the maximum number of fields to determine layout
+      const maxFields = Math.max(debitFields.length, creditFields.length);
+
+      return (
+        <Col
+          key="financial-analysis-all-groups"
+          xs={24}
+          sm={24}
+          md={24}
+          lg={24}
+          xl={24}
+          xxl={24}
+        >
+          <div style={{ marginBottom: 24 }}>
+            <Row gutter={[8, 8]}>
+              {/* Debit Side (Left Column) - All debit fields stacked vertically */}
+              <Col xs={24} sm={12} md={12} lg={12} xl={12} xxl={12}>
+                <div
+                  style={{
+                    borderRight: "1px solid #e8e8e8",
+                    paddingRight: 12,
+                  }}
+                >
+                  {debitFields.map((item, index) => (
+                    <div
+                      key={`debit-${item.field.id}`}
+                      style={{
+                        marginBottom: index < debitFields.length - 1 ? 16 : 0,
+                      }}
+                    >
+                      <div>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: "12px",
+                            display: "block",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {item.title}
+                        </Text>
+                        {item.variant !== "only" && (
+                          <Text
+                            type="secondary"
+                            style={{
+                              fontSize: "11px",
+                              display: "block",
+                              marginBottom: 4,
+                            }}
+                          >
+                            {item.variant === "estimated"
+                              ? "Estimated"
+                              : "Actuals"}
+                          </Text>
+                        )}
+                        {renderSingleField(item.field.id, item.field, false)}
+                      </div>
+                    </div>
+                  ))}
+                  {debitFields.length === 0 && (
+                    <Text type="secondary" style={{ fontStyle: "italic" }}>
+                      No debit fields
+                    </Text>
+                  )}
+                </div>
+              </Col>
+
+              {/* Credit Side (Right Column) - All credit fields stacked vertically */}
+              <Col xs={24} sm={12} md={12} lg={12} xl={12} xxl={12}>
+                <div style={{ paddingLeft: 12 }}>
+                  {creditFields.map((item, index) => (
+                    <div
+                      key={`credit-${item.field.id}`}
+                      style={{
+                        marginBottom: index < creditFields.length - 1 ? 16 : 0,
+                      }}
+                    >
+                      <div>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: "12px",
+                            display: "block",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {item.title}
+                        </Text>
+                        {item.variant !== "only" && (
+                          <Text
+                            type="secondary"
+                            style={{
+                              fontSize: "11px",
+                              display: "block",
+                              marginBottom: 4,
+                            }}
+                          >
+                            {item.variant === "estimated"
+                              ? "Estimated"
+                              : "Actuals"}
+                          </Text>
+                        )}
+                        {renderSingleField(item.field.id, item.field, false)}
+                      </div>
+                    </div>
+                  ))}
+                  {creditFields.length === 0 && (
+                    <Text type="secondary" style={{ fontStyle: "italic" }}>
+                      No credit fields
+                    </Text>
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </div>
+        </Col>
+      );
+    };
+
     // Handle the actual schema structure from the backend
     // The backend now returns sections with fields array
     if (!section.fields || !Array.isArray(section.fields)) {
       return <div>No fields found for section: {section.label}</div>;
     }
 
+    // Filter fields that should be visible
+    const visibleFields = section.fields.filter((field: any) => {
+      if (field.dependencies?.show) {
+        return checkConditionalVisibility(field.dependencies.show, data);
+      }
+      return true;
+    });
+
+    // Group financial analysis fields if this is a financial section
+    const { grouped: groupedFields, standalone: standaloneFields } =
+      isFinancialAnalysisSection()
+        ? groupFinancialFields(visibleFields)
+        : { grouped: [], standalone: visibleFields };
+
+    // Separate regular fields from array fields (arrays take full width)
+    const regularStandaloneFields = standaloneFields.filter(
+      (field: any) => field.type !== "array" || !field.arrayItemFields
+    );
+    const arrayFields = standaloneFields.filter(
+      (field: any) => field.type === "array" && field.arrayItemFields
+    );
+
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
-        {section.fields.map((field: any) => renderField(field.id, field))}
+        <Row gutter={[16, 16]}>
+          {/* Grouped financial fields - all groups rendered together with debit on left, credit on right */}
+          {groupedFields.length > 0 && renderAllGroupedFields(groupedFields)}
+
+          {/* Regular standalone fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
+          {regularStandaloneFields.map((field: any) => (
+            <Col key={field.id} xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+              {renderSingleField(field.id, field, true)}
+            </Col>
+          ))}
+          {/* Array fields - always full width */}
+          {arrayFields.map((field: any) => (
+            <Col
+              key={field.id}
+              xs={24}
+              sm={24}
+              md={24}
+              lg={24}
+              xl={24}
+              xxl={24}
+            >
+              {renderSingleField(field.id, field, true)}
+            </Col>
+          ))}
+        </Row>
       </Form>
     );
   };
@@ -1409,24 +2188,31 @@ export const BusinessVerificationDetails: React.FC<
 
     const [items, setItems] = useState(() => ensureArrayWithIds(data));
     const [form] = Form.useForm();
-    const initialValuesSet = React.useRef(false);
+    const previousFieldIdRef = React.useRef<string | null>(null);
 
-    // Update items when data changes
+    // Update items only when field changes or on initial mount
+    // Don't reset when data changes due to user input
     React.useEffect(() => {
-      const newItems = ensureArrayWithIds(data);
-      setItems(newItems);
+      const isNewField = previousFieldIdRef.current !== field.id;
+      if (isNewField || previousFieldIdRef.current === null) {
+        const newItems = ensureArrayWithIds(data);
+        setItems(newItems);
 
-      // Set form values
-      const formValues: any = {};
-      newItems.forEach((item: any, index: number) => {
-        Object.keys(item).forEach((key) => {
-          if (key !== "_id") {
-            formValues[`${field.id}[${index}].${key}`] = item[key];
-          }
+        // Set form values
+        const formValues: any = {};
+        newItems.forEach((item: any, index: number) => {
+          Object.keys(item).forEach((key) => {
+            if (key !== "_id") {
+              formValues[`${field.id}[${index}].${key}`] = item[key];
+            }
+          });
         });
-      });
-      form.setFieldsValue(formValues);
-    }, [data, field.id, form]);
+        form.setFieldsValue(formValues);
+        previousFieldIdRef.current = field.id;
+      }
+      // Intentionally not including 'data' to avoid resetting on user input
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [field.id, form]);
 
     // Array form change handler - update section-level uncommitted changes
     const handleArrayFormChange = useCallback(
@@ -1461,6 +2247,26 @@ export const BusinessVerificationDetails: React.FC<
       },
       [field.id, sectionId, setSectionUncommittedChanges]
     );
+
+    // Sync form values and trigger change handler when items change
+    const previousItemsLengthRef = React.useRef(items.length);
+    React.useEffect(() => {
+      if (previousItemsLengthRef.current !== items.length) {
+        // Items were added or removed, update form and trigger change handler
+        const formValues: any = {};
+        items.forEach((item: any, index: number) => {
+          Object.keys(item).forEach((key) => {
+            if (key !== "_id") {
+              formValues[`${field.id}[${index}].${key}`] = item[key];
+            }
+          });
+        });
+        form.setFieldsValue(formValues);
+        handleArrayFormChange({}, formValues);
+        previousItemsLengthRef.current = items.length;
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [items.length]);
 
     const addItem = () => {
       const newItem: any = {
@@ -1720,7 +2526,9 @@ export const BusinessVerificationDetails: React.FC<
     <div>
       {/* Bank Name Header */}
       {currentDepartment === "PD" &&
-        (completeVerificationData?.bankName || verificationData?.bankName || verificationData?.loan?.bankName) && (
+        (completeVerificationData?.bankName ||
+          verificationData?.bankName ||
+          verificationData?.loan?.bankName) && (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
             <Text style={{ color: "#1e40af", fontWeight: 600 }}>
               {typeof completeVerificationData?.bankName === "string"
@@ -1760,7 +2568,10 @@ export const BusinessVerificationDetails: React.FC<
       {/* Main Single Column Layout */}
       <div style={{ padding: "0 12px" }}>
         {/* PD Department - Use Dynamic Forms Only */}
-        {currentDepartment === "PD" && useGenericApproach && schemaForm && !formLoading ? (
+        {currentDepartment === "PD" &&
+        useGenericApproach &&
+        schemaForm &&
+        !formLoading ? (
           <>
             <CollapsibleFormSections
               schema={schemaForm}
@@ -1949,7 +2760,8 @@ export const BusinessVerificationDetails: React.FC<
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(200px, 1fr))",
                     gap: "16px",
                   }}
                 >
@@ -2014,58 +2826,20 @@ export const BusinessVerificationDetails: React.FC<
         ) : null}
       </div>
 
-      {/* Edit Request Logs - Conditional rendering based on department */}
-      {role !== "VerificationExecutive" && (
+      {/* Edit Request Logs - Only for FI department, not for PD */}
+      {role !== "VerificationExecutive" && currentDepartment !== "PD" && (
         <section style={{ marginBottom: 24 }}>
-          {currentDepartment === "PD"
-            ? useMemo(
-                () => (
-                  <PDRequestLogs
-                    currentData={data}
-                    changedData={changedData}
-                    verificationId={verificationId}
-                    fetchEditRequests={fetchEditRequests}
-                    disabled={hasEditRequest}
-                    admin={false}
-                    verificationType={activeTab}
-                    currentDepartment={currentDepartment}
-                    dynamicSchema={schemaForm}
-                  />
-                ),
-                [
-                  data,
-                  changedData,
-                  verificationId,
-                  hasEditRequest,
-                  activeTab,
-                  currentDepartment,
-                  schemaForm,
-                ]
-              )
-            : useMemo(
-                () => (
-                  <EditRequestLogs
-                    currentData={data}
-                    changedData={changedData}
-                    verificationId={verificationId}
-                    fetchEditRequests={fetchEditRequests}
-                    disabled={hasEditRequest}
-                    admin={false}
-                    verificationType={activeTab}
-                    currentDepartment={currentDepartment}
-                    dynamicSchema={schemaForm}
-                  />
-                ),
-                [
-                  data,
-                  changedData,
-                  verificationId,
-                  hasEditRequest,
-                  activeTab,
-                  currentDepartment,
-                  schemaForm,
-                ]
-              )}
+          <EditRequestLogs
+            currentData={data}
+            changedData={changedData}
+            verificationId={verificationId}
+            fetchEditRequests={fetchEditRequests}
+            disabled={hasEditRequest}
+            admin={false}
+            verificationType={activeTab}
+            currentDepartment={currentDepartment}
+            dynamicSchema={schemaForm}
+          />
         </section>
       )}
 

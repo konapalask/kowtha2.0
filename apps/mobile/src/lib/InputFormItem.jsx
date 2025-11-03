@@ -29,7 +29,10 @@ export function InputFormItem({data}) {
           },
           ...data?.rules,
         }}
-        render={({field: {onChange, value, onBlur}, fieldState: {error, invalid}}) => {
+        render={({
+          field: {onChange, value, onBlur},
+          fieldState: {error, invalid},
+        }) => {
           // Manual validation trigger on blur
           const handleBlur = async () => {
             onBlur();
@@ -41,14 +44,14 @@ export function InputFormItem({data}) {
           // Handle number formatting
           const getDisplayValue = () => {
             if (value == null || value === '') return '';
-            
+
             // If formatter is specified in schema, format the value for display
             if (data?.formatter) {
               const formatted = formatNumberForInput(value, data.formatter);
-              console.log(`[InputFormItem] Formatting field "${data.key}": value="${value}" → formatted="${formatted}"`, data.formatter);
+              // console.log(`[InputFormItem] Formatting field "${data.key}": value="${value}" → formatted="${formatted}"`, data.formatter);
               return formatted;
             }
-            
+
             // For number/integer types, ensure it's a string
             return String(value);
           };
@@ -56,11 +59,11 @@ export function InputFormItem({data}) {
           const displayValue = getDisplayValue();
 
           // Handle text change with formatting
-          const handleTextChange = (text: string) => {
+          const handleTextChange = text => {
             if (data?.formatter) {
               // For formatted fields, we need to handle the input carefully
               // Allow typing and format on blur, but store clean values
-              
+
               if (text === '') {
                 onChange('');
                 return;
@@ -68,7 +71,7 @@ export function InputFormItem({data}) {
 
               // Parse the input to get clean numeric value
               const cleanValue = parseFormattedNumber(text);
-              
+
               // Validate the clean value
               if (cleanValue === '' || isValidNumber(cleanValue)) {
                 onChange(cleanValue);
@@ -104,17 +107,19 @@ export function InputFormItem({data}) {
                 ]}
                 placeholder={data?.placeholder}
                 value={displayValue}
-              onChangeText={text => {
-                handleTextChange(text);
-                // If field is invalid, keep validating on change so message persists
-                if (invalid && data?.trigger) {
-                  data.trigger(data.key);
-                }
-              }}
+                onChangeText={text => {
+                  handleTextChange(text);
+                  // If field is invalid, keep validating on change so message persists
+                  if (invalid && data?.trigger) {
+                    data.trigger(data.key);
+                  }
+                }}
                 onBlur={handleBlur}
                 editable={!isDisabled}
                 keyboardType={
-                  data?.formatter || data?.type === 'number' || data?.type === 'integer'
+                  data?.formatter ||
+                  data?.type === 'number' ||
+                  data?.type === 'integer'
                     ? 'numeric'
                     : data?.keyboardType || 'default'
                 }
