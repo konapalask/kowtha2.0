@@ -74,15 +74,56 @@ export const convertBackendSchemaToWebFormat = (backendSchema: any) => {
   return {
     id: backendSchema.id,
     name: backendSchema.bankName,
-    sections: backendSchema.sections.map((section: any) => ({
-      id: section.id,
-      label: section.label,
-      fields: convertSchemaPropertiesToFields(
-        section.schema?.properties || {},
-        section.schema?.required || []
-      ),
-      required: section.required,
-    })),
+    sections: backendSchema.sections.map((section: any) => {
+      const schema = section.schema || {};
+      const creditFields = schema.credit || [];
+      const debitFields = schema.debit || [];
+      
+      // Convert properties to fields with side and variant attributes
+      const allFields = convertSchemaPropertiesToFields(
+        schema.properties || {},
+        schema.required || [],
+        creditFields,
+        debitFields
+      );
+
+      // Create a map for quick lookup
+      const fieldMap = new Map(allFields.map((field: any) => [field.id, field]));
+
+      // Order fields based on credit/debit arrays to preserve the intended order
+      // Debit fields first (in the order specified in debit array), then credit fields (in the order specified in credit array)
+      const orderedFields: any[] = [];
+      
+      // Add debit fields in the order they appear in debitFields array
+      debitFields.forEach((fieldId) => {
+        const field = fieldMap.get(fieldId);
+        if (field) {
+          orderedFields.push(field);
+        }
+      });
+      
+      // Add credit fields in the order they appear in creditFields array
+      creditFields.forEach((fieldId) => {
+        const field = fieldMap.get(fieldId);
+        if (field) {
+          orderedFields.push(field);
+        }
+      });
+      
+      // Add any remaining fields that weren't in the arrays (preserving their original order)
+      allFields.forEach((field: any) => {
+        if (!debitFields.includes(field.id) && !creditFields.includes(field.id)) {
+          orderedFields.push(field);
+        }
+      });
+
+      return {
+        id: section.id,
+        label: section.label,
+        fields: orderedFields,
+        required: section.required,
+      };
+    }),
   };
 };
 
@@ -91,7 +132,9 @@ export const convertBackendSchemaToWebFormat = (backendSchema: any) => {
  */
 const convertSchemaPropertiesToFields = (
   properties: any,
-  requiredFields: string[]
+  requiredFields: string[],
+  creditFields: string[] = [],
+  debitFields: string[] = []
 ) => {
   const fields: any[] = [];
 
@@ -107,7 +150,52 @@ const convertSchemaPropertiesToFields = (
       placeholder: property.title || fieldId,
       formatter: property.formatter,
       dependencies: property.dependencies,
+      title: property.title, // Preserve original title
     };
+
+    // Determine side (debit/credit) based on credit/debit arrays or fallback to title/fieldId
+    if (debitFields.includes(fieldId)) {
+      field.side = "debit";
+    } else if (creditFields.includes(fieldId)) {
+      field.side = "credit";
+    } else {
+      // Fallback: check title starts with "To" (debit) or "By" (credit)
+      const title = property.title || "";
+      if (title.toLowerCase().startsWith("to ")) {
+        field.side = "debit";
+      } else if (title.toLowerCase().startsWith("by ")) {
+        field.side = "credit";
+      }
+      // If still no side, check fieldId
+      if (!field.side) {
+        if (fieldId.toLowerCase().includes("debit")) {
+          field.side = "debit";
+        } else if (fieldId.toLowerCase().includes("credit")) {
+          field.side = "credit";
+        }
+      }
+    }
+
+    // Determine variant (estimated/actuals) based on field ID or title
+    const title = property.title || "";
+    const lowerFieldId = fieldId.toLowerCase();
+    const lowerTitle = title.toLowerCase();
+    
+    if (
+      lowerFieldId.includes("estimation") ||
+      lowerFieldId.includes("estimated") ||
+      lowerTitle.includes("estimation") ||
+      lowerTitle.includes("estimated")
+    ) {
+      field.variant = "estimated";
+    } else if (
+      lowerFieldId.includes("actual") ||
+      lowerTitle.includes("actual") ||
+      lowerFieldId.includes("_2023") ||
+      lowerFieldId.includes("_2024")
+    ) {
+      field.variant = "actuals";
+    }
 
     if (Object.keys(uiSettings).length > 0) {
       field.ui = uiSettings;
@@ -138,7 +226,9 @@ const convertSchemaPropertiesToFields = (
     if (property.type === "array" && property.items) {
       field.arrayItemFields = convertSchemaPropertiesToFields(
         property.items.properties || {},
-        property.items.required || []
+        property.items.required || [],
+        creditFields,
+        debitFields
       );
     }
 
@@ -146,7 +236,9 @@ const convertSchemaPropertiesToFields = (
     if (property.type === "object" && property.properties) {
       field.objectFields = convertSchemaPropertiesToFields(
         property.properties,
-        property.required || []
+        property.required || [],
+        creditFields,
+        debitFields
       );
     }
 

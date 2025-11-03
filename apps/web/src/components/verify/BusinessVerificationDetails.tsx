@@ -1078,7 +1078,7 @@ export const BusinessVerificationDetails: React.FC<
             "Positive";
 
           await verifierEditApi(String(id), verificationType, {
-            findings,
+            // findings,
             verificationData: mergedVerificationData,
             // approvedStatus,
           });
@@ -1383,7 +1383,153 @@ export const BusinessVerificationDetails: React.FC<
       [section.id, setSectionUncommittedChanges]
     );
 
-    const renderField = (fieldId: string, field: any) => {
+    // Helper functions for financial analysis field grouping
+    const isFinancialAnalysisSection = () => {
+      return (
+        section.id === "financialAnalysis" ||
+        section.id === "financialAnalysisComprehensive" ||
+        section.label?.toLowerCase().includes("financial")
+      );
+    };
+
+    // Use side and variant attributes that are set by the schema conversion service
+    // These are determined from the credit/debit arrays in the schema
+    const getFieldSide = (field: any): "debit" | "credit" | null => {
+      // Use the side attribute set by schema service (from credit/debit arrays)
+      return field.side || null;
+    };
+
+    const getFieldVariant = (field: any): "estimated" | "actuals" | null => {
+      // Use the variant attribute set by schema service
+      return field.variant || null;
+    };
+
+    // Extract base name for grouping (removes side/variant suffixes)
+    const getBaseFieldName = (field: any): string => {
+      const fieldId = field.id || "";
+      const title = field.label || field.title || "";
+
+      // Try to extract base from title (remove "To"/"By" and " - Estimated/Actuals")
+      let base = title
+        .replace(/^(To|By)\s+/i, "")
+        .replace(/\s*-\s*(Estimated|Actuals|Estimations)$/i, "")
+        .trim();
+
+      // If title extraction didn't work, use field ID
+      if (!base || base === title) {
+        base = fieldId
+          .replace(/Debit|Credit/gi, "")
+          .replace(/Actuals|Estimations|Estimated/gi, "")
+          .replace(/_2023|_2024/g, "")
+          .replace(/Change$/, "");
+      }
+
+      return base || fieldId;
+    };
+
+    // Group fields for financial analysis display
+    // Groups fields by base name, then organizes into 4 parts: [Debit Estimated, Debit Actuals, Credit Estimated, Credit Actuals]
+    const groupFinancialFields = (
+      fields: any[]
+    ): {
+      grouped: Array<{
+        baseName: string;
+        debitEstimated: any | null;
+        debitActuals: any | null;
+        creditEstimated: any | null;
+        creditActuals: any | null;
+        debitOnly: any | null; // For fields without estimated/actuals variant on debit side
+        creditOnly: any | null; // For fields without estimated/actuals variant on credit side
+      }>;
+      standalone: any[];
+    } => {
+      if (!isFinancialAnalysisSection()) {
+        return { grouped: [], standalone: fields };
+      }
+
+      // Group fields by base name while preserving order
+      // Use Map to store groups and an array to track order of first occurrence
+      const fieldGroups = new Map<
+        string,
+        {
+          baseName: string;
+          debitEstimated: any | null;
+          debitActuals: any | null;
+          creditEstimated: any | null;
+          creditActuals: any | null;
+          debitOnly: any | null;
+          creditOnly: any | null;
+        }
+      >();
+      const groupOrder: string[] = []; // Track the order groups are created
+
+      const processed = new Set<string>();
+      const standalone: any[] = [];
+
+      fields.forEach((field) => {
+        if (processed.has(field.id)) return;
+
+        const baseName = getBaseFieldName(field);
+        const side = getFieldSide(field);
+        const variant = getFieldVariant(field);
+
+        // Initialize group if it doesn't exist and track its order
+        if (!fieldGroups.has(baseName)) {
+          fieldGroups.set(baseName, {
+            baseName,
+            debitEstimated: null,
+            debitActuals: null,
+            creditEstimated: null,
+            creditActuals: null,
+            debitOnly: null,
+            creditOnly: null,
+          });
+          groupOrder.push(baseName); // Track order of first occurrence
+        }
+
+        const group = fieldGroups.get(baseName)!;
+
+        // Categorize field based on side and variant
+        if (side === "debit") {
+          if (variant === "estimated") {
+            group.debitEstimated = field;
+          } else if (variant === "actuals") {
+            group.debitActuals = field;
+          } else {
+            // No variant, goes in debitOnly
+            group.debitOnly = field;
+          }
+        } else if (side === "credit") {
+          if (variant === "estimated") {
+            group.creditEstimated = field;
+          } else if (variant === "actuals") {
+            group.creditActuals = field;
+          } else {
+            // No variant, goes in creditOnly
+            group.creditOnly = field;
+          }
+        } else {
+          // No side determined, treat as standalone
+          standalone.push(field);
+          processed.add(field.id);
+          return;
+        }
+
+        processed.add(field.id);
+      });
+
+      // Convert map to array in the order groups were first encountered
+      const grouped = groupOrder.map((baseName) => fieldGroups.get(baseName)!);
+
+      return { grouped, standalone };
+    };
+
+    // Render a single field (for use in grouped and standalone rendering)
+    const renderSingleField = (
+      fieldId: string,
+      field: any,
+      showLabel = true
+    ) => {
       // Check conditional visibility
       if (field.dependencies?.show) {
         const shouldShow = checkConditionalVisibility(
@@ -1430,7 +1576,11 @@ export const BusinessVerificationDetails: React.FC<
       // Handle enum fields (select dropdown)
       if (field.enum && field.enum.length > 0) {
         return (
-          <Form.Item key={fieldId} name={fieldId} label={field.label}>
+          <Form.Item
+            key={fieldId}
+            name={fieldId}
+            label={showLabel ? field.label : undefined}
+          >
             <Select
               disabled={readOnly || field.readOnly}
               placeholder={`Select ${field.label}`}
@@ -1449,7 +1599,11 @@ export const BusinessVerificationDetails: React.FC<
       switch (field.type) {
         case "boolean":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Radio.Group disabled={readOnly || field.readOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
@@ -1470,7 +1624,7 @@ export const BusinessVerificationDetails: React.FC<
               <Form.Item
                 key={fieldId}
                 name={fieldId}
-                label={field.label}
+                label={showLabel ? field.label : undefined}
                 getValueFromEvent={(e) => {
                   // Convert YYYY-MM-DD to DD-MM-YYYY when saving
                   return convertYYYYMMDDToDDMMYYYY(e.target.value);
@@ -1498,7 +1652,11 @@ export const BusinessVerificationDetails: React.FC<
             field.ui?.widget === "richtext"
           ) {
             return (
-              <Form.Item key={fieldId} name={fieldId} label={field.label}>
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={showLabel ? field.label : undefined}
+              >
                 <TextArea
                   disabled={readOnly || field.readOnly}
                   placeholder={field.placeholder || field.label}
@@ -1509,7 +1667,11 @@ export const BusinessVerificationDetails: React.FC<
           }
 
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Input
                 disabled={readOnly || field.readOnly}
                 placeholder={field.placeholder || field.label}
@@ -1520,7 +1682,11 @@ export const BusinessVerificationDetails: React.FC<
         case "integer":
         case "number":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <InputNumber
                 disabled={readOnly || field.readOnly}
                 style={{ width: "100%" }}
@@ -1549,7 +1715,7 @@ export const BusinessVerificationDetails: React.FC<
             <Form.Item
               key={fieldId}
               name={fieldId}
-              label={field.label}
+              label={showLabel ? field.label : undefined}
               getValueFromEvent={(e) => {
                 // Convert YYYY-MM-DD to DD-MM-YYYY when saving
                 return convertYYYYMMDDToDDMMYYYY(e.target.value);
@@ -1571,7 +1737,11 @@ export const BusinessVerificationDetails: React.FC<
 
         case "select":
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Select
                 disabled={readOnly || field.readOnly}
                 placeholder={`Select ${field.label}`}
@@ -1587,7 +1757,11 @@ export const BusinessVerificationDetails: React.FC<
 
         default:
           return (
-            <Form.Item key={fieldId} name={fieldId} label={field.label}>
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+            >
               <Input
                 disabled={readOnly || field.readOnly}
                 placeholder={field.placeholder || field.label}
@@ -1595,6 +1769,226 @@ export const BusinessVerificationDetails: React.FC<
             </Form.Item>
           );
       }
+    };
+
+    // Render all grouped fields for financial analysis
+    // Layout: All groups rendered in a single row with two columns
+    // Left column: All debit fields stacked vertically (Estimated then Actuals for each group)
+    // Right column: All credit fields stacked vertically (Estimated then Actuals for each group)
+    const renderAllGroupedFields = (
+      groups: Array<{
+        baseName: string;
+        debitEstimated: any | null;
+        debitActuals: any | null;
+        creditEstimated: any | null;
+        creditActuals: any | null;
+        debitOnly: any | null;
+        creditOnly: any | null;
+      }>
+    ) => {
+      // Helper to get clean title from a field
+      const getCleanTitle = (field: any | null, baseName: string): string => {
+        if (!field) return baseName;
+        const title = field.title || field.label || baseName;
+        return title
+          .replace(/^(To|By)\s+/i, "")
+          .replace(/\s*-\s*(Estimated|Actuals|Estimations)$/i, "")
+          .trim();
+      };
+
+      // Collect all debit fields and credit fields in order
+      const debitFields: Array<{
+        field: any;
+        title: string;
+        variant: "estimated" | "actuals" | "only";
+      }> = [];
+      const creditFields: Array<{
+        field: any;
+        title: string;
+        variant: "estimated" | "actuals" | "only";
+      }> = [];
+
+      groups.forEach((group) => {
+        const baseTitle = getCleanTitle(
+          group.debitEstimated ||
+            group.debitActuals ||
+            group.debitOnly ||
+            group.creditEstimated ||
+            group.creditActuals ||
+            group.creditOnly,
+          group.baseName
+        );
+
+        const hasDebitVariants =
+          group.debitEstimated !== null || group.debitActuals !== null;
+        const hasCreditVariants =
+          group.creditEstimated !== null || group.creditActuals !== null;
+        const hasVariants = hasDebitVariants || hasCreditVariants;
+
+        // Add debit fields in order (Estimated, then Actuals, or Only if no variants)
+        if (group.debitEstimated) {
+          debitFields.push({
+            field: group.debitEstimated,
+            title: baseTitle,
+            variant: "estimated",
+          });
+        } else if (!hasVariants && group.debitOnly) {
+          debitFields.push({
+            field: group.debitOnly,
+            title: baseTitle,
+            variant: "only",
+          });
+        }
+
+        if (group.debitActuals) {
+          debitFields.push({
+            field: group.debitActuals,
+            title: baseTitle,
+            variant: "actuals",
+          });
+        }
+
+        // Add credit fields in order (Estimated, then Actuals, or Only if no variants)
+        if (group.creditEstimated) {
+          creditFields.push({
+            field: group.creditEstimated,
+            title: baseTitle,
+            variant: "estimated",
+          });
+        } else if (!hasVariants && group.creditOnly) {
+          creditFields.push({
+            field: group.creditOnly,
+            title: baseTitle,
+            variant: "only",
+          });
+        }
+
+        if (group.creditActuals) {
+          creditFields.push({
+            field: group.creditActuals,
+            title: baseTitle,
+            variant: "actuals",
+          });
+        }
+      });
+
+      // Find the maximum number of fields to determine layout
+      const maxFields = Math.max(debitFields.length, creditFields.length);
+
+      return (
+        <Col
+          key="financial-analysis-all-groups"
+          xs={24}
+          sm={24}
+          md={24}
+          lg={24}
+          xl={24}
+          xxl={24}
+        >
+          <div style={{ marginBottom: 24 }}>
+            <Row gutter={[8, 8]}>
+              {/* Debit Side (Left Column) - All debit fields stacked vertically */}
+              <Col xs={24} sm={12} md={12} lg={12} xl={12} xxl={12}>
+                <div
+                  style={{
+                    borderRight: "1px solid #e8e8e8",
+                    paddingRight: 12,
+                  }}
+                >
+                  {debitFields.map((item, index) => (
+                    <div
+                      key={`debit-${item.field.id}`}
+                      style={{
+                        marginBottom: index < debitFields.length - 1 ? 16 : 0,
+                      }}
+                    >
+                      <div>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: "12px",
+                            display: "block",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {item.title}
+                        </Text>
+                        {item.variant !== "only" && (
+                          <Text
+                            type="secondary"
+                            style={{
+                              fontSize: "11px",
+                              display: "block",
+                              marginBottom: 4,
+                            }}
+                          >
+                            {item.variant === "estimated"
+                              ? "Estimated"
+                              : "Actuals"}
+                          </Text>
+                        )}
+                        {renderSingleField(item.field.id, item.field, false)}
+                      </div>
+                    </div>
+                  ))}
+                  {debitFields.length === 0 && (
+                    <Text type="secondary" style={{ fontStyle: "italic" }}>
+                      No debit fields
+                    </Text>
+                  )}
+                </div>
+              </Col>
+
+              {/* Credit Side (Right Column) - All credit fields stacked vertically */}
+              <Col xs={24} sm={12} md={12} lg={12} xl={12} xxl={12}>
+                <div style={{ paddingLeft: 12 }}>
+                  {creditFields.map((item, index) => (
+                    <div
+                      key={`credit-${item.field.id}`}
+                      style={{
+                        marginBottom: index < creditFields.length - 1 ? 16 : 0,
+                      }}
+                    >
+                      <div>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: "12px",
+                            display: "block",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {item.title}
+                        </Text>
+                        {item.variant !== "only" && (
+                          <Text
+                            type="secondary"
+                            style={{
+                              fontSize: "11px",
+                              display: "block",
+                              marginBottom: 4,
+                            }}
+                          >
+                            {item.variant === "estimated"
+                              ? "Estimated"
+                              : "Actuals"}
+                          </Text>
+                        )}
+                        {renderSingleField(item.field.id, item.field, false)}
+                      </div>
+                    </div>
+                  ))}
+                  {creditFields.length === 0 && (
+                    <Text type="secondary" style={{ fontStyle: "italic" }}>
+                      No credit fields
+                    </Text>
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </div>
+        </Col>
+      );
     };
 
     // Handle the actual schema structure from the backend
@@ -1611,21 +2005,30 @@ export const BusinessVerificationDetails: React.FC<
       return true;
     });
 
+    // Group financial analysis fields if this is a financial section
+    const { grouped: groupedFields, standalone: standaloneFields } =
+      isFinancialAnalysisSection()
+        ? groupFinancialFields(visibleFields)
+        : { grouped: [], standalone: visibleFields };
+
     // Separate regular fields from array fields (arrays take full width)
-    const regularFields = visibleFields.filter(
+    const regularStandaloneFields = standaloneFields.filter(
       (field: any) => field.type !== "array" || !field.arrayItemFields
     );
-    const arrayFields = visibleFields.filter(
+    const arrayFields = standaloneFields.filter(
       (field: any) => field.type === "array" && field.arrayItemFields
     );
 
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
         <Row gutter={[16, 16]}>
-          {/* Regular fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
-          {regularFields.map((field: any) => (
+          {/* Grouped financial fields - all groups rendered together with debit on left, credit on right */}
+          {groupedFields.length > 0 && renderAllGroupedFields(groupedFields)}
+
+          {/* Regular standalone fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
+          {regularStandaloneFields.map((field: any) => (
             <Col key={field.id} xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-              {renderField(field.id, field)}
+              {renderSingleField(field.id, field, true)}
             </Col>
           ))}
           {/* Array fields - always full width */}
@@ -1639,7 +2042,7 @@ export const BusinessVerificationDetails: React.FC<
               xl={24}
               xxl={24}
             >
-              {renderField(field.id, field)}
+              {renderSingleField(field.id, field, true)}
             </Col>
           ))}
         </Row>

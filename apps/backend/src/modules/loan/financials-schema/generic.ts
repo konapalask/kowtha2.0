@@ -668,6 +668,100 @@ export const financialsSchema = {
         },
       },
     },
+    debit: [
+      // Opening Stock
+      "openingStockEstimations",
+      "openingStockActuals",
+      // Purchase
+      "purchaseEstimations",
+      "purchaseActuals",
+      // Cost of Services
+      "costOfServicesEstimations",
+      "costOfServicesActuals",
+      // Wages
+      "wagesEstimations",
+      "wagesActuals",
+      // Hamali Charges
+      "hamaliChargesEstimations",
+      "hamaliChargesActuals",
+      // Manufacturing Expenses
+      "manufacturingExpensesEstimations",
+      "manufacturingExpensesActuals",
+      // Packing Charges
+      "packingChargesEstimations",
+      "packingChargesActuals",
+      // Gross Profit (Debit)
+      "grossProfitDebitEstimations",
+      "grossProfitDebitActuals",
+      // Salaries
+      "salariesEstimations",
+      "salariesActuals",
+      // Rent
+      "rentEstimations",
+      "rentActuals",
+      // Electricity Charges
+      "electricityChargesEstimations",
+      "electricityChargesActuals",
+      // Printing & Stationery
+      "printingStationeryEstimations",
+      "printingStationeryActuals",
+      // Telephone Charges
+      "telephoneChargesEstimations",
+      "telephoneChargesActuals",
+      // Postage & Telegram
+      "postageTelegramEstimations",
+      "postageTelegramActuals",
+      // Office Maintenance
+      "officeMaintenanceEstimations",
+      "officeMaintenanceActuals",
+      // Repairs & Maintenance
+      "repairsMaintenanceEstimations",
+      "repairsMaintenanceActuals",
+      // Sadar Expenses
+      "sadarExpensesEstimations",
+      "sadarExpensesActuals",
+      // Audit Fee
+      "auditFeeEstimations",
+      "auditFeeActuals",
+      // Advertisement
+      "advertisementEstimations",
+      "advertisementActuals",
+      // Bank Charges
+      "bankChargesEstimations",
+      "bankChargesActuals",
+      // Insurance
+      "insuranceEstimations",
+      "insuranceActuals",
+      // Depreciation
+      "depreciationEstimations",
+      "depreciationActuals",
+      // Interest on Loan
+      "interestOnLoanEstimations",
+      "interestOnLoanActuals",
+      // Net Profit
+      "netProfitEstimations",
+      "netProfitActuals",
+    ],
+    credit: [
+      // Sales
+      "salesEstimations",
+      "salesActuals",
+      // Services
+      "servicesEstimations",
+      "servicesActuals",
+      // Closing Stock
+      "closingStockEstimations",
+      "closingStockActuals",
+      // Gross Profit (Credit)
+      "grossProfitCreditEstimations",
+      "grossProfitCreditActuals",
+      // Rent Received
+      "rentReceivedEstimations",
+      "rentReceivedActuals",
+      // Commission Received
+      "commissionReceivedEstimations",
+      "commissionReceivedActuals",
+    ],
   },
 } as const;
 
