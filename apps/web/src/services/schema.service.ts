@@ -78,7 +78,7 @@ export const convertBackendSchemaToWebFormat = (backendSchema: any) => {
       const schema = section.schema || {};
       const creditFields = schema.credit || [];
       const debitFields = schema.debit || [];
-      
+
       // Convert properties to fields with side and variant attributes
       const allFields = convertSchemaPropertiesToFields(
         schema.properties || {},
@@ -88,31 +88,36 @@ export const convertBackendSchemaToWebFormat = (backendSchema: any) => {
       );
 
       // Create a map for quick lookup
-      const fieldMap = new Map(allFields.map((field: any) => [field.id, field]));
+      const fieldMap = new Map(
+        allFields.map((field: any) => [field.id, field])
+      );
 
       // Order fields based on credit/debit arrays to preserve the intended order
       // Debit fields first (in the order specified in debit array), then credit fields (in the order specified in credit array)
       const orderedFields: any[] = [];
-      
+
       // Add debit fields in the order they appear in debitFields array
-      debitFields.forEach((fieldId) => {
+      debitFields.forEach((fieldId: string) => {
         const field = fieldMap.get(fieldId);
         if (field) {
           orderedFields.push(field);
         }
       });
-      
+
       // Add credit fields in the order they appear in creditFields array
-      creditFields.forEach((fieldId) => {
+      creditFields.forEach((fieldId: string) => {
         const field = fieldMap.get(fieldId);
         if (field) {
           orderedFields.push(field);
         }
       });
-      
+
       // Add any remaining fields that weren't in the arrays (preserving their original order)
       allFields.forEach((field: any) => {
-        if (!debitFields.includes(field.id) && !creditFields.includes(field.id)) {
+        if (
+          !debitFields.includes(field.id) &&
+          !creditFields.includes(field.id)
+        ) {
           orderedFields.push(field);
         }
       });
@@ -151,6 +156,7 @@ const convertSchemaPropertiesToFields = (
       formatter: property.formatter,
       dependencies: property.dependencies,
       title: property.title, // Preserve original title
+      formula: property.formula, // Preserve formula for calculated fields
     };
 
     // Determine side (debit/credit) based on credit/debit arrays or fallback to title/fieldId
@@ -180,7 +186,7 @@ const convertSchemaPropertiesToFields = (
     const title = property.title || "";
     const lowerFieldId = fieldId.toLowerCase();
     const lowerTitle = title.toLowerCase();
-    
+
     if (
       lowerFieldId.includes("estimation") ||
       lowerFieldId.includes("estimated") ||

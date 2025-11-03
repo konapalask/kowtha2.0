@@ -1311,6 +1311,53 @@ export const BusinessVerificationDetails: React.FC<
     );
   };
 
+  // Formula evaluation utility
+  const evaluateFormula = (
+    formula: string,
+    formValues: Record<string, any>
+  ): number | null => {
+    if (!formula || typeof formula !== "string") return null;
+
+    try {
+      // Extract field references from formula (words that match field names)
+      // Replace field references with their actual values
+      let evaluatedFormula = formula;
+
+      // Find all potential field names (words that appear in formValues)
+      const fieldNames = Object.keys(formValues).filter(
+        (key) =>
+          formValues[key] !== undefined &&
+          formValues[key] !== null &&
+          formValues[key] !== ""
+      );
+
+      // Replace field references with their numeric values
+      for (const fieldName of fieldNames) {
+        const regex = new RegExp(`\\b${fieldName}\\b`, "g");
+        const value = formValues[fieldName];
+        const numValue =
+          typeof value === "number" ? value : parseFloat(String(value));
+        if (!isNaN(numValue)) {
+          evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
+        }
+      }
+
+      // Check if formula still contains field references (meaning some values are missing)
+      // This is a simple check - if the formula contains words that look like field names, we might be missing values
+      // But we'll try to evaluate anyway and return null if it fails
+
+      // Safely evaluate the formula using Function constructor
+      // This allows us to evaluate expressions like "a + b" or "(a + b) * 100"
+      const result = Function(
+        '"use strict"; return (' + evaluatedFormula + ")"
+      )();
+      return typeof result === "number" && !isNaN(result) ? result : null;
+    } catch (error) {
+      // If evaluation fails, return null (field dependencies might not be filled yet)
+      return null;
+    }
+  };
+
   // Form Section Renderer - Updated to handle the actual schema structure
   const FormSectionRenderer = ({
     section,
@@ -1371,16 +1418,78 @@ export const BusinessVerificationDetails: React.FC<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [section.id, form, isActive]);
 
-    // Form change handler - update section-level uncommitted changes
+    // Watch form values to recalculate formulas
+    const formValues = Form.useWatch([], form);
+
+    // Calculate formula fields whenever form values change
+    React.useEffect(() => {
+      if (!isActive || !formValues) return; // Only calculate when section is active
+
+      const calculatedFields: Record<string, any> = {};
+
+      // Find all fields with formulas and calculate them
+      section.fields?.forEach((field: any) => {
+        if (field.formula) {
+          const calculatedValue = evaluateFormula(field.formula, formValues);
+          if (calculatedValue !== null) {
+            calculatedFields[field.id] = calculatedValue;
+          }
+        }
+      });
+
+      // Update form with calculated values only if they differ from current values
+      if (Object.keys(calculatedFields).length > 0) {
+        const fieldsToUpdate: Record<string, any> = {};
+        Object.entries(calculatedFields).forEach(([key, val]) => {
+          const currentValue = formValues[key];
+          const currentNum =
+            typeof currentValue === "number"
+              ? currentValue
+              : parseFloat(String(currentValue));
+          const newNum =
+            typeof val === "number" ? val : parseFloat(String(val));
+
+          // Only update if value has actually changed (avoid infinite loops)
+          if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+            fieldsToUpdate[key] = val;
+          }
+        });
+
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          form.setFieldsValue(fieldsToUpdate);
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formValues, isActive]);
+
+    // Form change handler - update section-level uncommitted changes and recalculate formulas
     const handleFormChange = useCallback(
       (changedValues: any, allValues: any) => {
+        // Recalculate formula fields
+        const calculatedFields: Record<string, any> = {};
+        section.fields?.forEach((field: any) => {
+          if (field.formula) {
+            const calculatedValue = evaluateFormula(field.formula, allValues);
+            if (calculatedValue !== null) {
+              calculatedFields[field.id] = calculatedValue;
+            }
+          }
+        });
+
+        // Update form with calculated values
+        if (Object.keys(calculatedFields).length > 0) {
+          form.setFieldsValue(calculatedFields);
+          // Merge calculated fields into allValues for uncommitted changes
+          Object.assign(allValues, calculatedFields);
+        }
+
         // Update section-level uncommitted changes
         setSectionUncommittedChanges((prev: any) => ({
           ...prev,
           [section.id]: allValues,
         }));
       },
-      [section.id, setSectionUncommittedChanges]
+      [section.id, section.fields, form, setSectionUncommittedChanges]
     );
 
     // Helper functions for financial analysis field grouping
@@ -1544,6 +1653,10 @@ export const BusinessVerificationDetails: React.FC<
       // Check if field is required
       const isRequired = field?.required ?? false;
 
+      // Fields with formulas are read-only
+      const isFormulaField = !!field.formula;
+      const fieldReadOnly = readOnly || field.readOnly || isFormulaField;
+
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
         return (
@@ -1582,7 +1695,7 @@ export const BusinessVerificationDetails: React.FC<
             label={showLabel ? field.label : undefined}
           >
             <Select
-              disabled={readOnly || field.readOnly}
+              disabled={fieldReadOnly}
               placeholder={`Select ${field.label}`}
             >
               {field.enum.map((option: string) => (
@@ -1604,7 +1717,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldId}
               label={showLabel ? field.label : undefined}
             >
-              <Radio.Group disabled={readOnly || field.readOnly}>
+              <Radio.Group disabled={fieldReadOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -1637,7 +1750,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <Input
-                  disabled={readOnly || field.readOnly}
+                  disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
                   type="date"
                 />
@@ -1658,7 +1771,7 @@ export const BusinessVerificationDetails: React.FC<
                 label={showLabel ? field.label : undefined}
               >
                 <TextArea
-                  disabled={readOnly || field.readOnly}
+                  disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
                   rows={field.textAreaRows || field.ui?.rows || 3}
                 />
@@ -1688,7 +1801,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <InputNumber
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 style={{ width: "100%" }}
                 placeholder={field.placeholder || field.label}
                 formatter={
@@ -1728,7 +1841,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
                 type="date"
               />
@@ -1743,7 +1856,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Select
-                disabled={readOnly || field.readOnly}
+                disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
               >
                 {field.options?.map((option: string) => (
