@@ -1905,7 +1905,7 @@ export class LoanService {
         );
         throw new NotFoundException("Verification not found");
       }
-
+      
       const updatedVerification = await this.prisma.verification.update({
         where: {
           id: verification.id,

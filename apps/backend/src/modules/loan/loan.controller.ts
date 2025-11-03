@@ -629,6 +629,7 @@ export class LoanController {
     @Param("type") verificationType: VerificationType,
     @Body() body: { status: ApprovedStatus; path?: string }
   ) {
+    console.log("Update verification approval");
     const approvedStatus = body.status;
     const result = await this.loanService.updateVerificationApproval(
       Number(loanId),
