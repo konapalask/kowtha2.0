@@ -205,55 +205,9 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
             <td style="${valueCellStyle}">Loan Amount: ${formatMultiline(observations.loanAmountApplied)}</td>
             <td style="${valueCellStyle}">Purpose of Loan: ${formatMultiline(observations.purposeOfLoan)}</td>
         </tr>
-      </table>
+      </table>      
 
-
-      <table style="${tableStyle}">
-      <tr>
-        <td style="${labelCellStyle}">Particulars</td>
-        <td style="${valueCellStyle}">Units</td>
-        <td style="${valueCellStyle}">Charge</td>
-        <td style="${valueCellStyle}">Total</td>
-      </tr>
-      ${Array.isArray(observations.particulars) ? observations.particulars.map((particular: any) => `
-        <tr>
-          <td style="${valueCellStyle}">${formatMultiline(particular.particulars)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(particular.units)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(particular.charge)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(particular.total)}</td>
-        </tr>
-      `) : `<tr>
-        <td style="${valueCellStyle}" colspan="4">Not provided</td>
-      </tr>`}
-      <tr>
-        <td style="${labelCellStyle}" colspan="3">Daily Gross Income</td>
-        <td style="${valueCellStyle}">${formatMultiline(observations.dailyGrossIncome)}</td>
-        </tr>
-        <tr>
-          <td style="${labelCellStyle}" colspan="3">Labour & Material (Everyday)</td>
-          <td style="${valueCellStyle}">${formatMultiline(observations.labourMaterialEveryday)}</td>
-        </tr>
-        <tr>
-          <td style="${labelCellStyle}" colspan="3">Net Income / Day</td>
-          <td style="${valueCellStyle}">${formatMultiline(observations.netIncomeDay)}</td>
-        </tr>
-      </table>
-
-      <h2 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#222;"><u>Applicant's Monthly Expenses of the business:</u></h2>
-      <table style="${tableStyle}">
-        ${renderKeyValue("Sales", employeesInfrastructure.monthlySales)}
-        ${renderKeyValue("Purchase", employeesInfrastructure.monthlyPurchase)}
-        ${renderKeyValue("Rent", employeesInfrastructure.rent)}
-        ${renderKeyValue("Salaries/Wages", employeesInfrastructure.salariesWages)}
-        ${renderKeyValue("Transport Charges", employeesInfrastructure.transportCharges)}
-        ${renderKeyValue("Electricity Bill", employeesInfrastructure.electricityBill)}
-        ${renderKeyValue("Other Exp", employeesInfrastructure.otherExpenses)}
-        ${renderKeyValue("Total Expenses", employeesInfrastructure.totalExpenses)}
-        ${renderKeyValue("Net Profit", employeesInfrastructure.netProfit)}
-        ${renderKeyValue("Net Margin", employeesInfrastructure.netMargin)}
-      </table>
-
-      <p> Signature of the Assesing Official: </p>
+      <br><p> Signature of the Assesing Official: ________________________</p>
       <p style="margin:20px 0 8px;font-weight:600;color:#222;">Disclaimer Clause:</p>
       <p style="margin:0 0 24px;color:#333;">
         This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Aditya Birla Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. Kowtha &amp; Co will not be held liable in any case.

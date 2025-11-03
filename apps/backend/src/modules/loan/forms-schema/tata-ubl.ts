@@ -143,6 +143,16 @@ export const tataUblSchema = {
             type: "number",
             title: "CMV / Rent p.m.",
           },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "addressOfPDAndPersonMet",
+      label: "Address of PD and Person Met",
+      schema: {
+        type: "object",
+        properties: {
           addressOfPDAndPersonMet: {
             type: "string",
             title: "Address of PD and persona met",

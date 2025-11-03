@@ -289,7 +289,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       <tr>
         <td style="${labelCellStyle}">Premise Address</td>
         <td style="${valueCellStyle}">${formatMultiline(addresses.residencePremiseAddress)}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.businessPremiseAddress || "N/A" )}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessPremiseAddress || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Ownership status (Rented/Owned, parental)</td>

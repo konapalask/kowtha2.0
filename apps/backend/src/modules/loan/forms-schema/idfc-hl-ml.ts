@@ -555,22 +555,10 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "PD Conducted by",
           },
-          signature: {
-            type: "string",
-            title: "Signature",
-          },
           pdDate: {
             type: "string",
             title: "Date",
-          },
-          detailsMatch: {
-            type: "string",
-            title:
-              "Whether details provided in the application and during discussion are same (Yes/No)",
-          },
-          detailsMismatchNotes: {
-            type: "string",
-            title: "If No, provide details",
+            format: "date",
           },
         },
       },

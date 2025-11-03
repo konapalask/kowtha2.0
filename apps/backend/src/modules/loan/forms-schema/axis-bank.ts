@@ -421,19 +421,59 @@ export const axisBankSchema = {
           },
           endUseOfProposedLoan: {
             type: "string",
-            title: "End Use of proposed Loan in detail",
+            title: "End Use of proposed Loan in detail(Basis purpose of loan, in case cash out end use must be detailed)",
             ui: {
               widget: "textarea",
               rows: 6,
             },
-          },
-          averageBalances: {
-            type: "string",
-            title: "Average Balances",
-          },
+          },          
         },
       },
       required: true,
+    },
+    {
+      id: "bankingDetails",
+      label: "Banking Details",
+      schema: {
+        type: "object",
+        properties: {
+          bankName: {
+            type: "string",
+            title: "Bank Name",
+          },
+          accountType: {
+            type: "string",
+            title: "A/c type",
+            enum: ["Savings", "Current", "CC/OD"],
+          },
+          averageBalance: {
+            type: "number",
+            title: "Average Balances",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          anyChequeBounces: {
+            type: "string",
+            title: "Banking performance- Any cheque bounces seen (Y/N)",
+            enum: ["Yes", "No"],
+          },
+          
+
+          addressOfProperty: {  
+            type: "string",
+            title: "Details of collateral- Address of property",
+          },
+          statusOfPD: {
+            type: "string",
+            title: "Status of PD (Positive, Negative, Credit Manager visit needed)",
+            enum: ["Positive", "Negative", "Credit Manager visit needed"],
+          },
+        },
+      },
     },
   ],
 } as const;

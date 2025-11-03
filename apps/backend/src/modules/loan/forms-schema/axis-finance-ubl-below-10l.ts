@@ -556,14 +556,6 @@ export const axisFinanceUblBelow10lSchema = {
               type: "string",
               title: "End use of loan:(Loan Amount & Detailed End-Use)",
             },
-            remarks: {
-              type: "string",
-              title: "Remarks",
-              ui: {
-                widget: "textarea",
-                rows: 3,
-              },
-            },
           },
         },
       },
