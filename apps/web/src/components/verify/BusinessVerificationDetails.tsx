@@ -25,7 +25,6 @@ const { TextArea } = Input;
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
-import PDRequestLogs from "./PDRequestLogs";
 import Footer from "./Footer";
 import AssistantVerifierFooter from "./AssistantVerifierFooter";
 import { useRouter } from "next/router";
@@ -158,6 +157,7 @@ export const BusinessVerificationDetails: React.FC<
   applicationNumber,
   loanId,
 }) => {
+  console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
   const userDetails = getItem(USER_DETAILS, true) as any;
   const role = userDetails?.departmentRoles?.find(
@@ -900,6 +900,9 @@ export const BusinessVerificationDetails: React.FC<
     const [sectionUncommittedChanges, setSectionUncommittedChanges] =
       useState<any>({});
 
+    // Store form instances for each section to access current values
+    const formInstancesRef = React.useRef<{ [key: string]: any }>({});
+
     const toggleSection = (sectionId: string) => {
       // Check if there are uncommitted changes before closing
       if (
@@ -936,6 +939,8 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     // Check if there are uncommitted changes in a section
+    // Using useMemo to ensure it updates when sectionUncommittedChanges changes
+    // This ensures the button visibility updates when form values change
     const hasUncommittedChanges = (sectionId: string) => {
       const sectionChanges = sectionUncommittedChanges[sectionId];
       if (!sectionChanges) return false;
@@ -946,6 +951,9 @@ export const BusinessVerificationDetails: React.FC<
         if (Array.isArray(value)) {
           return value.length > 0;
         }
+        if (typeof value === "object" && value !== null) {
+          return Object.keys(value).length > 0;
+        }
         return value !== undefined && value !== null && value !== "";
       });
     };
@@ -953,145 +961,319 @@ export const BusinessVerificationDetails: React.FC<
     // Handle save for a specific section
     const handleSectionSave = async (sectionId: string) => {
       try {
-        const sectionData = sectionUncommittedChanges[sectionId];
+        // Get current form values from the form instance for the section being saved
+        const formInstance = formInstancesRef.current[sectionId];
+        let sectionData: any = {};
 
-        if (!sectionData) {
+        if (formInstance) {
+          // Get all current form values from this section's form
+          sectionData = formInstance.getFieldsValue();
+        } else {
+          // Fallback to uncommitted changes if form instance not available
+          sectionData = sectionUncommittedChanges[sectionId];
+        }
+
+        if (!sectionData || Object.keys(sectionData).length === 0) {
           message.warning("No changes to save");
           return;
         }
 
-        // Save to IndexedDB
-        const request = indexedDB.open("editLogs", 1);
+        // Save to backend API
+        try {
+          // Get all initial data (contains all sections from backend)
+          const rawApiData =
+            verificationData?.verificationData || verificationData || {};
+          const existingVerificationData = rawApiData as Record<string, any>;
 
-        request.onerror = (event: any) => {
-          console.error("Database error:", request.error);
-        };
+          // Collect data from ALL sections to preserve them
+          // 1. Start with all initial verification data (preserves ALL sections from backend)
+          // 2. Merge with formData (dynamicFormData) which may have initial loaded data
+          // 3. Merge committed changes from IndexedDB
+          // 4. Get current values from all form instances
+          // 5. Include uncommitted changes
+          let allSectionsData: Record<string, any> = mergeDeep(
+            existingVerificationData,
+            formData || {}
+          );
 
-        request.onsuccess = (event: any) => {
-          const db = event.target.result;
+          // Merge committed changes
+          allSectionsData = mergeDeep(allSectionsData, changedData || {});
 
-          try {
-            const transaction = db.transaction("logs", "readwrite");
-            const store = transaction.objectStore("logs");
-
-            const getRequest = store.get(`${id}_${activeTab}`);
-
-            getRequest.onsuccess = () => {
-              const existingData = getRequest.result || {};
-
-              const logEntry = {
-                id: `${id}_${activeTab}`,
-                ...existingData,
-                [sectionId]: sectionData,
-                timestamp: new Date().toISOString(),
-              };
-
-              const putRequest = store.put(logEntry);
-
-              putRequest.onsuccess = () => {
-                console.log(`Section ${sectionId} saved successfully`);
-                message.success(
-                  `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
+          // Update with data from all form instances (if available)
+          // Form instances have the most current values, so they take precedence
+          // But preserve all sections that exist in initial data (even without form instances)
+          Object.keys(formInstancesRef.current).forEach((sid) => {
+            const instance = formInstancesRef.current[sid];
+            if (instance) {
+              const formValues = instance.getFieldsValue();
+              if (formValues && Object.keys(formValues).length > 0) {
+                // Merge with existing data to preserve fields not in the form
+                allSectionsData[sid] = mergeDeep(
+                  allSectionsData[sid] || {},
+                  formValues
                 );
+              }
+            }
+          });
 
-                // Move uncommitted changes to committed changes
-                setChangedData((prev: any) => ({
-                  ...prev,
+          // Also include uncommitted changes from other sections that don't have form instances
+          Object.keys(sectionUncommittedChanges).forEach((sid) => {
+            const uncommittedData = sectionUncommittedChanges[sid];
+            if (uncommittedData && Object.keys(uncommittedData).length > 0) {
+              // Merge with existing or form instance data
+              allSectionsData[sid] = mergeDeep(
+                allSectionsData[sid] || {},
+                uncommittedData
+              );
+            }
+          });
+
+          // Ensure the current section's data is included (takes precedence)
+          allSectionsData[sectionId] = mergeDeep(
+            allSectionsData[sectionId] || {},
+            sectionData
+          );
+
+          // IMPORTANT: Preserve ALL sections from initial data, even if they don't have form instances
+          // This ensures sections like commonPoints, familyBackground, etc. are not lost
+          Object.keys(existingVerificationData).forEach((sectionKey) => {
+            // Skip uploadedItems - we'll add it separately at the end
+            if (sectionKey === "uploadedItems") return;
+
+            // If section doesn't exist in allSectionsData, preserve it from initial data
+            if (!allSectionsData[sectionKey]) {
+              allSectionsData[sectionKey] =
+                existingVerificationData[sectionKey];
+            }
+          });
+
+          // Get uploadedItems from existing verification data or from the prop
+          const uploadedItems =
+            existingVerificationData?.uploadedItems ||
+            verificationData?.verificationData?.uploadedItems ||
+            verificationData?.uploadedItems ||
+            [];
+
+          // Remove uploadedItems from allSectionsData if it exists there (we'll add it at the end)
+          const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
+            allSectionsData;
+
+          // Include uploadedItems inside verificationData (at the root level of verificationData)
+          const mergedVerificationData = {
+            ...sectionsWithoutUploadedItems,
+            uploadedItems: uploadedItems,
+          };
+
+          const verificationType =
+            verificationData?.type ||
+            completeVerificationData?.type ||
+            "Business";
+          const findings =
+            verificationData?.findings ||
+            completeVerificationData?.findings ||
+            "Business Verification Findings";
+          const approvedStatus =
+            verificationData?.approvedStatus ||
+            completeVerificationData?.approvedStatus ||
+            "Positive";
+
+          await verifierEditApi(String(id), verificationType, {
+            findings,
+            verificationData: mergedVerificationData,
+            // approvedStatus,
+          });
+
+          // Also save to IndexedDB for local tracking
+          const request = indexedDB.open("editLogs", 1);
+
+          request.onerror = (event: any) => {
+            console.error("Database error:", request.error);
+          };
+
+          request.onsuccess = (event: any) => {
+            const db = event.target.result;
+
+            try {
+              const transaction = db.transaction("logs", "readwrite");
+              const store = transaction.objectStore("logs");
+
+              const getRequest = store.get(`${id}_${activeTab}`);
+
+              getRequest.onsuccess = () => {
+                const existingData = getRequest.result || {};
+
+                const logEntry = {
+                  id: `${id}_${activeTab}`,
+                  ...existingData,
                   [sectionId]: sectionData,
-                }));
+                  timestamp: new Date().toISOString(),
+                };
 
-                // Clear section uncommitted changes
-                setSectionUncommittedChanges((prev: any) => {
-                  const newChanges = { ...prev };
-                  delete newChanges[sectionId];
-                  return newChanges;
-                });
+                const putRequest = store.put(logEntry);
 
-                setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+                putRequest.onsuccess = () => {
+                  // Move uncommitted changes to committed changes
+                  setChangedData((prev: any) => ({
+                    ...prev,
+                    [sectionId]: sectionData,
+                  }));
+
+                  // Clear section uncommitted changes
+                  setSectionUncommittedChanges((prev: any) => {
+                    const newChanges = { ...prev };
+                    delete newChanges[sectionId];
+                    return newChanges;
+                  });
+
+                  setLocalEditLogsUpdated((prev) => prev + 1); // Trigger refresh
+                };
+
+                putRequest.onerror = () => {
+                  console.error("Error saving to IndexedDB:", putRequest.error);
+                };
               };
 
-              putRequest.onerror = () => {
-                console.error("Error saving section:", putRequest.error);
-                message.error("Failed to save section");
+              getRequest.onerror = () => {
+                console.error("Error fetching existing log:", getRequest.error);
               };
-            };
 
-            getRequest.onerror = () => {
-              console.error("Error fetching existing log:", getRequest.error);
-            };
+              transaction.oncomplete = () => {
+                db.close();
+              };
 
-            transaction.oncomplete = () => {
+              transaction.onerror = () => {
+                console.error("Transaction error:", transaction.error);
+                db.close();
+              };
+            } catch (error) {
+              console.error("Error in transaction:", error);
               db.close();
-            };
+            }
+          };
 
-            transaction.onerror = () => {
-              console.error("Transaction error:", transaction.error);
-              db.close();
-            };
-          } catch (error) {
-            console.error("Error in transaction:", error);
-            db.close();
-          }
-        };
+          message.success(
+            `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
+          );
+
+          // Refresh verification data
+          fetchVerificationData?.();
+        } catch (error: any) {
+          console.error("Error saving section to backend:", error);
+          const errorMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to save section";
+          message.error(errorMessage);
+        }
       } catch (error) {
         console.error("Error saving section:", error);
         message.error("Failed to save section");
       }
     };
 
+    // Header component - no memo to ensure it re-renders when state changes
+    const SectionHeader = ({
+      sectionLabel,
+      sectionId,
+      sectionChanges,
+      onSave,
+    }: {
+      sectionLabel: string;
+      sectionId: string;
+      sectionChanges: any;
+      onSave: () => void;
+    }) => {
+      // Calculate hasChanges directly from the state passed as prop
+      // Handle undefined/null sectionChanges properly
+      const hasChanges = (() => {
+        if (!sectionChanges || typeof sectionChanges !== "object") {
+          return false;
+        }
+
+        const keys = Object.keys(sectionChanges);
+        if (keys.length === 0) {
+          return false;
+        }
+
+        // Check if there are any non-empty values
+        return keys.some((key) => {
+          const value = sectionChanges[key];
+
+          // Skip empty strings
+          if (value === "" || value === null || value === undefined) {
+            return false;
+          }
+
+          // Check arrays
+          if (Array.isArray(value)) {
+            return value.length > 0;
+          }
+
+          // Check objects (but not empty objects)
+          if (typeof value === "object" && value !== null) {
+            return Object.keys(value).length > 0;
+          }
+
+          // For other types, if it exists, it's a change
+          return true;
+        });
+      })();
+
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>{sectionLabel}</span>
+          {(role === "Verifier" || role === "Admin") &&
+            activeSections.includes(sectionId) &&
+            hasChanges && (
+              <Button
+                type="primary"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent collapse toggle
+                  onSave();
+                }}
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "12px",
+                  height: "24px",
+                  padding: "0 8px",
+                }}
+              >
+                Save
+              </Button>
+            )}
+        </div>
+      );
+    };
+
     return (
       <div>
-        {schema?.sections?.map((section: any) => (
-          // <Card
-          //   key={section.id}
-          //   title={section.label}
-          //   extra={
-          //     <Button
-          //       type="text"
-          //       icon={<EditOutlined />}
-          //       onClick={() => onEdit(section.id)}
-          //       disabled={readOnly}
-          //     />
-          //   }
-          //   style={{ marginBottom: 16 }}
-          // >
-          <Collapse
-            activeKey={activeSections}
-            onChange={(keys) => setActiveSections(keys as string[])}
-            accordion
-          >
+        <Collapse
+          activeKey={activeSections}
+          onChange={(keys) => {
+            // Only update if user manually changed (not from state updates)
+            setActiveSections(
+              Array.isArray(keys) ? keys : [keys].filter(Boolean)
+            );
+          }}
+          accordion={false}
+        >
+          {schema?.sections?.map((section: any) => (
             <Collapse.Panel
               key={section.id}
               header={
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span>{section.label}</span>
-                  {role === "Verifier" &&
-                    activeSections.includes(section.id) &&
-                    hasUncommittedChanges(section.id) && (
-                      <Button
-                        type="primary"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent collapse toggle
-                          handleSectionSave(section.id);
-                        }}
-                        style={{
-                          marginLeft: "8px",
-                          fontSize: "12px",
-                          height: "24px",
-                          padding: "0 8px",
-                        }}
-                      >
-                        Save
-                      </Button>
-                    )}
-                </div>
+                <SectionHeader
+                  sectionLabel={section.label}
+                  sectionId={section.id}
+                  sectionChanges={sectionUncommittedChanges[section.id] || {}}
+                  onSave={() => handleSectionSave(section.id)}
+                />
               }
             >
               {/* <Form layout="vertical"> */}
@@ -1116,12 +1298,15 @@ export const BusinessVerificationDetails: React.FC<
                 readOnly={readOnly}
                 setSectionUncommittedChanges={setSectionUncommittedChanges}
                 changedData={changedData}
+                onFormInstanceReady={(formInstance) => {
+                  formInstancesRef.current[section.id] = formInstance;
+                }}
+                isActive={activeSections.includes(section.id)}
               />
               {/* </Form> */}
             </Collapse.Panel>
-          </Collapse>
-          // </Card>
-        ))}
+          ))}
+        </Collapse>
       </div>
     );
   };
@@ -1133,21 +1318,58 @@ export const BusinessVerificationDetails: React.FC<
     readOnly,
     setSectionUncommittedChanges,
     changedData,
+    onFormInstanceReady,
+    isActive,
   }: {
     section: any;
     data: any;
     readOnly: boolean;
     setSectionUncommittedChanges: (fn: (prev: any) => any) => void;
     changedData: any;
+    onFormInstanceReady?: (formInstance: any) => void;
+    isActive?: boolean;
   }) => {
-    console.log(section);
+    // console.log(section);
     const [form] = Form.useForm();
-    const initialValuesSet = React.useRef(false);
+    const previousSectionIdRef = React.useRef<string | null>(null);
+    const previousIsActiveRef = React.useRef<boolean>(false);
+    const lastInitializedDataRef = React.useRef<any>(null);
 
-    // Set initial form values
+    // Register form instance with parent
     React.useEffect(() => {
-      form.setFieldsValue(data);
-    }, [data, form]);
+      if (onFormInstanceReady) {
+        onFormInstanceReady(form);
+      }
+    }, [form, onFormInstanceReady]);
+
+    // Set initial form values when section changes, on first mount, or when section becomes active
+    React.useEffect(() => {
+      const isNewSection = previousSectionIdRef.current !== section.id;
+      const becameActive = isActive && !previousIsActiveRef.current;
+
+      if (isNewSection || previousSectionIdRef.current === null) {
+        // New section or first mount - initialize with data (includes uncommitted changes)
+        form.setFieldsValue(data || {});
+        previousSectionIdRef.current = section.id;
+        previousIsActiveRef.current = isActive || false;
+        lastInitializedDataRef.current = data;
+      } else if (becameActive) {
+        // Section became active - re-initialize with latest data (preserves uncommitted changes)
+        // Only re-initialize if data actually changed to avoid losing user input
+        if (
+          JSON.stringify(data) !==
+          JSON.stringify(lastInitializedDataRef.current)
+        ) {
+          form.setFieldsValue(data || {});
+          lastInitializedDataRef.current = data;
+        }
+        previousIsActiveRef.current = true;
+      } else {
+        previousIsActiveRef.current = isActive || false;
+      }
+      // Intentionally not including 'data' in deps to avoid resetting during typing
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [section.id, form, isActive]);
 
     // Form change handler - update section-level uncommitted changes
     const handleFormChange = useCallback(
@@ -1450,24 +1672,31 @@ export const BusinessVerificationDetails: React.FC<
 
     const [items, setItems] = useState(() => ensureArrayWithIds(data));
     const [form] = Form.useForm();
-    const initialValuesSet = React.useRef(false);
+    const previousFieldIdRef = React.useRef<string | null>(null);
 
-    // Update items when data changes
+    // Update items only when field changes or on initial mount
+    // Don't reset when data changes due to user input
     React.useEffect(() => {
-      const newItems = ensureArrayWithIds(data);
-      setItems(newItems);
+      const isNewField = previousFieldIdRef.current !== field.id;
+      if (isNewField || previousFieldIdRef.current === null) {
+        const newItems = ensureArrayWithIds(data);
+        setItems(newItems);
 
-      // Set form values
-      const formValues: any = {};
-      newItems.forEach((item: any, index: number) => {
-        Object.keys(item).forEach((key) => {
-          if (key !== "_id") {
-            formValues[`${field.id}[${index}].${key}`] = item[key];
-          }
+        // Set form values
+        const formValues: any = {};
+        newItems.forEach((item: any, index: number) => {
+          Object.keys(item).forEach((key) => {
+            if (key !== "_id") {
+              formValues[`${field.id}[${index}].${key}`] = item[key];
+            }
+          });
         });
-      });
-      form.setFieldsValue(formValues);
-    }, [data, field.id, form]);
+        form.setFieldsValue(formValues);
+        previousFieldIdRef.current = field.id;
+      }
+      // Intentionally not including 'data' to avoid resetting on user input
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [field.id, form]);
 
     // Array form change handler - update section-level uncommitted changes
     const handleArrayFormChange = useCallback(
@@ -1502,6 +1731,26 @@ export const BusinessVerificationDetails: React.FC<
       },
       [field.id, sectionId, setSectionUncommittedChanges]
     );
+
+    // Sync form values and trigger change handler when items change
+    const previousItemsLengthRef = React.useRef(items.length);
+    React.useEffect(() => {
+      if (previousItemsLengthRef.current !== items.length) {
+        // Items were added or removed, update form and trigger change handler
+        const formValues: any = {};
+        items.forEach((item: any, index: number) => {
+          Object.keys(item).forEach((key) => {
+            if (key !== "_id") {
+              formValues[`${field.id}[${index}].${key}`] = item[key];
+            }
+          });
+        });
+        form.setFieldsValue(formValues);
+        handleArrayFormChange({}, formValues);
+        previousItemsLengthRef.current = items.length;
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [items.length]);
 
     const addItem = () => {
       const newItem: any = {
@@ -2061,58 +2310,20 @@ export const BusinessVerificationDetails: React.FC<
         ) : null}
       </div>
 
-      {/* Edit Request Logs - Conditional rendering based on department */}
-      {role !== "VerificationExecutive" && (
+      {/* Edit Request Logs - Only for FI department, not for PD */}
+      {role !== "VerificationExecutive" && currentDepartment !== "PD" && (
         <section style={{ marginBottom: 24 }}>
-          {currentDepartment === "PD"
-            ? useMemo(
-                () => (
-                  <PDRequestLogs
-                    currentData={data}
-                    changedData={changedData}
-                    verificationId={verificationId}
-                    fetchEditRequests={fetchEditRequests}
-                    disabled={hasEditRequest}
-                    admin={false}
-                    verificationType={activeTab}
-                    currentDepartment={currentDepartment}
-                    dynamicSchema={schemaForm}
-                  />
-                ),
-                [
-                  data,
-                  changedData,
-                  verificationId,
-                  hasEditRequest,
-                  activeTab,
-                  currentDepartment,
-                  schemaForm,
-                ]
-              )
-            : useMemo(
-                () => (
-                  <EditRequestLogs
-                    currentData={data}
-                    changedData={changedData}
-                    verificationId={verificationId}
-                    fetchEditRequests={fetchEditRequests}
-                    disabled={hasEditRequest}
-                    admin={false}
-                    verificationType={activeTab}
-                    currentDepartment={currentDepartment}
-                    dynamicSchema={schemaForm}
-                  />
-                ),
-                [
-                  data,
-                  changedData,
-                  verificationId,
-                  hasEditRequest,
-                  activeTab,
-                  currentDepartment,
-                  schemaForm,
-                ]
-              )}
+          <EditRequestLogs
+            currentData={data}
+            changedData={changedData}
+            verificationId={verificationId}
+            fetchEditRequests={fetchEditRequests}
+            disabled={hasEditRequest}
+            admin={false}
+            verificationType={activeTab}
+            currentDepartment={currentDepartment}
+            dynamicSchema={schemaForm}
+          />
         </section>
       )}
 
