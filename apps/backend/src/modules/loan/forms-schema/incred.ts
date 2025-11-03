@@ -1,9 +1,8 @@
-import financialsSchema from "../financials-schema/generic";
+import statement2Schema from "../financials-schema/statement2";
 export const incredSchema = {
   id: 20,
   bankName: "INCRED",
   sections: [
-    financialsSchema,
     {
       id: "general",
       label: "General",
@@ -323,6 +322,7 @@ export const incredSchema = {
       },
       required: true,
     },
+    statement2Schema,
   ],
 } as const;
 export default incredSchema;

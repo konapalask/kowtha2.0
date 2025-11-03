@@ -3,7 +3,6 @@ export const idfcPlSchema = {
   id: 18,
   bankName: "IDFC PL",
   sections: [
-    financialsSchema,
     {
       id: "general",
       label: "General",
@@ -420,6 +419,7 @@ export const idfcPlSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 

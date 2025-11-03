@@ -1,9 +1,8 @@
-import { financialsSchema } from "../financials-schema/generic";
+import statement4Schema from "../financials-schema/statement4";
 export const heroFincorpSchema = {
   id: 13,
   bankName: "Hero Fincorp",
   sections: [
-    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
@@ -365,6 +364,7 @@ export const heroFincorpSchema = {
         },
       },
     },
+    statement4Schema,
   ],
 } as const;
 

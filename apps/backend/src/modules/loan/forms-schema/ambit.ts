@@ -4,7 +4,6 @@ export const ambitSchema = {
   id: 8,
   bankName: "Ambit",
   sections: [
-    financialsSchema,
     {
       id: "general",
       label: "General",
@@ -478,6 +477,7 @@ export const ambitSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default ambitSchema;

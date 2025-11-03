@@ -1,9 +1,8 @@
-import financialsSchema from "../financials-schema/generic";
+import statement4Schema from "../financials-schema/statement4";
 export const rblSchema = {
   id: 6,
   bankName: "RBL",
   sections: [
-    financialsSchema,
     {
       id: "caseDetails",
       label: "Case Details",
@@ -633,6 +632,7 @@ export const rblSchema = {
       },
       required: true,
     },
+    statement4Schema,
   ],
 } as const;
 export default rblSchema;
