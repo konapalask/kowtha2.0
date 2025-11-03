@@ -4,10 +4,12 @@ import App from './App';
 import {name as appName} from './app.json';
 
 const isDev = __DEV__;
+const appEnv = (process.env && process.env.REACT_APP_ENV) || undefined;
 
 let RootComponent = App;
 
-if (!isDev) {
+// Wrap with CodePush only when not in development and not in production env
+if (!isDev && appEnv !== 'production') {
   const codePushOptions = {
     checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME,
     installMode: CodePush.InstallMode.IMMEDIATE,
