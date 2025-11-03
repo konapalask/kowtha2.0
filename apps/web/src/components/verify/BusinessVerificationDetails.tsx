@@ -2618,7 +2618,8 @@ export const BusinessVerificationDetails: React.FC<
                             marginBottom: "12px",
                             fontWeight: "600",
                             fontSize: "14px",
-                            textAlign: "center",
+                            display: "inline-block",
+                            minWidth: "300px",
                             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                           }}
                         >
