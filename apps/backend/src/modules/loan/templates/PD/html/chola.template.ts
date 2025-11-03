@@ -178,12 +178,6 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     (item: any) => formatMultiline(item?.recommendations || "")
   );
 
-  const financialStatement = verificationData.financialStatement || {};
-  const expenditure = financialStatement.expenditure || {};
-  const income = financialStatement.income || {};
-
-  const financialAnalysis = verificationData.financialAnalysis || {};
-
   const businessList = Array.isArray(aboutBusiness)
     ? aboutBusiness
         .map((item: any) =>
@@ -237,110 +231,6 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     ],
     bankingDetails
   );
-
-  // Create unified financial table with EXPENDITURE and INCOME columns
-  const createFinancialTable = () => {
-    const expenditureRows = [];
-    const incomeRows = [];
-    
-    // Expenditure items
-    if (hasValue(expenditure.toPurchaseOfMaterial)) {
-      expenditureRows.push(["To purchases of Material", formatCurrency(expenditure.toPurchaseOfMaterial)]);
-    }
-    if (hasValue(expenditure.toElectricity)) {
-      expenditureRows.push(["To Electricity", formatCurrency(expenditure.toElectricity)]);
-    }
-    if (hasValue(expenditure.toRent)) {
-      expenditureRows.push(["To Rent", formatCurrency(expenditure.toRent)]);
-    }
-    if (hasValue(expenditure.toSalaries)) {
-      expenditureRows.push(["To Salaries", formatCurrency(expenditure.toSalaries)]);
-    }
-    if (hasValue(expenditure.toTransportation)) {
-      expenditureRows.push(["To Transportation", formatCurrency(expenditure.toTransportation)]);
-    }
-    if (hasValue(expenditure.toOtherExpenses)) {
-      expenditureRows.push(["To Other expenses", formatCurrency(expenditure.toOtherExpenses)]);
-    }
-    if (hasValue(expenditure.toNetProfit)) {
-      expenditureRows.push(["To Net Profit", formatCurrency(expenditure.toNetProfit)]);
-    }
-    
-    // Income items
-    if (hasValue(income.byGrossReceipts)) {
-      incomeRows.push(["By Gross Receipts", formatCurrency(income.byGrossReceipts)]);
-    }
-    
-    // Calculate totals
-    const expenditureTotal = hasValue(expenditure.totalExpenditure) 
-      ? formatCurrency(expenditure.totalExpenditure) 
-      : "Not provided";
-    const incomeTotal = hasValue(income.totalIncome) 
-      ? formatCurrency(income.totalIncome) 
-      : "Not provided";
-    
-    // Find the maximum number of rows between expenditure and income
-    const maxRows = Math.max(expenditureRows.length, incomeRows.length);
-    
-    let tableRows = "";
-    
-    // Create table rows
-    for (let i = 0; i < maxRows; i++) {
-      const expenditureRow = expenditureRows[i] || ["", ""];
-      const incomeRow = incomeRows[i] || ["", ""];
-      
-      tableRows += `
-        <tr>
-          <td style="${cellStyle}">${expenditureRow[0]}</td>
-          <td style="${cellStyle}">${expenditureRow[1]}</td>
-          <td style="${cellStyle}">${incomeRow[0]}</td>
-          <td style="${cellStyle}">${incomeRow[1]}</td>
-        </tr>
-      `;
-    }
-    
-    // Add total row that spans both sections
-    tableRows += `
-      <tr>
-        <td style="${cellStyle};font-weight:bold;">Total</td>
-        <td style="${cellStyle};font-weight:bold;">${expenditureTotal}</td>
-        <td style="${cellStyle};font-weight:bold;">Total</td>
-        <td style="${cellStyle};font-weight:bold;">${incomeTotal}</td>
-      </tr>
-    `;
-    
-    return `
-      <table style="${tableStyle}">
-        <tr>
-          <td colspan="2" style="${cellStyle};font-weight:bold;text-align:center;background:#f5f5f5;">EXPENDITURE</td>
-          <td colspan="2" style="${cellStyle};font-weight:bold;text-align:center;background:#f5f5f5;">INCOME</td>
-        </tr>
-        <tr>
-          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">PARTICULARS</td>
-          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">Estimated</td>
-          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">PARTICULARS</td>
-          <td style="${cellStyle};font-weight:bold;background:#f5f5f5;">Estimated</td>
-        </tr>
-        ${tableRows}
-      </table>
-    `;
-  };
-
-  const financialDetailsTable = createFinancialTable();
-
-  const grossDisposable = hasValue(
-    financialAnalysis.totalGrossDisposableIncome
-  )
-    ? formatCurrency(financialAnalysis.totalGrossDisposableIncome)
-    : "Not provided";
-
-  const totalObligations = hasValue(financialAnalysis.totalObligations)
-    ? formatCurrency(financialAnalysis.totalObligations)
-    : "Not provided";
-
-  const netDisposable = hasValue(financialAnalysis.netDisposableIncome)
-    ? formatCurrency(financialAnalysis.netDisposableIncome)
-    : "Not provided";
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -416,17 +306,12 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         "We estimated financials, purely based on the valid documents provided by the applicant."
       }</p>
 
-      ${financialDetailsTable}
 
-      <ul>
-        <li>Total Gross disposable Income (A)       ${grossDisposable} per month</li>
-        <li>Total Obligations (B)       ${totalObligations} per month</li>
-        <li>Net Disposable Income (C = A – B)       ${netDisposable} per month</li>
-      </ul>
-
-
+      <br><br>
       <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
       <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
+
+      <div style="page-break-before: always;"></div>
       <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
 

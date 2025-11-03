@@ -114,7 +114,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
   const pdDetails = verificationData.pdVisitDetails || {};
   const profile = verificationData.businessProfile || {};
   const banking = verificationData.bankingAndWorkingCapital || {};
-  const suppliersClients = ensureArray(banking.suppliersClients || verificationData.suppliersClients?.suppliersClients);
+  const suppliersClients = ensureArray(verificationData.suppliersClients || []);
   const observations = verificationData.observations || {};
 
   const facilityRows = ensureArray(banking.facilities).map((facility: any) => [

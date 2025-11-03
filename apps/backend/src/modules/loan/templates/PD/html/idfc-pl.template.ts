@@ -170,11 +170,9 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
   const employment = verificationData.employmentDetails || {};
   const income = verificationData.incomeDetails || {};
   const banking = verificationData.bankingDetails || {};
-  const residence = verificationData.residenceDetails || verificationData.loanAmount || {};
+  const residence = verificationData.residenceDetails || {};
   const assets = verificationData.assetsOwned || {};
-  const bil = verificationData.bilLoanDetails || verificationData.loanDetailsBil || {};
-  const interviewer =
-    verificationData.interviewerDetails || verificationData.loanDetailsBil || {};
+  const bil = verificationData.loanDetailsBil || {};
 
   const latitude = general.latitude || verificationData.general?.lat || "";
   const longitude = general.longitude || verificationData.general?.lng || "";
@@ -310,10 +308,10 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       ${renderKeyValueTable([
         ["Loan Amount Applied", bil.loanAmountApplied, formatCurrency],
         ["End Use", bil.endUse],
-        ["Name of Interviewer", bil.nameOfInterviewer || interviewer.nameOfInterviewer],
-        ["Designation & Signature", bil.designationSignature || interviewer.designationAndSignature],
-        ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || interviewer.pdStatus],
-        ["Interviewer's Remarks", bil.interviewerSRemarks || interviewer.interviewersRemarks],
+        ["Name of Interviewer", bil.nameOfInterviewer || ""],
+        ["Designation & Signature", bil.designationSignature || ""],
+        ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || ""],
+        ["Interviewer's Remarks", bil.interviewerSRemarks || ""],
       ])}
 
       ${sectionTitle("Disclaimer Clause")}

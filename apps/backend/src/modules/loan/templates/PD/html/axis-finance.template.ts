@@ -177,7 +177,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const familySection = verificationData.familyBackground || {};
   const residence = verificationData.placeOfResidenceOffice || {};
   const company = verificationData.companyProfile || {};
-  const employment = verificationData["Self Employed/Salaried"] || {};
+  const employment = verificationData.selfEmployedOrSalaried || {};
   const businessDetails = verificationData.businessDetails || {};
   const employeeCosts = verificationData.employeotherMajorCost || {};
   const businessData = verificationData.businessData || {};

@@ -330,15 +330,6 @@ export const idfcPlSchema = {
               },
             },
           },
-          totalMonthlyCommitment: {
-            type: "number",
-            title: "Total Monthly Commitment",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
         },
       },
     },

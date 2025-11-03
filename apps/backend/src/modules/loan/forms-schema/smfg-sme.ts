@@ -423,6 +423,20 @@ export const smfgSmeSchema = {
             type: "string",
             title: "PD Conducted By (Name & Designation)",
           },
+          pdDesignation: {
+            type: "string",
+            title: "PD Designation",
+          },
+          pdDate: {
+            type: "string",
+            title: "PD Date",
+            format: "date",
+          },
+          pdTime: {
+            type: "string",
+            title: "PD Time",
+            format: "time",
+          },
         },
       },
     },

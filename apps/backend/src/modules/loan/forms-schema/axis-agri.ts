@@ -38,26 +38,6 @@ export const axisAgriSchema = {
             title: "Incorporation Date",
             format: "date",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
         required: ["referenceNumber", "nameOfFirm"],
       },
@@ -77,6 +57,7 @@ export const axisAgriSchema = {
           dateAndTimeOfPd: {
             type: "string",
             title: "Date & Time of PD",
+            format: "datetime",
           },
           placeOfPd: {
             type: "string",
