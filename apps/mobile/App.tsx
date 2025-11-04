@@ -35,6 +35,7 @@ import PD from './src/screens/PD';
 import QAFormTesting from './src/screens/QAFormTesting';
 import {UserProvider} from './src/contexts/UserContext';
 import ErrorBoundary from 'react-native-error-boundary';
+import RNRestart from 'react-native-restart';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -334,6 +335,7 @@ const ErrorFallback = ({error}: {error: Error}) => {
         onPress={() => {
           // Optionally restart the app or navigate to a safe screen
           console.log('Error occurred:', error);
+          RNRestart.restart();
         }}>
         <Text style={styles.errorButtonText}>Try Again</Text>
       </Pressable>

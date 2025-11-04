@@ -45,8 +45,11 @@ import {
   getCurrentDepartmentRole,
   useDepartmentChange,
 } from "@/utils/utility";
-import { pdBankOptions as staticPdBankOptions } from "@/utils/options";
-// import { getPdBanksApi } from "@/services/schema.service"; // Commented out: Using static options
+// import { pdBankOptions as staticPdBankOptions } from "@/utils/options";
+import {
+  getPdBanksApi,
+  getTemplateOptionsApi,
+} from "@/services/schema.service";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -100,7 +103,8 @@ export default function Loans() {
     fieldExecutiveEmployeeCode: undefined,
     fieldExecutiveName: undefined,
   });
-  const [pdBankOptions] = useState<any[]>(staticPdBankOptions);
+  const [pdBankOptions, setPdBankOptions] = useState<any[]>([]);
+  const [templateOptions, setTemplateOptions] = useState<any[]>([]);
 
   // Update currentOffice when department changes
   useEffect(() => {
@@ -167,18 +171,27 @@ export default function Loans() {
         // message.error("Failed to fetch verifiers");
       });
     // Commented out: Using static pdBankOptions from options.tsx instead of backend API
-    // getPdBanksApi()
-    //   .then((res) => {
-    //     const options =
-    //       res?.map((item: any) => ({
-    //         label: item,
-    //         value: item,
-    //       })) ?? [];
-    //     setPdBankOptions(options);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    getPdBanksApi()
+      .then((res) => {
+        const options =
+          res?.map((item: any) => ({
+            label: item,
+            value: item,
+          })) ?? [];
+        setPdBankOptions(options);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // Fetch template options from backend
+    getTemplateOptionsApi()
+      .then((res) => {
+        setTemplateOptions(res ?? []);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   const fetchExecutives = async () => {
@@ -869,6 +882,7 @@ export default function Loans() {
           setRefresh={setRefresh}
           fetchExecutives={fetchExecutives}
           pdBankOptions={pdBankOptions}
+          templateOptions={templateOptions}
         />
       )}
 
@@ -880,6 +894,7 @@ export default function Loans() {
         setLoading={setLoading}
         setRefresh={setRefresh}
         verifiers={verifiers}
+        templateOptions={templateOptions}
       />
     </DashboardLayout>
   );

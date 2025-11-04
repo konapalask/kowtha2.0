@@ -1,9 +1,9 @@
-import financialsSchema from "../financials-schema/generic";
+import statement2Schema from "../financials-schema/statement2";
+
 export const axisFinanceSchema = {
   id: 10,
   bankName: "Axis Finance",
   sections: [
-    financialsSchema,
     {
       id: "personalDiscussionSheet",
       label: "Personal Discussion Sheet",
@@ -487,6 +487,7 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
+    statement2Schema,
   ],
 } as const;
 export default axisFinanceSchema;

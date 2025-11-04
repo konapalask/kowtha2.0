@@ -65,6 +65,7 @@ interface LoanEditProps {
   setRefresh: (refresh: boolean) => void;
   fetchExecutives: any;
   pdBankOptions: any;
+  templateOptions: any[];
 }
 
 const LoanEditDrawer: React.FC<LoanEditProps> = ({
@@ -85,6 +86,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
   setRefresh,
   fetchExecutives,
   pdBankOptions,
+  templateOptions,
 }) => {
   const [form] = Form.useForm();
   const userDetails = getUserDetails();
@@ -377,6 +379,7 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                   setLoading={setLoading}
                   fetchLoanDetails={fetchLoanDetails}
                   pdBankOptions={pdBankOptions}
+                  templateOptions={templateOptions}
                 />
               ) : (
                 <Descriptions

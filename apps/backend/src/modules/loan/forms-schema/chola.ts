@@ -3,7 +3,6 @@ export const cholaSchema = {
   id: 11,
   bankName: "Chola",
   sections: [
-    financialsSchema,
     {
       id: "basicInformation",
       label: "Basic Information",
@@ -320,6 +319,7 @@ export const cholaSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 export default cholaSchema;

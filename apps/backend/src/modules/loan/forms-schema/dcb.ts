@@ -1,9 +1,8 @@
-import financialsSchema from "../financials-schema/generic";
+import statement3Schema from "../financials-schema/statement3";
 export const dcbSchema = {
   id: 12,
   bankName: "DCB",
   sections: [
-    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
@@ -750,6 +749,7 @@ export const dcbSchema = {
       },
       required: true,
     },
+    statement3Schema,
   ],
 } as const;
 export default dcbSchema;

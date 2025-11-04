@@ -473,6 +473,7 @@ export const axisBankSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 export default axisBankSchema;

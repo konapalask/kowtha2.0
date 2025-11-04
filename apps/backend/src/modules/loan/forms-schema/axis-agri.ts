@@ -3,7 +3,6 @@ export const axisAgriSchema = {
   id: 9,
   bankName: "Axis Agri",
   sections: [
-    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",
@@ -299,6 +298,7 @@ export const axisAgriSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

@@ -112,9 +112,9 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Repayment from</strong></p></td>
                     <td colspan="5" style="border:1px solid #ccc;padding:8px">
-                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.repaymentBankName || ""}</p>
-                        <p style="margin:8px 0;line-height:1.5">Type - ${verificationData.proposedLoanDetails?.typeSAAccount || ""}</p>
-                        <p style="margin:8px 0;line-height:1.5">Account No. - ${verificationData.proposedLoanDetails?.accountNo || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.repaymentFrom?.repaymentBankName || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">Type - ${verificationData.proposedLoanDetails?.repaymentFrom?.typeSAAccount || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">Account No. - ${verificationData.proposedLoanDetails?.repaymentFrom?.accountNo || ""}</p>
                     </td>
                 </tr>
                 <tr>

@@ -3,7 +3,6 @@ export const niwasSalariedSchema = {
   id: 23,
   bankName: "Niwas Salaried",
   sections: [
-    financialsSchema,
     {
       id: "generalInfo",
       label: "Basic Details",
@@ -680,6 +679,7 @@ export const niwasSalariedSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

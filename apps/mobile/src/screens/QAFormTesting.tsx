@@ -35,6 +35,163 @@ import {
 } from '../helpers/dummyPDData';
 import {generateMockDataFromSchema} from '../helpers/mockDataGenerator';
 
+// Deep merge utility that prefers source values and preserves arrays when source is non-empty
+const deepMerge = (target: any, source: any): any => {
+  if (source === undefined || source === null) return target;
+  if (Array.isArray(target) && Array.isArray(source)) {
+    // Prefer source array if it has items; otherwise keep target
+    return source.length > 0 ? source : target;
+  }
+  if (
+    target &&
+    typeof target === 'object' &&
+    !Array.isArray(target) &&
+    source &&
+    typeof source === 'object' &&
+    !Array.isArray(source)
+  ) {
+    const result: any = {...target};
+    Object.keys(source).forEach(key => {
+      result[key] = deepMerge(target?.[key], source[key]);
+    });
+    return result;
+  }
+  // For primitives or differing types, prefer source if it is not empty string/null/undefined
+  if (source === '' || source === null || source === undefined) return target;
+  return source;
+};
+
+// Field key mappings for automatic data population (align with PD.tsx)
+const FIELD_KEY_MAPPINGS: Record<string, string[]> = {
+  applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
+  businessName: [
+    'businessName',
+    'nameOfConcern',
+    'nameOfBusiness',
+    'nameOfEntity',
+  ],
+  phoneNo: ['applicantMobile', 'applicantContactNumber', 'phoneNo'],
+  applicationNumber: [
+    'applicationNumber',
+    'applicationNo',
+    'applicationId',
+    'referenceNumber',
+    'proposalNumber',
+  ],
+  loanAmount: ['loanAmount', 'amount'],
+  purposeOfLoan: ['loanType', 'purposeOfLoan'],
+  bankName: ['repaymentBankName', 'bankName'],
+  address: [
+    'applicantAddress',
+    'initiatedAddress',
+    'addressVisited',
+    'businessAddress',
+    'pdAddress',
+    'officeAddress',
+    'initiatedPremises',
+    'address',
+  ],
+  latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
+  longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
+  coordinates: [
+    'coordinates',
+    'geoTag',
+    'geoCoordinates',
+    'siteCoordinates',
+    'latitudeLongitude',
+  ],
+};
+
+const matchesFieldPattern = (fieldKey: string, patterns: string[]): boolean => {
+  const fieldKeyLower = fieldKey.toLowerCase();
+  return patterns.some(pattern =>
+    fieldKeyLower.includes(pattern.toLowerCase()),
+  );
+};
+
+// Dynamic schema-based initial data (similar to PD.tsx)
+const getInitialDataBySchema = (
+  schema: any,
+  userData: any,
+  loggedInUserName?: string,
+) => {
+  if (!userData || !schema) return {} as any;
+
+  const commonData: Record<string, any> = {
+    applicantName:
+      userData?.loan?.applicantName || userData?.applicantName || '',
+    businessName: userData?.businessName || userData?.loan?.businessName || '',
+    phoneNo: userData?.loan?.applicantMobile || userData?.contactNumber || '',
+    applicationNumber:
+      userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
+    loanAmount: userData?.loan?.loanAmount || '',
+    purposeOfLoan: userData?.loan?.loanType || '',
+    bankName: userData?.loan?.bankName || '',
+    address:
+      userData?.applicantAddress || userData?.loan?.applicantAddress || '',
+    latitude: '',
+    longitude: '',
+    coordinates: '',
+  };
+
+  const initialData: Record<string, any> = {};
+
+  if (schema?.sections) {
+    schema.sections.forEach((section: any) => {
+      initialData[section.id] = {};
+
+      if (section.schema?.properties) {
+        Object.keys(section.schema.properties).forEach(fieldKey => {
+          for (const [commonKey, patterns] of Object.entries(
+            FIELD_KEY_MAPPINGS,
+          )) {
+            if (matchesFieldPattern(fieldKey, patterns)) {
+              if (commonKey === 'coordinates') {
+                const coords = commonData.coordinates || '';
+                initialData[section.id][fieldKey] = coords;
+              } else if (
+                commonKey === 'latitude' ||
+                commonKey === 'longitude'
+              ) {
+                if (!initialData[section.id][fieldKey]) {
+                  initialData[section.id][fieldKey] = commonData[commonKey];
+                }
+              } else {
+                initialData[section.id][fieldKey] = commonData[commonKey];
+              }
+              break;
+            }
+          }
+
+          // Special case: pdDoneBy or nameOfPersonMet
+          if (
+            fieldKey.includes('pdDone') ||
+            fieldKey.includes('pdDoneBy') ||
+            fieldKey.includes('nameOfPersonMet') ||
+            fieldKey.includes('verifierName')
+          ) {
+            initialData[section.id][fieldKey] = loggedInUserName || '';
+          }
+
+          // Special case: bankName
+          if (
+            fieldKey.toLowerCase().includes('bank') &&
+            fieldKey.toLowerCase().includes('name')
+          ) {
+            initialData[section.id][fieldKey] = userData?.loan?.bankName || '';
+          }
+
+          if (!(fieldKey in initialData[section.id])) {
+            initialData[section.id][fieldKey] = '';
+          }
+        });
+      }
+    });
+  }
+
+  return initialData;
+};
+
 // Function to get initial data based on bank name
 const getInitialDataByBank = (
   bankName: string,
@@ -160,8 +317,8 @@ const getInitialDataByBank = (
             member.education === '10th'
               ? '10th pass'
               : member.education === '12th'
-                ? 'Under graduate'
-                : 'Graduate',
+              ? 'Under graduate'
+              : 'Graduate',
           occupation: member.occupation,
           relation: member.relationship,
           remarks: 'Verified at premises',
@@ -611,9 +768,14 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
 
       setSchemaForm(schema);
 
-      // Get initial data based on bank
-      let initialData = getInitialDataByBank(
+      // Get initial data: bank-specific + dynamic schema-based
+      let bankInitialData = getInitialDataByBank(
         selectedBank,
+        dummyData.userData,
+        loggedInUserName,
+      );
+      const schemaInitialData = getInitialDataBySchema(
+        schema,
         dummyData.userData,
         loggedInUserName,
       );
@@ -627,51 +789,50 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
           mockDataKeys: Object.keys(comprehensiveMockData),
         });
 
-        // Merge with initial data (initial data takes precedence for basic fields)
-        // Deep merge to handle nested objects properly
-        initialData = {
-          ...comprehensiveMockData,
-          ...initialData,
-        };
+        // Merge order (to preserve mock data):
+        // 1) Start with schema-based initial data
+        // 2) Merge bank-specific initial data on top (fills more keys)
+        // 3) Finally merge MOCK data LAST so it wins and is not lost
+        let mergedInitial = deepMerge(schemaInitialData, bankInitialData);
+        mergedInitial = deepMerge(mergedInitial, comprehensiveMockData);
 
-        // Handle specific bank section merging for better data integrity
-        Object.keys(comprehensiveMockData).forEach(sectionId => {
-          if (
-            (initialData as any)[sectionId] &&
-            typeof (initialData as any)[sectionId] === 'object' &&
-            !Array.isArray((initialData as any)[sectionId])
-          ) {
-            // Merge object sections, keeping initial data where it exists
-            (initialData as any)[sectionId] = {
-              ...(comprehensiveMockData as any)[sectionId],
-              ...(initialData as any)[sectionId],
-            };
-          } else if (!(initialData as any)[sectionId]) {
-            // If no initial data for this section, use mock data
-            (initialData as any)[sectionId] = (comprehensiveMockData as any)[
-              sectionId
-            ];
-          }
-        });
+        // Ensure per-section deep merge as well to retain mock section objects
+        if (schema.sections?.length) {
+          schema.sections.forEach((section: any) => {
+            const id = section.id;
+            const base = (schemaInitialData as any)[id] || {};
+            const bankBase = (bankInitialData as any)[id] || {};
+            const mockBase = (comprehensiveMockData as any)[id] || {};
+            mergedInitial[id] = deepMerge(deepMerge(base, bankBase), mockBase);
+          });
+        }
 
         console.log(
-          '✅ Enhanced Mock Data Generation: Generated comprehensive faker.js data for all sections',
+          '✅ Merge complete with mock data preserved (mock wins on conflicts)',
           {bankName: selectedBank},
         );
+
+        // AUTO-INJECT GPS COORDINATES into all sections that need it
+        const dataWithCoordinates = injectCoordinatesIntoSections(
+          mergedInitial,
+          dummyData.coordinates,
+          schema,
+        );
+
+        setSectionData(dataWithCoordinates);
+        setFormLoaded(true);
       } catch (error) {
         console.error('❌ Failed to generate comprehensive mock data:', error);
-        // Continue with basic initialData as fallback
+        // Fallback: still combine schema + bank initial data
+        const mergedInitial = deepMerge(schemaInitialData, bankInitialData);
+        const dataWithCoordinates = injectCoordinatesIntoSections(
+          mergedInitial,
+          dummyData.coordinates,
+          schema,
+        );
+        setSectionData(dataWithCoordinates);
+        setFormLoaded(true);
       }
-
-      // AUTO-INJECT GPS COORDINATES into all sections that need it
-      const dataWithCoordinates = injectCoordinatesIntoSections(
-        initialData,
-        dummyData.coordinates,
-        schema,
-      );
-
-      setSectionData(dataWithCoordinates);
-      setFormLoaded(true);
 
       Toast.show({
         type: 'success',
@@ -721,8 +882,9 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
 
         // Inject coordinates (for RBL and similar banks with "coordinates" field)
         if (hasCoordinates) {
-          updatedData[section.id].coordinates =
-            `${coordinates.latitude},${coordinates.longitude}`;
+          updatedData[
+            section.id
+          ].coordinates = `${coordinates.latitude},${coordinates.longitude}`;
         }
 
         // Inject separate latitude/longitude fields
@@ -982,7 +1144,9 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
           console.log(
             `🔍 Section ${section.id} - Required fields:`,
             requiredFields,
-            `(base: ${baseRequiredFields}, conditional: ${requiredFields.length !== baseRequiredFields.length})`,
+            `(base: ${baseRequiredFields}, conditional: ${
+              requiredFields.length !== baseRequiredFields.length
+            })`,
           );
 
           for (const fieldId of requiredFields) {
@@ -1024,7 +1188,11 @@ const QAFormTesting = ({navigation}: {navigation: any}) => {
                       const itemFieldTitle =
                         fieldSchema.items?.properties?.[requiredField]?.title ||
                         requiredField;
-                      const errorMsg = `${section.label} → ${fieldSchema.title} [${index + 1}] → ${itemFieldTitle}: Required field is empty`;
+                      const errorMsg = `${section.label} → ${
+                        fieldSchema.title
+                      } [${
+                        index + 1
+                      }] → ${itemFieldTitle}: Required field is empty`;
                       console.log('❌ VALIDATION ERROR:', errorMsg);
                       validationErrors.push(errorMsg);
                     }

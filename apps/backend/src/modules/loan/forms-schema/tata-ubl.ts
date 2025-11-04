@@ -54,23 +54,25 @@ export const tataUblSchema = {
             title: "Tenure (months)",
           },
           repaymentFrom: {
-            type: "string",
+            type: "object",
             title: "Repayment from (Bank name)",
-          },
-          repaymentBankName: {
-            type: "string",
-            title: "Bank name",
-            readOnly: true,
-          },
-          typeSAAccount: {
-            type: "enum",
-            title: "Type (SA A/C)",
-            enum: ["Savings", "Current", "Fixed Deposit"],
-            default: "Savings",
-          },
-          accountNo: {
-            type: "number",
-            title: "Account No.",
+            properties: {
+              repaymentBankName: {
+                type: "string",
+                title: "Bank name",
+                readOnly: true,
+              },
+              typeSAAccount: {
+                type: "string",
+                title: "Type (SA A/C)",
+                enum: ["Savings", "Current", "Fixed Deposit"],
+                default: "Savings",
+              },
+              accountNo: {
+                type: "number",
+                title: "Account No.",
+              },
+            },
           },
         },
       },
