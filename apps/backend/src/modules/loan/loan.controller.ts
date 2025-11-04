@@ -43,7 +43,12 @@ import {
   Delete,
 } from "@nestjs/common";
 import { PDTemplateService } from "./pd-templates.service";
-import { formSchema, BANK_NAMES, getAllTemplateOptions } from "./forms-schema";
+import {
+  formSchema,
+  BANK_NAMES,
+  getAllTemplateOptions,
+  bankSchemas,
+} from "./forms-schema";
 import { financialsSchema } from "./financials-schema/generic";
 
 @ApiTags("loans")
@@ -1284,6 +1289,20 @@ export class LoanController {
   @Get("get-bank-forms")
   @Roles(All)
   @ApiOperation({ summary: "Get bank forms schema with metadata" })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        bankName: {
+          type: "string",
+          description:
+            "Bank name or template name to match against BankSchemaConfig",
+          example: "Axis Bank",
+        },
+      },
+      required: ["bankName"],
+    },
+  })
   @ApiResponse({ status: 200, description: "Bank forms fetched successfully" })
   async getBankForms(
     @Query("bankName") bankName: string,
@@ -1307,30 +1326,34 @@ export class LoanController {
       };
     }
 
-    // Return Financial Analysis schema (generic for now)
-    if (type === "financial-analysis") {
-      return {
-        status: 200,
-        message: "Financial analysis schema fetched successfully",
-        data: financialsSchema,
-      };
-    }
-    if (
-      !bankName ||
-      !Object.prototype.hasOwnProperty.call(formSchema, bankName)
-    ) {
+    if (!bankName) {
       return {
         status: 400,
-        message: "Invalid or unsupported bank name",
+        message: "Bank name is required",
         data: null,
       };
     }
 
-    const schema = formSchema[bankName];
+    // Find matching BankSchemaConfig by bankName or template name
+    const matchingConfig = bankSchemas.find(
+      (config) =>
+        config.bankName === bankName || config.templates.includes(bankName)
+    );
+
+    if (!matchingConfig) {
+      return {
+        status: 400,
+        message: "Invalid or unsupported bank name or template",
+        data: null,
+      };
+    }
+
+    const schema = matchingConfig.schema;
+    const matchedBankName = matchingConfig.bankName;
 
     // Add metadata for verifier fields and template mapping
     const result = {
-      bankName: bankName,
+      bankName: matchedBankName,
       schema: schema,
       metadata: {
         // Fields that verifiers can add/edit (common across all banks)
@@ -1340,12 +1363,8 @@ export class LoanController {
           "path",
           "approvedStatus",
           "comments",
-        ],
-        // Template information for PDF generation
-        hasCustomTemplate: ["RBL"].includes(bankName),
-        // Section IDs for mapping (extracted from schema)
-        sectionIds: schema.sections?.map((s: any) => s.id) || [],
-      },
+        ]
+      }
     };
 
     return {
