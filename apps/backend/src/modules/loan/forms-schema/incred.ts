@@ -15,34 +15,43 @@ export const incredSchema = {
             title: "Application No",
             readOnly: true,
           },
-          nameOfTheApplicantConcern: {
+          nameOfApplicant: {
             type: "string",
-            title: "Name of the Applicant/Concern",
+            title: "Name of the Applicant",
             readOnly: true,
           },
-          nameOfCoApplicantCoApplicantS: {
+          nameOfCoApplicant: {
             type: "string",
-            title: "Name of Co-Applicant / Co-applicant's",
+            title: "Name of the Co-Applicant",
           },
-          latitude: {
+          visitedPremiseBusinessAddress: {
             type: "string",
-            title: "Latitude",
+            title: "Visited Premise / Business Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          longitude: {
+          personMeetOwnerOfTheBusinessWithContactNo: {
             type: "string",
-            title: "Longitude",
+            title: "Person Meet/owner of the business with Contact No",
           },
-          region: {
+          dateTimeOfVisit: {
             type: "string",
-            title: "Region",
+            title: "Date & time of Visit",
+            format: "datetime",
           },
-          location: {
+          pdDoneByWithDesignation: {
             type: "string",
-            title: "Location",
+            title: "PD Done by with Designation",
           },
-          branch: {
+          loanAmtAppliedAndPurpose: {
             type: "string",
-            title: "Branch",
+            title: "Loan Amt. Applied and Purpose",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
         required: ["applicationNo", "nameOfTheApplicantConcern"],
@@ -50,40 +59,40 @@ export const incredSchema = {
       required: true,
     },
     {
-      id: "dateTimeOfVisit",
-      label: "Date & time of Visit",
+      id: "applicantAndBusinessDetails",
+      label: "Applicant and Business Details",
       schema: {
         type: "object",
         properties: {
-          pdDoneByWithDesignation: {
-            type: "string",
-            title: "PD Done by with Designation",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "loanAmtAppliedAndPurpose",
-      label: "Loan Amt. Applied and Purpose",
-      schema: {
-        type: "object",
-        properties: {
-          aboutTheApplicantBusiness: {
+          aboutTheApplicantOrBusiness: {
             type: "string",
             title: "About the Applicant/Business",
+            ui: {
+              widget: "textarea",
+              rows: 8,
+            },
           },
           aboutTheCoApplicant: {
             type: "string",
             title: "About the Co-Applicant",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
-          asPerAuditedItrs: {
-            type: "string",
-            title: "As Per Audited ITRs",
-          },
-          turnoverRs: {
+          asPerAuditedItrsTurnover: {
             type: "number",
-            title: "Turnover (Rs.)",
+            title: "As Per Audited ITRs - Turnover",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          asPerAuditedItrsNetProfit: {
+            type: "number",
+            title: "As Per Audited ITRs - Net Profit",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -96,16 +105,12 @@ export const incredSchema = {
       required: true,
     },
     {
-      id: "netProfitRs",
-      label: "Net Profit (Rs.)",
+      id: "asPerAssessment",
+      label: "As Per Assessment",
       schema: {
         type: "object",
         properties: {
-          asPerAssessment: {
-            type: "string",
-            title: "As Per Assessment",
-          },
-          receiptsPerMonthRs: {
+          receiptsPerMonth: {
             type: "number",
             title: "Receipts Per Month (Rs.)",
             formatter: {
@@ -115,7 +120,7 @@ export const incredSchema = {
               minDecimalPlaces: 0,
             },
           },
-          purchasesPerMonthRs: {
+          purchasesPerMonth: {
             type: "number",
             title: "Purchases Per Month (Rs.)",
             formatter: {
@@ -125,7 +130,7 @@ export const incredSchema = {
               minDecimalPlaces: 0,
             },
           },
-          expensesPerMonthRs: {
+          expensesPerMonth: {
             type: "number",
             title: "Expenses Per Month (Rs.)",
             formatter: {
@@ -135,13 +140,19 @@ export const incredSchema = {
               minDecimalPlaces: 0,
             },
           },
-          whetherRegisteredUnderMsme: {
-            type: "boolean",
-            title: "Whether registered under MSME",
-          },
-          whetherRegisteredUnderGst: {
-            type: "boolean",
-            title: "Whether Registered under GST",
+        },
+      },
+      required: true,
+    },
+    {
+      id: "noOfEmployees",
+      label: "No. of Employees",
+      schema: {
+        type: "object",
+        properties: {
+          noOfEmployees: {
+            type: "integer",
+            title: "No. of Employees",
           },
         },
       },
@@ -153,41 +164,116 @@ export const incredSchema = {
       schema: {
         type: "object",
         properties: {
-          fyEGFy202526: {
-            type: "string",
-            title: "FY (e.g., FY 2025-26)",
+          debtors: {
+            type: "object",
+            properties: {
+              fy2020to2021: {
+                type: "number",
+                title: "FY 2020-21",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              currentPeriodOrAtTimeOfPd: {
+                type: "string",
+                title: "Current Period / At Time of PD",
+              },
+              noOfDays: {
+                type: "integer",
+                title: "Credit Period allowed to Debtors - No. of Days",
+              },
+            },
           },
-          currentPeriodAtTimeOfPd: {
-            type: "number",
-            title: "Current Period / At Time of PD",
+          creditors: {
+            type: "object",
+            properties: {
+                fy2020to2021: {
+                type: "number",
+                title: "FY 2020-21",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+                currentPeriodOrAtTimeOfPd: {
+                  type: "string",
+                  title: "Current Period / At Time of PD",
+                },
+                noOfDays: {
+                  type: "integer",
+                  title: "Credit Period allowed by Creditors/Supplies - No. of Days",
+                },
+              },
+            },
           },
-          noOfDays: {
-            type: "integer",
-            title: "No. of Days",
+          stock: {
+            type: "object",
+            properties: {
+              fy2020to2021: {
+                type: "number",
+                title: "FY 2020-21",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+                currentPeriodOrAtTimeOfPd: {
+                  type: "string",
+                  title: "Current Period / At Time of PD",
+                },
+                noOfDays: {
+                  type: "integer",
+                  title: "Credit Period allowed by Creditors/Supplies - No. of Days"
+                }
+              },
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "creditPeriodAllowedByCreditorsSupplies",
-      label: "Credit Period allowed by Creditors/Supplies",
+      id: "capitalInvestmentTillDate",
+      label: "Capital Investment Till Date",
       schema: {
         type: "object",
         properties: {
-          stock: {
-            type: "string",
-            title: "Stock",
-          },
-          capitalInvestmentTillDate: {
+          tillDate: {
             type: "number",
-            title: "Capital Investment Till Date",
+            title: "Till Date",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "documentsObserved",
+      label: "Documents Observed",
+      schema: {
+        type: "object",
+        properties: {
+          documentsObserved: {
+            type: "string",
+            title: "Documents observed/ Statutory requirement docs",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          docsVerified: {
+            type: "string",
+            title: "Docs Verified for P&L",
           },
         },
       },
@@ -199,29 +285,71 @@ export const incredSchema = {
       schema: {
         type: "object",
         properties: {
-          name: {
-            type: "string",
-            title: "Name",
-          },
-          relation: {
-            type: "string",
-            title: "Relation",
-          },
-          age: {
-            type: "integer",
-            title: "Age",
-          },
-          education: {
-            type: "string",
-            title: "Education",
-          },
-          occupation: {
-            type: "string",
-            title: "Occupation",
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relation: {
+                  type: "string",
+                  title: "Relation",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                education: {
+                  type: "string",
+                  title: "Education",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+              },
           },
           noOfDependents: {
             type: "integer",
             title: "No. of Dependents",
+          },
+          generalLifestylePersonality: {
+            type: "string",
+            title: "General Lifestyle/Personality",
+          },
+        },
+      },
+      },
+    },
+    {
+      id: "residenceOfficeCollateralDetails",
+      label: "RESIDENCE/OFFICE/Collateral Details",
+      schema: {
+        type: "object",
+        properties: {
+          ownershipAndNameOfOwners: {
+            type: "string",
+            title: "OWNERSHIP AND NAME OF OWNERS",
+          },
+          officePremisesDetails: {
+            type: "string",
+            title: "OFFICE PREMISES DETAILS",
+          },
+          residenceCurrentAddressDetails: {
+            type: "string",
+            title: "RESIDENCE/CURRENT ADDRESS DETAILS",
+          },
+          collateralDescriptionAndTypeApproxValue: {
+            type: "string",
+            title: "COLLATERAL DESCRIPTION AND TYPE & Approx Value",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
@@ -231,53 +359,120 @@ export const incredSchema = {
       id: "otherLiabilitiesLoansApplicantCoApplicants",
       label: "Other Liabilities / Loans (Applicant/Co-Applicants)",
       schema: {
-        type: "object",
-        properties: {
-          financier: {
-            type: "string",
-            title: "Financier",
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            financier: {
+              type: "string",
+              title: "Financier",
+            },
+            natureOfLoan: {
+              type: "string",
+              title: "Nature of Loan / Account No.",
+            },
+            loanAmount: {
+              type: "number",
+              title: "Loan Amount",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            emi: {
+              type: "number",
+              title: "EMI",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+              willCloseContinue: {
+                type: "string",
+                title: "Will Close / Continue",
+                enum: ["Close", "Continue"],
+              },
+              
+            },
           },
         },
       },
-      required: true,
-    },
+    },   
     {
-      id: "loanAmount",
-      label: "Loan Amount",
+      id: "chitFundetc",
+      label: "Chit fund, Private Finance and Hand loans etc",
       schema: {
         type: "object",
         properties: {
-          emi: {
-            type: "number",
-            title: "EMI",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          willCloseContinue: {
+          chitFundetc: {
             type: "string",
-            title: "Will Close / Continue",
+            title: "Chit fund, Private Finance and Hand loans etc",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
-      required: true,
+    }, 
+    {
+      id: "otherAssets",
+      label: "Other Assets",
+      schema: {
+        type: "object",
+        properties: {
+          otherAssets: {
+            type: "string",
+            title: "Other Assets",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
     },
+    {
+      id:"otherSourcesOfIncome",
+      label: "Other Sources of Income",
+      schema: {
+        type: "object",
+        properties: {
+          otherSourcesOfIncome: {
+            type: "string",
+            title: "Other Sources of Income",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    
     {
       id: "references",
       label: "References",
       schema: {
-        type: "object",
-        properties: {
-          sNo: {
-            type: "integer",
-            title: "S No",
-          },
-          nameOfThePerson: {
-            type: "string",
-            title: "Name of the Person",
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            nameOfThePerson: {
+              type: "string",
+              title: "Name of the Person",
+            },
+            telephoneNoAddressForCommunication: {
+              type: "string",
+              title: "Telephone No. / Address for Communication",
+            },
+            supplierOrBuyerOrMarketReference: {
+              type: "string",
+              title: "Supplier / Buyer / Market Reference",
+            },
           },
         },
       },
@@ -289,35 +484,13 @@ export const incredSchema = {
       schema: {
         type: "object",
         properties: {
-          estimatedIncome: {
-            type: "number",
-            title: "Estimated Income",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "theGrossSalesAsPerOurAssumptions",
-      label: "The Gross Sales as per our assumptions",
-      schema: {
-        type: "object",
-        properties: {
-          pbditMargin: {
-            type: "number",
-            title: "PBDIT Margin",
-          },
-          thePatOfTheBusinessConcernRs: {
+          observationsRemarksDuringPd: {
             type: "string",
-            title: "The PAT of the Business Concern (Rs.)",
-          },
-          overallPositivesNegatives: {
-            type: "string",
-            title: "Overall Positives / Negatives",
-          },
-          acceptReject: {
-            type: "string",
-            title: "Accept / Reject",
+            title: "Observations/Remarks During PD",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
         },
       },
