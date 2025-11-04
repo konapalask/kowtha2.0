@@ -18,12 +18,7 @@ import { FieldExecutiveAssignedDto } from "./dto/field-executive-assigned.dto";
 import { CreateVerificationRetryDto } from "./dto/create-verification-retry.dto";
 import { UpdateVerificationStatusDto } from "./dto/update-verification-status.dto";
 import { SubmitVerificationExecutiveDto } from "./dto/submit-verification-executive.dto";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody
-} from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import {
   VerificationType,
   LoanStatus,
@@ -31,7 +26,7 @@ import {
   VerificationStatus,
   AddressType,
   ApprovedStatus,
-  Department
+  Department,
 } from "@prisma/client";
 import {
   Controller,
@@ -45,10 +40,10 @@ import {
   BadRequestException,
   Patch,
   Res,
-  Delete
+  Delete,
 } from "@nestjs/common";
 import { PDTemplateService } from "./pd-templates.service";
-import { formSchema, BANK_NAMES } from "./forms-schema";
+import { formSchema, BANK_NAMES, getAllTemplateOptions } from "./forms-schema";
 import { financialsSchema } from "./financials-schema/generic";
 
 @ApiTags("loans")
@@ -58,7 +53,7 @@ export class LoanController {
   constructor(
     private loanService: LoanService,
     private pdTemplateService: PDTemplateService
-  ) { }
+  ) {}
 
   /*
       The below API's are used by only Operations Executive . His tasks include: Create Loan, Edit Loan, Assign Field Executive
@@ -349,7 +344,12 @@ export class LoanController {
   */
 
   @Get("get-verifier-loans")
-  @Roles(UserRole.Admin, UserRole.Verifier, UserRole.FieldExecutive, UserRole.VerificationExecutive)
+  @Roles(
+    UserRole.Admin,
+    UserRole.Verifier,
+    UserRole.FieldExecutive,
+    UserRole.VerificationExecutive
+  )
   @ApiOperation({ summary: "Get loans assigned to verifier" })
   @ApiResponse({
     status: 200,
@@ -393,9 +393,7 @@ export class LoanController {
         );
       } else if (department === Department.PD) {
         console.log("Preview PD Verification PDF");
-        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(
-          Number(id)
-        );
+        pdfBuffer = await this.pdTemplateService.generatePreviewPDF(Number(id));
       }
 
       res.set({
@@ -648,7 +646,8 @@ export class LoanController {
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({
     summary: "Update financial analysis data for a verification",
-    description: "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format."
+    description:
+      "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
   })
   @ApiResponse({
     status: 200,
@@ -704,7 +703,8 @@ export class LoanController {
   @Get(":id/export-financial-analysis")
   @Roles(UserRole.Admin, UserRole.Verifier)
   @ApiOperation({
-    summary: "Export financial analysis data as Excel file with bank-specific template",
+    summary:
+      "Export financial analysis data as Excel file with bank-specific template",
   })
   @ApiResponse({
     status: 200,
@@ -726,7 +726,8 @@ export class LoanController {
       );
 
       res.set({
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename=financial-analysis-loan-${loanId}.xlsx`,
         "Content-Length": excelBuffer.length,
       });
@@ -773,10 +774,14 @@ export class LoanController {
 
   @Get("field-executive/assigned")
   @Roles(UserRole.Admin, UserRole.FieldExecutive)
-  @ApiOperation({ summary: "Get all loans assigned to field executive with verification details" })
+  @ApiOperation({
+    summary:
+      "Get all loans assigned to field executive with verification details",
+  })
   @ApiResponse({
     status: 200,
-    description: "Returns a paginated list of loans assigned to the field executive with verification details",
+    description:
+      "Returns a paginated list of loans assigned to the field executive with verification details",
     schema: {
       type: "object",
       properties: {
@@ -957,8 +962,13 @@ export class LoanController {
 
   @Delete(":id/verification/:type")
   @Roles(UserRole.Admin, UserRole.OperationsExecutive)
-  @ApiOperation({ summary: "Delete verification assigned to a field executive" })
-  @ApiBody({ type: DeleteVerificationDto, description: "Field executive ID to identify the verification to delete" })
+  @ApiOperation({
+    summary: "Delete verification assigned to a field executive",
+  })
+  @ApiBody({
+    type: DeleteVerificationDto,
+    description: "Field executive ID to identify the verification to delete",
+  })
   @ApiResponse({
     status: 200,
     description: "The verification has been successfully deleted",
@@ -996,7 +1006,11 @@ export class LoanController {
     status: 400,
     description: "Cannot delete a completed verification",
   })
-  @ApiResponse({ status: 404, description: "Verification not found or not assigned to this field executive" })
+  @ApiResponse({
+    status: 404,
+    description:
+      "Verification not found or not assigned to this field executive",
+  })
   async deleteVerification(
     @Param("id") loanId: string,
     @Param("type") verificationType: VerificationType,
@@ -1101,7 +1115,8 @@ export class LoanController {
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({
     summary: "Create financial analysis data for a verification",
-    description: "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format."
+    description:
+      "Bank-specific DTO should be used based on the loan's bank. The DTO structure varies by bank template format.",
   })
   @ApiResponse({
     status: 201,
@@ -1205,7 +1220,12 @@ export class LoanController {
     @Param("id") loanId: string,
     @Body() submitDto: SubmitVerificationExecutiveDto
   ) {
-    const { verificationType, verificationData, synopsis, ...financialAnalysisData } = submitDto;
+    const {
+      verificationType,
+      verificationData,
+      synopsis,
+      ...financialAnalysisData
+    } = submitDto;
 
     const result = await this.loanService.submitVerificationExecutive(
       Number(loanId),
@@ -1278,6 +1298,15 @@ export class LoanController {
       };
     }
 
+    // Return all template options
+    if (type === "templates") {
+      return {
+        status: 200,
+        message: "Template options fetched successfully",
+        data: getAllTemplateOptions(),
+      };
+    }
+
     // Return Financial Analysis schema (generic for now)
     if (type === "financial-analysis") {
       return {
@@ -1325,5 +1354,4 @@ export class LoanController {
       data: result,
     };
   }
-
 }

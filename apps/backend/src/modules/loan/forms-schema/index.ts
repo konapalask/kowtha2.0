@@ -27,35 +27,210 @@ import adityaBirlaSchema from "./aditya-birla";
 import ambitSchema from "./ambit";
 import axisFinanceSchema from "./axis-finance";
 
-export const formSchema = {
-  "Axis Finance UBL Above 10L": axisFinanceUblAbove10lSchema,
-  "Axis Finance UBL Below 10L": axisFinanceUblBelow10lSchema,
-  "Axis Bank": axisBankSchema,
-  "Arka Fincap": arkaFincapSchema,
-  "Tata Ubl": tataUblSchema,
-  "RBL": rblSchema,
-  "HeroHousing-Salaried": herohousingSalariedSchema,
-  "HeroHousing-Self": herohousingSelfSchema,
-  "Chola": cholaSchema,
-  "DCB": dcbSchema,
-  "Hero Fincorp": heroFincorpSchema,
-  "ICICI": iciciSchema,
-  "IDFC HL & ML": idfcHlMlSchema,
-  "IDFC PL": idfcPlSchema,
-  "IIFL": iiflSchema,
-  "Niwas Salaried": niwasSalariedSchema,
-  "Niwas Senp": niwasSenpSchema,
-  "Yes Bank": yesBankSchema,
-  "SMFG SME": smfgSmeSchema,
-  "India Shelter SENP": indiaShelterSenpSchema,
-  "India Shelter Salaried": indiaShelterSalariedSchema,
-  "INCRED": incredSchema,
-  "Axis Agri": axisAgriSchema,
-  "Aditya Birla": adityaBirlaSchema,
-  "Ambit": ambitSchema,
-  "Axis Finance": axisFinanceSchema,
-} as const;
+export interface BankSchemaConfig {
+  bankName: string;
+  schema: any;
+  templates: string[];
+}
+
+export const bankSchemas: BankSchemaConfig[] = [
+  {
+    bankName: "Aditya Birla",
+    schema: adityaBirlaSchema,
+    templates: ["ADITYA BIRLA-HL", "ADITYA BIRLA-ML", "ADITYA BIRLA-STSL"],
+  },
+  {
+    bankName: "Ambit",
+    schema: ambitSchema,
+    templates: ["AMBIT-HL", "AMBIT-MSME"],
+  },
+  {
+    bankName: "Axis Finance",
+    schema: axisFinanceSchema,
+    templates: ["AXIS FINANCE-HL", "AXIS FINANCE-UBL"],
+  },
+  {
+    bankName: "Axis Finance UBL Above 10L",
+    schema: axisFinanceUblAbove10lSchema,
+    templates: [],
+  },
+  {
+    bankName: "Axis Finance UBL Below 10L",
+    schema: axisFinanceUblBelow10lSchema,
+    templates: [],
+  },
+  {
+    bankName: "Axis Bank",
+    schema: axisBankSchema,
+    templates: ["AXIS BANK"],
+  },
+  {
+    bankName: "Axis Agri",
+    schema: axisAgriSchema,
+    templates: ["AXIS AGRI", "AXIS BUSINESS AGRI"],
+  },
+  {
+    bankName: "Arka Fincap",
+    schema: arkaFincapSchema,
+    templates: ["ARKA FINCAP"],
+  },
+  {
+    bankName: "Chola",
+    schema: cholaSchema,
+    templates: ["CHOLA-HL", "CHOLA-SME"],
+  },
+  {
+    bankName: "DCB",
+    schema: dcbSchema,
+    templates: ["DCB BANK"],
+  },
+  {
+    bankName: "Hero Fincorp",
+    schema: heroFincorpSchema,
+    templates: ["HERO FINCORP"],
+  },
+  {
+    bankName: "HeroHousing-Salaried",
+    schema: herohousingSalariedSchema,
+    templates: ["HERO HOUSING-SALARIED", "HERO HOUSING"],
+  },
+  {
+    bankName: "HeroHousing-Self",
+    schema: herohousingSelfSchema,
+    templates: ["HERO HOUSING-SELF EMPLOYED", "HERO HOUSING"],
+  },
+  {
+    bankName: "ICICI",
+    schema: iciciSchema,
+    templates: ["ICICI"],
+  },
+  {
+    bankName: "IDFC HL & ML",
+    schema: idfcHlMlSchema,
+    templates: ["IDFC FIRST-HL", "IDFC FIRST-ML"],
+  },
+  {
+    bankName: "IDFC PL",
+    schema: idfcPlSchema,
+    templates: ["IDFC FIRST-PL"],
+  },
+  {
+    bankName: "IIFL",
+    schema: iiflSchema,
+    templates: ["IIFL"],
+  },
+  {
+    bankName: "India Shelter SENP",
+    schema: indiaShelterSenpSchema,
+    templates: ["INDIA SHELTER SENP", "INDIA SHELTER"],
+  },
+  {
+    bankName: "India Shelter Salaried",
+    schema: indiaShelterSalariedSchema,
+    templates: ["INDIA SHELTER SALARIED", "INDIA SHELTER"],
+  },
+  {
+    bankName: "INCRED",
+    schema: incredSchema,
+    templates: ["INCRED/KKR India Financial Services Limited"],
+  },
+  {
+    bankName: "Niwas Salaried",
+    schema: niwasSalariedSchema,
+    templates: ["NIWAS SALARIED", "NIWAS"],
+  },
+  {
+    bankName: "Niwas Senp",
+    schema: niwasSenpSchema,
+    templates: ["NIWAS SENP", "NIWAS"],
+  },
+  {
+    bankName: "RBL",
+    schema: rblSchema,
+    templates: ["RBL BANK (PD & LIP)"],
+  },
+  {
+    bankName: "SMFG SME",
+    schema: smfgSmeSchema,
+    templates: ["SMFG-SME"],
+  },
+  {
+    bankName: "Tata Ubl",
+    schema: tataUblSchema,
+    templates: ["TATA CAPITAL-UBL"],
+  },
+  {
+    bankName: "Yes Bank",
+    schema: yesBankSchema,
+    templates: ["YES BANK-HL"],
+  },
+];
+
+// Legacy formSchema for backward compatibility
+export const formSchema = bankSchemas.reduce(
+  (acc, config) => {
+    acc[config.bankName] = config.schema;
+    return acc;
+  },
+  {} as Record<string, any>
+) as Record<string, any>;
 
 export type FormSchema = typeof formSchema;
 export type BankName = keyof typeof formSchema;
 export const BANK_NAMES = Object.keys(formSchema) as BankName[];
+
+// Additional templates that don't have schemas yet
+const additionalTemplates = [
+  "CENTRUM",
+  "CENT BANK",
+  "CLIX CAPITAL-HL",
+  "CLIX CAPITAL-UBL",
+  "EASY HL",
+  "FED BANK (PD&LIP)",
+  "GODREJ-HL",
+  "GODREJ-UBL",
+  "INDUSIND",
+  "JANA SMALL FINANCE BANK LIMITED",
+  "KOTAK",
+  "MUTHOOT-HL",
+  "MUTHOOT FINCORP (PD & LIP)",
+  "NIDO HOME FINANCE",
+  "NORTHERN ARC",
+  "NIPUN",
+  "PIRAMAL (PD, AIP, LIP)",
+  "PNB",
+  "SAMMAAN",
+  "SMFG-ML (MICRO & MASS)",
+  "SMFG-HL",
+  "TATA CAPITAL-FSL",
+  "TATA CAPITAL-HFL",
+  "TRUHOME (PD & LIP)",
+  "VERITAS",
+];
+
+// Generate template options from bank schemas and additional templates
+export const getAllTemplateOptions = (): Array<{
+  value: string;
+  label: string;
+}> => {
+  const templates: Array<{ value: string; label: string }> = [];
+
+  // Add templates from bank schemas
+  bankSchemas.forEach((config) => {
+    config.templates.forEach((template) => {
+      templates.push({ value: template, label: template });
+    });
+  });
+
+  // Add additional templates that don't have schemas yet
+  additionalTemplates.forEach((template) => {
+    templates.push({ value: template, label: template });
+  });
+
+  // Remove duplicates and sort
+  const uniqueTemplates = Array.from(
+    new Map(templates.map((t) => [t.value, t])).values()
+  );
+
+  return uniqueTemplates.sort((a, b) => a.label.localeCompare(b.label));
+};
