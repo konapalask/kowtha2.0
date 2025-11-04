@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "react-native run-android; adb shell am start -n com.beyondscale.kowthafi.internal/com.beyondscale.kowthafi.MainActivity",
+    "android:internal": "react-native run-android; adb shell am start -n com.beyondscale.kowthafi.internal/com.beyondscale.kowthafi.MainActivity",
+    "android:client": "cd android && ./gradlew installClientDebug && cd .. && adb shell am start -n com.beyondscale.kowthafi.client/com.beyondscale.kowthafi.MainActivity",
+    "android:build": "cd android && ./gradlew assembleInternalDebug && cd ..",
+    "android:build:client": "cd android && ./gradlew assembleClientDebug && cd ..",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

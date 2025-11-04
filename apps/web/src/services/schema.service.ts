@@ -44,6 +44,30 @@ export const getPdBanksApi = async () => {
 };
 
 /**
+ * Fetch all template options from backend
+ */
+export const getTemplateOptionsApi = async (): Promise<
+  Array<{ value: string; label: string }>
+> => {
+  try {
+    const response = await axiosInstance.get(`/loans/get-bank-forms`, {
+      params: { type: "templates", department: "PD" },
+    });
+
+    if (response.data.status === 200) {
+      return response.data.data;
+    }
+
+    throw new Error(
+      response.data.message || "Failed to fetch template options"
+    );
+  } catch (error: any) {
+    console.error("Error fetching template options:", error);
+    throw error;
+  }
+};
+
+/**
  * Fetch list of all supported bank names
  */
 export const getSupportedBanks = async (): Promise<string[]> => {

@@ -15,7 +15,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../layout/UserContextProvider";
 import { createLoanApi } from "@/services/loans.services";
-import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions, templateNameOptions } from "@/utils/options";
+import { bankOptions, loanTypeOptions, applicantTypeOptions, pdBankOptions } from "@/utils/options";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAllFieldExecutivesApi } from "@/services/users.services";
 import { getUserDetails, getCurrentDepartmentOfficeId, getCurrentDepartment } from "@/utils/utility";
@@ -28,6 +28,7 @@ interface BulkImportProps {
   setLoading: (loading: boolean) => void;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   verifiers?: any[];
+  templateOptions: any[];
 }
 
 const BulkImportDrawer: React.FC<BulkImportProps> = ({
@@ -38,6 +39,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
   setLoading,
   setRefresh,
   verifiers = [],
+  templateOptions,
 }) => {
   const userDetails = getUserDetails();
   const [fieldExecutives, setFieldExecutives] = useState<any[]>([]);
@@ -205,7 +207,7 @@ const BulkImportDrawer: React.FC<BulkImportProps> = ({
                             <Select
                               showSearch
                               placeholder="Select Template Name"
-                              options={templateNameOptions}
+                              options={templateOptions}
                               filterOption={(input, option) =>
                                 (option?.label ?? "")
                                   .toLowerCase()

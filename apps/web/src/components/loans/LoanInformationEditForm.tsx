@@ -15,7 +15,6 @@ import {
   applicantTypeOptions,
   bankOptions,
   loanTypeOptions,
-  templateNameOptions,
 } from "@/utils/options";
 import { getUserDetails, isEmpty, getCurrentDepartment } from "@/utils/utility";
 import { isMobileVerificationCompleted } from "@/utils/loanCompletionChecker";
@@ -29,6 +28,7 @@ interface LoanInfoFormProps {
   setLoading: (loading: boolean) => void;
   fetchLoanDetails: () => void;
   pdBankOptions: any;
+  templateOptions: any[];
 }
 
 const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
@@ -40,6 +40,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   setLoading,
   fetchLoanDetails,
   pdBankOptions,
+  templateOptions,
 }) => {
   const userDetails = getUserDetails();
   const currentDepartment = getCurrentDepartment();
@@ -76,7 +77,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 specifyLoanType: selectedLoan?.loanType,
                 bankName: selectedLoan?.bankName,
                 applicantType: selectedLoan?.applicantType,
-                ...(currentDepartment === "PD" && { templateName: selectedLoan?.templateName }),
+                ...(currentDepartment === "PD" && {
+                  templateName: selectedLoan?.templateName,
+                }),
               }
         }
         onFinish={async (values) => {
@@ -96,7 +99,9 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
               applicantAddress: values.applicantAddress?.trim(),
               loanType: loanTypeFinal,
               bankName: values.bankName,
-              ...(currentDepartment === "PD" && { templateName: values.templateName }),
+              ...(currentDepartment === "PD" && {
+                templateName: values.templateName,
+              }),
               loanAmount: Number(values.loanAmount),
             };
 
@@ -346,7 +351,7 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 <Select
                   showSearch
                   placeholder="Select Template Name"
-                  options={templateNameOptions}
+                  options={templateOptions}
                   filterOption={(input, option) =>
                     (option?.label ?? "")
                       .toString()

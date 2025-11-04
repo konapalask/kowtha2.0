@@ -46,7 +46,10 @@ import {
   useDepartmentChange,
 } from "@/utils/utility";
 // import { pdBankOptions as staticPdBankOptions } from "@/utils/options";
-import { getPdBanksApi } from "@/services/schema.service"; // Commented out: Using static options
+import {
+  getPdBanksApi,
+  getTemplateOptionsApi,
+} from "@/services/schema.service";
 
 const DashboardLayout = dynamic(
   () => import("@/components/layout/DashboardLayout"),
@@ -101,6 +104,7 @@ export default function Loans() {
     fieldExecutiveName: undefined,
   });
   const [pdBankOptions, setPdBankOptions] = useState<any[]>([]);
+  const [templateOptions, setTemplateOptions] = useState<any[]>([]);
 
   // Update currentOffice when department changes
   useEffect(() => {
@@ -175,6 +179,15 @@ export default function Loans() {
             value: item,
           })) ?? [];
         setPdBankOptions(options);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    // Fetch template options from backend
+    getTemplateOptionsApi()
+      .then((res) => {
+        setTemplateOptions(res ?? []);
       })
       .catch((err) => {
         console.log(err);
@@ -869,6 +882,7 @@ export default function Loans() {
           setRefresh={setRefresh}
           fetchExecutives={fetchExecutives}
           pdBankOptions={pdBankOptions}
+          templateOptions={templateOptions}
         />
       )}
 
@@ -880,6 +894,7 @@ export default function Loans() {
         setLoading={setLoading}
         setRefresh={setRefresh}
         verifiers={verifiers}
+        templateOptions={templateOptions}
       />
     </DashboardLayout>
   );
