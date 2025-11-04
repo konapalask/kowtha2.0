@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const iiflSchema = {
   id: 19,
   bankName: "IIFL",
@@ -385,6 +386,7 @@ export const iiflSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

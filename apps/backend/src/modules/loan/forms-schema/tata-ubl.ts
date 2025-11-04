@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const tataUblSchema = {
   id: 5,
   bankName: "Tata Ubl",
@@ -35,9 +36,9 @@ export const tataUblSchema = {
           product: {
             type: "string",
             title: "Product",
-            readOnly: true,
+            // readOnly: true,
           },
-          amount: {
+          loanAmount: {
             type: "number",
             title: "Amount",
             readOnly: true,
@@ -56,7 +57,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Repayment from (Bank name)",
           },
-          bankName: {
+          repaymentBankName: {
             type: "string",
             title: "Bank name",
             readOnly: true,
@@ -81,9 +82,10 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          address: {
+          officeAddress: {
             type: "string",
             title: "Address",
+            readOnly: true,
           },
           rentedOwned: {
             type: "string",
@@ -141,6 +143,16 @@ export const tataUblSchema = {
             type: "number",
             title: "CMV / Rent p.m.",
           },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "addressOfPDAndPersonMet",
+      label: "Address of PD and Person Met",
+      schema: {
+        type: "object",
+        properties: {
           addressOfPDAndPersonMet: {
             type: "string",
             title: "Address of PD and persona met",
@@ -224,7 +236,7 @@ export const tataUblSchema = {
             ui: { widget: "textarea", rows: 6 },
           },
           stockAsOnDate: {
-            type: "string",
+            type: "date",
             title: "Stock as on date",
           },
         },
@@ -437,9 +449,9 @@ export const tataUblSchema = {
                   type: "string",
                   title: "Nature of Loan",
                 },
-                amount: {
+                loanAmount: {
                   type: "number",
-                  title: "Amount",
+                  title: "Loan Amount",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
@@ -617,6 +629,7 @@ export const tataUblSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default tataUblSchema;

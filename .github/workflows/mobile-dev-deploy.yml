@@ -2,7 +2,7 @@ name: CI/CD - Revopush
 
 on:
   push:
-    branches: [ revopush-cicd, development ]
+    branches: [ revopush-cicd ]
   #workflow_dispatch:  # Uncomment if you want manual runs
 
 jobs:

@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const herohousingSalariedSchema = {
   id: 14,
   bankName: "HeroHousing-Salaried",
@@ -342,6 +343,7 @@ export const herohousingSalariedSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

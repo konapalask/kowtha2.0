@@ -130,24 +130,18 @@ export const indiaShelterSalariedTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       ${renderTableHeader("PD SHEET – SALARIED")}
-      <tr>
-        <td style="${labelCellStyle}">Loan Number</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.loanNumber)}</td>
-        <td style="${labelCellStyle}">Branch</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.branch)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Region</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.region)}</td>
-        <td style="${labelCellStyle}">Location</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.location)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Latitude</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.latitude)}</td>
-        <td style="${labelCellStyle}">Longitude</td>
-        <td style="${valueCellStyle}">${formatMultiline(general.longitude)}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Loan Number",
+        general.loanNumber,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Branch",
+        general.branch,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
@@ -170,80 +164,97 @@ export const indiaShelterSalariedTemplate = (
         <td style="${labelCellStyle}">Applicant DOB</td>
         <td style="${valueCellStyle}">${formatMultiline(basic.applicantDob)}</td>
       </tr>
-      <tr>
-        <td style="${labelCellStyle}">Marital Status</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.maritalStatus
-        )}</td>
-        <td style="${labelCellStyle}">Qualification</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.qualification
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Category</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.category)}</td>
-        <td style="${labelCellStyle}">Total No. of Family Members</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.totalFamilyMembers
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Spouse Name</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.spouseName)}</td>
-        <td style="${labelCellStyle}">Spouse DOB</td>
-        <td style="${valueCellStyle}">${formatMultiline(basic.spouseDob)}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Marital Status",
+        basic.maritalStatus,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Spouse Name",
+        basic.spouseName,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Spouse DOB",
+        basic.spouseDob,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Does the spouse work? (If yes then give brief)",
         basic.spouseWorkDetails,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">No. of non-earning members / dependents</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          basic.nonEarningMembers
-        )}</td>
-        <td style="${labelCellStyle}" colspan="2"></td>
-      </tr>
+      ${renderKeyValueRow(
+        "Qualification",
+        basic.qualification,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Category",
+        basic.category,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Total No. of Family Members",
+        basic.totalFamilyMembers,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "No. of non-earning members / dependents",
+        basic.nonEarningMembers,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${dependentsRow}
     </table>
   `;
 
   const residenceTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Residence & Income Snapshot</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">Residence Address & details</th></tr>
       ${renderKeyValueRow(
-        "Residence Address",
+        "Address: ",
         residence.residenceAddress,
+        undefined,
+        { colSpan: 3 } 
+      )}
+      ${renderKeyValueRow(
+        "Years at Current Residence",
+        residence.yearsAtCurrentResidence,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Years at Current Residence</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          residence.yearsAtCurrentResidence
-        )}</td>
-        <td style="${labelCellStyle}">Area (in Sq ft)</td>
-        <td style="${valueCellStyle}">${formatMultiline(residence.areaSqft)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Monthly Rent & Security Deposit (if rented)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          residence.monthlyRentDeposit
-        )}</td>
-        <td style="${labelCellStyle}">Purchase price & MV (if owned)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          residence.purchasePriceMv
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Years in Current City</td>
-        <td style="${valueCellStyle}" colspan="3">${formatMultiline(
-          residence.yearsInCurrentCity
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Area (in Sq ft)",
+        residence.areaSqft,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Monthly Rent & Security Deposit (if rented)",
+        residence.monthlyRentDeposit,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Purchase price & MV (if owned)",
+        residence.purchasePriceMv,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Years in Current City",
+        residence.yearsInCurrentCity,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Other Income",
         financial.otherIncome,
@@ -256,19 +267,21 @@ export const indiaShelterSalariedTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Existing Relationship with Indiashelter</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          financial.existingRelationshipWithIndiashelter
-        )}</td>
-        <td style="${labelCellStyle}">Monthly Household Expenses</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          financial.monthlyHouseholdExpenses
-        )}</td>
-      </tr>
-      ${renderKeyValueRow(
+       ${renderKeyValueRow(
         "Credit Card Details",
-        financial.creditCardDetails,
+        "Rs. " + financial.creditCardDetails,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Monthly Household Expenses",
+        financial.monthlyHouseholdExpenses,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Existing Relationship with Indiashelter",
+        financial.existingRelationshipWithIndiashelter,
         undefined,
         { colSpan: 3 }
       )}
@@ -277,7 +290,7 @@ export const indiaShelterSalariedTemplate = (
 
   const loanPurposeTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">Loan Purpose & Collateral</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
         renderList(loanPurpose.purposes, "Not provided"),
@@ -290,64 +303,79 @@ export const indiaShelterSalariedTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Minimum Loan Amount Required</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          loanPurpose.minimumLoanAmount
-        )}</td>
-        <td style="${labelCellStyle}">Tenure Required</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          loanPurpose.tenureRequired
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Comfortable EMI</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          loanPurpose.comfortableEmi
-        )}</td>
-        <td style="${labelCellStyle}">Status of Property to be Purchased</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          collateral.propertyStatus
-        )}</td>
-      </tr>
       ${renderKeyValueRow(
-        "Usage of Property after Purchase",
-        renderList(collateral.usageAfterPurchase, "Not provided"),
+        "Minimum Loan Amount Required",
+        formatCurrency(loanPurpose.minimumLoanAmount),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "If Others, specify usage",
-        collateral.usageOtherNotes,
+        "Tenure Required",
+        formatMultiline(loanPurpose.tenureRequired),
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Property Address",
-        collateral.propertyAddress,
+        "Comfortable EMI",
+        formatCurrency(loanPurpose.comfortableEmi),
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Area (in Sqft)</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          collateral.propertyAreaSqft
-        )}</td>
-        <td style="${labelCellStyle}">Ownership of the property from how many years?</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          collateral.ownershipDuration
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Agreement Value</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          collateral.agreementValue
-        )}</td>
-        <td style="${labelCellStyle}">Own Contribution</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          collateral.ownContribution
-        )}</td>
-      </tr>
+      
+    </table>
+  `;
+
+  const collateralTable = `
+  <table style="${tableStyle}">
+    <tr><th style="${subHeaderStyle}" colspan="4">Collateral Details</th></tr>
+    ${renderKeyValueRow(
+      "Status of Property to be Purchased",
+      collateral.propertyStatus,
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Usage of Property after Purchase",
+      renderList(collateral.usageAfterPurchase, "Not provided"),
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "If Others, specify usage",
+      collateral.usageOtherNotes,
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Property Address",
+      collateral.propertyAddress,
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Area (in Sqft)",
+      collateral.propertyAreaSqft,
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Ownership of the property from how many years?",
+      collateral.ownershipDuration,
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Agreement Value",
+      formatCurrency(collateral.agreementValue),
+      undefined,
+      { colSpan: 3 }
+    )}
+    ${renderKeyValueRow(
+      "Own Contribution",
+      formatCurrency(collateral.ownContribution),
+      undefined,
+      { colSpan: 3 }
+    )}
     </table>
   `;
 
@@ -392,42 +420,43 @@ export const indiaShelterSalariedTemplate = (
   const employerTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Employer Details</th></tr>
-      <tr>
-        <td style="${labelCellStyle}">Existing Relationship with Indiashelter</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          employer.existingRelationshipWithIndiashelter
-        )}</td>
-        <td style="${labelCellStyle}">Employer Name</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          employer.employerName
-        )}</td>
-      </tr>
+      ${renderKeyValueRow(
+        "Employer Name",
+        employer.employerName,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Employer Address",
         employer.employerAddress,
         undefined,
         { colSpan: 3 }
       )}
-      <tr>
-        <td style="${labelCellStyle}">Designation</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          employer.designation
-        )}</td>
-        <td style="${labelCellStyle}">Years in Present Employment</td>
-        <td style="${valueCellStyle}">${formatMultiline(
-          employer.yearsInPresentEmployment
-        )}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Current Monthly Salary (Gross)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          employer.salaryGross
-        )}</td>
-        <td style="${labelCellStyle}">Current Monthly Salary (Net)</td>
-        <td style="${valueCellStyle}">${formatCurrency(
-          employer.salaryNet
-        )}</td>
-      </tr>
+      
+      ${renderKeyValueRow(
+        "Designation",
+        employer.designation,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Current Monthly Salary (Gross)",
+        employer.salaryGross,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Current Monthly Salary (Net)",
+        employer.salaryNet,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "No of yrs in present employment",
+        employer.yearsInPresentEmployment,
+        undefined,
+        { colSpan: 3 }
+      )}
       ${renderKeyValueRow(
         "Applicant's Job Profile",
         employer.jobProfile,
@@ -651,7 +680,7 @@ export const indiaShelterSalariedTemplate = (
 
   const pdReviewTable = `
     <table style="${tableStyle}">
-      <tr><th style="${subHeaderStyle}" colspan="4">PD Officer Review</th></tr>
+      <tr><th style="${subHeaderStyle}" colspan="4">To be filled by PD officer</th></tr>
       ${renderKeyValueRow(
         "Major Observations / Comments / Concerns",
         pdReview.majorObservations,
@@ -705,12 +734,13 @@ export const indiaShelterSalariedTemplate = (
       ${generalTable}
       ${basicDetailsTable}
       ${residenceTable}
-      ${loanPurposeTable}
-      ${referencesTable}
       ${employerTable}
       ${familyMembersTable}
       ${currentLoansTable}
       ${bankingTable}
+      ${loanPurposeTable}
+      ${collateralTable}
+      ${referencesTable}
       ${tpcTable}
       ${documentsTable}
       ${pdReviewTable}

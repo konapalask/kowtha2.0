@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const indiaShelterSalariedSchema = {
   id: 22,
   bankName: "India Shelter Salaried",
@@ -756,6 +757,7 @@ export const indiaShelterSalariedSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

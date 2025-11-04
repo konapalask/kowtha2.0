@@ -1,3 +1,5 @@
+import statement2Schema from "../financials-schema/statement2";
+
 export const axisFinanceSchema = {
   id: 10,
   bankName: "Axis Finance",
@@ -158,7 +160,7 @@ export const axisFinanceSchema = {
       required: true,
     },
     {
-      id: "Self Employed/Salaried",
+      id: "selfEmployedOrSalaried",
       label: "Self Employed/Salaried",
       schema: {
         type: "object",
@@ -313,7 +315,8 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
-    { id: "coApplicantIncome", 
+    { 
+      id: "coApplicantIncome", 
       label: "Co-Applicant Income", 
       schema: {
       type: "object",
@@ -484,6 +487,7 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
+    statement2Schema,
   ],
 } as const;
 export default axisFinanceSchema;

@@ -1,3 +1,4 @@
+import statement3Schema from "../financials-schema/statement3";
 export const dcbSchema = {
   id: 12,
   bankName: "DCB",
@@ -414,6 +415,7 @@ export const dcbSchema = {
       },
       required: true,
     },
+    statement3Schema,
   ],
 } as const;
 export default dcbSchema;

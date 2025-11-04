@@ -28,15 +28,18 @@ import {colors} from '../constants/colors';
 // Field key mappings for automatic data population
 const FIELD_KEY_MAPPINGS = {
   applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
-  businessName: ['businessName', 'nameOfConcern'],
-  phoneNo: ['applicantMobile'],
+  businessName: ['businessName', 'nameOfConcern', 'nameOfBusiness'],
+  phoneNo: ['applicantMobile', 'applicantContactNumber'],
   applicationNumber: [
     'applicationNumber',
     'applicationNo',
     'applicationId',
     'referenceNumber',
+    'proposalNumber',
   ],
   loanAmount: ['loanAmount'],
+  purposeOfLoan: ['loanType', 'purposeOfLoan'],
+  bankName: ['repaymentBankName'],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -44,6 +47,7 @@ const FIELD_KEY_MAPPINGS = {
     'businessAddress',
     'pdAddress',
     'officeAddress',
+    'initiatedPremises',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -71,7 +75,7 @@ const getInitialDataByBank = (
   loggedInUserName?: string,
 ) => {
   if (!userData || !schema) return {};
-
+  // console.log('userData', userData);
   // Extract common data from userData
   const commonData: Record<string, any> = {
     applicantName:
@@ -81,6 +85,8 @@ const getInitialDataByBank = (
     applicationNumber:
       userData?.loan?.applicationNumber || userData?.loan?.loanId || '',
     loanAmount: userData?.loan?.loanAmount || '',
+    purposeOfLoan: userData?.loan?.loanType || '',
+    bankName: userData?.loan?.bankName || '',
     address:
       userData?.applicantAddress || userData?.loan?.applicantAddress || '',
     latitude: '',
@@ -182,14 +188,15 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // const [formData, setFormData] = useState<any>({});
   // Initialize with empty object - schema will define the structure
   const [sectionData, setSectionData] = useState<any>({});
+  // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   // console.log('sectionData', sectionData);
 
   // Log sectionData whenever it changes
-  useEffect(() => {
-    console.log('sectionData updated:', sectionData);
-  }, [sectionData]);
+  // useEffect(() => {
+  //   console.log('sectionData updated:', sectionData);
+  // }, [sectionData]);
 
   // useLayoutEffect(() => {
   //   loadFormData();
@@ -415,20 +422,105 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     });
   };
 
-  const isSectionValid = (sectionId: string): boolean => {
+  const isSectionValid = (sectionId: string, sectionSchema?: any): boolean => {
+    // Special handling for photo capture section
     if (sectionId === 'photoCapture') {
-      return sectionData?.uploadedItems?.length > 0;
+      return (sectionData?.uploadedItems?.length || 0) > 0;
     }
 
-    const sectionDataExists =
-      sectionData[sectionId] !== undefined && sectionData[sectionId] !== null;
-    if (!sectionDataExists) {
+    // If no schema provided, fallback to basic check
+    if (!sectionSchema) {
+      const sectionDataExists =
+        sectionData[sectionId] !== undefined && sectionData[sectionId] !== null;
+      if (!sectionDataExists) {
+        return false;
+      }
+      const sectionContent = sectionData[sectionId];
+      if (typeof sectionContent === 'object' && sectionContent !== null) {
+        return Object.keys(sectionContent).length > 0;
+      }
+      return true;
+    }
+
+    // Check if section has data
+    const sectionContent = sectionData[sectionId];
+    if (!sectionContent || typeof sectionContent !== 'object') {
       return false;
     }
 
-    const sectionContent = sectionData[sectionId];
-    if (typeof sectionContent === 'object' && sectionContent !== null) {
-      return Object.keys(sectionContent).length > 0;
+    // Get required fields from schema
+    const baseRequiredFields = sectionSchema?.required || [];
+
+    if (baseRequiredFields.length === 0) {
+      // If no required fields, do not mark section as completed
+      return false;
+    }
+
+    // Filter required fields based on conditional dependencies
+    const requiredFields = baseRequiredFields.filter((fieldId: string) => {
+      const fieldSchema = sectionSchema?.properties?.[fieldId];
+      if (!fieldSchema?.dependencies?.required) {
+        return true; // Always required if no conditional dependency
+      }
+
+      // Check if field should be required based on dependencies
+      const dependencies = fieldSchema.dependencies.required;
+      for (const [depFieldName, expectedValue] of Object.entries(
+        dependencies,
+      )) {
+        const actualValue = sectionContent[depFieldName];
+        if (Array.isArray(expectedValue)) {
+          if (!expectedValue.includes(actualValue)) {
+            return false; // Not required if dependency condition not met
+          }
+        } else {
+          if (actualValue !== expectedValue) {
+            return false; // Not required if dependency condition not met
+          }
+        }
+      }
+      return true; // Required if all dependency conditions are met
+    });
+
+    // Check if all required fields are filled
+    for (const fieldId of requiredFields) {
+      const fieldValue = sectionContent[fieldId];
+      const fieldSchema = sectionSchema?.properties?.[fieldId];
+
+      // For array fields
+      if (fieldSchema?.type === 'array') {
+        if (!Array.isArray(fieldValue) || fieldValue.length === 0) {
+          return false;
+        }
+
+        // Check if each array item has required fields filled
+        const itemRequiredFields = fieldSchema.items?.required || [];
+        if (itemRequiredFields.length > 0) {
+          const hasValidItem = fieldValue.some((item: any) => {
+            if (!item || typeof item !== 'object') return false;
+            return itemRequiredFields.every((requiredField: string) => {
+              const itemFieldValue = item[requiredField];
+              return (
+                itemFieldValue !== null &&
+                itemFieldValue !== undefined &&
+                itemFieldValue !== ''
+              );
+            });
+          });
+
+          if (!hasValidItem) {
+            return false;
+          }
+        }
+      } else {
+        // Regular field - check if it's empty
+        const isEmpty =
+          fieldValue === null || fieldValue === undefined || fieldValue === '';
+
+        if (isEmpty) {
+          return false;
+        }
+      }
     }
 
     return true;
@@ -782,7 +874,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                           <Text style={styles.requiredMark}> *</Text>
                         )}
                       </Text>
-                      {isSectionValid(sec.id) && (
+                      {isSectionValid(sec.id, sec.schema) && (
                         <Icon name="check" size={18} color="#34C759" />
                       )}
                       <Text style={styles.sectionIndicator}>

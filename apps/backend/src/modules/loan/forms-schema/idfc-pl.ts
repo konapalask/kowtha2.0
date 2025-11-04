@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const idfcPlSchema = {
   id: 18,
   bankName: "IDFC PL",
@@ -44,22 +45,6 @@ export const idfcPlSchema = {
           branch: {
             type: "string",
             title: "Branch",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
           },
         },
         required: ["nameOfTheApplicant", "sdfcId", "visitedAddress"],
@@ -344,15 +329,6 @@ export const idfcPlSchema = {
               },
             },
           },
-          totalMonthlyCommitment: {
-            type: "number",
-            title: "Total Monthly Commitment",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
         },
       },
     },
@@ -443,6 +419,7 @@ export const idfcPlSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 

@@ -106,13 +106,13 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.proposedLoanDetails?.product || ""}</p></td>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.proposedLoanDetails?.amount)}</p></td>
+                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.proposedLoanDetails?.loanAmount)}</p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.proposedLoanDetails?.tenure || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Repayment from</strong></p></td>
                     <td colspan="5" style="border:1px solid #ccc;padding:8px">
-                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.bankName || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">Bank name – ${verificationData.proposedLoanDetails?.repaymentBankName || ""}</p>
                         <p style="margin:8px 0;line-height:1.5">Type - ${verificationData.proposedLoanDetails?.typeSAAccount || ""}</p>
                         <p style="margin:8px 0;line-height:1.5">Account No. - ${verificationData.proposedLoanDetails?.accountNo || ""}</p>
                     </td>
@@ -120,7 +120,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">5</p></td>
                     <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Office Address</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.officeAddress?.add || ""}</p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.officeAddress?.officeAddress || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Rented/ Owned</strong></p></td>
@@ -158,7 +158,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">7</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Address of PD</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done in office & met: ${verificationData.basicDetails?.addressOfPDAndPersonMet || ""}</p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done in office & met: ${verificationData.addressOfPDAndPersonMet?.addressOfPDAndPersonMet || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">8</p></td>
@@ -320,11 +320,11 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">15</p></td>
                     <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Supplier Details</p></td>
                     <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Creditors as on date</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.totalCreditors || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalCreditorsAsOnDate || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Suppliers (No.)</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.totalSuppliers || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalSuppliersNo || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Supplier</strong></p></td>
@@ -333,10 +333,10 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since(years)</strong></p></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.supplierName || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.purchasePercentage || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.creditorDays || ""}</p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.suppliers?.relationshipSinceYears || ""}</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.nameOfSupplier || ""}</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.percentageOfTotalPurchases || ""}</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.creditorDays || ""}</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.relationshipSinceYears || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">16</p></td>
@@ -555,11 +555,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Pan Card</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.panCard || ""}</p></td>
                 </tr>
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">29</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Document Seen</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.otherDocumentSeen || ""}</p></td>
-                </tr>
+             
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">30</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>

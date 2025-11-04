@@ -1,3 +1,4 @@
+import statement2Schema from "../financials-schema/statement2";
 export const smfgSmeSchema = {
   id: 25,
   bankName: "SMFG SME",
@@ -230,7 +231,7 @@ export const smfgSmeSchema = {
           },
           netSavings: {
             type: "number",
-            title: "Monthly Net Saving after Expenses (Rs.)",
+            title: "Monthly Net Saving after all Expenses (Rs.)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -421,9 +422,24 @@ export const smfgSmeSchema = {
             type: "string",
             title: "PD Conducted By (Name & Designation)",
           },
+          pdDesignation: {
+            type: "string",
+            title: "PD Designation",
+          },
+          pdDate: {
+            type: "string",
+            title: "PD Date",
+            format: "date",
+          },
+          pdTime: {
+            type: "string",
+            title: "PD Time",
+            format: "time",
+          },
         },
       },
     },
+    statement2Schema,
   ],
 } as const;
 

@@ -2,6 +2,33 @@ import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate } from "./pd-base.template";
 
 export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
+
+  // Extract sections using constants
+  const applicantDetails = verificationData.applicantDetails || {};
+  const familyMembers = verificationData.familyMembers || {};
+  const bankingDetails = verificationData.bankingDetails || {};
+  const licMutualFunds = verificationData.licMutualFunds || {};
+  const assets = verificationData.assets || {};
+  const existingLoans = verificationData.existingLoans || {};
+  const aboutTheBusiness = verificationData.aboutTheBusiness || {};
+  const regularCustomers = verificationData.regularCustomers || {};
+  const regularSuppliers = verificationData.regularSuppliers || {};
+  const businessActivityObserved = verificationData.businessActivityObserved || {};
+  const documentsObserved = verificationData.documentsObserved || {};
+  const gstRegistration = verificationData.gstRegistration || {};
+  const itrDetails = verificationData.itrDetails || {};
+  const monthlyGrossReceipts = verificationData.monthlyGrossReceipts || {};
+  const monthlyExpenses = verificationData.monthlyExpenses || {};
+  const netProfit = verificationData.netProfit || {};
+  const netMargin = verificationData.netMargin || {};
+  const familyExpenses = verificationData.familyExpenses || {};
+  const employees = verificationData.employees || {};
+  const concerns = verificationData.concerns || {};
+  const otherObservations = verificationData.otherObservations || [];
+  const otherIncomes = verificationData.otherIncomes || [];
+  const neighborCheck = verificationData.neighborCheck || {};
+  const status = verificationData.status || {};
+
   const date = new Date();
   const timeZone = "Asia/Kolkata";
   const zonedDate = toZonedTime(date, timeZone);
@@ -13,11 +40,11 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
     const numericAmount =
       typeof amount === "string"
         ? Number(
-            amount
-              .toString()
-              .replace(/[^0-9.-]/g, "")
-              .replace(/(\..*)\./g, "$1")
-          )
+          amount
+            .toString()
+            .replace(/[^0-9.-]/g, "")
+            .replace(/(\..*)\./g, "$1")
+        )
         : amount;
 
     if (Number.isNaN(numericAmount)) {
@@ -28,11 +55,11 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderAssetsTable = () => {
-    const assetsSource = Array.isArray(verificationData.assets?.assets)
-      ? verificationData.assets.assets
-      : Array.isArray(verificationData.assets)
-      ? verificationData.assets
-      : [];
+    const assetsSource = Array.isArray(assets.assets)
+      ? assets.assets
+      : Array.isArray(assets)
+        ? assets
+        : [];
 
     if (!assetsSource.length) {
       return `<div style="font-size:12px;color:#666;">No asset details provided</div>`;
@@ -52,20 +79,20 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
         (asset: any) => `
           <tr>
             <td style="border:1px solid #ccc;padding:6px;">${getValue(
-              asset.description,
-              asset.assetDescription
-            )}</td>
+          asset.description,
+          asset.assetDescription
+        )}</td>
             <td style="border:1px solid #ccc;padding:6px;">${getValue(
-              asset.area,
-              asset.areaMeasured
-            )}</td>
+          asset.area,
+          asset.areaMeasured
+        )}</td>
             <td style="border:1px solid #ccc;padding:6px;">${formatCurrency(
-              asset.marketValue
-            )}</td>
+          asset.marketValue
+        )}</td>
             <td style="border:1px solid #ccc;padding:6px;">${getValue(
-              asset.nameOfAssetHolder,
-              asset.ownerName
-            )}</td>
+          asset.nameOfAssetHolder,
+          asset.ownerName
+        )}</td>
           </tr>
         `
       )
@@ -80,7 +107,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderBusinessNarrative = () => {
-    const businessSection = verificationData.aboutTheBusiness;
+    const businessSection = aboutTheBusiness;
 
     if (typeof businessSection === "string" && businessSection.trim().length) {
       return `<div>${businessSection}</div>`;
@@ -195,17 +222,15 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderNeighborTable = () => {
-    const neighbors = verificationData.neighborCheck?.neighbors;
+    const neighbors = neighborCheck.neighbors;
     if (Array.isArray(neighbors) && neighbors.length) {
       const rows = neighbors
         .map(
           (entry: any) => `
           <tr>
-            <td style="border:1px solid #ccc;padding:6px;">${
-              getValue(entry.name) || "Not Provided"
+            <td style="border:1px solid #ccc;padding:6px;">${getValue(entry.name) || "Not Provided"
             }</td>
-            <td style="border:1px solid #ccc;padding:6px;">${
-              getValue(entry.feedback) || "Not Provided"
+            <td style="border:1px solid #ccc;padding:6px;">${getValue(entry.feedback) || "Not Provided"
             }</td>
           </tr>
         `
@@ -226,8 +251,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
     }
 
     const fallback = getValue(
-      verificationData.neighborCheck?.neighborCheck,
-      verificationData.neighborCheck
+      neighborCheck.neighborCheck,
+      neighborCheck
     );
     return fallback
       ? `<div>${fallback}</div>`
@@ -235,7 +260,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderConcernsSummary = () => {
-    const summary = getValue(verificationData.concerns?.concernsSummary);
+    const summary = getValue(concerns.concernsSummary);
     return summary
       ? summary
       : '<div style="font-size:12px;color:#666;">Not Provided</div>';
@@ -259,30 +284,30 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
   const applicationNumber = getValue(
     loanDetails?.applicationNumber,
-    verificationData.applicantDetails?.applicationNo,
+    applicantDetails.applicationNo,
     verificationData.applicationNo,
     verificationData.basicInformation?.applicationId
   );
 
   const applicantName = getValue(
     loanDetails?.applicantName,
-    verificationData.applicantDetails?.nameOfApplicant,
+    applicantDetails.nameOfApplicant,
     verificationData.nameOfApplicant
   );
 
   const coApplicantName = getValue(
-    verificationData.applicantDetails?.nameOfCoApplicant,
+    applicantDetails.nameOfCoApplicant,
     verificationData.nameOfCoApplicant
   );
 
   const applicantMobile = getValue(
     loanDetails?.applicantMobile,
-    verificationData.applicantDetails?.phoneNumber,
+    applicantDetails.phoneNumber,
     verificationData.phoneNumber
   );
 
   const nameOfConcern = getValue(
-    verificationData.applicantDetails?.nameOfConcern,
+    applicantDetails.nameOfConcern,
     verificationData.businessDetails?.businessName,
     verificationData.businessFinancialProfile?.businessName,
     loanDetails?.businessName
@@ -290,22 +315,22 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
   const initiatedPremises = getValue(
     loanDetails?.applicantAddress,
-    verificationData.applicantDetails?.initiatedPremises,
+    applicantDetails.initiatedPremises,
     verificationData.initiatedPremises
   );
 
   const visitedPremises = getValue(
-    verificationData.applicantDetails?.visitedPremises,
+    applicantDetails.visitedPremises,
     verificationData.visitedPremises
   );
 
   const residentialPremises = getValue(
-    verificationData.applicantDetails?.residentialPremises,
+    applicantDetails.residentialPremises,
     verificationData.residentialPremises
   );
 
   const appointmentFixedRaw = getValue(
-    verificationData.applicantDetails?.appointmentFixed,
+    applicantDetails.appointmentFixed,
     verificationData.appointmentFixed
   );
 
@@ -328,18 +353,18 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const appointmentFixed = formatTimeValue(appointmentFixedRaw);
 
   const dateOfVisit = getValue(
-    verificationData.applicantDetails?.dateOfVisit,
+    applicantDetails.dateOfVisit,
     verificationData.dateOfVisit
   );
 
   const familySection =
-    verificationData.familyDetails || verificationData.familyMembers || {};
+    verificationData.familyDetails || familyMembers || {};
 
   const familyMembersList = Array.isArray(familySection.familyMembers)
     ? familySection.familyMembers
-    : Array.isArray(verificationData.familyMembers?.familyMembers)
-    ? verificationData.familyMembers.familyMembers
-    : [];
+    : Array.isArray(familyMembers.familyMembers)
+      ? familyMembers.familyMembers
+      : [];
 
   const nonEarningKeywords = [
     "student",
@@ -355,42 +380,42 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
   const computedTotalFamilyMembers =
     familySection.totalFamilyMembers ??
-    verificationData.familyMembers?.totalFamilyMembers ??
+    familyMembers.totalFamilyMembers ??
     (familyMembersList.length ? familyMembersList.length : "");
 
   const computedEarningMembers =
     familySection.earningMembers ??
-    verificationData.familyMembers?.earningMembers ??
+    familyMembers.earningMembers ??
     (familyMembersList.length
       ? familyMembersList.filter((member: any) => {
-          const occupation = getValue(
-            member.occupation,
-            member.employmentType,
-            member.workType
-          ).toLowerCase();
+        const occupation = getValue(
+          member.occupation,
+          member.employmentType,
+          member.workType
+        ).toLowerCase();
 
-          if (!occupation) {
-            return false;
-          }
+        if (!occupation) {
+          return false;
+        }
 
-          return !nonEarningKeywords.some((keyword) =>
-            occupation.includes(keyword)
-          );
-        }).length
+        return !nonEarningKeywords.some((keyword) =>
+          occupation.includes(keyword)
+        );
+      }).length
       : "");
 
   const combinedAmountPurpose = (() => {
     const parts: string[] = [];
     const loanAmountDisplay = formatCurrency(
       loanDetails?.loanAmount ||
-        verificationData.applicantDetails?.loanAmount ||
-        verificationData.loanAmount
+      applicantDetails.loanAmount ||
+      verificationData.loanAmount
     );
     if (loanAmountDisplay) {
       parts.push(`Loan Amount: ${loanAmountDisplay}`);
     }
     const purpose = getValue(
-      verificationData.applicantDetails?.purposeOfLoan,
+      applicantDetails.purposeOfLoan,
       verificationData.purposeOfLoan,
       loanDetails?.purposeOfLoan
     );
@@ -402,12 +427,12 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
   const typeOfCollateralDisplay = (() => {
     const type = getValue(
-      verificationData.applicantDetails?.typeOfCollateral,
+      applicantDetails.typeOfCollateral,
       verificationData.typeOfCollateral
     );
     const valueDisplay = formatCurrency(
-      verificationData.applicantDetails?.marketValueOfCollateral ||
-        verificationData.marketValueOfCollateral
+      applicantDetails.marketValueOfCollateral ||
+      verificationData.marketValueOfCollateral
     );
     if (type && valueDisplay) {
       return `${type} (Value: ${valueDisplay})`;
@@ -416,12 +441,12 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   })();
 
   const collateralPropertyAddress = getValue(
-    verificationData.applicantDetails?.collateralPropertyAddress,
+    applicantDetails.collateralPropertyAddress,
     verificationData.collateralPropertyAddress
   );
 
   const aboutApplicantText = getValue(
-    verificationData.applicantDetails?.aboutTheApplicant,
+    applicantDetails.aboutTheApplicant,
     verificationData.aboutTheApplicant
   );
 
@@ -438,42 +463,37 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
     const rows = familyMembersList.length
       ? familyMembersList
-          .map(
-            (member: any) => `
+        .map(
+          (member: any) => `
               <tr>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(member.name, member.personMet) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(
-                    member.relationship,
-                    member.relation,
-                    member.relationshipToApplicant
-                  ) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(
-                    member.age ? `${member.age} years` : "",
-                    member.ageYears ? `${member.ageYears} years` : ""
-                  ) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(
-                    member.education,
-                    member.educationalQualification
-                  ) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(
-                    member.occupation,
-                    member.employmentType,
-                    member.workType
-                  ) || "Not Provided"
-                }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(member.name, member.personMet) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(
+              member.relationship,
+              member.relation,
+              member.relationshipToApplicant
+            ) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(
+              member.age ? `${member.age} years` : "",
+              member.ageYears ? `${member.ageYears} years` : ""
+            ) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(
+              member.education,
+              member.educationalQualification
+            ) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(
+              member.occupation,
+              member.employmentType,
+              member.workType
+            ) || "Not Provided"
+            }</td>
               </tr>
             `
-          )
-          .join("")
+        )
+        .join("")
       : `<tr><td colspan="5" style="border:1px solid #ccc;padding:6px;text-align:center;">No family member information provided</td></tr>`;
 
 
@@ -486,8 +506,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderBankingDetails = () => {
-    const bankingDetails =
-      verificationData.bankingDetails?.bankingDetails || [];
+    const bankingDetailsArray =
+      bankingDetails.bankingDetails || [];
 
     const header = `
       <tr style="background-color:#f5f5f5;">
@@ -498,29 +518,25 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
       </tr>
     `;
 
-    const rows = bankingDetails.length
-      ? bankingDetails
-          .map(
-            (bank: any) => `
+    const rows = bankingDetailsArray.length
+      ? bankingDetailsArray
+        .map(
+          (bank: any) => `
               <tr>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(bank.bankName) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(bank.accountType) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  formatCurrency(bank.avgBalance) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  bank.noOfYearsMaintained
-                    ? `${bank.noOfYearsMaintained} years`
-                    : "Not Provided"
-                }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(bank.bankName) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(bank.accountType) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${formatCurrency(bank.avgBalance) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${bank.noOfYearsMaintained
+              ? `${bank.noOfYearsMaintained} years`
+              : "Not Provided"
+            }</td>
               </tr>
             `
-          )
-          .join("")
+        )
+        .join("")
       : `<tr><td colspan="4" style="border:1px solid #ccc;padding:6px;text-align:center;">No banking details provided</td></tr>`;
 
     return `
@@ -534,8 +550,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderExistingLoans = () => {
     const loans =
       verificationData.existingLoanDetails?.loans ||
-      verificationData.existingLoans?.loans ||
-      verificationData.existingLoans ||
+      existingLoans.loans ||
+      existingLoans ||
       [];
 
     const header = `
@@ -550,31 +566,26 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
 
     const rows = loans.length
       ? loans
-          .map(
-            (loan: any) => `
+        .map(
+          (loan: any) => `
               <tr>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(loan.bank, loan.bankName) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(loan.type, loan.loanType) || "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  formatCurrency(loan.loanAmount || loan.amount) ||
-                  "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  formatCurrency(loan.emi || loan.installment) ||
-                  "Not Provided"
-                }</td>
-                <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(loan.status, loan.loanStatus) ||
-                  "Not Provided"
-                }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(loan.bank, loan.bankName) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(loan.type, loan.loanType) || "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${formatCurrency(loan.loanAmount || loan.amount) ||
+            "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${formatCurrency(loan.emi || loan.installment) ||
+            "Not Provided"
+            }</td>
+                <td style="border:1px solid #ccc;padding:6px;">${getValue(loan.status, loan.loanStatus) ||
+            "Not Provided"
+            }</td>
               </tr>
             `
-          )
-          .join("")
+        )
+        .join("")
       : `<tr><td colspan="5" style="border:1px solid #ccc;padding:6px;text-align:center;">No loan details provided</td></tr>`;
 
     return `
@@ -631,11 +642,11 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(verificationData.applicantDetails?.personMet, verificationData.personMet)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(applicantDetails.personMet, verificationData.personMet)}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount and Purpose of Loan</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${combinedAmountPurpose || getValue(verificationData.applicantDetails?.amountAndPurposeOfLoan, verificationData.amountAndPurposeOfLoan)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${combinedAmountPurpose || getValue(applicantDetails.amountAndPurposeOfLoan, verificationData.amountAndPurposeOfLoan)}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>
@@ -648,7 +659,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Applicant</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${aboutApplicantText ||
-                  `The applicant is ${applicantName}, a business owner who has been running the concern ${nameOfConcern} successfully. The applicant resides at ${residentialPremises}.`}</p></td>
+    `The applicant is ${applicantName}, a business owner who has been running the concern ${nameOfConcern} successfully. The applicant resides at ${residentialPremises}.`}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top;width:25%"><p style="margin:8px 0;line-height:1.5"><strong>Family Details</strong></p></td>
@@ -663,7 +674,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>LIC/Mutual funds</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.licMutualFunds?.licMutualFunds || ""}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(licMutualFunds.licMutualFunds) || ""}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>Assets</strong></p></td>
@@ -690,82 +701,84 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name and Contact number of Regular Customers</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">${renderStakeholderTable(
-                  verificationData.regularCustomers?.customers || [],
-                  [
-                    { key: "name", label: "Customer Name" },
-                    { key: "contactNumber", label: "Contact Number" },
-                  ],
-                  "No regular customers captured"
-                )}</td>
+      regularCustomers.customers || [],
+      [
+        { key: "name", label: "Customer Name" },
+        { key: "contactNumber", label: "Contact Number" },
+      ],
+      "No regular customers captured"
+    )}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name and Contact number of Regular Suppliers</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">${renderStakeholderTable(
-                  verificationData.regularSuppliers?.suppliers || [],
-                  [
-                    { key: "name", label: "Supplier Name" },
-                    { key: "contactNumber", label: "Contact Number" },
-                  ],
-                  "No regular suppliers captured"
-                )}</td>
+      regularSuppliers.suppliers || [],
+      [
+        { key: "name", label: "Supplier Name" },
+        { key: "contactNumber", label: "Contact Number" },
+      ],
+      "No regular suppliers captured"
+    )}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Business Activity and stock level observed at the time of visit</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.businessActivityObserved?.businessActivityAndStockLevelObserved || ""}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
+      businessActivityObserved.businessActivityAndStockLevelObserved
+    ) || ""}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Documents Observed</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCommaSeparatedList(
-                  verificationData.documentsObserved?.documentsObserved
-                )}</p></td>
+      documentsObserved.documentsObserved
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Whether Business Registered under GST?</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatBooleanDisplay(
-                  verificationData.gstRegistration?.gstRegistered
-                )}</p></td>
+      gstRegistration.gstRegistered
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>As per Audited individual ITR's</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  verificationData.itrDetails?.itrFiled
-                )}</p></td>
+      itrDetails.itrFiled
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Gross Receipts</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  verificationData.monthlyGrossReceipts?.monthlyGrossReceipts
-                )}</p></td>
+      monthlyGrossReceipts.monthlyGrossReceipts
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Expenses</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  verificationData.monthlyExpenses?.monthlyExpenses
-                )}</p></td>
+      monthlyExpenses.monthlyExpenses
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Profit</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(
-                  verificationData.netProfit?.netProfit
-                )}</p></td>
+      netProfit.netProfit
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  verificationData.netMargin?.netMargin
-                )}</p></td>
+      netMargin.netMargin
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Expenses</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  verificationData.familyExpenses?.familyExpenses
-                )}</p></td>
+      familyExpenses.familyExpenses
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Employees</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
-                  verificationData.employees?.numberOfEmployees
-                )}</p></td>
+      employees.numberOfEmployees
+    )}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Concerns</strong></p></td>
@@ -773,24 +786,41 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  Array.isArray(verificationData.otherObservations)
-                    ? verificationData.otherObservations.join(", ")
-                    : getValue(verificationData.otherObservations)
-                }</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${(() => {
+      if (Array.isArray(otherObservations)) {
+        return otherObservations.join(", ");
+      }
+      if (otherObservations && typeof otherObservations === "object" && otherObservations.otherObservations) {
+        return Array.isArray(otherObservations.otherObservations)
+          ? otherObservations.otherObservations.join(", ")
+          : getValue(otherObservations.otherObservations);
+      }
+      return getValue(otherObservations) || "Not Provided";
+    })()}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
-                <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  Array.isArray(verificationData.otherIncomes) &&
-                  verificationData.otherIncomes.length > 0
-                    ? verificationData.otherIncomes
-                        .map((income: any) =>
-                          getValue(income.otherIncome, income)
-                        )
-                        .join(", ")
-                    : "Applicant receives rental income Rs. 1,50,000/- per month"
-                }</p></td>
+                <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${(() => {
+      if (Array.isArray(otherIncomes) && otherIncomes.length > 0) {
+        return otherIncomes
+          .map((income: any) =>
+            getValue(income.otherIncome, income, typeof income === "string" ? income : "")
+          )
+          .join(", ");
+      }
+      if (otherIncomes && typeof otherIncomes === "object" && otherIncomes.otherIncomes) {
+        const incomes = otherIncomes.otherIncomes;
+        if (Array.isArray(incomes) && incomes.length > 0) {
+          return incomes
+            .map((income: any) =>
+              getValue(income.otherIncome, income, typeof income === "string" ? income : "")
+            )
+            .join(", ");
+        }
+        return getValue(incomes) || "";
+      }
+      return "Not Provided";
+    })()}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Neighbor Check</strong></p></td>
@@ -799,9 +829,9 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Status</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${getValue(
-                  html_data.status,
-                  verificationData.status?.status
-                ) || "Not Provided"}</strong></p></td>
+      html_data.status,
+      status.status
+    ) || "Not Provided"}</strong></p></td>
             </tr>
             </table>
         
@@ -813,11 +843,10 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <p style="margin:8px 0;line-height:1.5"><strong></strong></p>
         <div style="margin-bottom: 20px;"></div>
         <p style="margin:8px 0;line-height:1.5"><strong>Photos</strong>:</p>
-            ${
-              html_data.imagesData && html_data.imagesData.trim().length > 0
-                ? html_data.imagesData
-                : '<div style="font-size:12px;color:#666;">No photographs uploaded</div>'
-            }
+            ${html_data.imagesData && html_data.imagesData.trim().length > 0
+      ? html_data.imagesData
+      : '<div style="font-size:12px;color:#666;">No photographs uploaded</div>'
+    }
     </div>    
   `;
 };

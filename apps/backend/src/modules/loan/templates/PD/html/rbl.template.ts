@@ -589,5 +589,6 @@ export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
 
       ${renderSubHeading("Photographs taken during visit")}
     </div>
-  `;
+    ${pdBaseTemplateFooter(html_data)}
+  `;  
 };

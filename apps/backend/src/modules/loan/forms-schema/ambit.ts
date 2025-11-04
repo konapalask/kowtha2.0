@@ -1,3 +1,5 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const ambitSchema = {
   id: 8,
   bankName: "Ambit",
@@ -475,6 +477,7 @@ export const ambitSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default ambitSchema;

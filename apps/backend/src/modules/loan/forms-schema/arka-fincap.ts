@@ -1,3 +1,5 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const arkaFincapSchema = {
   id: 4,
   bankName: "Arka Fincap",
@@ -601,6 +603,7 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default arkaFincapSchema;

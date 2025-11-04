@@ -531,7 +531,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       content: wrapParagraph(formatMultiline(personalDiscussion.strengths || "")),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>Other observation</strong></p>`,
+      instruction: `<p style="${paragraphStyle}"><strong>Other observation (example: GST Returns, Bank Statement, ITRs, Food License, etc.)</strong></p>`,
       content:
         (hasValue(personalDiscussion.otherObservation)
           ? wrapParagraph(formatMultiline(personalDiscussion.otherObservation))
@@ -556,16 +556,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   ];
 
   const personalDiscussionTable = renderInstructionTable(personalDiscussionRows);
-
-  const detailsMatchText = wrapParagraph(
-    `The details provided in the application form and the details provided by the customer at the time of discussion are same – <strong>${formatMultiline(
-      personalDiscussion.detailsMatch || ""
-    )}</strong>. ${
-      hasValue(personalDiscussion.detailsMismatchNotes)
-        ? `If NO please provide the details: ${formatMultiline(personalDiscussion.detailsMismatchNotes)}`
-        : ""
-    }`
-  );
 
   const noteBlock = `
     <div style="font-size:12px;line-height:1.6;margin-top:16px;">
@@ -613,7 +603,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
 
       ${wrapParagraph("<strong>VII] Personal Discussion Details:-</strong>")}
       ${personalDiscussionTable}
-      ${detailsMatchText}
 
       <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
 

@@ -1,3 +1,4 @@
+import financialsSchema from "../financials-schema/generic";
 export const indiaShelterSenpSchema = {
   id: 21,
   bankName: "India Shelter SENP",
@@ -15,22 +16,6 @@ export const indiaShelterSenpSchema = {
           branch: {
             type: "string",
             title: "Branch",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
           },
         },
       },
@@ -64,6 +49,16 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title:
               "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
+              enum: [
+                "Below 10",
+                "10th Pass",
+                "12th Pass",
+                "Diploma",
+                "ITI Certification",
+                "Graduate",
+                "PG",
+                "Professional Certification",
+              ],
           },
           category: {
             type: "string",
@@ -1318,6 +1313,7 @@ export const indiaShelterSenpSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 
