@@ -25,6 +25,8 @@ import {getItem, setItem} from '../helpers/utility';
 import dayjs from 'dayjs';
 import DeptModal from '../components/DeptModal';
 import {useUser} from '../contexts/UserContext';
+import {NativeModules} from 'react-native';
+const {BuildConfigModule} = NativeModules;
 
 type VerificationListScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -68,6 +70,7 @@ const VerificationListScreen = () => {
   const disabled = !isLoggedIn;
   const [testUser, setTestUser] = useState(false);
   const [openDeptModal, setOpenDeptModal] = useState(false);
+  const [isInternal, setIsInternal] = useState<boolean>(false);
   // const disabled = false;
   // const testUser = await getItem('testUser');
   // const opacity = useRef(new Animated.Value(1)).current;
@@ -199,6 +202,20 @@ const VerificationListScreen = () => {
   useEffect(() => {
     fetchData(1, false);
   }, [selectedFilter, appNumberFilter]);
+
+  useEffect(() => {
+    // Check if this is an internal build
+    const checkIsInternal = async () => {
+      try {
+        const result = await BuildConfigModule.isInternal();
+        setIsInternal(result === true);
+      } catch (error) {
+        console.error('Error checking isInternal:', error);
+        setIsInternal(false);
+      }
+    };
+    checkIsInternal();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -699,6 +716,9 @@ const VerificationListScreen = () => {
           }
         />
       )}
+      {/* <View>
+        <Text>{BuildConfigModule.isInternal()}</Text>
+      </View> */}
       {openDeptModal && (
         <DeptModal
           currentDept={currentDept}
@@ -709,12 +729,12 @@ const VerificationListScreen = () => {
       )}
 
       {/* QA Forms Testing FAB - Development Only */}
-      {process.env.REACT_APP_ENV === 'development' && (
+      {isInternal && (
         <TouchableOpacity
           style={styles.qaFab}
           onPress={() => navigation.navigate('QAFormTesting' as any)}>
           <Icon name="assignment" size={24} color="#fff" />
-          <Text style={styles.qaFabText}>QA</Text>
+          <Text style={styles.qaFabText}>QA Internal</Text>
         </TouchableOpacity>
       )}
     </View>

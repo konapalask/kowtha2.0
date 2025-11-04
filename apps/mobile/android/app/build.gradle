@@ -99,6 +99,21 @@ android {
             keyPassword MYAPP_UPLOAD_KEY_PASSWORD
         }
     }
+            flavorDimensions "env"
+
+    productFlavors {
+            internal {
+            dimension "env"
+            applicationIdSuffix ".internal"
+            buildConfigField "boolean", "IS_INTERNAL", "true"
+            }
+        
+        client {
+            dimension "env"
+            applicationIdSuffix ".client"
+            buildConfigField "boolean", "IS_INTERNAL", "false"
+        }
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
