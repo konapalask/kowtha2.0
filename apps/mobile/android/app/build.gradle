@@ -21,7 +21,7 @@ react {
     //   The list of variants to that are debuggable. For those we're going to
     //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
     //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
-    // debuggableVariants = ["liteDebug", "prodDebug"]
+    debuggableVariants = ["internalDebug", "clientDebug"]
 
     /* Bundling */
     //   A list containing the node command and its flags. Default is just 'node'.
@@ -84,6 +84,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 17
         versionName "1.0.17"
+        
+        // Set default dimension strategy so React Native CLI knows which variant to use
+        missingDimensionStrategy "env", "internal"
     }
     signingConfigs {
         debug {
@@ -106,6 +109,7 @@ android {
             dimension "env"
             applicationIdSuffix ".internal"
             buildConfigField "boolean", "IS_INTERNAL", "true"
+            isDefault = true
             }
         
         client {
@@ -114,6 +118,7 @@ android {
             buildConfigField "boolean", "IS_INTERNAL", "false"
         }
     }
+    
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -125,6 +130,26 @@ android {
             minifyEnabled false  // Enable code shrinking
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'}
+    }
+}
+
+// Create task aliases for React Native CLI compatibility
+// When React Native CLI calls installDebug/assembleDebug, it will use installInternalDebug/assembleInternalDebug
+afterEvaluate {
+    if (!tasks.findByName('installDebug')) {
+        tasks.create('installDebug') {
+            dependsOn 'installInternalDebug'
+            group = 'install'
+            description = 'Install debug variant (defaults to internalDebug)'
+        }
+    }
+    
+    if (!tasks.findByName('assembleDebug')) {
+        tasks.create('assembleDebug') {
+            dependsOn 'assembleInternalDebug'
+            group = 'build'
+            description = 'Assemble debug variant (defaults to internalDebug)'
+        }
     }
 }
 
