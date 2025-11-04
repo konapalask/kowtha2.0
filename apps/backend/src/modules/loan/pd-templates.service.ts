@@ -10,6 +10,7 @@ import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { LoggingService } from "src/modules/common/logging/logging.service";
 import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
+import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
 // import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
 import { RBLInterface } from "./templates/PD/interface/rbl.interface";
 import { rblTemplate } from "./templates/PD/html/rbl.template";
@@ -34,6 +35,9 @@ import { adityaBirlaTemplate } from "./templates/PD/html/aditya-birla.template";
 import { niwasSenpTemplate } from "./templates/PD/html/niwas-senp.template";
 import { niwasSalariedTemplate } from "./templates/PD/html/niwas-salaried.template";
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
+import { dcbTemplate } from "./templates/PD/html/dcb.template";
+import { incredTemplate } from "./templates/PD/html/incred.template";
+
 import {
   validateVerificationData,
   logDataStructure,
@@ -409,7 +413,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return templates.axisFinanceUBLTemplate(verificationData, html_data);
+      return axisFinanceUBLTemplate(verificationData, html_data);
     }
 
     if (bankName == "RBL" || bankName == "Rbl") {
@@ -655,6 +659,29 @@ export class PDTemplateService {
       );
       return adityaBirlaTemplate(verification, html_data);
     }
+
+    if (bankName == "DCB") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return dcbTemplate(verification, html_data);
+    }
+
+    if (bankName == "INCRED") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return incredTemplate(verification, html_data);
+    }
+
 
     // Generic template for all other banks (uses schema-driven approach)
     try {
