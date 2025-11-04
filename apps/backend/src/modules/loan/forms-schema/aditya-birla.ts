@@ -93,9 +93,14 @@ export const adityaBirlaSchema = {
       id: "documentVerification",
       label: "Document Verification",
       schema: {
-        type: "string",
-        title: "Documents verified",
-        ui: { widget: "textarea", rows: 4 },
+        type: "object",
+        properties: {
+          documentsVerified: {
+            type: "string",
+            title: "Documents verified",
+            ui: { widget: "textarea", rows: 4 },
+          },
+        },
       },
     },
     {
@@ -107,7 +112,10 @@ export const adityaBirlaSchema = {
           natureOfBusiness: { type: "string", title: "Nature of Business" },
           mainProduct: { type: "string", title: "Main Product" },
           mainRawMaterial: { type: "string", title: "Main Raw Material" },
-          vendorsSuppliersToApplicant: { type: "string", title: "Vendors / Suppliers to applicant" },
+          vendorsSuppliersToApplicant: {
+            type: "string",
+            title: "Vendors / Suppliers to applicant",
+          },
         },
       },
     },
@@ -121,7 +129,7 @@ export const adityaBirlaSchema = {
           businessTransaction: {
             type: "string",
             title: "Business transaction",
-          },  
+          },
           stockObserved: {
             type: "number",
             title: "Stock observed",
@@ -149,13 +157,22 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          mainCustomers: { type: "string", title: "Main customers in the business" },
+          mainCustomers: {
+            type: "string",
+            title: "Main customers in the business",
+          },
           salesPaymentTerms: { type: "string", title: "Sales payment terms" },
           gstRegistration: { type: "string", title: "GST registration" },
           itrsFiling: { type: "string", title: "ITRs filing" },
-          numberOfEmployees: { type: "number", title: "Number of employees (Co- applicant)" },
+          numberOfEmployees: {
+            type: "number",
+            title: "Number of employees (Co- applicant)",
+          },
           godownAddress: { type: "string", title: "Godown address (if any)" },
-          otherBusinessDetails: { type: "string", title: "Other business details (if any)" },
+          otherBusinessDetails: {
+            type: "string",
+            title: "Other business details (if any)",
+          },
         },
       },
     },
@@ -172,11 +189,26 @@ export const adityaBirlaSchema = {
           previousExperience: { type: "string", title: "Previous experience" },
           businessPremises: { type: "string", title: "Business premises" },
           ifRented: { type: "string", title: "If rented" },
-          businessPremisesInSqFt: { type: "string", title: "Business premises in Sq. ft" },
-          marketReferenceFrom: { type: "string", title: "Market reference from" },
-          vendorsContactDetails: { type: "string", title: "Vendors contact details" },
-          dailySalesMonthlySales: { type: "string", title: "Daily sales/ monthly sales" },
-          personalDetailsSummary: { type: "string", title: "About personal details" },
+          businessPremisesInSqFt: {
+            type: "string",
+            title: "Business premises in Sq. ft",
+          },
+          marketReferenceFrom: {
+            type: "string",
+            title: "Market reference from",
+          },
+          vendorsContactDetails: {
+            type: "string",
+            title: "Vendors contact details",
+          },
+          dailySalesMonthlySales: {
+            type: "string",
+            title: "Daily sales/ monthly sales",
+          },
+          personalDetailsSummary: {
+            type: "string",
+            title: "About personal details",
+          },
         },
       },
     },
@@ -184,16 +216,21 @@ export const adityaBirlaSchema = {
       id: "familyMembers",
       label: "Family Members",
       schema: {
-        type: "array",
-        title: "Family Members",
-        items: {
-          type: "object",
-          properties: {
-            name: { type: "string", title: "Name" },
-            relation: { type: "string", title: "Relation" },
-            age: { type: "string", title: "Age" },
-            businessName: { type: "string", title: "Business name" },
-            education: { type: "string", title: "Education" },
+        type: "object",
+        properties: {
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string", title: "Name" },
+                relation: { type: "string", title: "Relation" },
+                age: { type: "string", title: "Age" },
+                businessName: { type: "string", title: "Business name" },
+                education: { type: "string", title: "Education" },
+              },
+            },
           },
         },
       },
@@ -207,26 +244,42 @@ export const adityaBirlaSchema = {
           salesBills: { type: "number", title: "Sales bills" },
           purchaseBills: { type: "number", title: "Purchase bills" },
           neighbourCheckName: { type: "string", title: "Neighbour check name" },
-          neighbourCheckNumber: { type: "string", title: "Neighbour check number" },
+          neighbourCheckNumber: {
+            type: "string",
+            title: "Neighbour check number",
+          },
           cibilDetails: { type: "string", title: "Cibil details" },
-          previousLoans: { type: "string", title: "Previous loans",ui: { widget: "textarea", rows:4  } },
+          previousLoans: {
+            type: "string",
+            title: "Previous loans",
+            ui: { widget: "textarea", rows: 4 },
+          },
           bankingDetails: { type: "string", title: "Banking details" },
           firmAccount: { type: "string", title: "Firm account" },
           savingsAccount: { type: "string", title: "Savings account" },
           assetsDetails: { type: "string", title: "Assets details" },
           otherIncome: { type: "string", title: "Other income" },
           businessMachinery: { type: "string", title: "Business machinery" },
-          observation: { type: "string", title: "Observation", ui: { widget: "textarea", rows: 6 } },
+          observation: {
+            type: "string",
+            title: "Observation",
+            ui: { widget: "textarea", rows: 6 },
+          },
           statusOfPd: { type: "string", title: "Status" },
-          loanAmountApplied: { type: "number", title: "Loan amount applied",formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
+          loanAmountApplied: {
+            type: "number",
+            title: "Loan amount applied",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
 
           purposeOfLoan: { type: "string", title: "Purpose of loan" },
-          particulars: { type: "array", 
+          particulars: {
+            type: "array",
             items: {
               type: "object",
               properties: {
@@ -236,9 +289,12 @@ export const adityaBirlaSchema = {
                 total: { type: "string", title: "Total" },
               },
             },
-           },
+          },
           dailyGrossIncome: { type: "number", title: "Daily gross income" },
-          labourMaterialEveryday: { type: "number", title: "Labour & material (Everyday)" },
+          labourMaterialEveryday: {
+            type: "number",
+            title: "Labour & material (Everyday)",
+          },
           netIncomeDay: { type: "number", title: "Net income / day" },
         },
       },

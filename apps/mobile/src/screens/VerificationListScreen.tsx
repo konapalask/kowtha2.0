@@ -709,12 +709,14 @@ const VerificationListScreen = () => {
       )}
 
       {/* QA Forms Testing FAB - Development Only */}
-      <TouchableOpacity
-        style={styles.qaFab}
-        onPress={() => navigation.navigate('QAFormTesting' as any)}>
-        <Icon name="assignment" size={24} color="#fff" />
-        <Text style={styles.qaFabText}>QA</Text>
-      </TouchableOpacity>
+      {process.env.REACT_APP_ENV === 'development' && (
+        <TouchableOpacity
+          style={styles.qaFab}
+          onPress={() => navigation.navigate('QAFormTesting' as any)}>
+          <Icon name="assignment" size={24} color="#fff" />
+          <Text style={styles.qaFabText}>QA</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
