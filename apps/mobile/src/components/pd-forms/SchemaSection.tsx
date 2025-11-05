@@ -149,23 +149,39 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     try {
       let evaluatedFormula = formula;
 
-      // Find all potential field names (words that appear in formValues)
-      const fieldNames = Object.keys(formValues).filter(
-        key =>
-          formValues[key] !== undefined &&
-          formValues[key] !== null &&
-          formValues[key] !== '',
-      );
+      // Extract all field names from the formula (words that match JavaScript identifier pattern)
+      // This regex matches valid JavaScript identifiers in the formula
+      const fieldNameMatches = formula.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g);
+      const fieldNamesInFormula = fieldNameMatches || [];
 
-      // Replace field references with their numeric values
-      for (const fieldName of fieldNames) {
+      // Replace all field references in the formula with their numeric values
+      // Treat empty/missing values as 0
+      for (const fieldName of fieldNamesInFormula) {
+        // Skip JavaScript keywords and built-in functions
+        const jsKeywords = [
+          'true',
+          'false',
+          'null',
+          'undefined',
+          'NaN',
+          'Infinity',
+        ];
+        if (jsKeywords.includes(fieldName)) continue;
+
         const regex = new RegExp(`\\b${fieldName}\\b`, 'g');
         const value = formValues[fieldName];
-        const numValue =
-          typeof value === 'number' ? value : parseFloat(String(value));
-        if (!isNaN(numValue)) {
-          evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
+
+        // Treat empty/missing values as 0
+        let numValue = 0;
+        if (value !== undefined && value !== null && value !== '') {
+          const parsed =
+            typeof value === 'number' ? value : parseFloat(String(value));
+          if (!isNaN(parsed)) {
+            numValue = parsed;
+          }
         }
+
+        evaluatedFormula = evaluatedFormula.replace(regex, String(numValue));
       }
 
       // Safely evaluate the formula using Function constructor
@@ -250,7 +266,10 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       Object.entries(schema.properties).forEach(([fieldId, property]) => {
         if ((property as any).formula) {
           // Convert form values to numbers for formula evaluation
+          // Include all fields from schema, treating empty values as 0
           const numericValues: Record<string, any> = {};
+
+          // First, include all fields from formValues
           Object.entries(formValues).forEach(([key, val]) => {
             const fieldSchema = schema.properties[key];
             if (
@@ -259,11 +278,20 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             ) {
               const numVal =
                 typeof val === 'number' ? val : parseFloat(String(val));
-              if (!isNaN(numVal)) {
-                numericValues[key] = numVal;
-              }
+              // Treat empty/missing values as 0
+              numericValues[key] = isNaN(numVal) ? 0 : numVal;
             } else {
-              numericValues[key] = val;
+              // For non-numeric fields, use 0 if empty
+              numericValues[key] =
+                val === undefined || val === null || val === '' ? 0 : val;
+            }
+          });
+
+          // Also ensure all schema properties are included (in case formula references fields not yet in formValues)
+          Object.keys(schema.properties).forEach(key => {
+            if (!(key in numericValues)) {
+              // Field not in formValues, treat as 0
+              numericValues[key] = 0;
             }
           });
 
@@ -591,21 +619,42 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       const watchedArray = watch(fieldId as any);
       const arrayData = Array.isArray(watchedArray) ? watchedArray : [];
 
+      // For primitive arrays, don't use ensureArrayItemsHaveIds - use array directly
+      const isPrimitiveArray = !property.items?.properties;
+      const processedArray = isPrimitiveArray
+        ? arrayData
+        : ensureArrayItemsHaveIds(arrayData);
+
       const handleAddItem = () => {
         const currentData = getValues();
         const currentArray = Array.isArray(currentData[fieldId])
           ? currentData[fieldId]
           : [];
 
-        // Create new item with unique ID
-        const newItem = {
-          _id: generateArrayItemId(),
-        };
+        // Determine if this is a primitive array (string, number, etc.) or object array
 
-        const newArrayData = [
-          ...ensureArrayItemsHaveIds(currentArray),
-          newItem,
-        ];
+        let newItem: any;
+        if (isPrimitiveArray) {
+          // For primitive arrays, create the appropriate primitive value
+          if (
+            property.items?.type === 'number' ||
+            property.items?.type === 'integer'
+          ) {
+            newItem = 0;
+          } else {
+            // Default to empty string for strings and other types
+            newItem = '';
+          }
+        } else {
+          // For object arrays, create new item with unique ID
+          newItem = {
+            _id: generateArrayItemId(),
+          };
+        }
+
+        const newArrayData = isPrimitiveArray
+          ? [...currentArray, newItem]
+          : [...ensureArrayItemsHaveIds(currentArray), newItem];
         setValue(fieldId, newArrayData, {
           shouldDirty: true,
           shouldTouch: true,
@@ -621,18 +670,25 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           ? currentData[fieldId]
           : [];
 
-        // Ensure all items have IDs before filtering
-        const arrayWithIds = ensureArrayItemsHaveIds(currentArray);
-        const newArrayData = arrayWithIds.filter(
+        // For primitive arrays, filter directly. For object arrays, ensure IDs first
+        const arrayToFilter = isPrimitiveArray
+          ? currentArray
+          : ensureArrayItemsHaveIds(currentArray);
+        const newArrayData = arrayToFilter.filter(
           (_: any, i: number) => i !== indexToRemove,
         );
 
-        // Clear all field values for the removed item to prevent stale data
+        // Clear field values for the removed item
+        // For arrays of objects, clear sub-properties
         if (property.items?.properties) {
           Object.keys(property.items.properties).forEach(subFieldId => {
             const subFieldKey = `${fieldId}[${indexToRemove}].${subFieldId}`;
             setValue(subFieldKey as any, undefined, {shouldDirty: true});
           });
+        } else {
+          // For arrays of primitives, clear the item value directly
+          const fieldKey = `${fieldId}[${indexToRemove}]`;
+          setValue(fieldKey as any, undefined, {shouldDirty: true});
         }
 
         setValue(fieldId, newArrayData, {
@@ -650,85 +706,69 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             {property.title}
             {isRequired ? ' *' : ''}
           </Text>
-          {ensureArrayItemsHaveIds(arrayData).map(
-            (item: ArrayItemWithId, index: number) => (
-              <View
-                key={item._id || `${fieldId}-${index}`}
-                style={styles.repeaterItem}>
-                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
-                {property.items?.properties &&
-                  Object.entries(property.items.properties).map(
-                    ([subFieldId, subProperty]) => {
-                      const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
-                      // Check if this field is required in the array items
-                      const isSubFieldRequired =
-                        (property.items as any)?.required?.includes(
-                          subFieldId,
-                        ) ?? false;
+          {processedArray.map((item: any, index: number) => (
+            <View
+              key={
+                isPrimitiveArray
+                  ? `${fieldId}-${index}`
+                  : item._id || `${fieldId}-${index}`
+              }
+              style={styles.repeaterItem}>
+              <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+              {/* Handle arrays of objects */}
+              {property.items?.properties &&
+                Object.entries(property.items.properties).map(
+                  ([subFieldId, subProperty]) => {
+                    const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+                    // Check if this field is required in the array items
+                    const isSubFieldRequired =
+                      (property.items as any)?.required?.includes(subFieldId) ??
+                      false;
 
-                      // Handle date/time fields in arrays
-                      const isDateField =
-                        subProperty.format === 'date' ||
-                        subProperty.format === 'time' ||
-                        subProperty.format === 'date-time';
-                      if (isDateField) {
-                        return (
-                          <View key={subFieldKey}>
-                            {renderDateField(
-                              subFieldKey,
-                              subProperty.title,
-                              item?.[subFieldId],
-                              subProperty.readOnly,
-                              subProperty.format,
-                            )}
-                          </View>
-                        );
-                      }
+                    // Handle date/time fields in arrays
+                    const isDateField =
+                      subProperty.format === 'date' ||
+                      subProperty.format === 'time' ||
+                      subProperty.format === 'date-time';
+                    if (isDateField) {
+                      return (
+                        <View key={subFieldKey}>
+                          {renderDateField(
+                            subFieldKey,
+                            subProperty.title,
+                            item?.[subFieldId],
+                            subProperty.readOnly,
+                            subProperty.format,
+                          )}
+                        </View>
+                      );
+                    }
 
-                      // Handle enum fields (select dropdown) in arrays
-                      if (subProperty.enum && subProperty.enum.length > 0) {
-                        const options = subProperty.enum.map(option => ({
-                          id: option,
-                          name: option,
-                        }));
-
-                        return (
-                          <SelectFormItem
-                            key={subFieldKey}
-                            data={{
-                              control,
-                              key: subFieldKey,
-                              title: subProperty.title,
-                              required: isSubFieldRequired,
-                              options,
-                              defaultValue: item?.[subFieldId] ?? '',
-                            }}
-                          />
-                        );
-                      }
-
-                      if (shouldUseTextArea(subProperty)) {
-                        return (
-                          <TextAreaFormItem
-                            key={subFieldKey}
-                            data={{
-                              control,
-                              key: subFieldKey,
-                              title: subProperty.title,
-                              required: isSubFieldRequired,
-                              disabled:
-                                subProperty.readOnly ||
-                                !!(subProperty as any).formula,
-                              defaultValue: item?.[subFieldId] ?? '',
-                              numberOfLines: getTextAreaLines(subProperty),
-                              maxLength: getMaxLength(subProperty),
-                            }}
-                          />
-                        );
-                      }
+                    // Handle enum fields (select dropdown) in arrays
+                    if (subProperty.enum && subProperty.enum.length > 0) {
+                      const options = subProperty.enum.map(option => ({
+                        id: option,
+                        name: option,
+                      }));
 
                       return (
-                        <InputFormItem
+                        <SelectFormItem
+                          key={subFieldKey}
+                          data={{
+                            control,
+                            key: subFieldKey,
+                            title: subProperty.title,
+                            required: isSubFieldRequired,
+                            options,
+                            defaultValue: item?.[subFieldId] ?? '',
+                          }}
+                        />
+                      );
+                    }
+
+                    if (shouldUseTextArea(subProperty)) {
+                      return (
+                        <TextAreaFormItem
                           key={subFieldKey}
                           data={{
                             control,
@@ -739,27 +779,86 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                               subProperty.readOnly ||
                               !!(subProperty as any).formula,
                             defaultValue: item?.[subFieldId] ?? '',
-                            keyboardType:
-                              subProperty.type === 'number' ||
-                              subProperty.type === 'integer'
-                                ? 'numeric'
-                                : 'default',
-                            type: subProperty.type,
-                            formatter: (subProperty as any).formatter,
-                            trigger,
+                            numberOfLines: getTextAreaLines(subProperty),
+                            maxLength: getMaxLength(subProperty),
                           }}
                         />
                       );
-                    },
-                  )}
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => handleRemoveItem(index)}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
-              </View>
-            ),
-          )}
+                    }
+
+                    return (
+                      <InputFormItem
+                        key={subFieldKey}
+                        data={{
+                          control,
+                          key: subFieldKey,
+                          title: subProperty.title,
+                          required: isSubFieldRequired,
+                          disabled:
+                            subProperty.readOnly ||
+                            !!(subProperty as any).formula,
+                          defaultValue: item?.[subFieldId] ?? '',
+                          keyboardType:
+                            subProperty.type === 'number' ||
+                            subProperty.type === 'integer'
+                              ? 'numeric'
+                              : 'default',
+                          type: subProperty.type,
+                          formatter: (subProperty as any).formatter,
+                          trigger,
+                        }}
+                      />
+                    );
+                  },
+                )}
+              {/* Handle arrays of primitives (string, number, etc.) */}
+              {!property.items?.properties && property.items && (
+                <InputFormItem
+                  data={{
+                    control,
+                    key: `${fieldId}[${index}]`,
+                    title: property.items.title || property.title || 'Value',
+                    required: false,
+                    disabled: property.items.readOnly || false,
+                    defaultValue: (() => {
+                      // Extract the actual primitive value from the item
+                      // Handle both primitive values and wrapped objects
+                      if (
+                        typeof item === 'string' ||
+                        typeof item === 'number'
+                      ) {
+                        return String(item);
+                      }
+                      // If item is an object (shouldn't happen, but handle it)
+                      if (item && typeof item === 'object') {
+                        // Try to find a primitive value in the object
+                        const primitiveValue = Object.values(item).find(
+                          val =>
+                            typeof val === 'string' || typeof val === 'number',
+                        );
+                        return primitiveValue ? String(primitiveValue) : '';
+                      }
+                      return '';
+                    })(),
+                    placeholder:
+                      property.items.title || property.title || 'Enter value',
+                    keyboardType:
+                      property.items.type === 'number' ||
+                      property.items.type === 'integer'
+                        ? 'numeric'
+                        : 'default',
+                    type: property.items.type,
+                    trigger,
+                  }}
+                />
+              )}
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => handleRemoveItem(index)}>
+                <Text style={styles.removeButtonText}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
           <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
             <Text style={styles.addButtonText}>+ Add</Text>
           </TouchableOpacity>
