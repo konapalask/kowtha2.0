@@ -307,12 +307,18 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Debtor Days</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since (years)</strong></p></td>
                 </tr>
+                ${verificationData.customerDetails?.customers
+                  ?.map(
+                    (customer: any) => `
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.nameOfCustomer || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.percentageOfTotalSales || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.debtorDays || ""}</p></td>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.relationshipSinceYears || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.nameOfCustomer || ""}</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.percentageOfTotalSales || ""}</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.debtorDays || ""}</p></td>
+                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.relationshipSinceYears || ""}</p></td>
                 </tr>
+                `
+                  )
+                  .join("")}
             </table>
             
             <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
@@ -332,12 +338,18 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Creditor Days</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since(years)</strong></p></td>
                 </tr>
-                <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.nameOfSupplier || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.percentageOfTotalPurchases || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.creditorDays || ""}</p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.relationshipSinceYears || ""}</p></td>
-                </tr>
+                ${verificationData.supplierDetails?.suppliers
+                  ?.map(
+                    (supplier: any) => `
+                    <tr>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.nameOfSupplier || ""}</p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.percentageOfTotalPurchases || ""}</p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.creditorDays || ""}</p></td>
+                        <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.relationshipSinceYears || ""}</p></td>
+                    </tr>
+                `
+                  )
+                  .join("")}
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">16</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Other Business/ Income Details (if any)</p></td>

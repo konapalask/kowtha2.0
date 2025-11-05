@@ -50,6 +50,7 @@ export const axisBankSchema = {
             type: "string",
             title: "Full Address",
             readOnly: true,
+            ui: { widget: "textarea", rows: 3 },
           },
           applicantContactNumber: {
             type: "string",
@@ -419,12 +420,13 @@ export const axisBankSchema = {
           },
           endUseOfProposedLoan: {
             type: "string",
-            title: "End Use of proposed Loan in detail(Basis purpose of loan, in case cash out end use must be detailed)",
+            title:
+              "End Use of proposed Loan in detail(Basis purpose of loan, in case cash out end use must be detailed)",
             ui: {
               widget: "textarea",
               rows: 6,
             },
-          },          
+          },
         },
       },
       required: true,
@@ -459,15 +461,15 @@ export const axisBankSchema = {
             title: "Banking performance- Any cheque bounces seen (Y/N)",
             enum: ["Yes", "No"],
           },
-          
 
-          addressOfProperty: {  
+          addressOfProperty: {
             type: "string",
             title: "Details of collateral- Address of property",
           },
           statusOfPD: {
             type: "string",
-            title: "Status of PD (Positive, Negative, Credit Manager visit needed)",
+            title:
+              "Status of PD (Positive, Negative, Credit Manager visit needed)",
             enum: ["Positive", "Negative", "Credit Manager visit needed"],
           },
         },
