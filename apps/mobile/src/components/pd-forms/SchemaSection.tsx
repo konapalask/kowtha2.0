@@ -457,116 +457,140 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
   };
 
   const renderField = (fieldId: string, property: JsonSchemaProperty) => {
-    const formData = watch(); // Use watch to trigger re-renders on field changes
+    try {
+      const formData = watch(); // Use watch to trigger re-renders on field changes
 
-    // Check conditional required validation
-    let isRequired = schema.required?.includes(fieldId) ?? false;
+      // Check conditional required validation
+      let isRequired = schema.required?.includes(fieldId) ?? false;
 
-    if (property.dependencies?.required) {
-      const shouldBeRequired = checkConditionalVisibility(
-        property.dependencies.required,
-        formData,
-      );
-      isRequired = shouldBeRequired;
-    }
-
-    // Check conditional visibility
-    if (property.dependencies?.show) {
-      const shouldShow = checkConditionalVisibility(
-        property.dependencies.show,
-        formData,
-      );
-      if (!shouldShow) {
-        return null; // Hide field if conditions not met
+      if (property.dependencies?.required) {
+        const shouldBeRequired = checkConditionalVisibility(
+          property.dependencies.required,
+          formData,
+        );
+        isRequired = shouldBeRequired;
       }
-    }
 
-    // Fields with formulas are read-only
-    const isFormulaField = !!(property as any).formula;
-    const fieldReadOnly = property.readOnly || isFormulaField;
+      // Check conditional visibility
+      if (property.dependencies?.show) {
+        const shouldShow = checkConditionalVisibility(
+          property.dependencies.show,
+          formData,
+        );
+        if (!shouldShow) {
+          return null; // Hide field if conditions not met
+        }
+      }
 
-    // Handle nested object fields (like repaymentFrom)
-    if (property.type === 'object' && property.properties) {
-      return (
-        <View style={styles.nestedObjectContainer}>
-          <Text style={styles.nestedObjectLabel}>
-            {property.title}
-            {isRequired ? ' *' : ''}
-          </Text>
-          <View style={styles.nestedObjectContent}>
-            {Object.entries(property.properties).map(
-              ([subFieldId, subProperty]) => {
-                const subFieldKey = `${fieldId}.${subFieldId}`;
-                const subFieldValue = formData[fieldId]?.[subFieldId];
+      // Fields with formulas are read-only
+      const isFormulaField = !!(property as any).formula;
+      const fieldReadOnly = property.readOnly || isFormulaField;
 
-                // Handle date/time fields in nested objects
-                const isDateField =
-                  subProperty?.format === 'date' ||
-                  subProperty?.format === 'time' ||
-                  subProperty?.format === 'date-time';
-                if (isDateField) {
-                  console.log('subProperty', subProperty);
-                  return (
-                    <View key={subFieldKey}>
-                      {renderDateField(
-                        subFieldKey,
-                        subProperty.title,
-                        subFieldValue,
-                        subProperty.readOnly,
-                        subProperty.format,
-                      )}
-                    </View>
-                  );
-                }
+      // Handle nested object fields (like repaymentFrom)
+      if (property.type === 'object' && property.properties) {
+        return (
+          <View style={styles.nestedObjectContainer}>
+            <Text style={styles.nestedObjectLabel}>
+              {property.title}
+              {isRequired ? ' *' : ''}
+            </Text>
+            <View style={styles.nestedObjectContent}>
+              {Object.entries(property.properties).map(
+                ([subFieldId, subProperty]) => {
+                  const subFieldKey = `${fieldId}.${subFieldId}`;
+                  const subFieldValue = formData[fieldId]?.[subFieldId];
 
-                // Handle enum in nested objects
-                if (subProperty.enum && subProperty.enum.length > 0) {
-                  const options = subProperty.enum.map(option => ({
-                    id: option,
-                    name: option,
-                  }));
+                  // Handle date/time fields in nested objects
+                  const isDateField =
+                    subProperty?.format === 'date' ||
+                    subProperty?.format === 'time' ||
+                    subProperty?.format === 'date-time';
+                  if (isDateField) {
+                    console.log('subProperty', subProperty);
+                    return (
+                      <View key={subFieldKey}>
+                        {renderDateField(
+                          subFieldKey,
+                          subProperty.title,
+                          subFieldValue,
+                          subProperty.readOnly,
+                          subProperty.format,
+                        )}
+                      </View>
+                    );
+                  }
 
-                  return (
-                    <SelectFormItem
-                      key={subFieldKey}
-                      data={{
-                        control,
-                        key: subFieldKey,
-                        title: subProperty.title,
-                        required: false,
-                        options,
-                        defaultValue: subFieldValue ?? '',
-                      }}
-                    />
-                  );
-                }
+                  // Handle enum in nested objects
+                  if (subProperty.enum && subProperty.enum.length > 0) {
+                    const options = subProperty.enum.map(option => ({
+                      id: option,
+                      name: option,
+                    }));
 
-                // Handle textarea in nested objects
-                if (shouldUseTextArea(subProperty)) {
-                  return (
-                    <TextAreaFormItem
-                      key={subFieldKey}
-                      data={{
-                        control,
-                        key: subFieldKey,
-                        title: subProperty.title,
-                        required: false,
-                        disabled:
-                          subProperty.readOnly ||
-                          !!(subProperty as any).formula,
-                        defaultValue: subFieldValue ?? '',
-                        numberOfLines: getTextAreaLines(subProperty),
-                        maxLength: getMaxLength(subProperty),
-                      }}
-                    />
-                  );
-                }
+                    return (
+                      <SelectFormItem
+                        key={subFieldKey}
+                        data={{
+                          control,
+                          key: subFieldKey,
+                          title: subProperty.title,
+                          required: false,
+                          options,
+                          defaultValue: subFieldValue ?? '',
+                        }}
+                      />
+                    );
+                  }
 
-                // Handle number/integer in nested objects
-                if (
-                  subProperty.type === 'number' ||
-                  subProperty.type === 'integer'
-                ) {
+                  // Handle textarea in nested objects
+                  if (shouldUseTextArea(subProperty)) {
+                    return (
+                      <TextAreaFormItem
+                        key={subFieldKey}
+                        data={{
+                          control,
+                          key: subFieldKey,
+                          title: subProperty.title,
+                          required: false,
+                          disabled:
+                            subProperty.readOnly ||
+                            !!(subProperty as any).formula,
+                          defaultValue: subFieldValue ?? '',
+                          numberOfLines: getTextAreaLines(subProperty),
+                          maxLength: getMaxLength(subProperty),
+                        }}
+                      />
+                    );
+                  }
+
+                  // Handle number/integer in nested objects
+                  if (
+                    subProperty.type === 'number' ||
+                    subProperty.type === 'integer'
+                  ) {
+                    return (
+                      <InputFormItem
+                        key={subFieldKey}
+                        data={{
+                          control,
+                          key: subFieldKey,
+                          title: subProperty.title,
+                          required: false,
+                          disabled:
+                            subProperty.readOnly ||
+                            !!(subProperty as any).formula,
+                          defaultValue: subFieldValue?.toString() ?? '',
+                          placeholder: subProperty.title,
+                          keyboardType: 'numeric',
+                          type: subProperty.type,
+                          formatter: (subProperty as any).formatter,
+                          trigger,
+                        }}
+                      />
+                    );
+                  }
+
+                  // Default to InputFormItem for nested objects
                   return (
                     <InputFormItem
                       key={subFieldKey}
@@ -578,197 +602,195 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                         disabled:
                           subProperty.readOnly ||
                           !!(subProperty as any).formula,
-                        defaultValue: subFieldValue?.toString() ?? '',
+                        defaultValue: subFieldValue ?? '',
                         placeholder: subProperty.title,
-                        keyboardType: 'numeric',
-                        type: subProperty.type,
-                        formatter: (subProperty as any).formatter,
-                        trigger,
                       }}
                     />
                   );
-                }
-
-                // Default to InputFormItem for nested objects
-                return (
-                  <InputFormItem
-                    key={subFieldKey}
-                    data={{
-                      control,
-                      key: subFieldKey,
-                      title: subProperty.title,
-                      required: false,
-                      disabled:
-                        subProperty.readOnly || !!(subProperty as any).formula,
-                      defaultValue: subFieldValue ?? '',
-                      placeholder: subProperty.title,
-                    }}
-                  />
-                );
-              },
-            )}
+                },
+              )}
+            </View>
           </View>
-        </View>
-      );
-    }
-
-    // Handle array fields (like familyDetails) - keeping custom implementation for now
-    // as lib doesn't have a repeater component
-    if (property.type === 'array' && property.items) {
-      // Use live watch to reflect updates immediately in UI
-      const watchedArray = watch(fieldId as any);
-      const arrayData = Array.isArray(watchedArray) ? watchedArray : [];
-
-      // For primitive arrays, don't use ensureArrayItemsHaveIds - use array directly
-      const isPrimitiveArray = !property.items?.properties;
-      const processedArray = isPrimitiveArray
-        ? arrayData
-        : ensureArrayItemsHaveIds(arrayData);
-
-      const handleAddItem = () => {
-        const currentData = getValues();
-        const currentArray = Array.isArray(currentData[fieldId])
-          ? currentData[fieldId]
-          : [];
-
-        // Determine if this is a primitive array (string, number, etc.) or object array
-
-        let newItem: any;
-        if (isPrimitiveArray) {
-          // For primitive arrays, create the appropriate primitive value
-          if (
-            property.items?.type === 'number' ||
-            property.items?.type === 'integer'
-          ) {
-            newItem = 0;
-          } else {
-            // Default to empty string for strings and other types
-            newItem = '';
-          }
-        } else {
-          // For object arrays, create new item with unique ID
-          newItem = {
-            _id: generateArrayItemId(),
-          };
-        }
-
-        const newArrayData = isPrimitiveArray
-          ? [...currentArray, newItem]
-          : [...ensureArrayItemsHaveIds(currentArray), newItem];
-        setValue(fieldId, newArrayData, {
-          shouldDirty: true,
-          shouldTouch: true,
-          shouldValidate: true,
-        });
-        // Persist immediately so toggling sections does not revert
-        onSubmit(getValues());
-      };
-
-      const handleRemoveItem = (indexToRemove: number) => {
-        const currentData = getValues();
-        const currentArray = Array.isArray(currentData[fieldId])
-          ? currentData[fieldId]
-          : [];
-
-        // For primitive arrays, filter directly. For object arrays, ensure IDs first
-        const arrayToFilter = isPrimitiveArray
-          ? currentArray
-          : ensureArrayItemsHaveIds(currentArray);
-        const newArrayData = arrayToFilter.filter(
-          (_: any, i: number) => i !== indexToRemove,
         );
+      }
 
-        // Clear field values for the removed item
-        // For arrays of objects, clear sub-properties
-        if (property.items?.properties) {
-          Object.keys(property.items.properties).forEach(subFieldId => {
-            const subFieldKey = `${fieldId}[${indexToRemove}].${subFieldId}`;
-            setValue(subFieldKey as any, undefined, {shouldDirty: true});
+      // Handle array fields (like familyDetails) - keeping custom implementation for now
+      // as lib doesn't have a repeater component
+      if (property.type === 'array' && property.items) {
+        // Use live watch to reflect updates immediately in UI
+        const watchedArray = watch(fieldId as any);
+        const arrayData = Array.isArray(watchedArray) ? watchedArray : [];
+
+        // For primitive arrays, don't use ensureArrayItemsHaveIds - use array directly
+        const isPrimitiveArray = !property.items?.properties;
+        const processedArray = isPrimitiveArray
+          ? arrayData
+          : ensureArrayItemsHaveIds(arrayData);
+
+        const handleAddItem = () => {
+          const currentData = getValues();
+          const currentArray = Array.isArray(currentData[fieldId])
+            ? currentData[fieldId]
+            : [];
+
+          // Determine if this is a primitive array (string, number, etc.) or object array
+
+          let newItem: any;
+          if (isPrimitiveArray) {
+            // For primitive arrays, create the appropriate primitive value
+            if (
+              property.items?.type === 'number' ||
+              property.items?.type === 'integer'
+            ) {
+              newItem = 0;
+            } else {
+              // Default to empty string for strings and other types
+              newItem = '';
+            }
+          } else {
+            // For object arrays, create new item with unique ID
+            newItem = {
+              _id: generateArrayItemId(),
+            };
+          }
+
+          const newArrayData = isPrimitiveArray
+            ? [...currentArray, newItem]
+            : [...ensureArrayItemsHaveIds(currentArray), newItem];
+          setValue(fieldId, newArrayData, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
           });
-        } else {
-          // For arrays of primitives, clear the item value directly
-          const fieldKey = `${fieldId}[${indexToRemove}]`;
-          setValue(fieldKey as any, undefined, {shouldDirty: true});
-        }
+          // Persist immediately so toggling sections does not revert
+          onSubmit(getValues());
+        };
 
-        setValue(fieldId, newArrayData, {
-          shouldDirty: true,
-          shouldTouch: true,
-          shouldValidate: true,
-        });
-        // Persist immediately so toggling sections does not revert
-        onSubmit(getValues());
-      };
+        const handleRemoveItem = (indexToRemove: number) => {
+          const currentData = getValues();
+          const currentArray = Array.isArray(currentData[fieldId])
+            ? currentData[fieldId]
+            : [];
 
-      return (
-        <View style={styles.repeaterContainer}>
-          <Text style={styles.repeaterLabel}>
-            {property.title}
-            {isRequired ? ' *' : ''}
-          </Text>
-          {processedArray.map((item: any, index: number) => (
-            <View
-              key={
-                isPrimitiveArray
-                  ? `${fieldId}-${index}`
-                  : item._id || `${fieldId}-${index}`
-              }
-              style={styles.repeaterItem}>
-              <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
-              {/* Handle arrays of objects */}
-              {property.items?.properties &&
-                Object.entries(property.items.properties).map(
-                  ([subFieldId, subProperty]) => {
-                    const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
-                    // Check if this field is required in the array items
-                    const isSubFieldRequired =
-                      (property.items as any)?.required?.includes(subFieldId) ??
-                      false;
+          // For primitive arrays, filter directly. For object arrays, ensure IDs first
+          const arrayToFilter = isPrimitiveArray
+            ? currentArray
+            : ensureArrayItemsHaveIds(currentArray);
+          const newArrayData = arrayToFilter.filter(
+            (_: any, i: number) => i !== indexToRemove,
+          );
 
-                    // Handle date/time fields in arrays
-                    const isDateField =
-                      subProperty.format === 'date' ||
-                      subProperty.format === 'time' ||
-                      subProperty.format === 'date-time';
-                    if (isDateField) {
+          // Clear field values for the removed item
+          // For arrays of objects, clear sub-properties
+          if (property.items?.properties) {
+            Object.keys(property.items.properties).forEach(subFieldId => {
+              const subFieldKey = `${fieldId}[${indexToRemove}].${subFieldId}`;
+              setValue(subFieldKey as any, undefined, {shouldDirty: true});
+            });
+          } else {
+            // For arrays of primitives, clear the item value directly
+            const fieldKey = `${fieldId}[${indexToRemove}]`;
+            setValue(fieldKey as any, undefined, {shouldDirty: true});
+          }
+
+          setValue(fieldId, newArrayData, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          });
+          // Persist immediately so toggling sections does not revert
+          onSubmit(getValues());
+        };
+
+        return (
+          <View style={styles.repeaterContainer}>
+            <Text style={styles.repeaterLabel}>
+              {property.title}
+              {isRequired ? ' *' : ''}
+            </Text>
+            {processedArray.map((item: any, index: number) => (
+              <View
+                key={
+                  isPrimitiveArray
+                    ? `${fieldId}-${index}`
+                    : item._id || `${fieldId}-${index}`
+                }
+                style={styles.repeaterItem}>
+                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                {/* Handle arrays of objects */}
+                {property.items?.properties &&
+                  Object.entries(property.items.properties).map(
+                    ([subFieldId, subProperty]) => {
+                      const subFieldKey = `${fieldId}[${index}].${subFieldId}`;
+                      // Check if this field is required in the array items
+                      const isSubFieldRequired =
+                        (property.items as any)?.required?.includes(
+                          subFieldId,
+                        ) ?? false;
+
+                      // Handle date/time fields in arrays
+                      const isDateField =
+                        subProperty.format === 'date' ||
+                        subProperty.format === 'time' ||
+                        subProperty.format === 'date-time';
+                      if (isDateField) {
+                        return (
+                          <View key={subFieldKey}>
+                            {renderDateField(
+                              subFieldKey,
+                              subProperty.title,
+                              item?.[subFieldId],
+                              subProperty.readOnly,
+                              subProperty.format,
+                            )}
+                          </View>
+                        );
+                      }
+
+                      // Handle enum fields (select dropdown) in arrays
+                      if (subProperty.enum && subProperty.enum.length > 0) {
+                        const options = subProperty.enum.map(option => ({
+                          id: option,
+                          name: option,
+                        }));
+
+                        return (
+                          <SelectFormItem
+                            key={subFieldKey}
+                            data={{
+                              control,
+                              key: subFieldKey,
+                              title: subProperty.title,
+                              required: isSubFieldRequired,
+                              options,
+                              defaultValue: item?.[subFieldId] ?? '',
+                            }}
+                          />
+                        );
+                      }
+
+                      if (shouldUseTextArea(subProperty)) {
+                        return (
+                          <TextAreaFormItem
+                            key={subFieldKey}
+                            data={{
+                              control,
+                              key: subFieldKey,
+                              title: subProperty.title,
+                              required: isSubFieldRequired,
+                              disabled:
+                                subProperty.readOnly ||
+                                !!(subProperty as any).formula,
+                              defaultValue: item?.[subFieldId] ?? '',
+                              numberOfLines: getTextAreaLines(subProperty),
+                              maxLength: getMaxLength(subProperty),
+                            }}
+                          />
+                        );
+                      }
+
                       return (
-                        <View key={subFieldKey}>
-                          {renderDateField(
-                            subFieldKey,
-                            subProperty.title,
-                            item?.[subFieldId],
-                            subProperty.readOnly,
-                            subProperty.format,
-                          )}
-                        </View>
-                      );
-                    }
-
-                    // Handle enum fields (select dropdown) in arrays
-                    if (subProperty.enum && subProperty.enum.length > 0) {
-                      const options = subProperty.enum.map(option => ({
-                        id: option,
-                        name: option,
-                      }));
-
-                      return (
-                        <SelectFormItem
-                          key={subFieldKey}
-                          data={{
-                            control,
-                            key: subFieldKey,
-                            title: subProperty.title,
-                            required: isSubFieldRequired,
-                            options,
-                            defaultValue: item?.[subFieldId] ?? '',
-                          }}
-                        />
-                      );
-                    }
-
-                    if (shouldUseTextArea(subProperty)) {
-                      return (
-                        <TextAreaFormItem
+                        <InputFormItem
                           key={subFieldKey}
                           data={{
                             control,
@@ -779,156 +801,156 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                               subProperty.readOnly ||
                               !!(subProperty as any).formula,
                             defaultValue: item?.[subFieldId] ?? '',
-                            numberOfLines: getTextAreaLines(subProperty),
-                            maxLength: getMaxLength(subProperty),
+                            keyboardType:
+                              subProperty.type === 'number' ||
+                              subProperty.type === 'integer'
+                                ? 'numeric'
+                                : 'default',
+                            type: subProperty.type,
+                            formatter: (subProperty as any).formatter,
+                            trigger,
                           }}
                         />
                       );
-                    }
-
-                    return (
-                      <InputFormItem
-                        key={subFieldKey}
-                        data={{
-                          control,
-                          key: subFieldKey,
-                          title: subProperty.title,
-                          required: isSubFieldRequired,
-                          disabled:
-                            subProperty.readOnly ||
-                            !!(subProperty as any).formula,
-                          defaultValue: item?.[subFieldId] ?? '',
-                          keyboardType:
-                            subProperty.type === 'number' ||
-                            subProperty.type === 'integer'
-                              ? 'numeric'
-                              : 'default',
-                          type: subProperty.type,
-                          formatter: (subProperty as any).formatter,
-                          trigger,
-                        }}
-                      />
-                    );
-                  },
+                    },
+                  )}
+                {/* Handle arrays of primitives (string, number, etc.) */}
+                {!property.items?.properties && property.items && (
+                  <InputFormItem
+                    data={{
+                      control,
+                      key: `${fieldId}[${index}]`,
+                      title: property.items.title || property.title || 'Value',
+                      required: false,
+                      disabled: property.items.readOnly || false,
+                      defaultValue: (() => {
+                        // Extract the actual primitive value from the item
+                        // Handle both primitive values and wrapped objects
+                        if (
+                          typeof item === 'string' ||
+                          typeof item === 'number'
+                        ) {
+                          return String(item);
+                        }
+                        // If item is an object (shouldn't happen, but handle it)
+                        if (item && typeof item === 'object') {
+                          // Try to find a primitive value in the object
+                          const primitiveValue = Object.values(item).find(
+                            val =>
+                              typeof val === 'string' ||
+                              typeof val === 'number',
+                          );
+                          return primitiveValue ? String(primitiveValue) : '';
+                        }
+                        return '';
+                      })(),
+                      placeholder:
+                        property.items.title || property.title || 'Enter value',
+                      keyboardType:
+                        property.items.type === 'number' ||
+                        property.items.type === 'integer'
+                          ? 'numeric'
+                          : 'default',
+                      type: property.items.type,
+                      trigger,
+                    }}
+                  />
                 )}
-              {/* Handle arrays of primitives (string, number, etc.) */}
-              {!property.items?.properties && property.items && (
-                <InputFormItem
-                  data={{
-                    control,
-                    key: `${fieldId}[${index}]`,
-                    title: property.items.title || property.title || 'Value',
-                    required: false,
-                    disabled: property.items.readOnly || false,
-                    defaultValue: (() => {
-                      // Extract the actual primitive value from the item
-                      // Handle both primitive values and wrapped objects
-                      if (
-                        typeof item === 'string' ||
-                        typeof item === 'number'
-                      ) {
-                        return String(item);
-                      }
-                      // If item is an object (shouldn't happen, but handle it)
-                      if (item && typeof item === 'object') {
-                        // Try to find a primitive value in the object
-                        const primitiveValue = Object.values(item).find(
-                          val =>
-                            typeof val === 'string' || typeof val === 'number',
-                        );
-                        return primitiveValue ? String(primitiveValue) : '';
-                      }
-                      return '';
-                    })(),
-                    placeholder:
-                      property.items.title || property.title || 'Enter value',
-                    keyboardType:
-                      property.items.type === 'number' ||
-                      property.items.type === 'integer'
-                        ? 'numeric'
-                        : 'default',
-                    type: property.items.type,
-                    trigger,
-                  }}
-                />
-              )}
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => handleRemoveItem(index)}>
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveItem(index)}>
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+              <Text style={styles.addButtonText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      }
 
-    // Handle enum fields (select dropdown)
-    if (property.enum && property.enum.length > 0) {
-      const options = property.enum.map(option => ({
-        id: option,
-        name: option,
-      }));
-
-      return (
-        <SelectFormItem
-          data={{
-            control,
-            key: fieldId,
-            title: property.title,
-            required: isRequired,
-            options,
-            defaultValue: formData[fieldId] ?? '',
-          }}
-        />
-      );
-    }
-
-    // Handle different field types
-    switch (property.type) {
-      case 'boolean':
-        // Use RadioFormItem for boolean (Yes/No options)
+      // Handle enum fields (select dropdown)
+      if (property.enum && property.enum.length > 0) {
+        const options = property.enum.map(option => ({
+          id: option,
+          name: option,
+        }));
 
         return (
-          <RadioFormItem
+          <SelectFormItem
             data={{
               control,
               key: fieldId,
               title: property.title,
               required: isRequired,
-              options: [
-                {key: true, title: 'Yes'},
-                {key: false, title: 'No'},
-              ],
-              layout: 'row',
-              defaultValue: formData[fieldId] ?? null,
+              options,
+              defaultValue: formData[fieldId] ?? '',
             }}
           />
         );
+      }
 
-      case 'string':
-        // Check if it should be a date/time field
-        const isDateField =
-          property.format === 'date' ||
-          property.format === 'time' ||
-          property.format === 'date-time';
-        if (isDateField) {
-          return renderDateField(
-            fieldId,
-            property.title,
-            formData[fieldId],
-            property.readOnly,
-            property.format,
-          );
-        }
+      // Handle different field types
+      switch (property.type) {
+        case 'boolean':
+          // Use RadioFormItem for boolean (Yes/No options)
 
-        // Check if it should be a textarea
-        if (shouldUseTextArea(property)) {
           return (
-            <TextAreaFormItem
+            <RadioFormItem
+              data={{
+                control,
+                key: fieldId,
+                title: property.title,
+                required: isRequired,
+                options: [
+                  {key: true, title: 'Yes'},
+                  {key: false, title: 'No'},
+                ],
+                layout: 'row',
+                defaultValue: formData[fieldId] ?? null,
+              }}
+            />
+          );
+
+        case 'string':
+          // Check if it should be a date/time field
+          const isDateField =
+            property.format === 'date' ||
+            property.format === 'time' ||
+            property.format === 'date-time';
+          if (isDateField) {
+            return renderDateField(
+              fieldId,
+              property.title,
+              formData[fieldId],
+              property.readOnly,
+              property.format,
+            );
+          }
+
+          // Check if it should be a textarea
+          if (shouldUseTextArea(property)) {
+            return (
+              <TextAreaFormItem
+                data={{
+                  control,
+                  key: fieldId,
+                  title: property.title,
+                  required: isRequired,
+                  disabled: fieldReadOnly,
+                  defaultValue: formData[fieldId] ?? '',
+                  placeholder: property.title,
+                  trigger,
+                  numberOfLines: getTextAreaLines(property),
+                  maxLength: getMaxLength(property),
+                }}
+              />
+            );
+          }
+
+          return (
+            <InputFormItem
               data={{
                 control,
                 key: fieldId,
@@ -938,143 +960,149 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 defaultValue: formData[fieldId] ?? '',
                 placeholder: property.title,
                 trigger,
-                numberOfLines: getTextAreaLines(property),
-                maxLength: getMaxLength(property),
               }}
             />
           );
-        }
 
-        return (
-          <InputFormItem
-            data={{
-              control,
-              key: fieldId,
-              title: property.title,
-              required: isRequired,
-              disabled: fieldReadOnly,
-              defaultValue: formData[fieldId] ?? '',
-              placeholder: property.title,
-              trigger,
-            }}
-          />
-        );
-
-      case 'number':
-        return (
-          <InputFormItem
-            data={{
-              control,
-              key: fieldId,
-              title: property.title,
-              required: isRequired,
-              disabled: fieldReadOnly,
-              defaultValue: formData[fieldId]?.toString() ?? '',
-              placeholder: property.title,
-              keyboardType: 'numeric', // Numeric keyboard for decimal numbers
-              type: 'number',
-              trigger,
-              formatter: (property as any).formatter, // Pass formatter from schema
-              rules: {
-                validate: {
-                  isNumber: (value: string) => {
-                    if (!value) return true; // Allow empty for non-required fields
-                    const numValue = parseFloat(value);
-                    return !isNaN(numValue) || 'Please enter a valid number';
-                  },
-                  nonNegative: (value: string) => {
-                    if (!value) return true;
-                    const numValue = parseFloat(value);
-                    return (
-                      numValue >= 0 ||
-                      'Value must be greater than or equal to 0'
-                    );
-                  },
-                  maxTwoDecimals: (value: string) => {
-                    if (!value) return true;
-                    const maxDp =
-                      (property as any)?.formatter?.maxDecimalPlaces ?? 2;
-                    if (maxDp == null) return true;
-                    const match = value.match(/^(?:-)?\d*(?:\.(\d+))?$/);
-                    if (!match) return 'Please enter a valid number';
-                    const decimals = match[1]?.length || 0;
-                    return (
-                      decimals <= maxDp ||
-                      `Maximum ${maxDp} decimal places allowed`
-                    );
+        case 'number':
+          return (
+            <InputFormItem
+              data={{
+                control,
+                key: fieldId,
+                title: property.title,
+                required: isRequired,
+                disabled: fieldReadOnly,
+                defaultValue: formData[fieldId]?.toString() ?? '',
+                placeholder: property.title,
+                keyboardType: 'numeric', // Numeric keyboard for decimal numbers
+                type: 'number',
+                trigger,
+                formatter: (property as any).formatter, // Pass formatter from schema
+                rules: {
+                  validate: {
+                    isNumber: (value: string) => {
+                      if (!value) return true; // Allow empty for non-required fields
+                      const numValue = parseFloat(value);
+                      return !isNaN(numValue) || 'Please enter a valid number';
+                    },
+                    nonNegative: (value: string) => {
+                      if (!value) return true;
+                      const numValue = parseFloat(value);
+                      return (
+                        numValue >= 0 ||
+                        'Value must be greater than or equal to 0'
+                      );
+                    },
+                    maxTwoDecimals: (value: string) => {
+                      if (!value) return true;
+                      const maxDp =
+                        (property as any)?.formatter?.maxDecimalPlaces ?? 2;
+                      if (maxDp == null) return true;
+                      const match = value.match(/^(?:-)?\d*(?:\.(\d+))?$/);
+                      if (!match) return 'Please enter a valid number';
+                      const decimals = match[1]?.length || 0;
+                      return (
+                        decimals <= maxDp ||
+                        `Maximum ${maxDp} decimal places allowed`
+                      );
+                    },
                   },
                 },
-              },
-            }}
-          />
-        );
+              }}
+            />
+          );
 
-      case 'integer':
-        return (
-          <InputFormItem
-            data={{
-              control,
-              key: fieldId,
-              title: property.title,
-              required: isRequired,
-              disabled: fieldReadOnly,
-              defaultValue: formData[fieldId]?.toString() ?? '',
-              placeholder: property.title,
-              keyboardType: 'number-pad', // Number pad for integers (no decimal point)
-              type: 'integer',
-              trigger,
-              formatter: (property as any).formatter, // Pass formatter from schema
-              rules: {
-                validate: {
-                  isInteger: (value: string) => {
-                    if (!value) return true; // Allow empty for non-required fields
-                    const intValue = parseInt(value, 10);
-                    return (
-                      (!isNaN(intValue) &&
-                        Number.isInteger(parseFloat(value))) ||
-                      'Please enter a valid integer'
-                    );
-                  },
-                  nonNegative: (value: string) => {
-                    if (!value) return true;
-                    const intValue = parseInt(value, 10);
-                    if (isNaN(intValue)) return 'Please enter a valid integer';
-                    return (
-                      intValue >= 0 ||
-                      'Value must be greater than or equal to 0'
-                    );
+        case 'integer':
+          return (
+            <InputFormItem
+              data={{
+                control,
+                key: fieldId,
+                title: property.title,
+                required: isRequired,
+                disabled: fieldReadOnly,
+                defaultValue: formData[fieldId]?.toString() ?? '',
+                placeholder: property.title,
+                keyboardType: 'number-pad', // Number pad for integers (no decimal point)
+                type: 'integer',
+                trigger,
+                formatter: (property as any).formatter, // Pass formatter from schema
+                rules: {
+                  validate: {
+                    isInteger: (value: string) => {
+                      if (!value) return true; // Allow empty for non-required fields
+                      const intValue = parseInt(value, 10);
+                      return (
+                        (!isNaN(intValue) &&
+                          Number.isInteger(parseFloat(value))) ||
+                        'Please enter a valid integer'
+                      );
+                    },
+                    nonNegative: (value: string) => {
+                      if (!value) return true;
+                      const intValue = parseInt(value, 10);
+                      if (isNaN(intValue))
+                        return 'Please enter a valid integer';
+                      return (
+                        intValue >= 0 ||
+                        'Value must be greater than or equal to 0'
+                      );
+                    },
                   },
                 },
-              },
-            }}
-          />
-        );
+              }}
+            />
+          );
 
-      default:
-        // Default to InputFormItem
-        return (
-          <InputFormItem
-            data={{
-              control,
-              key: fieldId,
-              title: property.title,
-              required: isRequired,
-              disabled: fieldReadOnly,
-              defaultValue: formData[fieldId] ?? '',
-              placeholder: property.title,
-              trigger,
-            }}
-          />
-        );
+        default:
+          // Default to InputFormItem
+          return (
+            <InputFormItem
+              data={{
+                control,
+                key: fieldId,
+                title: property.title,
+                required: isRequired,
+                disabled: fieldReadOnly,
+                defaultValue: formData[fieldId] ?? '',
+                placeholder: property.title,
+                trigger,
+              }}
+            />
+          );
+      }
+    } catch (err: any) {
+      return (
+        <View style={styles.schemaErrorBox}>
+          <Text style={styles.schemaErrorTitle}>Schema render error</Text>
+          <Text style={styles.schemaErrorDetails}>
+            Field: {fieldId} • {(property as any)?.title || 'Untitled'}
+          </Text>
+          <Text style={styles.schemaErrorDetails}>
+            {(err && (err.message || String(err))) || 'Unknown error'}
+          </Text>
+        </View>
+      );
     }
   };
 
   return (
     <>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {Object.entries(schema.properties).map(([fieldId, property]) => (
-          <View key={fieldId}>{renderField(fieldId, property)}</View>
-        ))}
+        {Object.entries(schema.properties || {}).map(([fieldId, property]) => {
+          if (!property || !(property as any).type) {
+            return (
+              <View key={fieldId} style={styles.schemaErrorBox}>
+                <Text style={styles.schemaErrorTitle}>Invalid schema</Text>
+                <Text style={styles.schemaErrorDetails}>
+                  Field: {fieldId} is missing required definition
+                </Text>
+              </View>
+            );
+          }
+          return <View key={fieldId}>{renderField(fieldId, property)}</View>;
+        })}
       </ScrollView>
       <DateTimePickerModal
         isVisible={datePickerState.visible}
@@ -1157,6 +1185,24 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 8,
     fontWeight: '500',
+  },
+  schemaErrorBox: {
+    borderWidth: 1,
+    borderColor: '#ffcccc',
+    backgroundColor: '#fff6f6',
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 8,
+  },
+  schemaErrorTitle: {
+    color: '#cc0000',
+    fontWeight: '700',
+    marginBottom: 4,
+    fontSize: 13,
+  },
+  schemaErrorDetails: {
+    color: '#a94442',
+    fontSize: 12,
   },
   addButton: {
     backgroundColor: '#007AFF',

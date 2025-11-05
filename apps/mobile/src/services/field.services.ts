@@ -23,7 +23,7 @@ export const submitVerification = async (
   department?: string,
 ) => {
   return axiosInstance.patch(
-    `/loans/${id}/submit-verification-report?department=${department ?? 'FI'}`,
+    `/loans/${id}/submit-verification-report?department=${department}`,
     data,
   );
 };
@@ -58,14 +58,20 @@ export const uploadImageToS3 = async (
   });
 };
 
-export const verificationRetryApi = async (payload: any) => {
-  return axiosInstance.post(`/loans/verification-retry`, payload);
+export const verificationRetryApi = async (
+  payload: any,
+  department?: string,
+) => {
+  return axiosInstance.post(
+    `/loans/verification-retry?department=${department}`,
+    payload,
+  );
 };
 
-export const getPDSchema = async (bankName: string) => {
+export const getPDSchema = async (templateName: string) => {
   return axiosInstance.get(
     `/loans/get-bank-forms?bankName=${encodeURIComponent(
-      bankName,
+      templateName,
     )}&department=PD`,
   );
 };

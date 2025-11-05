@@ -31,7 +31,7 @@ export const axisFinanceUblBelow10lSchema = {
             title: "Date of Report",
             format: "date",
           },
-          customerName: {
+          applicantName: {
             type: "string",
             title: "Name of Customer",
             readOnly: true,

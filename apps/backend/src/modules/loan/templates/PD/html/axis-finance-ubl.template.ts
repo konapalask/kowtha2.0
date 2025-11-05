@@ -33,7 +33,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | undefined | null): T[] => {
+const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -78,7 +78,10 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
     .map(
       (row) =>
         `<tr>${row
-          .map((cell) => `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`)
+          .map(
+            (cell) =>
+              `<td style="${cellStyle};text-align:center;">${cell || "-"}</td>`
+          )
           .join("")}</tr>`
     )
     .join("");
@@ -90,7 +93,10 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   `;
 };
 
-export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) => {
+export const axisFinanceUBLTemplate = (
+  verificationData: any,
+  html_data: any
+) => {
   const date = new Date();
   const timeZone = "Asia/Kolkata";
   const zonedDate = toZonedTime(date, timeZone);
@@ -125,9 +131,7 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
     verificationData.businessOverview?.aboutBusiness
   )
     .map((entry: any) =>
-      hasValue(entry?.detail)
-        ? formatMultiline(entry.detail)
-        : ""
+      hasValue(entry?.detail) ? formatMultiline(entry.detail) : ""
     )
     .filter(Boolean)
     .join("<br>");
@@ -154,47 +158,57 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
 
   const suppliers = ensureArray(suppliersSection.topSuppliers).map(
     (supplier: any) =>
-    [supplier?.name, supplier?.contactDetails, supplier?.location, supplier?.referenceCheck]
-      .map(formatMultiline)
-      .join(" - ")
+      [
+        supplier?.name,
+        supplier?.contactDetails,
+        supplier?.location,
+        supplier?.referenceCheck,
+      ]
+        .map(formatMultiline)
+        .join(" - ")
   );
 
   const customersSection = verificationData.clientsDebtors || {};
 
   const customers = ensureArray(customersSection.topCustomers).map(
     (customer: any) =>
-    [customer?.name, customer?.contactDetails, customer?.location, customer?.referenceCheck]
-      .map(formatMultiline)
-      .join(" - ")
+      [
+        customer?.name,
+        customer?.contactDetails,
+        customer?.location,
+        customer?.referenceCheck,
+      ]
+        .map(formatMultiline)
+        .join(" - ")
   );
 
   const expenditureSection = verificationData.expenditure || {};
 
-  const salaries = ensureArray(
-    expenditureSection.salariesAndWages
-  ).map((item: any) => [
-    formatMultiline(item?.noOfEmployees || ""),
-    formatMultiline(item?.salaryPerMonthPerEmployee || ""),
-    formatMultiline(item?.statusOfEmployee || ""),
-    formatMultiline(item?.noOfLabours || ""),
-    formatMultiline(item?.wagesPerMonthOrDay || ""),
-    formatMultiline(item?.statusOfLabour || ""),
-    formatMultiline(item?.remarks || ""),
-  ]);
+  const salaries = ensureArray(expenditureSection.salariesAndWages).map(
+    (item: any) => [
+      formatMultiline(item?.noOfEmployees || ""),
+      formatMultiline(item?.salaryPerMonthPerEmployee || ""),
+      formatMultiline(item?.statusOfEmployee || ""),
+      formatMultiline(item?.noOfLabours || ""),
+      formatMultiline(item?.wagesPerMonthOrDay || ""),
+      formatMultiline(item?.statusOfLabour || ""),
+      formatMultiline(item?.remarks || ""),
+    ]
+  );
 
   const assetSection = verificationData.assetDetails || {};
 
-  const immovableProperties = ensureArray(
-    assetSection.immovableProperties
-  ).map((property: any) => [
-    formatMultiline(property?.address || ""),
-    formatMultiline(property?.areaMeasurements || ""),
-    formatCurrency(property?.purchaseCostLakhs),
-    formatMultiline(property?.purchaseYear || ""),
-    formatCurrency(property?.marketValueLakhs),
-    formatMultiline(property?.ownerName || ""),
-    formatMultiline(property?.mortgaged || ""),
-  ]);
+  const immovableProperties = ensureArray(assetSection.immovableProperties).map(
+    (property: any) => [
+      formatMultiline(property?.address || ""),
+      formatMultiline(property?.areaMeasurements || ""),
+      formatCurrency(property?.purchaseCostLakhs),
+      formatMultiline(property?.purchaseYear || ""),
+      formatCurrency(property?.marketValueLakhs),
+      formatMultiline(property?.ownerName || ""),
+      formatMultiline(property?.mortgaged || ""),
+    ]
+  );
 
   const vehicles = ensureArray(assetSection.vehicles || []).map(
     (vehicle: any) => `<li>${formatMultiline(vehicle || "")}</li>`
@@ -225,16 +239,16 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
 
   const thirdPartySection = verificationData.thirdPartyCheck || {};
 
-  const thirdPartyReferences = ensureArray(
-    thirdPartySection.references
-  ).map((ref: any) => [
-    formatMultiline(ref?.name || ""),
-    formatMultiline(ref?.address || ""),
-    formatMultiline(ref?.contactNo || ""),
-    formatMultiline(ref?.knowingSince || ""),
-    formatMultiline(ref?.feedbackOnBorrower || ""),
-    formatMultiline(ref?.feedbackOnBusiness || ""),
-  ]);
+  const thirdPartyReferences = ensureArray(thirdPartySection.references).map(
+    (ref: any) => [
+      formatMultiline(ref?.name || ""),
+      formatMultiline(ref?.address || ""),
+      formatMultiline(ref?.contactNo || ""),
+      formatMultiline(ref?.knowingSince || ""),
+      formatMultiline(ref?.feedbackOnBorrower || ""),
+      formatMultiline(ref?.feedbackOnBusiness || ""),
+    ]
+  );
 
   const observations = ensureArray(thirdPartySection.observations)
     .map((item: any) => `<li>${formatMultiline(item || "")}</li>`)
@@ -266,7 +280,7 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         )}</td>
       </tr>
       ${[
-        ["Name of Customer", basic.customerName],
+        ["Name of Customer", basic.applicantName],
         ["Date of Report", basic.dateOfReport],
         ["Name of Concern", basic.concernName],
         ["Constitution", basic.constitution],
@@ -327,23 +341,20 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
 
       <p style="${paragraphStyle}"><strong>About the Business</strong></p>
       ${renderKeyValueTable([
-        ["About the Business", businessPoints || "Not provided"]
+        ["About the Business", businessPoints || "Not provided"],
       ])}
 
       <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
       ${renderInnerTable(
-        [
-          "Document Category",
-          "Document Name", 
-          "Document Type",
-          "Remarks"
-        ],
-        ensureArray(verificationData.businessOverview?.documentsObserved).map((doc: any) => [
-          formatMultiline(doc?.documentCategory || ""),
-          formatMultiline(doc?.documentName || ""),
-          formatMultiline(doc?.documentType || ""),
-          formatMultiline(doc?.remarks || "")
-        ])
+        ["Document Category", "Document Name", "Document Type", "Remarks"],
+        ensureArray(verificationData.businessOverview?.documentsObserved).map(
+          (doc: any) => [
+            formatMultiline(doc?.documentCategory || ""),
+            formatMultiline(doc?.documentName || ""),
+            formatMultiline(doc?.documentType || ""),
+            formatMultiline(doc?.remarks || ""),
+          ]
+        )
       )}
 
       <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
@@ -352,27 +363,19 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           "No of fixed suppliers",
           suppliersSection.numberOfFixedSuppliers || "Not provided",
         ],
-        [
-          "Credit period",
-          suppliersSection.creditPeriodDays || "Not provided",
-        ],
+        ["Credit period", suppliersSection.creditPeriodDays || "Not provided"],
         [
           "Cash - Cheque proportion",
           suppliersSection.cashChequeProportion || "Not provided",
         ],
       ])}
       ${renderInnerTable(
-        [
-          "Name (top 3 Suppliers)",
-          "Contact Details",
-          "Location",
-          "Ref. Check"
-        ],
+        ["Name (top 3 Suppliers)", "Contact Details", "Location", "Ref. Check"],
         ensureArray(suppliersSection.topSuppliers).map((supplier: any) => [
           formatMultiline(supplier?.name || ""),
           formatMultiline(supplier?.contactDetails || ""),
           formatMultiline(supplier?.location || ""),
-          formatMultiline(supplier?.referenceCheck || "")
+          formatMultiline(supplier?.referenceCheck || ""),
         ])
       )}
 
@@ -382,27 +385,19 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
           "No of fixed customers",
           customersSection.numberOfFixedCustomers || "Not provided",
         ],
-        [
-          "Credit period",
-          customersSection.creditPeriodDays || "Not provided",
-        ],
+        ["Credit period", customersSection.creditPeriodDays || "Not provided"],
         [
           "Cash - Cheque proportion",
           customersSection.cashChequeProportion || "Not provided",
         ],
       ])}
       ${renderInnerTable(
-        [
-          "Name (top 3 Customers)",
-          "Contact Details",
-          "Location",
-          "Ref. Check"
-        ],
+        ["Name (top 3 Customers)", "Contact Details", "Location", "Ref. Check"],
         ensureArray(customersSection.topCustomers).map((customer: any) => [
           formatMultiline(customer?.name || ""),
           formatMultiline(customer?.contactDetails || ""),
           formatMultiline(customer?.location || ""),
-          formatMultiline(customer?.referenceCheck || "")
+          formatMultiline(customer?.referenceCheck || ""),
         ])
       )}
       ${renderKeyValueTable([
@@ -492,7 +487,10 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
       )}
 
       ${renderKeyValueTable([
-        ["End Use of Loan: (Loan Amount & Detailed End-Use)", endUseOfLoan || "Not provided"]
+        [
+          "End Use of Loan: (Loan Amount & Detailed End-Use)",
+          endUseOfLoan || "Not provided",
+        ],
       ])}
 
       <p style="${paragraphStyle}"><strong>Third Party Check</strong></p>
@@ -507,18 +505,25 @@ export const axisFinanceUBLTemplate = (verificationData: any, html_data: any) =>
         ],
         thirdPartyReferences
       )}
+      ${renderKeyValueTable([["Observation:", observations || "Not provided"]])}
       ${renderKeyValueTable([
-        ["Observation:", observations || "Not provided"],
-      ])}
-      ${renderKeyValueTable([
-        ["Other Income: (Income from other than initiated business)", thirdPartySection.otherIncome || "NA"],
+        [
+          "Other Income: (Income from other than initiated business)",
+          thirdPartySection.otherIncome || "NA",
+        ],
         ["Site Coordinates:", thirdPartySection.siteCoordinates || ""],
       ])}
       ${renderKeyValueTable([
         ["Remarks:", thirdPartySection.remarks || ""],
         ["Status:", thirdPartySection.status || ""],
-        ["AFL Verifier's Name & Emp Code:", thirdPartySection.verifierNameEmpCode || ""],
-        ["AFL Verifier's Signature:", thirdPartySection.verifierSignature || ""],
+        [
+          "AFL Verifier's Name & Emp Code:",
+          thirdPartySection.verifierNameEmpCode || "",
+        ],
+        [
+          "AFL Verifier's Signature:",
+          thirdPartySection.verifierSignature || "",
+        ],
       ])}
 
       
