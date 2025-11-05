@@ -5,7 +5,7 @@ export interface AxisFinanceUBLInterface {
     branch?: string;
     applicationNo?: string;
     dateOfReport?: string;
-    customerName?: string;
+    applicantName?: string;
     concernName?: string;
     constitution?: string;
     initiatedAddress?: string;

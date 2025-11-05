@@ -3,7 +3,6 @@ export const iiflSchema = {
   id: 19,
   bankName: "IIFL",
   sections: [
-    financialsSchema,
     {
       id: "basicDetails",
       label: "Basic Details",
@@ -387,6 +386,7 @@ export const iiflSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

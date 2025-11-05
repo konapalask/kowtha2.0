@@ -17,6 +17,7 @@ import {verificationRetryApi} from '../../services/field.services';
 import {useForm, Controller} from 'react-hook-form';
 import Toast from 'react-native-toast-message';
 import {useNavigation} from '@react-navigation/native';
+import {useUser} from '../../contexts/UserContext';
 
 interface InvestigableProps {
   isInvestigable: boolean | null;
@@ -55,6 +56,7 @@ const Investigable: React.FC<InvestigableProps> = ({
   const selectedDate = watch('date');
   const [userDetails, setUserDetails] = useState<any>({});
   // console.log(userDetails);
+  const {currentDept} = useUser();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -108,9 +110,9 @@ const Investigable: React.FC<InvestigableProps> = ({
         date: dayjs(data.date).toISOString(),
         address: item?.address,
         reason: data.reason,
-        fieldExecutiveId: Number(userDetails?.sub),
+        fieldExecutiveId: Number(userDetails?.id),
       };
-      await verificationRetryApi(payload);
+      await verificationRetryApi(payload, currentDept);
       Toast.show({
         type: 'success',
         text1: 'Submitted Successfully',

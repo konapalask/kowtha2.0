@@ -1,4 +1,5 @@
 import financialsSchema from "../financials-schema/generic";
+
 export const axisFinanceUblAbove10lSchema = {
   id: 1,
   bankName: "Axis Finance UBL Above 10L",
@@ -31,7 +32,7 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Date of Report",
             format: "date",
           },
-          customerName: {
+          applicantName: {
             type: "string",
             title: "Name of Customer",
             readOnly: true,
@@ -51,6 +52,7 @@ export const axisFinanceUblAbove10lSchema = {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
@@ -157,6 +159,7 @@ export const axisFinanceUblAbove10lSchema = {
                 dependent: {
                   type: "string",
                   title: "Dependent",
+                  enum: ["Yes", "No"],
                 },
               },
             },
@@ -379,8 +382,14 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "No of Employees",
                 },
                 salaryPerMonthPerEmployee: {
-                  type: "string",
+                  type: "number",
                   title: "Salary per month per employee",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 statusOfEmployee: {
                   type: "string",
@@ -391,8 +400,14 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "No. of labours",
                 },
                 wagesPerMonthOrDay: {
-                  type: "string",
+                  type: "number",
                   title: "Wages per month/per day",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 statusOfLabour: {
                   type: "string",
@@ -450,7 +465,7 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Purchase cost (in Lakhs)",
                 },
                 purchaseYear: {
-                  type: "string",
+                  type: "integer",
                   title: "Purchase Year",
                 },
                 marketValueLakhs: {
@@ -621,11 +636,11 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Address",
                 },
                 contactNo: {
-                  type: "string",
+                  type: "number",
                   title: "Contact No.",
                 },
                 knowingSince: {
-                  type: "string",
+                  type: "number",
                   title: "Knowing Since",
                 },
                 feedbackOnBorrower: {

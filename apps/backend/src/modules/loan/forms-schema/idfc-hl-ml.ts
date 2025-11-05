@@ -3,7 +3,6 @@ export const idfcHlMlSchema = {
   id: 17,
   bankName: "IDFC HL & ML",
   sections: [
-    financialsSchema,
     {
       id: "generalDetails",
       label: "General Details",
@@ -563,6 +562,7 @@ export const idfcHlMlSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

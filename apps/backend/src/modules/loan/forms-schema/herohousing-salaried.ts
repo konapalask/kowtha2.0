@@ -3,7 +3,6 @@ export const herohousingSalariedSchema = {
   id: 14,
   bankName: "HeroHousing-Salaried",
   sections: [
-    financialsSchema,
     {
       id: "generalInfo",
       label: "General Loan & Visit Details",
@@ -344,6 +343,7 @@ export const herohousingSalariedSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

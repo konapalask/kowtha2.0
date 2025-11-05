@@ -3,7 +3,6 @@ export const cholaSchema = {
   id: 11,
   bankName: "Chola",
   sections: [
-    financialsSchema,
     {
       id: "basicInformation",
       label: "Basic Information",
@@ -72,16 +71,22 @@ export const cholaSchema = {
       id: "aboutTheApplicantAndItsBusiness",
       label: "About the Applicant & its Business",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            aboutTheApplicant: {
-              type: "string",
-              title: "About the Applicant & Business",
-              ui: {
-                widget: "textarea",
-                rows: 8,
+        type: "object",
+        properties: {
+          aboutEntries: {
+            type: "array",
+            title: "About the Applicant & Business",
+            items: {
+              type: "object",
+              properties: {
+                aboutTheApplicant: {
+                  type: "string",
+                  title: "About the Applicant & Business",
+                  ui: {
+                    widget: "textarea",
+                    rows: 8,
+                  },
+                },
               },
             },
           },
@@ -122,13 +127,19 @@ export const cholaSchema = {
       id: "assets",
       label: "Assets",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            assetDetails: {
-              type: "string",
-              title: "Asset details",
+        type: "object",
+        properties: {
+          assets: {
+            type: "array",
+            title: "Assets",
+            items: {
+              type: "object",
+              properties: {
+                assetDetails: {
+                  type: "string",
+                  title: "Asset details",
+                },
+              },
             },
           },
         },
@@ -138,13 +149,19 @@ export const cholaSchema = {
       id: "customersReferenceNumbers",
       label: "Customers - Reference Numbers",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            customerReferenceNumber: {
-              type: "string",
-              title: "Customer Reference Number",
+        type: "object",
+        properties: {
+          customerReferenceNumbers: {
+            type: "array",
+            title: "Customer Reference Numbers",
+            items: {
+              type: "object",
+              properties: {
+                customerReferenceNumber: {
+                  type: "string",
+                  title: "Customer Reference Number",
+                },
+              },
             },
           },
         },
@@ -154,13 +171,19 @@ export const cholaSchema = {
       id: "otherIncomes",
       label: "Other Incomes",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            otherIncome: {
-              type: "string",
-              title: "Other Income",
+        type: "object",
+        properties: {
+          otherIncomes: {
+            type: "array",
+            title: "Other Incomes",
+            items: {
+              type: "object",
+              properties: {
+                otherIncome: {
+                  type: "string",
+                  title: "Other Income",
+                },
+              },
             },
           },
         },
@@ -170,41 +193,47 @@ export const cholaSchema = {
       id: "existingLoanDetails",
       label: "Existing Loan Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankName: {
-              type: "string",
-              title: "Bank Name",
-            },
-            typeOfLoan: {
-              type: "string",
-              title: "Type of Loan",
-            },
-            loanAmount: {
-              type: "number",
-              title: "Loan Amount (In Rs.)",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          existingLoans: {
+            type: "array",
+            title: "Existing Loan Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount (In Rs.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emiInterest: {
+                  type: "number",
+                  title: "EMI/Interest (In Rs.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                tenureTotalCompleted: {
+                  type: "string",
+                  title: "Total Tenure / Completed [in months]",
+                },
               },
-            },
-            emiInterest: {
-              type: "number",
-              title: "EMI/Interest (In Rs.)",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-            },
-            tenureTotalCompleted: {
-              type: "string",
-              title: "Total Tenure / Completed [in months]",
             },
           },
         },
@@ -214,29 +243,35 @@ export const cholaSchema = {
       id: "bankingDetails",
       label: "Banking Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankName: {
-              type: "string",
-              title: "Bank Name",
-            },
-            accountNo: {
-              type: "string",
-              title: "A/c No",
-            },
-            accountType: {
-              type: "string",
-              title: "A/c Type",
-            },
-            relationshipSince: {
-              type: "string",
-              title: "Relationship since",
-            },
-            averageBalance: {
-              type: "string",
-              title: "Avg balance",
+        type: "object",
+        properties: {
+          bankingDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountNo: {
+                  type: "string",
+                  title: "A/c No",
+                },
+                accountType: {
+                  type: "string",
+                  title: "A/c Type",
+                },
+                relationshipSince: {
+                  type: "string",
+                  title: "Relationship since",
+                },
+                averageBalance: {
+                  type: "string",
+                  title: "Avg balance",
+                },
+              },
             },
           },
         },
@@ -263,16 +298,22 @@ export const cholaSchema = {
       id: "comfortFactor",
       label: "Comfort Factor",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            comfortFactor: {
-              type: "string",
-              title: "Comfort Factor",
-              ui: {
-                widget: "textarea",
-                rows: 6,
+        type: "object",
+        properties: {
+          comfortFactors: {
+            type: "array",
+            title: "Comfort Factor",
+            items: {
+              type: "object",
+              properties: {
+                comfortFactor: {
+                  type: "string",
+                  title: "Comfort Factor",
+                  ui: {
+                    widget: "textarea",
+                    rows: 6,
+                  },
+                },
               },
             },
           },
@@ -284,16 +325,22 @@ export const cholaSchema = {
       label:
         "Discomfort Factor(e.g., Mismatch name board, Not filing ITR, not provided bank statements, etc.)",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            discomfortFactor: {
-              type: "string",
-              title: "Discomfort Factor",
-              ui: {
-                widget: "textarea",
-                rows: 6,
+        type: "object",
+        properties: {
+          discomfortFactors: {
+            type: "array",
+            title: "Discomfort Factor",
+            items: {
+              type: "object",
+              properties: {
+                discomfortFactor: {
+                  type: "string",
+                  title: "Discomfort Factor",
+                  ui: {
+                    widget: "textarea",
+                    rows: 6,
+                  },
+                },
               },
             },
           },
@@ -304,22 +351,29 @@ export const cholaSchema = {
       id: "Recommendations",
       label: "Recommendations",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            recommendations: {
-              type: "string",
-              title: "Enter Details",
-              ui: {
-                widget: "textarea",
-                rows: 6,
+        type: "object",
+        properties: {
+          recommendations: {
+            type: "array",
+            title: "Recommendations",
+            items: {
+              type: "object",
+              properties: {
+                recommendation: {
+                  type: "string",
+                  title: "Enter Details",
+                  ui: {
+                    widget: "textarea",
+                    rows: 6,
+                  },
+                },
               },
             },
           },
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 export default cholaSchema;

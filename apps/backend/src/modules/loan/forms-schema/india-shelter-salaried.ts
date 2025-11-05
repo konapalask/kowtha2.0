@@ -3,7 +3,6 @@ export const indiaShelterSalariedSchema = {
   id: 22,
   bankName: "India Shelter Salaried",
   sections: [
-    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",
@@ -758,6 +757,7 @@ export const indiaShelterSalariedSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

@@ -3,7 +3,6 @@ export const yesBankSchema = {
   id: 26,
   bankName: "Yes Bank",
   sections: [
-    financialsSchema,
     {
       id: "generalInfo",
       label: "General Information",
@@ -594,6 +593,7 @@ export const yesBankSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 

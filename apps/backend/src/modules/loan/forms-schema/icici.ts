@@ -3,7 +3,6 @@ export const iciciSchema = {
   id: 16,
   bankName: "ICICI",
   sections: [
-    financialsSchema,
     {
       id: "proposal",
       label: "Proposal",
@@ -786,6 +785,7 @@ export const iciciSchema = {
       },
       required: true,
     },
+    financialsSchema,
   ],
 } as const;
 export default iciciSchema;
