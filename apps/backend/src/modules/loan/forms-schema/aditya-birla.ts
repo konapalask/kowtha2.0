@@ -278,24 +278,6 @@ export const adityaBirlaSchema = {
           },
 
           purposeOfLoan: { type: "string", title: "Purpose of loan" },
-          particulars: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                particulars: { type: "string", title: "Particulars" },
-                units: { type: "string", title: "Units" },
-                charge: { type: "string", title: "Charge" },
-                total: { type: "string", title: "Total" },
-              },
-            },
-          },
-          dailyGrossIncome: { type: "number", title: "Daily gross income" },
-          labourMaterialEveryday: {
-            type: "number",
-            title: "Labour & material (Everyday)",
-          },
-          netIncomeDay: { type: "number", title: "Net income / day" },
         },
       },
     },

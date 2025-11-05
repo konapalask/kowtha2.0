@@ -4,14 +4,19 @@ export const dcbSchema = {
   bankName: "DCB",
   sections: [
     {
-      id: "dateOfVisit",
-      label: "Date of Visit",
+      id: "basicDetails",
+      label: "Basic Details",
       schema: {
         type: "object",
         properties: {
+          dateOfVisit: {
+            type: "string",
+            title: "Date of Visit",
+            format: "date",
+          },
           personMet: {
             type: "string",
-            title: "Person Met",
+            title: "Person(S) Met",
           },
           name: {
             type: "string",
@@ -26,26 +31,6 @@ export const dcbSchema = {
             type: "integer",
             title: "Years of Service",
           },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
         required: ["name"],
       },
@@ -57,6 +42,10 @@ export const dcbSchema = {
       schema: {
         type: "object",
         properties: {
+          borrowerName: {
+            type: "string",
+            title: "Borrower's Name",
+          },
           residenceAddress: {
             type: "string",
             title: "Residence Address",
@@ -79,6 +68,7 @@ export const dcbSchema = {
               "Public Limited",
               "LLP",
               "HUF",
+              "Others",
             ],
           },
           detailsOfDirectorsProprietor: {
@@ -90,47 +80,83 @@ export const dcbSchema = {
       required: true,
     },
     {
-      id: "shareholdingPatternIn",
-      label: "Shareholding Pattern (in %)",
+      id: "detailsOfDirectorsAndProprietor",
+      label: "Details of Directors & Proprietor",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            nameOfShareholder: {
+              type: "string",
+              title: "Name",
+            },
+            ageOfShareholder: {
+              type: "integer",
+              title: "Age",
+            },
+            qualifications: {
+              type: "string",
+              title: "Qualifications",
+            },
+            responsibilities: {
+              type: "string",
+              title: "Responsibilities",
+            },
+            shareholdingPatternIn: {
+              type: "number",
+              title: "Share holding Pattern (in %)",
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "history",
+      label: "History",
       schema: {
         type: "object",
         properties: {
-          history: {
-            type: "string",
-            title: "History",
-          },
           yearOfEstablishment: {
             type: "integer",
             title: "Year of Establishment",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "anyChangeInOwnership",
-      label: "Any Change in Ownership",
-      schema: {
-        type: "object",
-        properties: {
+          anyChangeInOwnership: {
+            type: "string",
+            title: "Any Change in Ownership",
+          },
           registrationAffiliations: {
             type: "string",
             title: "Registration / Affiliations",
           },
+          anyAwardsWon: {
+            type: "string",
+            title: "Any Awards Won",
+          },
+          anyChangeInRegisteredOffice: {
+            type: "string",
+            title: "Any Change in Registered Office",
+          },
+          legalProceedings: {
+            type: "string",
+            title: "Legal Proceedings",
+          },
+          disputes: {
+            type: "string",
+            title: "Disputes",
+          },
         },
       },
       required: true,
     },
+
     {
-      id: "disputes",
-      label: "Disputes",
+      id: "businessActivities",
+      label: "Business Activities",
       schema: {
         type: "object",
         properties: {
-          businessActivities: {
-            type: "string",
-            title: "Business Activities",
-          },
           businessProfile: {
             type: "string",
             title: "Business Profile",
@@ -139,16 +165,70 @@ export const dcbSchema = {
             type: "string",
             title: "Products",
           },
-          businessSetUp: {
-            type: "string",
-            title: "Business Set-up",
-          },
+
+        },
+      },
+    },
+    
+    {
+      id: "businessSetup",
+      label: "Business Set-up",
+      schema: {
+        type: "object",
+        properties: {
           officeSetUpWithOverallLook: {
-            type: "string",
+            type: "array",
             title: "Office Set-up with Overall Look",
+            items: {
+              type: "object",
+              properties: {
+                detail: {
+                  type: "string",
+                  title: "Detail",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
+              },
+            },
+          },
+          expenses: {
+            type: "array",
+            title: "Expenses",
+            items: {
+              type: "object",
+              properties: {
+                expenseDetail: {
+                  type: "string",
+                  title: "Expense Detail",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
+              },
+            },
+          },
+          transactions: {
+            type: "array",
+            title: "Transactions",
+            items: {
+              type: "object",
+              properties: {
+                transactionDetail: {
+                  type: "string",
+                  title: "Transaction Detail",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
+              },
+            },
           },
           plantAndMachinery: {
-            type: "string",
+            type: "string", 
             title: "Plant and Machinery",
           },
           officeEquipment: {
@@ -159,73 +239,250 @@ export const dcbSchema = {
             type: "string",
             title: "Workers and Salaries",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "emi",
-      label: "EMI",
-      schema: {
-        type: "object",
-        properties: {
-          personalAssetsOfProprietor: {
+          noOfEmployees: {
+            type: "integer",
+            title: "No. of Employees",
+          },
+          typeOfBusiness: {
             type: "string",
-            title: "Personal Assets of Proprietor",
+            title: "Type",
+          },
+          averagePay: {
+            type: "number",
+            title: "Average Pay",
           },
         },
       },
       required: true,
     },
     {
-      id: "contactNo",
-      label: "Contact No",
+      id: "detailsOfAllLoansAsOn",
+      label: "Details of All Loans as on",
       schema: {
-        type: "object",
+          type: "array",
+          items: {
+            type: "object",
         properties: {
-          sisterCompanies: {
+          bank: {
             type: "string",
-            title: "Sister Companies",
+            title: "Bank",
+          },
+          typeOfLoan: {
+            type: "string",
+            title: "Type of Loan",
+          },
+          loanAmount: {
+            type: "number",
+            title: "o/s Amount/",
+          },
+          emi: {
+            type: "number",
+            title: "EMI",
+          },
+         
+        },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "personalAssetsOfProprietor",
+      label: "Personal Assets of Proprietor",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            asset: {
+              type: "string",
+              title: "Asset",
+            },
+            value: {
+              type: "number",
+              title: "Value",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "assuredCovered",
-      label: "Assured Covered",
+      id: "detailsOfCustomers",
+      label: "Details of Customers / Clients: Not Applicable- Walk in Customers.",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+          nameOfCustomers: {
+            type: "string",
+            title: "Name of Customers",
+          },
+          location: {
+            type: "string",
+            title: "Location",
+          },
+          contactNo: {
+            type: "number",
+            title: "Contact No",
+          },
+        },
+      },
+      },
+      required: true,
+    },
+    {
+      id: "detailsOfSuppliers",
+      label: "Details of Suppliers",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            nameOfSuppliers: {
+              type: "string",
+              title: "Name of Suppliers",
+            },
+            location: {
+              type: "string",
+              title: "Location",
+            },
+            contactNo: {
+              type: "number",
+              title: "Contact No",
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "sisterCompanies",
+      label: "Sister Companies :",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            nameOfSisterCompanies: {
+              type: "string",
+              title: "Name of firm",
+            },
+            businessProfile: {
+              type: "string",
+              title: "Business Profile",
+            },
+            turnover: {
+              type: "number",
+              title: "Turnover",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            netProfit: {
+              type: "number",
+              title: "Net Profit",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+
+    {
+      id: "insuranceCompanyName",
+      label: "Insurance Company Name",
+      schema: {
+        type: "string",
+        title: "Insurance Company Name",
+      },
+      required: true,
+    },
+    {
+      id: "insuranceDetails",
+      label: "Insurance Details",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+          assetsCovered: {
+            type: "string",
+            title: "Assets Covered",
+          },
+          coverNoteNoPolicyNo: {
+            type: "string",
+            title: "Cover Note No. / Policy No",
+          },
+          validUpTo: {
+            type: "string",
+            title: "Valid up to",
+          },
+          sumAssured: {
+            type: "number",
+            title: "Sum Assured",
+          },
+          assuredCovered: {
+            type: "string",
+            title: "Assured Covered",
+          },
+         },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "performanceDetails",
+      label: "Performance After Last Audited Financials",
       schema: {
         type: "object",
         properties: {
-          performanceAfterLastAuditedFinancials: {
-            type: "string",
-            title: "Performance After Last Audited Financials",
-          },
           lastAvailableFinancialStatementPeriod: {
             type: "string",
-            title: "Last Available Financial Statement Period",
+            title: "Last available financial statement period",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "recentSummaryFinancials2MonthsOld",
-      label: "Recent Summary Financials (≤ 2 months old)",
-      schema: {
-        type: "object",
-        properties: {
-          advanceTaxesPaidCurrentAY: {
+          recentSummaryFinancials: {
             type: "string",
-            title: "Advance Taxes Paid (Current A.Y.)",
+            title: "Recent summary financials ( up to a period not more than two months old)",
+          },
+          advanceTaxesPaidCurrentAY: {
+            type: "number",
+            title: "Advance Taxes Paid (for current A.Y.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           changeInBorrowingsBetweenFys: {
-            type: "string",
-            title: "Change in Borrowings (between FYs)",
+            type: "number",
+            title: "Change in Borrowings (from F.Y. 20-21 to F.Y. 21-22)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           changeInCapitalBetweenFys: {
             type: "number",
-            title: "Change in Capital (between FYs)",
+            title: "Change in Capital (from F.Y. 22-23 to F.Y. 23-24)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -235,15 +492,33 @@ export const dcbSchema = {
           },
           changeInTurnoverBetweenFys: {
             type: "number",
-            title: "Change in Turnover (between FYs)",
+            title: "Change in Turnover (from F.Y. 22-23 to F.Y. 23-24)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           last6MonthsTurnoverAsPerGstReturns: {
             type: "number",
             title: "Last 6 Months Turnover as per GST Returns",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           netProfitOnSales: {
             type: "number",
             title: "Net Profit % on Sales",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           debtorsPositionAsOn: {
             type: "string",
@@ -253,16 +528,30 @@ export const dcbSchema = {
             type: "string",
             title: "Creditors Position as on",
           },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "otherBusinessInterests",
+      label: "Other Business Interests of the Proprietor",
+      schema: {
+        type: "object",
+        properties: {
           otherBusinessInterestsOfTheProprietor: {
             type: "string",
             title: "Other Business Interests of the Proprietor",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "bankingDetailsStatutoryObligations",
+      id: "bankingDetails",
       label: "Banking Details & Statutory Obligations",
       schema: {
         type: "object",
@@ -289,7 +578,7 @@ export const dcbSchema = {
           },
           evidenceOfStatutoryDuesPfPtEic: {
             type: "string",
-            title: "Evidence of Statutory Dues (PF, PT, EIC)",
+            title: "Evidence of statutory dues being paid on time PF, PT and EIC (Employee related)",
           },
           municipalCorporationTaxesBstCstMvat: {
             type: "string",
@@ -304,7 +593,7 @@ export const dcbSchema = {
       required: true,
     },
     {
-      id: "activityLevelsAtCpaVisit",
+      id: "activityLevelsAtCPAVisit",
       label: "Activity Levels at CPA Visit",
       schema: {
         type: "object",
@@ -316,11 +605,11 @@ export const dcbSchema = {
           levelOfActivityObservationsProductionDeliveryCustomers: {
             type: "string",
             title:
-              "Level of Activity / Observations (Production / Delivery / Customers)",
+              "Level of activity as well as overall observation of business (description of Production / Delivery / Customers)",
           },
           photographsOfBusinessActivitySetupStock: {
             type: "string",
-            title: "Photographs of Business Activity, Setup & Stock",
+            title: "Photographs of Business Activity, Setup and Stock",
           },
         },
       },
@@ -334,26 +623,42 @@ export const dcbSchema = {
         properties: {
           detailsOfEndUseOfFunds: {
             type: "string",
-            title: "Details of End-Use of Funds",
+            title: "End-Use of Funds (incl Cash out use)",
           },
           loanRequired: {
             type: "number",
             title: "Loan Required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           emiComfortableWith: {
             type: "number",
             title: "EMI Comfortable With",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "propertyDetailsAddress",
-      label: "Property Details (Address)",
+      id: "detailsOfPropertyToBeMortgaged",
+      label: "Details of Property to be mortgaged",
       schema: {
         type: "object",
         properties: {
+          propertyDetailsAddress: {
+            type: "string",
+            title: "Property Details (address)",
+          },
           nameOfThePropertyOwner: {
             type: "string",
             title: "Name of the Property Owner",
@@ -369,47 +674,76 @@ export const dcbSchema = {
           estimatedValueAsPerCustomer: {
             type: "number",
             title: "Estimated Value as per Customer",
-          },
-          verification: {
-            type: "string",
-            title: "Verification",
-          },
-          aSalesAndPurchasesPeriodWise: {
-            type: "string",
-            title: "a) Sales and Purchases (Period Wise)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
       required: true,
     },
     {
-      id: "salesRs",
-      label: "Sales (Rs.)",
+      id: "verification",
+      label: "Verification",
       schema: {
         type: "object",
         properties: {
-          bDocumentsVerifiedEGGstCertificateItrsBankStatement: {
-            type: "string",
-            title:
-              "b) Documents Verified (e.g., GST Certificate, ITRs, Bank Statement)",
+          detailsOfSalesAndPurchasesPeriodWise: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                months: {
+                  type: "integer",
+                  title: "Months",
+                },
+                purchasesRs: {
+                  type: "number",
+                  title: "Purchases (Rs.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                salesRs: {
+                  type: "number",
+                  title: "Sales (Rs.)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+              },
+            },
           },
+          documentVerification: {
+            type: "string",
+            title: "Document Verified",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "concludingImpressions",
+      label: "Concluding impressions",
+      schema: {
+        type: "object",
+        properties: {
           concludingImpressions: {
             type: "string",
             title: "Concluding Impressions",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "tpcFeedback",
-      label: "TPC Feedback",
-      schema: {
-        type: "object",
-        properties: {
-          statusOfThisCasePositiveNegativeCreditRefer: {
-            type: "string",
-            title: "Status of this Case - Positive/Negative/Credit Refer",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
         },
       },
