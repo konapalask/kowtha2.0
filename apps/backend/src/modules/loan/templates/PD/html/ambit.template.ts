@@ -1,289 +1,261 @@
-import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.template";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
+
+const tableStyle =
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
+const labelCellStyle =
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
+const valueCellStyle =
+  "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
+
+const hasValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((entry) => hasValue(entry));
+  if (typeof value === "object")
+    return Object.values(value).some((entry) => hasValue(entry));
+  return false;
+};
+
+const formatMultiline = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return String(value).replace(/\n+/g, "<br>");
+};
+
+const formatCurrency = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return formatMultiline(value);
+  return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
+};
+
+const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
+};
+
+const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+  const rendered = formatter ? formatter(value) : formatMultiline(value);
+  return `
+    <tr>
+      <td style="${labelCellStyle}">${label}</td>
+      <td style="${valueCellStyle}" colspan="${options?.colspan || 1}">
+        ${rendered}
+      </td>
+    </tr>
+  `;
+};
+
+const renderArrayTable = (headers: string[], rows: string[][]): string => {
+  return `
+    <table style="${tableStyle}">
+      <tr>
+        ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
+      </tr>
+      ${rows.map((row) => `
+        <tr>
+          ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
+        </tr>
+      `).join("")}
+    </table>
+  `;
+};
 
 export const ambitTemplate = (verificationData: any, html_data: any) => {
-  const date = new Date();
-  const timeZone = "Asia/Kolkata";
-  const zonedDate = toZonedTime(date, timeZone);
-  const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
+  const general = verificationData.general || {};
+  const residentialDetails = verificationData.residentialDetails || {};
+  const propertyDetails = verificationData.propertyDetails || {};
+  const contactDetails = verificationData.contactDetails || {};
+  const structureOfLoan = verificationData.structureOfLoan || {};
+  const visitDetails = verificationData.visitDetails || {};
+  const familyDetails = verificationData.familyDetails || {};
+  const aboutTheBusiness = verificationData.aboutTheBusiness || {};
+  const otherObservations = verificationData.otherObservations || {};
+  const purposeOfLoan = verificationData.purposeOfLoan || {};
+  const documentsObserved = verificationData.documentsObserved || {};
+  const regularCustomer = verificationData.regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularCustomers || {};
+  const regularSupplier = verificationData.regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularSuppliers || {};
+  const businessActivityAndStockLevelObserved = verificationData.businessActivityAndStockLevelObserved || {};
+  const bankingDetails = verificationData.bankingDetails || {};
+  const existingLoans = verificationData.existingLoans || {};
+  const otherBusinessIncome = verificationData.otherBusinessIncome || {};
+  const status = verificationData.status || {};
+
 
   return `
-    ${pdBaseTemplate()}
+    ${pdBaseTemplate(html_data)}
+    <div class="template-content ambit-template">
+      <h1 style="margin:0 0 16px;color:#1f2a37;font-size:24px; text-align:center">AMBIT</h1>
+      <table style="${tableStyle}">
+        ${renderKeyValue("Name of Applicant", general.nameOfApplicant)}
+        ${renderKeyValue("Name of Co-Applicant", general.nameOfCoApplicant)}
+        ${renderKeyValue("Application No.", general.applicationNo)}
+        ${renderKeyValue("Name of Concern", general.nameOfConcern)}
+        ${renderKeyValue("Name of the Proprietor as per License", general.nameOfTheProprietorAsPerLicense)}
+        ${renderKeyValue("PD Initiated Address", general.pdinitiatedAddress)}
+        ${renderKeyValue("Visited Address", general.visitedAddress)}
+        ${renderKeyValue("Business License Address", general.businessLicenseAddress)}
 
-        <div class="report-title">DUE DILIGENCE REPORT</div>
-
-        <div class="align-wrapper">
-      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of Applicant</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.general?.nameOfApplicant || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of Co-Applicant</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.general?.nameOfCoApplicant || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Application no.</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.general?.applicationNo || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of Concern</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.general?.nameOfConcern || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name of the proprietor as per license</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.general?.nameOfTheProprietorAsPerLicense || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>PD Initiated address</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.pdDetails?.pdInitiatedAddress || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Visited Premise</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.pdDetails?.visitedPremise || ""}</td>
+          <td style="${labelCellStyle}">Residential Details</td>
+          <td>
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}" colspan="4"><strong>Address:</strong> ${residentialDetails.address}</td>
               </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Business License Address</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.pdDetails?.businessLicenseAddress || ""}</td>
+              <tr>
+                <td style="${labelCellStyle}">Rented/Owned</td>
+                <td style="${labelCellStyle}">Owned by</td>
+                <td style="${labelCellStyle}">Area (In Sq. Ft.)</td>
+                <td style="${labelCellStyle}">Occupied since (years)</td>
+              </tr>
+              <tr>
+                <td style="${valueCellStyle}">${residentialDetails.rentedOwned}</td>
+                <td style="${valueCellStyle}">${residentialDetails.ownedBy}</td>
+                <td style="${valueCellStyle}">${residentialDetails.areaInSqFt}</td>
+                <td style="${valueCellStyle}">${residentialDetails.occupiedSinceYears}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
         <tr>
-          <td rowspan="3" style="border:1px solid #ccc;padding:8px"><strong>Residential Details</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px"><strong>Address</strong>: ${verificationData.address?.address || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Rented/Owned</strong></td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px"><strong>Owned by</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>Area (In Sq. Ft.)</strong></td>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>Occupied since (years)</strong></td>
-        </tr>
-        <tr>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.address?.rentedOwned || ""}</td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px">${verificationData.address?.ownedBy || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${verificationData.address?.areaInSqFt || ""}</td>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px">${verificationData.address?.occupiedSinceYears || ""}</td>
-        </tr>
-        <tr>
-          <td rowspan="3" style="border:1px solid #ccc;padding:8px"><strong>Property Details</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px"><strong>Address</strong>: ${verificationData.propertyDetails?.propertyAddress || ""}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>Market Value</strong></td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px"><strong>Owned by</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>Area (In Sq. Ft.)</strong></td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Occupied since (years)</strong></td>
-        </tr>
-        <tr>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.marketValue || ""}</td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.ownedBy || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.areaInSqFt || ""}</td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.occupiedSinceYears || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Phone Number</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.phoneNumber || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Appointment Fixed</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${verificationData.marketValue?.appointmentFixed || ""}</td>
-          <td colspan="13" style="border:1px solid #ccc;padding:8px"><strong>Date of Visit</strong>: ${verificationData.pdDetails?.dateOfVisit || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Structure of Loan</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.loanStructure?.structureOfLoan || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>No. of Visit</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.noOfVisit?.noOfVisit || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Person Met</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.noOfVisit?.personMet || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>About the Applicant</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.noOfVisit?.aboutTheApplicant || ""}</td>
-        </tr>
-        <tr>
-          <td rowspan="${Array.isArray(verificationData.familyDetails?.familyDetails) && verificationData.familyDetails?.familyDetails.length > 0 ? verificationData.familyDetails?.familyDetails.length + 1 : 2}" style="border:1px solid #ccc;padding:8px"><strong>Family details</strong></td>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name</strong></td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px"><strong>Relationship</strong></td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>Age</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>Education</strong></td>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Occupation</strong></td>
-        </tr>
-        ${
-          Array.isArray(verificationData.familyDetails?.familyDetails) &&
-          verificationData.familyDetails?.familyDetails.length > 0
-            ? verificationData.familyDetails.familyDetails
-                .map(
-                  (family) => `
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px">${family.name || ""}</td>
-          <td colspan="7" style="border:1px solid #ccc;padding:8px">${family.relationship || ""}</td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px">${family.age || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${family.education || ""}</td>
-          <td style="border:1px solid #ccc;padding:8px">${family.occupation || ""}</td>
-        </tr>
-        `
-                )
-                .join("")
-            : '<tr><td colspan="18" style="border:1px solid #ccc;padding:8px;text-align:center;">No family details available</td></tr>'
-        }
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>About the Business</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.aboutTheBusiness || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Other observations</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.otherObservations || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Concerns</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.concerns || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Purpose of Loan</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.loanDetails?.purposeOfLoan || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>As per Audited individual ITR's</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.asPerAuditedIndividualITRs || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Whether registered under MSME</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.whetherRegisteredUnderMSME || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Whether registered under GST</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.whetherRegisteredUnderGST || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Documents Observed</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.documentsObserved || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Automation Level</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.businessDetails?.automationLevel || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Receipts</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.receipts || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Payments</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.payments || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name and Contact number of Regular Customers</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.nameAndContactNumberOfRegularCustomers || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Name and Contact number of Regular Suppliers</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.nameAndContactNumberOfRegularSuppliers || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Net Margin</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.netMargin || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Expenditure</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.expenditure || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Employees</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.receiptsPayments?.employees || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Assets</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.assetsDetails?.assets || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>LIC/Mutual funds</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.assetsDetails?.licMutualFunds || ""}</td>
-        </tr>
-        <tr>
-          <td rowspan="${Array.isArray(verificationData.bankingDetails?.bankingDetails) && verificationData.bankingDetails?.bankingDetails.length > 0 ? verificationData.bankingDetails?.bankingDetails.length + 1 : 2}" style="border:1px solid #ccc;padding:8px"><strong>Banking details</strong></td>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px"><strong>BANKNAME</strong></td>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px"><strong>ACCOUNTTYPE</strong></td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px"><strong>AVGBAL</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>NO:OFYEARSMAINTAINED</strong></td>
-        </tr>
-        ${
-          Array.isArray(verificationData.bankingDetails?.bankingDetails) &&
-          verificationData.bankingDetails?.bankingDetails.length > 0
-            ? verificationData.bankingDetails.bankingDetails
-                .map(
-                  (banking) => `
-        <tr>
-          <td colspan="4" style="border:1px solid #ccc;padding:8px">${banking.bankName || ""}</td>
-          <td colspan="3" style="border:1px solid #ccc;padding:8px">${banking.accountType || ""}</td>
-          <td colspan="6" style="border:1px solid #ccc;padding:8px">${banking.avgBalance || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${banking.noOfYearsMaintained || ""}</td>
-        </tr>
-        `
-                )
-                .join("")
-            : '<tr><td colspan="18" style="border:1px solid #ccc;padding:8px;text-align:center;">No banking details available</td></tr>'
-        }
-        <tr>
-          <td rowspan="${Array.isArray(verificationData.loansDetails?.loans) && verificationData.loansDetails?.loans.length > 0 ? verificationData.loansDetails?.loans.length + 1 : 2}" style="border:1px solid #ccc;padding:8px"><strong>No. of Loans</strong></td>
-          <td style="border:1px solid #ccc;padding:8px"><strong>BANK</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>TYPE</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>LOAN</strong></td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px"><strong>EMI</strong></td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px"><strong>OPEN/CLOSE</strong></td>
-        </tr>
-        ${
-          Array.isArray(verificationData.loansDetails?.loans) &&
-          verificationData.loansDetails?.loans.length > 0
-            ? verificationData.loansDetails.loans
-                .map(
-                  (loan) => `
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px">${loan.bank || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${loan.type || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${loan.loanAmount || ""}</td>
-          <td colspan="5" style="border:1px solid #ccc;padding:8px">${loan.emi || ""}</td>
-          <td colspan="2" style="border:1px solid #ccc;padding:8px">${loan.openClose || ""}</td>
-        </tr>
-        `
-                )
-                .join("")
-            : '<tr><td colspan="18" style="border:1px solid #ccc;padding:8px;text-align:center;">No loans available</td></tr>'
-        }
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>End Use</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.loanDetails?.endUse || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Security Offered</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.securityDetails?.securityOffered || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Address</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.securityDetails?.address || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Other Business/Income</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.otherIncomeDetails?.otherBusinessIncome || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Neighbor Check</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.neighborCheck?.neighborCheck || ""}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:8px"><strong>Status</strong></td>
-          <td colspan="18" style="border:1px solid #ccc;padding:8px">${verificationData.finalStatus?.status || ""}</td>
-        </tr>
-    </table>
-    </div>
-    
-    <p style="margin:20px;"><strong>Disclaimer Clause:</strong></p>
-    <p style="margin:20px;">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Ambit Finvest Pvt. Ltd. will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. KOWTHA & CO will not be held liable in any case.</p>
+          <td style="${labelCellStyle}">Property Details</td>
+          <td>
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}" colspan="4"><strong>Address:</strong> ${propertyDetails.propertyAddress}</td>
+              </tr>
+              <tr>
+                <td style="${labelCellStyle}">Market Value</td>
+                <td style="${labelCellStyle}">Owned by</td>
+                <td style="${labelCellStyle}">Area (In Sq. Ft.)</td>
+                <td style="${labelCellStyle}">Occupied since (years)</td>
+              </tr>
+              <tr>
+                <td style="${valueCellStyle}">${propertyDetails.marketValue}</td>
+                <td style="${valueCellStyle}">${propertyDetails.ownedBy}</td>
+                <td style="${valueCellStyle}">${propertyDetails.areaInSqFt}</td>
+                <td style="${valueCellStyle}">${propertyDetails.occupiedSinceYears}</td>
+              </tr>
+            </table>
+          </td>
 
-    <p style="margin:20px;"><strong>Residence photos:</strong></p>
-    <p style="margin:20px;"><strong>Property Photos:</strong></p>
-    <p style="margin:20px;"><strong>Business photos:</strong></p>
-    ${html_data.imagesData || ""}
+        ${renderKeyValue("Phone Number", contactDetails.phoneNumber)}
+        ${renderKeyValue("Appointment Fixed", contactDetails.appointmentFixed)}
+        ${renderKeyValue("Date of Visit", contactDetails.dateOfVisit)}
+
+        ${renderKeyValue("Structure of Loan", formatMultiline(structureOfLoan.structureOfLoan))}
+
+        ${renderKeyValue("No. of Visit", visitDetails.noOfVisit)}
+        ${renderKeyValue("Person Met", visitDetails.personMet)}
+        ${renderKeyValue("About the Applicant", visitDetails.aboutTheApplicant)}
+
+        <tr>
+          <td style="${labelCellStyle}">Family Details</td>
+          <td>
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Name</td>
+                <td style="${labelCellStyle}">Relationship</td>
+                <td style="${labelCellStyle}">Age</td>
+                <td style="${labelCellStyle}">Education</td>
+                <td style="${labelCellStyle}">Occupation</td>
+              </tr>
+              ${ensureArray(familyDetails.familyDetails).map((family) => `
+                <tr>
+                  <td style="${valueCellStyle}">${family.name}</td>
+                  <td style="${valueCellStyle}">${family.relationship}</td>
+                  <td style="${valueCellStyle}">${family.age}</td>
+                  <td style="${valueCellStyle}">${family.education}</td>
+                  <td style="${valueCellStyle}">${family.occupation}</td>
+                </tr>
+              `).join("")}
+            </table>
+          </td>
+        </tr>
+
+        ${renderKeyValue("About the Business", formatMultiline(aboutTheBusiness.aboutTheBusiness))}
+        ${renderKeyValue("Other Observations", formatMultiline(otherObservations.observations))}
+        ${renderKeyValue("Concerns", formatMultiline(otherObservations.concerns))}
+        ${renderKeyValue("Purpose of Loan", formatMultiline(purposeOfLoan.purposeOfLoan))}
+        ${renderKeyValue("As per Audited individual ITR's", purposeOfLoan.asPerAuditedIndividualItrS)}
+        ${renderKeyValue("Whether registered under MSME", purposeOfLoan.whetherRegisteredUnderMsme)}
+        ${renderKeyValue("Whether registered under GST", purposeOfLoan.whetherRegisteredUnderGst)}
+        ${renderKeyValue("Documents Observed", formatMultiline(documentsObserved.documentsObserved))}
+        ${renderKeyValue("Automation Level", documentsObserved.automationLevel)}
+        ${renderKeyValue("Receipts", formatCurrency(documentsObserved.receipts))}
+        ${renderKeyValue("Payments", formatCurrency(documentsObserved.payments))}
+        
+
+        ${renderKeyValue("Name and Contact number of Regular Customers",formatMultiline(regularCustomer.nameAndContactNumberOfRegularCustomers))}
+        ${renderKeyValue("Name and Contact number of Regular Suppliers", formatMultiline(regularSupplier.nameAndContactNumberOfRegularSuppliers))}
+        ${renderKeyValue("Net Margin", formatCurrency(businessActivityAndStockLevelObserved.netMargin))}
+        ${renderKeyValue("Expenditure", formatCurrency(businessActivityAndStockLevelObserved.expenditure))}
+        ${renderKeyValue("Employees", businessActivityAndStockLevelObserved.employees)}
+        ${renderKeyValue("Assets", formatMultiline(businessActivityAndStockLevelObserved.assets))}
+        ${renderKeyValue("LIC/Mutual funds", formatMultiline(businessActivityAndStockLevelObserved.licMutualFunds))}
+        
+        <tr>
+          <td style="${labelCellStyle}">Banking Details</td>
+          <td>
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Bank Name</td>
+                <td style="${labelCellStyle}">Account Type</td>
+                <td style="${labelCellStyle}">Avg Balance</td>
+                <td style="${labelCellStyle}">No. of Years Maintained</td>
+              </tr>
+              ${ensureArray(bankingDetails.bankingDetails).map((banking) => `
+                <tr>
+                  <td style="${valueCellStyle}">${banking.bankName}</td>
+                  <td style="${valueCellStyle}">${banking.accountType}</td>
+                  <td style="${valueCellStyle}">${banking.averageBalance}</td>
+                  <td style="${valueCellStyle}">${banking.noOfYearsMaintained}</td>
+                </tr>
+              `).join("")}  
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="${labelCellStyle}">No. of Loans</td>
+          <td>
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Bank</td>
+                <td style="${labelCellStyle}">Type</td>
+                <td style="${labelCellStyle}">Loan Amount</td>
+                <td style="${labelCellStyle}">EMI</td>
+                <td style="${labelCellStyle}">Open/Close</td>
+              </tr>
+              ${ensureArray(existingLoans.loanDetails).map((existingLoan) => `
+                <tr>
+                  <td style="${valueCellStyle}">${existingLoan.bank}</td>
+                  <td style="${valueCellStyle}">${existingLoan.type}</td>
+                  <td style="${valueCellStyle}">${existingLoan.loanAmount}</td>
+                  <td style="${valueCellStyle}">${existingLoan.emi}</td>
+                  <td style="${valueCellStyle}">${existingLoan.openClose}</td>
+                </tr>
+              `).join("")}  
+            </table>
+          </td>
+        </tr>
+
+        ${renderKeyValue("End Use", formatMultiline(otherBusinessIncome.endUse))}
+        ${renderKeyValue("Security Offered", formatMultiline(otherBusinessIncome.securityOffered))}
+        ${renderKeyValue("Address", otherBusinessIncome.address_3)}
+        ${renderKeyValue("Other Business/Income", formatMultiline(otherBusinessIncome.otherBusinessIncome))}
+        ${renderKeyValue("Neighbor Check", formatMultiline(otherBusinessIncome.neighborCheck))}
+        ${renderKeyValue("Status", status.status)}
+      </table>
+
+      <h3 style="margin:0 0 16px;color:#1f2a37;font-size:14px;">Disclaimer Clause:</h3>
+      <p style="margin:0 0 24px;color:#333;"> This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Ambit Finvest Pvt. Ltd. will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.
+
+    </div>
+    ${pdBaseTemplateFooter(html_data)}
+
   `;
 };

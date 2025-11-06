@@ -29,7 +29,11 @@ import {colors} from '../constants/colors';
 const FIELD_KEY_MAPPINGS = {
   applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
   businessName: ['businessName', 'nameOfConcern', 'nameOfBusiness'],
-  phoneNo: ['applicantMobile', 'applicantContactNumber'],
+  phoneNo: [
+    'applicantMobile',
+    'applicantContactNumber',
+    'applicantPhoneNumber',
+  ],
   applicationNumber: [
     'applicationNumber',
     'applicationNo',
@@ -75,7 +79,7 @@ const getInitialDataByBank = (
   loggedInUserName?: string,
 ) => {
   if (!userData || !schema) return {};
-  // console.log('userData', userData);
+  console.log('userData', userData);
   // Extract common data from userData
   const commonData: Record<string, any> = {
     applicantName:
@@ -364,15 +368,18 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   }, [bankName]);
 
   useEffect(() => {
+    console.log(userData);
     // Load schema based on bank name
     const loadSchema = async () => {
-      if (!bankName) {
-        console.warn('No bank name provided');
+      if (!userData?.templateName && !bankName) {
+        console.warn('No template name provided');
         return;
       }
 
       try {
-        const schema = await loadMobilePDFormsSchema(bankName);
+        const schema = await loadMobilePDFormsSchema(
+          userData?.templateName ?? bankName,
+        );
         if (schema) {
           setSchemaForm(schema);
           // Note: Initial data population is now handled in the consolidated effect
@@ -383,7 +390,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       }
     };
     loadSchema();
-  }, [bankName]);
+  }, [userData?.templateName]);
 
   // Watch form values to update formData
   // const watchedValues = watch();
