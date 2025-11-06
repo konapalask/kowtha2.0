@@ -79,6 +79,65 @@ const convertYYYYMMDDToDDMMYYYY = (dateString: string): string => {
   return dateString;
 };
 
+
+const convertTimeToHTML5Format = (timeString: string): string => {
+  if (!timeString) return "";
+  
+  if (/^\d{1,2}:\d{2}$/.test(timeString.trim())) {
+    return timeString.trim();
+  }
+  
+  const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+  const match = timeString.trim().match(timeRegex);
+  
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const period = match[3].toUpperCase();
+    
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+    
+    return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  }
+ 
+  return timeString;
+};
+
+
+const convertTimeFromHTML5Format = (timeString: string): string => {
+  if (!timeString) return "";
+  
+  
+  if (/AM|PM/i.test(timeString)) {
+    return timeString;
+  }
+  
+  // Try to parse "HH:MM" format (24-hour)
+  const timeRegex = /(\d{1,2}):(\d{2})/;
+  const match = timeString.trim().match(timeRegex);
+  
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    
+    const period = hours >= 12 ? "PM" : "AM";
+    if (hours > 12) {
+      hours -= 12;
+    } else if (hours === 0) {
+      hours = 12;
+    }
+    
+    return `${hours}:${minutes} ${period}`;
+  }
+  
+ 
+  return timeString;
+};
+
 const serializeFormValues = (value: any): any => {
   if (dayjs.isDayjs(value)) {
     return value.format("DD/MM/YYYY");
@@ -195,8 +254,9 @@ export const BusinessVerificationDetails: React.FC<
   const [currentSectionSchema, setCurrentSectionSchema] = useState<any>(null);
   const [localEditLogsUpdated, setLocalEditLogsUpdated] = useState(0);
 
-  // Collapse state - moved to parent level to persist across re-renders
   const [activeSections, setActiveSections] = useState<string[]>([]);
+
+  const formInstancesRef = React.useRef<{ [key: string]: any }>({});
 
   const handleSave = async () => {
     patchFinalVerdict(id as string, "Business", {
@@ -663,36 +723,80 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
-  // Handle Verification Executive Submit
   const handleVerificationExecutiveSubmit = async () => {
     try {
       setLoading(true);
 
-      // Prepare verification data
+      const rawApiData =
+        verificationData?.verificationData || verificationData || {};
+      const existingVerificationData = rawApiData as Record<string, any>;
+
+      let allSectionsData: Record<string, any> = mergeDeep(
+        existingVerificationData,
+        dynamicFormData || {}
+      );
+
+      allSectionsData = mergeDeep(allSectionsData, changedData || {});
+
+      Object.keys(formInstancesRef.current).forEach((sectionId) => {
+        const instance = formInstancesRef.current[sectionId];
+        if (instance) {
+          const formValues = instance.getFieldsValue();
+          if (formValues && Object.keys(formValues).length > 0) {
+            allSectionsData[sectionId] = mergeDeep(
+              allSectionsData[sectionId] || {},
+              formValues
+            );
+          }
+        }
+      });
+
+      if (allSectionsData.financialAnalysis) {
+        console.log("Financial Analysis data collected:", allSectionsData.financialAnalysis);
+      }
+
+      Object.keys(existingVerificationData).forEach((sectionKey) => {
+        if (sectionKey === "uploadedItems") return;
+
+        if (!allSectionsData[sectionKey]) {
+          allSectionsData[sectionKey] =
+            existingVerificationData[sectionKey];
+        }
+      });
+
+      const uploadedItems =
+        existingVerificationData?.uploadedItems ||
+        verificationData?.verificationData?.uploadedItems ||
+        verificationData?.uploadedItems ||
+        [];
+
+      const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
+        allSectionsData;
+
+
       const verificationDataPayload = {
-        ...dynamicFormData,
-        ...changedData,
-        uploadedItems: data?.uploadedItems || [], // Include photo capture data inside verificationData
+        ...sectionsWithoutUploadedItems,
+        uploadedItems: uploadedItems,
       };
 
-      // Get synopsis from editor content
       const synopsis =
         editorContent || "Business verification completed successfully";
 
-      // Prepare the complete payload
       const payload = {
         verificationType: "Business",
         verificationData: verificationDataPayload,
         synopsis,
       };
 
-      // Call the assistant verifier API
+      console.log("Submitting payload:", JSON.stringify(payload, null, 2));
+      if ((verificationDataPayload as any).financialAnalysis) {
+        console.log("Financial Analysis in payload:", (verificationDataPayload as any).financialAnalysis);
+      }
+
       await asstVerifierSubmitApi(id as string, payload);
 
       message.success("Verification submitted successfully!");
 
-      // Refresh the verification data
-      // fetchVerificationData();
       router.push(`/verify`);
     } catch (error: any) {
       console.error("Error submitting verification executive data:", error);
@@ -883,6 +987,7 @@ export const BusinessVerificationDetails: React.FC<
     changedData,
     setChangedData,
     setLocalEditLogsUpdated,
+    parentFormInstancesRef,
   }: {
     schema: any;
     formData: any;
@@ -895,13 +1000,12 @@ export const BusinessVerificationDetails: React.FC<
     changedData: any;
     setChangedData: (data: any) => void;
     setLocalEditLogsUpdated: (fn: (prev: number) => number) => void;
+    parentFormInstancesRef: React.MutableRefObject<{ [key: string]: any }>;
   }) => {
-    // Section-level uncommitted changes state
     const [sectionUncommittedChanges, setSectionUncommittedChanges] =
       useState<any>({});
 
-    // Store form instances for each section to access current values
-    const formInstancesRef = React.useRef<{ [key: string]: any }>({});
+    const formInstancesRef = parentFormInstancesRef;
 
     const toggleSection = (sectionId: string) => {
       // Check if there are uncommitted changes before closing
@@ -1726,11 +1830,42 @@ export const BusinessVerificationDetails: React.FC<
 
         case "text":
         case "string":
-          // Check if it should be a date field based on field name or label
+          const isTimeField =
+            (field.label?.toLowerCase().includes("time") ||
+              fieldId.toLowerCase().includes("time")) &&
+            !field.label?.toLowerCase().includes("date") &&
+            !fieldId.toLowerCase().includes("date");
+
           const isDateField =
-            field.label?.toLowerCase().includes("date") ||
-            field.label?.toLowerCase().includes("visit") ||
-            fieldId.toLowerCase().includes("date");
+            (field.label?.toLowerCase().includes("date") ||
+              field.label?.toLowerCase().includes("visit") ||
+              fieldId.toLowerCase().includes("date")) &&
+            !isTimeField;
+
+          if (isTimeField) {
+            return (
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={showLabel ? field.label : undefined}
+                getValueFromEvent={(e) => {
+                
+                  return convertTimeFromHTML5Format(e.target.value);
+                }}
+                getValueProps={(value) => {
+                  return {
+                    value: convertTimeToHTML5Format(value || ""),
+                  };
+                }}
+              >
+                <Input
+                  disabled={fieldReadOnly}
+                  placeholder={`Select ${field.label}`}
+                  type="time"
+                />
+              </Form.Item>
+            );
+          }
 
           if (isDateField) {
             return (
@@ -2372,11 +2507,43 @@ export const BusinessVerificationDetails: React.FC<
           );
 
         case "string":
-          // Check if it should be a date field based on field name or label
+          const isArrayItemTimeField =
+            (itemField.label?.toLowerCase().includes("time") ||
+              itemFieldId.toLowerCase().includes("time")) &&
+            !itemField.label?.toLowerCase().includes("date") &&
+            !itemFieldId.toLowerCase().includes("date");
+
           const isArrayItemDateField =
-            itemField.label?.toLowerCase().includes("date") ||
-            itemField.label?.toLowerCase().includes("visit") ||
-            itemFieldId.toLowerCase().includes("date");
+            (itemField.label?.toLowerCase().includes("date") ||
+              itemField.label?.toLowerCase().includes("visit") ||
+              itemFieldId.toLowerCase().includes("date")) &&
+            !isArrayItemTimeField;
+
+          if (isArrayItemTimeField) {
+            return (
+              <Form.Item
+                key={itemFieldId}
+                name={fieldKey}
+                label={itemField.label}
+                getValueFromEvent={(e) => {
+                  // Convert HH:MM to HH:MM AM/PM when saving
+                  return convertTimeFromHTML5Format(e.target.value);
+                }}
+                getValueProps={(value) => {
+                  // Convert HH:MM AM/PM to HH:MM when displaying
+                  return {
+                    value: convertTimeToHTML5Format(value || ""),
+                  };
+                }}
+              >
+                <Input
+                  disabled={readOnly || itemField.readOnly}
+                  placeholder={`Select ${itemField.label}`}
+                  type="time"
+                />
+              </Form.Item>
+            );
+          }
 
           if (isArrayItemDateField) {
             return (
@@ -2585,6 +2752,7 @@ export const BusinessVerificationDetails: React.FC<
               changedData={changedData}
               setChangedData={setChangedData}
               setLocalEditLogsUpdated={setLocalEditLogsUpdated}
+              parentFormInstancesRef={formInstancesRef}
             />
 
             {/* Photo Capture Section - Grouped by Document Type */}
