@@ -134,8 +134,14 @@ export const tataUblSchema = {
             title: "Owned by",
           },
           areaSqFt: {
-            type: "string",
+            type: "number",
             title: "Area (In Sq. Ft.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 0,
+              minDecimalPlaces: 0,
+            },
           },
           occupiedSinceYears: {
             type: "integer",
@@ -158,6 +164,7 @@ export const tataUblSchema = {
           addressOfPDAndPersonMet: {
             type: "string",
             title: "Address of PD and persona met",
+            ui: { widget: "textarea", rows: 4 },
           },
         },
       },
@@ -256,14 +263,8 @@ export const tataUblSchema = {
             title: "Current Employees",
           },
           salaryRange: {
-            type: "number",
+            type: "string",
             title: "Salary Range",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 0,
-              minDecimalPlaces: 0,
-            },
           },
           keyEmployeeName: {
             type: "string",
@@ -288,8 +289,14 @@ export const tataUblSchema = {
             title: "Nature of Account",
           },
           avgBal: {
-            type: "string",
+            type: "number",
             title: "Avg. Bal",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -310,16 +317,34 @@ export const tataUblSchema = {
             title: "Exp. Turnover (FY 2025-26)",
           },
           monthlyTurnoverSales: {
-            type: "string",
+            type: "number",
             title: "Monthly Turnover / Sales",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           netMonthlyIncome: {
-            type: "string",
+            type: "number",
             title: "Net Monthly Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           profitMargin: {
-            type: "string",
+            type: "number",
             title: "Profit Margin",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           covidEffectOnTurnover: {
             type: "string",
@@ -362,12 +387,24 @@ export const tataUblSchema = {
                   title: "Name of Customer",
                 },
                 percentageOfTotalSales: {
-                  type: "string",
+                  type: "number",
                   title: "% of Total Sales",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 debtorDays: {
-                  type: "string",
+                  type: "number",
                   title: "Debtor Days",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 0,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 relationshipSinceYears: {
                   type: "integer",
@@ -405,12 +442,24 @@ export const tataUblSchema = {
                   title: "Name of Supplier",
                 },
                 percentageOfTotalPurchases: {
-                  type: "string",
+                  type: "number",
                   title: "% of Total Purchases",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 creditorDays: {
-                  type: "string",
+                  type: "number",
                   title: "Creditor Days",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 0,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 relationshipSinceYears: {
                   type: "integer",

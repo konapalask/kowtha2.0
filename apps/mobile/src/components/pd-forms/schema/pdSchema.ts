@@ -43,29 +43,34 @@ export function clearSchemaCache(bankName?: string): void {
 }
 
 export async function loadMobilePDFormsSchema(
-  bankName: string,
+  templateName: string,
   forceRefresh: boolean = false,
 ): Promise<any | null> {
-  if (cachedSchema[bankName] && !forceRefresh) {
-    return cachedSchema[bankName];
+  if (cachedSchema[templateName] && !forceRefresh) {
+    return cachedSchema[templateName];
   }
 
   try {
     // Fetch schema from backend API (single source of truth)
-    console.log('Fetching PD schema from backend for bank:', bankName);
-    const response = await getPDSchema(bankName);
+    console.log('Fetching PD schema from backend for template:', templateName);
+    const response = await getPDSchema(templateName);
 
     // Backend returns: { status, message, data: { bankName, schema, metadata } }
     const backendData = response.data?.data;
 
     if (backendData && backendData.schema) {
       // Cache and return the schema
-      cachedSchema[bankName] = backendData.schema;
-      console.log('✓ PD schema loaded from backend successfully:', bankName);
+      cachedSchema[templateName] = backendData.schema;
+      console.log(
+        '✓ PD schema loaded from backend successfully:',
+        templateName,
+      );
       return backendData.schema;
     }
 
-    throw new Error(`No schema data received from backend for: ${bankName}`);
+    throw new Error(
+      `No schema data received from backend for: ${templateName}`,
+    );
   } catch (error: any) {
     console.error(
       'Failed to fetch schema from backend:',

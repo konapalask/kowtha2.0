@@ -5,9 +5,17 @@ export const statement4Schema = {
     type: "object",
     properties: {
       // Header Information
-      synopsis: { type: "string", title: "Synopsis of the verification" },
-      businessName: { type: "string", title: "Business Name" },
-      partnersNames: { type: "string", title: "Partners Names" },
+      synopsis: {
+        type: "string",
+        title: "Synopsis of the verification",
+        ui: { widget: "textarea", rows: 3 },
+      },
+      businessName: { type: "string", title: "Business Name", readonly: true },
+      partnersNames: {
+        type: "string",
+        title: "Partners Names",
+        ui: { widget: "textarea", rows: 3 },
+      },
 
       // Expenditure Section - with Audited Income and Assessed columns
       openingStockAssessed: {

@@ -24,7 +24,7 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Name of Co-Applicant",
           },
-          phoneNumber: {
+          applicantPhoneNumber: {
             type: "string",
             title: "Phone Number",
             readOnly: true,
@@ -38,14 +38,17 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Initiated Premises",
             readOnly: true,
+            ui: { widget: "textarea", rows: 3 },
           },
           visitedPremises: {
             type: "string",
             title: "Visited Premises",
+            ui: { widget: "textarea", rows: 3 },
           },
           residentialPremises: {
             type: "string",
             title: "Residential Premises",
+            ui: { widget: "textarea", rows: 3 },
           },
           appointmentFixed: {
             type: "string",
@@ -110,6 +113,16 @@ export const arkaFincapSchema = {
                 relationship: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -118,6 +131,14 @@ export const arkaFincapSchema = {
                 education: {
                   type: "string",
                   title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "Under graduate",
+                    "Graduate",
+                    "Post Graduate",
+                    "Professional",
+                  ],
                 },
                 occupation: {
                   type: "string",

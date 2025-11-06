@@ -55,7 +55,7 @@ export const adityaBirlaSchema = {
             readOnly: true,
           },
           yearsInCurrentAddress: {
-            type: "string",
+            type: "number",
             title: "No. of years in current address",
           },
           constitutionOfBusiness: {
