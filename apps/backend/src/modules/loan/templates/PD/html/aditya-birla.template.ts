@@ -33,6 +33,11 @@ const formatObservations = (value: any): string => {
   return lines.map((line: string) => `• ${line.trim()}`).join("<br>");
 };
 
+const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
+};
 
 const renderKeyValue = (
   label: string,
@@ -56,7 +61,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const business = verificationData.businessOverview || {};
   const financials = verificationData.salesFinancials || {};
   const businessProfile = verificationData.businessProfile || {};
-  const familyMembers = verificationData.familyMembers || [];
+  const familyMembers = verificationData.familyMembers.familyMembers || [];
   const observations = verificationData.observations || {};
   const employeesInfrastructure = verificationData.employeesInfrastructure || {};
 
@@ -155,7 +160,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         <td style="${labelCellStyle}">Business</td>
         <td style="${labelCellStyle}">Education</td>  
       </tr>
-      ${Array.isArray(familyMembers) ? familyMembers.map((member: any) => `
+      ${ensureArray(familyMembers).map((member: any) => `
         <tr>
           <td style="${valueCellStyle}">${formatMultiline(member.name)}</td>
           <td style="${valueCellStyle}">${formatMultiline(member.relation)}</td>
@@ -163,9 +168,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}">${formatMultiline(member.businessName)}</td>
           <td style="${valueCellStyle}">${formatMultiline(member.education)}</td>
         </tr>
-      `) : `<tr>
-        <td style="${valueCellStyle}" colspan="5">Not provided</td>
-      </tr>`}
+      `).join("\n")}
       </table>
 
       <table style="${tableStyle}">
