@@ -37,6 +37,11 @@ import { niwasSalariedTemplate } from "./templates/PD/html/niwas-salaried.templa
 import { genericPDTemplate } from "./templates/PD/html/generic.template";
 import { dcbTemplate } from "./templates/PD/html/dcb.template";
 import { incredTemplate } from "./templates/PD/html/incred.template";
+import { ambitTemplate } from "./templates/PD/html/ambit.template";
+import { ambitMsmeTemplate } from "./templates/PD/html/ambit-msme.template";
+import { janaSalariedTemplate } from "./templates/PD/html/jana-salaried.template";
+import { janaSenpAbove50lTemplate } from "./templates/PD/html/jana-senp-above-50l.template";
+import { janaSenpBelow50lTemplate } from "./templates/PD/html/jana-senp-below-50l.template";
 
 import {
   validateVerificationData,
@@ -681,8 +686,60 @@ export class PDTemplateService {
       );
       return incredTemplate(verification, html_data);
     }
+    if (bankName == "Ambit") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return ambitTemplate(verification, html_data);
+    }
+    if (bankName == "Ambit-MSME") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return ambitMsmeTemplate(verification, html_data);
+    }
 
+    if (bankName == "Jana Salaried") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return janaSalariedTemplate(verification, html_data);
+    }
 
+    if (bankName == "Jana Senp Above 50l") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return janaSenpAbove50lTemplate(verification, html_data);
+    }
+
+    if (bankName == "Jana Senp Below 50l") {
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        financialAnalysis
+      );
+      return janaSenpBelow50lTemplate(verification, html_data);
+    }
+  
     // Generic template for all other banks (uses schema-driven approach)
     try {
       // Get schema for this bank
