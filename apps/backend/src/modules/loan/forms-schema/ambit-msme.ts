@@ -53,73 +53,84 @@ export const ambitMsmeSchema = {
                         type: "string",
                         title: "Name of the proprietor as per Business license",
                     },
-                    initiatedAddress: {
-                        type: "object",
-                        properties: {
-                            address: {
-                                type: "string",
-                                title: "Address",
-                                ui: {
-                                    widget: "textarea",
-                                    rows: 2,
-                                },
-                            },
-                            latitude: {
-                                type: "number",
-                                title: "Latitude",
-                            },
-                            longitude: {
-                                type: "number",
-                                title: "Longitude",
-                            },
-                        },
-                    },
-                    visitedAddress: {
-                        type: "object",
-                        properties: {
-                            address: {
-                                type: "string",
-                                title: "Address",
-                                ui: {
-                                    widget: "textarea",
-                                    rows: 2,
-                                },
-                            },
-                            latitude: {
-                                type: "number",
-                                title: "Latitude",
-                            },
-                            longitude: {
-                                type: "number",
-                                title: "Longitude",
-                            },
-                        },
-                    },
-                    businessLicenseAddress: {
-                        type: "object",
-                        properties: {
-                            address: {
-                                type: "string",
-                                title: "Address",
-                                ui: {
-                                    widget: "textarea",
-                                    rows: 2,
-                                },
-                            },
-                            latitude: {
-                                type: "number",
-                                title: "Latitude",
-                            },
-                            longitude: {
-                                type: "number",
-                                title: "Longitude",
-                            },
-                        },
-                    },
                 },
             },
             required: true,
         },
+
+        {
+            id: "addressDetails",
+            label: "Address Details",
+            schema: {
+                type: "object",
+                properties: {
+                initiatedAddress: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "string",
+                            title: "Address",
+                            ui: {
+                                widget: "textarea",
+                                rows: 2,
+                            },
+                        },
+                        latitude: {
+                            type: "number",
+                            title: "Latitude",
+                        },
+                        longitude: {
+                            type: "number",
+                            title: "Longitude",
+                        },
+                    },
+                },
+                visitedAddress: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "string",
+                            title: "Address",
+                            ui: {
+                                widget: "textarea",
+                                rows: 2,
+                            },
+                        },
+                        latitude: {
+                            type: "number",
+                            title: "Latitude",
+                        },
+                        longitude: {
+                            type: "number",
+                            title: "Longitude",
+                        },
+                    },
+                },
+                businessLicenseAddress: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "string",
+                            title: "Address",
+                            ui: {
+                                widget: "textarea",
+                                rows: 2,
+                            },
+                        },
+                        latitude: {
+                            type: "number",
+                            title: "Latitude",
+                        },
+                        longitude: {
+                            type: "number",
+                            title: "Longitude",
+                        },
+                    },
+                },
+                },
+            },
+        },
+        
         {
             id: "residentialDetails",
             label: "Residential Details",
@@ -357,8 +368,8 @@ export const ambitMsmeSchema = {
             },
         },
         {
-            id: "suplliersDetails",
-            label: "Suplliers Details",
+            id: "suppliersDetails",
+            label: "Suppliers Details",
             schema: {
                 type: "array",
                 items: {
@@ -380,6 +391,10 @@ export const ambitMsmeSchema = {
                     feedback: {
                         type: "string",
                         title: "Feedback",
+                        ui: {
+                            widget: "textarea",
+                            rows: 3,
+                        },
                     },
                 },
             },
@@ -563,7 +578,7 @@ export const ambitMsmeSchema = {
                                 type: "string",
                                 title: "Name of Bank / NBFC",
                             },
-                            type: {
+                            typeOfLoan: {
                                 type: "string",
                                 title: "Type of Loan",
                             },
