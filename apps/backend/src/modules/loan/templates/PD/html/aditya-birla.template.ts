@@ -129,7 +129,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
       <tr>
         <td colspan="2">
-        ${renderKeyValue("APPLICANT:", formatMultiline(businessProfile.applicantSummary))}
+        ${renderKeyValue("APPLICANT:", formatObservations(businessProfile.applicantSummary))}
         </td>
         <td colspan="2">
           ${renderKeyValue("Native Place", businessProfile.nativePlace)}
@@ -205,8 +205,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
-            <td style="${valueCellStyle}">Loan Amount: ${formatMultiline(observations.loanAmountApplied)}</td>
-            <td style="${valueCellStyle}">Purpose of Loan: ${formatMultiline(observations.purposeOfLoan)}</td>
+            <td style="${valueCellStyle}">Loan Amount: ${formatMultiline(observations.loanAmountApplied)} <br>Purpose of Loan: ${formatMultiline(observations.purposeOfLoan)}</td>
         </tr>
       </table>      
 
