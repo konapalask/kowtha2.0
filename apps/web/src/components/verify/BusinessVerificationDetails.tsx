@@ -19,6 +19,7 @@ import {
   InputNumber,
   Radio,
   Select,
+  DatePicker,
 } from "antd";
 
 const { TextArea } = Input;
@@ -1995,21 +1996,32 @@ export const BusinessVerificationDetails: React.FC<
                 key={fieldId}
                 name={fieldId}
                 label={showLabel ? field.label : undefined}
-                getValueFromEvent={(e) => {
-                  // Convert YYYY-MM-DD to DD-MM-YYYY when saving
-                  return convertYYYYMMDDToDDMMYYYY(e.target.value);
-                }}
                 getValueProps={(value) => {
-                  // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
-                  return {
-                    value: convertDDMMYYYYToYYYYMMDD(value || ""),
-                  };
+                  // Convert DD-MM-YYYY or DD/MM/YYYY to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle DD-MM-YYYY or DD/MM/YYYY format
+                  const dateStr = String(value).trim();
+                  const parts = dateStr.split(/[-\/]/);
+                  if (parts.length === 3) {
+                    const [day, month, year] = parts;
+                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  }
+                  // Try parsing as-is
+                  const parsed = dayjs(value);
+                  return { value: parsed.isValid() ? parsed : undefined };
+                }}
+                getValueFromEvent={(date) => {
+                  // Convert dayjs object to DD/MM/YYYY format when saving
+                  if (!date) return undefined;
+                  return date.format("DD/MM/YYYY");
                 }}
               >
-                <Input
+                <DatePicker
                   disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
-                  type="date"
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
                 />
               </Form.Item>
             );
@@ -2086,21 +2098,32 @@ export const BusinessVerificationDetails: React.FC<
               key={fieldId}
               name={fieldId}
               label={showLabel ? field.label : undefined}
-              getValueFromEvent={(e) => {
-                // Convert YYYY-MM-DD to DD-MM-YYYY when saving
-                return convertYYYYMMDDToDDMMYYYY(e.target.value);
-              }}
               getValueProps={(value) => {
-                // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
-                return {
-                  value: convertDDMMYYYYToYYYYMMDD(value || ""),
-                };
+                // Convert DD-MM-YYYY or DD/MM/YYYY to dayjs object
+                if (!value) return { value: undefined };
+                if (dayjs.isDayjs(value)) return { value };
+                // Handle DD-MM-YYYY or DD/MM/YYYY format
+                const dateStr = String(value).trim();
+                const parts = dateStr.split(/[-\/]/);
+                if (parts.length === 3) {
+                  const [day, month, year] = parts;
+                  return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                }
+                // Try parsing as-is
+                const parsed = dayjs(value);
+                return { value: parsed.isValid() ? parsed : undefined };
+              }}
+              getValueFromEvent={(date) => {
+                // Convert dayjs object to DD/MM/YYYY format when saving
+                if (!date) return undefined;
+                return date.format("DD/MM/YYYY");
               }}
             >
-              <Input
+              <DatePicker
                 disabled={fieldReadOnly}
                 placeholder={`Select ${field.label}`}
-                type="date"
+                format="DD/MM/YYYY"
+                style={{ width: "100%" }}
               />
             </Form.Item>
           );
@@ -2710,21 +2733,32 @@ export const BusinessVerificationDetails: React.FC<
               key={itemFieldId}
               name={fieldKey}
               label={itemField.label}
-              getValueFromEvent={(e) => {
-                // Convert YYYY-MM-DD to DD-MM-YYYY when saving
-                return convertYYYYMMDDToDDMMYYYY(e.target.value);
-              }}
               getValueProps={(value) => {
-                // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
-                return {
-                  value: convertDDMMYYYYToYYYYMMDD(value || ""),
-                };
+                // Convert DD-MM-YYYY or DD/MM/YYYY to dayjs object
+                if (!value) return { value: undefined };
+                if (dayjs.isDayjs(value)) return { value };
+                // Handle DD-MM-YYYY or DD/MM/YYYY format
+                const dateStr = String(value).trim();
+                const parts = dateStr.split(/[-\/]/);
+                if (parts.length === 3) {
+                  const [day, month, year] = parts;
+                  return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                }
+                // Try parsing as-is
+                const parsed = dayjs(value);
+                return { value: parsed.isValid() ? parsed : undefined };
+              }}
+              getValueFromEvent={(date) => {
+                // Convert dayjs object to DD/MM/YYYY format when saving
+                if (!date) return undefined;
+                return date.format("DD/MM/YYYY");
               }}
             >
-              <Input
+              <DatePicker
                 disabled={readOnly || itemField.readOnly}
                 placeholder={`Select ${itemField.label}`}
-                type="date"
+                format="DD/MM/YYYY"
+                style={{ width: "100%" }}
               />
             </Form.Item>
           );
@@ -2774,21 +2808,32 @@ export const BusinessVerificationDetails: React.FC<
                 key={itemFieldId}
                 name={fieldKey}
                 label={itemField.label}
-                getValueFromEvent={(e) => {
-                  // Convert YYYY-MM-DD to DD-MM-YYYY when saving
-                  return convertYYYYMMDDToDDMMYYYY(e.target.value);
-                }}
                 getValueProps={(value) => {
-                  // Convert DD-MM-YYYY to YYYY-MM-DD when displaying
-                  return {
-                    value: convertDDMMYYYYToYYYYMMDD(value || ""),
-                  };
+                  // Convert DD-MM-YYYY or DD/MM/YYYY to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle DD-MM-YYYY or DD/MM/YYYY format
+                  const dateStr = String(value).trim();
+                  const parts = dateStr.split(/[-\/]/);
+                  if (parts.length === 3) {
+                    const [day, month, year] = parts;
+                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  }
+                  // Try parsing as-is
+                  const parsed = dayjs(value);
+                  return { value: parsed.isValid() ? parsed : undefined };
+                }}
+                getValueFromEvent={(date) => {
+                  // Convert dayjs object to DD/MM/YYYY format when saving
+                  if (!date) return undefined;
+                  return date.format("DD/MM/YYYY");
                 }}
               >
-                <Input
+                <DatePicker
                   disabled={readOnly || itemField.readOnly}
                   placeholder={`Select ${itemField.label}`}
-                  type="date"
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
                 />
               </Form.Item>
             );
