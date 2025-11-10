@@ -134,7 +134,10 @@ export default function Loans() {
   };
 
   useEffect(() => {
-    fetchLoans(pagination.current, pagination.pageSize);
+    // Only fetch loans if department is available
+    if (currentDepartment) {
+      fetchLoans(pagination.current, pagination.pageSize);
+    }
   }, [
     refresh,
     pagination.current,

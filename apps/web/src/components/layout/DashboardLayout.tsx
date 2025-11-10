@@ -213,13 +213,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ),
       label: <Link href="/loans">Loans</Link>,
     },
-    {
-      key: "users",
-      icon: (
-        <TeamOutlined style={{ fontSize: 20, color: "var(--primary-800)" }} />
-      ),
-      label: <Link href="/users">Users</Link>,
-    },
+    ...(getCurrentDepartmentRole() !== "VerificationExecutive"
+      ? [
+          {
+            key: "users",
+            icon: (
+              <TeamOutlined style={{ fontSize: 20, color: "var(--primary-800)" }} />
+            ),
+            label: <Link href="/users">Users</Link>,
+          },
+        ]
+      : []),
     ...(getCurrentDepartmentRole() === "Admin" ||
     getCurrentDepartmentRole() === "Verifier" ||
     getCurrentDepartmentRole() === "VerificationExecutive"

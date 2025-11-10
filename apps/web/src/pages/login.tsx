@@ -20,7 +20,7 @@ import {
 import { getCookie, setCookie } from "@/helpers/localStorage";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants/defaultKeys";
 import { UserContext } from "@/components/layout/UserContextProvider";
-import { getUserDetails, isEmpty, setUserDetails, getCurrentDepartmentRole, getDefaultDepartmentRole, getFirstAvailableNavigationOption } from "@/utils/utility";
+import { getUserDetails, isEmpty, setUserDetails, getCurrentDepartmentRole, getDefaultDepartmentRole, getFirstAvailableNavigationOption, setCurrentDepartment, initializeCurrentDepartment, getCurrentDepartment } from "@/utils/utility";
 import SelectDepartmentModal from "@/components/SelectDepartmentModal";
 // import { useUser } from "@/components/layout/UserContextProvider";
 
@@ -191,6 +191,7 @@ export default function Login() {
               };
 
               setUserDetails(updatedUserDetails);
+              setCurrentDepartment(singleDepartment);
               message.success(`Default department set to ${singleDepartment}`);
               
               // Small delay to ensure state is updated before navigation
@@ -235,6 +236,10 @@ export default function Login() {
           }
         } else {
           setUserDetails(userData);
+          // Initialize current department if not already set
+          if (!getCurrentDepartment() && userData.defaultDepartment) {
+            setCurrentDepartment(userData.defaultDepartment);
+          }
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -276,6 +281,7 @@ export default function Login() {
 
       // Update localStorage with the new user details
       setUserDetails(updatedUserDetails);
+      setCurrentDepartment(department);
       setShowDepartmentModal(false);
       message.success("Default department updated successfully");
     } catch (error) {
