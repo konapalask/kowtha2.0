@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Table, Card, Button, Space, Tag, Typography, Badge, Input } from "antd";
+import { Table, Card, Button, Space, Tag, Typography, Badge, Input, Checkbox } from "antd";
 import {
   CheckCircleOutlined,
   CheckOutlined,
@@ -51,6 +51,9 @@ export default function Verify() {
   // Search state
   const [searchApplicationNumber, setSearchApplicationNumber] = useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
+  
+  // Filter state
+  const [showPostponedOnly, setShowPostponedOnly] = useState<boolean>(false);
 
   // Pagination state
   const pageSize = 10;
@@ -98,7 +101,16 @@ export default function Verify() {
           searchApplicantName.toLowerCase()
         );
 
-      return statusMatch && applicationNumberMatch && applicantNameMatch;
+      // Filter by appointment postponed
+      let postponedMatch = true;
+      if (showPostponedOnly) {
+        const hasPostponedVerification = loan?.verifications?.some(
+          (v: any) => v.isPostponed === true && v.status === "Pending"
+        );
+        postponedMatch = hasPostponedVerification === true;
+      }
+
+      return statusMatch && applicationNumberMatch && applicantNameMatch && postponedMatch;
     }) ?? [];
 
   const getStatusTags = (record: any) => {
@@ -247,14 +259,14 @@ export default function Verify() {
         }
       : false;
 
-  // Reset to first page when search changes
+  // Reset to first page when search or filter changes
   useEffect(() => {
     setCurrentPage(1);
     router.replace({
       pathname: router.pathname,
       query: { ...router.query, page: 1 },
     }, undefined, { shallow: true });
-  }, [searchApplicationNumber, searchApplicantName]);
+  }, [searchApplicationNumber, searchApplicantName, showPostponedOnly]);
 
   return (
     <DashboardLayout>
@@ -262,24 +274,35 @@ export default function Verify() {
         <div
           style={{
             marginTop: 16,
+            marginBottom: 16,
             display: "flex",
             gap: 16,
             alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
           }}
         >
-          {/* <Badge color="green" text="Completed - Positive" /> */}
-          <div style={{ gap: 2 }}>
-            <CheckOutlined style={{ color: "green" }} /> Completed - Positive
-          </div>
-          {/* <Badge color="red" text="Completed - Negative" /> */}
-          <div style={{ gap: 2 }}>
-            <CheckOutlined style={{ color: "red" }} /> Completed - Negative
-          </div>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            {/* <Badge color="green" text="Completed - Positive" /> */}
+            <div style={{ gap: 2 }}>
+              <CheckOutlined style={{ color: "green" }} /> Completed - Positive
+            </div>
+            {/* <Badge color="red" text="Completed - Negative" /> */}
+            <div style={{ gap: 2 }}>
+              <CheckOutlined style={{ color: "red" }} /> Completed - Negative
+            </div>
 
-          {/* <Badge color="green" text="Investigations completed" /> */}
-          {/* <Tag color="green">Investigations Completed</Tag> */}
-          {/* <Badge color="orange" text="In Progress" />
-          <Badge color="default" text="Pending" /> */}
+            {/* <Badge color="green" text="Investigations completed" /> */}
+            {/* <Tag color="green">Investigations Completed</Tag> */}
+            {/* <Badge color="orange" text="In Progress" />
+            <Badge color="default" text="Pending" /> */}
+          </div>
+          <Checkbox
+            checked={showPostponedOnly}
+            onChange={(e) => setShowPostponedOnly(e.target.checked)}
+          >
+            Appointment Postponed
+          </Checkbox>
         </div>
         <Table
           className="striped-table"
