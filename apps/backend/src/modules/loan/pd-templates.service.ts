@@ -4,15 +4,15 @@ import { formSchema } from "./forms-schema";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
 import * as templates from "./templates/PD/html/_index";
-import * as interfaces from "./templates/PD/interface/_index";
+// import * as interfaces from "./templates/PD/interface/_index";
 import { VerificationType, Department } from "@prisma/client";
 import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { LoggingService } from "src/modules/common/logging/logging.service";
-import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
+// import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
 import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
 // import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
-import { RBLInterface } from "./templates/PD/interface/rbl.interface";
+// import { RBLInterface } from "./templates/PD/interface/rbl.interface";
 import { rblTemplate } from "./templates/PD/html/rbl.template";
 import { iciciTemplate } from "./templates/PD/html/icici.template";
 import { cholaTemplate } from "./templates/PD/html/chola.template";
@@ -403,30 +403,30 @@ export class PDTemplateService {
       bankName === "Axis Finance UBL Above 10L" ||
       bankName === "Axis Finance UBL Below 10L"
     ) {
-      const verificationData = (verification?.verificationData ||
-        verification) as AxisFinanceUBLInterface;
+      // const verificationData = (verification?.verificationData ||
+        // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
-        verificationData,
+        verification,
         bankName,
         loan.applicationNumber,
         synopsis,
         financialAnalysis,
         loan
       );
-      return axisFinanceUBLTemplate(verificationData, html_data);
+      return axisFinanceUBLTemplate(verification, html_data);
     }
 
     if (bankName == "RBL" || bankName == "Rbl") {
-      let verificationData = verification as RBLInterface;
+      // let verificationData = verification as RBLInterface; 
       const html_data = await this.FormatPDImages(
-        verificationData,
+        verification,
         bankName,
         loan.applicationNumber,
         synopsis,
         financialAnalysis,
         loan
       );
-      return rblTemplate(verificationData, html_data);
+      return rblTemplate(verification, html_data);
     }
 
     if (bankName == "ICICI") {

@@ -2915,12 +2915,12 @@ export class LoanService {
       if (!bankName) {
         const loan = await this.prisma.loan.findUnique({
           where: { id: loanId },
-          select: { bankName: true },
+          select: { templateName: true },
         });
         if (!loan) {
           throw new NotFoundException('Loan not found');
         }
-        bankName = loan.bankName;
+        bankName = loan.templateName;
       }
 
       const templatesService = await this.getFinancialAnalysisTemplatesService();

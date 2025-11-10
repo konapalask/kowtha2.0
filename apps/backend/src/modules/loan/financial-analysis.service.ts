@@ -16,12 +16,10 @@ export class FinancialAnalysisTemplatesService {
     private loggingService: LoggingService
   ) { }
   private readonly bankTemplateMappings = {
-    'generic': ["AMBIT-HL", "AMBIT-MSME", "ARKA FINCAP", "CENTRUM", "CENT BANK", "CHOLA-HL", "CHOLA-SME", "CLIX CAPITAL-HL", "CLIX CAPITAL-UBL", "EASY HL", "FED BANK (PD&LIP)", "GODREJ-HL", "GODREJ-UBL", "INDUSIND", "KOTAK", "MUTHOOT-HL", "MUTHOOT FINCORP (PD & LIP)", "NIDO HOME FINANCE", "NORTHERN ARC", "NIPUN", "PIRAMAL (PD, AIP, LIP)", "PNB", "TRUHOME (PD & LIP)", "VERITAS",],
-    'statement-1': [],
-    'statement-2': ["AXIS FINANCE-HL", "INCRED/KKR India Financial Services Limited", "SAMMAAN", "SMFG-ML (MICRO & MASS)", "SMFG-HL", "TATA CAPITAL-FSL", "TATA CAPITAL-HFL"],
+    'generic': [ "ADITYA BIRLA-HL", "ADITYA BIRLA-ML", "ADITYA BIRLA-STSL", "AMBIT-HL", "AMBIT-MSME", "AXIS FINANCE-UBL", "AXIS FINANCE-UBL", "AXIS BANK", "AXIS AGRI", "AXIS BUSINESS AGRI", "ARKA FINCAP", "CENTRUM", "CENT BANK", "CHOLA-HL", "CHOLA-SME", "CLIX CAPITAL-HL", "CLIX CAPITAL-UBL", "EASY HL", "FED BANK (PD&LIP)", "GODREJ-HL", "GODREJ-UBL", "HERO HOUSING", "HERO HOUSING", "ICICI", "IDFC FIRST-HL", "IDFC FIRST-ML", "IDFC FIRST-PL", "IIFL", "INDUSIND", "INDIA SHELTER", "INDIA SHELTER", "JANA SMALL FINANCE BANK LIMITED", "JANA SMALL FINANCE BANK LIMITED", "JANA SMALL FINANCE BANK LIMITED", "KOTAK", "MUTHOOT-HL", "MUTHOOT FINCORP (PD & LIP)", "NIDO HOME FINANCE", "NIWAS", "NIWAS", "NORTHERN ARC", "NIPUN", "PIRAMAL (PD, AIP, LIP)", "PNB", "SMFG-SME", "TATA CAPITAL-UBL", "TRUHOME (PD & LIP)", "VERITAS", "YES BANK-HL",],
+    'statement-2': ["AXIS FINANCE-HL", "INCRED/KKR India Financial Services Limited", "SAMMAAN", "SMFG-ML (MICRO & MASS)", "SMFG-HL", "TATA CAPITAL-FSL", "TATA CAPITAL-HFL",],
     'statement-3': ["DCB BANK"],
     'statement-4': ["HERO FINCORP", "RBL BANK (PD & LIP)"],
-    'statement-5': [],
   };
   
    // Main export function that routes to the appropriate template based on bank
@@ -49,12 +47,12 @@ export class FinancialAnalysisTemplatesService {
       if (!verification) {
         throw new NotFoundException('Verification not found');
       }
-
-      const financialAnalysis = (verification.financialAnalysis as any) || {};
+      
+      const financialAnalysis = (verification.verificationData as any)?.financialAnalysis || {};
       const loan = verification.loan;
-
+      
       if (this.isServiceBusinessFormat(bankName)) {
-        return await this.generateServiceBusinessFormat(
+        return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
           loan
@@ -78,12 +76,6 @@ export class FinancialAnalysisTemplatesService {
           loan
         );
       } else if (this.isComprehensiveFormat(bankName)) {
-        return await this.generateComprehensiveFormat(
-          ExcelJS,
-          financialAnalysis,
-          loan
-        );
-      } else {
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
@@ -132,9 +124,7 @@ export class FinancialAnalysisTemplatesService {
     return comprehensiveBanks.some((bank) => bankName.includes(bank));
   }
 
-  /**
-   * Standard Trading and P&L Format (Default)
-   */
+
   private async generateStandardFormat(
     ExcelJS: any,
     financialAnalysis: any,
@@ -143,17 +133,15 @@ export class FinancialAnalysisTemplatesService {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
-    // Set column widths
     worksheet.columns = [
-      { width: 25 }, // A - Left Particulars
-      { width: 15 }, // B - Left Actuals
-      { width: 15 }, // C - Left Estimations
-      { width: 25 }, // D - Right Particulars
-      { width: 15 }, // E - Right Actuals
-      { width: 15 }, // F - Right Estimations
+      { width: 25 },
+      { width: 15 },
+      { width: 15 },
+      { width: 25 },
+      { width: 15 },
+      { width: 15 },
     ];
 
-    // Add title
     const titleRow = worksheet.addRow([
       'Trading and Profit & Loss Account for the year ending 31.03.2026',
     ]);
@@ -166,7 +154,7 @@ export class FinancialAnalysisTemplatesService {
       pattern: 'solid',
       fgColor: { argb: 'FFD9E1F2' },
     };
-
+    console.log('financialAnalysis', financialAnalysis);
     // Add header row
     const headerRow = worksheet.addRow([
       'Particulars',
@@ -192,46 +180,45 @@ export class FinancialAnalysisTemplatesService {
       };
     });
 
-    // Define the rows structure
     const leftItems = [
-      { label: 'To Opening Stock', key: 'openingStock', actualKey: 'openingStockActual' },
-      { label: 'To Purchase', key: 'purchase', actualKey: 'purchaseActual' },
-      { label: 'To Cost of Services', key: 'costOfServices', actualKey: 'costOfServicesActual' },
-      { label: 'To Wages', key: 'wages', actualKey: 'wagesActual' },
-      { label: 'To Hamali Charges', key: 'hamaliCharges', actualKey: 'hamaliChargesActual' },
-      { label: 'To Manufacturing Expenses', key: 'manufacturingExpenses', actualKey: 'manufacturingExpensesActual' },
-      { label: 'To Packing Charges', key: 'packingCharges', actualKey: 'packingChargesActual' },
+      { label: 'To Opening Stock', key: 'openingStockEstimations', actualKey: 'openingStockActuals' },
+      { label: 'To Purchase', key: 'purchaseEstimations', actualKey: 'purchaseActuals' },
+      { label: 'To Cost of Services', key: 'costOfServicesEstimations', actualKey: 'costOfServicesActuals' },
+      { label: 'To Wages', key: 'wagesEstimations', actualKey: 'wagesActuals' },
+      { label: 'To Hamali Charges', key: 'hamaliChargesEstimations', actualKey: 'hamaliChargesActuals' },
+      { label: 'To Manufacturing Expenses', key: 'manufacturingExpensesEstimations', actualKey: 'manufacturingExpensesActuals' },
+      { label: 'To Packing Charges', key: 'packingChargesEstimations', actualKey: 'packingChargesActuals' },
       { label: '', key: '' },
-      { label: 'To Gross Profit', key: 'grossProfit', actualKey: 'grossProfitActual', isBold: true },
+      { label: 'To Gross Profit', key: 'grossProfitDebitEstimations', actualKey: 'grossProfitDebitActuals', isBold: true },
       { label: '', key: '' },
-      { label: 'To Salaries', key: 'salaries', actualKey: 'salariesActual' },
-      { label: 'To Rent', key: 'rent', actualKey: 'rentActual' },
-      { label: 'To Electricity Charges', key: 'electricityCharges', actualKey: 'electricityChargesActual' },
-      { label: 'To Printing & Stationery', key: 'printingStationery', actualKey: 'printingStationeryActual' },
-      { label: 'To Telephone Charges', key: 'telephoneCharges', actualKey: 'telephoneChargesActual' },
-      { label: 'To Postage & Telegram', key: 'postageTelegram', actualKey: 'postageTelegramActual' },
-      { label: 'To Office Maintenance', key: 'officeMaintenance', actualKey: 'officeMaintenanceActual' },
-      { label: 'To Repairs & Maintenance', key: 'repairsMaintenance', actualKey: 'repairsMaintenanceActual' },
-      { label: 'To Sadar Expenses', key: 'sadarExpenses', actualKey: 'sadarExpensesActual' },
-      { label: 'To Audit Fee', key: 'auditFee', actualKey: 'auditFeeActual' },
-      { label: 'To Advertisement', key: 'advertisement', actualKey: 'advertisementActual' },
-      { label: 'To Bank Charges', key: 'bankCharges', actualKey: 'bankChargesActual' },
-      { label: 'To Insurance', key: 'insurance', actualKey: 'insuranceActual' },
-      { label: 'To Depreciation', key: 'depreciation', actualKey: 'depreciationActual' },
-      { label: 'To Interest on Loan', key: 'interestOnLoan', actualKey: 'interestOnLoanActual' },
+      { label: 'To Salaries', key: 'salariesEstimations', actualKey: 'salariesActuals' },
+      { label: 'To Rent', key: 'rentEstimations', actualKey: 'rentActuals' },
+      { label: 'To Electricity Charges', key: 'electricityChargesEstimations', actualKey: 'electricityChargesActuals' },
+      { label: 'To Printing & Stationery', key: 'printingStationeryEstimations', actualKey: 'printingStationeryActuals' },
+      { label: 'To Telephone Charges', key: 'telephoneChargesEstimations', actualKey: 'telephoneChargesActuals' },
+      { label: 'To Postage & Telegram', key: 'postageTelegramEstimations', actualKey: 'postageTelegramActuals' },
+      { label: 'To Office Maintenance', key: 'officeMaintenanceEstimations', actualKey: 'officeMaintenanceActuals' },
+      { label: 'To Repairs & Maintenance', key: 'repairsMaintenanceEstimations', actualKey: 'repairsMaintenanceActuals' },
+      { label: 'To Sadar Expenses', key: 'sadarExpensesEstimations', actualKey: 'sadarExpensesActuals' },
+      { label: 'To Audit Fee', key: 'auditFeeEstimations', actualKey: 'auditFeeActuals' },
+      { label: 'To Advertisement', key: 'advertisementEstimations', actualKey: 'advertisementActuals' },
+      { label: 'To Bank Charges', key: 'bankChargesEstimations', actualKey: 'bankChargesActuals' },
+      { label: 'To Insurance', key: 'insuranceEstimations', actualKey: 'insuranceActuals' },
+      { label: 'To Depreciation', key: 'depreciationEstimations', actualKey: 'depreciationActuals' },
+      { label: 'To Interest on Loan', key: 'interestOnLoanEstimations', actualKey: 'interestOnLoanActuals' },
       { label: '', key: '' },
-      { label: 'To Net Profit', key: 'netProfit', actualKey: 'netProfitActual', isBold: true },
+      { label: 'To Net Profit', key: 'netProfitEstimations', actualKey: 'netProfitActuals', isBold: true },
       { label: '', key: '' },
     ];
 
     const rightItems = [
-      { label: 'By Sales', key: 'sales', actualKey: 'salesActual' },
-      { label: 'By Services', key: 'services', actualKey: 'servicesActual' },
-      { label: 'By Closing Stock', key: 'closingStock', actualKey: 'closingStockActual' },
+      { label: 'By Sales', key: 'salesEstimations', actualKey: 'salesActuals' },
+      { label: 'By Services', key: 'servicesEstimations', actualKey: 'servicesActuals' },
+      { label: 'By Closing Stock', key: 'closingStockEstimations', actualKey: 'closingStockActuals' },
       ...Array(5).fill({ label: '', key: '' }),
-      { label: 'By Gross Profit', key: 'grossProfit', actualKey: 'grossProfitActual', isBold: true },
-      { label: 'By Rent Received', key: 'rentReceived', actualKey: 'rentReceivedActual' },
-      { label: 'By Commission Received', key: 'commissionReceived', actualKey: 'commissionReceivedActual' },
+      { label: 'By Gross Profit', key: 'grossProfitCreditEstimations', actualKey: 'grossProfitCreditActuals', isBold: true },
+      { label: 'By Rent Received', key: 'rentReceivedEstimations', actualKey: 'rentReceivedActuals' },
+      { label: 'By Commission Received', key: 'commissionReceivedEstimations', actualKey: 'commissionReceivedActuals' },
       ...Array(17).fill({ label: '', key: '' }),
     ];
 
@@ -288,9 +275,7 @@ export class FinancialAnalysisTemplatesService {
     return await this.finalizeWorkbook(workbook, loan.id);
   }
 
-  /**
-   * Service Business Format - Simple estimated P&L
-   */
+
   private async generateServiceBusinessFormat(
     ExcelJS: any,
     financialAnalysis: any,
@@ -298,7 +283,6 @@ export class FinancialAnalysisTemplatesService {
   ): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
-
     worksheet.columns = [
       { width: 40 },
       { width: 20 },
@@ -390,6 +374,7 @@ export class FinancialAnalysisTemplatesService {
     financialAnalysis: any,
     loan: any
   ): Promise<Buffer> {
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
