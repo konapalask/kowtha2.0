@@ -1,4 +1,4 @@
-import { RBLInterface } from "../interface/rbl.interface";
+// import { RBLInterface } from "../interface/rbl.interface";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 type KeyValueRow = {
@@ -183,7 +183,7 @@ const hasAnyField = (record: any, fields: string[]): boolean => {
   return fields.some((field) => hasMeaningfulValue(record[field]));
 };
 
-export const rblTemplate = (verificationData: RBLInterface, html_data: any) => {
+export const rblTemplate = (verificationData: any, html_data: any) => {
   const source = verificationData as any;
   const caseDetails = source.caseDetails ?? {};
   const meetingDetails = source.meetingDetails ?? caseDetails ?? {};

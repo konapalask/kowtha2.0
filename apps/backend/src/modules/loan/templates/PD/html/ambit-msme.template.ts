@@ -65,9 +65,10 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
 
 export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
     const general = verificationData.general || {};
-    const initiatedAddress = verificationData.general.initiatedAddress || {};
-    const visitedAddress = verificationData.general.visitedAddress || {};
-    const businessLicenseAddress = verificationData.general.businessLicenseAddress || {};
+    const addressDetails = verificationData.addressDetails || {};
+    const initiatedAddress = addressDetails.initiatedAddress || {};
+    const visitedAddress = addressDetails.visitedAddress || {};
+    const businessLicenseAddress = addressDetails.businessLicenseAddress || {};
     const residentialDetails = verificationData.residentialDetails || {};
     const propertyDetails = verificationData.propertyDetails || {};
     const generalInfo = verificationData.generalInfo || {};
@@ -83,7 +84,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
     const businessOrIncomeDetails = verificationData.businessOrIncomeDetails || {};
     const assetsDetails = verificationData.assetsDetails || {};
     const endUseOfLoan = verificationData.endUseOfLoan || {};
-    const loanDetails = verificationData.loanDetails || {};4
+    const loanDetails = verificationData.loanDetails || {};
     const strengthsAndWeaknesses = verificationData.strengthsAndWeaknesses || {};
     const documentsSeen = verificationData.documentsSeen || {};
     const bankingDetails = verificationData.bankingDetails || {};
@@ -96,18 +97,27 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <h1 style="margin:0 0 16px;color:#1f2a37;font-size:24px; text-align:center">Ambit Finvest Pvt. Ltd.</h1>
 
         <table class="section-table">
-        ${renderKeyValue("Name of the Applicant", general.nameOfApplicant)}
-        ${renderKeyValue("Name of the Co-Applicant", general.nameOfCoApplicant)}
-        ${renderKeyValue("Date of Report", general.dateOfReport)}
-        ${renderKeyValue("Ambit Application ID", general.applicationNo)}
-        ${renderKeyValue("Requested Loan Amount", general.loanAmount)}
-        ${renderKeyValue("Maximum Comfortable EMI", general.emi)}
-        ${renderKeyValue("Business Name", general.businessName)}
-        ${renderKeyValue("Name of the proprietor as per Business license", general.nameOfTheProprietor)}
-        ${renderKeyValue("Initiated Address", initiatedAddress.address+", "+initiatedAddress.latitude+", "+initiatedAddress.longitude)}
-        ${renderKeyValue("Visited Address", visitedAddress.address+", "+visitedAddress.latitude+", "+visitedAddress.longitude)}
-        ${renderKeyValue("Business License Address", businessLicenseAddress.address+", "+businessLicenseAddress.latitude+", "+businessLicenseAddress.longitude)}
-
+        ${renderKeyValue("Name of the Applicant", general?.nameOfApplicant)}
+        ${renderKeyValue("Name of the Co-Applicant", general?.nameOfCoApplicant)}
+        ${renderKeyValue("Date of Report", general?.dateOfReport)}
+        ${renderKeyValue("Ambit Application ID", general?.applicationNo)}
+        ${renderKeyValue("Requested Loan Amount", general?.loanAmount, formatCurrency)}
+        ${renderKeyValue("Maximum Comfortable EMI", general?.emi, formatCurrency)}
+        ${renderKeyValue("Business Name", general?.businessName)}
+        ${renderKeyValue("Name of the proprietor as per Business license", general?.nameOfTheProprietor)}
+        <tr>
+          <td style="${labelCellStyle}">Initiated Address</td>
+          <td style="${valueCellStyle}">${initiatedAddress?.address || ""}${initiatedAddress?.latitude !== undefined && initiatedAddress?.latitude !== null ? `<br>Latitude: ${initiatedAddress.latitude}` : ""}${initiatedAddress?.longitude !== undefined && initiatedAddress?.longitude !== null ? `<br>Longitude: ${initiatedAddress.longitude}` : ""}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Visited Address</td>
+          <td style="${valueCellStyle}">${visitedAddress?.address || ""}${visitedAddress?.latitude !== undefined && visitedAddress?.latitude !== null ? `<br>Latitude: ${visitedAddress.latitude}` : ""}${visitedAddress?.longitude !== undefined && visitedAddress?.longitude !== null ? `<br>Longitude: ${visitedAddress.longitude}` : ""}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Business License Address</td>
+          <td style="${valueCellStyle}">${businessLicenseAddress?.address || ""}${businessLicenseAddress?.latitude !== undefined && businessLicenseAddress?.latitude !== null ? `<br>Latitude: ${businessLicenseAddress.latitude}` : ""}${businessLicenseAddress?.longitude !== undefined && businessLicenseAddress?.longitude !== null ? `<br>Longitude: ${businessLicenseAddress.longitude}` : ""}</td>
+        </tr>
+        
         <tr>
           <td style="${labelCellStyle}">Residential Details</td>
           <td>
@@ -224,7 +234,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                 <td>
                     <table style="${tableStyle}">
                     <tr>
-                    <td style="${labelCellStyle}">Supplier Details:-</td>
+                    <td style="${labelCellStyle}" colspan="4">Supplier Details:-</td>
                     <tr>
                         <td style="${labelCellStyle}">Name of Suppliers</td>
                         <td style="${labelCellStyle}">Mob Number</td>
@@ -241,7 +251,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                     `).join("")}
                     
                     <tr>
-                    <td style="${labelCellStyle}">Customer Details:-</td>
+                    <td style="${labelCellStyle}" colspan="4">Customer Details:-</td>
                     <tr>
                         <td style="${labelCellStyle}">Name of Customers</td>
                         <td style="${labelCellStyle}">Mob Number</td>

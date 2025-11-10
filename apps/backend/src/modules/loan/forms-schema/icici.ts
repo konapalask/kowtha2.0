@@ -57,6 +57,10 @@ export const iciciSchema = {
             type: "string",
             title: "Location Address of PD",
           },
+          pdConductedBy: {
+            type: "string",
+            title: "PD Conducted by (Name)",
+          },
           personMetAtPd: {
             type: "string",
             title: "Person Met at PD",
@@ -69,7 +73,6 @@ export const iciciSchema = {
             type: "string",
             title: "Distance from HFC Branch",
           },
-          
         },
       },
       required: true,
@@ -134,40 +137,46 @@ export const iciciSchema = {
         type: "object",
         properties: {
           residenceDetails: {
-            currentResidenceOwnedRented: {
-              type: "string",
-              title: "Current Residence – Owned/Rented",
-              enum: ["Owned", "Rented"],
+            type: "object",
+            properties: {
+              currentResidenceOwnedRented: {
+                type: "string",
+                title: "Current Residence – Owned/Rented",
+                enum: ["Owned", "Rented"],
+              },
+              currentResidenceAddress: {
+                type: "string",
+                title: "Current Residence Address",
+              },
+              ifOwnedOwnerName: {
+                type: "string",
+                title: "If Current Residence is Owned – Owner Name",
+              },
+              ifRentedOwnerNameContactNo: {
+                type: "string",
+                title: "If Rented – Owner Name & Contact No",
+              },
+              ifRentedPermanentResidenceDetails: {
+                type: "string",
+                title: "If Rented – Permanent Residence Details",
+              },
+              noOfYearsInCurrentResidence: {
+                type: "integer",
+                title: "No. of Years in Current Residence",
+              },
+              previousResidenceDetails: {
+                type: "string",
+                title: "Previous Residence Details",
+              },
+              noOfYearsInSameCity: {
+                type: "integer",
+                title: "No. of Years in Same City",
+              },
+              distanceFromCurrentResidenceToBusiness: {
+                type: "string",
+                title: "Distance from Current Residence to Business Premises",
+              },
             },
-            ifOwnedOwnerName: {
-              type: "string",
-              title: "If Owned – Owner Name",
-            },
-            ifRentedOwnerNameContactNo: {
-              type: "string",
-              title: "If Rented – Owner Name & Contact No",
-            },
-            ifRentedPermanentResidenceDetails: {
-              type: "string",
-              title: "If Rented – Permanent Residence Details",
-            },
-            noOfYearsInCurrentResidence: {
-              type: "integer",
-              title: "No. of Years in Current Residence",
-            },
-            previousResidenceDetails: {
-              type: "string",
-              title: "Previous Residence Details",
-            },
-            noOfYearsInSameCity: {
-              type: "integer",
-              title: "No. of Years in Same City",
-            },
-            distanceFromCurrentResidenceToBusiness: {
-              type: "string",
-              title: "Distance from Current Residence to Business Premises",
-            },
-
           },
           
           familyDetailsWithDependents: {
@@ -233,7 +242,7 @@ export const iciciSchema = {
           documentsVerified: {
             type: "string",
             title:
-              "Documents Verified (Kutcha Bills/License/Other Documents) and Period",
+              "Documents Verified (Kutcha Bills/License/Other Documents) and Period of bills verified and amount",
           },
           machineryAssetsUsed: {
             type: "string",
@@ -245,7 +254,7 @@ export const iciciSchema = {
           },
           businessVintageAsPerDocuments: {
             type: "integer",
-            title: "Business Vintage as per Document Verified (Years)",
+            title: "Business Vintage as per Document Verified",
           },
           businessLocalityAndMarketCompetition: {
             type: "string",
@@ -271,7 +280,7 @@ export const iciciSchema = {
           },
           maximumEmiPayingCapability: {
             type: "number",
-            title: "Maximum EMI Paying Capability (Customer Confirmed)",
+            title: "Maximum EMI Paying Capability Customer Confirmed",
           },
         },
       },
@@ -299,7 +308,7 @@ export const iciciSchema = {
         properties: {
           applicantMonthlyTO: {
             type: "number",
-            title: "Applicant - Monthly TO / Gross Receipts",
+            title: "Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
           },
           applicantCostOfRawMaterial: {
             type: "number",
@@ -311,7 +320,7 @@ export const iciciSchema = {
           },
           applicantOtherIncome: {
             type: "number",
-            title: "Applicant - Any Other Regular Income (Other than Business)",
+            title: "Applicant - Any Other Regular Income Other than Business",
           },
           applicantGrossMonthlyIncome: {
             type: "number",
@@ -351,7 +360,7 @@ export const iciciSchema = {
           },
           applicantHouseholdExpensesOther: {
             type: "number",
-            title: "Applicant - Household Expenses: Others",
+            title: "Applicant - Household Expenses: Others household expenses",
           },
           applicantNetMonthlyIncome: {
             type: "number",
@@ -371,7 +380,7 @@ export const iciciSchema = {
           },
           coApplicantMonthlyTO: {
             type: "number",
-            title: "Co-Applicant - Monthly TO / Gross Receipts",
+            title: "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
           },
           coApplicantCostOfRawMaterial: {
             type: "number",
@@ -383,7 +392,7 @@ export const iciciSchema = {
           },
           coApplicantOtherIncome: {
             type: "number",
-            title: "Co-Applicant - Any Other Regular Income",
+            title: "Co-Applicant - Any Other Regular Income Other than Business",
           },
           coApplicantGrossMonthlyIncome: {
             type: "number",
@@ -423,7 +432,7 @@ export const iciciSchema = {
           },
           coApplicantHouseholdExpensesOther: {
             type: "number",
-            title: "Co-Applicant - Household Expenses: Others",
+            title: "Co-Applicant - Household Expenses: Others household expenses",
           },
           coApplicantNetMonthlyIncome: {
             type: "number",
@@ -431,7 +440,7 @@ export const iciciSchema = {
           },
           coApplicantSavingsInvestments: {
             type: "number",
-            title: "Co-Applicant - Less: Savings/Investments",
+            title: "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
           },
           coApplicantExistingEmi: {
             type: "number",
@@ -511,15 +520,20 @@ export const iciciSchema = {
         properties: {
           forTraders: {
             type: "string",
-            title: "For Traders (Weighing Machine Bill/UPI Scanner)",
+            title: "For Traders",
+          },
+          forTradersRemarks: {
+            type: "string",
+            title: "For Traders Remarks",
           },
           forManufacturers: {
             type: "string",
-            title: "For Manufacturers (Electricity Consumption)",
+            title: "For Manufacturers",
           },
-          remarks: {
+
+          forManufacturersRemarks: {
             type: "string",
-            title: "Remarks",
+            title: "For Manufacturers Remarks",
           },
         },
       },
@@ -539,6 +553,10 @@ export const iciciSchema = {
           itrAmountDeclared: {
             type: "string",
             title: "If Filing - Amount of Income Declared",
+          },
+          itrDetailsIfAny: {
+            type: "string",
+            title: "ITR Details If any",
           },
         },
       },
@@ -603,14 +621,32 @@ export const iciciSchema = {
                 loanAmount: {
                   type: "number",
                   title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 pos: {
                   type: "number",
                   title: "POS (Principal Outstanding)",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 emi: {
                   type: "number",
                   title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 securityOffered: {
                   type: "string",
@@ -626,14 +662,22 @@ export const iciciSchema = {
           totalLoanAmount: {
             type: "number",
             title: "Total Loan Amount",
-          },
-          totalPos: {
-            type: "number",
-            title: "Total POS",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           totalEmi: {
             type: "number",
             title: "Total EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -721,16 +765,6 @@ export const iciciSchema = {
             type: "string",
             title: "Proposed Property Distance from Business",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "sellerDetails",
-      label: "Seller Details (Purchase Case)",
-      schema: {
-        type: "object",
-        properties: {
           sellerDetails: {
             type: "string",
             title: "Seller Details",
@@ -780,6 +814,25 @@ export const iciciSchema = {
           summaryOfTransaction: {
             type: "string",
             title: "Summary of Transaction (Detailed Remarks)",
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "pdStatus",
+      label: "PD Status",
+      schema: {
+        type: "object",
+        properties: {
+          pdStatus: {
+            type: "string",
+            title: "Positive/Negative (If Negative then remarks)",
+            enum: ["Positive", "Negative", "Credit Refer"],
+          },
+          remarks: {
+            type: "string",
+            title: "Remarks",
           },
         },
       },

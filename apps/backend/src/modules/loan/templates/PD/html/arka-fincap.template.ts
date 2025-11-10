@@ -12,8 +12,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const aboutTheBusiness = verificationData.aboutTheBusiness || {};
   const regularCustomers = verificationData.regularCustomers || {};
   const regularSuppliers = verificationData.regularSuppliers || {};
-  const businessActivityObserved =
-    verificationData.businessActivityObserved || {};
+  const businessActivityObserved = verificationData.businessActivityObserved || {};
   const documentsObserved = verificationData.documentsObserved || {};
   const gstRegistration = verificationData.gstRegistration || {};
   const itrDetails = verificationData.itrDetails || {};

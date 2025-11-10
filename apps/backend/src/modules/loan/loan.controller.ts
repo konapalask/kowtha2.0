@@ -729,7 +729,6 @@ export class LoanController {
         Number(loanId),
         bankName
       );
-
       res.set({
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
