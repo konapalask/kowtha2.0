@@ -3,7 +3,6 @@ import { Drawer, Modal } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState, createContext, useContext, useRef } from "react";
 import { Typography, message, Tabs } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
 import {
   getVerificationData,
@@ -46,57 +45,12 @@ export default function LoanVerifyDetails() {
   const [editRequests, setEditRequests] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const currentDepartment = useDepartmentChange();
-  const [postponedNotificationVisible, setPostponedNotificationVisible] = useState(false);
-  const [postponedVerification, setPostponedVerification] = useState<any>(null);
-
-  // Helper function to get acknowledged postponements from localStorage
-  const getAcknowledgedPostponements = (): Set<string> => {
-    try {
-      const stored = localStorage.getItem("acknowledgedPostponements");
-      return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
-      return new Set();
-    }
-  };
-
-  // Helper function to save acknowledged postponements to localStorage
-  const saveAcknowledgedPostponement = (verificationId: number, postponedDate: string, postponedReason: string) => {
-    try {
-      const acknowledged = getAcknowledgedPostponements();
-      const postponementKey = `${verificationId}_${postponedDate || ''}_${postponedReason || ''}`;
-      acknowledged.add(postponementKey);
-      localStorage.setItem("acknowledgedPostponements", JSON.stringify(Array.from(acknowledged)));
-    } catch (error) {
-      console.error("Failed to save acknowledged postponement:", error);
-    }
-  };
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
       .then((res) => {
         const newData = res?.data;
         setVerificationData(newData);
-        
-        // Get already acknowledged postponements
-        const acknowledged = getAcknowledgedPostponements();
-        
-        // Check for postponed appointments that haven't been acknowledged
-        if (newData?.verifications?.length > 0) {
-          const postponedVerifications = newData.verifications.filter(
-            (v: any) => v.isPostponed === true && v.status === "Pending"
-          );
-          
-          // Find the first unacknowledged postponement
-          const unacknowledgedPostponement = postponedVerifications.find((v: any) => {
-            const postponementKey = `${v.id}_${v.postponedDate || ''}_${v.postponedReason || ''}`;
-            return !acknowledged.has(postponementKey);
-          });
-          
-          if (unacknowledgedPostponement) {
-            setPostponedVerification(unacknowledgedPostponement);
-            setPostponedNotificationVisible(true);
-          }
-        }
         
         // Set the first available tab as active
         if (newData?.verifications?.length > 0) {
@@ -419,72 +373,6 @@ export default function LoanVerifyDetails() {
           />
         )}
 
-        {/* Postponed Appointment Notification Modal */}
-        <Modal
-          open={postponedNotificationVisible}
-          onOk={() => {
-            // Mark this postponement as acknowledged
-            if (postponedVerification) {
-              saveAcknowledgedPostponement(
-                postponedVerification.id,
-                postponedVerification.postponedDate || '',
-                postponedVerification.postponedReason || ''
-              );
-            }
-            setPostponedNotificationVisible(false);
-          }}
-          onCancel={() => {
-            // Mark this postponement as acknowledged even if cancelled
-            if (postponedVerification) {
-              saveAcknowledgedPostponement(
-                postponedVerification.id,
-                postponedVerification.postponedDate || '',
-                postponedVerification.postponedReason || ''
-              );
-            }
-            setPostponedNotificationVisible(false);
-          }}
-          okText="OK"
-          cancelButtonProps={{ style: { display: "none" } }}
-          width={500}
-          title={
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ExclamationCircleOutlined style={{ color: "#faad14", fontSize: 20 }} />
-              <span>Appointment Postponed</span>
-            </div>
-          }
-        >
-          {postponedVerification && (
-            <div style={{ marginTop: 16 }}>
-              <p style={{ marginBottom: 12, fontSize: 14 }}>
-                <strong>Application Number:</strong> {verificationData?.applicationNumber}
-              </p>
-              <p style={{ marginBottom: 12, fontSize: 14 }}>
-                <strong>Verification Type:</strong>{" "}
-                {postponedVerification.type === "Business"
-                  ? "Business Verification"
-                  : postponedVerification.type === "Work"
-                    ? "Work Verification"
-                    : postponedVerification.type === "PermanentAddress"
-                      ? "Permanent Address Verification"
-                      : postponedVerification.type === "CurrentAddress"
-                        ? "Current Address Verification"
-                        : postponedVerification.type}
-              </p>
-              {postponedVerification.postponedDate && (
-                <p style={{ marginBottom: 12, fontSize: 14 }}>
-                  <strong>Postponed To:</strong>{" "}
-                  {dayjs(postponedVerification.postponedDate).format("DD-MM-YYYY")}
-                </p>
-              )}
-              {postponedVerification.postponedReason && (
-                <p style={{ marginBottom: 12, fontSize: 14 }}>
-                  <strong>Reason:</strong> {postponedVerification.postponedReason}
-                </p>
-              )}
-            </div>
-          )}
-        </Modal>
       </Drawer>
     </TabContext.Provider>
   );
