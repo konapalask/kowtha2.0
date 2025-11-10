@@ -1,11 +1,12 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Table, Card, Button, Space, Tag, Typography, Badge } from "antd";
+import { Table, Card, Button, Space, Tag, Typography, Badge, Input } from "antd";
 import {
   CheckCircleOutlined,
   CheckOutlined,
   CloseCircleOutlined,
   EyeOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 // import DashboardLayout from "@/components/layout/DashboardLayout";
 import dayjs from "dayjs";
@@ -47,6 +48,10 @@ export default function Verify() {
   const router = useRouter();
   const currentDepartment = useDepartmentChange();
 
+  // Search state
+  const [searchApplicationNumber, setSearchApplicationNumber] = useState<string>("");
+  const [searchApplicantName, setSearchApplicantName] = useState<string>("");
+
   // Pagination state
   const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,16 +75,31 @@ export default function Verify() {
   }, [currentDepartment]); // Add currentDepartment as dependency
 
   const filteredLoans =
-    loans?.filter((loan) =>
-      [
+    loans?.filter((loan) => {
+      // Filter by status
+      const statusMatch = [
         "Unassigned",
         "Assigned",
         "FVCompleted",
         "Approved",
         "Rejected",
         "Pending",
-      ].includes(loan?.status ?? "")
-    ) ?? [];
+      ].includes(loan?.status ?? "");
+
+      // Filter by application number
+      const applicationNumberMatch = !searchApplicationNumber || 
+        (loan?.applicationNumber?.toLowerCase() || "").includes(
+          searchApplicationNumber.toLowerCase()
+        );
+
+      // Filter by applicant name
+      const applicantNameMatch = !searchApplicantName || 
+        (loan?.applicantName?.toLowerCase() || "").includes(
+          searchApplicantName.toLowerCase()
+        );
+
+      return statusMatch && applicationNumberMatch && applicantNameMatch;
+    }) ?? [];
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -128,6 +148,21 @@ export default function Verify() {
       key: "applicationNumber",
       width: 150,
       render: (text) => text ?? "-",
+      filterDropdown: () => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Application Number"
+            prefix={<SearchOutlined />}
+            value={searchApplicationNumber}
+            onChange={(e) => setSearchApplicationNumber(e.target.value)}
+            allowClear
+            style={{ width: 200 }}
+          />
+        </div>
+      ),
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
     },
     {
       title: "Applicant Name",
@@ -135,6 +170,21 @@ export default function Verify() {
       key: "applicantName",
       width: 150,
       render: (text) => text ?? "-",
+      filterDropdown: () => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Applicant Name"
+            prefix={<SearchOutlined />}
+            value={searchApplicantName}
+            onChange={(e) => setSearchApplicantName(e.target.value)}
+            allowClear
+            style={{ width: 200 }}
+          />
+        </div>
+      ),
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
     },
     {
       title: "Investigations",
@@ -196,6 +246,15 @@ export default function Verify() {
           },
         }
       : false;
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+    router.replace({
+      pathname: router.pathname,
+      query: { ...router.query, page: 1 },
+    }, undefined, { shallow: true });
+  }, [searchApplicationNumber, searchApplicantName]);
 
   return (
     <DashboardLayout>
