@@ -325,24 +325,6 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
       `
           : ""
       }
-      
-      <div class="verification-summary">
-        <table>
-          <tr>
-            <td>Field Visit Time</td>
-            <td>${fieldVisitTimeDisplay}</td>
-          </tr>
-          <tr>
-            <td>PD Verified By (Officer)</td>
-            <td>${pdVerifiedByDisplay}</td>
-          </tr>
-          <tr>
-            <td>PD Verified Date</td>
-            <td>${pdVerifiedDateDisplay}</td>
-          </tr>
-        </table>
-      </div>
-      
       ${
         html_data?.imageDataUri
           ? `

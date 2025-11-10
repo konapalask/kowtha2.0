@@ -25,7 +25,11 @@ import incredSchema from "./incred";
 import axisAgriSchema from "./axis-agri";
 import adityaBirlaSchema from "./aditya-birla";
 import ambitSchema from "./ambit";
+import ambitMsmeSchema from "./ambit-msme";
 import axisFinanceSchema from "./axis-finance";
+import janaSalariedSchema from "./jana-salaried";
+import janaSenpAbove50lSchema from "./jana-senp-above-50l";
+import janaSenpBelow50lSchema from "./jana-senp-below-50l";
 
 export interface BankSchemaConfig {
   bankName: string;
@@ -42,22 +46,27 @@ export const bankSchemas: BankSchemaConfig[] = [
   {
     bankName: "Ambit",
     schema: ambitSchema,
-    templates: ["AMBIT-HL", "AMBIT-MSME"],
+    templates: ["AMBIT-HL"],
+  },
+  {
+    bankName: "Ambit-MSME",
+    schema: ambitMsmeSchema,
+    templates: ["AMBIT-MSME"],
   },
   {
     bankName: "Axis Finance",
     schema: axisFinanceSchema,
-    templates: ["AXIS FINANCE-HL", "AXIS FINANCE-UBL"],
+    templates: ["AXIS FINANCE-HL"],
   },
   {
     bankName: "Axis Finance UBL Above 10L",
     schema: axisFinanceUblAbove10lSchema,
-    templates: [],
+    templates: ["AXIS FINANCE-UBL"],
   },
   {
     bankName: "Axis Finance UBL Below 10L",
     schema: axisFinanceUblBelow10lSchema,
-    templates: [],
+    templates: ["AXIS FINANCE-UBL"],
   },
   {
     bankName: "Axis Bank",
@@ -72,7 +81,7 @@ export const bankSchemas: BankSchemaConfig[] = [
   {
     bankName: "Arka Fincap",
     schema: arkaFincapSchema,
-    templates: ["ARKA FINCAP"],
+    templates: ["ARKA FINCAP","CENTRUM","CENT BANK","CLIX CAPITAL-UBL","EASY HL","FED BANK (PD&LIP)","GODREJ-HL","GODREJ-UBL","INDUSIND","KOTAK","MUTHOOT-HL","MUTHOOT FINCORP (PD & LIP)","NIDO HOME FINANCE","NORTHERN ARC","NIPUN","PIRAMAL (PD, AIP, LIP)","PNB","SAMMAAN","SMFG-ML (MICRO & MASS)","SMFG-HL","TATA CAPITAL-FSL","TATA CAPITAL-HFL","TRUHOME (PD & LIP)","VERITAS"],
   },
   {
     bankName: "Chola",
@@ -92,12 +101,12 @@ export const bankSchemas: BankSchemaConfig[] = [
   {
     bankName: "HeroHousing-Salaried",
     schema: herohousingSalariedSchema,
-    templates: ["HERO HOUSING-SALARIED", "HERO HOUSING"],
+    templates: ["HERO HOUSING"],
   },
   {
     bankName: "HeroHousing-Self",
     schema: herohousingSelfSchema,
-    templates: ["HERO HOUSING-SELF EMPLOYED", "HERO HOUSING"],
+    templates: ["HERO HOUSING"],
   },
   {
     bankName: "ICICI",
@@ -122,12 +131,12 @@ export const bankSchemas: BankSchemaConfig[] = [
   {
     bankName: "India Shelter SENP",
     schema: indiaShelterSenpSchema,
-    templates: ["INDIA SHELTER SENP", "INDIA SHELTER"],
+    templates: ["INDIA SHELTER"],
   },
   {
     bankName: "India Shelter Salaried",
     schema: indiaShelterSalariedSchema,
-    templates: ["INDIA SHELTER SALARIED", "INDIA SHELTER"],
+    templates: ["INDIA SHELTER"],
   },
   {
     bankName: "INCRED",
@@ -135,14 +144,29 @@ export const bankSchemas: BankSchemaConfig[] = [
     templates: ["INCRED/KKR India Financial Services Limited"],
   },
   {
+    bankName: "Jana Salaried",
+    schema: janaSalariedSchema,
+    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+  },
+  {
+    bankName: "Jana Senp Above 50l",
+    schema: janaSenpAbove50lSchema,
+    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+  },
+  {
+    bankName: "Jana Senp Below 50l",
+    schema: janaSenpBelow50lSchema,
+    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+  },
+  {
     bankName: "Niwas Salaried",
     schema: niwasSalariedSchema,
-    templates: ["NIWAS SALARIED", "NIWAS"],
+    templates: ["NIWAS"],
   },
   {
     bankName: "Niwas Senp",
     schema: niwasSenpSchema,
-    templates: ["NIWAS SENP", "NIWAS"],
+    templates: ["NIWAS"],
   },
   {
     bankName: "RBL",

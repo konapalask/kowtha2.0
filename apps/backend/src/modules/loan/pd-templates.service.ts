@@ -379,7 +379,7 @@ export class PDTemplateService {
         : undefined;
 
     return {
-      bankName: bankName,
+      bankName: loan?.templateName || bankName,
       applicationNumber: applicationNumber,
       path: synopsis,
       financialAnalysis: financialAnalysis,
@@ -548,7 +548,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return smfgSmeTemplate(verification, html_data);
     }
@@ -583,7 +584,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return arkaFincapTemplate(verification, html_data);
     }
@@ -594,7 +596,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return heroHousingSelfTemplate(verification, html_data);
     }
@@ -605,7 +608,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return herohousingSalariedTemplate(verification, html_data);
     }
@@ -616,7 +620,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return indiaShelterSenpTemplate(verification, html_data);
     }
@@ -627,7 +632,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return indiaShelterSalariedTemplate(verification, html_data);
     }
@@ -638,7 +644,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return idfcPlTemplate(verification, html_data);
     }
@@ -649,7 +656,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return idfcHlMlTemplate(verification, html_data);
     }
@@ -660,7 +668,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return adityaBirlaTemplate(verification, html_data);
     }
@@ -671,7 +680,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return dcbTemplate(verification, html_data);
     }
@@ -682,7 +692,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return incredTemplate(verification, html_data);
     }
@@ -692,7 +703,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return ambitTemplate(verification, html_data);
     }
@@ -702,7 +714,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return ambitMsmeTemplate(verification, html_data);
     }
@@ -713,7 +726,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return janaSalariedTemplate(verification, html_data);
     }
@@ -724,7 +738,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return janaSenpAbove50lTemplate(verification, html_data);
     }
@@ -735,7 +750,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return janaSenpBelow50lTemplate(verification, html_data);
     }
@@ -753,7 +769,8 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
-        financialAnalysis
+        financialAnalysis,
+        loan
       );
       return genericPDTemplate(verification, schema, html_data);
     } catch (error) {
@@ -782,6 +799,7 @@ export class PDTemplateService {
           applicantAddress: true,
           loanType: true,
           bankName: true,
+          templateName: true,
           loanAmount: true,
           status: true,
           office: { select: { name: true, address: true } },
@@ -817,6 +835,7 @@ export class PDTemplateService {
       const verification = loan.verifications[0];
 
       const bankName = loan.bankName;
+      const templateName = loan.templateName;
 
       const verificationData: any = verification.verificationData;
 
@@ -853,9 +872,12 @@ export class PDTemplateService {
         schema
       );
 
+      // Use templateName for footer, fallback to bankName if templateName is not set
+      const footerName = templateName || bankName || "Kowtha";
+
       const pdfBuffer = await this.loanService.PDFBufferGeneration(
         htmlTemplate,
-        bankName
+        footerName
       );
 
       await this.loggingService.info(
