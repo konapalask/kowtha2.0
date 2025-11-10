@@ -117,7 +117,16 @@ export default function Loans() {
   const fetchLoans = async (page = 1, limit = 20) => {
     try {
       setLoading(true);
-      const result = await getLoansApi(page, limit, filters);
+      // Map FilterValue to LoanFilters format
+      const apiFilters: any = {
+        ...filters,
+        employeeCode: filters.fieldExecutiveEmployeeCode,
+        employeeName: filters.fieldExecutiveName,
+      };
+      // Remove the fieldExecutive prefixed keys as they're mapped to employeeCode/Name
+      delete apiFilters.fieldExecutiveEmployeeCode;
+      delete apiFilters.fieldExecutiveName;
+      const result = await getLoansApi(page, limit, apiFilters);
       const data = result.data.data;
       setLoans(data?.items ?? [null]);
       setPagination({
@@ -134,7 +143,10 @@ export default function Loans() {
   };
 
   useEffect(() => {
-    fetchLoans(pagination.current, pagination.pageSize);
+    // Only fetch loans if department is available
+    if (currentDepartment) {
+      fetchLoans(pagination.current, pagination.pageSize);
+    }
   }, [
     refresh,
     pagination.current,
@@ -795,6 +807,9 @@ export default function Loans() {
           <FilterOverlay
             filters={filters}
             onFilterChange={(newFilters: FilterValue) => setFilters(newFilters)}
+            currentDepartment={currentDepartment}
+            pdBankOptions={pdBankOptions}
+            templateOptions={templateOptions}
           />
           {!(
             getCurrentDepartmentRole() === "Verifier" ||

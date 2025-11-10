@@ -26,7 +26,7 @@ import { getDashboardMetrics } from "@/services/dashboard.services";
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import Attendance from "@/components/attendance/Attendance";
-import { useDepartmentChange } from "@/utils/utility";
+import { useDepartmentChange, getCurrentDepartmentRole } from "@/utils/utility";
 
 interface DashboardMetrics {
   totalLoans: number | null | undefined;
@@ -461,7 +461,9 @@ export default function Dashboard() {
           </Card>
         </Col>
       </Row> */}
-      <Attendance dateRange={dateRange} />
+      {getCurrentDepartmentRole() !== "VerificationExecutive" && (
+        <Attendance dateRange={dateRange} />
+      )}
     </DashboardLayout>
   );
 }
