@@ -1062,6 +1062,43 @@ export const BusinessVerificationDetails: React.FC<
       });
     };
 
+    // Helper function to convert flat array format (fieldId[index].property) to array format
+    const convertFlatArraysToNested = (formValues: any, sectionSchema: any): any => {
+      if (!formValues || typeof formValues !== "object") return formValues;
+      
+      const result: any = {};
+      const arrayFields: Record<string, any[]> = {};
+      
+      // First pass: identify array fields and collect their values
+      Object.keys(formValues).forEach((key) => {
+        // Check if this is an array field in flat format (e.g., "aboutBusiness[0].detail")
+        const arrayMatch = key.match(/^(.+?)\[(\d+)\]\.(.+)$/);
+        if (arrayMatch) {
+          const fieldId = arrayMatch[1];
+          const index = parseInt(arrayMatch[2]);
+          const propertyName = arrayMatch[3];
+          
+          if (!arrayFields[fieldId]) {
+            arrayFields[fieldId] = [];
+          }
+          if (!arrayFields[fieldId][index]) {
+            arrayFields[fieldId][index] = {};
+          }
+          arrayFields[fieldId][index][propertyName] = formValues[key];
+        } else {
+          // Regular field, keep as is
+          result[key] = formValues[key];
+        }
+      });
+      
+      // Second pass: add converted arrays to result
+      Object.keys(arrayFields).forEach((fieldId) => {
+        result[fieldId] = arrayFields[fieldId];
+      });
+      
+      return result;
+    };
+
     // Handle save for a specific section
     const handleSectionSave = async (sectionId: string) => {
       try {
@@ -1071,13 +1108,89 @@ export const BusinessVerificationDetails: React.FC<
 
         if (formInstance) {
           // Get all current form values from this section's form
-          sectionData = formInstance.getFieldsValue();
-        } else {
-          // Fallback to uncommitted changes if form instance not available
-          sectionData = sectionUncommittedChanges[sectionId];
+          const formValues = formInstance.getFieldsValue();
+          // Find the section schema to convert flat arrays
+          const sectionSchema = schema?.sections?.find((s: any) => s.id === sectionId);
+          // Convert flat array format to nested array format
+          sectionData = convertFlatArraysToNested(formValues, sectionSchema);
         }
+        
+        // Always merge with uncommitted changes (array fields store data here)
+        const uncommittedData = sectionUncommittedChanges[sectionId] || {};
+        sectionData = { ...uncommittedData, ...sectionData };
 
-        if (!sectionData || Object.keys(sectionData).length === 0) {
+        // Check if there are actual changes by comparing with initial data
+        // Get initial data from formData (original data) before any changes
+        const initialSectionData = formData?.[sectionId] || {};
+        const hasActualChanges = (() => {
+          // If sectionData is empty, no changes
+          if (!sectionData || Object.keys(sectionData).length === 0) {
+            return false;
+          }
+          
+          // Check if any key in sectionData differs from initialSectionData
+          const allKeys = Array.from(new Set([
+            ...Object.keys(sectionData),
+            ...Object.keys(initialSectionData),
+          ]));
+          
+          for (const key of allKeys) {
+            const currentValue = sectionData[key];
+            const initialValue = initialSectionData[key];
+            
+            // Deep comparison for arrays and objects
+            if (Array.isArray(currentValue) || Array.isArray(initialValue)) {
+              const currentArray = Array.isArray(currentValue) ? currentValue : [];
+              const initialArray = Array.isArray(initialValue) ? initialValue : [];
+              
+              // If current array has items but initial doesn't, that's a change
+              if (currentArray.length > 0 && initialArray.length === 0) {
+                // Check if current array has any non-empty items
+                const hasNonEmptyItems = currentArray.some((item: any) => {
+                  if (!item || typeof item !== "object") return false;
+                  return Object.values(item).some((val: any) => {
+                    if (val === null || val === undefined) return false;
+                    if (typeof val === "string" && val.trim() !== "") return true;
+                    return val !== "";
+                  });
+                });
+                if (hasNonEmptyItems) return true;
+              }
+              
+              // Check if arrays have different lengths
+              if (currentArray.length !== initialArray.length) {
+                return true;
+              }
+              
+              // Check if any item has non-empty values and arrays differ
+              const hasNonEmptyItems = currentArray.some((item: any) => {
+                if (!item || typeof item !== "object") return false;
+                return Object.values(item).some((val: any) => {
+                  if (val === null || val === undefined) return false;
+                  if (typeof val === "string" && val.trim() !== "") return true;
+                  return val !== "";
+                });
+              });
+              
+              if (hasNonEmptyItems && JSON.stringify(currentArray) !== JSON.stringify(initialArray)) {
+                return true;
+              }
+            } else if (typeof currentValue === "object" && currentValue !== null) {
+              if (JSON.stringify(currentValue) !== JSON.stringify(initialValue || {})) {
+                return true;
+              }
+            } else if (currentValue !== initialValue) {
+              // For primitive values, check if they're different and not empty
+              if (currentValue !== "" && currentValue !== null && currentValue !== undefined) {
+                return true;
+              }
+            }
+          }
+          
+          return false;
+        })();
+
+        if (!hasActualChanges) {
           message.warning("No changes to save");
           return;
         }
@@ -1308,9 +1421,18 @@ export const BusinessVerificationDetails: React.FC<
             return false;
           }
 
-          // Check arrays
+          // Check arrays - must have at least one item with at least one non-empty field
           if (Array.isArray(value)) {
-            return value.length > 0;
+            if (value.length === 0) return false;
+            // Check if any item in the array has at least one non-empty field
+            return value.some((item: any) => {
+              if (!item || typeof item !== "object") return false;
+              return Object.values(item).some((fieldValue: any) => {
+                if (fieldValue === null || fieldValue === undefined) return false;
+                if (typeof fieldValue === "string" && fieldValue.trim() === "") return false;
+                return true;
+              });
+            });
           }
 
           // Check objects (but not empty objects)
@@ -2352,9 +2474,12 @@ export const BusinessVerificationDetails: React.FC<
     // Array form change handler - update section-level uncommitted changes
     const handleArrayFormChange = useCallback(
       (changedValues: any, allValues: any) => {
+        // Get ALL form values to ensure we capture everything, not just changed fields
+        const allFormValues = form.getFieldsValue();
+        
         // Convert form values back to array format
         const arrayData: any[] = [];
-        Object.keys(allValues).forEach((key) => {
+        Object.keys(allFormValues).forEach((key) => {
           if (key.startsWith(`${field.id}[`)) {
             const match = key.match(
               new RegExp(`${field.id}\\[(\\d+)\\]\\.(.+)`)
@@ -2366,12 +2491,13 @@ export const BusinessVerificationDetails: React.FC<
               if (!arrayData[index]) {
                 arrayData[index] = {};
               }
-              arrayData[index][fieldKey] = allValues[key];
+              arrayData[index][fieldKey] = allFormValues[key];
             }
           }
         });
 
         // Update section-level uncommitted changes
+        // Always update, even if array is empty, to track all changes
         setSectionUncommittedChanges((prev: any) => ({
           ...prev,
           [sectionId]: {
@@ -2380,7 +2506,7 @@ export const BusinessVerificationDetails: React.FC<
           },
         }));
       },
-      [field.id, sectionId, setSectionUncommittedChanges]
+      [field.id, sectionId, setSectionUncommittedChanges, form, items.length]
     );
 
     // Sync form values and trigger change handler when items change
@@ -2397,7 +2523,10 @@ export const BusinessVerificationDetails: React.FC<
           });
         });
         form.setFieldsValue(formValues);
-        handleArrayFormChange({}, formValues);
+        // Use setTimeout to ensure form values are set before getting them
+        setTimeout(() => {
+          handleArrayFormChange({}, form.getFieldsValue());
+        }, 0);
         previousItemsLengthRef.current = items.length;
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
