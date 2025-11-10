@@ -18,7 +18,7 @@ const { RangePicker } = DatePicker;
 interface FilterOption {
   key: string;
   label: string;
-  type: "status" | "applicationNumber" | "assignee" | "dateRange";
+  type: "status" | "applicationNumber" | "assignee" | "dateRange" | "text" | "select" | "businessStatus";
 }
 
 const filterOptions: FilterOption[] = [
@@ -29,6 +29,23 @@ const filterOptions: FilterOption[] = [
     type: "applicationNumber",
   },
   { key: "assignee", label: "Assignee", type: "assignee" },
+  { key: "dateRange", label: "Date Range", type: "dateRange" },
+];
+
+// PD-specific filter options
+const pdFilterOptions: FilterOption[] = [
+  { key: "status", label: "Status", type: "status" },
+  {
+    key: "applicationNumber",
+    label: "Application Number",
+    type: "applicationNumber",
+  },
+  { key: "applicantName", label: "Applicant Name", type: "text" },
+  { key: "applicantMobile", label: "Mobile", type: "text" },
+  { key: "bankName", label: "Bank Name", type: "select" },
+  { key: "templateName", label: "Template Name", type: "select" },
+  { key: "assignee", label: "Assignee", type: "assignee" },
+  { key: "businessStatus", label: "Business Status", type: "businessStatus" },
   { key: "dateRange", label: "Date Range", type: "dateRange" },
 ];
 
@@ -48,17 +65,38 @@ export interface FilterValue {
   fieldExecutiveName?: string;
   startDate?: string;
   endDate?: string;
+  // PD-specific filters
+  applicantName?: string;
+  applicantMobile?: string;
+  bankName?: string;
+  templateName?: string;
+  businessStatus?: string;
 }
 
 interface FilterOverlayProps {
   filters: FilterValue;
   onFilterChange: (newFilters: FilterValue) => void;
+  currentDepartment?: string;
+  pdBankOptions?: Array<{ label: string; value: string }>;
+  templateOptions?: Array<{ label: string; value: string }>;
 }
+
+const businessStatusOptions = [
+  { label: "Pending", value: "Pending" },
+  { label: "In Progress", value: "In Progress" },
+  { label: "Completed", value: "Completed" },
+  { label: "Postponed", value: "Postponed" },
+];
 
 const FilterOverlay: React.FC<FilterOverlayProps> = ({
   filters,
   onFilterChange,
+  currentDepartment,
+  pdBankOptions = [],
+  templateOptions = [],
 }) => {
+  // Use PD-specific filters if department is PD
+  const availableFilterOptions = currentDepartment === "PD" ? pdFilterOptions : filterOptions;
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
     Object.keys(filters).filter(
       (key) => filters[key as keyof FilterValue] !== undefined
@@ -91,6 +129,42 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             fieldExecutiveEmployeeCode: undefined,
             fieldExecutiveName: undefined,
           });
+          break;
+        case "applicantName":
+          onFilterChange({
+            ...filters,
+            applicantName: undefined,
+          });
+          break;
+        case "applicantMobile":
+          onFilterChange({
+            ...filters,
+            applicantMobile: undefined,
+          });
+          break;
+        case "bankName":
+          onFilterChange({
+            ...filters,
+            bankName: undefined,
+          });
+          break;
+        case "templateName":
+          onFilterChange({
+            ...filters,
+            templateName: undefined,
+          });
+          break;
+        case "businessStatus":
+          onFilterChange({
+            ...filters,
+            businessStatus: undefined,
+          });
+          break;
+        case "dateRange":
+          const newFilters = { ...filters };
+          delete newFilters.startDate;
+          delete newFilters.endDate;
+          onFilterChange(newFilters);
           break;
       }
     }
@@ -151,23 +225,15 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
       case "status":
         return (
           <Space direction="vertical">
-            {/* {statusOptions.map(status => (
-              <Radio
-                key={status.value}
-                checked={filters.status === status.value}
-                onChange={(e) => handleFilterValueChange('status', e.target.checked ? status.value : undefined)}
-              >
-                {status.label}
-              </Radio>
-            ))} */}
             <Select
               style={{ minWidth: 200 }}
               options={statusOptions}
               value={filters.status}
-              onSelect={(value: string) =>
-                handleFilterValueChange("status", value)
+              onChange={(value: string) =>
+                handleFilterValueChange("status", value || undefined)
               }
               placeholder="Select Status"
+              allowClear
             />
           </Space>
         );
@@ -180,6 +246,83 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
               handleFilterValueChange("applicationNumber", e.target.value)
             }
             style={{ width: 200 }}
+          />
+        );
+      case "text":
+        if (option.key === "applicantName") {
+          return (
+            <Input
+              placeholder="Search applicant name"
+              value={filters.applicantName}
+              onChange={(e) =>
+                handleFilterValueChange("applicantName", e.target.value)
+              }
+              style={{ width: 200 }}
+            />
+          );
+        }
+        if (option.key === "applicantMobile") {
+          return (
+            <Input
+              placeholder="Search mobile number"
+              value={filters.applicantMobile}
+              onChange={(e) =>
+                handleFilterValueChange("applicantMobile", e.target.value)
+              }
+              style={{ width: 200 }}
+            />
+          );
+        }
+        return null;
+      case "select":
+        if (option.key === "bankName") {
+          return (
+            <Select
+              style={{ minWidth: 200 }}
+              options={pdBankOptions}
+              value={filters.bankName}
+              onChange={(value: string) =>
+                handleFilterValueChange("bankName", value || undefined)
+              }
+              placeholder="Select Bank Name"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              allowClear
+            />
+          );
+        }
+        if (option.key === "templateName") {
+          return (
+            <Select
+              style={{ minWidth: 200 }}
+              options={templateOptions}
+              value={filters.templateName}
+              onChange={(value: string) =>
+                handleFilterValueChange("templateName", value || undefined)
+              }
+              placeholder="Select Template Name"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              allowClear
+            />
+          );
+        }
+        return null;
+      case "businessStatus":
+        return (
+          <Select
+            style={{ minWidth: 200 }}
+            options={businessStatusOptions}
+            value={filters.businessStatus}
+            onChange={(value: string) =>
+              handleFilterValueChange("businessStatus", value || undefined)
+            }
+            placeholder="Select Business Status"
+            allowClear
           />
         );
       case "assignee":
@@ -216,7 +359,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
   const content = (
     <div style={{ width: 300 }}>
       <Space direction="vertical" style={{ width: "100%" }}>
-        {filterOptions.map((option) => (
+        {availableFilterOptions.map((option) => (
           <div
             key={option.key}
             style={{ display: "flex", flexDirection: "column", gap: 8 }}
@@ -298,6 +441,66 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onClose={() => handleClearFilter("fieldExecutiveName")}
         >
           Employee Name: {filters.fieldExecutiveName}
+        </Tag>
+      );
+    }
+
+    if (filters.applicantName) {
+      activeFilters.push(
+        <Tag
+          key="applicantName"
+          closable
+          onClose={() => handleClearFilter("applicantName")}
+        >
+          Applicant Name: {filters.applicantName}
+        </Tag>
+      );
+    }
+
+    if (filters.applicantMobile) {
+      activeFilters.push(
+        <Tag
+          key="applicantMobile"
+          closable
+          onClose={() => handleClearFilter("applicantMobile")}
+        >
+          Mobile: {filters.applicantMobile}
+        </Tag>
+      );
+    }
+
+    if (filters.bankName) {
+      activeFilters.push(
+        <Tag
+          key="bankName"
+          closable
+          onClose={() => handleClearFilter("bankName")}
+        >
+          Bank: {filters.bankName}
+        </Tag>
+      );
+    }
+
+    if (filters.templateName) {
+      activeFilters.push(
+        <Tag
+          key="templateName"
+          closable
+          onClose={() => handleClearFilter("templateName")}
+        >
+          Template: {filters.templateName}
+        </Tag>
+      );
+    }
+
+    if (filters.businessStatus) {
+      activeFilters.push(
+        <Tag
+          key="businessStatus"
+          closable
+          onClose={() => handleClearFilter("businessStatus")}
+        >
+          Business Status: {filters.businessStatus}
         </Tag>
       );
     }

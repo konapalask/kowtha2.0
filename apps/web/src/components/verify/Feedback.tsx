@@ -419,18 +419,18 @@ const Feedback: React.FC<FeedbackProps> = ({
             style={{
               minHeight: "300px",
               background:
-                disabled || (!!existingSynopsis && !isEditing)
+                disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)
                   ? "#f8f9fa"
                   : "#fff",
               borderRadius: 8,
               border:
-                disabled || (!!existingSynopsis && !isEditing)
+                disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)
                   ? "1px solid #e9ecef"
                   : "1px solid #d9d9d9",
             }}
           >
             <ReactQuill
-              readOnly={disabled || (!!existingSynopsis && !isEditing)}
+              readOnly={disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)}
               theme="snow"
               value={editorContent}
               onChange={handleEditorChange}
@@ -451,7 +451,7 @@ const Feedback: React.FC<FeedbackProps> = ({
             >
               <Row justify="end">
                 <Col>
-                  {role !== "VerificationExecutive" && (
+                  {role !== "VerificationExecutive" ? (
                     <Button
                       type="primary"
                       size="small"
@@ -486,6 +486,36 @@ const Feedback: React.FC<FeedbackProps> = ({
                         : isEditing
                           ? "Update Synopsis"
                           : "Submit Synopsis"}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => {
+                        const synopsisPlain = convertPointsToText(editorContent);
+                        if (!synopsisPlain || synopsisPlain === "") {
+                          message.warning("Please enter synopsis content before saving.");
+                          return;
+                        }
+                        // message.success("Synopsis saved locally. It will be submitted with verification.");
+                      }}
+                      disabled={
+                        disabled ||
+                        !editorContent ||
+                        editorContent.trim() === "<ul><li><br></li></ul>"
+                      }
+                      style={{
+                        background: "#1e40af",
+                        border: "none",
+                        borderRadius: "6px",
+                        height: "32px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        boxShadow: "0 2px 8px rgba(30, 64, 175, 0.3)",
+                        color: "#ffffff",
+                      }}
+                    >
+                      Save Synopsis
                     </Button>
                   )}
                 </Col>

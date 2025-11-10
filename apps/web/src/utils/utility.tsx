@@ -220,6 +220,8 @@ export const getFirstAvailableNavigationOption = (departmentRole: string): strin
   switch (departmentRole) {
     case "Verifier":
       return "/loans";
+    case "VerificationExecutive":
+      return "/loans";
     case "Admin":
       return "/dashboard";
     case "OperationsExecutive":
