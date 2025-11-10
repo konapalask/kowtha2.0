@@ -2509,26 +2509,43 @@ export const BusinessVerificationDetails: React.FC<
       [field.id, sectionId, setSectionUncommittedChanges, form, items.length]
     );
 
-    // Sync form values and trigger change handler when items change
+    // Sync form values and trigger change handler when items are ADDED (not removed)
+    // Removal is handled directly in removeItem function
     const previousItemsLengthRef = React.useRef(items.length);
     React.useEffect(() => {
-      if (previousItemsLengthRef.current !== items.length) {
-        // Items were added or removed, update form and trigger change handler
+      const wasAdded = items.length > previousItemsLengthRef.current;
+      
+      if (wasAdded) {
+        // Item was added - preserve existing values and add new ones
+        const currentFormValues = form.getFieldsValue();
         const formValues: any = {};
+        
         items.forEach((item: any, index: number) => {
-          Object.keys(item).forEach((key) => {
-            if (key !== "_id") {
-              formValues[`${field.id}[${index}].${key}`] = item[key];
-            }
-          });
+          if (field.arrayItemFields) {
+            field.arrayItemFields.forEach((itemField: any) => {
+              const key = `${field.id}[${index}].${itemField.id}`;
+              // Preserve form value if it exists, otherwise use item value
+              formValues[key] = currentFormValues[key] ?? item[itemField.id] ?? "";
+            });
+          } else {
+            Object.keys(item).forEach((key) => {
+              if (key !== "_id") {
+                const formKey = `${field.id}[${index}].${key}`;
+                formValues[formKey] = currentFormValues[formKey] ?? item[key] ?? "";
+              }
+            });
+          }
         });
+        
         form.setFieldsValue(formValues);
-        // Use setTimeout to ensure form values are set before getting them
+        
+        // Trigger change handler after a short delay
         setTimeout(() => {
           handleArrayFormChange({}, form.getFieldsValue());
         }, 0);
-        previousItemsLengthRef.current = items.length;
       }
+      
+      previousItemsLengthRef.current = items.length;
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [items.length]);
 
@@ -2548,7 +2565,84 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     const removeItem = (index: number) => {
-      setItems(items.filter((_: any, i: number) => i !== index));
+      // Don't allow removing if only one item exists
+      if (items.length <= 1) {
+        return;
+      }
+      
+      // Get current form values before removal
+      const currentFormValues = form.getFieldsValue();
+      
+      // Filter out the removed item
+      const newItems = items.filter((_: any, i: number) => i !== index);
+      
+      // Build new form values with reindexed items
+      // Items after the removed index need to shift down
+      const newFormValues: any = {};
+      
+      // Also build the array data directly for uncommitted changes
+      const arrayData: any[] = [];
+      
+      newItems.forEach((item: any, newIndex: number) => {
+        // Determine the old index (items after removed index were at oldIndex + 1)
+        const oldIndex = newIndex >= index ? newIndex + 1 : newIndex;
+        
+        // Build array item object - start with the item data as base
+        const arrayItem: any = { ...item };
+        delete arrayItem._id; // Remove _id from the data
+        
+        if (field.arrayItemFields) {
+          field.arrayItemFields.forEach((itemField: any) => {
+            const oldKey = `${field.id}[${oldIndex}].${itemField.id}`;
+            const newKey = `${field.id}[${newIndex}].${itemField.id}`;
+            // Priority: form value (if exists) > item value > empty string
+            // Preserve form value if it exists (even if empty, as user might have cleared it)
+            const formValue = currentFormValues[oldKey];
+            const value = formValue !== undefined 
+              ? formValue 
+              : (item[itemField.id] !== undefined ? item[itemField.id] : "");
+            newFormValues[newKey] = value;
+            arrayItem[itemField.id] = value;
+          });
+        } else {
+          Object.keys(item).forEach((key) => {
+            if (key !== "_id") {
+              const oldKey = `${field.id}[${oldIndex}].${key}`;
+              const newKey = `${field.id}[${newIndex}].${key}`;
+              const formValue = currentFormValues[oldKey];
+              const value = formValue !== undefined 
+                ? formValue 
+                : (item[key] !== undefined ? item[key] : "");
+              newFormValues[newKey] = value;
+              arrayItem[key] = value;
+            }
+          });
+        }
+        
+        arrayData.push(arrayItem);
+      });
+      
+      // Update items state first
+      setItems(newItems);
+      
+      // Update form with reindexed values
+      form.setFieldsValue(newFormValues);
+      
+      // Directly update uncommitted changes with the array data
+      // This ensures changes are tracked even if form hasn't fully updated
+      setSectionUncommittedChanges((prev: any) => ({
+        ...prev,
+        [sectionId]: {
+          ...prev[sectionId],
+          [field.id]: arrayData,
+        },
+      }));
+      
+      // Also trigger the change handler to ensure everything is in sync
+      setTimeout(() => {
+        const allFormValues = form.getFieldsValue();
+        handleArrayFormChange({}, allFormValues);
+      }, 100);
     };
 
     const renderArrayItemField = (
