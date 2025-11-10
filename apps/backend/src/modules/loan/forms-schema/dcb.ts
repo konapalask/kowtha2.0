@@ -165,11 +165,10 @@ export const dcbSchema = {
             type: "string",
             title: "Products",
           },
-
         },
       },
     },
-    
+
     {
       id: "businessSetup",
       label: "Business Set-up",
@@ -228,7 +227,7 @@ export const dcbSchema = {
             },
           },
           plantAndMachinery: {
-            type: "string", 
+            type: "string",
             title: "Plant and Machinery",
           },
           officeEquipment: {
@@ -259,28 +258,27 @@ export const dcbSchema = {
       id: "detailsOfAllLoansAsOn",
       label: "Details of All Loans as on",
       schema: {
-          type: "array",
-          items: {
-            type: "object",
-        properties: {
-          bank: {
-            type: "string",
-            title: "Bank",
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            bank: {
+              type: "string",
+              title: "Bank",
+            },
+            typeOfLoan: {
+              type: "string",
+              title: "Type of Loan",
+            },
+            loanAmount: {
+              type: "number",
+              title: "o/s Amount/",
+            },
+            emi: {
+              type: "number",
+              title: "EMI",
+            },
           },
-          typeOfLoan: {
-            type: "string",
-            title: "Type of Loan",
-          },
-          loanAmount: {
-            type: "number",
-            title: "o/s Amount/",
-          },
-          emi: {
-            type: "number",
-            title: "EMI",
-          },
-         
-        },
         },
       },
       required: true,
@@ -314,26 +312,27 @@ export const dcbSchema = {
     },
     {
       id: "detailsOfCustomers",
-      label: "Details of Customers / Clients: Not Applicable- Walk in Customers.",
+      label:
+        "Details of Customers / Clients: Not Applicable- Walk in Customers.",
       schema: {
         type: "array",
         items: {
           type: "object",
           properties: {
-          nameOfCustomers: {
-            type: "string",
-            title: "Name of Customers",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          contactNo: {
-            type: "number",
-            title: "Contact No",
+            nameOfCustomers: {
+              type: "string",
+              title: "Name of Customers",
+            },
+            location: {
+              type: "string",
+              title: "Location",
+            },
+            contactNo: {
+              type: "number",
+              title: "Contact No",
+            },
           },
         },
-      },
       },
       required: true,
     },
@@ -408,8 +407,13 @@ export const dcbSchema = {
       id: "insuranceCompanyName",
       label: "Insurance Company Name",
       schema: {
-        type: "string",
-        title: "Insurance Company Name",
+        type: "object",
+        properties: {
+          insuranceCompanyName: {
+            type: "string",
+            title: "Insurance Company Name",
+          },
+        },
       },
       required: true,
     },
@@ -421,27 +425,27 @@ export const dcbSchema = {
         items: {
           type: "object",
           properties: {
-          assetsCovered: {
-            type: "string",
-            title: "Assets Covered",
+            assetsCovered: {
+              type: "string",
+              title: "Assets Covered",
+            },
+            coverNoteNoPolicyNo: {
+              type: "string",
+              title: "Cover Note No. / Policy No",
+            },
+            validUpTo: {
+              type: "string",
+              title: "Valid up to",
+            },
+            sumAssured: {
+              type: "number",
+              title: "Sum Assured",
+            },
+            assuredCovered: {
+              type: "string",
+              title: "Assured Covered",
+            },
           },
-          coverNoteNoPolicyNo: {
-            type: "string",
-            title: "Cover Note No. / Policy No",
-          },
-          validUpTo: {
-            type: "string",
-            title: "Valid up to",
-          },
-          sumAssured: {
-            type: "number",
-            title: "Sum Assured",
-          },
-          assuredCovered: {
-            type: "string",
-            title: "Assured Covered",
-          },
-         },
         },
       },
       required: true,
@@ -458,7 +462,8 @@ export const dcbSchema = {
           },
           recentSummaryFinancials: {
             type: "string",
-            title: "Recent summary financials ( up to a period not more than two months old)",
+            title:
+              "Recent summary financials ( up to a period not more than two months old)",
           },
           advanceTaxesPaidCurrentAY: {
             type: "number",
@@ -578,7 +583,8 @@ export const dcbSchema = {
           },
           evidenceOfStatutoryDuesPfPtEic: {
             type: "string",
-            title: "Evidence of statutory dues being paid on time PF, PT and EIC (Employee related)",
+            title:
+              "Evidence of statutory dues being paid on time PF, PT and EIC (Employee related)",
           },
           municipalCorporationTaxesBstCstMvat: {
             type: "string",

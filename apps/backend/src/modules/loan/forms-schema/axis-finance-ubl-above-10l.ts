@@ -746,32 +746,32 @@ export const axisFinanceUblAbove10lSchema = {
       },
       required: true,
     },
-    {
-      id: "recommendations",
-      label: "Recommendations",
-      schema: {
-        type: "object",
-        properties: {
-          recommendations: {
-            type: "array",
-            title: "Recommendations",
-            items: {
-              type: "string",
-              title: "Recommendation",
-            },
-          },
-          disclaimer: {
-            type: "string",
-            title: "Disclaimer if any",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-        },
-      },
-      required: true,
-    },
+    // {
+    //   id: "recommendations",
+    //   label: "Recommendations",
+    //   schema: {
+    //     type: "object",
+    //     properties: {
+    //       recommendations: {
+    //         type: "array",
+    //         title: "Recommendations",
+    //         items: {
+    //           type: "string",
+    //           title: "Recommendation",
+    //         },
+    //       },
+    //       disclaimer: {
+    //         type: "string",
+    //         title: "Disclaimer if any",
+    //         ui: {
+    //           widget: "textarea",
+    //           rows: 3,
+    //         },
+    //       },
+    //     },
+    //   },
+    //   required: true,
+    // },
     financialsSchema,
   ],
 } as const;

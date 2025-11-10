@@ -43,7 +43,7 @@ const FIELD_KEY_MAPPINGS = {
   ],
   loanAmount: ['loanAmount'],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
-  bankName: ['repaymentBankName'],
+  bankName: ['repaymentBankName', 'nameOfFirm'],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -720,7 +720,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
         Toast.show({
           type: 'error',
-          text1: '🪄 Abracadabra - Frontend Validation Error!',
+          text1: 'Frontend Validation Error!',
           text2: validationErrors[0], // Show first error
           visibilityTime: 8000,
           position: 'top',
