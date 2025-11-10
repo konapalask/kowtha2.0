@@ -10,7 +10,6 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-  
           applicantName: {
             type: "string",
             title: "Name of the Applicant",
@@ -315,24 +314,24 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
-    { 
-      id: "coApplicantIncome", 
-      label: "Co-Applicant Income", 
+    {
+      id: "coApplicantIncome",
+      label: "Co-Applicant Income",
       schema: {
-      type: "object",
-      properties: {
-        coApplicantIncome: {
-          type: "number",
-          title: "Co-Applicant Income",
-          formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          coApplicantIncome: {
+            type: "number",
+            title: "Co-Applicant Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
-    },
     },
     {
       id: "otherIncome",
@@ -367,31 +366,33 @@ export const axisFinanceSchema = {
     {
       id: "otherLiabilitiesIncludingCcLimitsOwnCoApplicants",
       label: "OTHER LIABILITIES INCLUDING CC LIMITS (OWN/CO APPLICANTS)",
-      // this is an array of objects
-      items: {
-        type: "object",
-        properties: {
-          from: {
-            type: "string",
-            title: "From",
+      schema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            from: {
+              type: "string",
+              title: "From",
+            },
+            natureOfLoan: {
+              type: "string",
+              title: "Nature of Loan",
+              enum: ["Personal Loan", "Home Loan", "Car Loan", "Other"],
+            },
+            amount: {
+              type: "number",
+              title: "O/S Amount",
+            },
+            emi: {
+              type: "number",
+              title: "EMI",
+            },
+            willCloseContinue: {
+              type: "string",
+              title: "Will Close / Continue",
+            },
           },
-        },
-        natureOfLoan: {
-          type: "string",
-          title: "Nature of Loan",
-          enum: ["Personal Loan", "Home Loan", "Car Loan", "Other"],
-        },
-        amount: {
-          type: "number",
-          title: "O/S Amount",
-        },
-        emi: {
-          type: "number",
-          title: "EMI",
-        },
-        willCloseContinue: {
-          type: "string",
-          title: "Will Close / Continue",
         },
       },
       required: true,
@@ -431,11 +432,10 @@ export const axisFinanceSchema = {
             title: "Affordable EMI",
           },
         },
-      
       },
       required: true,
     },
-    
+
     {
       id: "endUseOfFunds",
       label: "End Use of Funds",
@@ -447,7 +447,7 @@ export const axisFinanceSchema = {
             title: "End Use of Funds",
           },
         },
-      },    
+      },
     },
     {
       id: "otherObservations",

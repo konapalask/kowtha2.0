@@ -62,8 +62,7 @@ export const herohousingSalariedSchema = {
         properties: {
           borrowerDetails: {
             type: "string",
-            title:
-              "Borrower details (qualification & professional journey)",
+            title: "Borrower details (qualification & professional journey)",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -153,8 +152,7 @@ export const herohousingSalariedSchema = {
           },
           localityFeedback: {
             type: "string",
-            title:
-              "Locality competitors, overall prospect, negative feedback",
+            title: "Locality competitors, overall prospect, negative feedback",
             ui: { widget: "textarea", rows: 2 },
           },
         },
@@ -292,57 +290,57 @@ export const herohousingSalariedSchema = {
         },
       },
     },
-    {
-      id: "essChecklist",
-      label: "Environmental & Social Safeguards (ESS)",
-      schema: {
-        type: "object",
-        properties: {
-          essResponses: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                question: { type: "string", title: "Question" },
-                response: {
-                  type: "string",
-                  title: "Response",
-                  enum: ["Yes", "No"],
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "observations",
-      label: "Observations & Conclusion",
-      schema: {
-        type: "object",
-        properties: {
-          detailedObservations: {
-            type: "string",
-            title: "Detailed observations (Positive & Negative)",
-            ui: { widget: "textarea", rows: 4 },
-          },
-          concerns: {
-            type: "string",
-            title: "Concerns",
-            ui: { widget: "textarea", rows: 2 },
-          },
-          pdStatus: {
-            type: "string",
-            title: "Status of PD",
-            enum: ["Positive", "Negative", "Referred"],
-          },
-          pdConductedBy: {
-            type: "string",
-            title: "PD conducted by (Name & designation)",
-          },
-        },
-      },
-    },
+    // {
+    //   id: "essChecklist",
+    //   label: "Environmental & Social Safeguards (ESS)",
+    //   schema: {
+    //     type: "object",
+    //     properties: {
+    //       essResponses: {
+    //         type: "array",
+    //         items: {
+    //           type: "object",
+    //           properties: {
+    //             question: { type: "string", title: "Question" },
+    //             response: {
+    //               type: "string",
+    //               title: "Response",
+    //               enum: ["Yes", "No"],
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
+    // {
+    //   id: "observations",
+    //   label: "Observations & Conclusion",
+    //   schema: {
+    //     type: "object",
+    //     properties: {
+    //       detailedObservations: {
+    //         type: "string",
+    //         title: "Detailed observations (Positive & Negative)",
+    //         ui: { widget: "textarea", rows: 4 },
+    //       },
+    //       concerns: {
+    //         type: "string",
+    //         title: "Concerns",
+    //         ui: { widget: "textarea", rows: 2 },
+    //       },
+    //       pdStatus: {
+    //         type: "string",
+    //         title: "Status of PD",
+    //         enum: ["Positive", "Negative", "Referred"],
+    //       },
+    //       pdConductedBy: {
+    //         type: "string",
+    //         title: "PD conducted by (Name & designation)",
+    //       },
+    //     },
+    //   },
+    // },
     financialsSchema,
   ],
 } as const;

@@ -155,7 +155,7 @@ export const ambitSchema = {
               widget: "textarea",
               rows: 3,
             },
-          }, 
+          },
         },
       },
     },
@@ -346,7 +346,7 @@ export const ambitSchema = {
         type: "object",
         properties: {
           nameAndContactNumberOfRegularCustomers: {
-            type: "array  ",
+            type: "array",
             title: "Name and Contact number of Regular Customers",
             items: {
               type: "object",
@@ -381,7 +381,7 @@ export const ambitSchema = {
           },
         },
       },
-    },  
+    },
     {
       id: "businessActivityAndStockLevelObserved",
       label: "Business Activity and Stock Level Observed",
@@ -397,35 +397,35 @@ export const ambitSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            expenditure: {
-              type: "number",
-              title: "Expenditure",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-              employees: {
-                type: "integer",
-                title: "Employees",
-              },
-              assets: {
-                type: "string",
-                title: "Assets",
-                ui: {
-                  widget: "textarea",
-                  rows: 3,
-                },
-              },
-              licMutualFunds: {
-                type: "string",
-                title: "LIC/Mutual funds",
-                ui: {
-                  widget: "textarea",
-                  rows: 3,
-                },
-              },
+          },
+          expenditure: {
+            type: "number",
+            title: "Expenditure",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          employees: {
+            type: "integer",
+            title: "Employees",
+          },
+          assets: {
+            type: "string",
+            title: "Assets",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          licMutualFunds: {
+            type: "string",
+            title: "LIC/Mutual funds",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
         },
@@ -441,7 +441,7 @@ export const ambitSchema = {
           type: "object",
           properties: {
             bankName: {
-              type: "string", 
+              type: "string",
               title: "Bank Name",
             },
             accountType: {
@@ -453,18 +453,18 @@ export const ambitSchema = {
               type: "number",
               title: "AVG BAL",
               formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            noOfYearsMaintained: {
+              type: "integer",
+              title: "No. of years maintained",
             },
           },
-          noOfYearsMaintained: {
-            type: "integer",
-            title: "No. of years maintained",
-          },
         },
-      },
       },
     },
     {
@@ -525,7 +525,6 @@ export const ambitSchema = {
       schema: {
         type: "object",
         properties: {
-
           endUse: {
             type: "string",
             title: "End Use",
