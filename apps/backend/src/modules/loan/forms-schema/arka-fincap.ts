@@ -395,7 +395,11 @@ export const arkaFincapSchema = {
         properties: {
           documentsObserved: {
             type: "string",
-            title: "Documents Observed",
+            // title: "Documents Observed",
+            ui: {
+              widget: "textarea",
+              rows: 5,
+            },
           },
         },
       },
@@ -541,7 +545,8 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Concerns",
             ui: {
-              widget: "richtext",
+              widget: "textarea",
+              rows: 5,
             },
           },
         },

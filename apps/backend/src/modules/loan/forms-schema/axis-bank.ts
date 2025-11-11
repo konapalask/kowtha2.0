@@ -23,7 +23,7 @@ export const axisBankSchema = {
           product: {
             type: "string",
             title: "Product (HL / LAP / Asha HL)",
-            enum: ["HL", "LAP", "Asha HL"],
+            enum: ["HL", "LAP", "Asha HL", "EL", "Others"],
           },
           loanAmount: {
             type: "number",
@@ -185,6 +185,20 @@ export const axisBankSchema = {
             title: "Is Resi Cum office?",
             enum: ["Yes", "No"],
           },
+          separateOfficeDetails: {
+            type: "string",
+            title: "Separate office details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+            show: {
+              isResiCumOffice: "Yes",
+            },
+            required: {
+              isResiCumOffice: "Yes",
+            },
+          },
         },
       },
       required: true,
@@ -274,6 +288,10 @@ export const axisBankSchema = {
                   type: "string",
                   title: "Location",
                 },
+                averageDebtorDays: {
+                  type: "integer",
+                  title: "Average debtor days",
+                },
               },
             },
           },
@@ -294,6 +312,10 @@ export const axisBankSchema = {
                 location: {
                   type: "string",
                   title: "Location",
+                },
+                averageCreditorDays: {
+                  type: "integer",
+                  title: "Average creditor days",
                 },
               },
             },
@@ -468,9 +490,8 @@ export const axisBankSchema = {
           },
           statusOfPD: {
             type: "string",
-            title:
-              "Status of PD (Positive, Negative, Credit Manager visit needed)",
-            enum: ["Positive", "Negative", "Credit Manager visit needed"],
+            title: "Status of PD (Positive, Negative, Credit Refer)",
+            enum: ["Positive", "Negative", "Credit Refer"],
           },
         },
       },

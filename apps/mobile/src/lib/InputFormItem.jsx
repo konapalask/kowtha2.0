@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Controller} from 'react-hook-form';
 import {TextInput, View, Text, StyleSheet} from 'react-native';
 import {
@@ -10,6 +10,7 @@ import {
 
 export function InputFormItem({data}) {
   const isDisabled = data?.disabled;
+  const [height, setHeight] = useState(44); // Default single-line height
 
   return (
     <View style={styles.container}>
@@ -96,11 +97,28 @@ export function InputFormItem({data}) {
             }
           };
 
+          const handleContentSizeChange = event => {
+            const newHeight = event.nativeEvent.contentSize.height;
+            const minHeight = 44; // Minimum single-line height
+            const maxHeight = 200; // Maximum height to prevent excessive growth
+            // Set height to content size, but clamp between min and max
+            setHeight(Math.max(minHeight, Math.min(newHeight + 10, maxHeight)));
+          };
+
+          // Only enable multiline/growing for text inputs (not numbers, integers, or passwords)
+          const isNumericOrPassword =
+            data?.formatter ||
+            data?.type === 'number' ||
+            data?.type === 'integer' ||
+            data?.type === 'password';
+          const shouldGrow = !isNumericOrPassword;
+
           return (
             <>
               <TextInput
                 style={[
                   styles.input,
+                  shouldGrow && {height: height},
                   isDisabled && styles.disabledInput,
                   error && styles.errorBorder,
                   {fontSize: data?.name ? 20 : 14},
@@ -115,7 +133,13 @@ export function InputFormItem({data}) {
                   }
                 }}
                 onBlur={handleBlur}
+                onContentSizeChange={
+                  shouldGrow ? handleContentSizeChange : undefined
+                }
                 editable={!isDisabled}
+                multiline={shouldGrow}
+                textAlignVertical={shouldGrow ? 'top' : 'center'}
+                scrollEnabled={false}
                 keyboardType={
                   data?.formatter ||
                   data?.type === 'number' ||

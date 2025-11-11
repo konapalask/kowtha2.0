@@ -528,7 +528,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         style={styles.addDocumentButton}
         onPress={() => setShowDocumentSelectionModal(true)}>
         <Icons name="plus" size={24} color={colors.text.inverse} />
-        <Text style={styles.addDocumentButtonText}>Add New Document</Text>
+        <Text style={styles.addDocumentButtonText}>Document/Photos</Text>
       </TouchableOpacity>
 
       {/* Document Selection Modal */}

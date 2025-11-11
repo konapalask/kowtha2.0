@@ -97,17 +97,17 @@ export const axisFinanceSchema = {
             type: "string",
             title: "Occupation",
           },
+          noOfDependants: {
+            type: "integer",
+            title: "No. of Dependants",
+          },
+          generalLifestylePersonality: {
+            type: "string",
+            title: "General Lifestyle/Personality",
+            enum: ["Good", "Average", "Bad"],
+          },
         },
         required: true,
-      },
-      noOfDependants: {
-        type: "integer",
-        title: "No. of Dependants",
-      },
-      generalLifestylePersonality: {
-        type: "string",
-        title: "General Lifestyle/Personality",
-        enum: ["Good", "Average", "Bad"],
       },
     },
     {
