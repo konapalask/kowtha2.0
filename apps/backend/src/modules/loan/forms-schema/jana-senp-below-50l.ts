@@ -28,7 +28,18 @@ export const janaSenpBelow50lSchema = {
                         name: { type: "string", title: "Name" },
                         relationWithApplicant: { type: "string", title: "Relation" },
                         age: { type: "number", title: "Age (Yrs)" },
-                        qualification: { type: "string", title: "Qualification" },
+                        qualification: { 
+                          type: "string", 
+                          title: "Qualification",
+                          enum: [
+                            "Below 10th",
+                            "10th pass",
+                            "12th pass",
+                            "Diploma/ITI certification",
+                            "Graduate",
+                            "PG/Professional Certification"
+                          ]
+                        },
                         earningMember: { type: "boolean", title: "Earning Member<br>(Yes/No)"},
                         approxIncome: { type: "number", title: "Approx. Income", formatter: {
                             useIndianFormat: true,
@@ -253,7 +264,7 @@ export const janaSenpBelow50lSchema = {
                 properties: {
                     didPdAgentMetTheEmployer: { type: "string", title: "Did the PD agent met the employer? (Y/N)", enum: ["Yes", "No"] },
                     employerName: { type: "string", title: "Name of the employer" },
-                    mobileNumberOfEmployer: { type: "string", title: "Mobile number of the employer" },
+                    mobileNumberOfEmployer: { type: "integer", title: "Mobile number of the employer" },
 
                     employerMaintainAttendanceSheet: { type: "string", title: "Does Employer maintain attendance sheet (Y/N)", enum: ["Yes", "No"] },
                     nameOfBorrowerReflectingInAttendance: { type: "string", title: "f yes, is the name of the borrower reflecting in the attendance register (Y/N)", enum: ["Yes", "No"] },
@@ -266,7 +277,7 @@ export const janaSenpBelow50lSchema = {
                             type: "object",
                             properties: {
                                 nameOfReferencePeople: { type: "string", title: "Name of the reference people for attendance confirmation in same firm" },
-                                mobileNumberReferencePeople: { type: "string", title: "Mobile number of the reference people for attendance confirmation in same firm" },
+                                mobileNumberReferencePeople: { type: "integer", title: "Mobile number of the reference people for attendance confirmation in same firm" },
                             },
                         },
                     },
@@ -278,7 +289,7 @@ export const janaSenpBelow50lSchema = {
                             type: "object",
                             properties: {
                                 nameOfNeighbour: { type: "string", title: "Name of the neighbour" },
-                                mobileNumberNeighbour: { type: "string", title: "Mobile number of the neighbour" },
+                                mobileNumberNeighbour: { type: "integer", title: "Mobile number of the neighbour" },
                                 feedbackOnApplicant: { type: "string", title: "Feedback on the applicant" },
                             },
                         },
@@ -297,7 +308,7 @@ export const janaSenpBelow50lSchema = {
                             type: "object",
                             properties: {
                                 nameOfReferencePeople: { type: "string", title: "Name of the reference people for salary confirmation in same firm" },
-                                mobileNumberReferencePeople: { type: "string", title: "Mobile number of the reference people for salary confirmation in same firm" },
+                                mobileNumberReferencePeople: { type: "integer", title: "Mobile number of the reference people for salary confirmation in same firm" },
                             },
                         },
                     },
@@ -553,7 +564,7 @@ export const janaSenpBelow50lSchema = {
                         title: "Document name of client, mobile number, type of contract & contract value in PD report",
                         properties: {
                             nameOfClient: { type: "string", title: "Document name of the client" },
-                            mobileNumberOfClient: { type: "string", title: "Mobile number of the client" },
+                            mobileNumberOfClient: { type: "integer", title: "Mobile number of the client" },
                             typeOfContract: { type: "string", title: "Type of contract" },
                             contractValue: { type: "number", title: "Contract Value in PD report" , formatter: {
                                 useIndianFormat: true,
@@ -572,7 +583,7 @@ export const janaSenpBelow50lSchema = {
                             type: "object",
                             properties: {
                                 nameOfClient: { type: "string", title: "Name of the client" },
-                                mobileNumberOfClient: { type: "string", title: "Mobile number of the client" },
+                                mobileNumberOfClient: { type: "integer", title: "Mobile number of the client" },
                                 feedbackOnClient: { type: "string", title: "Feedback on the client" , ui: { widget: "textarea", rows: 3 } },
                             },
                         },
@@ -584,7 +595,7 @@ export const janaSenpBelow50lSchema = {
                             type: "object",
                             properties: {
                                 nameOfNeighbour: { type: "string", title: "Name of the neighbour" },
-                                mobileNumberOfNeighbour: { type: "string", title: "Mobile number of the neighbour" },
+                                mobileNumberOfNeighbour: { type: "integer", title: "Mobile number of the neighbour" },
                                 feedbackDetails: { type: "string", title: "Feedback details" , ui: { widget: "textarea", rows: 3 } },
                             },
                         },

@@ -31,7 +31,7 @@ export const herohousingSelfTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD Visit date and time</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.pdVisitDate || html_data.dateOfReport || ""}, ${verificationData.basicDetails?.pdVisitTime || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.pdVisitDate || verificationData.generalInfo?.pdVisitDate || html_data?.pdVerifiedDate || html_data?.dateOfReport || ""}${verificationData.basicDetails?.pdVisitTime || verificationData.generalInfo?.pdVisitTime ? `, ${verificationData.basicDetails?.pdVisitTime || verificationData.generalInfo?.pdVisitTime}` : ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD address & location</strong></p></td>

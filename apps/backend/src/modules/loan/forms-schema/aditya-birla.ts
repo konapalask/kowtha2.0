@@ -81,7 +81,12 @@ export const adityaBirlaSchema = {
             title: "Contact number",
           },
           tin: { type: "string", title: "TIN" },
-          pan: { type: "string", title: "PAN" },
+          pan: { 
+            type: "string", 
+            title: "PAN",
+            pattern: "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
+            description: "PAN format: ABCDE1234F"
+          },
           certificateOfIncorporation: {
             type: "string",
             title: "Certificate of Incorporation",
@@ -228,7 +233,18 @@ export const adityaBirlaSchema = {
                 relation: { type: "string", title: "Relation" },
                 age: { type: "integer", title: "Age" },
                 businessName: { type: "string", title: "Business name" },
-                education: { type: "string", title: "Education" },
+                education: { 
+                  type: "string", 
+                  title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ]
+                },
               },
             },
           },

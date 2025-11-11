@@ -379,9 +379,8 @@ export const indiaShelterSalariedSchema = {
                   title: "Relationship",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
-                  pattern: "^[0-9]{10}$",
                 },
                 email: {
                   type: "string",
@@ -511,11 +510,18 @@ export const indiaShelterSalariedSchema = {
                 educationalQualification: {
                   type: "string",
                   title: "Educational Qualification (incl. Govt/Private)",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ],
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
-                  pattern: "^[0-9]{10}$",
                 },
                 stayingWithApplicant: {
                   type: "string",
@@ -635,9 +641,8 @@ export const indiaShelterSalariedSchema = {
                   title: "Name",
                 },
                 mobileNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Mobile Number",
-                  pattern: "^[0-9]{10}$",
                 },
                 knowingSince: {
                   type: "string",

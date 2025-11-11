@@ -567,7 +567,7 @@ export const indiaShelterSenpSchema = {
             minimum: 0,
           },
           mobileNumber: {
-            type: "string",
+            type: "integer",
             title: "Mobile No.",
             pattern: "^[0-9]{10}$",
           },
@@ -1146,6 +1146,14 @@ export const indiaShelterSenpSchema = {
                   type: "string",
                   title:
                     "Educational Qualification (Also mention if Govt. or Private institution)",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ],
                 },
                 contactNumber: {
                   type: "string",
@@ -1239,7 +1247,7 @@ export const indiaShelterSenpSchema = {
                   },
                 },
                 mobileNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Mobile No.",
                   pattern: "^[0-9]{10}$",
                 },

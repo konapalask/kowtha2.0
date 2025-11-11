@@ -336,6 +336,22 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
           : ""
       }
       
+      <div class="verification-summary" style="margin: 24px 0; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top; width: 220px; font-weight: bold; background: #f5f5f5;">Field Visit Time</td>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top;">${fieldVisitTimeDisplay}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top; width: 220px; font-weight: bold; background: #f5f5f5;">PD Verified By (Officer)</td>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top;">${pdVerifiedByDisplay}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top; width: 220px; font-weight: bold; background: #f5f5f5;">PD Verified Date</td>
+            <td style="padding: 6px 8px; border: 1px solid #ccc; vertical-align: top;">${pdVerifiedDateDisplay}</td>
+          </tr>
+        </table>
+      </div>
     
     </body>
     </html>

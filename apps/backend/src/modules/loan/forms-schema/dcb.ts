@@ -98,6 +98,14 @@ export const dcbSchema = {
             qualifications: {
               type: "string",
               title: "Qualifications",
+              enum: [
+                "Below 10th",
+                "10th pass",
+                "12th pass",
+                "Diploma/ITI certification",
+                "Graduate",
+                "PG/Professional Certification"
+              ],
             },
             responsibilities: {
               type: "string",

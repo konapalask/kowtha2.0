@@ -1124,8 +1124,13 @@ export const BusinessVerificationDetails: React.FC<
         // Get initial data from formData (original data) before any changes
         const initialSectionData = formData?.[sectionId] || {};
         const hasActualChanges = (() => {
-          // If sectionData is empty, no changes
-          if (!sectionData || Object.keys(sectionData).length === 0) {
+          // If we have form values from the form instance, there might be changes
+          // Don't immediately return false if sectionData is empty - check form values first
+          const formValues = formInstance?.getFieldsValue() || {};
+          const hasFormValues = formValues && Object.keys(formValues).length > 0;
+          
+          // If sectionData is empty but we have form values, that's a potential change
+          if ((!sectionData || Object.keys(sectionData).length === 0) && !hasFormValues) {
             return false;
           }
           
@@ -1180,10 +1185,17 @@ export const BusinessVerificationDetails: React.FC<
               if (JSON.stringify(currentValue) !== JSON.stringify(initialValue || {})) {
                 return true;
               }
-            } else if (currentValue !== initialValue) {
-              // For primitive values, check if they're different and not empty
-              if (currentValue !== "" && currentValue !== null && currentValue !== undefined) {
-                return true;
+            } else {
+              // For primitive values, normalize empty values for comparison
+              const normalizedCurrent = currentValue === "" || currentValue === null || currentValue === undefined ? null : currentValue;
+              const normalizedInitial = initialValue === "" || initialValue === null || initialValue === undefined ? null : initialValue;
+              
+              // If normalized values differ, it's a change
+              if (normalizedCurrent !== normalizedInitial) {
+                // Only consider it a change if the current value is not empty/null
+                if (normalizedCurrent !== null) {
+                  return true;
+                }
               }
             }
           }
@@ -1953,11 +1965,19 @@ export const BusinessVerificationDetails: React.FC<
 
         case "text":
         case "string":
+          // Check if schema explicitly defines format as "time"
+          const hasTimeFormat = field.format === "time" || field.schema?.format === "time";
+          
+          // More specific time field detection - only match if it's clearly a time field
           const isTimeField =
-            (field.label?.toLowerCase().includes("time") ||
-              fieldId.toLowerCase().includes("time")) &&
+            hasTimeFormat ||
+            ((field.label?.toLowerCase().match(/\b(time|appointment)\b/) ||
+              fieldId.toLowerCase().match(/\b(time|appointment)\b/)) &&
             !field.label?.toLowerCase().includes("date") &&
-            !fieldId.toLowerCase().includes("date");
+            !fieldId.toLowerCase().includes("date") &&
+            // Exclude fields that mention time in description but aren't time fields
+            !field.label?.toLowerCase().includes("observed at the time") &&
+            !field.label?.toLowerCase().includes("at the time of"));
 
           const isDateField =
             (field.label?.toLowerCase().includes("date") ||
