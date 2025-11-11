@@ -17,7 +17,7 @@ import {
   getFieldExecutivesApi,
   getVerifierLoansApi,
 } from "@/services/loans.services";
-import { useDepartmentChange } from "@/utils/utility";
+import { useDepartmentChange, getCurrentDepartmentRole } from "@/utils/utility";
 
 dayjs.extend(relativeTime);
 
@@ -77,6 +77,19 @@ export default function Verify() {
 
   const filteredLoans =
     loans?.filter((loan) => {
+      if (currentDepartment === "PD") {
+        const currentRole = getCurrentDepartmentRole();
+        if (currentRole === "Admin" || currentRole === "Verifier") {
+          // Find Business verification
+          const businessVerification = loan?.verifications?.find(
+            (v: any) => v.type === "Business"
+          );
+          if (!businessVerification || !businessVerification.initialSubmitted) {
+            return false;
+          }
+        }
+      }
+
       // Filter by status
       const statusMatch = [
         "Unassigned",
