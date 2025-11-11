@@ -18,11 +18,18 @@ export interface BankSchemaResponse {
  */
 export const getSchemaFromBackend = async (
   bankName: string,
-  department: string = "PD"
+  department: string = "PD",
+  templateName?: string
 ): Promise<BankSchemaResponse> => {
   try {
+   
+    const nameToUse = templateName || bankName;
+    
     const response = await axiosInstance.get(`/loans/get-bank-forms`, {
-      params: { bankName, department },
+      params: { 
+        bankName: nameToUse, 
+        department 
+      },
     });
 
     if (response.data.status === 200) {
@@ -31,7 +38,7 @@ export const getSchemaFromBackend = async (
 
     throw new Error(response.data.message || "Failed to fetch schema");
   } catch (error: any) {
-    console.error(`Error fetching schema for bank ${bankName}:`, error);
+    console.error(`Error fetching schema for ${templateName || bankName}:`, error);
     throw error;
   }
 };

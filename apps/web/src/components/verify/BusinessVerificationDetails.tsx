@@ -375,23 +375,29 @@ export const BusinessVerificationDetails: React.FC<
           verificationData?.loan?.bankName ||
           "";
 
-        // Skip if no bank name
-        if (!bankName) {
-          console.log("No bank name found, skipping dynamic schema");
+        const templateName =
+          completeVerificationData?.loan?.templateName ||
+          verificationData?.loan?.templateName ||
+          "";
+
+        // Skip if no bank name or template name
+        if (!bankName && !templateName) {
+          console.log("No bank name or template name found, skipping dynamic schema");
           setUseNewApproach(false);
           setFormLoading(false);
           return;
         }
 
-        console.log("Loading PD schema from backend for bank:", bankName);
+        console.log("Loading PD schema from backend for bank:", bankName, "templateName:", templateName);
 
         try {
-          // Fetch schema from backend (single source of truth)
+         
           const { getSchemaFromBackend, convertBackendSchemaToWebFormat } =
             await import("@/services/schema.service");
           const backendResponse = await getSchemaFromBackend(
             bankName,
-            currentDepartment || "PD"
+            currentDepartment || "PD",
+            templateName || undefined
           );
 
           // Convert backend schema to web format
