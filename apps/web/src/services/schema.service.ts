@@ -18,11 +18,18 @@ export interface BankSchemaResponse {
  */
 export const getSchemaFromBackend = async (
   bankName: string,
-  department: string = "PD"
+  department: string = "PD",
+  templateName?: string
 ): Promise<BankSchemaResponse> => {
   try {
+   
+    const nameToUse = templateName || bankName;
+    
     const response = await axiosInstance.get(`/loans/get-bank-forms`, {
-      params: { bankName, department },
+      params: { 
+        bankName: nameToUse, 
+        department 
+      },
     });
 
     if (response.data.status === 200) {
@@ -31,7 +38,7 @@ export const getSchemaFromBackend = async (
 
     throw new Error(response.data.message || "Failed to fetch schema");
   } catch (error: any) {
-    console.error(`Error fetching schema for bank ${bankName}:`, error);
+    console.error(`Error fetching schema for ${templateName || bankName}:`, error);
     throw error;
   }
 };
@@ -275,6 +282,52 @@ const convertSchemaPropertiesToFields = (
     // Handle date format
     if (property.format === "date") {
       field.type = "date";
+    }
+
+
+    // Explicitly ensure specific fields are text fields, not dates/time pickers
+    // These fields should never be date/time pickers even if they contain keywords in the name
+    const excludedFromDateTimeFields = [
+      // Visit-related fields (text, not dates)
+      "numberOfVisits",
+      "noOfVisit",
+      "numberOfVisitsMade",
+      "visitedBy",
+      "visitedAddress",
+      "visitedPremises",
+      "addressVisited",
+      "addressVisitedType",
+      // Person/Customer-related fields (text, not dates)
+      "personMet",
+      "personMetAtPd",
+      "personMetInPd",
+      "personMetName",
+      "personMetDesignation",
+      "personMetMobileNo",
+      "nameOfCustomer",
+      "nameOfCustomers",
+      "nameOfClient",
+      "relationshipWithCustomer",
+      "reasonIfCustomerNotAvailable",
+      "contactPersonName",
+      "contactPersonNumber",
+      "didPdAgentMetTheEmployer",
+      // Business activity fields
+      "businessActivityAndStockLevelObserved",
+      // Generic "name" fields when they refer to people (not dates)
+      // Note: We'll handle "name" fields more carefully - only exclude if title contains person/customer
+    ];
+    if (excludedFromDateTimeFields.includes(fieldId)) {
+      field.type = "text";
+    }
+    
+    // Also exclude "name" field if it's in a context where it refers to a person/customer
+    // (to avoid false positives, we check the title)
+    if (fieldId === "name" && property.title) {
+      const titleLower = property.title.toLowerCase();
+      if (titleLower.includes("person") || titleLower.includes("customer") || titleLower.includes("client")) {
+        field.type = "text";
+      }
     }
 
     fields.push(field);
