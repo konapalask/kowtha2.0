@@ -228,9 +228,24 @@ export const BusinessVerificationDetails: React.FC<
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
-  const [editorContent, setEditorContent] = useState(
-    completeVerificationData?.path || "<ul><li><br></li></ul>"
-  );
+  const [editorContent, setEditorContent] = useState(() => {
+    const synopsis = completeVerificationData?.synopsis;
+    if (synopsis) {
+      const isHtmlList = /<\s*ul[^>]*>/i.test(synopsis);
+      return isHtmlList ? synopsis : "<ul><li><br></li></ul>";
+    }
+    return "<ul><li><br></li></ul>";
+  });
+
+  useEffect(() => {
+    if (completeVerificationData?.synopsis) {
+      const synopsis = completeVerificationData.synopsis;
+      // If it's already HTML (contains <ul>), use it directly
+      const isHtmlList = /<\s*ul[^>]*>/i.test(synopsis);
+      const contentToSet = isHtmlList ? synopsis : synopsis;
+      setEditorContent(contentToSet);
+    }
+  }, [completeVerificationData?.synopsis]);
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [verdict, setVerdict] = useState(
@@ -248,6 +263,9 @@ export const BusinessVerificationDetails: React.FC<
   const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
+  
+  // Local storage for VerificationExecutive saved sections (no API call)
+  const [savedSectionData, setSavedSectionData] = useState<Record<string, any>>({});
 
   // Dynamic edit modal states
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -739,6 +757,9 @@ export const BusinessVerificationDetails: React.FC<
 
       allSectionsData = mergeDeep(allSectionsData, changedData || {});
 
+      // Merge saved section data (from Save buttons - no API calls)
+      allSectionsData = mergeDeep(allSectionsData, savedSectionData || {});
+
       Object.keys(formInstancesRef.current).forEach((sectionId) => {
         const instance = formInstancesRef.current[sectionId];
         if (instance) {
@@ -989,6 +1010,8 @@ export const BusinessVerificationDetails: React.FC<
     setChangedData,
     setLocalEditLogsUpdated,
     parentFormInstancesRef,
+    savedSectionData,
+    setSavedSectionData,
   }: {
     schema: any;
     formData: any;
@@ -1002,6 +1025,8 @@ export const BusinessVerificationDetails: React.FC<
     setChangedData: (data: any) => void;
     setLocalEditLogsUpdated: (fn: (prev: number) => number) => void;
     parentFormInstancesRef: React.MutableRefObject<{ [key: string]: any }>;
+    savedSectionData: Record<string, any>;
+    setSavedSectionData: (data: any) => void;
   }) => {
     const [sectionUncommittedChanges, setSectionUncommittedChanges] =
       useState<any>({});
@@ -1196,7 +1221,39 @@ export const BusinessVerificationDetails: React.FC<
           return;
         }
 
-        // Save to backend API
+        // For VerificationExecutive: Save locally only (no API call)
+        if (role === "VerificationExecutive") {
+          // Save to local state
+          setSavedSectionData((prev: any) => ({
+            ...prev,
+            [sectionId]: sectionData,
+          }));
+
+          // Update the form instance directly so saved values are immediately visible
+          const formInstance = formInstancesRef.current[sectionId];
+          if (formInstance) {
+            // Merge saved data with current form values to preserve any new changes
+            const currentFormValues = formInstance.getFieldsValue();
+            formInstance.setFieldsValue({
+              ...currentFormValues,
+              ...sectionData,
+            });
+          }
+
+          // Clear section uncommitted changes
+          setSectionUncommittedChanges((prev: any) => {
+            const newChanges = { ...prev };
+            delete newChanges[sectionId];
+            return newChanges;
+          });
+
+          message.success(
+            `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved locally`
+          );
+          return;
+        }
+
+        // For Verifier/Admin: Save to backend API
         try {
           // Get all initial data (contains all sections from backend)
           const rawApiData =
@@ -1455,7 +1512,7 @@ export const BusinessVerificationDetails: React.FC<
           }}
         >
           <span>{sectionLabel}</span>
-          {(role === "Verifier" || role === "Admin") &&
+          {((role === "Verifier" || role === "Admin" || role === "VerificationExecutive")) &&
             activeSections.includes(sectionId) &&
             hasChanges && (
               <Button
@@ -1513,12 +1570,14 @@ export const BusinessVerificationDetails: React.FC<
                       formData[section.id] ||
                       {}),
                     ...(changedData[section.id] || {}), // Include committed changes
+                    ...(savedSectionData[section.id] || {}), // Include saved section data (for VerificationExecutive)
                     ...(sectionUncommittedChanges[section.id] || {}),
                   }),
                   [
                     dynamicFormData[section.id],
                     formData[section.id],
                     changedData[section.id], // Add changedData to dependencies
+                    savedSectionData[section.id], // Add savedSectionData to dependencies
                     sectionUncommittedChanges[section.id],
                   ]
                 )}
@@ -3021,6 +3080,8 @@ export const BusinessVerificationDetails: React.FC<
               setChangedData={setChangedData}
               setLocalEditLogsUpdated={setLocalEditLogsUpdated}
               parentFormInstancesRef={formInstancesRef}
+              savedSectionData={savedSectionData}
+              setSavedSectionData={setSavedSectionData}
             />
 
             {/* Photo Capture Section - Grouped by Document Type */}
@@ -3156,7 +3217,12 @@ export const BusinessVerificationDetails: React.FC<
               editorContent={editorContent}
               setEditorContent={setEditorContent}
               handleSave={handleSave}
-              verificationData={verificationData}
+              verificationData={{
+                ...verificationData,
+                // Pass completeVerificationData so Feedback can access synopsis from API
+                verifications: completeVerificationData ? [completeVerificationData] : verificationData?.verifications,
+                synopsis: completeVerificationData?.synopsis || verificationData?.synopsis,
+              }}
               currentDepartment={currentDepartment}
               hasEditRequest={hasEditRequest}
             />
