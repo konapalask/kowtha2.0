@@ -2012,13 +2012,18 @@ export const BusinessVerificationDetails: React.FC<
 
         case "text":
         case "string":
+          // Explicitly exclude numberOfVisits and visitedBy from date detection
+          const isExcludedFromDate = fieldId === "numberOfVisits" || fieldId === "visitedBy";
+          
           const isTimeField =
+            !isExcludedFromDate &&
             (field.label?.toLowerCase().includes("time") ||
               fieldId.toLowerCase().includes("time")) &&
             !field.label?.toLowerCase().includes("date") &&
             !fieldId.toLowerCase().includes("date");
 
           const isDateField =
+            !isExcludedFromDate &&
             (field.label?.toLowerCase().includes("date") ||
               field.label?.toLowerCase().includes("visit") ||
               fieldId.toLowerCase().includes("date")) &&

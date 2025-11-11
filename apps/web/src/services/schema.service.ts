@@ -277,6 +277,10 @@ const convertSchemaPropertiesToFields = (
       field.type = "date";
     }
 
+    if (fieldId === "numberOfVisits" || fieldId === "visitedBy") {
+      field.type = "text";
+    }
+
     fields.push(field);
   });
 
