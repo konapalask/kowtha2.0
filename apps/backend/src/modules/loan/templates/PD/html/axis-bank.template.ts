@@ -216,7 +216,8 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Is Resi Cum office? If yes details of separate office set up.</strong></p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.businessPlaceVintage?.isResiCumOffice || ""}</p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.businessPlaceVintage?.isResiCumOffice || ""}${verificationData.businessPlaceVintage?.isResiCumOffice === "No" ? "" : `: ${verificationData.businessPlaceVintage?.separateOfficeDetails || ""}`}</p></td>
+                
             </tr>
         </table>
         
@@ -256,7 +257,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Top 3 clients (customers) (Average debtor days).</strong></p></td>
                 <td colspan="7" style="border:1px solid #ccc;padding:8px">
                     <ul>
-                        ${(verificationData.otherDetailsObserved?.top3ClientsCustomers || verificationData.businessDetails?.regularCustomers || []).map((customer: any) => `<li>${customer.nameOfRegularCustomers || customer.name || ""} - ${customer.contactNumberOfRegularCustomers || customer.contactDetails || ""} days</li>`).join("") || ""}
+                        ${(verificationData.otherDetailsObserved?.top3ClientsCustomers || verificationData.businessDetails?.regularCustomers || []).map((customer: any) => `<li>${customer.nameOfRegularCustomers || customer.name || ""} - ${customer.contactNumberOfRegularCustomers || customer.contactDetails || ""} - ${customer.averageDebtorDays || ""} days</li>`).join("") || ""}
                     </ul>
                 </td>
             </tr>
@@ -264,7 +265,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Top 3 clients (suppliers) (Average creditor days).</strong></p></td>
                 <td colspan="7" style="border:1px solid #ccc;padding:8px">
                     <ul>
-                        ${(verificationData.otherDetailsObserved?.top3ClientsSuppliers || verificationData.businessDetails?.regularSuppliers || []).map((supplier: any) => `<li>${supplier.nameOfRegularSuppliers || supplier.name || ""} - ${supplier.contactNumberOfRegularSuppliers || supplier.contactDetails || ""} days</li>`).join("") || ""}
+                        ${(verificationData.otherDetailsObserved?.top3ClientsSuppliers || verificationData.businessDetails?.regularSuppliers || []).map((supplier: any) => `<li>${supplier.nameOfRegularSuppliers || supplier.name || ""} - ${supplier.contactNumberOfRegularSuppliers || supplier.contactDetails || ""} - ${supplier.averageCreditorDays || ""} days</li>`).join("") || ""}
                     </ul>
                 </td>
             </tr>

@@ -211,8 +211,13 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   };
 
   const handleDocumentTypeSelection = (documentType: string) => {
-    setSelectedDocumentType(documentType);
-    setCustomDocumentType('');
+    // Toggle selection - if already selected, deselect it
+    if (selectedDocumentType === documentType) {
+      setSelectedDocumentType('');
+    } else {
+      setSelectedDocumentType(documentType);
+      setCustomDocumentType('');
+    }
   };
 
   const handleCustomDocumentType = () => {
@@ -369,14 +374,6 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     const form = documentForms.find(f => f.id === formId);
     if (!form) return;
 
-    if (form.uploadedItems.length >= 2) {
-      Alert.alert(
-        'Upload Limit Reached',
-        `You can only upload up to 2 photos for ${form.documentType}. Please remove some photos before adding more.`,
-      );
-      return;
-    }
-
     try {
       const result = await launchCamera({
         mediaType: 'photo',
@@ -474,21 +471,11 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     const form = documentForms.find(f => f.id === formId);
     if (!form) return;
 
-    const remainingSlots = 2 - form.uploadedItems.length;
-
-    if (remainingSlots <= 0) {
-      Alert.alert(
-        'Upload Limit Reached',
-        `You can only upload up to 2 photos for ${form.documentType}. Please remove some photos before adding more.`,
-      );
-      return;
-    }
-
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
-        selectionLimit: remainingSlots,
+        selectionLimit: 0, // 0 means unlimited selection
       });
 
       if (result.assets && result.assets.length > 0) {
@@ -541,7 +528,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         style={styles.addDocumentButton}
         onPress={() => setShowDocumentSelectionModal(true)}>
         <Icons name="plus" size={24} color={colors.text.inverse} />
-        <Text style={styles.addDocumentButtonText}>Add New Document</Text>
+        <Text style={styles.addDocumentButtonText}>Document/Photos</Text>
       </TouchableOpacity>
 
       {/* Document Selection Modal */}
@@ -559,27 +546,40 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Document Type</Text>
 
-            <ScrollView style={styles.documentTypeList}>
-              {DOCUMENT_TYPES.map((type, index) => (
+            {/* Selected Tag at Top */}
+            {selectedDocumentType && (
+              <View style={styles.selectedTagContainer}>
                 <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.documentTypeItem,
-                    selectedDocumentType === type &&
-                      styles.documentTypeItemSelected,
-                  ]}
-                  onPress={() => handleDocumentTypeSelection(type)}>
-                  <Text
-                    style={[
-                      styles.documentTypeItemText,
-                      selectedDocumentType === type &&
-                        styles.documentTypeItemTextSelected,
-                    ]}>
-                    {type}
+                  style={styles.selectedTag}
+                  onPress={() =>
+                    handleDocumentTypeSelection(selectedDocumentType)
+                  }>
+                  <Text style={styles.selectedTagText}>
+                    {selectedDocumentType}
                   </Text>
+                  <Icons
+                    name="closecircle"
+                    size={18}
+                    color={colors.text.inverse}
+                    style={styles.selectedTagIcon}
+                  />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
+              </View>
+            )}
+
+            {/* Tag Pool */}
+            <View style={styles.tagPoolContainer}>
+              {DOCUMENT_TYPES.filter(type => type !== selectedDocumentType).map(
+                (type, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.tag}
+                    onPress={() => handleDocumentTypeSelection(type)}>
+                    <Text style={styles.tagText}>{type}</Text>
+                  </TouchableOpacity>
+                ),
+              )}
+            </View>
 
             <Text style={styles.customTypeLabel}>
               Or add custom document type:
@@ -668,13 +668,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[
-                styles.button,
-                (isUploading || form.uploadedItems.length >= 2) &&
-                  styles.buttonDisabled,
-              ]}
+              style={[styles.button, isUploading && styles.buttonDisabled]}
               onPress={() => handleCaptureForForm(form.id)}
-              disabled={isUploading || form.uploadedItems.length >= 2}>
+              disabled={isUploading}>
               <Text style={styles.buttonText}>
                 {isUploading ? (
                   'Uploading...'
@@ -688,13 +684,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.button,
-                (isUploading || form.uploadedItems.length >= 2) &&
-                  styles.buttonDisabled,
-              ]}
+              style={[styles.button, isUploading && styles.buttonDisabled]}
               onPress={() => handleGalleryForForm(form.id)}
-              disabled={isUploading || form.uploadedItems.length >= 2}>
+              disabled={isUploading}>
               <Text style={styles.buttonText}>
                 {isUploading ? (
                   'Uploading...'
@@ -711,7 +703,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
           {form.uploadedItems.length > 0 && (
             <Text style={styles.uploadCount}>
-              {form.uploadedItems.length}/2 documents uploaded
+              {form.uploadedItems.length} document
+              {form.uploadedItems.length !== 1 ? 's' : ''} uploaded
             </Text>
           )}
 
@@ -977,28 +970,46 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  documentTypeList: {
-    maxHeight: 200,
+  selectedTagContainer: {
     marginBottom: 16,
   },
-  documentTypeItem: {
+  selectedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  selectedTagText: {
+    fontSize: 14,
+    color: colors.text.inverse,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  selectedTagIcon: {
+    marginLeft: 4,
+  },
+  tagPoolContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  tag: {
     backgroundColor: colors.input.background,
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  documentTypeItemSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  documentTypeItemText: {
-    fontSize: 16,
+  tagText: {
+    fontSize: 14,
     color: colors.text.primary,
-  },
-  documentTypeItemTextSelected: {
-    color: colors.text.inverse,
+    fontWeight: '500',
   },
   customTypeLabel: {
     fontSize: 14,

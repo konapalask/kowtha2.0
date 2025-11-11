@@ -36,6 +36,7 @@ export const ambitSchema = {
           pdinitiatedAddress: {
             type: "string",
             title: "PD initiated address",
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
@@ -211,6 +212,14 @@ export const ambitSchema = {
                 education: {
                   type: "string",
                   title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "Under graduate",
+                    "Graduate",
+                    "Post Graduate",
+                    "Professional",
+                  ],
                 },
                 occupation: {
                   type: "string",
@@ -274,10 +283,7 @@ export const ambitSchema = {
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
+            readOnly: true,
           },
           asPerAuditedIndividualItrS: {
             type: "string",
@@ -436,32 +442,38 @@ export const ambitSchema = {
       id: "bankingDetails",
       label: "Banking Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankName: {
-              type: "string",
-              title: "Bank Name",
-            },
-            accountType: {
-              type: "string",
-              title: "Account Type",
-              enum: ["Savings A/C", "Current A/C", "CC/OD A/C"],
-            },
-            averageBalance: {
-              type: "number",
-              title: "AVG BAL",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          bankingDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
+                  enum: ["Savings A/C", "Current A/C", "CC/OD A/C"],
+                },
+                averageBalance: {
+                  type: "number",
+                  title: "AVG BAL",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                noOfYearsMaintained: {
+                  type: "integer",
+                  title: "No. of years maintained",
+                },
               },
-            },
-            noOfYearsMaintained: {
-              type: "integer",
-              title: "No. of years maintained",
             },
           },
         },
