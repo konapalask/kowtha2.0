@@ -77,7 +77,7 @@ export const adityaBirlaSchema = {
           },
           management: { type: "string", title: "Management" },
           contactNumber: {
-            type: "string",
+            type: "integer",
             title: "Contact number",
           },
           tin: { type: "string", title: "TIN" },
@@ -226,7 +226,7 @@ export const adityaBirlaSchema = {
               properties: {
                 name: { type: "string", title: "Name" },
                 relation: { type: "string", title: "Relation" },
-                age: { type: "string", title: "Age" },
+                age: { type: "integer", title: "Age" },
                 businessName: { type: "string", title: "Business name" },
                 education: { type: "string", title: "Education" },
               },

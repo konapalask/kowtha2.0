@@ -36,6 +36,7 @@ export const ambitSchema = {
           pdinitiatedAddress: {
             type: "string",
             title: "PD initiated address",
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
@@ -155,7 +156,7 @@ export const ambitSchema = {
               widget: "textarea",
               rows: 3,
             },
-          }, 
+          },
         },
       },
     },
@@ -211,6 +212,14 @@ export const ambitSchema = {
                 education: {
                   type: "string",
                   title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "Under graduate",
+                    "Graduate",
+                    "Post Graduate",
+                    "Professional",
+                  ],
                 },
                 occupation: {
                   type: "string",
@@ -274,10 +283,7 @@ export const ambitSchema = {
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
+            readOnly: true,
           },
           asPerAuditedIndividualItrS: {
             type: "string",
@@ -346,7 +352,7 @@ export const ambitSchema = {
         type: "object",
         properties: {
           nameAndContactNumberOfRegularCustomers: {
-            type: "array  ",
+            type: "array",
             title: "Name and Contact number of Regular Customers",
             items: {
               type: "object",
@@ -381,7 +387,7 @@ export const ambitSchema = {
           },
         },
       },
-    },  
+    },
     {
       id: "businessActivityAndStockLevelObserved",
       label: "Business Activity and Stock Level Observed",
@@ -397,35 +403,35 @@ export const ambitSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
-            expenditure: {
-              type: "number",
-              title: "Expenditure",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-              employees: {
-                type: "integer",
-                title: "Employees",
-              },
-              assets: {
-                type: "string",
-                title: "Assets",
-                ui: {
-                  widget: "textarea",
-                  rows: 3,
-                },
-              },
-              licMutualFunds: {
-                type: "string",
-                title: "LIC/Mutual funds",
-                ui: {
-                  widget: "textarea",
-                  rows: 3,
-                },
-              },
+          },
+          expenditure: {
+            type: "number",
+            title: "Expenditure",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          employees: {
+            type: "integer",
+            title: "Employees",
+          },
+          assets: {
+            type: "string",
+            title: "Assets",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          licMutualFunds: {
+            type: "string",
+            title: "LIC/Mutual funds",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
         },
@@ -436,35 +442,41 @@ export const ambitSchema = {
       id: "bankingDetails",
       label: "Banking Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            bankName: {
-              type: "string", 
-              title: "Bank Name",
+        type: "object",
+        properties: {
+          bankingDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "Account Type",
+                  enum: ["Savings A/C", "Current A/C", "CC/OD A/C"],
+                },
+                averageBalance: {
+                  type: "number",
+                  title: "AVG BAL",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                noOfYearsMaintained: {
+                  type: "integer",
+                  title: "No. of years maintained",
+                },
+              },
             },
-            accountType: {
-              type: "string",
-              title: "Account Type",
-              enum: ["Savings A/C", "Current A/C", "CC/OD A/C"],
-            },
-            averageBalance: {
-              type: "number",
-              title: "AVG BAL",
-              formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          noOfYearsMaintained: {
-            type: "integer",
-            title: "No. of years maintained",
           },
         },
-      },
       },
     },
     {
@@ -525,7 +537,6 @@ export const ambitSchema = {
       schema: {
         type: "object",
         properties: {
-
           endUse: {
             type: "string",
             title: "End Use",

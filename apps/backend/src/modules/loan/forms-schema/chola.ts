@@ -263,10 +263,6 @@ export const cholaSchema = {
                   type: "string",
                   title: "A/c Type",
                 },
-                relationshipSince: {
-                  type: "string",
-                  title: "Relationship since",
-                },
                 averageBalance: {
                   type: "string",
                   title: "Avg balance",

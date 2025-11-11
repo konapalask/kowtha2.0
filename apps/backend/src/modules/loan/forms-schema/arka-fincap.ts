@@ -169,12 +169,12 @@ export const arkaFincapSchema = {
                 },
                 accountType: {
                   type: "string",
-                  title: "ACCOUNT TYPE",
+                  title: "Account Type",
                   enum: ["Savings", "Current", "CC/OD"],
                 },
                 avgBalance: {
                   type: "number",
-                  title: "AVG BAL",
+                  title: "Average Balance",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
@@ -184,7 +184,7 @@ export const arkaFincapSchema = {
                 },
                 noOfYearsMaintained: {
                   type: "number",
-                  title: "NO: OF YEARS MAINTAINED",
+                  title: "No. of Years Maintained",
                 },
               },
             },
@@ -395,7 +395,11 @@ export const arkaFincapSchema = {
         properties: {
           documentsObserved: {
             type: "string",
-            title: "Documents Observed",
+            // title: "Documents Observed",
+            ui: {
+              widget: "textarea",
+              rows: 5,
+            },
           },
         },
       },
@@ -541,7 +545,8 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Concerns",
             ui: {
-              widget: "richtext",
+              widget: "textarea",
+              rows: 5,
             },
           },
         },

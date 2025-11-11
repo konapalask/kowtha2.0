@@ -10,7 +10,6 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-  
           applicantName: {
             type: "string",
             title: "Name of the Applicant",
@@ -59,57 +58,66 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          name: {
-            type: "string",
-            title: "Name",
+          familyMembers: {
+            type: "array",
+            title: "Family Members",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relation: {
+                  type: "string",
+                  title: "Relation",
+                  enum: [
+                    "Self",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Other",
+                  ],
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                education: {
+                  type: "string",
+                  title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "Under graduate",
+                    "Graduate",
+                    "Post Graduate",
+                    "Professional",
+                  ],
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+              },
+            },
           },
-          relation: {
-            type: "string",
-            title: "Relation",
-            enum: [
-              "Self",
-              "Spouse",
-              "Son",
-              "Daughter",
-              "Father",
-              "Mother",
-              "Brother",
-              "Sister",
-              "Other",
-            ],
-          },
-          age: {
+          noOfDependants: {
             type: "integer",
-            title: "Age",
+            title: "No. of Dependants",
           },
-          education: {
+          generalLifestylePersonality: {
             type: "string",
-            title: "Education",
-            enum: [
-              "Below 10th",
-              "10th pass",
-              "Under graduate",
-              "Graduate",
-              "Post Graduate",
-              "Professional",
-            ],
-          },
-          occupation: {
-            type: "string",
-            title: "Occupation",
+            title: "General Lifestyle/Personality",
+            enum: ["Good", "Average", "Bad"],
           },
         },
-        required: true,
       },
-      noOfDependants: {
-        type: "integer",
-        title: "No. of Dependants",
-      },
-      generalLifestylePersonality: {
-        type: "string",
-        title: "General Lifestyle/Personality",
-        enum: ["Good", "Average", "Bad"],
-      },
+      required: true,
     },
     {
       id: "placeOfResidenceOffice",
@@ -315,24 +323,24 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
-    { 
-      id: "coApplicantIncome", 
-      label: "Co-Applicant Income", 
+    {
+      id: "coApplicantIncome",
+      label: "Co-Applicant Income",
       schema: {
-      type: "object",
-      properties: {
-        coApplicantIncome: {
-          type: "number",
-          title: "Co-Applicant Income",
-          formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          coApplicantIncome: {
+            type: "number",
+            title: "Co-Applicant Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
-    },
     },
     {
       id: "otherIncome",
@@ -367,31 +375,39 @@ export const axisFinanceSchema = {
     {
       id: "otherLiabilitiesIncludingCcLimitsOwnCoApplicants",
       label: "OTHER LIABILITIES INCLUDING CC LIMITS (OWN/CO APPLICANTS)",
-      // this is an array of objects
-      items: {
+      schema: {
         type: "object",
         properties: {
-          from: {
-            type: "string",
-            title: "From",
+          otherLiabilities: {
+            type: "array",
+            title: "Other Liabilities",
+            items: {
+              type: "object",
+              properties: {
+                from: {
+                  type: "string",
+                  title: "From",
+                },
+                natureOfLoan: {
+                  type: "string",
+                  title: "Nature of Loan",
+                  enum: ["Personal Loan", "Home Loan", "Car Loan", "Other"],
+                },
+                amount: {
+                  type: "number",
+                  title: "O/S Amount",
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                },
+                willCloseContinue: {
+                  type: "string",
+                  title: "Will Close / Continue",
+                },
+              },
+            },
           },
-        },
-        natureOfLoan: {
-          type: "string",
-          title: "Nature of Loan",
-          enum: ["Personal Loan", "Home Loan", "Car Loan", "Other"],
-        },
-        amount: {
-          type: "number",
-          title: "O/S Amount",
-        },
-        emi: {
-          type: "number",
-          title: "EMI",
-        },
-        willCloseContinue: {
-          type: "string",
-          title: "Will Close / Continue",
         },
       },
       required: true,
@@ -431,11 +447,10 @@ export const axisFinanceSchema = {
             title: "Affordable EMI",
           },
         },
-      
       },
       required: true,
     },
-    
+
     {
       id: "endUseOfFunds",
       label: "End Use of Funds",
@@ -447,7 +462,7 @@ export const axisFinanceSchema = {
             title: "End Use of Funds",
           },
         },
-      },    
+      },
     },
     {
       id: "otherObservations",
@@ -470,17 +485,23 @@ export const axisFinanceSchema = {
       id: "tradeReferences",
       label: "Trade References",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            nameOfThePerson: {
-              type: "string",
-              title: "Name of the Person",
-            },
-            contactDetails: {
-              type: "string",
-              title: "Telephone No. / Address for Communication",
+        type: "object",
+        properties: {
+          tradeReferences: {
+            type: "array",
+            title: "Trade References",
+            items: {
+              type: "object",
+              properties: {
+                nameOfThePerson: {
+                  type: "string",
+                  title: "Name of the Person",
+                },
+                contactDetails: {
+                  type: "string",
+                  title: "Telephone No. / Address for Communication",
+                },
+              },
             },
           },
         },
