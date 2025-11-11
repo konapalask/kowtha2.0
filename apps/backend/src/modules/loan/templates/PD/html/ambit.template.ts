@@ -75,8 +75,9 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
   const otherObservations = verificationData.otherObservations || {};
   const purposeOfLoan = verificationData.purposeOfLoan || {};
   const documentsObserved = verificationData.documentsObserved || {};
-  const regularCustomer = verificationData.regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularCustomers || {};
-  const regularSupplier = verificationData.regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularSuppliers || {};
+  const regularCustomersAndSuppliersActivity = verificationData.regularCustomersAndSuppliersActivity || {};
+  const regularCustomer = regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularCustomers || {};
+  const regularSupplier = regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularSuppliers || {};
   const businessActivityAndStockLevelObserved = verificationData.businessActivityAndStockLevelObserved || {};
   const bankingDetails = verificationData.bankingDetails || {};
   const existingLoans = verificationData.existingLoans || {};
