@@ -1,10 +1,16 @@
 import * as fs from "fs";
 import * as path from "path";
-import { formSchema } from "./forms-schema";
+import { 
+  formSchema, 
+  getFooterNameFromTemplate, 
+  getBankNameFromTemplate,
+  getSchemaFromTemplate,
+  bankSchemas 
+} from "./forms-schema";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
 import * as templates from "./templates/PD/html/_index";
-import * as interfaces from "./templates/PD/interface/_index";
+// import * as interfaces from "./templates/PD/interface/_index";
 import { VerificationType, Department } from "@prisma/client";
 import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
@@ -397,44 +403,53 @@ export class PDTemplateService {
 
   async InterfaceMapping(
     bankName: string,
+    templateName: string | null,
     verification: any,
     loan: any,
     synopsis: string,
     financialAnalysis: any,
     schema?: any
   ): Promise<any> {
-    // Banks with custom templates
-    if (
-      bankName === "Axis Finance UBL Above 10L" ||
-      bankName === "Axis Finance UBL Below 10L"
-    ) {
-      const verificationData = (verification?.verificationData ||
-        verification) as AxisFinanceUBLInterface;
+    // Helper function to check if templateName matches any key in templatesAndFooters
+    const matchesTemplate = (templateKey: string): boolean => {
+      if (!templateName) return false;
+      return templateName === templateKey;
+    };
+    
+    // Match by templateName first, then fallback to bankName for backward compatibility
+    const matchKey = templateName || bankName;
+    console.log("templateName", templateName);
+    console.log("bankName", bankName);
+    console.log("matchKey", matchKey);
+    // Banks with custom templates - match by templateName
+    if (matchesTemplate("AXIS FINANCE-UBL") || matchKey === "Axis Finance UBL Above 10L" || matchKey === "Axis Finance UBL Below 10L") {
+      // const verificationData = (verification?.verificationData ||
+        // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
-        verificationData,
+        verification,
         bankName,
         loan.applicationNumber,
         synopsis,
         financialAnalysis,
         loan
       );
-      return axisFinanceUBLTemplate(verificationData, html_data);
+      return axisFinanceUBLTemplate(verification, html_data);
     }
 
-    if (bankName == "RBL" || bankName == "Rbl") {
-      let verificationData = verification as RBLInterface;
+    if (matchesTemplate("RBL BANK (PD & LIP)")) {
+      // let verificationData = verification as RBLInterface; 
       const html_data = await this.FormatPDImages(
-        verificationData,
+        verification,
         bankName,
         loan.applicationNumber,
         synopsis,
         financialAnalysis,
         loan
       );
-      return rblTemplate(verificationData, html_data);
+      return rblTemplate(verification, html_data);
     }
 
-    if (bankName == "ICICI") {
+    if (matchesTemplate("ICICI")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -446,7 +461,7 @@ export class PDTemplateService {
       return iciciTemplate(verification, html_data);
     }
 
-    if (bankName == "Chola") {
+    if (matchesTemplate("CHOLA-HL") || matchesTemplate("CHOLA-ML")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -458,7 +473,7 @@ export class PDTemplateService {
       return cholaTemplate(verification, html_data);
     }
 
-    if (bankName == "Hero Fincorp") {
+    if (matchesTemplate("HERO FINCORP")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -470,7 +485,7 @@ export class PDTemplateService {
       return heroFincorpTemplate(verification, html_data);
     }
 
-    if (bankName == "IIFL") {
+    if (matchesTemplate("IIFL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -482,7 +497,7 @@ export class PDTemplateService {
       return iiflTemplate(verification, html_data);
     }
 
-    if (bankName == "Yes Bank") {
+    if (matchesTemplate("YES BANK-HL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -494,7 +509,7 @@ export class PDTemplateService {
       return yesBankTemplate(verification, html_data);
     }
 
-    if (bankName == "Tata Ubl") {
+    if (matchesTemplate("TATA CAPITAL-UBL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -506,7 +521,7 @@ export class PDTemplateService {
       return tataUblTemplate(verification, html_data);
     }
 
-    if (bankName == "Axis Bank") {
+    if (matchesTemplate("AXIS BANK")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -518,7 +533,7 @@ export class PDTemplateService {
       return axisBankTemplate(verification, html_data);
     }
 
-    if (bankName == "Axis Finance") {
+    if (matchesTemplate("AXIS FINANCE-HL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -530,7 +545,7 @@ export class PDTemplateService {
       return axisFinanceTemplate(verification, html_data);
     }
 
-    if (bankName == "Axis Agri") {
+    if (matchesTemplate("AXIS AGRI") || matchesTemplate("AXIS BUSINESS AGRI")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -542,7 +557,7 @@ export class PDTemplateService {
       return axisAgriTemplate(verification, html_data);
     }
 
-    if (bankName == "SMFG SME") {
+    if (matchesTemplate("SMFG-SME")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -554,7 +569,7 @@ export class PDTemplateService {
       return smfgSmeTemplate(verification, html_data);
     }
 
-    if (bankName == "Niwas Salaried") {
+    if (matchesTemplate("NIWAS")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -566,7 +581,7 @@ export class PDTemplateService {
       return niwasSalariedTemplate(verification, html_data);
     }
 
-    if (bankName == "Niwas Senp") {
+    if (matchesTemplate("NIWAS")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -578,7 +593,15 @@ export class PDTemplateService {
       return niwasSenpTemplate(verification, html_data);
     }
 
-    if (bankName == "Arka Fincap") {
+    if (matchesTemplate("ARKA FINCAP") || matchesTemplate("CENTRUM") || matchesTemplate("CENT BANK") || 
+        matchesTemplate("CLIX CAPITAL-HL") || matchesTemplate("CLIX CAPITAL-UBL") || matchesTemplate("EASY HL") ||
+        matchesTemplate("FED BANK (PD&LIP)") || matchesTemplate("GODREJ-HL") || matchesTemplate("GODREJ-UBL") ||
+        matchesTemplate("INDUSIND") || matchesTemplate("KOTAK") || matchesTemplate("MUTHOOT-HL") ||
+        matchesTemplate("MUTHOOT FINCORP (PD & LIP)") || matchesTemplate("NIDO HOME FINANCE") ||
+        matchesTemplate("NORTHERN ARC") || matchesTemplate("NIPUN") || matchesTemplate("PIRAMAL (PD, AIP, LIP)") ||
+        matchesTemplate("PNB") || matchesTemplate("SAMMAAN") || matchesTemplate("SMFG-ML (MICRO & MASS)") ||
+        matchesTemplate("SMFG-HL") || matchesTemplate("TATA CAPITAL-FSL") || matchesTemplate("TATA CAPITAL-HFL") ||
+        matchesTemplate("TRUHOME (PD & LIP)") || matchesTemplate("VERITAS")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -590,7 +613,8 @@ export class PDTemplateService {
       return arkaFincapTemplate(verification, html_data);
     }
 
-    if (bankName == "HeroHousing-Self") {
+    if (matchesTemplate("HERO HOUSING")) {
+      console.log("llllllllllllll")
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -602,7 +626,7 @@ export class PDTemplateService {
       return heroHousingSelfTemplate(verification, html_data);
     }
 
-    if (bankName == "HeroHousing-Salaried") {
+    if (matchesTemplate("HERO HOUSING")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -614,7 +638,7 @@ export class PDTemplateService {
       return herohousingSalariedTemplate(verification, html_data);
     }
 
-    if (bankName == "India Shelter SENP") {
+      if (matchesTemplate("INDIA SHELTER")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -626,7 +650,7 @@ export class PDTemplateService {
       return indiaShelterSenpTemplate(verification, html_data);
     }
 
-    if (bankName == "India Shelter Salaried") {
+    if (matchesTemplate("INDIA SHELTER")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -638,7 +662,7 @@ export class PDTemplateService {
       return indiaShelterSalariedTemplate(verification, html_data);
     }
 
-    if (bankName == "IDFC PL") {
+    if (matchesTemplate("IDFC FIRST-PL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -650,7 +674,7 @@ export class PDTemplateService {
       return idfcPlTemplate(verification, html_data);
     }
 
-    if (bankName == "IDFC HL & ML") {
+    if (matchesTemplate("IDFC FIRST-HL") || matchesTemplate("IDFC FIRST-ML")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -662,7 +686,8 @@ export class PDTemplateService {
       return idfcHlMlTemplate(verification, html_data);
     }
 
-    if (bankName == "Aditya Birla") {
+    if (matchesTemplate("ADITYA BIRLA-HL") || matchesTemplate("ADITYA BIRLA-ML") || matchesTemplate("ADITYA BIRLA-STSL")) {
+      
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -674,7 +699,8 @@ export class PDTemplateService {
       return adityaBirlaTemplate(verification, html_data);
     }
 
-    if (bankName == "DCB") {
+    if (matchesTemplate("DCB BANK")) {
+      console.log("********");
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -686,7 +712,7 @@ export class PDTemplateService {
       return dcbTemplate(verification, html_data);
     }
 
-    if (bankName == "INCRED") {
+    if (matchesTemplate("INCRED/KKR India Financial Services Limited")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -697,7 +723,7 @@ export class PDTemplateService {
       );
       return incredTemplate(verification, html_data);
     }
-    if (bankName == "Ambit") {
+    if (matchesTemplate("AMBIT-HL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -708,7 +734,7 @@ export class PDTemplateService {
       );
       return ambitTemplate(verification, html_data);
     }
-    if (bankName == "Ambit-MSME") {
+    if (matchesTemplate("AMBIT-MSME")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -720,7 +746,7 @@ export class PDTemplateService {
       return ambitMsmeTemplate(verification, html_data);
     }
 
-    if (bankName == "Jana Salaried") {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -732,7 +758,7 @@ export class PDTemplateService {
       return janaSalariedTemplate(verification, html_data);
     }
 
-    if (bankName == "Jana Senp Above 50l") {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -744,7 +770,7 @@ export class PDTemplateService {
       return janaSenpAbove50lTemplate(verification, html_data);
     }
 
-    if (bankName == "Jana Senp Below 50l") {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -758,10 +784,27 @@ export class PDTemplateService {
   
     // Generic template for all other banks (uses schema-driven approach)
     try {
-      // Get schema for this bank
-      const schema = formSchema[bankName as keyof typeof formSchema];
-      if (!schema) {
-        throw new NotFoundException(`Bank schema not found for: ${bankName}`);
+      // Get bankName and schema from templateName using helper functions
+      let schemaBankName = bankName;
+      let schemaToUse = schema;
+      
+      if (templateName) {
+        const foundBankName = getBankNameFromTemplate(templateName);
+        if (foundBankName) {
+          schemaBankName = foundBankName;
+        }
+        const foundSchema = getSchemaFromTemplate(templateName);
+        if (foundSchema) {
+          schemaToUse = foundSchema;
+        }
+      }
+      
+      // Fallback to formSchema if schema not found from templateName
+      if (!schemaToUse) {
+        schemaToUse = formSchema[schemaBankName as keyof typeof formSchema];
+      }
+      if (!schemaToUse) {
+        throw new NotFoundException(`Bank schema not found for: ${schemaBankName} (templateName: ${templateName || 'N/A'})`);
       }
 
       const html_data = await this.FormatPDImages(
@@ -772,7 +815,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return genericPDTemplate(verification, schema, html_data);
+      return genericPDTemplate(verification, schemaToUse, html_data);
     } catch (error) {
       await this.loggingService.error(
         "Failed to generate PDF using generic template",
@@ -839,14 +882,32 @@ export class PDTemplateService {
 
       const verificationData: any = verification.verificationData;
 
-      // Validate data against schema before generating PDF
-      const schema = formSchema[bankName as keyof typeof formSchema];
+      // Get bankName and schema from templateName using helper functions
+      let schemaBankName = bankName;
+      let schema = null;
+
+      console.log("templateName", templateName);
+      if (templateName) {
+        const foundBankName = getBankNameFromTemplate(templateName);
+        if (foundBankName) {
+          schemaBankName = foundBankName;
+        }
+        const foundSchema = getSchemaFromTemplate(templateName);
+        if (foundSchema) {
+          schema = foundSchema;
+        }
+      }
+
+      // Fallback to formSchema if schema not found from templateName
+      if (!schema) {
+        schema = formSchema[schemaBankName as keyof typeof formSchema];
+      }
       if (schema) {
-        logDataStructure(verificationData, `${bankName} Verification Data`);
+        logDataStructure(verificationData, `${schemaBankName} Verification Data`);
         const validationResult = validateVerificationData(
           verificationData,
           schema,
-          bankName
+          schemaBankName
         );
 
         // Log validation results but don't block PDF generation
@@ -865,6 +926,7 @@ export class PDTemplateService {
 
       const htmlTemplate = await this.InterfaceMapping(
         bankName,
+        templateName,
         verificationData,
         loan,
         verification.synopsis,
@@ -872,8 +934,8 @@ export class PDTemplateService {
         schema
       );
 
-      // Use templateName for footer, fallback to bankName if templateName is not set
-      const footerName = templateName || bankName || "Kowtha";
+      // Get footer name from templatesAndFooters using templateName, fallback to templateName, then bankName
+      const footerName = getFooterNameFromTemplate(templateName) || templateName || bankName || "Kowtha";
 
       const pdfBuffer = await this.loanService.PDFBufferGeneration(
         htmlTemplate,

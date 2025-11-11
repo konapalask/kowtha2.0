@@ -34,159 +34,249 @@ import janaSenpBelow50lSchema from "./jana-senp-below-50l";
 export interface BankSchemaConfig {
   bankName: string;
   schema: any;
-  templates: string[];
+  templatesAndFooters: Record<string, string>;
 }
 
 export const bankSchemas: BankSchemaConfig[] = [
   {
     bankName: "Aditya Birla",
     schema: adityaBirlaSchema,
-    templates: ["ADITYA BIRLA-HL", "ADITYA BIRLA-ML", "ADITYA BIRLA-STSL"],
+    templatesAndFooters: 
+      { 
+      "ADITYA BIRLA-HL" :"ADITYA BIRLA HOUSING FINANCE LIMITED" ,
+      "ADITYA BIRLA-ML" : "ADITYA BIRLA CAPITAL LIMITED" ,
+      "ADITYA BIRLA-STSL" : "ADITYA BIRLA CAPITAL LIMITED" 
+    },
   },
   {
     bankName: "Ambit",
     schema: ambitSchema,
-    templates: ["AMBIT-HL"],
+    templatesAndFooters: {
+      "AMBIT-HL" : "Ambit Finvest Pvt. Ltd." ,
+    },
   },
   {
     bankName: "Ambit-MSME",
     schema: ambitMsmeSchema,
-    templates: ["AMBIT-MSME"],
+    templatesAndFooters: {
+      "AMBIT-MSME" : "Ambit Finvest Pvt. Ltd." ,
+    },
   },
   {
     bankName: "Axis Finance",
     schema: axisFinanceSchema,
-    templates: ["AXIS FINANCE-HL"],
+    templatesAndFooters: {
+      "AXIS FINANCE-HL" : "AXIS FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "Axis Finance UBL Above 10L",
     schema: axisFinanceUblAbove10lSchema,
-    templates: ["AXIS FINANCE-UBL"],
+    templatesAndFooters: {
+      "AXIS FINANCE-UBL" : "AXIS FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "Axis Finance UBL Below 10L",
-    schema: axisFinanceUblBelow10lSchema,
-    templates: ["AXIS FINANCE-UBL"],
+    schema: axisFinanceUblAbove10lSchema,
+    templatesAndFooters: {
+      "AXIS FINANCE-UBL" : "AXIS FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "Axis Bank",
     schema: axisBankSchema,
-    templates: ["AXIS BANK"],
+    templatesAndFooters: {
+      "AXIS BANK" : "AXIS BANK LIMITED" ,
+    },
   },
   {
     bankName: "Axis Agri",
     schema: axisAgriSchema,
-    templates: ["AXIS AGRI", "AXIS BUSINESS AGRI"],
-  },
-  {
-    bankName: "Arka Fincap",
-    schema: arkaFincapSchema,
-    templates: ["ARKA FINCAP","CENTRUM","CENT BANK","CLIX CAPITAL-UBL","EASY HL","FED BANK (PD&LIP)","GODREJ-HL","GODREJ-UBL","INDUSIND","KOTAK","MUTHOOT-HL","MUTHOOT FINCORP (PD & LIP)","NIDO HOME FINANCE","NORTHERN ARC","NIPUN","PIRAMAL (PD, AIP, LIP)","PNB","SAMMAAN","SMFG-ML (MICRO & MASS)","SMFG-HL","TATA CAPITAL-FSL","TATA CAPITAL-HFL","TRUHOME (PD & LIP)","VERITAS"],
+    templatesAndFooters: {
+      "AXIS AGRI" : "AXIS BANK LIMITED" ,
+      "AXIS BUSINESS AGRI" : "AXIS BANK LIMITED" ,
+    },
   },
   {
     bankName: "Chola",
     schema: cholaSchema,
-    templates: ["CHOLA-HL", "CHOLA-SME"],
+    templatesAndFooters: {
+      "CHOLA-HL" : "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED" ,
+      "CHOLA-ML" : "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED" ,
+    },
   },
   {
     bankName: "DCB",
     schema: dcbSchema,
-    templates: ["DCB BANK"],
+    templatesAndFooters: {
+      "DCB BANK" : "DCB BANK LIMITED" ,
+    },
   },
   {
+    bankName: "Arka Fincap",
+    schema: arkaFincapSchema,
+    templatesAndFooters: {
+      "ARKA FINCAP" : "Arka Fincap Limited" ,
+      "CENTRUM" : "Centrum Housing Finance Limited" ,
+      "CENT BANK" : "CENT BANK HOME FINANCE LIMITED" ,
+      "CLIX CAPITAL-HL" : "Clix Capital Services Pvt. Ltd." ,
+      "CLIX CAPITAL-UBL" : "Clix Capital Services Pvt. Ltd." ,
+      "EASY HL" : "Easy Home Finance Limited" ,
+      "FED BANK (PD&LIP)" : "Fedbank Financial Services Ltd." ,
+      "GODREJ-HL" : "GODREJ FINANCE LTD" ,
+      "GODREJ-UBL" : "GODREJ FINANCE LTD" ,
+      "INDUSIND" : "INDUSIND BANK LIMITED" ,
+      "KOTAK" : "Kotak Mahindra Prime Ltd." ,
+      "MUTHOOT-HL" : "muthoot housing finance company limited" ,
+      "MUTHOOT FINCORP (PD & LIP)" : "MUTHOOT FINCORP LIMITED" ,
+      "NIDO HOME FINANCE" : "NIDO HOME FINANCE LIMITED" ,
+      "NORTHERN ARC" : "NORTHERN ARC CAPITAL LIMITED" ,
+      "NIPUN" : "Nipun Projects and Finance Private Limited" ,
+      "PIRAMAL (PD, AIP, LIP)" : "Piramal Finance Limited" ,
+      "PNB" : "PNB HOUSING FINANCE LIMITED" ,
+      "SAMMAAN" : "Sammaan Finserve Limited" ,
+      "SMFG-ML (MICRO & MASS)" : "SMFG INDIA CREDIT COMPANY LIMITED" ,
+      "SMFG-HL" : "SMFG INDIA HOME FINANCE COMPANY LIMITED" ,
+      "TATA CAPITAL-FSL" : "TATA CAPITAL LIMITED" ,
+      "TATA CAPITAL-HFL" : "TATA CAPITAL HOUSING FINANCE LIMITED" ,
+      "TRUHOME (PD & LIP)" : "TRUHOME FINANCE LIMITED" ,
+      "VERITAS" : "VERITAS FINANCE LIMITED" ,
+    },
+  },
+  { 
     bankName: "Hero Fincorp",
     schema: heroFincorpSchema,
-    templates: ["HERO FINCORP"],
+    templatesAndFooters: {
+      "HERO FINCORP" : "HERO FINCORP LIMITED" ,
+    },
   },
   {
     bankName: "HeroHousing-Salaried",
     schema: herohousingSalariedSchema,
-    templates: ["HERO HOUSING"],
+    templatesAndFooters: {
+      "HERO HOUSING" : "HERO HOUSING FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "HeroHousing-Self",
     schema: herohousingSelfSchema,
-    templates: ["HERO HOUSING"],
+    templatesAndFooters: {
+      "HERO HOUSING" : "HERO HOUSING FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "ICICI",
     schema: iciciSchema,
-    templates: ["ICICI"],
+    templatesAndFooters: {
+      "ICICI" : "icici home finance company limited" ,
+    },
   },
   {
     bankName: "IDFC HL & ML",
     schema: idfcHlMlSchema,
-    templates: ["IDFC FIRST-HL", "IDFC FIRST-ML"],
+    templatesAndFooters: {
+      "IDFC FIRST-HL" : "IDFC FIRST BANK LIMITED" ,
+      "IDFC FIRST-ML" : "IDFC FIRST BANK LIMITED" ,
+    },
   },
   {
     bankName: "IDFC PL",
     schema: idfcPlSchema,
-    templates: ["IDFC FIRST-PL"],
+    templatesAndFooters: {
+      "IDFC FIRST-PL" : "IDFC FIRST BANK LIMITED" ,
+    },
   },
   {
     bankName: "IIFL",
     schema: iiflSchema,
-    templates: ["IIFL"],
+    templatesAndFooters: {
+      "IIFL" : "IIFL HOME FINANCE LIMITED" ,
+    },
   },
   {
     bankName: "India Shelter SENP",
     schema: indiaShelterSenpSchema,
-    templates: ["INDIA SHELTER"],
+    templatesAndFooters: {
+      "INDIA SHELTER" : "India Shelter Finance Corporation Ltd." ,
+    },
   },
   {
     bankName: "India Shelter Salaried",
     schema: indiaShelterSalariedSchema,
-    templates: ["INDIA SHELTER"],
+    templatesAndFooters: {
+      "INDIA SHELTER" : "India Shelter Finance Corporation Ltd." ,
+    },
   },
   {
     bankName: "INCRED",
     schema: incredSchema,
-    templates: ["INCRED/KKR India Financial Services Limited"],
+    templatesAndFooters: {
+      "INCRED/KKR India Financial Services Limited" : "KKR India Financial Services Limited" ,
+    },
   },
   {
     bankName: "Jana Salaried",
     schema: janaSalariedSchema,
-    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+    templatesAndFooters: {
+      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+    },
   },
   {
     bankName: "Jana Senp Above 50l",
     schema: janaSenpAbove50lSchema,
-    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+    templatesAndFooters: {
+      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+    },
   },
   {
     bankName: "Jana Senp Below 50l",
     schema: janaSenpBelow50lSchema,
-    templates: ["JANA SMALL FINANCE BANK LIMITED"],
+    templatesAndFooters: {
+      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+    },
   },
   {
     bankName: "Niwas Salaried",
     schema: niwasSalariedSchema,
-    templates: ["NIWAS"],
+    templatesAndFooters: {
+      "NIWAS" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
+    },
   },
   {
     bankName: "Niwas Senp",
     schema: niwasSenpSchema,
-    templates: ["NIWAS"],
+    templatesAndFooters: {
+      "NIWAS" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
+    },
   },
   {
     bankName: "RBL",
     schema: rblSchema,
-    templates: ["RBL BANK (PD & LIP)"],
+    templatesAndFooters: {
+      "RBL BANK (PD & LIP)" : "RBL BANK LIMITED" ,
+    },
   },
   {
     bankName: "SMFG SME",
     schema: smfgSmeSchema,
-    templates: ["SMFG-SME"],
+    templatesAndFooters: {
+      "SMFG-SME" : "SMFG INDIA CREDIT COMPANY LIMITED" ,
+    },
   },
   {
     bankName: "Tata Ubl",
     schema: tataUblSchema,
-    templates: ["TATA CAPITAL-UBL"],
+    templatesAndFooters: {
+      "TATA CAPITAL-UBL" : "TATA CAPITAL LIMITED" ,
+    },
   },
   {
     bankName: "Yes Bank",
     schema: yesBankSchema,
-    templates: ["YES BANK-HL"],
+    templatesAndFooters: {
+      "YES BANK-HL" : "YES BANK LIMITED" ,
+    },
   },
 ];
 
@@ -204,51 +294,48 @@ export type BankName = keyof typeof formSchema;
 export const BANK_NAMES = Object.keys(formSchema) as BankName[];
 
 // Additional templates that don't have schemas yet
-const additionalTemplates = [
-  "CENTRUM",
-  "CENT BANK",
-  "CLIX CAPITAL-HL",
-  "CLIX CAPITAL-UBL",
-  "EASY HL",
-  "FED BANK (PD&LIP)",
-  "GODREJ-HL",
-  "GODREJ-UBL",
-  "INDUSIND",
-  "JANA SMALL FINANCE BANK LIMITED",
-  "KOTAK",
-  "MUTHOOT-HL",
-  "MUTHOOT FINCORP (PD & LIP)",
-  "NIDO HOME FINANCE",
-  "NORTHERN ARC",
-  "NIPUN",
-  "PIRAMAL (PD, AIP, LIP)",
-  "PNB",
-  "SAMMAAN",
-  "SMFG-ML (MICRO & MASS)",
-  "SMFG-HL",
-  "TATA CAPITAL-FSL",
-  "TATA CAPITAL-HFL",
-  "TRUHOME (PD & LIP)",
-  "VERITAS",
-];
+// const additionalTemplates = [
+//   "CENTRUM",
+//   "CENT BANK",
+//   "CLIX CAPITAL-HL",
+//   "CLIX CAPITAL-UBL",
+//   "EASY HL",
+//   "FED BANK (PD&LIP)",
+//   "GODREJ-HL",
+//   "GODREJ-UBL",
+//   "INDUSIND",
+//   "JANA SMALL FINANCE BANK LIMITED",
+//   "KOTAK",
+//   "MUTHOOT-HL",
+//   "MUTHOOT FINCORP (PD & LIP)",
+//   "NIDO HOME FINANCE",
+//   "NORTHERN ARC",
+//   "NIPUN",
+//   "PIRAMAL (PD, AIP, LIP)",
+//   "PNB",
+//   "SAMMAAN",
+//   "SMFG-ML (MICRO & MASS)",
+//   "SMFG-HL",
+//   "TATA CAPITAL-FSL",
+//   "TATA CAPITAL-HFL",
+//   "TRUHOME (PD & LIP)",
+//   "VERITAS",
+// ];
 
-// Generate template options from bank schemas and additional templates
+// Generate template options from bank schemas using templatesAndFooters keys
 export const getAllTemplateOptions = (): Array<{
   value: string;
   label: string;
 }> => {
   const templates: Array<{ value: string; label: string }> = [];
 
-  // Add templates from bank schemas
+  // Add templates from bank schemas - use keys from templatesAndFooters
   bankSchemas.forEach((config) => {
-    config.templates.forEach((template) => {
-      templates.push({ value: template, label: template });
-    });
-  });
-
-  // Add additional templates that don't have schemas yet
-  additionalTemplates.forEach((template) => {
-    templates.push({ value: template, label: template });
+    if (config.templatesAndFooters) {
+      Object.keys(config.templatesAndFooters).forEach((template) => {
+        templates.push({ value: template, label: template });
+      });
+    }
   });
 
   // Remove duplicates and sort
@@ -257,4 +344,91 @@ export const getAllTemplateOptions = (): Array<{
   );
 
   return uniqueTemplates.sort((a, b) => a.label.localeCompare(b.label));
+};
+
+/**
+ * Get footer name from template name by looking up in bankSchemas
+ * @param templateName - The template name selected (e.g., "ADITYA BIRLA-HL")
+ * @returns The corresponding footer name (e.g., "ADITYA BIRLA HOUSING FINANCE LIMITED") or null if not found
+ */
+export const getFooterNameFromTemplate = (templateName: string): string | null => {
+  if (!templateName) return null;
+
+  for (const config of bankSchemas) {
+    if (config.templatesAndFooters && config.templatesAndFooters[templateName]) {
+      return config.templatesAndFooters[templateName];
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Get template names from bankName (returns all templates for that bank)
+ * @param bankName - The bank name (e.g., "Aditya Birla")
+ * @returns Array of template names or empty array if not found
+ */
+export const getTemplateNamesFromBank = (bankName: string): string[] => {
+  if (!bankName) return [];
+
+  const matchingConfig = bankSchemas.find(
+    (config) => config.bankName === bankName
+  );
+
+  if (matchingConfig && matchingConfig.templatesAndFooters) {
+    return Object.keys(matchingConfig.templatesAndFooters);
+  }
+
+  return [];
+};
+
+/**
+ * Get bankName from templateName by looking up in bankSchemas
+ * @param templateName - The template name (e.g., "ADITYA BIRLA-HL")
+ * @returns The corresponding bankName (e.g., "Aditya Birla") or null if not found
+ */
+export const getBankNameFromTemplate = (templateName: string): string | null => {
+  if (!templateName) return null;
+
+  for (const config of bankSchemas) {
+    if (config.templatesAndFooters && config.templatesAndFooters[templateName]) {
+      return config.bankName;
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Get schema from templateName by looking up in bankSchemas
+ * @param templateName - The template name (e.g., "ADITYA BIRLA-HL")
+ * @returns The corresponding schema or null if not found
+ */
+export const getSchemaFromTemplate = (templateName: string): any | null => {
+  if (!templateName) return null;
+
+  for (const config of bankSchemas) {
+    if (config.templatesAndFooters && config.templatesAndFooters[templateName]) {
+      return config.schema;
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Get BankSchemaConfig from templateName
+ * @param templateName - The template name (e.g., "ADITYA BIRLA-HL")
+ * @returns The matching BankSchemaConfig or null if not found
+ */
+export const getBankConfigFromTemplate = (templateName: string): BankSchemaConfig | null => {
+  if (!templateName) return null;
+
+  for (const config of bankSchemas) {
+    if (config.templatesAndFooters && config.templatesAndFooters[templateName]) {
+      return config;
+    }
+  }
+
+  return null;
 };
