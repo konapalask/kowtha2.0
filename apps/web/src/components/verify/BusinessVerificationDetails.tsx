@@ -1947,7 +1947,8 @@ export const BusinessVerificationDetails: React.FC<
 
       // Fields with formulas are read-only
       const isFormulaField = !!field.formula;
-      const fieldReadOnly = readOnly || field.readOnly || isFormulaField;
+      // Allow editing of readOnly fields (auto fields), but keep formula fields and form-level readOnly
+      const fieldReadOnly = readOnly || isFormulaField;
 
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
@@ -2163,7 +2164,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
               />
             </Form.Item>
@@ -2264,7 +2265,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
               />
             </Form.Item>
@@ -2789,7 +2790,7 @@ export const BusinessVerificationDetails: React.FC<
         return (
           <Form.Item key={itemFieldId} name={fieldKey} label={itemField.label}>
             <Select
-              disabled={readOnly || itemField.readOnly}
+              disabled={readOnly}
               placeholder={`Select ${itemField.label}`}
             >
               {itemField.enum.map((option: string) => (
@@ -2813,7 +2814,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <InputNumber
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 style={{ width: "100%" }}
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
@@ -2863,7 +2864,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <DatePicker
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
                 style={{ width: "100%" }}
@@ -2902,7 +2903,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <Input
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
                   type="time"
                 />
@@ -2938,7 +2939,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <DatePicker
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY"
                   style={{ width: "100%" }}
@@ -2959,7 +2960,7 @@ export const BusinessVerificationDetails: React.FC<
                 label={itemField.label}
               >
                 <TextArea
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={itemField.placeholder || itemField.label}
                   rows={itemField.ui?.rows || 3}
                 />
@@ -2974,7 +2975,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <Input
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>
@@ -2987,7 +2988,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={readOnly || itemField.readOnly}>
+              <Radio.Group disabled={readOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -3002,7 +3003,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <Input
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>
