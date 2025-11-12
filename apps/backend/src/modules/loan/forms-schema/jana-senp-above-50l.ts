@@ -143,7 +143,18 @@ export const janaSenpAbove50lSchema = {
                         name: { type: "string", title: "Name" },
                         relationWithApplicant: { type: "string", title: "Relation with Applicant" },
                         age: { type: "number", title: "Age (Yrs)" },
-                        qualification: { type: "string", title: "Qualification" },
+                        qualification: { 
+                          type: "string", 
+                          title: "Qualification",
+                          enum: [
+                            "Below 10th",
+                            "10th pass",
+                            "12th pass",
+                            "Diploma/ITI certification",
+                            "Graduate",
+                            "PG/Professional Certification"
+                          ]
+                        },
                         occupation: { type: "string", title: "Occupation" },
                         incomePerMonth: { type: "number", title: "Income per month (approx.)", formatter: {
                             useIndianFormat: true,

@@ -1115,7 +1115,7 @@ export class LoanController {
     };
   }
 
-  @Post("verification/:id/ -analysis")
+  @Post("verification/:id/financial-analysis")
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({
     summary: "Create financial analysis data for a verification",

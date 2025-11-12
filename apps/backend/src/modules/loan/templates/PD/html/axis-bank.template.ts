@@ -361,15 +361,15 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Banking performance</strong></p></td>
-                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Any cheque bounces seen (Y/N): ${verificationData.commonPoints?.anyChequeBounces || ""} - ${verificationData.commonPoints?.bankingPerformance || ""}</p></td>
+                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Any cheque bounces seen (Y/N): ${verificationData.commonPoints?.anyChequeBounces || verificationData.bankingDetails?.anyChequeBounces || ""} - ${verificationData.commonPoints?.bankingPerformance || verificationData.bankingDetails?.bankingPerformance || verificationData.observations?.bankingPerformance || ""}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Details of collateral</strong></p></td>
-                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Address of property: ${verificationData.bankingDetails?.addressOfProperty || ""}</strong></p></td>
+                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Address of property: ${verificationData.bankingDetails?.addressOfProperty || verificationData.commonPoints?.addressOfProperty || ""}</strong></p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Status of PD (Positive, Negative, Credit Manager visit<br />needed)</strong></p></td>
-                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.bankingDetails?.statusOfPD || ""}</strong></p></td>
+                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data?.status || verificationData.commonPoints?.statusOfPD || verificationData.bankingDetails?.statusOfPD || verificationData.observations?.statusOfPd || ""}</strong></p></td>
             </tr>
         </table>
         

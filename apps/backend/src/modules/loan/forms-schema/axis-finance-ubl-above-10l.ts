@@ -63,13 +63,13 @@ export const axisFinanceUblAbove10lSchema = {
             },
           },
           phoneNumber: {
-            type: "string",
+            type: "integer",
             title: "Phone No.",
           },
           appointmentFixed: {
             type: "string",
+            format: "time",
             title: "Appointment Fixed",
-            format: "date",
           },
           structureOfLoan: {
             type: "string",

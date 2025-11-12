@@ -27,10 +27,12 @@ export const herohousingSalariedSchema = {
           },
           pdVisitDate: {
             type: "string",
+            format: "date",
             title: "PD visit date",
           },
           pdVisitTime: {
             type: "string",
+            format: "time",
             title: "PD visit time",
           },
           pdAddress: {
@@ -85,7 +87,18 @@ export const herohousingSalariedSchema = {
                   title: "Relationship with applicant",
                 },
                 age: { type: "integer", title: "Age" },
-                qualification: { type: "string", title: "Qualification" },
+                qualification: { 
+                  type: "string", 
+                  title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ]
+                },
                 occupation: { type: "string", title: "Occupation" },
                 incomeDetails: {
                   type: "string",

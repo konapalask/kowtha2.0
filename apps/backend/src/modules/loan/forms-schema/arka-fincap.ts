@@ -134,10 +134,10 @@ export const arkaFincapSchema = {
                   enum: [
                     "Below 10th",
                     "10th pass",
-                    "Under graduate",
+                    "12th pass",
+                    "Diploma/ITI certification",
                     "Graduate",
-                    "Post Graduate",
-                    "Professional",
+                    "PG/Professional Certification"
                   ],
                 },
                 occupation: {
@@ -335,7 +335,7 @@ export const arkaFincapSchema = {
                   title: "Customer Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -362,7 +362,7 @@ export const arkaFincapSchema = {
                   title: "Supplier Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },

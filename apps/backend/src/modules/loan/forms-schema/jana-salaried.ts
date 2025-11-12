@@ -43,6 +43,14 @@ export const janaSalariedSchema = {
                     qualification: {
                         type: "string",
                         title: "Qualification",
+                        enum: [
+                          "Below 10th",
+                          "10th pass",
+                          "12th pass",
+                          "Diploma/ITI certification",
+                          "Graduate",
+                          "PG/Professional Certification"
+                        ],
                     },
                     employerName: {
                         type: "string",
@@ -92,7 +100,18 @@ export const janaSalariedSchema = {
                                 name: { type: "string", title: "Name" } ,
                                 relationship: { type: "string", title: "Relationship with Applicant" },
                                 age: { type: "number", title: "Age (Yrs)" },
-                                qualification: { type: "string", title: "Qualification" },
+                                qualification: { 
+                                  type: "string", 
+                                  title: "Qualification",
+                                  enum: [
+                                    "Below 10th",
+                                    "10th pass",
+                                    "12th pass",
+                                    "Diploma/ITI certification",
+                                    "Graduate",
+                                    "PG/Professional Certification"
+                                  ]
+                                },
                                 occupation: { type: "string", title: "Occupation" },
                                 incomePerMonth: { type: "number", title: "Income per month (approx.)",formatter: {
                                     useIndianFormat: true,

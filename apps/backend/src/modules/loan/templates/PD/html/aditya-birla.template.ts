@@ -65,9 +65,12 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const observations = verificationData.observations || {};
   const employeesInfrastructure = verificationData.employeesInfrastructure || {};
 
+  const templateName = html_data?.bankName || "Aditya Birla";
+  
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content aditya-birla-template">
+      <h2 style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#222;text-align:center;">${templateName}</h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Proposal No.", proposal.proposalNumber)}
         <tr>

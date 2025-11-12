@@ -103,6 +103,14 @@ export const axisBankSchema = {
                 qualification: {
                   type: "string",
                   title: "qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ],
                 },
                 occupation: {
                   type: "string",

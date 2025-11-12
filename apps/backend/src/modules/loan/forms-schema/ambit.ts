@@ -125,9 +125,8 @@ export const ambitSchema = {
         type: "object",
         properties: {
           phoneNumber: {
-            type: "string",
+            type: "integer",
             title: "Phone Number",
-            pattern: "^[0-9]{10}$",
           },
           appointmentFixed: {
             type: "string",
@@ -215,10 +214,10 @@ export const ambitSchema = {
                   enum: [
                     "Below 10th",
                     "10th pass",
-                    "Under graduate",
+                    "12th pass",
+                    "Diploma/ITI certification",
                     "Graduate",
-                    "Post Graduate",
-                    "Professional",
+                    "PG/Professional Certification"
                   ],
                 },
                 occupation: {

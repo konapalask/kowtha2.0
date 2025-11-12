@@ -372,11 +372,12 @@ const Feedback: React.FC<FeedbackProps> = ({
         message.success("Synopsis submitted successfully!");
         setExistingSynopsis(editorContent);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting synopsis:", error);
-      message.error(
-        isEditing ? "Failed to update synopsis" : "Failed to submit synopsis"
-      );
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          (isEditing ? "Failed to update synopsis" : "Failed to submit synopsis");
+      message.error(errorMessage);
     } finally {
       setSynopsisLoading(false);
     }

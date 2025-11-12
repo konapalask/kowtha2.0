@@ -177,7 +177,7 @@ export const niwasSenpSchema = {
             title: "Total work experience",
           },
           officialEmail: { type: "string", title: "Official / Business email ID" },
-          contactNumber: { type: "string", title: "Contact number" },
+          contactNumber: { type: "integer", title: "Contact number" },
         },
       },
     },
@@ -331,7 +331,7 @@ export const niwasSenpSchema = {
                 reasonForMovement: { type: "string", title: "Reason for Movement" },
                 contactPersonNameNumber: { type: "object", title: "Contact Person Name & Number", properties: {
                   contactPersonName: { type: "string", title: "Contact Person Name" },
-                  contactPersonNumber: { type: "string", title: "Contact Person Number" },
+                  contactPersonNumber: { type: "integer", title: "Contact Person Number" },
                 } },
               },
             },
@@ -650,7 +650,7 @@ export const niwasSenpSchema = {
               properties: {
                 name: { type: "string", title: "Name" },
                 relationship: { type: "string", title: "Relationship" },
-                age: { type: "string", title: "Age" },
+                age: { type: "integer", title: "Age" },
                 employmentType: { type: "string", title: "Employment Type" },
                 education: {
                   type: "string",

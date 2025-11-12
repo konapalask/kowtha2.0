@@ -48,8 +48,18 @@ export class FinancialAnalysisTemplatesService {
         throw new NotFoundException('Verification not found');
       }
       
-      const financialAnalysis = (verification.verificationData as any)?.financialAnalysis || {};
+      // Financial analysis is stored in verification.financialAnalysis, not in verificationData
+      const financialAnalysis = (verification.financialAnalysis as any) || {};
       const loan = verification.loan;
+      
+      // Log for debugging if financial analysis is empty
+      if (!financialAnalysis || Object.keys(financialAnalysis).length === 0) {
+        await this.loggingService.warn('Financial analysis is empty for loan', {
+          loanId,
+          bankName,
+          verificationId: verification.id,
+        });
+      }
       
       if (this.isServiceBusinessFormat(bankName)) {
         return await this.generateStandardFormat(
@@ -76,6 +86,17 @@ export class FinancialAnalysisTemplatesService {
           loan
         );
       } else if (this.isComprehensiveFormat(bankName)) {
+        return await this.generateStandardFormat(
+          ExcelJS,
+          financialAnalysis,
+          loan
+        );
+      } else {
+        // Default fallback to standard format if bank doesn't match any specific format
+        await this.loggingService.warn('Bank format not recognized, using standard format', {
+          loanId,
+          bankName,
+        });
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,

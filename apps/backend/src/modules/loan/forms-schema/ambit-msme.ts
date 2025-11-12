@@ -236,7 +236,7 @@ export const ambitMsmeSchema = {
                 type: "object",
                 properties: {
                     phoneNumber: {
-                        type: "string",
+                        type: "integer",
                         title: "Mob no. of App and Co app",
                     },
                     kycDetails: {
@@ -316,6 +316,14 @@ export const ambitMsmeSchema = {
                         qualification: {
                             type: "string",
                             title: "Qualification",
+                            enum: [
+                              "Below 10th",
+                              "10th pass",
+                              "12th pass",
+                              "Diploma/ITI certification",
+                              "Graduate",
+                              "PG/Professional Certification"
+                            ],
                         },
                         occupation: {
                             type: "string",
@@ -381,7 +389,7 @@ export const ambitMsmeSchema = {
                         },
                     },
                     contactNumber: {
-                        type: "string",
+                        type: "integer",
                         title: "Mob Number",
                     },
                     location: {

@@ -110,11 +110,17 @@ export class PDTemplateService {
 
     const resolveCoordinate = (value: any) => {
       if (value === undefined || value === null) return undefined;
+      // Handle string "NaN" or "null" cases
+      if (typeof value === "string" && (value.toLowerCase() === "nan" || value.toLowerCase() === "null")) {
+        return undefined;
+      }
       const numeric = Number(value);
-      if (!Number.isNaN(numeric)) {
+      // Check if numeric is valid (not NaN, not Infinity)
+      if (!Number.isNaN(numeric) && Number.isFinite(numeric)) {
         return numeric.toFixed(6);
       }
-      return String(value);
+      // Return undefined for invalid values instead of string representation
+      return undefined;
     };
 
     const getPhotoEntriesFromItem = (item: any) => {

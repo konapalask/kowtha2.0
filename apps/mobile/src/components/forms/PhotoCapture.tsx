@@ -320,28 +320,30 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           documentType: form.documentType,
         };
 
-        // Add location details if available
-        if (
-          image.locationOrOverlay.latitude &&
-          image.locationOrOverlay.longitude
-        ) {
+        // Add location details if available and valid
+        const lat = image.locationOrOverlay.latitude;
+        const lng = image.locationOrOverlay.longitude;
+        
+        // Validate that latitude and longitude are valid numbers (not NaN, not null, not undefined)
+        const isValidLat = lat !== null && lat !== undefined && !Number.isNaN(lat) && Number.isFinite(lat);
+        const isValidLng = lng !== null && lng !== undefined && !Number.isNaN(lng) && Number.isFinite(lng);
+        
+        if (isValidLat && isValidLng) {
           try {
-            const locationDetails = await getLocationDetails(
-              image.locationOrOverlay.latitude,
-              image.locationOrOverlay.longitude,
-            );
-            newItem.latitude = image.locationOrOverlay.latitude;
-            newItem.longitude = image.locationOrOverlay.longitude;
+            const locationDetails = await getLocationDetails(lat, lng);
+            newItem.latitude = lat;
+            newItem.longitude = lng;
             newItem.locality = locationDetails.locality;
             newItem.pincode = locationDetails.pincode;
           } catch (locationError) {
             console.error('Error getting location details:', locationError);
-            newItem.latitude = image.locationOrOverlay.latitude;
-            newItem.longitude = image.locationOrOverlay.longitude;
+            newItem.latitude = lat;
+            newItem.longitude = lng;
             newItem.locality = 'Unknown';
             newItem.pincode = 'Unknown';
           }
         }
+        // If lat/lng are invalid, don't set them at all (they'll be undefined)
         newItems.push(newItem);
       }
 

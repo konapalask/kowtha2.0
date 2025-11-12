@@ -121,16 +121,26 @@ export const idfcHlMlSchema = {
             title: "Name of the Applicant",
           },
           phoneNumber: {
-            type: "string",
+            type: "integer",
             title: "Phone No. of the Applicant",
           },
           panNumber: {
             type: "string",
             title: "PAN No.",
+            pattern: "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
+            description: "PAN format: ABCDE1234F"
           },
           educationalQualification: {
             type: "string",
             title: "Educational Qualification",
+            enum: [
+              "Below 10th",
+              "10th pass",
+              "12th pass",
+              "Diploma/ITI certification",
+              "Graduate",
+              "PG/Professional Certification"
+            ],
           },
           roleInBusiness: {
             type: "string",
