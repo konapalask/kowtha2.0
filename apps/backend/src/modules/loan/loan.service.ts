@@ -898,11 +898,13 @@ export class LoanService {
       }
 
       if (filters?.postponed) {
-        where.verifications = {
-          some: {
-            isPostponed: true,
-          },
-        };
+        if (filters.postponed === "true") {
+          where.verifications = {
+            some: {
+              isPostponed: true,
+            },
+          };
+        }
       }
 
       if (filters?.applicantName) {

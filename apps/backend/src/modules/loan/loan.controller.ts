@@ -97,7 +97,7 @@ export class LoanController {
     if (!req.user.officeId) {
       throw new BadRequestException("User does not have an assigned office");
     }
-
+    console.log(filters);
     const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
       status: 200,
