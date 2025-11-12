@@ -99,19 +99,19 @@ export const herohousingSelfSchema = {
       schema: {
         type: "object",
         properties: {
-          qualificationAndJourney: {
+          qualificationOfCustomer: {
             type: "string",
             title:
-              "Borrower details – includes qualification & professional journey",
+              "Qualification of customer",
+          },
+          professionalJourney: {
+            type: "string",
+            title:
+              "Complete professional journey (service/business details of each activity post qualification to till date)",
             ui: {
               widget: "textarea",
               rows: 6,
             },
-          },
-          qualificationAndProfessionalJourney: {
-            type: "string",
-            title:
-              "Borrower details (legacy) – qualification & professional journey",
           },
           familyMembers: {
             type: "array",
@@ -602,33 +602,6 @@ export const herohousingSelfSchema = {
       schema: {
         type: "object",
         properties: {
-          lineItems: {
-            type: "array",
-            title: "Income assessment line items",
-            items: {
-              type: "object",
-              properties: {
-                particular: {
-                  type: "string",
-                  title: "Particular",
-                },
-                monthlyAmount: {
-                  type: "number",
-                  title: "Amount (Rs.) Monthly",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                comments: {
-                  type: "string",
-                  title: "Comments / Mode of validation",
-                },
-              },
-            },
-          },
           salesReceiptsMonthlyAverage: {
             type: "number",
             title: "Sales/receipt (Monthly average)",
@@ -637,6 +610,14 @@ export const herohousingSelfSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
+            },
+          },
+          salesReceiptsMonthlyAverageComments: {
+            type: "string",
+            title: "Sales/receipt (Monthly average) comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           otherIncome: {
@@ -649,6 +630,14 @@ export const herohousingSelfSchema = {
               minDecimalPlaces: 0,
             },
           },
+          otherIncomeComments: {
+            type: "string",
+            title: "Other income comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           totalMonthlyIncome: {
             type: "number",
             title: "Total monthly income",
@@ -657,6 +646,14 @@ export const herohousingSelfSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
+            },
+          },
+          totalMonthlyIncomeComments: {
+            type: "string",
+            title: "Total monthly income comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           costOfMaterialService: {
@@ -669,6 +666,14 @@ export const herohousingSelfSchema = {
               minDecimalPlaces: 0,
             },
           },
+          costOfMaterialServiceComments: {
+            type: "string",
+            title: "Cost of material/service comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           directExpenses: {
             type: "number",
             title: "Direct expenses",
@@ -677,6 +682,14 @@ export const herohousingSelfSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
+            },
+          },
+          directExpensesComments: {
+            type: "string",
+            title: "Direct expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           salary: {
@@ -689,6 +702,14 @@ export const herohousingSelfSchema = {
               minDecimalPlaces: 0,
             },
           },
+          salaryComments: {
+            type: "string",
+            title: "Salary comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           rent: {
             type: "number",
             title: "Rent",
@@ -697,6 +718,14 @@ export const herohousingSelfSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
+            },
+          },
+          rentComments: {
+            type: "string",
+            title: "Rent comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           electricityExpenses: {
@@ -709,6 +738,14 @@ export const herohousingSelfSchema = {
               minDecimalPlaces: 0,
             },
           },
+          electricityExpensesComments: {
+            type: "string",
+            title: "Electricity expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           otherMiscellaneousExpenses: {
             type: "number",
             title: "Other Miscellaneous Expenses",
@@ -717,6 +754,14 @@ export const herohousingSelfSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
+            },
+          },
+          otherMiscellaneousExpensesComments: {
+            type: "string",
+            title: "Other miscellaneous expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           otherFamilyExpenses: {
@@ -729,7 +774,14 @@ export const herohousingSelfSchema = {
               minDecimalPlaces: 0,
             },
           },
-
+          otherFamilyExpensesComments: {
+            type: "string",
+            title: "Other family expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
           netMonthlyAppraisalIncome: {
             type: "number",
             title: "Net monthly appraisal income",
@@ -743,6 +795,10 @@ export const herohousingSelfSchema = {
           monthlyNetIncomeComments: {
             type: "string",
             title: "Net monthly income comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
           monthlyObligations: {
             type: "number", 
@@ -757,7 +813,11 @@ export const herohousingSelfSchema = {
           monthlyObligationsComments: {
             type: "string",
             title: "Obligations comments",
-          },
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+            },
           netResidualIncome: {
             type: "number",
             title: "Net residual income (monthly)",
@@ -771,6 +831,10 @@ export const herohousingSelfSchema = {
           netResidualIncomeComments: {
             type: "string",
             title: "Residual income comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
           },
         },
       },

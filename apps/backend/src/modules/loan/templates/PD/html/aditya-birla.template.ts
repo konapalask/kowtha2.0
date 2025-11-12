@@ -61,7 +61,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const business = verificationData.businessOverview || {};
   const financials = verificationData.salesFinancials || {};
   const businessProfile = verificationData.businessProfile || {};
-  const familyMembers = verificationData.familyMembers.familyMembers || [];
+  const familyMembers = verificationData.familyMembers?.familyMembers || [];
   const observations = verificationData.observations || {};
   const employeesInfrastructure = verificationData.employeesInfrastructure || {};
 
@@ -208,7 +208,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
-            <td style="${valueCellStyle}">Loan Amount: ${formatMultiline(observations.loanAmountApplied)} <br>Purpose of Loan: ${formatMultiline(observations.purposeOfLoan)}</td>
+            <td style="${valueCellStyle}">Loan Amount: ${observations.loanAmountApplied} <br>Purpose of Loan: ${observations.purposeOfLoan}</td>
         </tr>
       </table>      
 

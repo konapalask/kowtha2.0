@@ -99,7 +99,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerHtml = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+        `<td style="${cellStyle};font-weight:bold;">${header}</td>`
     )
     .join("");
 
@@ -125,7 +125,7 @@ const joinDetails = (pairs: Array<[string, any, ((value: any) => string)?]>) => 
     .map(([label, value, formatter]) => {
       if (!hasValue(value)) return null;
       const rendered = formatter ? formatter(value) : formatMultiline(value);
-      return `<strong>${label}:</strong> ${rendered}`;
+      return `<i>${label}:</i> ${rendered}`;
     })
     .filter(Boolean);
   return items.length
@@ -170,7 +170,7 @@ export const heroHousingSelfTemplate = (
     {};
 
   const supplierCustomer =
-    verificationData.supplierAndCustomerDetails ||
+    verificationData.supplierCustomerDetails ||
     verificationData.detailsOfSupplierAndCustomer ||
     {};
 
@@ -240,7 +240,7 @@ export const heroHousingSelfTemplate = (
       right: wrapParagraph(formatMultiline(summary.nameOfCustomer || "")),
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Person met in PD and relationship with Applicant ---</strong></p>`,
+      left: `<p style="${paragraphStyle}"><strong>Person met in PD and relationship with Applicant</strong></p>`,
       right: wrapParagraph(
         formatMultiline(
           [summary.personMetInPd, summary.relationshipWithCustomer]
@@ -253,7 +253,7 @@ export const heroHousingSelfTemplate = (
       left: `<p style="${paragraphStyle}"><strong>PD Visit date and time</strong></p>`,
       right: wrapParagraph(
         formatMultiline(
-          [formatDate(summary.pdVisitDate || summary.pdVisitDateAndTime), summary.pdVisitTime]
+          [summary.pdVisitDate || summary.pdVisitDateAndTime, summary.pdVisitTime]
             .filter(hasValue)
             .join(", ")
         )
@@ -326,11 +326,10 @@ export const heroHousingSelfTemplate = (
   const familyValue =
       familyTableHtml;
 
-  const borrowerValue = multiParagraph(
-    borrowerProfile.qualificationAndJourney ||
-      borrowerProfile.qualificationAndProfessionalJourney ||
-      ""
-  );
+  const borrowerValue = joinDetails([
+    ["Qualification of customer", borrowerProfile.qualificationOfCustomer],
+    ["Professional journey", borrowerProfile.professionalJourney],
+  ]);
 
   const currentBusinessValue = joinDetails([
     ["Current business name", currentBusiness.currentBusinessName || currentBusiness.businessName],
@@ -524,14 +523,14 @@ export const heroHousingSelfTemplate = (
 
   if (hasValue(incomeAssessment.salesReceiptsMonthlyAverage)) {
     incomeItems.push([
-      "Sales/receipt (Monthly average)",
+      "<strong>Sales/receipt (Monthly average)</strong>",
       formatCurrency(incomeAssessment.salesReceiptsMonthlyAverage),
       formatMultiline(incomeAssessment.salesReceiptsMonthlyAverageComments || ""),
     ]);
   }
   if (hasValue(incomeAssessment.otherIncome)) {
     incomeItems.push([
-      "Other income",
+      "<strong>Other income</strong>",
       formatCurrency(incomeAssessment.otherIncome),
       formatMultiline(incomeAssessment.otherIncomeComments || ""),
     ]);

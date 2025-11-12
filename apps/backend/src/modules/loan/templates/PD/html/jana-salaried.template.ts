@@ -1,7 +1,7 @@
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
-  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
+  "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
 const labelCellStyle =
   "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
 const valueCellStyle =
@@ -130,8 +130,8 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>  
         <tr>
           <td style="${labelCellStyle}">No.of people in family</td>
-          <td>
-            <table style="${tableStyle}">
+          <td style="border:1px solid #ccc;padding:8px">
+            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
               <tr>
                 <td style="${labelCellStyle}">Name</td>
                 <td style="${labelCellStyle}">Relation</td>
@@ -161,7 +161,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Residence Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Ownership</td>
@@ -205,7 +205,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Networth Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Address</td>
@@ -251,7 +251,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Name of Bank / NBFC</td>
@@ -286,7 +286,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
           
         <tr>
           <td style="${labelCellStyle}">Banking Habits</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Bank Name</td>
@@ -314,7 +314,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Security Offered</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}" >Address</td>
@@ -347,7 +347,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Other Income</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Income</td>
@@ -368,7 +368,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Third Party Confirmation</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Individual / Business Name</td>
@@ -393,7 +393,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Documents Verified</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Document Category</td>
@@ -415,7 +415,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Major Observations / Comments / Concerns during PD</td>
-          <td> 
+          <td style="border:1px solid #ccc;padding:8px"> 
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Case Strengths</td>

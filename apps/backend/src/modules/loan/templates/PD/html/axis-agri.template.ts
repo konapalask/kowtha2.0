@@ -114,7 +114,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
   const pdDetails = verificationData.pdVisitDetails || {};
   const profile = verificationData.businessProfile || {};
   const banking = verificationData.bankingAndWorkingCapital || {};
-  const suppliersClients = ensureArray(verificationData.suppliersClients || []);
+  const suppliersClients = ensureArray(verificationData.suppliersClients.suppliersClients || []);
   const observations = verificationData.observations || {};
 
   const facilityRows = ensureArray(banking.facilities).map((facility: any) => [
@@ -236,20 +236,35 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow("Banking & Working Capital Limit Information", renderArrayTable(
-        ["Bank Name", "Limit Type", "Limit Amount"],
-        facilityRows
-      ), undefined, { colSpan: 3 })}
+      <tr>
+      <td style="${labelCellStyle}">Banking & Working Capital Limit Information</td>
+      <td style="border:1px solid #ccc;padding:8px">
+        <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">Bank Name</td>
+          <td style="${labelCellStyle}">Limit Type</td>
+          <td style="${labelCellStyle}">Limit Amount</td>
+        </tr>
+        ${ensureArray(banking.facilities).map((facility: any) => `
+          <tr>
+            <td style="${valueCellStyle}">${facility.bankName}</td>
+            <td style="${valueCellStyle}">${facility.limitType}</td>
+            <td style="${valueCellStyle}">${formatCurrency(facility.limitAmount)}</td>
+          </tr>
+        `).join("")}
+        </table>
+        </td>
+      </tr>
 
       ${renderKeyValueRow(
         "Is it a Takeover?", 
-        profile.isItATakeover, 
+        banking.isItATakeover, 
         undefined, { colSpan: 3 }
       )}
 
       ${renderKeyValueRow(
         "Any other loan obligations of the firm",
-        profile.anyOtherLoanObligationsOfTheFirm,
+        banking.otherLoanObligations,
         undefined,
         { colSpan: 3 }
       )}

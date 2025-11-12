@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.template";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
@@ -87,6 +87,26 @@ export const herohousingSalariedTemplate = (
   const zonedDate = toZonedTime(date, timeZone);
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
+  // Debug: Log the structure to help identify data issues
+  console.log("🔍 [HeroHousing Salaried] Verification Data Structure:", {
+    hasLoanDetails: verificationData?.loanDetails,
+    loanDetailsKeys: verificationData?.loanDetails ? Object.keys(verificationData.loanDetails) : [],
+    loanDetailsValue: verificationData?.loanDetails,
+    allTopLevelKeys: verificationData ? Object.keys(verificationData) : [],
+  });
+
+  const general = verificationData?.generalInfo || {};
+  const borrowerDetails = verificationData?.borrowerProfile || {};
+  const familyDetails = verificationData?.familyDetails || {};
+  const currentJobProfile = verificationData?.employmentProfile || {};
+  const detailsOfEmployer = verificationData?.employerDetails || {};
+  const propertyDetails = verificationData?.propertyDetails || {};
+  const investmentAndProperties = verificationData?.investmentAndProperties || {};
+  const endUseOfPropertyFund = verificationData?.endUseOfPropertyFund || {};
+  const loanDetails = verificationData?.detailsOfLoans || {};
+  const bankingDetails = verificationData?.bankingDetails || {};
+  const doc = verificationData?.documentVerificationAndOtherChecks || {};
+
   return `
     ${pdBaseTemplate()}
 
@@ -96,11 +116,11 @@ export const herohousingSalariedTemplate = (
       <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Loan account No.</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${html_data.applicationNumber || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.loanAccountNo || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.nameOfCustomer || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.nameOfCustomer || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
@@ -108,25 +128,25 @@ export const herohousingSalariedTemplate = (
             <p style="margin:8px 0;line-height:1.5"><strong>Mention the reason if customer was not available during the visit</strong></p>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.general?.personMetInPdAndRelationshipWithCustomer || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.general?.reasonIfCustomerNotAvailableDuringVisit || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">${general.personMet || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">${general.reasonIfCustomerNotAvailable || ""}</p>
           </td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD Visit date and time</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.pdVisitDateAndTime || html_data.dateOfReport || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdVisitDate || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD address</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.pdAddress || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdAddress || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.latLongOfOfficeAddress || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${ general.latLongOfOfficeAddress || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.requestedLoanAmount?.requestedLoanAmount || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.requestedLoanAmount || ""}</p></td>
         </tr>
       </table>
 
@@ -143,7 +163,10 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.profileOfCustomerBorrowerDetails?.borrowerDetails || ""}</p>
+          <ul>
+            <li><p style="margin:8px 0;line-height:1.5">${borrowerDetails.qualificationOfCustomer || ""}</p></li>
+            <li><p style="margin:8px 0;line-height:1.5">${borrowerDetails.professionalJourney || ""}</p></li>
+          </ul>
           </td>
         </tr>
         <tr>
@@ -164,25 +187,16 @@ export const herohousingSalariedTemplate = (
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Occupation (Job/Business)</p></td>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Income Details/dependent</p></td>
               </tr>
-              ${
-                Array.isArray(verificationData.familyDetails?.familyDetails) &&
-                verificationData.familyDetails?.familyDetails.length > 0
-                  ? verificationData.familyDetails?.familyDetails
-                      .map(
-                        (member) => `
-              <tr>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relationshipWithApplicant || ""}</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.age || ""}</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.qualification || ""}</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.occupation || ""}</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.incomeDetailsDependent || ""}</p></td>
-              </tr>
-              `
-                      )
-                      .join("")
-                  : '<tr><td colspan="6" style="border:1px solid #ccc;padding:8px;text-align:center;">No family details available</td></tr>'
-              }
+              ${ensureArray(familyDetails.members).map((member) => `
+                <tr>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relationship || ""}</p></td>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.age || ""}</p></td>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.qualification || ""}</p></td>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.occupation || ""}</p></td>
+                  <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.incomeDetails || ""}</p></td>
+                </tr>
+              `).join("")}
             </table>
           </td>
         </tr>
@@ -199,12 +213,14 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.currentJobProfile?.nameOfEmployer || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.totalExperience?.grossSalaryAndNetSalary || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.totalExperience?.typeOfEmploymentPermanentContractual || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.totalExperience?.designation || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.totalExperience?.jobProfile || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">${verificationData.totalExperience?.reportingToNameDesignation || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.nameOfEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.workingSince || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.typeOfEmployment || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.designation || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.jobProfile || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.reportingTo || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -223,7 +239,17 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.detailsOfEmployer?.detailsOfEmployerDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.businessName || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.constitution || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.natureOfBusiness || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.runningSince || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.partnersDetails || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.setupDetails || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.stockQuantum || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.machineryAssets || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.localityFeedback || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -232,7 +258,7 @@ export const herohousingSalariedTemplate = (
             <ul>
               <li>Whether customer visited the property</li>
               <li>Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)</li>
-              <li>Property is occupied by whom and reason if not self-occupied</li>
+              <li>Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)</li>
               <li>Source of property purchase (through dealer, builder/reference/relative)</li>
               <li>Name of seller and any relationship with customer</li>
               <li>Type of property/structure and area,</li>
@@ -242,7 +268,20 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.detailsOfProperty?.detailsOfPropertyDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.customerVisitedProperty || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.propertyType || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.propertyOccupancy || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.sourceOfPropertyPurchase || ""}</p></li>  
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.sellerDetails || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.relationshipWithCustomer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.typeOfProperty || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.areaOfProperty || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.dealValue || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.saleDeedValue || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.ocrSource || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.whenSellerBoughtTheProperty || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -255,7 +294,11 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.investmentAndProperties?.investmentAndPropertiesDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.investmentHabits || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.currentResidenceOwnership || ""} ${investmentAndProperties.rentedAmountIfAny ? "Rent amount: " + investmentAndProperties.rentedAmountIfAny : ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.detailsOfAssetsBuiltTillDate || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -267,7 +310,10 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.endUseOfPropertyFund?.endUseOfPropertyFundDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.proposedEndUseOfProperty || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.detailedEndUseOfFundInLapCases || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -282,7 +328,13 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.detailsOfLoans?.detailsOfLoansDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.detailsOfLoansPresentlyServicing || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.repaymentAccount || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.pastLoanEndUse || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.checkIfAnyHomeLoanLap || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.anyBouncingInLoans || ""}</p></li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -294,7 +346,22 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.banking?.bankingDescription || ""}</p>
+          ${bankingDetails?.bankAccounts && Array.isArray(bankingDetails.bankAccounts) && bankingDetails.bankAccounts.length > 0 ? `
+          <p style="margin:8px 0;line-height:1.5"><strong>Bank Accounts:</strong></p>
+          <ul>
+            ${ensureArray(bankingDetails.bankAccounts).map((account: any) => `
+              <li><p style="margin:8px 0;line-height:1.5">${account.bankDetails || ""}${account.accountOpenDate ? " - " + account.accountOpenDate : ""}${account.nameOfBankAccount ? " - " + account.nameOfBankAccount : ""}</p></li>
+            `).join("")}
+          </ul>
+          ` : ""}
+            ${bankingDetails?.savingAccounts && Array.isArray(bankingDetails.savingAccounts) && bankingDetails.savingAccounts.length > 0 ? `
+              <p style="margin:8px 0;line-height:1.5"><strong>Savings Accounts:</strong></p>
+              <ul>
+                ${ensureArray(bankingDetails.savingAccounts).map((account: any) => `
+                  <li><p style="margin:8px 0;line-height:1.5">${account.savingsAccountDetails || ""}</p></li>
+                `).join("")}
+              </ul>
+            ` : ""}
           </td>
         </tr>
         <tr>
@@ -309,7 +376,13 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${verificationData.documentVerificationAndOtherChecks?.documentVerificationAndOtherChecksDescription || ""}</p>
+            <ul>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.thirdPartyCheck || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.familyRelationshipCheckWithEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
+            </ul>
           </td>
         </tr>
       </table>
@@ -317,9 +390,7 @@ export const herohousingSalariedTemplate = (
       <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
       <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. HERO HOUSING FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO </strong>will not be held liable in any case.</p>
 
-      <p style="margin:8px 0;line-height:1.5"><strong>Photos with Geo coordinates of location</strong></p>
+      ${pdBaseTemplateFooter(html_data)}
     </div>
-
-    ${html_data.imagesData || ""}
   `;
 };

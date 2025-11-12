@@ -100,36 +100,6 @@ export const axisBankSchema = {
                   type: "integer",
                   title: "age",
                 },
-                qualification: {
-                  type: "string",
-                  title: "qualification",
-                  enum: [
-                    "Below 10th",
-                    "10th pass",
-                    "12th pass",
-                    "Diploma/ITI certification",
-                    "Graduate",
-                    "PG/Professional Certification"
-                  ],
-                },
-                occupation: {
-                  type: "string",
-                  title: "occupation",
-                },
-                incomePerMonth: {
-                  type: "number",
-                  title: "income per month",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                dependent: {
-                  type: "string",
-                  title: "dependent",
-                },
               },
             },
           },
@@ -467,23 +437,32 @@ export const axisBankSchema = {
       schema: {
         type: "object",
         properties: {
-          bankName: {
-            type: "string",
-            title: "Bank Name",
-          },
-          accountType: {
-            type: "string",
-            title: "A/c type",
-            enum: ["Savings", "Current", "CC/OD"],
-          },
-          averageBalance: {
-            type: "number",
-            title: "Average Balances",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          bankingDetails: {
+            type: "array",
+            title: "Banking Details",
+            items: {
+              type: "object",
+              properties: {
+                bankName: {
+                  type: "string",
+                  title: "Bank Name",
+                },
+                accountType: {
+                  type: "string",
+                  title: "A/c type",
+                  enum: ["Savings", "Current", "CC/OD"],
+                },
+                averageBalance: {
+                  type: "number",
+                  title: "Average Balances",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+              },
             },
           },
           anyChequeBounces: {
@@ -491,7 +470,6 @@ export const axisBankSchema = {
             title: "Banking performance- Any cheque bounces seen (Y/N)",
             enum: ["Yes", "No"],
           },
-
           addressOfProperty: {
             type: "string",
             title: "Details of collateral- Address of property",

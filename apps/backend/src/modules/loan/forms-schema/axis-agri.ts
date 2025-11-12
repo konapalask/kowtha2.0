@@ -135,27 +135,24 @@ export const axisAgriSchema = {
             title: "Financial Brief",
             ui: { widget: "textarea", rows: 3 },
           },
-          financeTurnover: {
-            type: "number",
-            title: "Annual Turnover (Rs.)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
-          collateralSecurityDetails: {
+          endUseOfTheLoanAndLoanAmountRequired: {
             type: "string",
-            title: "Collateral Security Details",
+            title: "End use of the Loan & Loan amount Required",
             ui: { widget: "textarea", rows: 2 },
           },
-          currentAccountIfAny: {
+          otherBusinessAlternateIncomeSources: {
             type: "string",
-            title: "Current Account (if any)",
+            title: "Other Business / Alternate Income Sources",
+            ui: { widget: "textarea", rows: 2 },
           },
-          existingBankingRelationsWithAxisIfAny: {
+          businessLicenseRelatedInformation: {
             type: "string",
-            title: "Existing Banking Relations with Axis (if any)",
+            title: "Business License Related Information",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          documentsProvidedDuringVisit: {
+            type: "string",
+            title: "Documnets Provided during Visit",
             ui: { widget: "textarea", rows: 2 },
           },
         },
@@ -198,7 +195,7 @@ export const axisAgriSchema = {
             title: "Additional Details / Conduct / TOD if availed",
             ui: { widget: "textarea", rows: 2 },
           },
-          takeoverRemarks: {
+          isItATakeover: {
             type: "string",
             title: "Is it a Takeover?",
           },
