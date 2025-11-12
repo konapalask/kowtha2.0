@@ -1,11 +1,10 @@
 import { Radio, Card, Button, Select, Row, Col, message } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 
-// Custom CSS for larger font size in the editor
 const customStyles = `
   .ql-editor {
     font-size: 16px !important;
@@ -20,14 +19,12 @@ const customStyles = `
     line-height: 1.6 !important;
   }
   
-  /* Light color when read-only */
   .ql-editor.ql-disabled,
   .ql-editor[readonly] {
     background-color: #f8f9fa !important;
     color: #6c757d !important;
   }
   
-  /* Light color for the entire editor container when disabled */
   .ql-container.ql-disabled {
     background-color: #f8f9fa !important;
   }
@@ -75,9 +72,9 @@ const Feedback: React.FC<FeedbackProps> = ({
   const { id } = router.query;
   const [synopsisLoading, setSynopsisLoading] = useState(false);
   const [existingSynopsis, setExistingSynopsis] = useState<string>("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const isInitializedRef = useRef(false);
 
-  // Function to convert text to points format
   const convertTextToPoints = (text: string): string => {
     if (!text) return "<ul><li><br></li></ul>";
 
@@ -91,7 +88,6 @@ const Feedback: React.FC<FeedbackProps> = ({
     return `<ul>${points}</ul>`;
   };
 
-  // Function to convert points back to text
   const convertPointsToText = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -105,8 +101,9 @@ const Feedback: React.FC<FeedbackProps> = ({
       .join(". ");
   };
 
-  // Fetch and display existing synopsis data when component loads
   useEffect(() => {
+    if (isInitializedRef.current) return;
+    
     let foundSynopsis = null;
 
     if (
@@ -127,7 +124,6 @@ const Feedback: React.FC<FeedbackProps> = ({
       foundSynopsis = verificationData.synopsis;
     }
 
-    // Fallback: check if synopsis is in the first verification
     if (
       !foundSynopsis &&
       verificationData &&
@@ -142,14 +138,16 @@ const Feedback: React.FC<FeedbackProps> = ({
 
     if (foundSynopsis) {
       setExistingSynopsis(foundSynopsis);
-      // If backend already has UL HTML, use it directly; else convert plain text to UL
       const isHtmlList = /<\s*ul[^>]*>/i.test(foundSynopsis);
       const contentToSet = isHtmlList
         ? foundSynopsis
         : convertTextToPoints(foundSynopsis);
       setEditorContent(contentToSet);
+      setHasChanges(false);
     }
-  }, [verificationData, setEditorContent]);
+    
+    isInitializedRef.current = true;
+  }, [verificationData]);
 
   const templateOptions = [
     { value: "TATA_CAPITAL_LIMITED", label: "TATA CAPITAL LIMITED" },
@@ -275,11 +273,9 @@ const Feedback: React.FC<FeedbackProps> = ({
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    // Find all <ul> elements
     const ul = doc.querySelector("ul");
-    if (!ul) return "<ul><li><br></li></ul>"; // fallback if no list
+    if (!ul) return "<ul><li><br></li></ul>";
 
-    // Only keep <ul><li> structure, remove everything else
     const cleanUl = document.createElement("ul");
 
     ul.querySelectorAll("li").forEach((li: any) => {
@@ -292,12 +288,33 @@ const Feedback: React.FC<FeedbackProps> = ({
   };
 
   const handleEditorChange = (content: string) => {
-    const sanitized = sanitizeToListOnly(content);
-
-    if (!sanitized || sanitized.trim() === "") {
+    // Don't sanitize on every keystroke - only set the content directly
+    // Sanitization will happen on save/submit
+    if (!content || content.trim() === "" || content === "<p><br></p>") {
       setEditorContent("<ul><li><br></li></ul>");
     } else {
-      setEditorContent(sanitized);
+      // Only sanitize if content doesn't have <ul> structure yet
+      // This allows user to type freely
+      if (content.includes("<ul>") || content.includes("<li>")) {
+        setEditorContent(content);
+      } else {
+        // If user is typing plain text, wrap it in list structure
+        // But don't be too aggressive - let them type
+        setEditorContent(content);
+      }
+    }
+    
+    // Track if content has changed from original (for Verifier/Admin)
+    if (role !== "VerificationExecutive" && existingSynopsis) {
+      const originalContent = existingSynopsis;
+      const isHtmlList = /<\s*ul[^>]*>/i.test(originalContent);
+      const normalizedOriginal = isHtmlList
+        ? originalContent
+        : convertTextToPoints(originalContent);
+      setHasChanges(content !== normalizedOriginal);
+    } else if (role !== "VerificationExecutive") {
+      // For new synopsis, track if there's any content
+      setHasChanges(!!(content && content.trim() !== "" && content !== "<ul><li><br></li></ul>"));
     }
   };
 
@@ -359,24 +376,13 @@ const Feedback: React.FC<FeedbackProps> = ({
 
       console.log("Submitting synopsis with payload:", payload);
 
-      if (isEditing) {
-        // Update existing synopsis using PATCH
-        await updateSynopsis(id as string, editorContent);
-        message.success("Synopsis updated successfully!");
-        setIsEditing(false);
-        // Update the existing synopsis state with new content
-        setExistingSynopsis(editorContent);
-      } else {
-        // Submit new synopsis with financial data
-        await submitFinancialAnalysis(id as string, payload);
-        message.success("Synopsis submitted successfully!");
-        setExistingSynopsis(editorContent);
-      }
+      // Submit new synopsis with financial data
+      await submitFinancialAnalysis(id as string, payload);
+      message.success("Synopsis submitted successfully!");
+      setExistingSynopsis(editorContent);
     } catch (error) {
       console.error("Error submitting synopsis:", error);
-      message.error(
-        isEditing ? "Failed to update synopsis" : "Failed to submit synopsis"
-      );
+      message.error("Failed to submit synopsis");
     } finally {
       setSynopsisLoading(false);
     }
@@ -388,49 +394,19 @@ const Feedback: React.FC<FeedbackProps> = ({
       <section style={{ marginBottom: 24 }}>
         <Card
           title="Synopsis"
-          extra={
-            existingSynopsis && (
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  setIsEditing(true);
-                  // If existing synopsis is UL HTML, use as-is; else convert text to UL
-                  const isHtmlList = /<\s*ul[^>]*>/i.test(existingSynopsis);
-                  const contentToSet = isHtmlList
-                    ? existingSynopsis
-                    : convertTextToPoints(existingSynopsis);
-                  setEditorContent(contentToSet);
-                  // Focus the editor for better UX
-                  setTimeout(() => {
-                    const editor = document.querySelector(".ql-editor");
-                    if (editor) {
-                      (editor as HTMLElement).focus();
-                    }
-                  }, 100);
-                }}
-                disabled={hasEditRequest}
-              />
-            )
-          }
+          extra={null}
           bodyStyle={{ padding: 0 }}
         >
           <div
             style={{
               minHeight: "300px",
-              background:
-                disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)
-                  ? "#f8f9fa"
-                  : "#fff",
+              background: disabled ? "#f8f9fa" : "#fff",
               borderRadius: 8,
-              border:
-                disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)
-                  ? "1px solid #e9ecef"
-                  : "1px solid #d9d9d9",
+              border: disabled ? "1px solid #e9ecef" : "1px solid #d9d9d9",
             }}
           >
             <ReactQuill
-              readOnly={disabled || (role !== "VerificationExecutive" && !!existingSynopsis && !isEditing)}
+              readOnly={disabled}
               theme="snow"
               value={editorContent}
               onChange={handleEditorChange}
@@ -455,18 +431,43 @@ const Feedback: React.FC<FeedbackProps> = ({
                     <Button
                       type="primary"
                       size="small"
-                      onClick={handleSynopsisSubmit}
+                      onClick={async () => {
+                        // Sanitize content before saving
+                        const sanitized = sanitizeToListOnly(editorContent);
+                        const contentToSave = sanitized || "<ul><li><br></li></ul>";
+                        
+                        // For Verifier/Admin: Always use PATCH update when synopsis exists
+                        if (existingSynopsis) {
+                          try {
+                            setSynopsisLoading(true);
+                            await updateSynopsis(id as string, contentToSave);
+                            message.success("Synopsis updated successfully!");
+                            setExistingSynopsis(contentToSave);
+                            setEditorContent(contentToSave);
+                            setHasChanges(false);
+                          } catch (error) {
+                            console.error("Error updating synopsis:", error);
+                            message.error("Failed to update synopsis");
+                          } finally {
+                            setSynopsisLoading(false);
+                          }
+                        } else {
+                          // New synopsis submission - update editorContent with sanitized version first
+                          setEditorContent(contentToSave);
+                          await handleSynopsisSubmit();
+                        }
+                      }}
                       loading={synopsisLoading}
                       disabled={
                         disabled ||
                         !editorContent ||
                         editorContent.trim() === "<ul><li><br></li></ul>" ||
                         synopsisLoading ||
-                        (!!existingSynopsis && !isEditing)
+                        (!!existingSynopsis && !hasChanges)
                       }
                       style={{
                         background:
-                          existingSynopsis && !isEditing
+                          existingSynopsis && !hasChanges
                             ? "#9ca3af"
                             : "#1e40af",
                         border: "none",
@@ -475,16 +476,16 @@ const Feedback: React.FC<FeedbackProps> = ({
                         fontSize: "14px",
                         fontWeight: "500",
                         boxShadow:
-                          existingSynopsis && !isEditing
+                          existingSynopsis && !hasChanges
                             ? "none"
                             : "0 2px 8px rgba(30, 64, 175, 0.3)",
                         color: "#ffffff",
                       }}
                     >
-                      {existingSynopsis && !isEditing
-                        ? "Synopsis Already Submitted"
-                        : isEditing
-                          ? "Update Synopsis"
+                      {existingSynopsis && !hasChanges
+                        ? "No Changes"
+                        : existingSynopsis
+                          ? "Save"
                           : "Submit Synopsis"}
                     </Button>
                   ) : (
@@ -542,8 +543,8 @@ const Feedback: React.FC<FeedbackProps> = ({
                 <Radio value="credit_refer">Credit Refer</Radio>
               </Radio.Group>
 
-              {/* Template Selection Dropdown */}
-              {role !== "VerificationExecutive" && (
+              {/* Template Selection Dropdown - Hidden for Verifier, Admin, and VerificationExecutive */}
+              {false && (
                 <div style={{ marginTop: 16, marginBottom: 16 }}>
                   <div style={{ marginBottom: 8 }}>
                     <strong>Select Template:</strong>
