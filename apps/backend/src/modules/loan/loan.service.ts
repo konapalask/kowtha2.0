@@ -897,6 +897,35 @@ export class LoanService {
         where.status = filters.status;
       }
 
+      if (filters?.postponed) {
+        where.verifications = {
+          some: {
+            isPostponed: true,
+          },
+        };
+      }
+
+      if (filters?.applicantName) {
+        where.applicantName = {
+          contains: filters.applicantName,
+          mode: "insensitive",
+        };
+      }
+
+      if (filters?.applicantMobile) {
+        where.applicantMobile = {
+          contains: filters.applicantMobile,
+          mode: "insensitive",
+        };
+      }
+
+      if (filters?.bankName) {
+        where.bankName = {
+          contains: filters.bankName,
+          mode: "insensitive",
+        };
+      }
+
       if (filters?.id) {
         where.id = Number(filters.id);
       }
