@@ -1336,7 +1336,7 @@ export class LoanController {
     // Find matching BankSchemaConfig by bankName or template name
     const matchingConfig = bankSchemas.find(
       (config) =>
-        config.bankName === bankName || config.templates.includes(bankName)
+        config.bankName === bankName || config.templatesAndFooters?.[bankName]
     );
 
     if (!matchingConfig) {
