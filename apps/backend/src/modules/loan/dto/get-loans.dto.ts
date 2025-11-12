@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 import { Department, LoanStatus } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ApiProperty } from '@nestjs/swagger';
@@ -20,6 +20,38 @@ export class GetLoansDto extends PaginationDto {
   @IsOptional()
   @IsString()
   applicationNumber?: string;
+
+  @ApiProperty({
+    description: 'Filter loans by bank name',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiProperty({
+    description: 'Filter loans by postponed status',
+    required: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  postponed?: boolean;
+
+  @ApiProperty({
+    description: 'Filter loans by applicant name',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  applicantName?: string;
+
+  @ApiProperty({
+    description: 'Filter loans by mobile number',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  applicantMobile?: string;
 
   @ApiProperty({
     description: 'Filter loans by id',
