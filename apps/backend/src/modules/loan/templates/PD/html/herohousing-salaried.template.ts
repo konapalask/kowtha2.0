@@ -31,7 +31,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -90,7 +90,9 @@ export const herohousingSalariedTemplate = (
   // Debug: Log the structure to help identify data issues
   console.log("🔍 [HeroHousing Salaried] Verification Data Structure:", {
     hasLoanDetails: verificationData?.loanDetails,
-    loanDetailsKeys: verificationData?.loanDetails ? Object.keys(verificationData.loanDetails) : [],
+    loanDetailsKeys: verificationData?.loanDetails
+      ? Object.keys(verificationData.loanDetails)
+      : [],
     loanDetailsValue: verificationData?.loanDetails,
     allTopLevelKeys: verificationData ? Object.keys(verificationData) : [],
   });
@@ -101,7 +103,8 @@ export const herohousingSalariedTemplate = (
   const currentJobProfile = verificationData?.employmentProfile || {};
   const detailsOfEmployer = verificationData?.employerDetails || {};
   const propertyDetails = verificationData?.propertyDetails || {};
-  const investmentAndProperties = verificationData?.investmentAndProperties || {};
+  const investmentAndProperties =
+    verificationData?.investmentAndProperties || {};
   const endUseOfPropertyFund = verificationData?.endUseOfPropertyFund || {};
   const loanDetails = verificationData?.detailsOfLoans || {};
   const bankingDetails = verificationData?.bankingDetails || {};
@@ -120,7 +123,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.nameOfCustomer || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.applicantName || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
@@ -142,7 +145,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${ general.latLongOfOfficeAddress || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.latitudeLongitude || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
@@ -187,7 +190,9 @@ export const herohousingSalariedTemplate = (
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Occupation (Job/Business)</p></td>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Income Details/dependent</p></td>
               </tr>
-              ${ensureArray(familyDetails.members).map((member) => `
+              ${ensureArray(familyDetails.members)
+                .map(
+                  (member) => `
                 <tr>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relationship || ""}</p></td>
@@ -196,7 +201,9 @@ export const herohousingSalariedTemplate = (
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.occupation || ""}</p></td>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.incomeDetails || ""}</p></td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
           </td>
         </tr>
@@ -346,22 +353,42 @@ export const herohousingSalariedTemplate = (
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-          ${bankingDetails?.bankAccounts && Array.isArray(bankingDetails.bankAccounts) && bankingDetails.bankAccounts.length > 0 ? `
+          ${
+            bankingDetails?.bankAccounts &&
+            Array.isArray(bankingDetails.bankAccounts) &&
+            bankingDetails.bankAccounts.length > 0
+              ? `
           <p style="margin:8px 0;line-height:1.5"><strong>Bank Accounts:</strong></p>
           <ul>
-            ${ensureArray(bankingDetails.bankAccounts).map((account: any) => `
+            ${ensureArray(bankingDetails.bankAccounts)
+              .map(
+                (account: any) => `
               <li><p style="margin:8px 0;line-height:1.5">${account.bankDetails || ""}${account.accountOpenDate ? " - " + account.accountOpenDate : ""}${account.nameOfBankAccount ? " - " + account.nameOfBankAccount : ""}</p></li>
-            `).join("")}
+            `
+              )
+              .join("")}
           </ul>
-          ` : ""}
-            ${bankingDetails?.savingAccounts && Array.isArray(bankingDetails.savingAccounts) && bankingDetails.savingAccounts.length > 0 ? `
+          `
+              : ""
+          }
+            ${
+              bankingDetails?.savingAccounts &&
+              Array.isArray(bankingDetails.savingAccounts) &&
+              bankingDetails.savingAccounts.length > 0
+                ? `
               <p style="margin:8px 0;line-height:1.5"><strong>Savings Accounts:</strong></p>
               <ul>
-                ${ensureArray(bankingDetails.savingAccounts).map((account: any) => `
+                ${ensureArray(bankingDetails.savingAccounts)
+                  .map(
+                    (account: any) => `
                   <li><p style="margin:8px 0;line-height:1.5">${account.savingsAccountDetails || ""}</p></li>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </ul>
-            ` : ""}
+            `
+                : ""
+            }
           </td>
         </tr>
         <tr>
@@ -377,11 +404,11 @@ export const herohousingSalariedTemplate = (
           </td>
           <td style="border:1px solid #ccc;padding:8px">
             <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${ doc.thirdPartyCheck || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${ doc.familyRelationshipCheckWithEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${ doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${doc.thirdPartyCheck || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${doc.familyRelationshipCheckWithEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
             </ul>
           </td>
         </tr>

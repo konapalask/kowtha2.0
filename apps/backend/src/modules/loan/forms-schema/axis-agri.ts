@@ -52,6 +52,7 @@ export const axisAgriSchema = {
             type: "string",
             title: "Address of the Firm",
             ui: { widget: "textarea", rows: 3 },
+            readOnly: true,
           },
           dateAndTimeOfPd: {
             type: "string",
@@ -138,17 +139,17 @@ export const axisAgriSchema = {
           endUseOfTheLoanAndLoanAmountRequired: {
             type: "string",
             title: "End use of the Loan & Loan amount Required",
-            ui: { widget: "textarea", rows: 2 },
+            ui: { widget: "textarea", rows: 3 },
           },
           otherBusinessAlternateIncomeSources: {
             type: "string",
             title: "Other Business / Alternate Income Sources",
-            ui: { widget: "textarea", rows: 2 },
+            ui: { widget: "textarea", rows: 3 },
           },
           businessLicenseRelatedInformation: {
             type: "string",
             title: "Business License Related Information",
-            ui: { widget: "textarea", rows: 2 },
+            ui: { widget: "textarea", rows: 3 },
           },
           documentsProvidedDuringVisit: {
             type: "string",
@@ -201,7 +202,7 @@ export const axisAgriSchema = {
           },
           otherLoanObligations: {
             type: "string",
-            title: "Other Loan Obligations of the Firm",
+            title: "Any other loan obligations of the firm",
             ui: { widget: "textarea", rows: 2 },
           },
         },

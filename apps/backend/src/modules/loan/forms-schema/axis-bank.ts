@@ -44,7 +44,7 @@ export const axisBankSchema = {
           pdAddress: {
             type: "string",
             title: "PD Address Type (Residence/Office/Factory/Godown)",
-            enum: ["residence", "Office", "Factory", "Godown"],
+            enum: ["Residence", "Office", "Factory", "Godown"],
           },
           applicantAddress: {
             type: "string",
@@ -228,7 +228,7 @@ export const axisBankSchema = {
           businessNameBoardSeen: {
             type: "string",
             title: "Business name board seen",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           noOfEmployeesSeen: {
             type: "integer",
@@ -237,12 +237,12 @@ export const axisBankSchema = {
           businessActivitySeen: {
             type: "string",
             title: "Business activity seen",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           stockSeen: {
             type: "string",
             title: "Stock seen",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           noOfMachinesSeen: {
             type: "integer",
@@ -322,16 +322,34 @@ export const axisBankSchema = {
         type: "object",
         properties: {
           turnOverAndMargin: {
-            type: "string",
+            type: "number",
             title: "Turnover and Margin",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           peakSalesMonths: {
-            type: "string",
+            type: "number",
             title: "Peak sales months - Volume in INR",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           lowSalesMonths: {
-            type: "string",
+            type: "number",
             title: "Low sales months - Volume in INR",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           customerIdentityEstablished: {
             type: "string",

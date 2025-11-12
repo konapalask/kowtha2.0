@@ -500,8 +500,14 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           netMargin: {
-            type: "string",
+            type: "number",
             title: "Net Margin",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -624,6 +630,7 @@ export const arkaFincapSchema = {
           status: {
             type: "string",
             title: "Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
           },
         },
       },

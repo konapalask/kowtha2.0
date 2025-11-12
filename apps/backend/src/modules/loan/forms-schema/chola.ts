@@ -31,7 +31,7 @@ export const cholaSchema = {
             type: "string",
             title: "Visited Address",
           },
-          loanRequested: {
+          loanAmountRequested: {
             type: "number",
             title: "Loan Requested",
             formatter: {
@@ -40,10 +40,12 @@ export const cholaSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
+            readOnly: true,
           },
           dateOfVisit: {
             type: "string",
@@ -112,6 +114,16 @@ export const cholaSchema = {
                 relation: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",

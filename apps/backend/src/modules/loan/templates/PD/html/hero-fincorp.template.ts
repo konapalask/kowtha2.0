@@ -32,7 +32,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | undefined | null): T[] => {
+const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -105,20 +105,23 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
   const businessProfileData = verificationData.businessProfile || {};
-  const businessProfile = Array.isArray(businessProfileData) 
-    ? businessProfileData 
+  const businessProfile = Array.isArray(businessProfileData)
+    ? businessProfileData
     : Array.isArray(businessProfileData.details)
-    ? businessProfileData.details
-    : [];
+      ? businessProfileData.details
+      : [];
   const financialSummary = verificationData.financialSummary || {};
   const relationships = verificationData.relationships || {};
   // Handle nested structures for existing loans
-  const existingLoansData = verificationData.existingLoanDetails || verificationData.existingLoans || {};
+  const existingLoansData =
+    verificationData.existingLoanDetails ||
+    verificationData.existingLoans ||
+    {};
   const existingLoansArray = Array.isArray(existingLoansData)
     ? existingLoansData
     : Array.isArray(existingLoansData.loans)
-    ? existingLoansData.loans
-    : [];
+      ? existingLoansData.loans
+      : [];
   const existingLoans = ensureArray(existingLoansArray);
   const loanAnalysis = verificationData.loanAnalysis || {};
   const generatedDate =
@@ -130,7 +133,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ["Name of Applicant / Contact person", basic.applicantName],
     ["Name of Concern", basic.concernName],
     ["Office Address", basic.officeAddress],
-    ["Phone", basic.phoneNumber],
+    ["Phone", basic.applicantPhoneNumber],
     ["Appointment Fixed", basic.appointmentFixed],
     ["Date of Visit", basic.dateOfVisit],
     ["Structure of Loan", basic.structureOfLoan],
@@ -144,24 +147,23 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   // Handle nested structures for family members
-  const familyMembersData = applicantProfile.familyMembers || verificationData.familyDetails || {};
+  const familyMembersData =
+    applicantProfile.familyMembers || verificationData.familyDetails || {};
   const familyMembersArray = Array.isArray(familyMembersData)
     ? familyMembersData
     : Array.isArray(familyMembersData.familyMembers)
-    ? familyMembersData.familyMembers
-    : Array.isArray(familyMembersData.members)
-    ? familyMembersData.members
-    : [];
-  const familyRows = ensureArray(familyMembersArray).map(
-    (member: any) => [
-      formatMultiline(member?.name || ""),
-      formatMultiline(member?.relation || ""),
-      formatMultiline(member?.age || ""),
-      formatMultiline(member?.qualification || ""),
-      formatMultiline(member?.occupation || ""),
-      formatMultiline(member?.income || ""),
-    ]
-  );
+      ? familyMembersData.familyMembers
+      : Array.isArray(familyMembersData.members)
+        ? familyMembersData.members
+        : [];
+  const familyRows = ensureArray(familyMembersArray).map((member: any) => [
+    formatMultiline(member?.name || ""),
+    formatMultiline(member?.relation || ""),
+    formatMultiline(member?.age || ""),
+    formatMultiline(member?.qualification || ""),
+    formatMultiline(member?.occupation || ""),
+    formatMultiline(member?.income || ""),
+  ]);
 
   const familyTable = renderInnerTable(
     [
@@ -187,12 +189,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   // Handle nested structures for customers
-  const customersData = relationships.customers || verificationData.customers || {};
+  const customersData =
+    relationships.customers || verificationData.customers || {};
   const customersArray = Array.isArray(customersData)
     ? customersData
     : Array.isArray(customersData.topCustomers)
-    ? customersData.topCustomers
-    : [];
+      ? customersData.topCustomers
+      : [];
   const customersList = ensureArray(customersArray).map(
     (customer: any) =>
       `<li>${formatMultiline(customer?.name || customer?.customerName || "Mr. Name")} – ${formatMultiline(
@@ -201,12 +204,16 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   // Handle nested structures for suppliers
-  const suppliersData = relationships.purchaseReferences || relationships.suppliers || verificationData.suppliers || {};
+  const suppliersData =
+    relationships.purchaseReferences ||
+    relationships.suppliers ||
+    verificationData.suppliers ||
+    {};
   const suppliersArray = Array.isArray(suppliersData)
     ? suppliersData
     : Array.isArray(suppliersData.topSuppliers)
-    ? suppliersData.topSuppliers
-    : [];
+      ? suppliersData.topSuppliers
+      : [];
   const purchaseReferencesList = ensureArray(suppliersArray).map(
     (supplier: any) =>
       `<li>${formatMultiline(supplier?.name || supplier?.supplierName || "Mr. Name")} – ${formatMultiline(
@@ -250,9 +257,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   const concernsList = renderList(
-    ensureArray(loanAnalysis.concerns).map((item: any) =>
-      formatMultiline(item)
-    )
+    ensureArray(loanAnalysis.concerns).map((item: any) => formatMultiline(item))
   );
 
   const otherBusinessList = renderList(
