@@ -34,8 +34,8 @@ export class GetLoansDto extends PaginationDto {
     required: false
   })
   @IsOptional()
-  @IsBoolean()
-  postponed?: boolean;
+  @IsString()
+  postponed?: string;
 
   @ApiProperty({
     description: 'Filter loans by applicant name',
