@@ -1,4 +1,4 @@
-import { format,  toZonedTime } from "date-fns-tz";
+import { format, toZonedTime } from "date-fns-tz";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
@@ -33,7 +33,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | undefined | null): T[] => {
+const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -133,12 +133,17 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   ]);
 
   // Handle nested structures for existing loans
-  const existingLoansData = verificationData.existingLoanDetails || verificationData.existingLoans || {};
-  const existingLoansArray = Array.isArray(existingLoansData) 
-    ? existingLoansData 
-    : Array.isArray(existingLoansData.loans)
-    ? existingLoansData.loans
-    : [];
+  const existingLoansData =
+    verificationData.existingLoanDetails ||
+    verificationData.existingLoans ||
+    {};
+  const existingLoansArray = Array.isArray(existingLoansData)
+    ? existingLoansData
+    : Array.isArray(existingLoansData.existingLoans)
+      ? existingLoansData.existingLoans
+      : Array.isArray(existingLoansData.loans)
+        ? existingLoansData.loans
+        : [];
   const existingLoans = ensureArray(existingLoansArray).map((loan: any) => [
     formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
     formatMultiline(loan?.typeOfLoan || ""),
@@ -152,8 +157,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   const bankingDetailsArray = Array.isArray(bankingDetailsData)
     ? bankingDetailsData
     : Array.isArray(bankingDetailsData.bankingDetails)
-    ? bankingDetailsData.bankingDetails
-    : [];
+      ? bankingDetailsData.bankingDetails
+      : [];
   const bankingDetails = ensureArray(bankingDetailsArray).map((bank: any) => [
     formatMultiline(bank?.bankName || ""),
     formatMultiline(bank?.accountNo || bank?.accountNumber || ""),
@@ -161,44 +166,65 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   ]);
 
   // Handle nested structures for assets
-  const assetsData = verificationData.assets || verificationData.assetDetails || {};
+  const assetsData =
+    verificationData.assets || verificationData.assetDetails || {};
   const assetsArray = Array.isArray(assetsData)
     ? assetsData
     : Array.isArray(assetsData.assets)
-    ? assetsData.assets
-    : [];
+      ? assetsData.assets
+      : [];
   const assets = ensureArray(assetsArray).map(
-    (asset: any) => `<li>${formatMultiline(asset?.assetDetails || asset?.details || asset || "")}</li>`
+    (asset: any) =>
+      `<li>${formatMultiline(asset?.assetDetails || asset?.details || asset || "")}</li>`
   );
 
   // Handle nested structures for customer references
-  const customerReferencesData = verificationData.customersReferenceNumbers || verificationData.customersReference || {};
+  const customerReferencesData =
+    verificationData.customersReferenceNumbers ||
+    verificationData.customersReference ||
+    {};
   const customerReferencesArray = Array.isArray(customerReferencesData)
     ? customerReferencesData
     : Array.isArray(customerReferencesData.references)
-    ? customerReferencesData.references
-    : [];
+      ? customerReferencesData.references
+      : [];
   const customerReferences = ensureArray(customerReferencesArray).map(
     (item: any) =>
       `<li>${formatMultiline(item?.customerReferenceNumber || item?.referenceNumber || item?.name || item || "")}</li>`
   );
 
   // Handle nested structures for other incomes
-  const otherIncomesData = verificationData.otherIncomes || verificationData.otherIncome || {};
+  const otherIncomesData =
+    verificationData.otherIncomes || verificationData.otherIncome || {};
   const otherIncomesArray = Array.isArray(otherIncomesData)
     ? otherIncomesData
     : Array.isArray(otherIncomesData.incomes)
-    ? otherIncomesData.incomes
-    : [];
+      ? otherIncomesData.incomes
+      : [];
   const otherIncomes = ensureArray(otherIncomesArray).map(
-    (item: any) => `<li>${formatMultiline(item?.otherIncome || item?.income || item || "")}</li>`
+    (item: any) =>
+      `<li>${formatMultiline(item?.otherIncome || item?.income || item || "")}</li>`
   );
 
-  const comfortFactors = ensureArray(verificationData.comfortFactor).map(
+  // Handle nested structures for comfort factors
+  const comfortFactorData = verificationData.comfortFactor || {};
+  const comfortFactorsArray = Array.isArray(comfortFactorData)
+    ? comfortFactorData
+    : Array.isArray(comfortFactorData.comfortFactors)
+      ? comfortFactorData.comfortFactors
+      : [];
+  const comfortFactors = ensureArray(comfortFactorsArray).map(
     (item: any) => `<li>${formatMultiline(item?.comfortFactor || "")}</li>`
   );
 
-  const discomfortFactors = ensureArray(verificationData.discomfortFactor).map(
+  // Handle nested structures for discomfort factors
+  const discomfortFactorData = verificationData.discomfortFactor || {};
+  const discomfortFactorsArray = Array.isArray(discomfortFactorData)
+    ? discomfortFactorData
+    : Array.isArray(discomfortFactorData.discomfortFactors)
+      ? discomfortFactorData.discomfortFactors
+      : [];
+  const discomfortFactors = ensureArray(discomfortFactorsArray).map(
     (item: any) => `<li>${formatMultiline(item?.discomfortFactor || "")}</li>`
   );
 
@@ -215,10 +241,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         )
         .join("")
     : hasValue(aboutBusiness?.details)
-    ? `<li>${formatMultiline(aboutBusiness.details)}</li>`
-    : hasValue(aboutBusiness)
-    ? `<li>${formatMultiline(aboutBusiness)}</li>`
-    : "";
+      ? `<li>${formatMultiline(aboutBusiness.details)}</li>`
+      : hasValue(aboutBusiness)
+        ? `<li>${formatMultiline(aboutBusiness)}</li>`
+        : "";
 
   const generalSection = renderKeyValueTable([
     [
@@ -229,7 +255,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     ["Business name", basic.businessName],
     ["Constitution", basic.constitution],
     ["Visited Address", basic.visitedAddress],
-    ["Loan Requested", formatCurrency(basic.loanRequested)],
+    ["Loan Requested", formatCurrency(basic.loanAmountRequested)],
     ["Purpose of loan", basic.purposeOfLoan],
     ["Date of visit", basic.dateOfVisit],
     ["Person met", basic.personMet],
@@ -252,11 +278,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   );
 
   const bankingTable = renderInnerTable(
-    [
-      "Bank Name",
-      "A/c No",
-      "A/c Type",
-    ],
+    ["Bank Name", "A/c No", "A/c Type"],
     bankingDetails
   );
 

@@ -120,7 +120,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         
         <tr>
           <td style="${labelCellStyle}">Residential Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${residentialDetails.address+", "+residentialDetails.latitude+", "+residentialDetails.longitude}</td>
@@ -147,7 +147,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
             <td style="${labelCellStyle}">Property Details (with Latitude and Longitude)</td>
-            <td>
+            <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${propertyDetails.address+", "+propertyDetails.latitude+", "+propertyDetails.longitude}</td>
@@ -192,7 +192,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">3</td>
                 <td style="${labelCellStyle}">Family Details/Background </td>
-                <td>
+                <td style="border:1px solid #ccc;padding:8px">
                     <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}">Name of Family Member</td>
@@ -231,7 +231,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">6</td>
                 <td style="${labelCellStyle}">Suppliers/ Customer/ Neighbour (TPC) (Minimum 2 required)</td>
-                <td>
+                <td style="border:1px solid #ccc;padding:8px">
                     <table style="${tableStyle}">
                     <tr>
                     <td style="${labelCellStyle}" colspan="4">Supplier Details:-</td>
@@ -316,7 +316,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">9</td>
                 <td style="${labelCellStyle}">Assets Details</td>
-                <td>
+                <td style="border:1px solid #ccc;padding:8px">
                     <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}">Asset Type</td>
@@ -349,7 +349,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <tr>
             <td style="${labelCellStyle}">11</td>
             <td style="${labelCellStyle}">Current live loans Details: </td>
-            <td>
+            <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">.
                 <tr>
                     <td style="${labelCellStyle}">Name of Bank / NBFC</td>
@@ -396,7 +396,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <tr>
             <td style="${labelCellStyle}">15</td>
             <td style="${labelCellStyle}">Banking Details</td>
-            <td>
+            <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                 <tr>
                     <td style="${labelCellStyle}">Bank Name</td>

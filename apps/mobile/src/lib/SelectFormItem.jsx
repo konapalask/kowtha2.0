@@ -21,16 +21,20 @@ export const SelectFormItem = ({data}) => {
           required: {value: data?.required !== false, message: 'Required'},
           ...data?.rules,
         }}
-        render={({field: {onChange, value}, fieldState: {error}}) => (
-          <>
-            <TouchableOpacity
-              style={[styles.selector, error && styles.errorBorder]}
-              onPress={() => actionSheetRef.current?.show()}>
-              <Text style={[{color: value ? '#000' : '#999', fontSize: 14}]}>
-                {data?.options?.find(opt => opt.id === value)?.name ||
-                  'Select an option'}
-              </Text>
-            </TouchableOpacity>
+        render={({field: {onChange, value}, fieldState: {error}}) => {
+          const selectedOption = data?.options?.find(opt => opt.id === value);
+          const displayText = selectedOption?.name || 'Select an option';
+          const hasValue = selectedOption !== undefined;
+          
+          return (
+            <>
+              <TouchableOpacity
+                style={[styles.selector, error && styles.errorBorder]}
+                onPress={() => actionSheetRef.current?.show()}>
+                <Text style={[{color: hasValue ? '#000' : '#999', fontSize: 14}]}>
+                  {displayText}
+                </Text>
+              </TouchableOpacity>
 
             <ActionSheet ref={actionSheetRef} gestureEnabled={true}>
               <View style={[styles.sheetContainer, {paddingBottom: 50}]}>
@@ -48,8 +52,9 @@ export const SelectFormItem = ({data}) => {
               </View>
             </ActionSheet>
             {error && <Text style={styles.errorText}>{error.message}</Text>}
-          </>
-        )}
+            </>
+          );
+        }}
       />
     </View>
   );

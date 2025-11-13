@@ -559,7 +559,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           </tr>
           <tr>
             <td style="${labelCellStyle}"><strong>Banking Details</strong></td>
-            <td colspan="3">
+            <td style="border:1px solid #ccc;padding:8px" colspan="3">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Bank Name</td>
@@ -643,7 +643,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         <!-- Collateral Details Section -->
         <tr>
           <td style="${labelCellStyle}" colspan="2"><strong>Collateral Details</strong></td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px" >
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Property Location</td>
