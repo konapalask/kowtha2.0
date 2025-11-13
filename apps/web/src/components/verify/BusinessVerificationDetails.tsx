@@ -257,9 +257,60 @@ export const BusinessVerificationDetails: React.FC<
   );
   const [loading, setLoading] = useState(false);
 
+  // Effect to restore scroll position after data refresh
+  useEffect(() => {
+    if (savedSectionRef.current && savedSectionScrollRef.current !== null) {
+      const sectionId = savedSectionRef.current;
+      const scrollPosition = savedSectionScrollRef.current;
+      
+      // Try multiple times to find the element (DOM might not be ready immediately)
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      const tryScroll = () => {
+        attempts++;
+        const sectionElement = document.getElementById(`section-${sectionId}`);
+        
+        if (sectionElement) {
+          // Found the element, scroll to it
+          // Use requestAnimationFrame for smoother scroll
+          requestAnimationFrame(() => {
+            sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Add a small offset to account for any fixed headers
+            setTimeout(() => {
+              const rect = sectionElement.getBoundingClientRect();
+              const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+              const targetY = rect.top + scrollTop - 20; // 20px offset
+              window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }, 100);
+          });
+          
+          // Clear the refs
+          savedSectionRef.current = null;
+          savedSectionScrollRef.current = null;
+        } else if (attempts < maxAttempts) {
+          // Element not found yet, try again after a short delay
+          setTimeout(tryScroll, 100);
+        } else {
+          // Max attempts reached, fallback to stored scroll position
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+          savedSectionRef.current = null;
+          savedSectionScrollRef.current = null;
+        }
+      };
+      
+      // Start trying after initial delay
+      setTimeout(tryScroll, 200);
+    }
+  }, [verificationData, completeVerificationData]); // Trigger when data updates
+
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
+  
+  // Ref to track section that was just saved (for scroll restoration)
+  const savedSectionRef = React.useRef<string | null>(null);
+  const savedSectionScrollRef = React.useRef<number | null>(null);
   const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
@@ -1133,6 +1184,16 @@ export const BusinessVerificationDetails: React.FC<
 
     // Handle save for a specific section
     const handleSectionSave = async (sectionId: string) => {
+      // Store current scroll position and section ID for restoration after save
+      const scrollPosition = window.scrollY || window.pageYOffset;
+      savedSectionRef.current = sectionId;
+      savedSectionScrollRef.current = scrollPosition;
+      
+      // Ensure section stays expanded
+      if (!activeSections.includes(sectionId)) {
+        setActiveSections([...activeSections, sectionId]);
+      }
+
       try {
         // Get current form values from the form instance for the section being saved
         const formInstance = formInstancesRef.current[sectionId];
@@ -1448,8 +1509,8 @@ export const BusinessVerificationDetails: React.FC<
             `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
           );
 
-          // Refresh verification data
-          fetchVerificationData?.();
+          // Refresh verification data - scroll restoration will happen in useEffect
+          await fetchVerificationData?.();
         } catch (error: any) {
           console.error("Error saving section to backend:", error);
           const errorMessage =
@@ -1578,9 +1639,10 @@ export const BusinessVerificationDetails: React.FC<
                 />
               }
             >
-              {/* <Form layout="vertical"> */}
-              {/* Render form fields based on section schema */}
-              <FormSectionRenderer
+              <div id={`section-${section.id}`}>
+                {/* <Form layout="vertical"> */}
+                {/* Render form fields based on section schema */}
+                <FormSectionRenderer
                 section={section}
                 data={useMemo(
                   () => ({
@@ -1608,6 +1670,7 @@ export const BusinessVerificationDetails: React.FC<
                 isActive={activeSections.includes(section.id)}
               />
               {/* </Form> */}
+              </div>
             </Collapse.Panel>
           ))}
         </Collapse>
@@ -1959,7 +2022,8 @@ export const BusinessVerificationDetails: React.FC<
 
       // Fields with formulas are read-only
       const isFormulaField = !!field.formula;
-      const fieldReadOnly = readOnly || field.readOnly || isFormulaField;
+      // Allow editing of readOnly fields (auto fields), but keep formula fields and form-level readOnly
+      const fieldReadOnly = readOnly || isFormulaField;
 
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
@@ -2141,7 +2205,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
               />
             </Form.Item>
@@ -2242,7 +2306,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
               />
             </Form.Item>
@@ -2767,7 +2831,7 @@ export const BusinessVerificationDetails: React.FC<
         return (
           <Form.Item key={itemFieldId} name={fieldKey} label={itemField.label}>
             <Select
-              disabled={readOnly || itemField.readOnly}
+              disabled={readOnly}
               placeholder={`Select ${itemField.label}`}
             >
               {itemField.enum.map((option: string) => (
@@ -2791,7 +2855,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <InputNumber
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 style={{ width: "100%" }}
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
@@ -2841,7 +2905,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <DatePicker
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
                 style={{ width: "100%" }}
@@ -2880,7 +2944,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <Input
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
                   type="time"
                 />
@@ -2916,7 +2980,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <DatePicker
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY"
                   style={{ width: "100%" }}
@@ -2937,7 +3001,7 @@ export const BusinessVerificationDetails: React.FC<
                 label={itemField.label}
               >
                 <TextArea
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={itemField.placeholder || itemField.label}
                   rows={itemField.ui?.rows || 3}
                 />
@@ -2952,7 +3016,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <Input
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>
@@ -2965,7 +3029,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={readOnly || itemField.readOnly}>
+              <Radio.Group disabled={readOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -2980,7 +3044,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <Input
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>

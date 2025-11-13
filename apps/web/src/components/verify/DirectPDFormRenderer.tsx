@@ -477,7 +477,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
 
     const commonProps = {
       placeholder: `Enter ${field.label}`,
-      disabled: field.readOnly || !editMode,
+      disabled: !editMode, // Allow editing of readOnly fields when in edit mode
     };
 
     switch (field.type) {
@@ -511,7 +511,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
       case "richtext":
         return (
           <RichTextEditor
-            readOnly={field.readOnly || !editMode}
+            readOnly={!editMode} // Allow editing of readOnly fields when in edit mode
             placeholder={`Enter ${field.label}`}
             minHeight={(rows ?? 3) * 40}
           />
@@ -553,7 +553,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
         );
 
       case "boolean":
-        return <Switch disabled={field.readOnly || !editMode} />;
+        return <Switch disabled={!editMode} />; // Allow editing of readOnly fields when in edit mode
 
       case "array":
         return renderArrayField(field, sectionId || "");
@@ -587,7 +587,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     const commonProps = {
       value: normalizedValue,
       placeholder: `Enter ${field.label}`,
-      disabled: field.readOnly || !editMode,
+      disabled: !editMode, // Allow editing of readOnly fields when in edit mode
     };
 
     switch (field.type) {
@@ -687,7 +687,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
             checked={!!value}
             onChange={onChange}
             size="small"
-            disabled={field.readOnly || !editMode}
+            disabled={!editMode} // Allow editing of readOnly fields when in edit mode
           />
         );
 
@@ -820,16 +820,16 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
     });
 
     const handleDeleteItem = (index: number) => {
-      if (!editMode || field.readOnly) {
-        return;
+      if (!editMode) {
+        return; // Allow editing of readOnly fields when in edit mode
       }
       const newArray = arrayWithIds.filter((_: any, i: number) => i !== index);
       updateArrayData(sectionId, field.id, newArray);
     };
 
     const handleAddItem = () => {
-      if (!editMode || field.readOnly) {
-        return;
+      if (!editMode) {
+        return; // Allow editing of readOnly fields when in edit mode
       }
       const newItem: any = { _id: uuidv4() };
       itemFields.forEach((itemField: any) => {
@@ -874,7 +874,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
                 }}
                 title={`${field.label} #${index + 1}`}
                 extra={
-                  editMode && !field.readOnly ? (
+                  editMode ? (
                     <Button
                       type="link"
                       size="small"
@@ -926,7 +926,7 @@ export const DirectPDFormRenderer: React.FC<DirectPDFormRendererProps> = ({
           ))}
         </Row>
 
-        {editMode && !field.readOnly && (
+        {editMode && (
           <Button
             type="dashed"
             onClick={handleAddItem}

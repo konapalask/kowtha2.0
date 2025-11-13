@@ -235,30 +235,28 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
             ),
           }));
 
-          // Action column for row removal (only if field is not readOnly)
-          if (!field.readOnly) {
-            columns.push({
-              title: "",
-              dataIndex: "__actions",
-              key: "actions",
-              render: (_: any, row: any) => {
-                const index = dataSource.findIndex((r) => r.key === row.key);
-                if (fields.length <= 1 || index < 0) {
-                  return <span />;
-                }
-                return (
-                  <Button
-                    type="text"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    onClick={() => remove(fields[index].name)}
-                    title="Remove item"
-                  />
-                );
-              },
-            });
-          }
+          // Action column for row removal (allow editing of readOnly fields)
+          columns.push({
+            title: "",
+            dataIndex: "__actions",
+            key: "actions",
+            render: (_: any, row: any) => {
+              const index = dataSource.findIndex((r) => r.key === row.key);
+              if (fields.length <= 1 || index < 0) {
+                return <span />;
+              }
+              return (
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={() => remove(fields[index].name)}
+                  title="Remove item"
+                />
+              );
+            },
+          });
 
           return (
             <Card size="small" title={field.label} style={{ marginBottom: 12 }}>
@@ -270,20 +268,18 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
                 size="middle"
                 rowKey="key"
               />
-              {!field.readOnly && (
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    // Add new item with unique ID
-                    const newItem = { _id: generateArrayItemId() };
-                    add(newItem);
-                  }}
-                  icon={<PlusOutlined />}
-                  style={{ width: "100%", marginTop: 8 }}
-                >
-                  Add {field.label}
-                </Button>
-              )}
+              <Button
+                type="dashed"
+                onClick={() => {
+                  // Add new item with unique ID
+                  const newItem = { _id: generateArrayItemId() };
+                  add(newItem);
+                }}
+                icon={<PlusOutlined />}
+                style={{ width: "100%", marginTop: 8 }}
+              >
+                Add {field.label}
+              </Button>
             </Card>
           );
         }}
@@ -336,7 +332,8 @@ export const DynamicEditModal: React.FC<DynamicEditModalProps> = ({
   };
 
   const renderFieldInput = (field: WebFieldDefinition) => {
-    const isReadOnly = field.readOnly;
+    // Allow editing of readOnly fields (auto fields)
+    const isReadOnly = false;
 
     // Common onChange handler to trim whitespace
     const handleChange = (value: any, onChange?: (value: any) => void) => {
