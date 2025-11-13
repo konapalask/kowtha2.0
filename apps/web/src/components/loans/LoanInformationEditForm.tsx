@@ -48,9 +48,89 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
   // console.log(form.getFieldsValue());
 
   const loanType = Form.useWatch("loanType", form);
+  const bankName = Form.useWatch("bankName", form);
 
   // Check if mobile verification is completed to disable bank name field
   const isVerificationCompleted = isMobileVerificationCompleted(selectedLoan);
+
+  // Filter template options based on selected bank name
+  const filteredTemplateOptions = React.useMemo(() => {
+    if (!bankName || !templateOptions || templateOptions.length === 0) {
+      return templateOptions || [];
+    }
+
+    // Map bank names to their template names (matching backend index.ts structure)
+    const bankToTemplatesMap: Record<string, string[]> = {
+      "Aditya Birla": ["ADITYA BIRLA-HL", "ADITYA BIRLA-ML", "ADITYA BIRLA-STSL"],
+      "Ambit": ["AMBIT-HL"],
+      "Ambit-MSME": ["AMBIT-MSME"],
+      "Axis Finance": ["AXIS FINANCE-HL"],
+      "Axis Finance UBL Above 10L": ["AXIS FINANCE-UBL"],
+      "Axis Finance UBL Below 10L": ["AXIS FINANCE-UBL"],
+      "Axis Bank": ["AXIS BANK"],
+      "Axis Agri": ["AXIS AGRI", "AXIS BUSINESS AGRI"],
+      "Chola": ["CHOLA-HL", "CHOLA-ML"],
+      "DCB": ["DCB BANK"],
+      "Arka Fincap": [
+        "ARKA FINCAP",
+        "CENTRUM",
+        "CENT BANK",
+        "CLIX CAPITAL-HL",
+        "CLIX CAPITAL-UBL",
+        "EASY HL",
+        "FED BANK (PD&LIP)",
+        "GODREJ-HL",
+        "GODREJ-UBL",
+        "INDUSIND",
+        "KOTAK",
+        "MUTHOOT-HL",
+        "MUTHOOT FINCORP (PD & LIP)",
+        "NIDO HOME FINANCE",
+        "NORTHERN ARC",
+        "NIPUN",
+        "PIRAMAL (PD, AIP, LIP)",
+        "PNB",
+        "SAMMAAN",
+        "SMFG-ML (MICRO & MASS)",
+        "SMFG-HL",
+        "TATA CAPITAL-FSL",
+        "TATA CAPITAL-HFL",
+        "TRUHOME (PD & LIP)",
+        "VERITAS",
+      ],
+      "Hero Fincorp": ["HERO FINCORP"],
+      "HeroHousing-Salaried": ["HERO HOUSING"],
+      "HeroHousing-Self": ["HERO HOUSING"],
+      "ICICI": ["ICICI"],
+      "IDFC HL & ML": ["IDFC FIRST-HL", "IDFC FIRST-ML"],
+      "IDFC PL": ["IDFC FIRST-PL"],
+      "IIFL": ["IIFL"],
+      "India Shelter SENP": ["INDIA SHELTER"],
+      "India Shelter Salaried": ["INDIA SHELTER"],
+      "INCRED": ["INCRED/KKR India Financial Services Limited"],
+      "Jana Salaried": ["JANA SMALL FINANCE BANK LIMITED"],
+      "Jana Senp Above 50l": ["JANA SMALL FINANCE BANK LIMITED"],
+      "Jana Senp Below 50l": ["JANA SMALL FINANCE BANK LIMITED"],
+      "Niwas Salaried": ["NIWAS"],
+      "Niwas Senp": ["NIWAS"],
+      "RBL": ["RBL BANK (PD & LIP)"],
+      "SMFG SME": ["SMFG-SME"],
+      "Tata Ubl": ["TATA CAPITAL-UBL"],
+      "Yes Bank": ["YES BANK-HL"],
+    };
+
+    const templatesForBank = bankToTemplatesMap[bankName] || [];
+    
+    if (templatesForBank.length === 0) {
+      // If bank not found in map, return all templates
+      return templateOptions;
+    }
+
+    // Filter template options to only include templates for selected bank
+    return templateOptions.filter((option) =>
+      templatesForBank.includes(option.value)
+    );
+  }, [bankName, templateOptions]);
 
   return (
     <div>
@@ -320,6 +400,12 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                     .includes(input.toString().toLowerCase())
                 }
                 disabled={isVerificationCompleted}
+                onChange={(value) => {
+                  // Clear template name when bank changes
+                  if (currentDepartment === "PD") {
+                    form.setFieldValue("templateName", undefined);
+                  }
+                }}
               />
             </Form.Item>
           </Col>
@@ -351,13 +437,25 @@ const LoanInformationEditForm: React.FC<LoanInfoFormProps> = ({
                 <Select
                   showSearch
                   placeholder="Select Template Name"
-                  options={templateOptions}
+                  options={filteredTemplateOptions}
                   filterOption={(input, option) =>
                     (option?.label ?? "")
                       .toString()
                       .toLowerCase()
                       .includes(input.toString().toLowerCase())
                   }
+                  disabled={!bankName}
+                  notFoundContent={
+                    bankName
+                      ? "No templates available for selected bank"
+                      : "Please select a bank first"
+                  }
+                  onChange={(value) => {
+                    // Clear template if bank changes and template is not valid for new bank
+                    if (value && !filteredTemplateOptions.some((opt) => opt.value === value)) {
+                      form.setFieldValue("templateName", undefined);
+                    }
+                  }}
                 />
               </Form.Item>
             </Col>
