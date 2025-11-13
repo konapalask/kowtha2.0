@@ -2109,7 +2109,6 @@ export const BusinessVerificationDetails: React.FC<
             !field.label?.toLowerCase().includes("at the time of"));
 
           const isDateField =
-            !isExcludedFromDate &&
             (field.label?.toLowerCase().includes("date") ||
               field.label?.toLowerCase().includes("visit") ||
               fieldId.toLowerCase().includes("date")) &&
