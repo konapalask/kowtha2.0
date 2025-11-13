@@ -135,16 +135,19 @@ export const janaSenpAbove50lSchema = {
             id: "familyDetails",
             label: "Family Details",
             schema: {
-                type: "array",
-                title: "Family Details",
-                items: {
-                    type: "object",
-                    properties: {
-                        name: { type: "string", title: "Name" },
-                        relationWithApplicant: { type: "string", title: "Relation with Applicant" },
-                        age: { type: "number", title: "Age (Yrs)" },
-                        qualification: { 
-                          type: "string", 
+                type: "object", 
+                properties: {
+                    familyMembers: {
+                        type: "array",
+                        title: "Family Members",
+                        items: {
+                            type: "object",
+                            properties: {
+                                name: { type: "string", title: "Name" } ,
+                                relationship: { type: "string", title: "Relationship with Applicant" },
+                                age: { type: "number", title: "Age (Yrs)" },
+                                qualification: { 
+                                    type: "string", 
                           title: "Qualification",
                           enum: [
                             "Below 10th",
@@ -165,6 +168,8 @@ export const janaSenpAbove50lSchema = {
                         dependent: { type: "string", title: "Dependent" },
                     },
                 },
+                },
+            },
             },
         },
 
@@ -182,17 +187,22 @@ export const janaSenpAbove50lSchema = {
             id: "shareholdingDetails",
             label: "Shareholding Details",
             schema: {
-                type: "array",
-                title: "Shareholding Details",
-                items: {
-                    type: "object",
-                    properties: {
-                        shareholderName: { type: "string", title: "Name of the Shareholder" },
-                        relationWithMainApplicant: { type: "string", title: "Relation with Main Applicant" },
-                        designation: { type: "string", title: "Designation" },
-                        shareholdingPercentage: { type: "number", title: "% of Shareholding" },
-                        comingIntoLoanStructure: { type: "string", title: "Coming into Loan Structure" },
-                        functionalRole: { type: "string", title: "Functional role of partner / director" },
+                type: "object",
+                properties: {
+                    shareholdingDetails: {
+                        type: "array",
+                        title: "Shareholding Details",
+                        items: {
+                            type: "object",
+                            properties: {
+                                shareholderName: { type: "string", title: "Name of the Shareholder" },
+                                relationship: { type: "string", title: "Relation with Main Applicant" },
+                                designation: { type: "string", title: "Designation" },
+                                shareholdingPercentage: { type: "number", title: "% of Shareholding" },
+                                comingIntoLoanStructure: { type: "string", title: "Coming into Loan Structure" },
+                                functionalRole: { type: "string", title: "Functional role of partner / director" },
+                            },
+                        },
                     },
                 },
             },
@@ -214,21 +224,26 @@ export const janaSenpAbove50lSchema = {
             id:"productOrServiceDetails",
             label: "Product or Service Details",
             schema: {
-                type: "array",
-                title: "Product or Service Details",
-                items: {
-                    type: "object",
-                    properties: {
-                        productOrServiceDetail: { type: "string", title: "Product/Service Detail" , ui: {
-                            widget: "textarea",
-                            rows: 3,
-                        }, },
-                        productOrServicePriceRange: { type: "number", title: "Product/Service Price Range approx." , formatter: {
-                            useIndianFormat: true,
-                            locale: "en-IN",
-                            maxDecimalPlaces: 2,
-                            minDecimalPlaces: 0,
-                        }, },
+                type: "object",
+                properties: {
+                    productOrServiceDetails: {
+                        type: "array",
+                        title: "Product or Service Details",
+                        items: {
+                            type: "object",
+                            properties: {
+                                productOrServiceDetail: { type: "string", title: "Product/Service Detail" , ui: {
+                                    widget: "textarea",
+                                    rows: 3,
+                                }, },
+                                productOrServicePriceRange: { type: "number", title: "Product/Service Price Range approx." , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                    minDecimalPlaces: 0,
+                                }, },
+                            },
+                        },
                     },
                 },
             },
@@ -332,15 +347,20 @@ export const janaSenpAbove50lSchema = {
             id: "documentsObserved",
             label: "Documents Observed",
             schema: {
-                type: "array",
-                title: "Documents Observed",
-                items: {
-                    type: "object",
-                    properties: {
-                        documentCategory: { type: "string", title: "Document Category" },
-                        documentName: { type: "string", title: "Document Name" },
-                        documentType: { type: "string", title: "Document Type" },
-                        documentRemarks: { type: "string", title: "Remarks" , ui: { widget: "textarea", rows: 3 } },
+                type: "object",
+                properties: {
+                    documents: {
+                        type: "array",
+                        title: "Documents Observed",
+                        items: {
+                            type: "object",
+                            properties: {
+                                documentCategory: { type: "string", title: "Document Category" },
+                                documentName: { type: "string", title: "Document Name" },
+                                documentType: { type: "string", title: "Document Type" },
+                                documentRemarks: { type: "string", title: "Remarks" , ui: { widget: "textarea", rows: 3 } },
+                            },
+                        },
                     },
                 },
             },
@@ -519,20 +539,17 @@ export const janaSenpAbove50lSchema = {
             id: "existingLoans",
             label: "Existing Loans",
             schema: {
-                type: "array",
-                title: "Existing Loans",
-                items: {
-                    type: "object",
-                    properties: {
-                        bankOrNbfcName: { type: "string", title: "Name of Bank / NBFC" },
-                        typeOfLoan: { type: "string", title: "Type of Loan" },
-                        sanctionedAmount: { type: "number", title: "Sanctioned Amount (in Lakhs)" , formatter: {
-                            useIndianFormat: true,
-                            locale: "en-IN",
-                            maxDecimalPlaces: 2,
-                            minDecimalPlaces: 0,
-                        }, },
-                        outstandingBalance: { type: "number", title: "O/S Balance (in Lakhs)" , formatter: {
+                type: "object",
+                properties: {
+                    existingLoans: {
+                        type: "array",  
+                        title: "Existing Loans",
+                        items: {
+                            type: "object",
+                            properties: {
+                                bankOrNbfcName: { type: "string", title: "Name of Bank / NBFC" },
+                                typeOfLoan: { type: "string", title: "Type of Loan" },
+                                sanctionedAmount: { type: "number", title: "Sanctioned Amount (in Lakhs)" , formatter: {
                             useIndianFormat: true,
                             locale: "en-IN",
                             maxDecimalPlaces: 2,
@@ -549,6 +566,8 @@ export const janaSenpAbove50lSchema = {
                         emiPaidBank: { type: "string", title: "EMI Paid Bank" },
                         securedAgainstAsset: { type: "string", title: "Secured Against which Asset" },
                     },
+                        },
+                    },
                 },
             },
         },
@@ -557,17 +576,22 @@ export const janaSenpAbove50lSchema = {
             id: "bankingDetails",
             label: "Banking Details",
             schema: {
-                type: "array",
-                title: "Banking Details",
-                items: {
-                    type: "object",
-                    properties: {
-                        bankName: { type: "string", title: "Bank Name" },
-                        branchName: { type: "string", title: "Branch Name" },
-                        accountType: { type: "string", title: "Account Type" },
-                        openSinceYear: { type: "string", title: "Open Since (Year)" },
+                type: "object",
+                properties: {
+                    details: {
+                        type: "array",
+                        title: "Banking Details",
+                        items: {
+                            type: "object",
+                            properties: {
+                                bankName: { type: "string", title: "Bank Name" },
+                                branchName: { type: "string", title: "Branch Name" },
+                                accountType: { type: "string", title: "Account Type" },
+                                openSinceYear: { type: "string", title: "Open Since (Year)" },
+                            },
+                        },
+                    },
                 },
-            },
             },
         },
 
@@ -632,19 +656,24 @@ export const janaSenpAbove50lSchema = {
             id:"thirdPartyConfirmation",
             label: "Third Party Confirmation",
             schema: {
-                type: "array",
-                title: "Third Party Confirmation",
-                items: {
-                    type: "object",
-                    properties: {
-                        individualOrBusinessName: { type: "string", title: "Individual / Business Name" },
-                        address: { type: "string", title: "Address" },
-                        contactNo: { type: "number", title: "Contact No." },
-                        knowingSince: { type: "number", title: "Knowing Since" },
-                        feedbackOnBorrower: { type: "string", title: "Feedback on Borrower" },
-                        feedbackOnBusiness: { type: "string", title: "Feedback on Business" },
+                type: "object",
+                properties: {
+                    thirdPartyConfirmation: {
+                        type: "array",
+                        title: "Third Party Confirmation",
+                        items: {
+                            type: "object",
+                            properties: {
+                                individualOrBusinessName: { type: "string", title: "Individual / Business Name" },
+                                address: { type: "string", title: "Address" },
+                                contactNo: { type: "number", title: "Contact No." },
+                                knowingSince: { type: "number", title: "Knowing Since" },
+                                feedbackOnBorrower: { type: "string", title: "Feedback on Borrower" },
+                                feedbackOnBusiness: { type: "string", title: "Feedback on Business" },
+                            },
+                        },
+                    },
                 },
-            },
             },
         },
         {
@@ -661,26 +690,31 @@ export const janaSenpAbove50lSchema = {
             id: "otherIncome",
             label: "Other Income",
             schema: {
-                type: "array",
-                title: "Other Income",
-                items: {
-                    type: "object",
-                    properties: {
-                    incomeAmount: { type: "number", title: "Income Amount" , formatter: {
-                        useIndianFormat: true,
-                        locale: "en-IN",
-                        maxDecimalPlaces: 2,
-                        minDecimalPlaces: 0,
-                    }, },
-                    details: { type: "string", title: "Details" },
-                    reference: { type: "string", title: "Reference" },
+                type: "object",
+                properties: {
+                    otherIncome: {
+                        type: "array",
+                        title: "Other Income",
+                        items: {
+                            type: "object",
+                            properties: {
+                                incomeAmount: { type: "number", title: "Income Amount" , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                    minDecimalPlaces: 0,
+                                }, },
+                                details: { type: "string", title: "Details" },
+                                reference: { type: "string", title: "Reference" },
+                            },
+                        },
+                    },
                 },
-            },
             },
         },
 
         {
-            id: "Remarks",
+            id: "remarks",
             label: "Remarks",
             schema: {
                 type: "object",

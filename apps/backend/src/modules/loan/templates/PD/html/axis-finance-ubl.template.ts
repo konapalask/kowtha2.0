@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.template";
+import { pdBaseTemplate , pdBaseTemplateFooter} from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
@@ -104,23 +104,14 @@ export const axisFinanceUBLTemplate = (
   const basic = verificationData.basicDetails || {};
   // Handle both possible structures: familyDetails.familyDetails or familyDetails.familyMembers or just familyDetails array
   const familyDetailsData = verificationData.familyDetails || {};
-  const familyMembersArray = Array.isArray(familyDetailsData) 
-    ? familyDetailsData 
-    : Array.isArray(familyDetailsData.familyDetails)
-    ? familyDetailsData.familyDetails
-    : Array.isArray(familyDetailsData.familyMembers)
-    ? familyDetailsData.familyMembers
-    : [];
-  const familyMembers = ensureArray(familyMembersArray).map(
+  const familyMembers = ensureArray(familyDetailsData.details).map(
     (member: any) => [
       formatMultiline(member?.name || ""),
       formatMultiline(member?.relation || ""),
       formatMultiline(member?.age ? `${member.age} years` : ""),
       formatMultiline(member?.qualification || ""),
       formatMultiline(member?.occupation || ""),
-      hasValue(member?.incomePerMonth)
-        ? formatCurrency(member?.incomePerMonth)
-        : "",
+      formatCurrency(member?.incomePerMonth),
       formatMultiline(member?.dependent || ""),
     ]
   );
@@ -254,14 +245,14 @@ export const axisFinanceUBLTemplate = (
   const bankingAccountsArray = Array.isArray(bankingDetailsData)
     ? bankingDetailsData
     : Array.isArray(bankingDetailsData.bankingDetails)
-    ? bankingDetailsData.bankingDetails
+    ? bankingDetailsData.banks
     : [];
   const bankingAccounts = ensureArray(bankingAccountsArray).map(
     (account: any) => [
-      formatMultiline(account?.bankName || ""),
-      formatMultiline(account?.branchName || ""),
-      formatMultiline(account?.accountType || ""),
-      formatMultiline(account?.openSinceYear || ""),
+      account?.bankName || "",
+      account?.branchName || "",
+      account?.accountType || "",
+      account?.openSince|| "",
     ]
   );
 
@@ -284,9 +275,7 @@ export const axisFinanceUBLTemplate = (
     ]
   );
 
-  const observations = ensureArray(thirdPartySection.observations)
-    .map((item: any) => `<li>${formatMultiline(item || "")}</li>`)
-    .join("");
+  const observations = formatMultiline(thirdPartySection.observations || "");
 
   const recommendations = ensureArray(
     verificationData.recommendations?.recommendations
@@ -496,7 +485,7 @@ export const axisFinanceUBLTemplate = (
         ],
         [
           "Car, Bike and any other vehicle (Company Name and Model)",
-          vehicles.length ? vehicles.join(", ") : "NA",
+          assetSection.vehicles || "NA",
         ],
       ])}
 
@@ -539,7 +528,7 @@ export const axisFinanceUBLTemplate = (
         ],
         thirdPartyReferences
       )}
-      ${renderKeyValueTable([["Observation:", observations || "Not provided"]])}
+      ${renderKeyValueTable([["Observations:", observations || "Not provided"]])}
       ${renderKeyValueTable([
         [
           "Other Income: (Income from other than initiated business)",
@@ -559,18 +548,15 @@ export const axisFinanceUBLTemplate = (
           thirdPartySection.verifierSignature || "",
         ],
       ])}
-
-      
-
-
       <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${formatMultiline(
         verificationData.recommendations?.disclaimer ||
           "We estimated financials, purely based on the valid documents provided by the applicant."
       )}</p>
 
       
-      <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
     </div>
+
+    ${pdBaseTemplateFooter(html_data)}
  
     `;
 };

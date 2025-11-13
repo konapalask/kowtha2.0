@@ -82,7 +82,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
   const jobProfile = verificationData.jobProfile || {};
   const averageStockMaintained = verificationData.averageStockMaintained || {};
   const workingHours = verificationData.workingHours || {};
-  const employmentDetails = verificationData.employmentDetails || {};
+  const employmentDetails = verificationData.employmentDetails || {};  
   const currentMonthlySalary = verificationData.currentMonthlySalary || {};
   const otherIncome = verificationData.otherIncome || {};
   const specificForCashSalariedProfile = verificationData.specificForCashSalariedProfile || {};
@@ -121,7 +121,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Details of Borrower’s & their family members & their Occupations</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Name</td>
@@ -131,8 +131,8 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Earning (Yes/No)</td>
               <td style="${labelCellStyle}">Approx. Income</td>
             </tr>
-            ${ensureArray(borrowerFamilyDetails).map((borrower: any) => `
-              <tr>
+            ${ensureArray(borrowerFamilyDetails.borrowerFamilyDetails).map((borrower: any) => `
+              <tr>  
                 <td style="${valueCellStyle}">${borrower.name}</td>
                 <td style="${valueCellStyle}">${borrower.relationWithApplicant}</td>
                 <td style="${valueCellStyle}">${borrower.age}</td>
@@ -147,7 +147,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Initiated address (Employment/Business</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Initiated Address</td>
@@ -164,7 +164,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Borrower Profile</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Applicant</td>
@@ -189,7 +189,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">If Partnership or Pvt. Ltd. Firm details of partner’s/share holders</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}" colspan="6"><u>Shareholding Details:</u></td>
@@ -202,7 +202,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Coming into Loan Structure</td>
               <td style="${labelCellStyle}">Function Handled</td>
             </tr>
-            ${ensureArray(shareholdingDetails).map((shareholder: any) => `
+            ${ensureArray(shareholdingDetails.shareholdingDetails).map((shareholder: any) => `
               <tr>
                 <td style="${valueCellStyle}">${shareholder.shareholderName}</td>
                 <td style="${valueCellStyle}">${shareholder.relationWithApplicant}</td>
@@ -239,7 +239,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Employee Details (to be filled for Self Employed Profile)</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">No of Employees</td>
@@ -263,7 +263,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Current monthly Salary (to be filled in salaried income profile)</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Mode of salary paid by employer – Cash/ Bank credit</td>
@@ -288,7 +288,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Other Source of Income (if any)</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Type of Income</td>
@@ -308,7 +308,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Specific for Cash Salaried Profile</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
               <tr>
               <td style="${labelCellStyle}" colspan="2">To be filled in for Cash Salaried profile:-</td>
@@ -361,7 +361,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Clients</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">No of Fixed Clients</td>
@@ -396,7 +396,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Vendors</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">No of Fixed Vendors</td>
@@ -430,7 +430,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">TPC Check</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Individual / Business Name</td>
@@ -440,7 +440,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Feedback on Borrower</td>
               <td style="${labelCellStyle}">Feedback on Business</td>
             </tr>
-            ${ensureArray(thirdPartyChecks).map((check: any) => `
+            ${ensureArray(thirdPartyChecks.thirdPartyChecks).map((check: any) => `
               <tr>
                 <td style="${valueCellStyle}">${check?.individualOrBusinessName || ""}</td>
                 <td style="${valueCellStyle}">${check?.address || ""}</td>
@@ -458,7 +458,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Income Assessment</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Last 3 Month Salary</td>
@@ -528,7 +528,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Specific for Contractor Profile</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}" colspan="2">To be filled in for Contractor (Resi cum office) profile:-</td>
@@ -571,12 +571,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Level of Activity & Stocks along with Observation</td>
-        <td style="${valueCellStyle}">${ensureArray(levelOfActivity).map((activity: any) => `${activity.observations}`).join("<br> ")}</td>
+        <td style="${valueCellStyle}">${ensureArray(levelOfActivity.levelOfActivity).map((activity: any) => `${activity.observations}`).join("<br> ")}</td>
       </tr>
 
       <tr>
         <td style="${labelCellStyle}">Details of property to be mortgaged</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Collateral Address</td>
@@ -617,7 +617,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">End Use of Loan</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">HL Purchase</td>
@@ -661,7 +661,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Other Asset Details (Including properties, vehicles, investments etc.)</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Asset Details</td>
@@ -705,7 +705,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Loan Details</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Name of Bank</td>
@@ -717,7 +717,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">MOB</td>
               <td style="${labelCellStyle}">EMI Paid Bank</td>
             </tr>
-            ${ensureArray(loanDetails).map((loan: any) => `
+            ${ensureArray(loanDetails.loanDetails).map((loan: any) => `
               <tr>
                 <td style="${valueCellStyle}">${loan.nameOfBank}</td>
                 <td style="${valueCellStyle}">${loan.typeOfLoan}</td>
@@ -735,29 +735,29 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Banking Details</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
-              <td style="${labelCellStyle}">Bank Name</td>
-              <td style="${labelCellStyle}">Branch Name</td>
-              <td style="${labelCellStyle}">Account Type</td>
-              <td style="${labelCellStyle}">Open Since (Year)</td>
-            </tr>
-            ${ensureArray(bankingDetails).map((bank: any) => `
-              <tr>
-                <td style="${valueCellStyle}">${bank.bankName}</td>
-                <td style="${valueCellStyle}">${bank.branchName}</td>
-                <td style="${valueCellStyle}">${bank.accountType}</td>
-                <td style="${valueCellStyle}">${bank.openSinceYear}</td>
-              </tr>
-            `).join("")}
+          <td style="${labelCellStyle}">Bank Name</td>
+          <td style="${labelCellStyle}">Branch Name</td>
+          <td style="${labelCellStyle}">Account Type</td>
+          <td style="${labelCellStyle}">Open Since (Year)</td>
+        </tr>
+        ${ensureArray(bankingDetails.details).map((bank: any) => `
+          <tr>
+          <td style="${valueCellStyle}">${bank.bankName}</td>
+          <td style="${valueCellStyle}">${bank.branchName}</td>
+          <td style="${valueCellStyle}">${bank.accountType}</td>
+          <td style="${valueCellStyle}">${bank.openSinceYear}</td>
+        </tr>
+        `).join("")}
           </table>
         </td>
       </tr>
 
       <tr>
         <td style="${labelCellStyle}">Loan Amount Required & End Use</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Loan Amount Required (in Lakhs)</td>
@@ -778,14 +778,14 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Documents Seen</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Document Category</td>
               <td style="${labelCellStyle}">Document Name</td>
               <td style="${labelCellStyle}">Document Type</td>
               <td style="${labelCellStyle}">Remarks</td>
-              ${ensureArray(documentsSeen).map((document: any) => `
+              ${ensureArray(documentsSeen.documentsSeen).map((document: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${document.documentCategory}</td>
                   <td style="${valueCellStyle}">${document.documentName}</td>
@@ -799,7 +799,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Interviewer’s Comments along with the explanations to credit comments (with brief summary report)</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Comforts</td>
@@ -823,7 +823,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
       </tr>
       <tr>
         <td style="${labelCellStyle}">Interviewer Details</td>
-        <td>
+        <td style="border:1px solid #ccc;padding:8px">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Interviewer Name</td>

@@ -564,13 +564,19 @@ export const arkaFincapSchema = {
       id: "otherObservations",
       label: "Other Observations",
       schema: {
-        type: "array",
+        type: "object",
         properties: {
           otherObservations: {
-            type: "string",
+            type: "array",
             title: "Other Observations",
-            ui: {
-              widget: "richtext",
+            items: {
+              type: "object",
+              properties: {
+                observation: {
+                  type: "string",
+                  title: "Other Observations",
+                },
+              },
             },
           },
         },
@@ -581,18 +587,24 @@ export const arkaFincapSchema = {
       id: "otherIncomes",
       label: "Other Incomes",
       schema: {
-        type: "array",
+        type: "object",
         properties: {
           otherIncomes: {
-            type: "string",
+            type: "array",
             title: "Other Incomes",
-            ui: {
-              widget: "richtext",
+            items: {
+              type: "object",
+              properties: {
+                otherIncome: {
+                  type: "string",
+                  title: "Other Incomes",
+                },
+              },
+              title: "Other Incomes",
             },
           },
         },
       },
-      required: true,
     },
     {
       id: "neighborCheck",

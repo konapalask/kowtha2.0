@@ -204,7 +204,7 @@ export const ambitMsmeSchema = {
                         type: "string",
                         title: "Property owner name",
                     },
-                    areaInSqFt: {
+                    natureOfUses: {
                         type: "number",
                         title: "Nature of uses",
                         enum: ["Self-Occupied", "Rented", "Vacant", "Others"],
@@ -230,18 +230,26 @@ export const ambitMsmeSchema = {
             },
         },
         {
-            id: "generalinfo",
+            id: "generalInfo",
             label: "General Info",
             schema: {
                 type: "object",
                 properties: {
-                    phoneNumber: {
+                    phoneNumberOfApplicant: {
                         type: "integer",
-                        title: "Mob no. of App and Co app",
+                        title: "Mob no. of Applicant",
                     },
-                    kycDetails: {
+                    phoneNumberOfCoApplicant: {
+                        type: "integer",
+                        title: "Mob no. of Co-Applicant",
+                    },
+                    kycDetailsOfApplicant: {
                         type: "string",
-                        title: "App & Co app KYC details and Utility bills/license",
+                        title: "Applicant KYC details and Utility bills/license",
+                    },
+                    kycDetailsOfCoApplicant: {
+                        type: "string",
+                        title: "Co-Applicant KYC details and Utility bills/license",
                     },
                     pdDoneDateAndTime: {
                         type: "string",
@@ -296,12 +304,15 @@ export const ambitMsmeSchema = {
             id: "familyDetails",
             label: "Family Details",
             schema: {
-                type: "array",
-                title: "Family Details",
-                items: {
-                    type: "object",
-                    properties: {
-                        name: {
+                type: "object",
+                properties: {
+                    details: {
+                        type: "array",
+                        title: "Family Details",
+                        items: {
+                            type: "object",
+                            properties: {
+                                name: {
                             type: "string",
                             title: "Name",
                         },
@@ -339,6 +350,8 @@ export const ambitMsmeSchema = {
                         },
                     },
                 },
+            },
+            },
             },
         },
         {
@@ -379,39 +392,49 @@ export const ambitMsmeSchema = {
             id: "suppliersDetails",
             label: "Suppliers Details",
             schema: {
-                type: "array",
-                items: {
-                    type: "object",
-                    properties: {
-                        name: {
-                            type: "string",
-                            title: "Name",
+                type: "object",
+                properties: {
+                    suppliersDetails: {
+                      type: "array",
+                      title: "Suppliers Details",
+                      items: {
+                        type: "object",
+                        properties: {
+                            name: {
+                                type: "string",
+                                title: "Name",
+                            },
+                            contactNumber: {
+                                type: "integer",
+                                title: "Mob Number",
+                            },
+                            location: {
+                                type: "string",
+                                title: "Location",
+                            },
+                            feedback: {
+                                type: "string",
+                                title: "Feedback",
+                                ui: {
+                                    widget: "textarea",
+                                    rows: 3,
+                                },
+                            },
                         },
-                    },
-                    contactNumber: {
-                        type: "integer",
-                        title: "Mob Number",
-                    },
-                    location: {
-                        type: "string",
-                        title: "Location",
-                    },
-                    feedback: {
-                        type: "string",
-                        title: "Feedback",
-                        ui: {
-                            widget: "textarea",
-                            rows: 3,
-                        },
-                    },
                 },
+            },
+             },
             },
         },
         {
             id: "customersDetails",
             label: "Customers Details",
             schema: {
-                type: "array",
+                type: "object",
+                properties: {
+                    customersDetails: {
+                      type: "array",
+                      title: "Customers Details",
                 items: {
                     type: "object",
                     properties: {
@@ -433,56 +456,68 @@ export const ambitMsmeSchema = {
                         },
                     },
                 },
+                },
+                },
             },
         },
         {
             id:"NeighbourChecks",
             label: "Neighbour Check (TPC)",
             schema: {
-                type: "array",
+                type: "object",
                 properties: {
+                  neighbourChecks: {
+                      type: "array",
+                      title: "Neighbour Checks",
                         items: {
                             type: "object",
                             properties: {
-                            neighbourName: {
-                                type: "string",
-                                title: "Neighbour, Resi/Business & Collateral Name",
-                            },
-                            contactNumber: {
-                                type: "string",
-                                title: "Mob Number",
-                            },
-                            location: {
-                                type: "string",
-                                title: "Location",
-                            },
-                            feedback: {
-                                type: "string",
-                                title: "Feedback",
+                                neighbourName: {
+                                    type: "string",
+                                    title: "Neighbour, Resi/Business & Collateral Name",
+                                },
+                                contactNumber: {
+                                    type: "string",
+                                    title: "Mob Number",
+                                },
+                                location: {
+                                    type: "string",
+                                    title: "Location",
+                                },
+                                feedback: {
+                                    type: "string",
+                                    title: "Feedback",
+                                },
                             },
                         },
                     },
-                    },
                 },
-            },
+            },  
+        },
             {
                 id: "otherChecks",
                 label: "Other Checks from Neighbour",
                 schema: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            otherChecks: {
-                                type: "string",
-                                title: "Other Checks from Neighbour",
-                            },
-                            remarks: {
-                                type: "string",
-                                title: "RemJarks",
+                    type: "object",
+                    properties: {
+                    otherChecks: {
+                        type: "array",
+                        title: "Other Checks from Neighbour",
+                        items: {
+                            type: "object",
+                            properties: {
+                                otherChecks: {
+                                    type: "string",
+                                    title: "Other Checks from Neighbour",
+                                },
+                                remarks: {
+                                    type: "string",
+                                    title: "RemJarks",
+                                },
                             },
                         },
                     },
+                },
                 },
             },
 
@@ -527,34 +562,40 @@ export const ambitMsmeSchema = {
                 id: "assetsDetails",
                 label: "Assets Details",
                 schema: {
-                    type: "array",
-                    items: {
-                        type: "object",
+                    type: "object",
                         properties: {
-                            assetType: {
-                                type: "string",
-                                title: "Asset Type",
+                        assetsDetails: {
+                            type: "array",
+                            title: "Assets Details",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    assetType: {
+                                        type: "string",
+                                        title: "Asset Type",
+                                    },
+                                    ownerName: {
+                                        type: "string",
+                                        title: "Ownership Hold By",
+                                    },
+                                    valueOfAsset: {
+                                        type: "string",
+                                        title: "Vallue of Asset",
+                                    },
+                                    currentSratus: {
+                                        type: "string",
+                                        title: "Current Status",
+                                        enum: ["Vacant", "Rental"],
+                                    },
+                                    pledgeOrFree:{
+                                        type: "string",
+                                        title: "Pledge/Free",
+                                    }
+                                },
                             },
-                            ownerName: {
-                                type: "string",
-                                title: "Ownership Hold By",
                             },
-                            valueOfAsset: {
-                                type: "string",
-                                title: "Vallue of Asset",
-                            },
-                            currentSratus: {
-                                type: "string",
-                                title: "Current Status",
-                                enum: ["Vacant", "Rental"],
-                            },
-                            pledgeOrFree:{
-                                type: "string",
-                                title: "Pledge/Free",
-                            }
                         },
                     },
-                },
             },
 
             {
@@ -578,60 +619,66 @@ export const ambitMsmeSchema = {
                 id: "loanDetails",
                 label: "Loan Details",
                 schema: {
-                    type: "array",
-                    items: {
-                        type: "object",
+                    type: "object",
                         properties: {
-                            bankName: {
-                                type: "string",
-                                title: "Name of Bank / NBFC",
-                            },
-                            typeOfLoan: {
-                                type: "string",
-                                title: "Type of Loan",
-                            },
-                            sanctionedAmount: {
-                                type: "number",
-                                title: "Sanctioned Amount",
-                                formatter: {
-                                    useIndianFormat: true,
-                                    locale: "en-IN",
-                                    maxDecimalPlaces: 2,
+                        loanDetails: {
+                            type: "array",
+                            title: "Loan Details",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    bankName: {
+                                        type: "string",
+                                        title: "Name of Bank / NBFC",
+                                    },
+                                    typeOfLoan: {
+                                        type: "string",
+                                        title: "Type of Loan",
+                                    },
+                                    sanctionedAmount: {
+                                        type: "number",
+                                        title: "Sanctioned Amount",
+                                        formatter: {
+                                            useIndianFormat: true,
+                                            locale: "en-IN",
+                                            maxDecimalPlaces: 2,
+                                        },
+                                    },
+                                    osBalance: {
+                                        type: "number",
+                                        title: "O/S Balance (in Lakhs)",
+                                        formatter: {
+                                            useIndianFormat: true,
+                                            locale: "en-IN",
+                                            maxDecimalPlaces: 2,
+                                        },
+                                },
+                                emi: {
+                                        type: "number",
+                                        title: "EMI Amount",
+                                        formatter: {
+                                            useIndianFormat: true,
+                                            locale: "en-IN",
+                                            maxDecimalPlaces: 2,
+                                        },
+                                },
+                                tenure: {
+                                        type: "number",
+                                        title: "Tenure (in Months)",
+                                        formatter: {
+                                            useIndianFormat: true,
+                                            locale: "en-IN",
+                                            maxDecimalPlaces: 2,
+                                        },
+                                },
+                                emiClearanceBankName: {
+                                        type: "string",
+                                        title: "EMI Clearance Bank Name",
                                 },
                             },
-                            osBalance: {
-                                type: "number",
-                                title: "O/S Balance (in Lakhs)",
-                                formatter: {
-                                    useIndianFormat: true,
-                                    locale: "en-IN",
-                                    maxDecimalPlaces: 2,
-                                },
-                           },
-                           emi: {
-                                type: "number",
-                                title: "EMI Amount",
-                                formatter: {
-                                    useIndianFormat: true,
-                                    locale: "en-IN",
-                                    maxDecimalPlaces: 2,
-                                },
-                           },
-                           tenure: {
-                                type: "number",
-                                title: "Tenure (in Months)",
-                                formatter: {
-                                    useIndianFormat: true,
-                                    locale: "en-IN",
-                                    maxDecimalPlaces: 2,
-                                },
-                           },
-                           emiClearanceBankName: {
-                                type: "string",
-                                title: "EMI Clearance Bank Name",
-                           },
+                        },
+                        },
                     },
-                },
                 },
             },
             
@@ -679,27 +726,34 @@ export const ambitMsmeSchema = {
                 schema: {
                     type: "object",
                     properties: {
-                        bankName: {
+                        bankingDetails: {
+                            type: "array",
+                            title: "Banking Details",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    bankName: {
                             type: "string",
                             title: "Bank Name",
+                            },
+                            accountType: {
+                                type: "string",
+                                title: "Account Type",
+                            },
+                            openSinceYear: {
+                                type: "number",
+                                title: "Open Since (Year)",
+                            },
+                            odOrCcLimit: {
+                                type: "number",
+                                title: "OD/CC Limit",
+                            },
                         },
-                        accountType: {
-                            type: "string",
-                            title: "Account Type",
-                        },
-                        openSinceYear: {
-                            type: "number",
-                            title: "Open Since (Year)",
-                        },
-                        odOrCcLimit: {
-                            type: "number",
-                            title: "OD/CC Limit",
+                            },
                         },
                     },
                 },
-                
             },
-
             {
                 id:  "otherObservations",
                 label: "Other Observations",
