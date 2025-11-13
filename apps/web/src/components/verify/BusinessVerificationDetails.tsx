@@ -2580,11 +2580,6 @@ export const BusinessVerificationDetails: React.FC<
                       </div>
                     </div>
                   ))}
-                  {debitFields.length === 0 && (
-                    <Text type="secondary" style={{ fontStyle: "italic" }}>
-                      No debit fields
-                    </Text>
-                  )}
                 </div>
               </Col>
 
@@ -2627,11 +2622,6 @@ export const BusinessVerificationDetails: React.FC<
                       </div>
                     </div>
                   ))}
-                  {creditFields.length === 0 && (
-                    <Text type="secondary" style={{ fontStyle: "italic" }}>
-                      No credit fields
-                    </Text>
-                  )}
                 </div>
               </Col>
             </Row>
