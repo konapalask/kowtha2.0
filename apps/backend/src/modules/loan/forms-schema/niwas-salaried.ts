@@ -577,7 +577,7 @@ export const niwasSalariedSchema = {
               properties: {
                 name: { type: "string", title: "Name" },
                 relation: { type: "string", title: "Relation" },
-                age: { type: "string", title: "Age" },
+                age: { type: "integer", title: "Age" },
                 employmentType: {
                   type: "string",
                   title: "Employment Type",

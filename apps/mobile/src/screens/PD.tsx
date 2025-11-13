@@ -28,11 +28,18 @@ import {colors} from '../constants/colors';
 // Field key mappings for automatic data population
 const FIELD_KEY_MAPPINGS = {
   applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
-  businessName: ['businessName', 'nameOfConcern', 'nameOfBusiness'],
+  businessName: [
+    'businessName',
+    'nameOfConcern',
+    'nameOfBusiness',
+    'nameOfFirm',
+    'concernName',
+  ],
   phoneNo: [
     'applicantMobile',
     'applicantContactNumber',
     'applicantPhoneNumber',
+    'loanAmountRequired',
   ],
   applicationNumber: [
     'applicationNumber',
@@ -40,10 +47,11 @@ const FIELD_KEY_MAPPINGS = {
     'applicationId',
     'referenceNumber',
     'proposalNumber',
+    'loanAccountNo',
   ],
-  loanAmount: ['loanAmount'],
+  loanAmount: ['loanAmount', 'loanAmountRequested'],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
-  bankName: ['repaymentBankName', 'nameOfFirm'],
+  bankName: ['repaymentBankName'],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -52,6 +60,7 @@ const FIELD_KEY_MAPPINGS = {
     'pdAddress',
     'officeAddress',
     'initiatedPremises',
+    'addressOfFirm',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -138,7 +147,7 @@ const getInitialDataByBank = (
           if (
             fieldKey.includes('pdDone') ||
             fieldKey.includes('pdDoneBy') ||
-            fieldKey.includes('nameOfPersonMet') ||
+            // fieldKey.includes('nameOfPersonMet') ||
             fieldKey.includes('verifierName')
           ) {
             initialData[section.id][fieldKey] = loggedInUserName || '';

@@ -164,8 +164,19 @@ export const iiflSchema = {
               properties: {
                 name: { type: "string", title: "Name" },
                 relationship: { type: "string", title: "Relationship" },
-                age: { type: "string", title: "Age" },
-                qualification: { type: "string", title: "Qualification" },
+                age: { type: "integer", title: "Age" },
+                qualification: { 
+                  type: "string", 
+                  title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ]
+                },
                 occupation: { type: "string", title: "Occupation" },
               },
             },

@@ -136,8 +136,21 @@ const Investigable: React.FC<InvestigableProps> = ({
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => {
-            setIsInvestigable(true);
-            onYes();
+            try {
+              setIsInvestigable(true);
+              // Only call onYes if it's provided and is a function
+              if (onYes && typeof onYes === 'function') {
+                onYes();
+              }
+            } catch (error) {
+              console.error('Error handling "No" selection:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Something went wrong',
+                text2: 'Please try again',
+                position: 'top',
+              });
+            }
           }}>
           <View
             style={[
@@ -149,7 +162,19 @@ const Investigable: React.FC<InvestigableProps> = ({
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.radioOption}
-          onPress={() => setIsInvestigable(false)}>
+          onPress={() => {
+            try {
+              setIsInvestigable(false);
+            } catch (error) {
+              console.error('Error handling "Yes" selection:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Something went wrong',
+                text2: 'Please try again',
+                position: 'top',
+              });
+            }
+          }}>
           <View
             style={[
               styles.radioCircle,

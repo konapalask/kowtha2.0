@@ -93,6 +93,104 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     initializeGeocoding();
   }, []);
 
+  // Sync uploadedItems and reconstruct documentForms when initialItems changes
+  useEffect(() => {
+    // Update uploadedItems state to match initialItems
+    setUploadedItems(prevItems => {
+      // Only update if initialItems has actually changed
+      const initialItemsIds = new Set(initialItems.map(item => item.id));
+      const prevItemsIds = new Set(prevItems.map(item => item.id));
+      const hasChanged =
+        initialItems.length !== prevItems.length ||
+        initialItems.some(item => !prevItemsIds.has(item.id)) ||
+        prevItems.some(item => !initialItemsIds.has(item.id));
+
+      if (hasChanged) {
+        return initialItems;
+      }
+      return prevItems;
+    });
+
+    // Reconstruct documentForms from initialItems if they exist
+    if (initialItems && initialItems.length > 0) {
+      // Group items by documentType
+      const groupedByDocumentType = initialItems.reduce(
+        (acc: Record<string, ExtendedUploadedItem[]>, item) => {
+          const docType = item.documentType || 'Other';
+          if (!acc[docType]) {
+            acc[docType] = [];
+          }
+          acc[docType].push(item);
+          return acc;
+        },
+        {},
+      );
+
+      // Reconstruct documentForms from grouped items
+      setDocumentForms(prevForms => {
+        const reconstructedForms: DocumentForm[] = Object.entries(
+          groupedByDocumentType,
+        ).map(([documentType, items], index) => {
+          // Check if a form with this documentType already exists
+          const existingForm = prevForms.find(
+            form => form.documentType === documentType,
+          );
+
+          // Check if items have changed for this document type
+          const existingItems = existingForm?.uploadedItems || [];
+          const existingItemsIds = new Set(existingItems.map(item => item.id));
+          const newItemsIds = new Set(items.map(item => item.id));
+          const itemsChanged =
+            items.length !== existingItems.length ||
+            items.some(item => !existingItemsIds.has(item.id)) ||
+            existingItems.some(item => !newItemsIds.has(item.id));
+
+          // If form exists and items haven't changed, preserve it
+          if (existingForm && !itemsChanged) {
+            return existingForm;
+          }
+
+          // Otherwise, create/update the form
+          return {
+            id: existingForm?.id || `${Date.now()}-${index}`,
+            documentType,
+            isGeotagEnabled: existingForm?.isGeotagEnabled || false,
+            uploadedItems: items,
+          };
+        });
+
+        // Check if forms have actually changed
+        const formsChanged =
+          reconstructedForms.length !== prevForms.length ||
+          reconstructedForms.some(form => {
+            const existing = prevForms.find(
+              f => f.documentType === form.documentType,
+            );
+            if (!existing) return true;
+            const existingIds = new Set(
+              existing.uploadedItems.map(item => item.id),
+            );
+            const newIds = new Set(form.uploadedItems.map(item => item.id));
+            return (
+              form.uploadedItems.length !== existing.uploadedItems.length ||
+              form.uploadedItems.some(item => !existingIds.has(item.id)) ||
+              existing.uploadedItems.some(item => !newIds.has(item.id))
+            );
+          });
+
+        return formsChanged ? reconstructedForms : prevForms;
+      });
+    } else if (initialItems.length === 0) {
+      // If initialItems is empty, only clear if we have forms
+      setDocumentForms(prevForms => {
+        if (prevForms.length > 0) {
+          return [];
+        }
+        return prevForms;
+      });
+    }
+  }, [initialItems]);
+
   const getLocationDetails = async (latitude: number, longitude: number) => {
     if (!isGeocodingInitialized) {
       console.warn('Geocoding not initialized, returning default values');
@@ -320,28 +418,38 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           documentType: form.documentType,
         };
 
-        // Add location details if available
-        if (
-          image.locationOrOverlay.latitude &&
-          image.locationOrOverlay.longitude
-        ) {
+        // Add location details if available and valid
+        const lat = image.locationOrOverlay.latitude;
+        const lng = image.locationOrOverlay.longitude;
+
+        // Validate that latitude and longitude are valid numbers (not NaN, not null, not undefined)
+        const isValidLat =
+          lat !== null &&
+          lat !== undefined &&
+          !Number.isNaN(lat) &&
+          Number.isFinite(lat);
+        const isValidLng =
+          lng !== null &&
+          lng !== undefined &&
+          !Number.isNaN(lng) &&
+          Number.isFinite(lng);
+
+        if (isValidLat && isValidLng) {
           try {
-            const locationDetails = await getLocationDetails(
-              image.locationOrOverlay.latitude,
-              image.locationOrOverlay.longitude,
-            );
-            newItem.latitude = image.locationOrOverlay.latitude;
-            newItem.longitude = image.locationOrOverlay.longitude;
+            const locationDetails = await getLocationDetails(lat, lng);
+            newItem.latitude = lat;
+            newItem.longitude = lng;
             newItem.locality = locationDetails.locality;
             newItem.pincode = locationDetails.pincode;
           } catch (locationError) {
             console.error('Error getting location details:', locationError);
-            newItem.latitude = image.locationOrOverlay.latitude;
-            newItem.longitude = image.locationOrOverlay.longitude;
+            newItem.latitude = lat;
+            newItem.longitude = lng;
             newItem.locality = 'Unknown';
             newItem.pincode = 'Unknown';
           }
         }
+        // If lat/lng are invalid, don't set them at all (they'll be undefined)
         newItems.push(newItem);
       }
 
@@ -482,7 +590,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         const imagesToUpload = result.assets.map(asset => ({
           uri: asset.uri || '',
           type: 'photo',
-          locationOrOverlay: {isOverlayNeeded: form.isGeotagEnabled},
+          locationOrOverlay: {isOverlayNeeded: false}, // Gallery images never get overlay
           isCamera: false,
         }));
         await uploadImageForDocumentForm(formId, imagesToUpload);

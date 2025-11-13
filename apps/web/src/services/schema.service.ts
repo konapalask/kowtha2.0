@@ -188,6 +188,8 @@ const convertSchemaPropertiesToFields = (
       dependencies: property.dependencies,
       title: property.title, // Preserve original title
       formula: property.formula, // Preserve formula for calculated fields
+      format: property.format, // Preserve format (date, time, etc.)
+      schema: property, // Preserve full schema for reference
     };
 
     // Determine side (debit/credit) based on credit/debit arrays or fallback to title/fieldId
@@ -282,6 +284,11 @@ const convertSchemaPropertiesToFields = (
     // Handle date format
     if (property.format === "date") {
       field.type = "date";
+    }
+    
+    // Handle time format
+    if (property.format === "time") {
+      field.type = "time";
     }
 
 

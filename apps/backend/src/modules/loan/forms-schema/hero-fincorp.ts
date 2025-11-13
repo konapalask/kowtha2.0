@@ -28,12 +28,14 @@ export const heroFincorpSchema = {
               rows: 3,
             },
           },
-          phoneNumber: {
-            type: "string",
+          applicantPhoneNumber: {
+            type: "integer",
             title: "Phone Number",
+            readOnly: true,
           },
           appointmentFixed: {
             type: "string",
+            format: "time",
             title: "Appointment Fixed",
           },
           dateOfVisit: {
@@ -54,6 +56,7 @@ export const heroFincorpSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
           numberOfVisits: {
             type: "string",
@@ -103,14 +106,32 @@ export const heroFincorpSchema = {
                 relation: {
                   type: "string",
                   title: "Relation",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
-                  type: "string",
+                  type: "integer",
                   title: "Age",
                 },
                 qualification: {
                   type: "string",
                   title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
                 },
                 occupation: {
                   type: "string",
@@ -130,17 +151,22 @@ export const heroFincorpSchema = {
       id: "businessProfile",
       label: "About the Business",
       schema: {
-        type: "array",
-        title: "Business Details",
-        items: {
-          type: "object",
-          properties: {
-            detail: {
-              type: "string",
-              title: "Detail",
-              ui: {
-                widget: "textarea",
-                rows: 3,
+        type: "object",
+        properties: {
+          details: {
+            type: "array",
+            title: "Business Details",
+            items: {
+              type: "object",
+              properties: {
+                detail: {
+                  type: "string",
+                  title: "Detail",
+                  ui: {
+                    widget: "textarea",
+                    rows: 3,
+                  },
+                },
               },
             },
           },
@@ -178,8 +204,14 @@ export const heroFincorpSchema = {
             },
           },
           netMarginPercent: {
-            type: "string",
+            type: "number",
             title: "Net margin (%)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           documentsObserved: {
             type: "array",
@@ -217,7 +249,7 @@ export const heroFincorpSchema = {
                   title: "Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -234,7 +266,7 @@ export const heroFincorpSchema = {
                   title: "Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -263,36 +295,42 @@ export const heroFincorpSchema = {
       id: "existingLoanDetails",
       label: "Existing Loans",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            financialInstitution: {
-              type: "string",
-              title: "Financial Institution",
-            },
-            loanAmount: {
-              type: "number",
-              title: "Loan Amount",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-            },
-            natureOfLoan: {
-              type: "string",
-              title: "Nature of Loan",
-            },
-            emi: {
-              type: "number",
-              title: "EMI",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+        type: "object",
+        properties: {
+          loans: {
+            type: "array",
+            title: "Existing Loans",
+            items: {
+              type: "object",
+              properties: {
+                financialInstitution: {
+                  type: "string",
+                  title: "Financial Institution",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                natureOfLoan: {
+                  type: "string",
+                  title: "Nature of Loan",
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
               },
             },
           },

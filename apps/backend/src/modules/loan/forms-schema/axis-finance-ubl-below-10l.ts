@@ -61,11 +61,12 @@ export const axisFinanceUblBelow10lSchema = {
             },
           },
           phoneNumber: {
-            type: "string",
+            type: "integer",
             title: "Phone No.",
           },
           appointmentFixed: {
             type: "string",
+            format: "time",
             title: "Appointment Fixed",
           },
           structureOfLoan: {
@@ -139,6 +140,14 @@ export const axisFinanceUblBelow10lSchema = {
                 qualification: {
                   type: "string",
                   title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ],
                 },
                 occupation: {
                   type: "string",

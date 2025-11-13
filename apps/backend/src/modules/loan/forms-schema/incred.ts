@@ -305,6 +305,14 @@ export const incredSchema = {
                 education: {
                   type: "string",
                   title: "Education",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification"
+                  ],
                 },
                 occupation: {
                   type: "string",

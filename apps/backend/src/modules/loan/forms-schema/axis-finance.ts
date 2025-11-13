@@ -44,9 +44,8 @@ export const axisFinanceSchema = {
             title: "Place of Interview",
           },
           applicantMobile: {
-            type: "string",
+            type: "integer",
             title: "Contact Number",
-            pattern: "^[0-9]{10}$",
           },
         },
       },
@@ -93,10 +92,10 @@ export const axisFinanceSchema = {
                   enum: [
                     "Below 10th",
                     "10th pass",
-                    "Under graduate",
+                    "12th pass",
+                    "Diploma/ITI certification",
                     "Graduate",
-                    "Post Graduate",
-                    "Professional",
+                    "PG/Professional Certification"
                   ],
                 },
                 occupation: {

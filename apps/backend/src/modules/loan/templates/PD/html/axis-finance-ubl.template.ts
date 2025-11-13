@@ -102,7 +102,16 @@ export const axisFinanceUBLTemplate = (
   const zonedDate = toZonedTime(date, timeZone);
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
   const basic = verificationData.basicDetails || {};
-  const familyMembers = ensureArray(verificationData.familyDetails.familyDetails).map(
+  // Handle both possible structures: familyDetails.familyDetails or familyDetails.familyMembers or just familyDetails array
+  const familyDetailsData = verificationData.familyDetails || {};
+  const familyMembersArray = Array.isArray(familyDetailsData) 
+    ? familyDetailsData 
+    : Array.isArray(familyDetailsData.familyDetails)
+    ? familyDetailsData.familyDetails
+    : Array.isArray(familyDetailsData.familyMembers)
+    ? familyDetailsData.familyMembers
+    : [];
+  const familyMembers = ensureArray(familyMembersArray).map(
     (member: any) => [
       formatMultiline(member?.name || ""),
       formatMultiline(member?.relation || ""),
@@ -116,7 +125,14 @@ export const axisFinanceUBLTemplate = (
     ]
   );
 
-  const shareholding = ensureArray(verificationData.shareholdingDetails.shareholdingDetails).map(
+  // Handle both possible structures: shareholdingDetails.shareholdingDetails or shareholdingDetails array
+  const shareholdingData = verificationData.shareholdingDetails || {};
+  const shareholdingArray = Array.isArray(shareholdingData)
+    ? shareholdingData
+    : Array.isArray(shareholdingData.shareholdingDetails)
+    ? shareholdingData.shareholdingDetails
+    : [];
+  const shareholding = ensureArray(shareholdingArray).map(
     (item: any) => [
       formatMultiline(item?.shareholderName || ""),
       formatMultiline(item?.relationWithMainApplicant || ""),
@@ -214,7 +230,14 @@ export const axisFinanceUBLTemplate = (
     (vehicle: any) => `<li>${formatMultiline(vehicle || "")}</li>`
   );
 
-  const existingLoans = ensureArray(verificationData.existingLoans.loans).map(
+  // Handle both possible structures: existingLoans.loans or existingLoans array
+  const existingLoansData = verificationData.existingLoans || {};
+  const existingLoansArray = Array.isArray(existingLoansData)
+    ? existingLoansData
+    : Array.isArray(existingLoansData.loans)
+    ? existingLoansData.loans
+    : [];
+  const existingLoans = ensureArray(existingLoansArray).map(
     (loan: any) => [
       formatMultiline(loan?.bankOrNbfcName || ""),
       formatMultiline(loan?.typeOfLoan || ""),
@@ -226,7 +249,14 @@ export const axisFinanceUBLTemplate = (
     ]
   );
 
-  const bankingAccounts = ensureArray(verificationData.bankingDetails.bankingDetails).map(
+  // Handle both possible structures: bankingDetails.bankingDetails or bankingDetails array
+  const bankingDetailsData = verificationData.bankingDetails || {};
+  const bankingAccountsArray = Array.isArray(bankingDetailsData)
+    ? bankingDetailsData
+    : Array.isArray(bankingDetailsData.bankingDetails)
+    ? bankingDetailsData.bankingDetails
+    : [];
+  const bankingAccounts = ensureArray(bankingAccountsArray).map(
     (account: any) => [
       formatMultiline(account?.bankName || ""),
       formatMultiline(account?.branchName || ""),
@@ -235,7 +265,11 @@ export const axisFinanceUBLTemplate = (
     ]
   );
 
-  const endUseOfLoan = verificationData.bankingDetails?.[0]?.endUseOfLoan || "";
+  // End use of loan might be in loanDetails or bankingDetails
+  const endUseOfLoan = verificationData.loanDetails?.endUseOfLoan 
+    || verificationData.bankingDetails?.endUseOfLoan
+    || (Array.isArray(verificationData.bankingDetails) && verificationData.bankingDetails[0]?.endUseOfLoan)
+    || "";
 
   const thirdPartySection = verificationData.thirdPartyCheck || {};
 

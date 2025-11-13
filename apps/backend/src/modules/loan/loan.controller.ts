@@ -97,7 +97,7 @@ export class LoanController {
     if (!req.user.officeId) {
       throw new BadRequestException("User does not have an assigned office");
     }
-
+    console.log(filters);
     const result = await this.loanService.getLoans(req.user.officeId, filters);
     return {
       status: 200,
@@ -1115,7 +1115,7 @@ export class LoanController {
     };
   }
 
-  @Post("verification/:id/ -analysis")
+  @Post("verification/:id/financial-analysis")
   @Roles(UserRole.Admin, UserRole.Verifier, UserRole.VerificationExecutive)
   @ApiOperation({
     summary: "Create financial analysis data for a verification",
@@ -1336,7 +1336,7 @@ export class LoanController {
     // Find matching BankSchemaConfig by bankName or template name
     const matchingConfig = bankSchemas.find(
       (config) =>
-        config.bankName === bankName || config.templates.includes(bankName)
+        config.bankName === bankName || config.templatesAndFooters?.[bankName]
     );
 
     if (!matchingConfig) {

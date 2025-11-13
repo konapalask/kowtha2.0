@@ -61,13 +61,16 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const business = verificationData.businessOverview || {};
   const financials = verificationData.salesFinancials || {};
   const businessProfile = verificationData.businessProfile || {};
-  const familyMembers = verificationData.familyMembers.familyMembers || [];
+  const familyMembers = verificationData.familyMembers?.familyMembers || [];
   const observations = verificationData.observations || {};
   const employeesInfrastructure = verificationData.employeesInfrastructure || {};
 
+  const templateName = html_data?.bankName || "Aditya Birla";
+  
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content aditya-birla-template">
+      <h2 style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#222;text-align:center;">${templateName}</h2>
       <table style="${tableStyle}">
         ${renderKeyValue("Proposal No.", proposal.proposalNumber)}
         <tr>
@@ -205,7 +208,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
-            <td style="${valueCellStyle}">Loan Amount: ${formatMultiline(observations.loanAmountApplied)} <br>Purpose of Loan: ${formatMultiline(observations.purposeOfLoan)}</td>
+            <td style="${valueCellStyle}">Loan Amount: ${observations.loanAmountApplied} <br>Purpose of Loan: ${observations.purposeOfLoan}</td>
         </tr>
       </table>      
 

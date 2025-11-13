@@ -134,10 +134,10 @@ export const arkaFincapSchema = {
                   enum: [
                     "Below 10th",
                     "10th pass",
-                    "Under graduate",
+                    "12th pass",
+                    "Diploma/ITI certification",
                     "Graduate",
-                    "Post Graduate",
-                    "Professional",
+                    "PG/Professional Certification"
                   ],
                 },
                 occupation: {
@@ -335,7 +335,7 @@ export const arkaFincapSchema = {
                   title: "Customer Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -362,7 +362,7 @@ export const arkaFincapSchema = {
                   title: "Supplier Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Number",
                 },
               },
@@ -500,8 +500,14 @@ export const arkaFincapSchema = {
         type: "object",
         properties: {
           netMargin: {
-            type: "string",
+            type: "number",
             title: "Net Margin",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
         },
       },
@@ -624,6 +630,7 @@ export const arkaFincapSchema = {
           status: {
             type: "string",
             title: "Status",
+            enum: ["Positive", "Negative", "Credit Refer"],
           },
         },
       },

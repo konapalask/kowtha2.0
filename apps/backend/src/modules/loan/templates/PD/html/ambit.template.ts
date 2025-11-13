@@ -101,7 +101,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Residential Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}" colspan="4"><strong>Address:</strong> ${residentialDetails.address}</td>
@@ -123,7 +123,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Property Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}" colspan="4"><strong>Address:</strong> ${propertyDetails.propertyAddress}</td>
@@ -155,7 +155,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Family Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Name</td>
@@ -200,7 +200,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         
         <tr>
           <td style="${labelCellStyle}">Banking Details</td>
-          <td>
+          <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Bank Name</td>

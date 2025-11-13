@@ -85,7 +85,7 @@ const getTextAreaLines = (property: JsonSchemaProperty): number | undefined => {
   if (typeof ui?.rows === 'number') {
     return ui.rows;
   }
-  return undefined;
+  return 5;
 };
 
 const getMaxLength = (property: JsonSchemaProperty): number | undefined => {
@@ -427,6 +427,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         pickerMode = 'time';
         break;
       case 'date-time':
+      case 'datetime':
         placeholderText = 'Select date and time';
         pickerMode = 'datetime';
         break;
@@ -504,7 +505,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                   const isDateField =
                     subProperty?.format === 'date' ||
                     subProperty?.format === 'time' ||
-                    subProperty?.format === 'date-time';
+                    subProperty?.format === 'date-time' ||
+                    subProperty?.format === 'datetime';
                   if (isDateField) {
                     console.log('subProperty', subProperty);
                     return (
@@ -732,7 +734,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                       const isDateField =
                         subProperty.format === 'date' ||
                         subProperty.format === 'time' ||
-                        subProperty.format === 'date-time';
+                        subProperty.format === 'date-time' ||
+                        subProperty.format === 'datetime';
                       if (isDateField) {
                         return (
                           <View key={subFieldKey}>
@@ -918,7 +921,8 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           const isDateField =
             property.format === 'date' ||
             property.format === 'time' ||
-            property.format === 'date-time';
+            property.format === 'date-time' ||
+            property.format === 'datetime';
           if (isDateField) {
             return renderDateField(
               fieldId,
