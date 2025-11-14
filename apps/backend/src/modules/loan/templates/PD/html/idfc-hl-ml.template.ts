@@ -2,8 +2,10 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-const cellStyle =
-  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+  const labelCellStyle =
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+const valueCellStyle =
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5"; 
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
@@ -75,8 +77,8 @@ const renderKeyValueTable = (rows: Array<[string, any, ((value: any) => string)?
             : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${label}</p></td>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${rendered}</p></td>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${label}</p></td>
+            <td style="${valueCellStyle}"><p style="${paragraphStyle}">${rendered}</p></td>
           </tr>`;
         })
         .join("")}
@@ -94,8 +96,8 @@ const renderInstructionTable = (
         .map(
           ({ instruction, content }) => `
         <tr>
-          <td style="${cellStyle}">${instruction}</td>
-          <td style="${cellStyle}">${content}</td>
+          <td style="${labelCellStyle}">${instruction}</td>
+          <td style="${valueCellStyle}">${content}</td>
         </tr>`
         )
         .join("")}
@@ -111,7 +113,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerRow = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+        `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
     )
     .join("");
 
@@ -119,7 +121,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
     .map(
       (row) =>
         `<tr>${row
-          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
           .join("")}</tr>`
     )
     .join("");

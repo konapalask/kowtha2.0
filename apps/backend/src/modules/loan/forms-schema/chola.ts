@@ -62,7 +62,7 @@ export const cholaSchema = {
           "nameOfTheCoApplicant",
           "constitution",
           "visitedAddress",
-          "loanRequested",
+          "loanAmountRequested",
           "purposeOfLoan",
           "dateOfVisit",
           "personMet",
@@ -154,8 +154,8 @@ export const cholaSchema = {
               },
             },
           },
-          },
         },
+      },
     },
     {
       id: "customersReferenceNumbers",
@@ -200,7 +200,7 @@ export const cholaSchema = {
           },
         },
       },
-      },
+    },
     {
       id: "existingLoanDetails",
       label: "Existing Loan Details",
@@ -245,11 +245,11 @@ export const cholaSchema = {
                   type: "string",
                   title: "Total Tenure / Completed [in months]",
                 },
-              },        
+              },
             },
           },
         },
-          },
+      },
     },
     {
       id: "bankingDetails",
@@ -315,17 +315,17 @@ export const cholaSchema = {
               type: "object",
               properties: {
                 comfortFactor: {
-                    type: "string",
-                    title: "Comfort Factor",
-                    ui: {
-                      widget: "textarea",
-                      rows: 6,
-                    },
+                  type: "string",
+                  title: "Comfort Factor",
+                  ui: {
+                    widget: "textarea",
+                    rows: 6,
                   },
                 },
               },
             },
           },
+        },
       },
     },
     {
@@ -358,10 +358,10 @@ export const cholaSchema = {
       id: "Recommendations",
       label: "Recommendations",
       schema: {
-          type: "object",
-          properties: {
-            recommendations: {
-              type: "array",
+        type: "object",
+        properties: {
+          recommendations: {
+            type: "array",
             title: "Recommendations",
             items: {
               type: "object",
@@ -372,11 +372,11 @@ export const cholaSchema = {
                 },
               },
             },
-          }
+          },
         },
       },
     },
-    
+
     financialsSchema,
   ],
 } as const;

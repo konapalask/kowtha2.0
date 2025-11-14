@@ -60,7 +60,7 @@ const wrapParagraph = (content: string) =>
 
 const bulletList = (items: string[]) =>
   items.length
-    ? `<ul style="margin:4px 0 0 18px;padding-left:18px;">${items
+    ? `<ul style="margin:4px 0 0 18px; font-weight:bold; padding-left:18px;">${items
         .map((item) => `<li>${item}</li>`)
         .join("")}</ul>`
     : "";
@@ -125,7 +125,7 @@ const joinDetails = (pairs: Array<[string, any, ((value: any) => string)?]>) => 
     .map(([label, value, formatter]) => {
       if (!hasValue(value)) return null;
       const rendered = formatter ? formatter(value) : formatMultiline(value);
-      return `<i>${label}:</i> ${rendered}`;
+      return `&nbsp; ${rendered}`;
     })
     .filter(Boolean);
   return items.length
@@ -623,7 +623,7 @@ export const heroHousingSelfTemplate = (
   const profileRows = [
     {
       left: `<p style="${paragraphStyle}"><strong>Borrower details ---</strong></p>${wrapParagraph(
-        "It should include the"
+        "<strong>It should include the</strong>"
       )}${bulletList([
         "Qualification of customer,",
         "Complete professional journey (service/ business details of each activity post qualification to till date)",

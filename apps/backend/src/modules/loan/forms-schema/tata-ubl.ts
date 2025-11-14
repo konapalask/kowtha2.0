@@ -60,7 +60,6 @@ export const tataUblSchema = {
               repaymentBankName: {
                 type: "string",
                 title: "Bank name",
-                readOnly: true,
               },
               typeSAAccount: {
                 type: "string",
@@ -88,7 +87,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Address",
             readOnly: true,
-          },
+           },
           rentedOwned: {
             type: "string",
             title: "Rented/Owned",
@@ -704,10 +703,15 @@ export const tataUblSchema = {
           dateOfPD: {
             type: "string",
             title: "Date of PD",
+            format: "date",
           },
           personMet: {
             type: "string",
             title: "Person met at the time of PD",
+          },
+          personDesignation: {
+            type: "string",
+            title: "Person Designation",
           },
           phoneNoOfApplicant: {
             type: "string",
