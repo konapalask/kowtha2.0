@@ -481,6 +481,23 @@ export const axisFinanceSchema = {
       },
     },
     {
+      id: "overallPositivesOrNegatives",
+      label: "Overall Positives or Negatives",
+      schema: {
+        type: "object",
+        properties: {
+          overallPositivesOrNegatives: {
+            type: "string",
+            title: "Overall Positives or Negatives",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
+          },
+        },
+      },
+    },
+    {
       id: "tradeReferences",
       label: "Trade References",
       schema: {

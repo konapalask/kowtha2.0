@@ -3,7 +3,9 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-const cellStyle =
+const labelCellStyle =
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+const valueCellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
@@ -62,8 +64,8 @@ const renderKeyValueTable = (
             : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}">${wrapParagraph(label)}</td>
-            <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
+            <td style="${labelCellStyle}">${wrapParagraph(label)}</td>
+            <td style="${valueCellStyle}">${wrapParagraph(rendered)}</td>
           </tr>`;
         })
         .join("")}
@@ -81,8 +83,8 @@ const renderInstructionTable = (
         .map(
           ({ instruction, value }) => `
         <tr>
-          <td style="${cellStyle}">${instruction}</td>
-          <td style="${cellStyle}">${value}</td>
+          <td style="${labelCellStyle}">${instruction}</td>
+          <td style="${valueCellStyle}">${value}</td>
         </tr>`
         )
         .join("")}
@@ -97,14 +99,14 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerRow = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+        `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
     )
     .join("");
   const rowsHtml = rows
     .map(
       (row) =>
         `<tr>${row
-          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
           .join("")}</tr>`
     )
     .join("");

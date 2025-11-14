@@ -84,10 +84,9 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          officeAddress: {
+          address: {
             type: "string",
             title: "Address",
-            readOnly: true,
           },
           rentedOwned: {
             type: "string",
@@ -704,10 +703,15 @@ export const tataUblSchema = {
           dateOfPD: {
             type: "string",
             title: "Date of PD",
+            format: "date",
           },
           personMet: {
             type: "string",
             title: "Person met at the time of PD",
+          },
+          personDesignation: {
+            type: "string",
+            title: "Person Designation",
           },
           phoneNoOfApplicant: {
             type: "string",
