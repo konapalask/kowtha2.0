@@ -60,7 +60,7 @@ export const herohousingSelfSchema = {
           longitude: {
             type: "string",
             title: "Longitude of business address",
-          }
+          },
           // latLongOfOfficeAddress: {
           //   type: "string",
           //   title: "Lat/Long of office address (legacy)",
