@@ -1591,7 +1591,7 @@ export const BusinessVerificationDetails: React.FC<
             alignItems: "center",
           }}
         >
-          <span>{sectionLabel}</span>
+          <span style={{ fontWeight: "bold" }}>{sectionLabel}</span>
           {((role === "Verifier" || role === "Admin" || role === "VerificationExecutive")) &&
             activeSections.includes(sectionId) &&
             hasChanges && (
@@ -2403,6 +2403,134 @@ export const BusinessVerificationDetails: React.FC<
               </Select>
             </Form.Item>
           );
+
+        case "object":
+          // Handle nested object fields (e.g., repaymentFrom with repaymentBankName, typeSAAccount, accountNo)
+          if (field.objectFields && field.objectFields.length > 0) {
+            return (
+              <div key={fieldId} style={{ marginBottom: 16 }}>
+                {showLabel && (
+                  <div style={{ marginBottom: 8 }}>
+                    <Text strong>
+                      {field.label}
+                      {isRequired ? " *" : ""}
+                    </Text>
+                  </div>
+                )}
+                <Card size="small" style={{ backgroundColor: "#fafafa" }}>
+                  <Row gutter={[16, 16]}>
+                    {field.objectFields.map((objectField: any) => {
+                      const objectFieldReadOnly = readOnly || objectField.readOnly || false;
+                      const objectFieldRequired = objectField.required || false;
+                      
+                      // Render nested field based on its type
+                      const renderNestedField = () => {
+                        switch (objectField.type) {
+                          case "text":
+                          case "string":
+                            return (
+                              <Input
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                                maxLength={objectField.maxLength}
+                              />
+                            );
+                          
+                          case "number":
+                          case "integer":
+                            return (
+                              <InputNumber
+                                disabled={objectFieldReadOnly}
+                                style={{ width: "100%" }}
+                                placeholder={objectField.placeholder || objectField.label}
+                                formatter={
+                                  objectField.formatter?.useIndianFormat
+                                    ? (value) => {
+                                        if (!value) return "";
+                                        const num = parseFloat(String(value));
+                                        return new Intl.NumberFormat("en-IN", {
+                                          minimumFractionDigits:
+                                            objectField.formatter?.minDecimalPlaces || 0,
+                                          maximumFractionDigits:
+                                            objectField.formatter?.maxDecimalPlaces || 2,
+                                        }).format(num);
+                                      }
+                                    : undefined
+                                }
+                                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+                              />
+                            );
+                          
+                          case "select":
+                            return (
+                              <Select
+                                disabled={objectFieldReadOnly}
+                                placeholder={`Select ${objectField.label}`}
+                              >
+                                {objectField.options?.map((option: string) => (
+                                  <Select.Option key={option} value={option}>
+                                    {option}
+                                  </Select.Option>
+                                ))}
+                                {objectField.enum?.map((option: string) => (
+                                  <Select.Option key={option} value={option}>
+                                    {option}
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            );
+                          
+                          case "textarea":
+                            return (
+                              <TextArea
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                                rows={objectField.textAreaRows || 3}
+                                maxLength={objectField.maxLength}
+                              />
+                            );
+                          
+                          default:
+                            return (
+                              <Input
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                              />
+                            );
+                        }
+                      };
+
+                      return (
+                        <Col
+                          key={objectField.id}
+                          span={objectField.type === "textarea" ? 24 : 12}
+                        >
+                          <Form.Item
+                            name={[fieldId, objectField.id]}
+                            label={objectField.label}
+                            rules={
+                              objectFieldRequired
+                                ? [
+                                    {
+                                      required: true,
+                                      message: `${objectField.label} is required`,
+                                    },
+                                  ]
+                                : []
+                            }
+                          >
+                            {renderNestedField()}
+                          </Form.Item>
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                </Card>
+              </div>
+            );
+          }
+          // Fallback if objectFields is not defined
+          return null;
 
         default:
           return (
