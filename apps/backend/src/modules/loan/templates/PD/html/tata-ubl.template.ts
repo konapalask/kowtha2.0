@@ -18,6 +18,12 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
     return `Rs. ${amount.toLocaleString("en-IN")}/-`;
   };
 
+  const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+    return [value];
+  };
+
   // Helper function to render family details table
   const renderFamilyDetails = () => {
     const familyMembers = verificationData.familyDetails?.familyDetails || [];
@@ -85,12 +91,12 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">1</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name of Applicant</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfApplicant || ""} </p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.applicantName || ""} </p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">2</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name of Entity</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfEntity || ""} </p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.businessName || ""} </p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">3</p></td>
@@ -153,7 +159,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.ownedBy || ""}</p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.areaSqFt || ""}</p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.occupiedSinceYears || ""}</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.cmvRentPerMonth || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.residentialAddress?.cmvRentPerMonth || "")}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">7</p></td>
@@ -310,15 +316,14 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                         <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Debtor Days</strong></p></td>
                         <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since (years)</strong></p></td>
                         </tr>
-                        ${verificationData.customerDetails?.customers
-                        ?.map(
-                            (customer: any) => `
-                        <tr>
-                            <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.nameOfCustomer || ""}</p></td>
-                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.percentageOfTotalSales || ""}</p></td>
-                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.debtorDays || ""}</p></td>
-                            <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.relationshipSinceYears || ""}</p></td>
-                        </tr>
+                        ${ensureArray(verificationData.customerDetails?.customers)
+                        .map(customer => `
+                            <tr>
+                                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.nameOfCustomer || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.percentageOfTotalSales || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.debtorDays || ""}</p></td>
+                                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.relationshipSinceYears || ""}</p></td>
+                            </tr>
                         `).join("")}
                      </table>
                     </td>
@@ -342,7 +347,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                             <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Creditor Days</strong></p></td>
                             <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since(years)</strong></p></td>
                         </tr>
-                        ${verificationData.supplierDetails?.suppliers
+                        ${ensureArray(verificationData.supplierDetails?.suppliers)
                         ?.map(
                             (supplier: any) => `
                             <tr>
@@ -572,41 +577,42 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">28</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Pan Card</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.panCard || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.panCard || ""}</p></td>
                 </tr>
-             
+                            
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">30</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.status || ""}</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.otherObservations?.finalStatus || ""}</strong></p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">31</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Date of PD:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]}, ${verificationData.basicDetails?.pdTime || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.dateOfPD || istDate.split(" ")[0]}, ${verificationData.otherObservations?.pdTime || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">32</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Person met at the<br />time of PD:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.personMet || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.personMet || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">33</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Phone No. of<br />Applicant:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.phoneNo || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.phoneNoOfApplicant || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">34</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done by:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${html_data.fieldExecutive || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.pdDoneBy || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">35</p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Latitude and Longitude</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.latitudeLongitude || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.latitudeAndLongitude || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Video Link:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Video Link:</strong></p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.videoLink || ""}</p></td>
                 </tr>
             </table>
             
@@ -614,23 +620,17 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
             <p style="margin:8px 0;line-height:1.5">(For Tata Capital Limited)</p>
             <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met ${verificationData.basicDetails?.personMet || ""} from (Name of the Agency) on ${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]} at ${verificationData.basicDetails?.pdTime || ""} AM/PM for Personal Discussion.</p>
             <p style="margin:8px 0;line-height:1.5"><b>I am informed that Executive is not authorized to collect any money. </b></p>
-            <p style="margin:8px 0;line-height:1.5">Person Interviewed / Met: ${verificationData.basicDetails?.personMet || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">Designation ${verificationData.basicDetails?.personDesignation || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">Sign: ${verificationData.basicDetails?.signature || ""}</p>
-
-            <div style="page-break-before: always;"></div>
-            <p style="margin:8px 0;line-height:1.5">Pan Card Photo: ${verificationData.documents?.panCard || ""}</p>
-            <p style="page-break-before: always;"></p>
-            <p style="margin:8px 0;line-height:1.5">Customer's Photo & Selfie: ${verificationData.documents?.customerPhoto || ""}</p>
-
+            <p style="margin:8px 0;line-height:1.5">Person Interviewed / Met: ${verificationData.otherObservations?.personMet || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">Designation ${verificationData.otherObservations?.personDesignation || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">Sign: ${verificationData.otherObservations?.signature || ""}</p>
 
             <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
             <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Tata Capital Limited will be absolutely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA &amp; CO</strong> will not be held liable in any cases</p>
             
-            <P>PHOTOS:</P><br />
-            <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
-        </div>
+  </div>
     </div>
+
+    ${pdBaseTemplateFooter(html_data)}
     
   `;
 };
