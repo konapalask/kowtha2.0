@@ -60,7 +60,6 @@ export const tataUblSchema = {
               repaymentBankName: {
                 type: "string",
                 title: "Bank name",
-                readOnly: true,
               },
               typeSAAccount: {
                 type: "string",
@@ -88,7 +87,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Address",
             readOnly: true,
-          },
+           },
           rentedOwned: {
             type: "string",
             title: "Rented/Owned",
@@ -225,6 +224,12 @@ export const tataUblSchema = {
                 monthlyIncome: {
                   type: "number",
                   title: "Monthly income",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
               },
             },
@@ -680,6 +685,55 @@ export const tataUblSchema = {
       },
       required: true,
     },
+
+    {
+      id: "otherObservations",
+      label: "Other Observations",
+      schema: {
+        type: "object",
+        properties: {
+          panCard: {
+            type: "string",
+            title: "Pan Card",
+          },
+          finalStatus: {
+            type: "string",
+            title: "Final Status",
+          },
+          dateOfPD: {
+            type: "string",
+            title: "Date of PD",
+            format: "date",
+          },
+          personMet: {
+            type: "string",
+            title: "Person met at the time of PD",
+          },
+          personDesignation: {
+            type: "string",
+            title: "Person Designation",
+          },
+          phoneNoOfApplicant: {
+            type: "string",
+            title: "Phone No. of Applicant",
+          },
+          pdDoneBy: {
+            type: "string",
+            title: "PD done by",
+          },
+          latitudeAndLongitude: {
+            type: "string",
+            title: "Latitude and Longitude",
+          },
+          videoLink: {
+            type: "string",
+            title: "Video Link",
+          },
+        },
+      },
+    },
+
+
     financialsSchema,
   ],
 } as const;

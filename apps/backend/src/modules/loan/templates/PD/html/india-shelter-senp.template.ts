@@ -7,7 +7,7 @@ const headerStyle =
 const subHeaderStyle =
   "background:#f7d8c7;color:#4a3426;font-weight:600;font-size:12px;padding:8px;border:1px solid #ccc;text-transform:uppercase";
 const labelCellStyle =
-  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;width:26%";
+  "background:#f4f6fb;font-weight:600;color:#1f2d3d;padding:8px;border:1px solid #d0d7de;vertical-align:top;";
 const valueCellStyle =
   "padding:8px;border:1px solid #d0d7de;color:#2f3b52;vertical-align:top";
 

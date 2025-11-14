@@ -18,6 +18,12 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
     return `Rs. ${amount.toLocaleString("en-IN")}/-`;
   };
 
+  const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+    return [value];
+  };
+
   // Helper function to render family details table
   const renderFamilyDetails = () => {
     const familyMembers = verificationData.familyDetails?.familyDetails || [];
@@ -83,23 +89,23 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Particular Description</strong></p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">1</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name of Applicant</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfApplicant || ""} </p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>1</strong></p></td>    
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Applicant</strong></p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.applicantName || ""} </p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">2</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name of Entity</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfEntity || ""} </p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>2</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Entity</strong></p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.businessName || ""} </p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">3</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name of<br />Co-Applicant(s)</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfCoApplicants || ""} (Wife)</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>3</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of<br />Co-Applicant(s)</strong></p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.nameOfCoApplicants || ""}</p></td>
                 </tr>
                 <tr>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">4</p></td>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Proposed Loan Details</p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>4</strong></p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Proposed Loan Details</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Product</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Tenure</strong></p></td>
@@ -118,8 +124,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">5</p></td>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Office Address</p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>5</strong></p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Office Address</strong></p></td>
                     <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.officeAddress?.officeAddress || ""}</p></td>
                 </tr>
                 <tr>
@@ -137,9 +143,9 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.officeAddress?.cmvRentPerMonth) || ""}</p></td>
                 </tr>
                 <tr>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">6</p></td>
-                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Residential Address</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.residentialAddress?.add || ""}</p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>6</strong></p></td>
+                    <td rowspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Residential Address</strong></p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Add –</strong> ${verificationData.residentialAddress?.address || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Rented/ Owned</strong></p></td>
@@ -153,16 +159,16 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.ownedBy || ""}</p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.areaSqFt || ""}</p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.occupiedSinceYears || ""}</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.residentialAddress?.cmvRentPerMonth || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.residentialAddress?.cmvRentPerMonth || "")}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">7</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Address of PD</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>7</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Address of PD</strong></p></td>
                     <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done in office & met: ${verificationData.addressOfPDAndPersonMet?.addressOfPDAndPersonMet || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">8</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Family Details</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>8</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Details</strong></p></td>
                     <td colspan="9" style="border:1px solid #ccc;padding:8px">
                         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
                             <tr>
@@ -186,32 +192,15 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">9</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Current Business Details</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>9</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Current Business Details</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px">
                         <ul>
                             ${
                               verificationData.businessDetails?.currentBusinessDetails
                                 ?.split("\n")
                                 .map((detail: string) => `<li>${detail}</li>`)
-                                .join("") ||
-                              `<li>He is started this business under the name ${verificationData.basicDetails?.nameOfEntity || ""} since ${verificationData.aboutTheBusiness?.businessStartYear || ""}.</li>
-                             <li>It is a Sole Proprietorship.</li>
-                             <li>He has ${verificationData.aboutTheBusiness?.businessVintage || ""} years total experience in this field.</li>
-                             <li>Nature of business is ${verificationData.aboutTheBusiness?.natureOfBusiness || ""}.</li>
-                             <li>He does Interior and Exterior Works to houses, apartments, offices etc.</li>
-                             <li>He does aluminum profile cupboards, UPVC windows & partition, modular kitchen, TV unit, false ceiling, wall designers etc.</li>
-                             <li>He charges Rs. 250-600 per sq feet.</li>
-                             <li>At present he has doing 1 contract in Mallapur and contract value is Rs. 5 lakhs.</li>
-                             <li>He does monthly 4-5 contracts.</li>
-                             <li>He purchases stock from local wholesale markets in Hyderabad.</li>
-                             <li>Major customers are General public.</li>
-                             <li>There are no workers working under him in this business and he maintains workers depend on work.</li>
-                             <li>He is running business in rental premises which cost Rs. 7000 per month.</li>
-                             <li>Good business activity is seen.</li>
-                             <li>The business transactions are cash and bank mode.</li>
-                             <li>Neighbor gave positive feedback about applicant.</li>
-                             <li>Hence status of the case is Positive.</li>`
+                                .join("")
                             }
                         </ul>
                     </td>
@@ -225,13 +214,13 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td colspan="8" style="border:1px solid #ccc;padding:8px"></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">10</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Stock as on date</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>10</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Stock as on date</strong></p></td>
                     <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.businessDetails?.stockAsOnDate || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">11</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Employees Details</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>11</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Employees Details</strong></p></td>
                     <td colspan="8" style="border:1px solid #ccc;padding:8px">
                         <p style="margin:8px 0;line-height:1.5"><strong>Current Employees:</strong> ${verificationData.employeesDetails?.currentEmployees || ""}</p>
                         <p style="margin:8px 0;line-height:1.5"><strong>Salary Range:</strong> ${verificationData.employeesDetails?.salaryRange || ""}</p>
@@ -239,8 +228,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">12</p></td>
-                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Bank Details</p></td>
+                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>12</strong></p></td>
+                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Bank Details</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Primary Banker</strong></p></td>
                     <td colspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Nature of Account</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Avg. Bal</strong></p></td>
@@ -258,106 +247,112 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"></td>
                 </tr>
                 <tr>
-                    <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">13</p></td>
-                    <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Sales and Profit Details</p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Turnover (FY 2024-25)</p></td>
+                    <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>13</strong></p></td>
+                    <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Sales and Profit Details</strong></p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Turnover (FY 2024-25)</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.turnoverFY202425 || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Exp. Turnover (FY 2024-25)</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Exp. Turnover (FY 2024-25)</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.expTurnoverFY202526 || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Monthly Turnover / Sales</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Turnover / Sales</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.monthlyTurnoverSales) || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Net Monthly Income</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Monthly Income</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.netMonthlyIncome) || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Profit Margin</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Profit Margin</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.profitMargin || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Is there any effect on turnover due to Covid</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Is there any effect on turnover due to Covid</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.covidEffectOnTurnover || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">After lockdown, is business running on same speed?</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>After lockdown, is business running on same speed?</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.postLockdownBusinessSpeed || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Cash Sales (% of total turnover)</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Cash Sales (% of total turnover)</strong></p></td>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.cashSalesPercentage || ""}</p></td>
                 </tr>
                 <tr>
-                    <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">14</p></td>
-                    <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Customer Details</p></td>
-                    <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Debtors as on date</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.totalDebtorsAsOnDate || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>14</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Customer Details</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px" colspan="10">
+                     <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+                        <tr>
+                        <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Total Debtors as on date</strong></p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.totalDebtorsAsOnDate || ""}</p></td>
+                        </tr>
+                        <tr>
+                        <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Total Customers (No.)</strong></p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.totalCustomersNo || ""}</p></td>
+                        </tr>
+                        <tr>
+                        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Customer</strong></p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>% of Total Sales</strong></p></td>
+                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Debtor Days</strong></p></td>
+                        <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since (years)</strong></p></td>
+                        </tr>
+                        ${ensureArray(verificationData.customerDetails?.customers)
+                        .map(customer => `
+                            <tr>
+                                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.nameOfCustomer || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.percentageOfTotalSales || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.debtorDays || ""}</p></td>
+                                <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.relationshipSinceYears || ""}</p></td>
+                            </tr>
+                        `).join("")}
+                     </table>
+                    </td>
+                </tr>
+                 <tr>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>15</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Supplier Details</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px" colspan="10">
+                     <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+                        <tr>
+                            <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Total Creditors as on date</strong></p></td>
+                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalCreditorsAsOnDate || ""}</p></td>
+                        </tr>
+                        <tr>
+                            <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Total Suppliers (No.)</strong></p></td>
+                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalSuppliersNo || ""}</p></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Supplier</strong></p></td>
+                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>% of Total Purchases</strong></p></td>
+                            <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Creditor Days</strong></p></td>
+                            <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since(years)</strong></p></td>
+                        </tr>
+                        ${ensureArray(verificationData.supplierDetails?.suppliers)
+                        ?.map(
+                            (supplier: any) => `
+                            <tr>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.nameOfSupplier || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.percentageOfTotalPurchases || ""}</p></td>
+                                <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.creditorDays || ""}</p></td>
+                                <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.relationshipSinceYears || ""}</p></td>
+                            </tr>
+                        `
+                        )
+                        .join("")}
+                    </table>
+                    </td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Customers (No.)</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.customerDetails?.totalCustomersNo || ""}</p></td>
-                </tr>
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Customer</strong></p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>% of Total Sales</strong></p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Debtor Days</strong></p></td>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since (years)</strong></p></td>
-                </tr>
-                ${verificationData.customerDetails?.customers
-                  ?.map(
-                    (customer: any) => `
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.nameOfCustomer || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.percentageOfTotalSales || ""}</p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.debtorDays || ""}</p></td>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${customer.relationshipSinceYears || ""}</p></td>
-                </tr>
-                `
-                  )
-                  .join("")}
-            </table>
-            
-            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
-                <tr>
-                    <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">15</p></td>
-                    <td rowspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Supplier Details</p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Creditors as on date</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalCreditorsAsOnDate || ""}</p></td>
-                </tr>
-                <tr>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Total Suppliers (No.)</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.supplierDetails?.totalSuppliersNo || ""}</p></td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Supplier</strong></p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>% of Total Purchases</strong></p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Creditor Days</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship since(years)</strong></p></td>
-                </tr>
-                ${verificationData.supplierDetails?.suppliers
-                  ?.map(
-                    (supplier: any) => `
-                    <tr>
-                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.nameOfSupplier || ""}</p></td>
-                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.percentageOfTotalPurchases || ""}</p></td>
-                        <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.creditorDays || ""}</p></td>
-                        <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${supplier.relationshipSinceYears || ""}</p></td>
-                    </tr>
-                `
-                  )
-                  .join("")}
-                <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">16</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Other Business/ Income Details (if any)</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>16</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Business/ Income Details (if any)</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherDetails?.otherBusinessIncomeDetails || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">17</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Assets</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>17</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Assets</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             ${verificationData.otherDetails?.assets ? `<li>${verificationData.otherDetails.assets}</li>` : "<li>Own House</li>"}
@@ -365,8 +360,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">18</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Liabilities</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>18</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Liabilities</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
                             <tr>
@@ -382,8 +377,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">19</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">End Use of<br />proposed Loan</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>19</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>End Use of<br />proposed Loan</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             <li>${verificationData.otherDetails?.endUseOfProposedLoan || ""}</li>
@@ -391,8 +386,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">20</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Political Connection</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>20</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Political Connection</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             <li>${verificationData.otherDetails?.politicalConnection || ""}</li>
@@ -400,8 +395,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">21</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Any Court Cases</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>21</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Any Court Cases</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             <li>${verificationData.otherDetails?.anyCourtCases || ""}</li>
@@ -409,8 +404,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">22</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Business belongs to which industry</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>22</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Business belongs to which industry</strong></p></td>
                     <td colspan="10" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             <li>${verificationData.otherDetails?.businessIndustry || ""}</li>
@@ -418,25 +413,25 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">23</p></td>
-                    <td rowspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Value Added Information</p></td>
-                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Customer Behavior?</p></td>
+                    <td rowspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>23</strong></p></td>
+                    <td rowspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Value Added Information</strong> <br />(If any)</p></td>
+                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Customer Behavior?</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.customerBehavior || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Salaries paid during covid to employees?</p></td>
+                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Salaries paid during covid to employees?</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.salariesPaidDuringCovid || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">If partly paid, % of deduction on salary?</p></td>
+                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>If partly paid, % of deduction on salary?</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.salaryDeductionPercentage || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Nature/Types of Neighborhood Shops (E.g. General Store, Jewelry Store, Hardware Store, etc.)</p></td>
+                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Nature/Types of Neighborhood Shops (E.g. General Store, Jewelry Store, Hardware Store, etc.)</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.neighborhoodShopsNature || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Digital wallet used in the business? (E.g. PhonePe, Paytm, GooglePay, AmazonPay, JIO Money, Yono SBI, Airtel Money, Etc.)</p></td>
+                    <td colspan="7" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Digital wallet used in the business? (E.g. PhonePe, Paytm, GooglePay, AmazonPay, JIO Money, Yono SBI, Airtel Money, Etc.)</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.digitalWalletUsed || ""}</p></td>
                 </tr>
             </table>
@@ -445,24 +440,24 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td rowspan="4" style="border:1px solid #ccc;padding:8px"></td>
                     <td rowspan="4" style="border:1px solid #ccc;padding:8px"></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Customer Shop/Office Locality (Slum/Market Road/ Main Road/ Highway)</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Customer Shop/Office Locality (Slum/Market Road/ Main Road/ Highway)</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.customerShopLocality || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Nearby Bus Stop /Taxi Stand/Rickshaw Stand/Metro Station Name.</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Nearby Bus Stop /Taxi Stand/Rickshaw Stand/Metro Station Name.</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.nearbyTransportStand || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Utility bill (Clear Photo to be Taken) last 2 months & present month units consumption to be written</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Utility bill (Clear Photo to be Taken) last 2 months & present month units consumption to be written</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.utilityBillDetails || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Loss Suffered In Business, If yes, the reason?</p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Loss Suffered In Business, If yes, the reason?</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.valueAddedInformation?.lossSufferedInBusiness || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">24</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Strengths</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>24</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Strengths</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             ${
@@ -481,8 +476,8 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">25</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Weaknesses</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>25</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Weaknesses</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px">
                         <ul>
                             ${
@@ -501,54 +496,54 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="11" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">26</p></td>
-                    <td rowspan="11" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Site Visit Observations</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name Plate Displayed</p></td>
+                    <td rowspan="11" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>26</strong></p></td>
+                    <td rowspan="11" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Site Visit Observations</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name Plate Displayed</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.namePlateDisplayed || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Office Well Furnished?</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Office Well Furnished?</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.officeWellFurnished || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Business Activity Seen</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Business Activity Seen</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.businessActivitySeen || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Difficulty in locating premises?</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Difficulty in locating premises?</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.difficultyInLocatingPremises || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Neighborhood:</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Neighborhood:</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.neighborhood || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Landmark</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Landmark</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.landmark || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Abnormal Increase / Decrease in Turnover</p></td>
+                        <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Abnormal Increase / Decrease in Turnover</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.abnormalIncreaseDecreaseInTurnover || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Any Decrease in Net worth</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Any Decrease in Net worth</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.anyDecreaseInNetWorth || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Stock Seen During PD?</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Stock Seen During PD?</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.stockSeenDuringPD || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">No. of employees seen during PD?</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>No. of employees seen during PD?</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.noOfEmployeesSeenDuringPD || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">No. of customers seen during PD?</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>No. of customers seen during PD?</strong></p></td>
                     <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.noOfCustomersSeenDuringPD || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">27</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Third Party Confirmation</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>27</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Third Party Confirmation</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px">
                         <p style="margin:8px 0;line-height:1.5">Got ${verificationData.siteVisitObservations?.thirdPartyConfirmationYears || ""} years positive response about the applicant -</p>
                         <p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.thirdPartyConfirmationDetails || ""}</p>
@@ -563,43 +558,44 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"></p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">28</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Pan Card</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.documents?.panCard || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>28</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Pan Card</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.panCard || ""}</p></td>
                 </tr>
-             
+                            
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">30</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>30</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.status || ""}</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.otherObservations?.finalStatus || ""}</strong></p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">31</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Date of PD:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]}, ${verificationData.basicDetails?.pdTime || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>31</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of PD:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.dateOfPD || istDate.split(" ")[0]}, ${verificationData.otherObservations?.pdTime || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">32</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Person met at the<br />time of PD:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.personMet || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>32</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person met at the<br />time of PD:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.personMet || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">33</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Phone No. of<br />Applicant:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.phoneNo || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>33</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Phone No. of<br />Applicant:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.phoneNoOfApplicant || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">34</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done by:</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${html_data.fieldExecutive || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>34</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD done by:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.pdDoneBy || ""}</p></td>
                 </tr>
                 <tr>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">35</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Latitude and Longitude</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.basicDetails?.latitudeLongitude || ""}</p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>35</strong>   </p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Latitude and Longitude</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.latitudeAndLongitude || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Video Link:</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Video Link:</strong></p></td>
+                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.videoLink || ""}</p></td>
                 </tr>
             </table>
             
@@ -607,23 +603,17 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
             <p style="margin:8px 0;line-height:1.5">(For Tata Capital Limited)</p>
             <p style="margin:8px 0;line-height:1.5">I, the undersigned, have applied for Micro Business Loan with Tata Capital Limited. In this regard, I have met ${verificationData.basicDetails?.personMet || ""} from (Name of the Agency) on ${verificationData.basicDetails?.pdDate || istDate.split(" ")[0]} at ${verificationData.basicDetails?.pdTime || ""} AM/PM for Personal Discussion.</p>
             <p style="margin:8px 0;line-height:1.5"><b>I am informed that Executive is not authorized to collect any money. </b></p>
-            <p style="margin:8px 0;line-height:1.5">Person Interviewed / Met: ${verificationData.basicDetails?.personMet || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">Designation ${verificationData.basicDetails?.personDesignation || ""}</p>
-            <p style="margin:8px 0;line-height:1.5">Sign: ${verificationData.basicDetails?.signature || ""}</p>
-
-            <div style="page-break-before: always;"></div>
-            <p style="margin:8px 0;line-height:1.5">Pan Card Photo: ${verificationData.documents?.panCard || ""}</p>
-            <p style="page-break-before: always;"></p>
-            <p style="margin:8px 0;line-height:1.5">Customer's Photo & Selfie: ${verificationData.documents?.customerPhoto || ""}</p>
-
+            <p style="margin:8px 0;line-height:1.5">Person Interviewed / Met: ${verificationData.otherObservations?.personMet || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">Designation ${verificationData.otherObservations?.personDesignation || ""}</p>
+            <p style="margin:8px 0;line-height:1.5">Sign: </p>
 
             <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
             <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Tata Capital Limited will be absolutely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA &amp; CO</strong> will not be held liable in any cases</p>
             
-            <P>PHOTOS:</P><br />
-            <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
-        </div>
+  </div>
     </div>
+
+    ${pdBaseTemplateFooter(html_data)}
     
   `;
 };

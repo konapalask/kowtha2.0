@@ -91,72 +91,18 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       ? detailsOfDirectorsAndProprietorData.directorsAndProprietor
       : [];
   const detailsOfDirectorsAndProprietor = ensureArray(
-    detailsOfDirectorsAndProprietorArray
+    verificationData.detailsOfDirectorsAndProprietor.details
   );
   const history = verificationData.history || {};
   const businessActivities = verificationData.businessActivities || {};
   const businessSetup = verificationData.businessSetup || {};
-  // Handle nested structures for details of all loans
-  const detailsOfAllLoansAsOnData =
-    verificationData.detailsOfAllLoansAsOn || {};
-  const detailsOfAllLoansAsOnArray = Array.isArray(detailsOfAllLoansAsOnData)
-    ? detailsOfAllLoansAsOnData
-    : Array.isArray(detailsOfAllLoansAsOnData.loans)
-      ? detailsOfAllLoansAsOnData.loans
-      : [];
-  const detailsOfAllLoansAsOn = ensureArray(detailsOfAllLoansAsOnArray);
-
-  // Handle nested structures for personal assets
-  const personalAssetsOfProprietorData =
-    verificationData.personalAssetsOfProprietor || {};
-  const personalAssetsOfProprietorArray = Array.isArray(
-    personalAssetsOfProprietorData
-  )
-    ? personalAssetsOfProprietorData
-    : Array.isArray(personalAssetsOfProprietorData.assets)
-      ? personalAssetsOfProprietorData.assets
-      : [];
-  const personalAssetsOfProprietor = ensureArray(
-    personalAssetsOfProprietorArray
-  );
-
-  // Handle nested structures for details of customers
-  const detailsOfCustomersData = verificationData.detailsOfCustomers || {};
-  const detailsOfCustomersArray = Array.isArray(detailsOfCustomersData)
-    ? detailsOfCustomersData
-    : Array.isArray(detailsOfCustomersData.customers)
-      ? detailsOfCustomersData.customers
-      : [];
-  const detailsOfCustomers = ensureArray(detailsOfCustomersArray);
-
-  // Handle nested structures for details of suppliers
-  const detailsOfSuppliersData = verificationData.detailsOfSuppliers || {};
-  const detailsOfSuppliersArray = Array.isArray(detailsOfSuppliersData)
-    ? detailsOfSuppliersData
-    : Array.isArray(detailsOfSuppliersData.suppliers)
-      ? detailsOfSuppliersData.suppliers
-      : [];
-  const detailsOfSuppliers = ensureArray(detailsOfSuppliersArray);
-
-  // Handle nested structures for sister companies
-  const sisterCompaniesData = verificationData.sisterCompanies || {};
-  const sisterCompaniesArray = Array.isArray(sisterCompaniesData)
-    ? sisterCompaniesData
-    : Array.isArray(sisterCompaniesData.companies)
-      ? sisterCompaniesData.companies
-      : [];
-  const sisterCompanies = ensureArray(sisterCompaniesArray);
-
+  const detailsOfAllLoansAsOn = verificationData.detailsOfAllLoansAsOn.details || {};
+  const personalAssetsOfProprietor = verificationData.personalAssetsOfProprietor.details || {};
+  const detailsOfCustomers = verificationData.detailsOfCustomers.details || {};
+  const detailsOfSuppliers = verificationData.detailsOfSuppliers.details || {};
+  const sisterCompanies = verificationData.sisterCompanies.details || {};
   const insuranceCompanyName = verificationData.insuranceCompanyName || {};
-
-  // Handle nested structures for insurance details
-  const insuranceDetailsData = verificationData.insuranceDetails || {};
-  const insuranceDetailsArray = Array.isArray(insuranceDetailsData)
-    ? insuranceDetailsData
-    : Array.isArray(insuranceDetailsData.details)
-      ? insuranceDetailsData.details
-      : [];
-  const insuranceDetails = ensureArray(insuranceDetailsArray);
+  const insuranceDetails = verificationData.insuranceDetails.details || {};
   const performanceDetails = verificationData.performanceDetails || {};
   const otherBusinessInterests = verificationData.otherBusinessInterests || {};
   const bankingDetails = verificationData.bankingDetails || {};
@@ -189,7 +135,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     </tr>
     ${renderKeyValue("Other site(s) of the Borrower / sites(s)", borrowerNameAndAddress.otherSiteSOfTheBorrower)}
     ${renderKeyValue("Constitution of Borrower", borrowerNameAndAddress.constitutionOfBorrower)}
-    ${renderKeyValue("Details of Directors & Proprietor", borrowerNameAndAddress.detailsOfDirectorsProprietor)}
+    ${renderKeyValue("Details of Directors & Proprietor", detailsOfDirectorsAndProprietorData.directorsAndProprietor)}
     </table>
     ${renderArrayTable(
       [
@@ -281,7 +227,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
       </tr>
       <tr>
       <td style="${valueCellStyle}">${businessSetup.noOfEmployees}</td>
-      <td style="${valueCellStyle}">${businessSetup.type}</td>
+      <td style="${valueCellStyle}">${businessSetup.typeOfBusiness}</td>
       <td style="${valueCellStyle}">${businessSetup.averagePay}</td>
     </tr>
     </table>
@@ -386,10 +332,10 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
         (item: any, index: number) => `
       <tr>
         <td style="${valueCellStyle}">${index + 1}</td>
-        <td style="${valueCellStyle}">${item.nameOfSisterCompanies || item.nameOfFirm || ""}</td>
-        <td style="${valueCellStyle}">${item.businessProfile || ""}</td>
-        <td style="${valueCellStyle}">${item.turnover || ""}</td>
-        <td style="${valueCellStyle}">${item.netProfit || ""}</td>
+        <td style="${valueCellStyle}">${item.nameOfSisterCompanies}</td>
+        <td style="${valueCellStyle}">${item.businessProfile}</td>
+        <td style="${valueCellStyle}">${item.turnover}</td>
+        <td style="${valueCellStyle}">${item.netProfit}</td>
       </tr>
     `
       )
@@ -397,9 +343,10 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Insurance Details</h2>
-    <p>Insurance Company Name:- ${insuranceCompanyName} <br> Due they are taking the exemptions by taking the Children Education Fee:
+    <p>Insurance Company Name:- ${insuranceCompanyName.insuranceCompanyName} <br> Due they are taking the exemptions by taking the Children Education Fee: ${insuranceCompanyName.dueExemptions}</p>
     <table style="${tableStyle}">
     <tr>
+    <td style="${labelCellStyle}">S.No</td>
     <td style="${labelCellStyle}">Assets Covered</td>
     <td style="${labelCellStyle}">Cover Note No. / Policy No</td>
     <td style="${labelCellStyle}">Valid up to</td>
@@ -443,7 +390,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Banking Details & Statutory Obligations</h2>
     <table style="${tableStyle}">
-    ${renderKeyValue("Banking Name", bankingDetails.bankingName)}
+    ${renderKeyValue("Banking Name", bankingDetails.bankName)}
     ${renderKeyValue("Branch", bankingDetails.branch)}
     ${renderKeyValue("Account Number", bankingDetails.accountNumber)}
     ${renderKeyValue("Account Type", bankingDetails.accountType)}
@@ -465,8 +412,8 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <tr>
     <td style="${labelCellStyle}" colspan="2">Details of End-Use of Funds:</td>
     </tr>
-    ${renderKeyValue("End-Use of Funds (incl Cash out use)", loanPurpose.endUseOfFunds)}
-    ${renderKeyValue("Loan Required", loanPurpose.loanAmountRequired)}
+    ${renderKeyValue("End-Use of Funds (incl Cash out use)", loanPurpose.detailsOfEndUseOfFunds)}
+    ${renderKeyValue("Loan Required", loanPurpose.loanRequired)}
     ${renderKeyValue("EMI Comfortable With", loanPurpose.emiComfortableWith)}
     </table>
 

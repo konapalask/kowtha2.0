@@ -1,6 +1,10 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
-import { CloseCircleOutlined, EditOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  EditOutlined,
+  ClockCircleOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -81,62 +85,58 @@ const convertYYYYMMDDToDDMMYYYY = (dateString: string): string => {
   return dateString;
 };
 
-
 const convertTimeToHTML5Format = (timeString: string): string => {
   if (!timeString) return "";
-  
+
   if (/^\d{1,2}:\d{2}$/.test(timeString.trim())) {
     return timeString.trim();
   }
-  
+
   const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
   const match = timeString.trim().match(timeRegex);
-  
+
   if (match) {
     let hours = parseInt(match[1], 10);
     const minutes = match[2];
     const period = match[3].toUpperCase();
-    
+
     if (period === "PM" && hours !== 12) {
       hours += 12;
     } else if (period === "AM" && hours === 12) {
       hours = 0;
     }
-    
+
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
   }
- 
+
   return timeString;
 };
 
-
 const convertTimeFromHTML5Format = (timeString: string): string => {
   if (!timeString) return "";
-  
-  
+
   if (/AM|PM/i.test(timeString)) {
     return timeString;
   }
-  
+
   // Try to parse "HH:MM" format (24-hour)
   const timeRegex = /(\d{1,2}):(\d{2})/;
   const match = timeString.trim().match(timeRegex);
-  
+
   if (match) {
     let hours = parseInt(match[1], 10);
     const minutes = match[2];
-    
+
     const period = hours >= 12 ? "PM" : "AM";
     if (hours > 12) {
       hours -= 12;
     } else if (hours === 0) {
       hours = 12;
     }
-    
+
     return `${hours}:${minutes} ${period}`;
   }
-  
- 
+
   return timeString;
 };
 
@@ -263,29 +263,33 @@ export const BusinessVerificationDetails: React.FC<
     if (savedSectionRef.current && savedSectionScrollRef.current !== null) {
       const sectionId = savedSectionRef.current;
       const scrollPosition = savedSectionScrollRef.current;
-      
+
       // Try multiple times to find the element (DOM might not be ready immediately)
       let attempts = 0;
       const maxAttempts = 10;
-      
+
       const tryScroll = () => {
         attempts++;
         const sectionElement = document.getElementById(`section-${sectionId}`);
-        
+
         if (sectionElement) {
           // Found the element, scroll to it
           // Use requestAnimationFrame for smoother scroll
           requestAnimationFrame(() => {
-            sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            sectionElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
             // Add a small offset to account for any fixed headers
             setTimeout(() => {
               const rect = sectionElement.getBoundingClientRect();
-              const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+              const scrollTop =
+                window.pageYOffset || document.documentElement.scrollTop;
               const targetY = rect.top + scrollTop - 20; // 20px offset
-              window.scrollTo({ top: targetY, behavior: 'smooth' });
+              window.scrollTo({ top: targetY, behavior: "smooth" });
             }, 100);
           });
-          
+
           // Clear the refs
           savedSectionRef.current = null;
           savedSectionScrollRef.current = null;
@@ -294,12 +298,12 @@ export const BusinessVerificationDetails: React.FC<
           setTimeout(tryScroll, 100);
         } else {
           // Max attempts reached, fallback to stored scroll position
-          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+          window.scrollTo({ top: scrollPosition, behavior: "smooth" });
           savedSectionRef.current = null;
           savedSectionScrollRef.current = null;
         }
       };
-      
+
       // Start trying after initial delay
       setTimeout(tryScroll, 200);
     }
@@ -308,16 +312,18 @@ export const BusinessVerificationDetails: React.FC<
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
-  
+
   // Ref to track section that was just saved (for scroll restoration)
   const savedSectionRef = React.useRef<string | null>(null);
   const savedSectionScrollRef = React.useRef<number | null>(null);
   const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
-  
+
   // Local storage for VerificationExecutive saved sections (no API call)
-  const [savedSectionData, setSavedSectionData] = useState<Record<string, any>>({});
+  const [savedSectionData, setSavedSectionData] = useState<Record<string, any>>(
+    {}
+  );
 
   // Dynamic edit modal states
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -434,16 +440,22 @@ export const BusinessVerificationDetails: React.FC<
 
         // Skip if no bank name or template name
         if (!bankName && !templateName) {
-          console.log("No bank name or template name found, skipping dynamic schema");
+          console.log(
+            "No bank name or template name found, skipping dynamic schema"
+          );
           setUseNewApproach(false);
           setFormLoading(false);
           return;
         }
 
-        console.log("Loading PD schema from backend for bank:", bankName, "templateName:", templateName);
+        console.log(
+          "Loading PD schema from backend for bank:",
+          bankName,
+          "templateName:",
+          templateName
+        );
 
         try {
-         
           const { getSchemaFromBackend, convertBackendSchemaToWebFormat } =
             await import("@/services/schema.service");
           const backendResponse = await getSchemaFromBackend(
@@ -832,15 +844,17 @@ export const BusinessVerificationDetails: React.FC<
       });
 
       if (allSectionsData.financialAnalysis) {
-        console.log("Financial Analysis data collected:", allSectionsData.financialAnalysis);
+        console.log(
+          "Financial Analysis data collected:",
+          allSectionsData.financialAnalysis
+        );
       }
 
       Object.keys(existingVerificationData).forEach((sectionKey) => {
         if (sectionKey === "uploadedItems") return;
 
         if (!allSectionsData[sectionKey]) {
-          allSectionsData[sectionKey] =
-            existingVerificationData[sectionKey];
+          allSectionsData[sectionKey] = existingVerificationData[sectionKey];
         }
       });
 
@@ -852,7 +866,6 @@ export const BusinessVerificationDetails: React.FC<
 
       const { uploadedItems: _, ...sectionsWithoutUploadedItems } =
         allSectionsData;
-
 
       const verificationDataPayload = {
         ...sectionsWithoutUploadedItems,
@@ -870,7 +883,10 @@ export const BusinessVerificationDetails: React.FC<
 
       console.log("Submitting payload:", JSON.stringify(payload, null, 2));
       if ((verificationDataPayload as any).financialAnalysis) {
-        console.log("Financial Analysis in payload:", (verificationDataPayload as any).financialAnalysis);
+        console.log(
+          "Financial Analysis in payload:",
+          (verificationDataPayload as any).financialAnalysis
+        );
       }
 
       await asstVerifierSubmitApi(id as string, payload);
@@ -1147,12 +1163,15 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     // Helper function to convert flat array format (fieldId[index].property) to array format
-    const convertFlatArraysToNested = (formValues: any, sectionSchema: any): any => {
+    const convertFlatArraysToNested = (
+      formValues: any,
+      sectionSchema: any
+    ): any => {
       if (!formValues || typeof formValues !== "object") return formValues;
-      
+
       const result: any = {};
       const arrayFields: Record<string, any[]> = {};
-      
+
       // First pass: identify array fields and collect their values
       Object.keys(formValues).forEach((key) => {
         // Check if this is an array field in flat format (e.g., "aboutBusiness[0].detail")
@@ -1161,7 +1180,7 @@ export const BusinessVerificationDetails: React.FC<
           const fieldId = arrayMatch[1];
           const index = parseInt(arrayMatch[2]);
           const propertyName = arrayMatch[3];
-          
+
           if (!arrayFields[fieldId]) {
             arrayFields[fieldId] = [];
           }
@@ -1174,12 +1193,12 @@ export const BusinessVerificationDetails: React.FC<
           result[key] = formValues[key];
         }
       });
-      
+
       // Second pass: add converted arrays to result
       Object.keys(arrayFields).forEach((fieldId) => {
         result[fieldId] = arrayFields[fieldId];
       });
-      
+
       return result;
     };
 
@@ -1189,7 +1208,7 @@ export const BusinessVerificationDetails: React.FC<
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = sectionId;
       savedSectionScrollRef.current = scrollPosition;
-      
+
       // Ensure section stays expanded
       if (!activeSections.includes(sectionId)) {
         setActiveSections([...activeSections, sectionId]);
@@ -1204,11 +1223,13 @@ export const BusinessVerificationDetails: React.FC<
           // Get all current form values from this section's form
           const formValues = formInstance.getFieldsValue();
           // Find the section schema to convert flat arrays
-          const sectionSchema = schema?.sections?.find((s: any) => s.id === sectionId);
+          const sectionSchema = schema?.sections?.find(
+            (s: any) => s.id === sectionId
+          );
           // Convert flat array format to nested array format
           sectionData = convertFlatArraysToNested(formValues, sectionSchema);
         }
-        
+
         // Always merge with uncommitted changes (array fields store data here)
         const uncommittedData = sectionUncommittedChanges[sectionId] || {};
         sectionData = { ...uncommittedData, ...sectionData };
@@ -1220,28 +1241,38 @@ export const BusinessVerificationDetails: React.FC<
           // If we have form values from the form instance, there might be changes
           // Don't immediately return false if sectionData is empty - check form values first
           const formValues = formInstance?.getFieldsValue() || {};
-          const hasFormValues = formValues && Object.keys(formValues).length > 0;
-          
+          const hasFormValues =
+            formValues && Object.keys(formValues).length > 0;
+
           // If sectionData is empty but we have form values, that's a potential change
-          if ((!sectionData || Object.keys(sectionData).length === 0) && !hasFormValues) {
+          if (
+            (!sectionData || Object.keys(sectionData).length === 0) &&
+            !hasFormValues
+          ) {
             return false;
           }
-          
+
           // Check if any key in sectionData differs from initialSectionData
-          const allKeys = Array.from(new Set([
-            ...Object.keys(sectionData),
-            ...Object.keys(initialSectionData),
-          ]));
-          
+          const allKeys = Array.from(
+            new Set([
+              ...Object.keys(sectionData),
+              ...Object.keys(initialSectionData),
+            ])
+          );
+
           for (const key of allKeys) {
             const currentValue = sectionData[key];
             const initialValue = initialSectionData[key];
-            
+
             // Deep comparison for arrays and objects
             if (Array.isArray(currentValue) || Array.isArray(initialValue)) {
-              const currentArray = Array.isArray(currentValue) ? currentValue : [];
-              const initialArray = Array.isArray(initialValue) ? initialValue : [];
-              
+              const currentArray = Array.isArray(currentValue)
+                ? currentValue
+                : [];
+              const initialArray = Array.isArray(initialValue)
+                ? initialValue
+                : [];
+
               // If current array has items but initial doesn't, that's a change
               if (currentArray.length > 0 && initialArray.length === 0) {
                 // Check if current array has any non-empty items
@@ -1249,18 +1280,19 @@ export const BusinessVerificationDetails: React.FC<
                   if (!item || typeof item !== "object") return false;
                   return Object.values(item).some((val: any) => {
                     if (val === null || val === undefined) return false;
-                    if (typeof val === "string" && val.trim() !== "") return true;
+                    if (typeof val === "string" && val.trim() !== "")
+                      return true;
                     return val !== "";
                   });
                 });
                 if (hasNonEmptyItems) return true;
               }
-              
+
               // Check if arrays have different lengths
               if (currentArray.length !== initialArray.length) {
                 return true;
               }
-              
+
               // Check if any item has non-empty values and arrays differ
               const hasNonEmptyItems = currentArray.some((item: any) => {
                 if (!item || typeof item !== "object") return false;
@@ -1270,19 +1302,38 @@ export const BusinessVerificationDetails: React.FC<
                   return val !== "";
                 });
               });
-              
-              if (hasNonEmptyItems && JSON.stringify(currentArray) !== JSON.stringify(initialArray)) {
+
+              if (
+                hasNonEmptyItems &&
+                JSON.stringify(currentArray) !== JSON.stringify(initialArray)
+              ) {
                 return true;
               }
-            } else if (typeof currentValue === "object" && currentValue !== null) {
-              if (JSON.stringify(currentValue) !== JSON.stringify(initialValue || {})) {
+            } else if (
+              typeof currentValue === "object" &&
+              currentValue !== null
+            ) {
+              if (
+                JSON.stringify(currentValue) !==
+                JSON.stringify(initialValue || {})
+              ) {
                 return true;
               }
             } else {
               // For primitive values, normalize empty values for comparison
-              const normalizedCurrent = currentValue === "" || currentValue === null || currentValue === undefined ? null : currentValue;
-              const normalizedInitial = initialValue === "" || initialValue === null || initialValue === undefined ? null : initialValue;
-              
+              const normalizedCurrent =
+                currentValue === "" ||
+                currentValue === null ||
+                currentValue === undefined
+                  ? null
+                  : currentValue;
+              const normalizedInitial =
+                initialValue === "" ||
+                initialValue === null ||
+                initialValue === undefined
+                  ? null
+                  : initialValue;
+
               // If normalized values differ, it's a change
               if (normalizedCurrent !== normalizedInitial) {
                 // Only consider it a change if the current value is not empty/null
@@ -1292,7 +1343,7 @@ export const BusinessVerificationDetails: React.FC<
               }
             }
           }
-          
+
           return false;
         })();
 
@@ -1566,8 +1617,10 @@ export const BusinessVerificationDetails: React.FC<
             return value.some((item: any) => {
               if (!item || typeof item !== "object") return false;
               return Object.values(item).some((fieldValue: any) => {
-                if (fieldValue === null || fieldValue === undefined) return false;
-                if (typeof fieldValue === "string" && fieldValue.trim() === "") return false;
+                if (fieldValue === null || fieldValue === undefined)
+                  return false;
+                if (typeof fieldValue === "string" && fieldValue.trim() === "")
+                  return false;
                 return true;
               });
             });
@@ -1592,7 +1645,9 @@ export const BusinessVerificationDetails: React.FC<
           }}
         >
           <span style={{ fontWeight: "bold" }}>{sectionLabel}</span>
-          {((role === "Verifier" || role === "Admin" || role === "VerificationExecutive")) &&
+          {(role === "Verifier" ||
+            role === "Admin" ||
+            role === "VerificationExecutive") &&
             activeSections.includes(sectionId) &&
             hasChanges && (
               <Button
@@ -1644,33 +1699,33 @@ export const BusinessVerificationDetails: React.FC<
                 {/* <Form layout="vertical"> */}
                 {/* Render form fields based on section schema */}
                 <FormSectionRenderer
-                section={section}
-                data={useMemo(
-                  () => ({
-                    ...(dynamicFormData[section.id] ||
-                      formData[section.id] ||
-                      {}),
-                    ...(changedData[section.id] || {}), // Include committed changes
-                    ...(savedSectionData[section.id] || {}), // Include saved section data (for VerificationExecutive)
-                    ...(sectionUncommittedChanges[section.id] || {}),
-                  }),
-                  [
-                    dynamicFormData[section.id],
-                    formData[section.id],
-                    changedData[section.id], // Add changedData to dependencies
-                    savedSectionData[section.id], // Add savedSectionData to dependencies
-                    sectionUncommittedChanges[section.id],
-                  ]
-                )}
-                readOnly={readOnly}
-                setSectionUncommittedChanges={setSectionUncommittedChanges}
-                changedData={changedData}
-                onFormInstanceReady={(formInstance) => {
-                  formInstancesRef.current[section.id] = formInstance;
-                }}
-                isActive={activeSections.includes(section.id)}
-              />
-              {/* </Form> */}
+                  section={section}
+                  data={useMemo(
+                    () => ({
+                      ...(dynamicFormData[section.id] ||
+                        formData[section.id] ||
+                        {}),
+                      ...(changedData[section.id] || {}), // Include committed changes
+                      ...(savedSectionData[section.id] || {}), // Include saved section data (for VerificationExecutive)
+                      ...(sectionUncommittedChanges[section.id] || {}),
+                    }),
+                    [
+                      dynamicFormData[section.id],
+                      formData[section.id],
+                      changedData[section.id], // Add changedData to dependencies
+                      savedSectionData[section.id], // Add savedSectionData to dependencies
+                      sectionUncommittedChanges[section.id],
+                    ]
+                  )}
+                  readOnly={readOnly}
+                  setSectionUncommittedChanges={setSectionUncommittedChanges}
+                  changedData={changedData}
+                  onFormInstanceReady={(formInstance) => {
+                    formInstancesRef.current[section.id] = formInstance;
+                  }}
+                  isActive={activeSections.includes(section.id)}
+                />
+                {/* </Form> */}
               </div>
             </Collapse.Panel>
           ))}
@@ -2123,14 +2178,18 @@ export const BusinessVerificationDetails: React.FC<
                   } else if (period === "AM" && hours === 12) {
                     hours = 0;
                   }
-                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  return {
+                    value: dayjs().hour(hours).minute(minutes).second(0),
+                  };
                 }
                 // Try parsing HH:mm format
                 const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
                 if (hhmmMatch) {
                   const hours = parseInt(hhmmMatch[1], 10);
                   const minutes = parseInt(hhmmMatch[2], 10);
-                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  return {
+                    value: dayjs().hour(hours).minute(minutes).second(0),
+                  };
                 }
                 return { value: undefined };
               }}
@@ -2154,7 +2213,7 @@ export const BusinessVerificationDetails: React.FC<
         case "string":
           // PURE SCHEMA-BASED: Match mobile logic exactly
           // Mobile checks: property.format === 'date' || 'time' || 'date-time' || 'datetime'
-          
+
           // Check format property for time field (fallback for fields that weren't converted)
           if (field.format === "time") {
             return (
@@ -2180,14 +2239,18 @@ export const BusinessVerificationDetails: React.FC<
                     } else if (period === "AM" && hours === 12) {
                       hours = 0;
                     }
-                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                    return {
+                      value: dayjs().hour(hours).minute(minutes).second(0),
+                    };
                   }
                   // Try parsing HH:mm format
                   const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
                   if (hhmmMatch) {
                     const hours = parseInt(hhmmMatch[1], 10);
                     const minutes = parseInt(hhmmMatch[2], 10);
-                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                    return {
+                      value: dayjs().hour(hours).minute(minutes).second(0),
+                    };
                   }
                   return { value: undefined };
                 }}
@@ -2207,7 +2270,7 @@ export const BusinessVerificationDetails: React.FC<
               </Form.Item>
             );
           }
-          
+
           // Check format property for datetime field (date-time or datetime)
           if (field.format === "date-time" || field.format === "datetime") {
             return (
@@ -2222,7 +2285,18 @@ export const BusinessVerificationDetails: React.FC<
                   // Handle DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A format
                   const dateTimeStr = String(value).trim();
                   // Try parsing with time
-                  const parsed = dayjs(dateTimeStr, ["DD-MM-YYYY HH:mm A", "DD/MM/YYYY HH:mm A", "DD-MM-YYYY hh:mm A", "DD/MM/YYYY hh:mm A", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mm:ss"], true);
+                  const parsed = dayjs(
+                    dateTimeStr,
+                    [
+                      "DD-MM-YYYY HH:mm A",
+                      "DD/MM/YYYY HH:mm A",
+                      "DD-MM-YYYY hh:mm A",
+                      "DD/MM/YYYY hh:mm A",
+                      "YYYY-MM-DD HH:mm",
+                      "YYYY-MM-DD HH:mm:ss",
+                    ],
+                    true
+                  );
                   if (parsed.isValid()) {
                     return { value: parsed };
                   }
@@ -2230,7 +2304,11 @@ export const BusinessVerificationDetails: React.FC<
                   const parts = dateTimeStr.split(/[-\/]/);
                   if (parts.length === 3) {
                     const [day, month, year] = parts;
-                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                    return {
+                      value: dayjs(
+                        `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                      ),
+                    };
                   }
                   return { value: undefined };
                 }}
@@ -2250,7 +2328,7 @@ export const BusinessVerificationDetails: React.FC<
               </Form.Item>
             );
           }
-          
+
           // Check format property for date field (date only)
           if (field.format === "date") {
             return (
@@ -2267,7 +2345,11 @@ export const BusinessVerificationDetails: React.FC<
                   const parts = dateStr.split(/[-\/]/);
                   if (parts.length === 3) {
                     const [day, month, year] = parts;
-                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                    return {
+                      value: dayjs(
+                        `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                      ),
+                    };
                   }
                   // Try parsing as-is
                   const parsed = dayjs(value);
@@ -2290,7 +2372,10 @@ export const BusinessVerificationDetails: React.FC<
           }
 
           // Check ui.widget for textarea (schema-defined widget type)
-          if (field.ui?.widget === "textarea" || field.ui?.widget === "richtext") {
+          if (
+            field.ui?.widget === "textarea" ||
+            field.ui?.widget === "richtext"
+          ) {
             const minRows = field.ui?.rows || 2;
             return (
               <Form.Item
@@ -2301,7 +2386,7 @@ export const BusinessVerificationDetails: React.FC<
                 <TextArea
                   disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
-                  autoSize={{ minRows: minRows, maxRows: 10 }}
+                  autoSize={{ minRows: minRows }}
                 />
               </Form.Item>
             );
@@ -2317,7 +2402,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={field.placeholder || field.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -2368,7 +2453,11 @@ export const BusinessVerificationDetails: React.FC<
                 const parts = dateStr.split(/[-\/]/);
                 if (parts.length === 3) {
                   const [day, month, year] = parts;
-                  return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  return {
+                    value: dayjs(
+                      `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                    ),
+                  };
                 }
                 // Try parsing as-is
                 const parsed = dayjs(value);
@@ -2544,9 +2633,10 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldId}
               label={showLabel ? field.label : undefined}
             >
-              <Input
+              <TextArea
                 disabled={readOnly}
                 placeholder={field.placeholder || field.label}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -2924,7 +3014,7 @@ export const BusinessVerificationDetails: React.FC<
       (changedValues: any, allValues: any) => {
         // Get ALL form values to ensure we capture everything, not just changed fields
         const allFormValues = form.getFieldsValue();
-        
+
         // Convert form values back to array format
         const arrayData: any[] = [];
         Object.keys(allFormValues).forEach((key) => {
@@ -2962,37 +3052,39 @@ export const BusinessVerificationDetails: React.FC<
     const previousItemsLengthRef = React.useRef(items.length);
     React.useEffect(() => {
       const wasAdded = items.length > previousItemsLengthRef.current;
-      
+
       if (wasAdded) {
         // Item was added - preserve existing values and add new ones
         const currentFormValues = form.getFieldsValue();
         const formValues: any = {};
-        
+
         items.forEach((item: any, index: number) => {
           if (field.arrayItemFields) {
             field.arrayItemFields.forEach((itemField: any) => {
               const key = `${field.id}[${index}].${itemField.id}`;
               // Preserve form value if it exists, otherwise use item value
-              formValues[key] = currentFormValues[key] ?? item[itemField.id] ?? "";
+              formValues[key] =
+                currentFormValues[key] ?? item[itemField.id] ?? "";
             });
           } else {
             Object.keys(item).forEach((key) => {
               if (key !== "_id") {
                 const formKey = `${field.id}[${index}].${key}`;
-                formValues[formKey] = currentFormValues[formKey] ?? item[key] ?? "";
+                formValues[formKey] =
+                  currentFormValues[formKey] ?? item[key] ?? "";
               }
             });
           }
         });
-        
+
         form.setFieldsValue(formValues);
-        
+
         // Trigger change handler after a short delay
         setTimeout(() => {
           handleArrayFormChange({}, form.getFieldsValue());
         }, 0);
       }
-      
+
       previousItemsLengthRef.current = items.length;
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [items.length]);
@@ -3017,28 +3109,28 @@ export const BusinessVerificationDetails: React.FC<
       if (items.length <= 1) {
         return;
       }
-      
+
       // Get current form values before removal
       const currentFormValues = form.getFieldsValue();
-      
+
       // Filter out the removed item
       const newItems = items.filter((_: any, i: number) => i !== index);
-      
+
       // Build new form values with reindexed items
       // Items after the removed index need to shift down
       const newFormValues: any = {};
-      
+
       // Also build the array data directly for uncommitted changes
       const arrayData: any[] = [];
-      
+
       newItems.forEach((item: any, newIndex: number) => {
         // Determine the old index (items after removed index were at oldIndex + 1)
         const oldIndex = newIndex >= index ? newIndex + 1 : newIndex;
-        
+
         // Build array item object - start with the item data as base
         const arrayItem: any = { ...item };
         delete arrayItem._id; // Remove _id from the data
-        
+
         if (field.arrayItemFields) {
           field.arrayItemFields.forEach((itemField: any) => {
             const oldKey = `${field.id}[${oldIndex}].${itemField.id}`;
@@ -3046,9 +3138,12 @@ export const BusinessVerificationDetails: React.FC<
             // Priority: form value (if exists) > item value > empty string
             // Preserve form value if it exists (even if empty, as user might have cleared it)
             const formValue = currentFormValues[oldKey];
-            const value = formValue !== undefined 
-              ? formValue 
-              : (item[itemField.id] !== undefined ? item[itemField.id] : "");
+            const value =
+              formValue !== undefined
+                ? formValue
+                : item[itemField.id] !== undefined
+                  ? item[itemField.id]
+                  : "";
             newFormValues[newKey] = value;
             arrayItem[itemField.id] = value;
           });
@@ -3058,24 +3153,27 @@ export const BusinessVerificationDetails: React.FC<
               const oldKey = `${field.id}[${oldIndex}].${key}`;
               const newKey = `${field.id}[${newIndex}].${key}`;
               const formValue = currentFormValues[oldKey];
-              const value = formValue !== undefined 
-                ? formValue 
-                : (item[key] !== undefined ? item[key] : "");
+              const value =
+                formValue !== undefined
+                  ? formValue
+                  : item[key] !== undefined
+                    ? item[key]
+                    : "";
               newFormValues[newKey] = value;
               arrayItem[key] = value;
             }
           });
         }
-        
+
         arrayData.push(arrayItem);
       });
-      
+
       // Update items state first
       setItems(newItems);
-      
+
       // Update form with reindexed values
       form.setFieldsValue(newFormValues);
-      
+
       // Directly update uncommitted changes with the array data
       // This ensures changes are tracked even if form hasn't fully updated
       setSectionUncommittedChanges((prev: any) => ({
@@ -3085,7 +3183,7 @@ export const BusinessVerificationDetails: React.FC<
           [field.id]: arrayData,
         },
       }));
-      
+
       // Also trigger the change handler to ensure everything is in sync
       setTimeout(() => {
         const allFormValues = form.getFieldsValue();
@@ -3160,14 +3258,18 @@ export const BusinessVerificationDetails: React.FC<
                   } else if (period === "AM" && hours === 12) {
                     hours = 0;
                   }
-                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  return {
+                    value: dayjs().hour(hours).minute(minutes).second(0),
+                  };
                 }
                 // Try parsing HH:mm format
                 const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
                 if (hhmmMatch) {
                   const hours = parseInt(hhmmMatch[1], 10);
                   const minutes = parseInt(hhmmMatch[2], 10);
-                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  return {
+                    value: dayjs().hour(hours).minute(minutes).second(0),
+                  };
                 }
                 return { value: undefined };
               }}
@@ -3233,7 +3335,11 @@ export const BusinessVerificationDetails: React.FC<
                 const parts = dateStr.split(/[-\/]/);
                 if (parts.length === 3) {
                   const [day, month, year] = parts;
-                  return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  return {
+                    value: dayjs(
+                      `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                    ),
+                  };
                 }
                 // Try parsing as-is
                 const parsed = dayjs(value);
@@ -3257,7 +3363,7 @@ export const BusinessVerificationDetails: React.FC<
         case "string":
           // PURE SCHEMA-BASED: Match mobile logic exactly
           // Mobile checks: property.format === 'date' || 'time' || 'date-time' || 'datetime'
-          
+
           // Check format property for time field
           if (itemField.format === "time") {
             return (
@@ -3283,14 +3389,18 @@ export const BusinessVerificationDetails: React.FC<
                     } else if (period === "AM" && hours === 12) {
                       hours = 0;
                     }
-                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                    return {
+                      value: dayjs().hour(hours).minute(minutes).second(0),
+                    };
                   }
                   // Try parsing HH:mm format
                   const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
                   if (hhmmMatch) {
                     const hours = parseInt(hhmmMatch[1], 10);
                     const minutes = parseInt(hhmmMatch[2], 10);
-                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                    return {
+                      value: dayjs().hour(hours).minute(minutes).second(0),
+                    };
                   }
                   return { value: undefined };
                 }}
@@ -3310,9 +3420,12 @@ export const BusinessVerificationDetails: React.FC<
               </Form.Item>
             );
           }
-          
+
           // Check format property for datetime field (date-time or datetime)
-          if (itemField.format === "date-time" || itemField.format === "datetime") {
+          if (
+            itemField.format === "date-time" ||
+            itemField.format === "datetime"
+          ) {
             return (
               <Form.Item
                 key={itemFieldId}
@@ -3325,7 +3438,18 @@ export const BusinessVerificationDetails: React.FC<
                   // Handle DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A format
                   const dateTimeStr = String(value).trim();
                   // Try parsing with time
-                  const parsed = dayjs(dateTimeStr, ["DD-MM-YYYY HH:mm A", "DD/MM/YYYY HH:mm A", "DD-MM-YYYY hh:mm A", "DD/MM/YYYY hh:mm A", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mm:ss"], true);
+                  const parsed = dayjs(
+                    dateTimeStr,
+                    [
+                      "DD-MM-YYYY HH:mm A",
+                      "DD/MM/YYYY HH:mm A",
+                      "DD-MM-YYYY hh:mm A",
+                      "DD/MM/YYYY hh:mm A",
+                      "YYYY-MM-DD HH:mm",
+                      "YYYY-MM-DD HH:mm:ss",
+                    ],
+                    true
+                  );
                   if (parsed.isValid()) {
                     return { value: parsed };
                   }
@@ -3333,7 +3457,11 @@ export const BusinessVerificationDetails: React.FC<
                   const parts = dateTimeStr.split(/[-\/]/);
                   if (parts.length === 3) {
                     const [day, month, year] = parts;
-                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                    return {
+                      value: dayjs(
+                        `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                      ),
+                    };
                   }
                   return { value: undefined };
                 }}
@@ -3353,7 +3481,7 @@ export const BusinessVerificationDetails: React.FC<
               </Form.Item>
             );
           }
-          
+
           // Check format property for date field (date only)
           if (itemField.format === "date") {
             return (
@@ -3370,7 +3498,11 @@ export const BusinessVerificationDetails: React.FC<
                   const parts = dateStr.split(/[-\/]/);
                   if (parts.length === 3) {
                     const [day, month, year] = parts;
-                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                    return {
+                      value: dayjs(
+                        `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+                      ),
+                    };
                   }
                   // Try parsing as-is
                   const parsed = dayjs(value);
@@ -3393,7 +3525,10 @@ export const BusinessVerificationDetails: React.FC<
           }
 
           // Check ui.widget for textarea (schema-defined widget type)
-          if (itemField.ui?.widget === "textarea" || itemField.ui?.widget === "richtext") {
+          if (
+            itemField.ui?.widget === "textarea" ||
+            itemField.ui?.widget === "richtext"
+          ) {
             const minRows = itemField.ui?.rows || 2;
             return (
               <Form.Item
@@ -3404,7 +3539,7 @@ export const BusinessVerificationDetails: React.FC<
                 <TextArea
                   disabled={readOnly}
                   placeholder={itemField.placeholder || itemField.label}
-                  autoSize={{ minRows: minRows, maxRows: 10 }}
+                  autoSize={{ minRows: minRows }}
                 />
               </Form.Item>
             );
@@ -3420,7 +3555,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -3446,9 +3581,10 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Input
+              <TextArea
                 disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -3714,8 +3850,12 @@ export const BusinessVerificationDetails: React.FC<
               verificationData={{
                 ...verificationData,
                 // Pass completeVerificationData so Feedback can access synopsis from API
-                verifications: completeVerificationData ? [completeVerificationData] : verificationData?.verifications,
-                synopsis: completeVerificationData?.synopsis || verificationData?.synopsis,
+                verifications: completeVerificationData
+                  ? [completeVerificationData]
+                  : verificationData?.verifications,
+                synopsis:
+                  completeVerificationData?.synopsis ||
+                  verificationData?.synopsis,
               }}
               currentDepartment={currentDepartment}
               hasEditRequest={hasEditRequest}

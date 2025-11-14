@@ -40,7 +40,7 @@ export const niwasSalariedSchema = {
             title: "Number of Dependents - Others",
           },
           yearsInCurrentResidence: {
-            type: "number",
+            type: "string",
             title: "Years in Current Residence",
             enum: ["<1 Year", "1-3 Years", "3-5 Years", ">5 Years"],
           },
@@ -85,7 +85,7 @@ export const niwasSalariedSchema = {
           residingLocationOwnershipStatus: {
             type: "string",
             title: "Residing location ownership status",
-            enum: ["self-Owned","Paarent-Owned", "Rented"],
+            enum: ["self-Owned","Parent-Owned", "Rented"],
           },
         },
       },
@@ -158,7 +158,7 @@ export const niwasSalariedSchema = {
             type: "string",
             title: "Final product/service offered by company",
           },
-          numberOfCompetitorsInNearbyMarket: {
+          companyCompetitors: {
             type: "number",
             title: "Number of competitors in nearby market",
           },
@@ -179,7 +179,7 @@ export const niwasSalariedSchema = {
       },
     },
     {
-      id: "companyDetails",
+      id: "companyEmployerInformation",
       label: "Company / Employer Information",
       schema: {
         type: "object",
@@ -237,38 +237,43 @@ export const niwasSalariedSchema = {
       id: "pastEmploymentBusinessDetails",
       label: "Past Employment/Business Details",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-          emplyerorBusinessName: {
-            type: "string",
-            title: " Employer/Business Name",
-          },
-          designation: {
-            type: "string",
-            title: "Designation",
-          },
-          fromDate: {
-            type: "date",
-            title: "From Date",
-          },
-          toDate: {
-            type: "date",
-            title: "To Date",
-          },
-          contactPersonName: {
-            type: "string",
-            title: "Contact Person Name",
-          },
-          contactPersonNumber: {
-            type: "number",
-            title: "Contact Person Number",
-          },
-          reasonForMovement: {
-            type: "string",
-            title: "Reason for Movement",
-          },
+        type: "object",
+        properties: {
+          pastEmployments: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+              emplyerorBusinessName: {
+                type: "string",
+                title: " Employer/Business Name",
+              },
+              designation: {
+                type: "string",
+                title: "Designation",
+              },
+              fromDate: {
+                type: "date",
+                title: "From Date",
+              },
+              toDate: {
+                type: "date",
+                title: "To Date",
+              },
+              contactPersonName: {
+                type: "string",
+                title: "Contact Person Name",
+              },
+              contactPersonNumber: {
+                type: "number",
+                title: "Contact Person Number",
+              },
+              reasonForMovement: {
+                type: "string",
+                title: "Reason for Movement",
+              },
+              },
+            },
           },
         },
       },
@@ -485,12 +490,12 @@ export const niwasSalariedSchema = {
             title: "Comfortable EMI",
             format: "currency",
           },
-          statusOfPropertyToBePurchased: {
+          statusOfProperty: {
             type: "string",
             title: "Status of property to be purchased",
             enum: ["Ready", "Under Construction", "Construction Yet to Start"],
           },
-          usageOfPropertyAfterPurchase: {
+          usageOfProperty: {
             type: "string",
             title: "Usage of property after purchase",
             enum: ["Self-Occupancy", "Investment", "Others"],
@@ -519,6 +524,10 @@ export const niwasSalariedSchema = {
             type: "number",
             title: "Construction estimate",
             format: "currency",
+          },
+          familyFriends: {
+            type: "string",
+            title: "Family/Friends",
           },
           registrationCharges: {
             type: "number",
@@ -552,12 +561,22 @@ export const niwasSalariedSchema = {
               cashAmount: {
                 type: "number",
                 title: "Cash Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
               chequeAmount: {
                 type: "number",
                 title: "Cheque Amount",
-                format: "currency",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
               },
             },
           },

@@ -139,17 +139,17 @@ export const axisAgriSchema = {
           endUseOfTheLoanAndLoanAmountRequired: {
             type: "string",
             title: "End use of the Loan & Loan amount Required",
-            ui: { widget: "textarea", rows: 3 },
+            ui: { widget: "textarea", rows: 2 },
           },
           otherBusinessAlternateIncomeSources: {
             type: "string",
             title: "Other Business / Alternate Income Sources",
-            ui: { widget: "textarea", rows: 3 },
+            ui: { widget: "textarea", rows: 2 },
           },
           businessLicenseRelatedInformation: {
             type: "string",
             title: "Business License Related Information",
-            ui: { widget: "textarea", rows: 3 },
+            ui: { widget: "textarea", rows: 2 },
           },
           documentsProvidedDuringVisit: {
             type: "string",
@@ -170,6 +170,7 @@ export const axisAgriSchema = {
             type: "array",
             items: {
               type: "object",
+              title: "Banking & Working Capital Limits",
               properties: {
                 bankName: {
                   type: "string",

@@ -4,7 +4,7 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
 const labelCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;vertical-align:top;width:32%";
+  "border:1px solid #c7cdd1;padding:8px;font-weight:bold;color:#222;vertical-align:top;width:32%";
 const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
 
@@ -90,9 +90,7 @@ export const herohousingSalariedTemplate = (
   // Debug: Log the structure to help identify data issues
   console.log("🔍 [HeroHousing Salaried] Verification Data Structure:", {
     hasLoanDetails: verificationData?.loanDetails,
-    loanDetailsKeys: verificationData?.loanDetails
-      ? Object.keys(verificationData.loanDetails)
-      : [],
+    loanDetailsKeys: verificationData?.loanDetails ? Object.keys(verificationData.loanDetails) : [],
     loanDetailsValue: verificationData?.loanDetails,
     allTopLevelKeys: verificationData ? Object.keys(verificationData) : [],
   });
@@ -103,8 +101,7 @@ export const herohousingSalariedTemplate = (
   const currentJobProfile = verificationData?.employmentProfile || {};
   const detailsOfEmployer = verificationData?.employerDetails || {};
   const propertyDetails = verificationData?.propertyDetails || {};
-  const investmentAndProperties =
-    verificationData?.investmentAndProperties || {};
+  const investmentAndProperties = verificationData?.investmentAndProperties || {};
   const endUseOfPropertyFund = verificationData?.endUseOfPropertyFund || {};
   const loanDetails = verificationData?.detailsOfLoans || {};
   const bankingDetails = verificationData?.bankingDetails || {};
@@ -123,7 +120,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.applicantName || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.nameOfCustomer || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
@@ -145,7 +142,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.general?.latitudeLongitude || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${ general.latLongOfOfficeAddress || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
@@ -159,10 +156,10 @@ export const herohousingSalariedTemplate = (
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Borrower details ---</strong></p>
-            <p style="margin:8px 0;line-height:1.5">It should include the</p>
+            <p style="margin:8px 0;line-height:1.5"><strong>It should include the</strong></p>
             <ul>
-              <li>Qualification of customer,</li>
-              <li>Complete professional journey (service/ business details of each activity post qualification to till date</li>
+              <li><strong>Qualification of customer,</strong></li>
+              <li><strong>Complete professional journey (service/ business details of each activity post qualification to till date</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -176,23 +173,21 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Family details</strong></p>
             <ul>
-              <li>Family details – Including dependents</li>
-              <li>Family background (Parents and siblings including all dependents)</li>
+              <li><strong>Family details – Including dependents</strong></li>
+              <li><strong>Family background (Parents and siblings including all dependents)</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
             <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
               <tr>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Name</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Relationship with applicant</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Age</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Qualification</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Occupation (Job/Business)</p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">Income Details/dependent</p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name</strong></p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship with applicant</strong></p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Age</strong></p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Qualification</strong></p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Occupation (Job/Business)</strong> <br> /dependent</p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Income Details/dependent</strong></p></td>
               </tr>
-              ${ensureArray(familyDetails.members)
-                .map(
-                  (member) => `
+              ${ensureArray(familyDetails.members).map((member) => `
                 <tr>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.relationship || ""}</p></td>
@@ -201,9 +196,7 @@ export const herohousingSalariedTemplate = (
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.occupation || ""}</p></td>
                   <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${member.incomeDetails || ""}</p></td>
                 </tr>
-              `
-                )
-                .join("")}
+              `).join("")}
             </table>
           </td>
         </tr>
@@ -211,12 +204,12 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Current Job profile</strong></p>
             <ul>
-              <li>Name of Employer</li>
-              <li>Working since</li>
-              <li>Type of employment (permanent/Contractual)</li>
-              <li>Designation</li>
-              <li>Job profile</li>
-              <li>Reporting to (Name/Designation)</li>
+              <li><strong>Name of Employer</strong></li>
+              <li><strong>Working since</strong></li>
+              <li><strong>Type of employment (permanent/Contractual)</strong></li>
+              <li><strong>Designation</strong></li>
+              <li><strong>Job profile</strong></li>
+              <li><strong>Reporting to (Name/Designation)</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -234,15 +227,15 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of employer</strong></p>
             <ul>
-              <li>Current business Name</li>
-              <li>Constitution</li>
-              <li>Nature of business/product or services details</li>
-              <li>Running since</li>
-              <li>Details of partners, director, shareholders with family background and other details</li>
-              <li>No. of employee and set up of business</li>
-              <li>Quantum of stock</li>
-              <li>No of Machinery and assets seen</li>
-              <li>Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback</li>
+              <li><strong>Current business Name</strong></li>
+              <li><strong>Constitution</strong></li>
+              <li><strong>Nature of business/product or services details</strong></li>
+              <li><strong>Running since</strong></li>
+              <li><strong>Details of partners, director, shareholders with family background and other details</strong></li>
+              <li><strong>No. of employee and set up of business</strong></li>
+              <li><strong>Quantum of stock</strong></li>
+              <li><strong>No of Machinery and assets seen</strong></li>
+              <li><strong>Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -263,15 +256,15 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of Property –</strong></p>
             <ul>
-              <li>Whether customer visited the property</li>
-              <li>Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)</li>
-              <li>Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)</li>
-              <li>Source of property purchase (through dealer, builder/reference/relative)</li>
-              <li>Name of seller and any relationship with customer</li>
-              <li>Type of property/structure and area,</li>
-              <li>What is actual deal value and sale deed value, OCR source</li>
-              <li>Whether seller is having any loan on the property</li>
-              <li>When seller bought the property,</li>
+              <li><strong>Whether customer visited the property</strong></li>
+              <li><strong>Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)</strong></li>
+              <li><strong>Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)</strong></li>
+              <li><strong>Source of property purchase (through dealer, builder/reference/relative)</strong></li>
+              <li><strong>Name of seller and any relationship with customer</strong></li>
+              <li><strong>Type of property/structure and area,</strong></li>
+              <li><strong>What is actual deal value and sale deed value, OCR source</strong></li>
+              <li><strong>Whether seller is having any loan on the property</strong></li>
+              <li><strong>When seller bought the property,</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -295,9 +288,9 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Investment and properties -</strong></p>
             <ul>
-              <li>What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving</li>
-              <li>Whether current residence is owned or rented and rent amount if any</li>
-              <li>Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)</li>
+              <li><strong>What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving</strong></li>
+              <li><strong>Whether current residence is owned or rented and rent amount if any</strong></li>
+              <li><strong>Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -312,8 +305,8 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>End use of property/fund –</strong></p>
             <ul>
-              <li>Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases</li>
-              <li>Clear and detailed end use of fund in LAP cases</li>
+              <li><strong>Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases</strong></li>
+              <li><strong>Clear and detailed end use of fund in LAP cases</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -327,11 +320,11 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of loans –</strong></p>
             <ul>
-              <li>Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue,</li>
-              <li>Repayment account from which all these EMI are getting paid</li>
-              <li>What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use</li>
-              <li>Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any OD limit or any other facility in the name of customer</li>
-              <li>Comment whether there is any bouncing in loans and if yes, period and reason of such bounces</li>
+              <li><strong>Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue,</strong></li>
+              <li><strong>Repayment account from which all these EMI are getting paid</strong></li>
+              <li><strong>What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use</strong></li>
+              <li><strong>Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any OD limit or any other facility in the name of customer</strong></li>
+              <li><strong>Comment whether there is any bouncing in loans and if yes, period and reason of such bounces</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
@@ -348,67 +341,47 @@ export const herohousingSalariedTemplate = (
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Banking –</strong></p>
             <ul>
-              <li>Please check and mention details of all his bank account, account open date, Name of bank account where salary is getting credited (if bank salary)</li>
-              <li>Please check any saving account of applicant and co applicant and provide the details of these accounts</li>
+              <li><strong>Please check and mention details of all his bank account, account open date, Name of bank account where salary is getting credited (if bank salary)</strong></li>
+              <li><strong>Please check any saving account of applicant and co applicant and provide the details of these accounts</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
-          ${
-            bankingDetails?.bankAccounts &&
-            Array.isArray(bankingDetails.bankAccounts) &&
-            bankingDetails.bankAccounts.length > 0
-              ? `
+          ${bankingDetails?.bankAccounts && Array.isArray(bankingDetails.bankAccounts) && bankingDetails.bankAccounts.length > 0 ? `
           <p style="margin:8px 0;line-height:1.5"><strong>Bank Accounts:</strong></p>
           <ul>
-            ${ensureArray(bankingDetails.bankAccounts)
-              .map(
-                (account: any) => `
+            ${ensureArray(bankingDetails.bankAccounts).map((account: any) => `
               <li><p style="margin:8px 0;line-height:1.5">${account.bankDetails || ""}${account.accountOpenDate ? " - " + account.accountOpenDate : ""}${account.nameOfBankAccount ? " - " + account.nameOfBankAccount : ""}</p></li>
-            `
-              )
-              .join("")}
+            `).join("")}
           </ul>
-          `
-              : ""
-          }
-            ${
-              bankingDetails?.savingAccounts &&
-              Array.isArray(bankingDetails.savingAccounts) &&
-              bankingDetails.savingAccounts.length > 0
-                ? `
+          ` : ""}
+            ${bankingDetails?.savingAccounts && Array.isArray(bankingDetails.savingAccounts) && bankingDetails.savingAccounts.length > 0 ? `
               <p style="margin:8px 0;line-height:1.5"><strong>Savings Accounts:</strong></p>
               <ul>
-                ${ensureArray(bankingDetails.savingAccounts)
-                  .map(
-                    (account: any) => `
+                ${ensureArray(bankingDetails.savingAccounts).map((account: any) => `
                   <li><p style="margin:8px 0;line-height:1.5">${account.savingsAccountDetails || ""}</p></li>
-                `
-                  )
-                  .join("")}
+                `).join("")}
               </ul>
-            `
-                : ""
-            }
+            ` : ""}
           </td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
             <p style="margin:8px 0;line-height:1.5"><strong>Document verification and other checks</strong></p>
             <ul>
-              <li>Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations</li>
-              <li>TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period</li>
-              <li>Additional check to be done from reference if there is any family relationship with employer and employee</li>
-              <li>Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations</li>
-              <li>Google check and any negative observation/feedback/dedupe match or any other feedback</li>
+              <li><strong>Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations</strong></li>
+              <li><strong>TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period</strong></li>
+              <li><strong>Additional check to be done from reference if there is any family relationship with employer and employee</strong></li>
+              <li><strong>Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations</strong></li>
+              <li><strong>Google check and any negative observation/feedback/dedupe match or any other feedback</strong></li>
             </ul>
           </td>
           <td style="border:1px solid #ccc;padding:8px">
             <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.thirdPartyCheck || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.familyRelationshipCheckWithEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.thirdPartyCheck || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.familyRelationshipCheckWithEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
+              <li><p style="margin:8px 0;line-height:1.5">${ doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
             </ul>
           </td>
         </tr>

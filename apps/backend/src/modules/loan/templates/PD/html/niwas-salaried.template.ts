@@ -84,13 +84,14 @@ export const niwasSalariedTemplate = (
   const general = verificationData.generalInfo || {};
   const assets = verificationData.assetsInvestments || {};
   const employment = verificationData.employmentDetails || {};
-  const company = verificationData.companyDetails || {};
+  const companyDetails = verificationData.companyEmployerInformation || {};
   const premises = verificationData.businessPremises || {};
   const ess = ensureArray(verificationData.essChecklist?.essResponses);
   const existingLoans = ensureArray(
     verificationData.existingLoans?.existingLoans
   );
   const loanPurpose = verificationData.loanPurpose || {};
+  const costAndFunds = verificationData.costAndFunds || {};
   const familyMembers = ensureArray(
     verificationData.familyMembers?.familyMembers
   );
@@ -99,8 +100,9 @@ export const niwasSalariedTemplate = (
     verificationData.employerFirmCheck?.checks
   );
   const pastEmployments = ensureArray(
-    verificationData.pastEmployment?.employments
+    verificationData.pastEmploymentBusinessDetails?.pastEmployments
   );
+  const financialDetails = verificationData.financialDetails || {};
   const pdComments = verificationData.pdOfficerComments || {};
 
   const assetRows = [
@@ -149,7 +151,7 @@ export const niwasSalariedTemplate = (
     ref.name || "",
     ref.address || "",
     ref.designation || "",
-    ref.noOfYearsKnownTheApplicant || "",
+    ref.yearsKnown || "",
     ref.contactNumber || "",
     ref.email || "",
    ]);
@@ -169,8 +171,8 @@ export const niwasSalariedTemplate = (
     entry.response || "",
   ]);
 
-  const pastEmploymentRows = pastEmployments.map((employment: any) => [
-    employment.employerName || "",
+  const pastEmploymentRows = ensureArray(pastEmployments).map((employment: any) => [
+    employment.emplyerorBusinessName || "",
     employment.designation || "",
     employment.fromDate || "",
     employment.toDate || "",
@@ -323,9 +325,18 @@ export const niwasSalariedTemplate = (
           "Number of Employees in Firm",
           employment.numberOfEmployeesInFirm
         )}
-        ${renderKeyValue("Final Product/Service offered by Company", employment.natureOfBusiness)}
-        ${renderKeyValue("Number of Competitors in Nearby Market", employment.numberOfCompetitorsInNearbyMarket)}
-        ${renderKeyValue("Locality of Business Premises", employment.localityOfBusinessPremises)}
+        <tr>
+          <td style="${labelCellStyle}">Final Product/Service offered by Company</td>
+          <td style="${valueCellStyle}">${employment.finalProductServiceOffered}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Number of Competitors in Nearby Market</td>
+          <td style="${valueCellStyle}">${employment.companyCompetitors}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Locality of Business Premises</td>
+            <td style="${valueCellStyle}">${ employment.localityOfBusinessPremises}</td>
+        </tr>
         <tr>
           <td style="${labelCellStyle}" colspan="2"></td>
         </tr>
@@ -335,18 +346,18 @@ export const niwasSalariedTemplate = (
           <td colspan="2" style="padding:0;">
             <table style="${tableStyle}">
               <tr>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Mode of Salary</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Type of Employer</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Type of Industry</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Department</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Role</th>
+                <th style="${labelCellStyle}">Mode of Salary</th>
+                <th style="${labelCellStyle}">Type of Employer</th>
+                <th style="${labelCellStyle}">Type of Industry</th>
+                <th style="${labelCellStyle}">Department</th>
+                <th style="${labelCellStyle}">Role</th>
               </tr>
               <tr>
-                <td style="${valueCellStyle}">${formatMultiline(employment.modeOfSalary)}</td>
-                <td style="${valueCellStyle}">${formatMultiline(employment.typeOfEmployer)}</td>
-                <td style="${valueCellStyle}">${formatMultiline(employment.typeOfIndustry)}</td>
-                <td style="${valueCellStyle}">${formatMultiline(employment.department)}</td>
-                <td style="${valueCellStyle}">${formatMultiline(employment.role)}</td>
+                <td style="${valueCellStyle}">${ companyDetails.modeOfSalary}</td>
+                <td style="${valueCellStyle}">${ companyDetails.typeOfEmployer}</td>
+                <td style="${valueCellStyle}">${ companyDetails.typeOfIndustry}</td>
+                <td style="${valueCellStyle}">${ companyDetails.department}</td>
+                <td style="${valueCellStyle}">${ companyDetails.role}</td>
               </tr>
             </table>
           </td>
@@ -358,12 +369,12 @@ export const niwasSalariedTemplate = (
       </h2>
       <table style="${tableStyle}">
               <tr>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Employer/Business Name</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Designation</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">From</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">To</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Contact Person Name & Number</th>
-                <th style="border:1px solid #c7cdd1;padding:8px;font-weight:600;text-align:left;color:#222;background:#f4f6fb;">Reason for Movement</th>
+                <th style="${labelCellStyle}">Employer/Business Name</th>
+                <th style="${labelCellStyle}">Designation</th>
+                <th style="${labelCellStyle}">From</th>
+                <th style="${labelCellStyle}">To</th>
+                <th style="${labelCellStyle}">Contact Person Name & Number</th>
+                <th style="${labelCellStyle}">Reason for Movement</th>
               </tr>
               <tr>
                 <td style="${valueCellStyle}">${formatMultiline(pastEmploymentRows[0]?.[0] || "")}</td>
@@ -381,35 +392,35 @@ export const niwasSalariedTemplate = (
       <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}">Monthly Salary Income</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlySalaryIncome.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlySalaryIncome.chequeAmount || 0)}</td>
           </tr>
           <tr>
-            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(employment.otherMonthlyIncome || 0)}</td> 
+            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(financialDetails.otherMonthlyIncome || 0)}</td> 
           </tr>
           <tr>
             <td style="${labelCellStyle}">Rental Income (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.rentalIncomeCash || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.rentalIncomeCheque || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.rentalIncome.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.rentalIncome.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Incentives/Perks (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.incentivesCash || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.incentivesCheque || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.incentives.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.incentives.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Bonus (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.monthlyBonusCash || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.monthlyBonusCheque || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlyBonus.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlyBonus.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Others, please specify source type:</td>
-            <td style="${valueCellStyle}" colspan="2">${formatMultiline(employment.otherMonthlyIncomeSourceType || "")}</td>
+            <td style="${valueCellStyle}" colspan="2">${formatMultiline(financialDetails.otherMonthlyIncomeSourceType || "")}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Income (In Rs):</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(employment.monthlyIncomeCash || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(employment.monthlyIncomeCheque || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlyIncome.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlyIncome.chequeAmount || 0)}</td>
           </tr>
       </table>
 
@@ -443,8 +454,8 @@ export const niwasSalariedTemplate = (
           "Comfortable EMI",
           loanPurpose.comfortableEmi
         )}
-        ${renderKeyValue("Status of Property to be Purchased", loanPurpose.statusOfPropertyToBePurchased)}
-        ${renderKeyValue("Usage of Property After Purchase", loanPurpose.usageOfPropertyAfterPurchase)}
+        ${renderKeyValue("Status of Property to be Purchased", loanPurpose.statusOfProperty)}
+        ${renderKeyValue("Usage of Property After Purchase", loanPurpose.usageOfProperty)}
         
       </table>
 
@@ -452,37 +463,37 @@ export const niwasSalariedTemplate = (
         cost and Funds Information (Loan Details)
         </h2>
         <table style="${tableStyle}">
-          ${renderKeyValue("Funds Required", loanPurpose.fundsRequired)}
+          ${renderKeyValue("Funds Required", costAndFunds.fundsRequired)}
           ${renderKeyValue(
             "Source of Own Funds (OCR)",
-            loanPurpose.sourceOfOwnFunds
+            costAndFunds.sourceOfOwnFunds
           )}
-          ${renderKeyValue("Purchase Cost", loanPurpose.purchaseCost)}
-          ${renderKeyValue("Savings", loanPurpose.savings)}
+          ${renderKeyValue("Purchase Cost", costAndFunds.purchaseCost)}
+          ${renderKeyValue("Savings", costAndFunds.savings)}
           ${renderKeyValue(
             "Construction Estimate",
-            loanPurpose.constructionEstimate
+            costAndFunds.constructionEstimate
           )}
-          ${renderKeyValue("Family/Friends", loanPurpose.familyFriends)}
+          ${renderKeyValue("Family/Friends", costAndFunds.familyFriends)}
           ${renderKeyValue(
             "Registration / Stamp Duty charges",
-            loanPurpose.registrationCharges
+            costAndFunds.registrationCharges
           )}
           ${renderKeyValue(
             "Other Loan Amount Taken",
-            loanPurpose.otherLoanAmountTaken
+            costAndFunds.otherLoanAmountTaken
           )}
-          ${renderKeyValue("Other Expenses", loanPurpose.otherExpenses)}
+          ${renderKeyValue("Other Expenses", costAndFunds.otherExpenses)}
           ${renderKeyValue(
             "Total Amount Spent (Total of all the above)",
-            loanPurpose.totalAmountSpent
+            costAndFunds.totalAmountSpent
           )}
           ${renderKeyValue(
             "Total Transaction Cost (Total of all the above)",
-            loanPurpose.totalTransactionCost
+            costAndFunds.totalTransactionCost
           )}
-          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)", loanPurpose.modeOfPaymentToSeller)}
-        </table>
+          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)","Cash Amount:"+ formatCurrency(costAndFunds.modeOfPaymentToSeller.cashAmount || 0)+"<br>" +"Cheque Amount: "+ formatCurrency(costAndFunds.modeOfPaymentToSeller.chequeAmount || 0))}
+            </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
         Other Family Member Details

@@ -23,7 +23,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const familyExpenses = verificationData.familyExpenses || {};
   const employees = verificationData.employees || {};
   const concerns = verificationData.concerns || {};
-  const otherObservations = verificationData.otherObservations || [];
+  const otherObservations = verificationData.otherObservations?.otherObservations || [];
   const otherIncomes = verificationData.otherIncomes || [];
   const neighborCheck = verificationData.neighborCheck || {};
   const status = verificationData.status || {};
@@ -51,6 +51,13 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
     }
 
     return `Rs. ${numericAmount.toLocaleString("en-IN")}/-`;
+  };
+
+
+  const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+    return [value];
   };
 
   const renderAssetsTable = () => {
@@ -795,57 +802,17 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${(() => {
-                  if (Array.isArray(otherObservations)) {
-                    return otherObservations.join(", ");
-                  }
-                  if (
-                    otherObservations &&
-                    typeof otherObservations === "object" &&
-                    otherObservations.otherObservations
-                  ) {
-                    return Array.isArray(otherObservations.otherObservations)
-                      ? otherObservations.otherObservations.join(", ")
-                      : getValue(otherObservations.otherObservations);
-                  }
-                  return getValue(otherObservations) || "Not Provided";
-                })()}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px">
+                ${ensureArray(otherObservations).map(
+                  (item: any) => `<li>${ item?.observation || ""}</li>`
+                ).join("<br>")}
+                </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
-                <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${(() => {
-                  if (Array.isArray(otherIncomes) && otherIncomes.length > 0) {
-                    return otherIncomes
-                      .map((income: any) =>
-                        getValue(
-                          income.otherIncome,
-                          income,
-                          typeof income === "string" ? income : ""
-                        )
-                      )
-                      .join(", ");
-                  }
-                  if (
-                    otherIncomes &&
-                    typeof otherIncomes === "object" &&
-                    otherIncomes.otherIncomes
-                  ) {
-                    const incomes = otherIncomes.otherIncomes;
-                    if (Array.isArray(incomes) && incomes.length > 0) {
-                      return incomes
-                        .map((income: any) =>
-                          getValue(
-                            income.otherIncome,
-                            income,
-                            typeof income === "string" ? income : ""
-                          )
-                        )
-                        .join(", ");
-                    }
-                    return getValue(incomes) || "";
-                  }
-                  return "Not Provided";
-                })()}</p></td>
+                <td colspan="8" style="border:1px solid #ccc;padding:8px">
+                ${ensureArray(otherIncomes).map((income: any) => `<p style="margin:8px 0;line-height:1.5">${income?.otherIncome || ""}</p>`).join("<br>")}
+                </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Neighbor Check</strong></p></td>

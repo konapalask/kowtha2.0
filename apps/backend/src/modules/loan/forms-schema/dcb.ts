@@ -32,7 +32,7 @@ export const dcbSchema = {
             title: "Years of Service",
           },
         },
-        required: ["name"],
+        required: ["applicantName"],
       },
       required: true,
     },
@@ -87,6 +87,14 @@ export const dcbSchema = {
         type: "object",
         properties: {
           directorsAndProprietor: {
+            type: "string",
+            title: "Details of Directors & Proprietor",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          details: {
             type: "array",
             title: "Details of Directors & Proprietor",
             items: {
@@ -271,13 +279,13 @@ export const dcbSchema = {
     },
     {
       id: "detailsOfAllLoansAsOn",
-      label: "Details of All Loans as on",
+      label: "Details of All Loans as on Date Of Visit",
       schema: {
         type: "object",
         properties: {
-          loans: {
+          details: {
             type: "array",
-            title: "Details of All Loans as on",
+            title: "Details of All Loans as on Date Of Visit",
             items: {
               type: "object",
               properties: {
@@ -310,7 +318,7 @@ export const dcbSchema = {
       schema: {
         type: "object",
         properties: {
-          assets: {
+          details: {
             type: "array",
             title: "Personal Assets of Proprietor",
             items: {
@@ -344,9 +352,10 @@ export const dcbSchema = {
       schema: {
         type: "object",
         properties: {
-          customers: {
+          details: {
             type: "array",
-            title: "Details of Customers / Clients",
+            title:
+              "Details of Customers / Clients: Not Applicable- Walk in Customers.",
             items: {
               type: "object",
               properties: {
@@ -375,9 +384,9 @@ export const dcbSchema = {
       schema: {
         type: "object",
         properties: {
-          suppliers: {
+          details: {
             type: "array",
-            title: "Details of Suppliers",
+            title: "Details of Suppliers.",
             items: {
               type: "object",
               properties: {
@@ -406,9 +415,9 @@ export const dcbSchema = {
       schema: {
         type: "object",
         properties: {
-          companies: {
+          details: {
             type: "array",
-            title: "Sister Companies",
+            title: "Sister Compnies.",
             items: {
               type: "object",
               properties: {
@@ -458,6 +467,11 @@ export const dcbSchema = {
             type: "string",
             title: "Insurance Company Name",
           },
+          dueExemptions: {
+            type: "string",
+            title:
+              "Due they are taking the exemptions by taking the Children Education Fee:",
+          },
         },
       },
       required: true,
@@ -470,7 +484,7 @@ export const dcbSchema = {
         properties: {
           details: {
             type: "array",
-            title: "Insurance Details",
+            title: "Sister Compnies.",
             items: {
               type: "object",
               properties: {
@@ -499,7 +513,6 @@ export const dcbSchema = {
           },
         },
       },
-      required: true,
     },
     {
       id: "performanceDetails",

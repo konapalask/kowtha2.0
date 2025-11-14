@@ -118,6 +118,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
     `Ref ${index + 1}`,
     ref.referenceType || "",
     ref.personMet || "",
+    ref.nameOfPersonSpokenTo || "",
     ref.feedback || "",
     ref.otherFeedback || "",
     ref.status || "",

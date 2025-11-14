@@ -131,7 +131,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle}">No.of people in family</td>
           <td style="border:1px solid #ccc;padding:8px">
-            <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+            <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Name</td>
                 <td style="${labelCellStyle}">Relation</td>
@@ -264,7 +264,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">EMI Paid Bank</td>
                 <td style="${labelCellStyle}">Secured Against which Asset</td>
               </tr>
-              ${loanDetails.map((item: any) => `
+              ${loanDetails.loanDetails.map((item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.bankName}</td>
                   <td style="${valueCellStyle}">${item.typeOfLoan}</td>
@@ -292,14 +292,14 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Bank Name</td>
                 <td style="${labelCellStyle}">Branch Name</td>
                 <td style="${labelCellStyle}">Account Type</td>
-                <td style="${labelCellStyle}">Operating Since</td>
+                <td style="${labelCellStyle}">Operating Since (Year)</td>
               </tr>
-              ${bankingDetails.map((item: any) => `
+              ${bankingDetails.bankingDetails.map((item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.bankName}</td>
                   <td style="${valueCellStyle}">${item.branchName}</td>
-                  <td style="${valueCellStyle}">${item.accountType}</td>
-                  <td style="${valueCellStyle}">${item.operatingSince}</td>
+                  <td style="${valueCellStyle}">${item.accountType} </td>
+                  <td style="${valueCellStyle}">${item.operatingSinceYear}</td>
                 </tr>
               `).join("")}
             </table>
@@ -354,7 +354,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Details</td>
                 <td style="${labelCellStyle}">Reference</td>
               </tr>
-              ${otherIncome.map((item: any) => `
+              ${otherIncome.otherIncomes.map((item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${formatCurrency(item.incomeAmount)}</td>
                   <td style="${valueCellStyle}">${item.details}</td>
@@ -401,7 +401,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Document Type</td>
                 <td style="${labelCellStyle}">Remarks</td>
               </tr>
-              ${documentsVerified.map((item: any) => `
+              ${documentsVerified.documentsVerified.map((item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.documentCategory}</td>
                   <td style="${valueCellStyle}">${item.documentName}</td>

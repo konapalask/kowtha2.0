@@ -354,6 +354,10 @@ export const yesBankSchema = {
                   type: "string",
                   title: "Person / Shop name",
                 },
+                nameOfPersonSpokenTo: {
+                  type: "string",
+                  title: "Name of person spoken to",
+                }, 
                 feedback: {
                   type: "string",
                   title:

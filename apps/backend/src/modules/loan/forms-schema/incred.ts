@@ -189,7 +189,7 @@ export const incredSchema = {
           creditors: {
             type: "object",
             properties: {
-                fy2020to2021: {
+              fy2020to2021: {
                 type: "number",
                 title: "FY 2020-21",
                 formatter: {
@@ -198,14 +198,14 @@ export const incredSchema = {
                   maxDecimalPlaces: 2,
                   minDecimalPlaces: 0,
                 },
-                currentPeriodOrAtTimeOfPd: {
-                  type: "string",
-                  title: "Current Period / At Time of PD",
-                },
-                noOfDays: {
-                  type: "integer",
-                  title: "Credit Period allowed by Creditors/Supplies - No. of Days",
-                },
+              },
+              currentPeriodOrAtTimeOfPd: {
+                type: "string",
+                title: "Current Period / At Time of PD",
+              },
+              noOfDays: {
+                type: "integer",
+                title: "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
             },
           },
@@ -221,14 +221,14 @@ export const incredSchema = {
                   maxDecimalPlaces: 2,
                   minDecimalPlaces: 0,
                 },
-                currentPeriodOrAtTimeOfPd: {
-                  type: "string",
-                  title: "Current Period / At Time of PD",
-                },
-                noOfDays: {
-                  type: "integer",
-                  title: "Credit Period allowed by Creditors/Supplies - No. of Days"
-                }
+              },
+              currentPeriodOrAtTimeOfPd: {
+                type: "string",
+                title: "Current Period / At Time of PD",
+              },
+              noOfDays: {
+                type: "integer",
+                title: "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
             },
           },
@@ -320,6 +320,16 @@ export const incredSchema = {
                 },
               },
           },
+        },
+      },
+      },
+    },
+    {
+      id: "noOfDependents",
+      label: "No. of Dependents",
+      schema: {
+        type: "object",
+        properties: {
           noOfDependents: {
             type: "integer",
             title: "No. of Dependents",
@@ -328,9 +338,9 @@ export const incredSchema = {
             type: "string",
             title: "General Lifestyle/Personality",
           },
-        },
+        }, 
       },
-      },
+      required: true,
     },
     {
       id: "residenceOfficeCollateralDetails",
@@ -366,43 +376,48 @@ export const incredSchema = {
       id: "otherLiabilitiesLoansApplicantCoApplicants",
       label: "Other Liabilities / Loans (Applicant/Co-Applicants)",
       schema: {
-        type: "array",
-        items: {
+        type: "object",
+        properties: {
+          details: {
+            type: "array",
+            title: "Other Liabilities / Loans (Applicant/Co-Applicants)",
+            items: {
           type: "object",
-          properties: {
-            financier: {
-              type: "string",
-              title: "Financier",
-            },
-            natureOfLoan: {
-              type: "string",
-              title: "Nature of Loan / Account No.",
-            },
-            loanAmount: {
-              type: "number",
-              title: "Loan Amount",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+              properties: {
+                financier: {
+                  type: "string",
+                  title: "Financier",
+                },
+                natureOfLoan: {
+                  type: "string",
+                  title: "Nature of Loan / Account No.",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                  willCloseContinue: {
+                    type: "string",
+                    title: "Will Close / Continue",
+                    enum: ["Close", "Continue"],
+                  },
               },
-            },
-            emi: {
-              type: "number",
-              title: "EMI",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-              willCloseContinue: {
-                type: "string",
-                title: "Will Close / Continue",
-                enum: ["Close", "Continue"],
-              },
-              
             },
           },
         },
@@ -464,21 +479,27 @@ export const incredSchema = {
       id: "references",
       label: "References",
       schema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            nameOfThePerson: {
-              type: "string",
-              title: "Name of the Person",
-            },
-            telephoneNoAddressForCommunication: {
-              type: "string",
-              title: "Telephone No. / Address for Communication",
-            },
-            supplierOrBuyerOrMarketReference: {
-              type: "string",
-              title: "Supplier / Buyer / Market Reference",
+        type: "object",
+        properties: {
+          details: {
+            type: "array",
+            title: "References",
+            items: {
+              type: "object",
+              properties: {
+                nameOfThePerson: {
+                  type: "string",
+                  title: "Name of the Person",
+                },
+                telephoneNoAddressForCommunication: {
+                  type: "string",
+                  title: "Telephone No. / Address for Communication",
+                },
+                supplierOrBuyerOrMarketReference: {
+                  type: "string",
+                  title: "Supplier / Buyer / Market Reference",
+                },
+              },
             },
           },
         },

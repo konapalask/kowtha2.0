@@ -102,19 +102,11 @@ export const herohousingSalariedSchema = {
                   ],
                 },
                 age: { type: "integer", title: "Age" },
-                qualification: {
+                qualification: { type: "string", title: "Qualification" },
+                occupation: {
                   type: "string",
-                  title: "Qualification",
-                  enum: [
-                    "Below 10th",
-                    "10th pass",
-                    "12th pass",
-                    "Diploma/ITI certification",
-                    "Graduate",
-                    "PG/Professional Certification",
-                  ],
+                  title: "Occupation (job/business)",
                 },
-                occupation: { type: "string", title: "Occupation" },
                 incomeDetails: {
                   type: "string",
                   title: "Income details / dependent",
@@ -132,7 +124,7 @@ export const herohousingSalariedSchema = {
         type: "object",
         properties: {
           nameOfEmployer: { type: "string", title: "Name of Employer" },
-          workingSince: { type: "string", title: "Working since" },
+          workingSince: { type: "integer", title: "Working since" },
           typeOfEmployment: {
             type: "string",
             title: "Type of employment",
@@ -168,7 +160,7 @@ export const herohousingSalariedSchema = {
             title: "Nature of business / services",
             ui: { widget: "textarea", rows: 2 },
           },
-          runningSince: { type: "string", title: "Running since" },
+          runningSince: { type: "integer", title: "Running since" },
           partnersDetails: {
             type: "string",
             title:
