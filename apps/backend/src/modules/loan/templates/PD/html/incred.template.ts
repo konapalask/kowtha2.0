@@ -65,21 +65,21 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
 
 export const incredTemplate = (verificationData: any, html_data: any) => {
 
-    const general = verificationData.generalInfo || {};
+    const general = verificationData.general || {};
     const applicantAndBusinessDetails = verificationData.applicantAndBusinessDetails || {};
     const asPerAssessment = verificationData.asPerAssessment || {};
     const noOfEmployees = verificationData.noOfEmployees || {};
     const debtorsCreditorsStock = verificationData.debtorsCreditorsStock || {};
     const capitalInvestmentTillDate = verificationData.capitalInvestmentTillDate || {};
     const documentsObserved = verificationData.documentsObserved || {};
-    const personalDetails = verificationData.personalDetailsFamilyBackground || {};
-    const familyMembers = personalDetails?.familyMembers || [];
+    const familyMembers = verificationData.personalDetailsFamilyBackground.familyMembers || [];
+    const noOfDependents = verificationData.noOfDependents || {};
     const residenceOfficeCollateralDetails = verificationData.residenceOfficeCollateralDetails || {};
-    const liabilities = verificationData.otherLiabilitiesLoansApplicantCoApplicants || {};
+    const liabilities = verificationData.otherLiabilitiesLoansApplicantCoApplicants.details || {};
     const chitFundetc = verificationData.chitFundetc || {};
     const assets = verificationData.otherAssets || {};
     const otherSourcesOfIncome = verificationData.otherSourcesOfIncome || {};
-    const references = verificationData.references || {};
+    const references = verificationData.references.details || {};
     const observationsRemarksDuringPd = verificationData.observationsRemarksDuringPd || {};
 
 
@@ -107,7 +107,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
             <td style="${labelCellStyle}">As Per Assessment</td>
-            <td>
+            <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}">Receipts Per Month</td>
@@ -129,7 +129,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
             <td style="${labelCellStyle}">Debtors/Creditors/Stock</td>
-            <td>
+            <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
                         <td style="${labelCellStyle}"></td>
@@ -190,8 +190,8 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             </tr>
         `).join("")}
 
-        ${renderKeyValue("No. of Dependents", personalDetails.noOfDependents, undefined, { colspan: 5 })}
-        ${renderKeyValue("General Lifestyle/Personality", personalDetails.generalLifestylePersonality, undefined, { colspan: 5 })}
+        ${renderKeyValue("No. of Dependents", noOfDependents.noOfDependents, undefined, { colspan: 5 })}
+        ${renderKeyValue("General Lifestyle/Personality", noOfDependents.generalLifestylePersonality, undefined, { colspan: 5 })}
       </table>
 
       <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">RESIDENCE/OFFICE/Collateral Details:</h2>
@@ -241,7 +241,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${references.map((reference) => `
             <tr>
                 <td style="${valueCellStyle}">${reference.nameOfThePerson}</td>
-                <td style="${valueCellStyle}">${reference.contactDetails}</td>
+                <td style="${valueCellStyle}">${reference.telephoneNoAddressForCommunication}</td>
                 <td style="${valueCellStyle}">${reference.supplierOrBuyerOrMarketReference}</td>
             </tr>
         `).join("")}

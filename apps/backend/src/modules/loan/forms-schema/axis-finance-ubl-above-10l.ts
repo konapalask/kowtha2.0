@@ -121,7 +121,7 @@ export const axisFinanceUblAbove10lSchema = {
       schema: {
         type: "object",
         properties: {
-          familyDetails: {
+          details: {
             type: "array",
             title: "Family Details",
             items: {
@@ -545,11 +545,11 @@ export const axisFinanceUblAbove10lSchema = {
             },
           },
           vehicles: {
-            type: "array",
+            type: "string",
             title: "Car, Bike and any other vehicle (Company Name and Model)",
-            items: {
-              type: "string",
-              title: "Car, Bike and any other vehicle (Company Name and Model)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
         },
@@ -609,7 +609,7 @@ export const axisFinanceUblAbove10lSchema = {
       schema: {
         type: "object",
         properties: {
-          bankingDetails: {
+          banks: {
             type: "array",
             title: "Bank Details",
             items: {
@@ -627,24 +627,16 @@ export const axisFinanceUblAbove10lSchema = {
                   type: "string",
                   title: "Account Type",
                 },
-                openSinceYear: {
-                  type: "integer",
+                openSince: {
+                  type: "number",
                   title: "Open since (Year)",
-                },
-                endUseOfLoan: {
-                  type: "string",
-                  title: "End use of loan:(Loan Amount & Detailed End-Use)",
-                },
-                remarks: {
-                  type: "string",
-                  title: "Remarks",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
                 },
               },
             },
+          },
+          endUseOfLoan: {
+            type: "string",
+            title: "End use of loan:(Loan Amount & Detailed End-Use)",
           },
         },
       },
@@ -690,11 +682,11 @@ export const axisFinanceUblAbove10lSchema = {
             },
           },
           observations: {
-            type: "array",
+            type: "string",
             title: "Observations",
-            items: {
-              type: "string",
-              title: "Observation",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           otherIncome: {

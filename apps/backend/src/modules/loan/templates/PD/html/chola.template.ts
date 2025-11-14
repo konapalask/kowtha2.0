@@ -166,45 +166,22 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   ]);
 
   // Handle nested structures for assets
-  const assetsData =
-    verificationData.assets || verificationData.assetDetails || {};
-  const assetsArray = Array.isArray(assetsData)
-    ? assetsData
-    : Array.isArray(assetsData.assets)
-      ? assetsData.assets
-      : [];
-  const assets = ensureArray(assetsArray).map(
-    (asset: any) =>
-      `<li>${formatMultiline(asset?.assetDetails || asset?.details || asset || "")}</li>`
-  );
+  const assetsSection = verificationData.assets || {};
+  const assetsArray = Array.isArray(assetsSection.assetDetails)
+    ? assetsSection.assetDetails
+    : [];
+
+  const assets = assetsArray.length
+    ? assetsArray.map(
+        (asset: any) => `<li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li>`
+      ).join("")
+    : "<li>Not provided</li>";
 
   // Handle nested structures for customer references
-  const customerReferencesData =
-    verificationData.customersReferenceNumbers ||
-    verificationData.customersReference ||
-    {};
-  const customerReferencesArray = Array.isArray(customerReferencesData)
-    ? customerReferencesData
-    : Array.isArray(customerReferencesData.references)
-      ? customerReferencesData.references
-      : [];
-  const customerReferences = ensureArray(customerReferencesArray).map(
-    (item: any) =>
-      `<li>${formatMultiline(item?.customerReferenceNumber || item?.referenceNumber || item?.name || item || "")}</li>`
-  );
+  const customerReferences = verificationData.customersReferenceNumbers || [];
 
   // Handle nested structures for other incomes
-  const otherIncomesData =
-    verificationData.otherIncomes || verificationData.otherIncome || {};
-  const otherIncomesArray = Array.isArray(otherIncomesData)
-    ? otherIncomesData
-    : Array.isArray(otherIncomesData.incomes)
-      ? otherIncomesData.incomes
-      : [];
-  const otherIncomes = ensureArray(otherIncomesArray).map(
-    (item: any) =>
-      `<li>${formatMultiline(item?.otherIncome || item?.income || item || "")}</li>`
-  );
+  const otherIncomes = verificationData.otherIncomes || [];
 
   // Handle nested structures for comfort factors
   const comfortFactorData = verificationData.comfortFactor || {};
@@ -229,7 +206,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   );
 
   const recommendations = ensureArray(verificationData.Recommendations).map(
-    (item: any) => formatMultiline(item?.recommendations || "")
+    (item: any) => `<li>${formatMultiline(item?.recommendations || "")}</li>`
   );
 
   const businessList = Array.isArray(aboutBusiness)
@@ -298,21 +275,21 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Assets: -</strong></p>
       <ul>
-        ${assets.length ? assets.join("") : "<li>Not provided</li>"}
+        ${assets}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
       <ul>
-        ${
-          customerReferences.length
-            ? customerReferences.join("")
-            : "<li>Not provided</li>"
-        }
+      ${ensureArray(customerReferences).map(
+        (item: any) => `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
+      ).join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
       <ul>
-        ${otherIncomes.length ? otherIncomes.join("") : "<li>Not provided</li>"}
+      ${ensureArray(otherIncomes).map(
+        (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
+      ).join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Existing Loan Details:</strong></p>
@@ -322,12 +299,11 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
 
       <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
-      ${wrapParagraph(
+      ${
         formatMultiline(
           verificationData.itrFinancialDetails
             ?.itrReceiptsVerificationInformation || ""
-        )
-      )}
+        )}
 
       <p style="${paragraphStyle}"><strong>Comfort Factor: -</strong></p>
       <ul>

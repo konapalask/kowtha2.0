@@ -95,8 +95,21 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
   const triggerPointVerification = verificationData.triggerPointVerification || {};
   const itrAndFinancial = verificationData.itrAndFinancial || {};
   const bankingDetails = verificationData.bankingDetails.bankDetails || {};
-  const existingLoanDetails = verificationData.existingLoanDetails || {};
-  const existingLoans = existingLoanDetails.loans || [];
+
+
+  // Handle existing loan details - check multiple possible structures
+  const existingLoanDetailsSection = verificationData.existingLoanDetails || {};
+    const existingLoanDetails = existingLoanDetailsSection;
+  
+  // Extract loans array - handle both direct array and nested structure
+  const existingLoansArray = Array.isArray(existingLoanDetailsSection.loans)
+    ? existingLoanDetailsSection.loans
+    : Array.isArray(existingLoanDetailsSection)
+    ? existingLoanDetailsSection
+    : [];
+  const existingLoans = existingLoansArray;
+
+
   const references = verificationData.references || {};
   const collateralDetails = verificationData.collateralDetails || {};
   const sellerDetails = verificationData.sellerDetails || {};
@@ -187,11 +200,11 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle}"><strong>Family Background and Personal details</strong></td>
           <td style="${labelCellStyle}"><strong>Residence Details</strong></td>
-          <td colspan="6">
+          <td style="border:1px solid #ccc;padding:8px" colspan="6">
             <table style="${tableStyle} width:100%;margin:0;">
             <tr>
               <td style="${labelCellStyle}">Current Residence- Owned/Rented</td>
-              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${"<br><strong>--- Address: </strong>"+residenceDetails.currentResidenceAddress}</td>
+              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${"<br><strong>Address: </strong>"+residenceDetails.currentResidenceAddress}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If Current Residence is Owned- Owner Name</td>
@@ -235,7 +248,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         <!-- Nature of Business Section -->
         <tr>
           <td style="${labelCellStyle}"><strong>Nature of Business and Business Vintage</strong></td>
-          <td colspan="7">
+          <td style="border:1px solid #ccc;padding:8px" colspan="7">
           <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}"><strong>Business Premises:</strong></td>
@@ -299,7 +312,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}"><strong>Income Assessment</strong></td>
-          <td colspan="7">
+          <td style="border:1px solid #ccc;padding:8px" colspan="7">
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}"><strong>Core Business income:</strong></td>
@@ -596,23 +609,30 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Security Offered</td>
             <td style="${labelCellStyle}">EMI Deducting Bank Account</td>
           </tr>
-          ${ensureArray(existingLoans.loans).map((loan: any) => `
+          ${existingLoans.length > 0
+            ? existingLoans.map((loan: any) => `
             <tr>
               <td style="${valueCellStyle}">${loan?.lender || ""}</td>
               <td style="${valueCellStyle}">${loan?.typeOfLoan || ""}</td>
-              <td style="${valueCellStyle}">${loan?.loanAvailedYear || ""}</td>
-              <td style="${valueCellStyle}">${formatCurrency(loan?.loanAmount) || ""}</td>
-              <td style="${valueCellStyle}">${formatCurrency(loan?.pos) || ""}</td>
-              <td style="${valueCellStyle}">${formatCurrency(loan?.emi) || ""}</td>
+              <td style="${valueCellStyle}">${
+                loan?.loanAvailedYear !== null && loan?.loanAvailedYear !== undefined
+                  ? String(loan.loanAvailedYear)
+                  : ""
+              }</td>
+              <td style="${valueCellStyle}">${formatCurrency(loan?.loanAmount)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(loan?.posAmount)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(loan?.emi)}</td>
               <td style="${valueCellStyle}">${loan?.securityOffered || ""}</td>
               <td style="${valueCellStyle}">${loan?.emiDeductingBankAccount || ""}</td>
-        </tr>
-            `).join("")}
+            </tr>
+            `).join("")
+            : `<tr><td style="${valueCellStyle}" colspan="8" style="text-align:center;">No existing loan details provided</td></tr>`
+          }
           <tr>
             <td style="${labelCellStyle}" colspan="3">Total</td>
-            <td style="${valueCellStyle}">${formatCurrency(existingLoanDetails?.totalLoanAmount) || ""}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanDetails?.totalLoanAmount)}</td>
             <td style="${labelCellStyle}">Total EMI</td>
-            <td style="${valueCellStyle}">${formatCurrency(existingLoanDetails?.totalEmi) || ""}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanDetails?.totalEmi)}</td>
             <td style="${labelCellStyle}" colspan="2"></td>
         </tr>
         </table>

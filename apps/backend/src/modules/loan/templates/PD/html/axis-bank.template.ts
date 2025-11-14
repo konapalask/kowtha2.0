@@ -304,7 +304,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td  colspan="2" style="${labelCellStyle}"><strong>5) Details of existing loans confirmed during PD</strong></td>
-            <td style="border:1px solid #ccc;padding:8px"> 
+            <td> 
              <table style="${tableStyle}">
                 <tr>
                     <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Loan type</strong></p></td>
@@ -353,7 +353,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Banking details:</strong></p></td>
-               <td style="border:1px solid #ccc;padding:8px">
+               <td>
                <table style="${tableStyle}">
                 <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Bank Name</strong></p></td>
