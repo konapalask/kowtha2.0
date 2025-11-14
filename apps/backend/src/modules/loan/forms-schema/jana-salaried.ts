@@ -195,34 +195,40 @@ export const janaSalariedSchema = {
             id: "loanDetails",
             label: "Loan Details",
             schema: {
-                type: "array",
-                items: {
-                    type: "object",
-                    properties: {
-                        bankName: { type: "string", title: "Name of Bank / NBFC" },
-                        typeOfLoan: { type: "string", title: "Type of Loan" },
-                        sanctionedAmount: { type: "number", title: "Sanctioned Amount (in Lakhs)" , formatter: {
-                            useIndianFormat: true,
-                            locale: "en-IN",
-                            maxDecimalPlaces: 2,
-                        }, },
-                        osBalance: { type: "number", title: "O/S Balance (in Lakhs)" , formatter: {
-                            useIndianFormat: true,
-                            locale: "en-IN",
-                            maxDecimalPlaces: 2,
-                        }, },
-                        emi: { type: "number", title: "EMI (in Rs.)" , formatter: {
-                            useIndianFormat: true,
-                            locale: "en-IN",
-                            maxDecimalPlaces: 2,
-                        }, },
-                        tenure: { type: "number", title: "Tenure(months)" },
-                        monthOnBooks: { type: "string", title: "Month on Books" },
-                        emiPaidBank: { type: "number", title: "EMI Paid Bank" },
-                        securedAgainstAsset: { type: "string", title: "Secured Against which Asset" },
-                    }, 
+                type: "object",
+                properties: {
+                    loanDetails: {
+                        type: "array",
+                        title: "Loan Details",
+                        items: {
+                            type: "object",
+                            properties: {
+                                bankName: { type: "string", title: "Name of Bank / NBFC" },
+                                typeOfLoan: { type: "string", title: "Type of Loan" },
+                                sanctionedAmount: { type: "number", title: "Sanctioned Amount (in Lakhs)" , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                }, },
+                                osBalance: { type: "number", title: "O/S Balance (in Lakhs)" , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                }, },
+                                emi: { type: "number", title: "EMI (in Rs.)" , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                }, },
+                                tenure: { type: "number", title: "Tenure(months)" },
+                                monthOnBooks: { type: "string", title: "Month on Books" },
+                                emiPaidBank: { type: "number", title: "EMI Paid Bank" },
+                                securedAgainstAsset: { type: "string", title: "Secured Against which Asset" },
+                            }, 
+                        },
+                    },
                 },
-            },
+                },
         },
 
         {
@@ -240,15 +246,21 @@ export const janaSalariedSchema = {
             id: "bankingDetails",
             label: "Banking Details",
             schema: {
-                type: "array",
-                items: {
-                    type: "object",
-                    properties: {
-                    bankName: { type: "string", title: "Bank Name" },
-                    branchName: { type: "string", title: "Branch Name" },
-                    accountType: { type: "string", title: "Account Type" },
-                    operatingSince: { type: "number", title: "Operating Since" },
+                type: "object",
+                properties: {
+                    bankingDetails: {
+                        type: "array",
+                        title: "Banking Details",
+                        items: {
+                        type: "object",
+                        properties: {
+                            bankName: { type: "string", title: "Bank Name" },
+                            branchName: { type: "string", title: "Branch Name" },
+                            accountType: { type: "string", title: "Account Type" },
+                            operatingSinceYear: { type: "number", title: "Operating Since (Year)" },
+                        },
                     },
+                  },
                 },
             }, 
         },
@@ -329,18 +341,24 @@ export const janaSalariedSchema = {
             id: "otherIncome",
             label: "Other Income",
             schema: {
-                type: "array",
-                items: {
-                    type: "object",
-                    properties: {
-                    incomeAmount: { type: "number", title: "Income" , formatter: {
-                        useIndianFormat: true,
-                        locale: "en-IN",
-                        maxDecimalPlaces: 2,
-                    }, },
-                    details: { type: "string", title: "Details" },
-                    reference: { type: "string", title: "Reference" },
-                    }, 
+                type: "object",
+                properties: {
+                    otherIncomes: {
+                        type: "array",
+                        title: "Other Income",
+                        items: {
+                            type: "object",
+                            properties: {
+                                incomeAmount: { type: "number", title: "Income" , formatter: {
+                                    useIndianFormat: true,
+                                    locale: "en-IN",
+                                    maxDecimalPlaces: 2,
+                                }, },
+                                details: { type: "string", title: "Details" },
+                                reference: { type: "string", title: "Reference" },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -365,15 +383,21 @@ export const janaSalariedSchema = {
             id: "documentsVerified",
             label: "Documents Verified",
             schema: {
-                type: "array",
-                items: {
-                    type: "object",
+                type: "object",
                 properties: {
-                    documentCategory: { type: "string", title: "Document Category"},
-                    documentName: { type: "string", title: "Document Name" },
-                    documentType: { type: "string", title: "Document Type" },
-                    remarks: { type: "string", title: "Remarks", ui: { widget: "textarea", rows: 3 } },
-                },
+                    documentsVerified: {
+                        type: "array",
+                        title: "Documents Verified",
+                        items: {
+                            type: "object",
+                            properties: {
+                                documentCategory: { type: "string", title: "Document Category"},
+                                documentName: { type: "string", title: "Document Name" },
+                                documentType: { type: "string", title: "Document Type" },
+                                remarks: { type: "string", title: "Remarks", ui: { widget: "textarea", rows: 3 } },
+                            },
+                        },
+                    },
                 },
             },
         },

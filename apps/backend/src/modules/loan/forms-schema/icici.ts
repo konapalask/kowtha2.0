@@ -636,7 +636,7 @@ export const iciciSchema = {
                     minDecimalPlaces: 0,
                   },
                 },
-                pos: {
+                posAmount: {
                   type: "number",
                   title: "POS (Principal Outstanding)",
                   formatter: {
