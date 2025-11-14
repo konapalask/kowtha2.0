@@ -21,8 +21,11 @@ const subHeadingStyle =
   "font-size:20px;font-weight:bold;margin:14px 0 6px 0;color:#333";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-const cellStyle = "border:1px solid #ccc;padding:8px";
-const headerCellStyle = `${cellStyle};font-weight:bold`;
+  const labelCellStyle =
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+const valueCellStyle =
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+  const headerCellStyle = `${labelCellStyle};font-weight:bold`;
 
 const displayValue = (value: any): string => {
   if (value === null || value === undefined) return "";
@@ -77,8 +80,8 @@ const renderTwoColumnTable = (rows: KeyValueRow[]) => {
             formatter !== undefined ? formatter(value) : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${label}</p></td>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${label}</p></td>
+            <td style="${valueCellStyle}"><p style="${paragraphStyle}">${
               resolved || ""
             }</p></td>
           </tr>`;
@@ -96,7 +99,7 @@ const renderSingleColumnTable = (values: string[]) => {
         .map(
           (value) => `
         <tr>
-          <td style="${cellStyle}"><p style="${paragraphStyle}">${value}</p></td>
+          <td style="${valueCellStyle}"><p style="${paragraphStyle}">${value}</p></td>
         </tr>`
         )
         .join("")}
@@ -136,7 +139,7 @@ const renderMultiColumnTable = (
                       column.formatter !== undefined
                         ? column.formatter(rawValue, item)
                         : formatMultiline(rawValue);
-                    return `<td style="${cellStyle}"><p style="${paragraphStyle}">${
+                    return `<td style="${valueCellStyle}"><p style="${paragraphStyle}">${
                       rendered || ""
                     }</p></td>`;
                   })
@@ -145,7 +148,7 @@ const renderMultiColumnTable = (
             `;
           })
           .join("")
-      : `<tr><td colspan="${columns.length}" style="${cellStyle}"><p style="${paragraphStyle}">${emptyMessage}</p></td></tr>`;
+      : `<tr><td colspan="${columns.length}" style="${valueCellStyle}"><p style="${paragraphStyle}">${emptyMessage}</p></td></tr>`;
 
   return `
     <table style="${tableStyle}">
