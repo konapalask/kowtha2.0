@@ -84,10 +84,11 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          address: {
+          officeAddress: {
             type: "string",
             title: "Address",
-          },
+            readOnly: true,
+           },
           rentedOwned: {
             type: "string",
             title: "Rented/Owned",
