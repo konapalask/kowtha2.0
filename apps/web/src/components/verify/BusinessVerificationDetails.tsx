@@ -1862,6 +1862,11 @@ export const BusinessVerificationDetails: React.FC<
 
     // Helper functions for financial analysis field grouping
     const isFinancialAnalysisSection = () => {
+      // Exclude detailed financial analysis as it has its own special rendering
+      if (section.id === "financialAnalysisDetailed" || 
+          section.label?.toLowerCase().includes("detailed financial analysis with balance sheet")) {
+        return false;
+      }
       return (
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
@@ -2772,26 +2777,72 @@ export const BusinessVerificationDetails: React.FC<
       return true;
     });
 
-    // Group financial analysis fields if this is a financial section
-    const { grouped: groupedFields, standalone: standaloneFields } =
-      isFinancialAnalysisSection()
-        ? groupFinancialFields(visibleFields)
-        : { grouped: [], standalone: visibleFields };
+    // For financial analysis sections, render fields in their original order (like mobile)
+    // Don't use grouping - just render sequentially to match mobile app
+    if (isFinancialAnalysisSection()) {
+      // Separate fields by type for proper layout
+      const regularFields: any[] = [];
+      const arrayFields: any[] = [];
+      const objectFields: any[] = [];
 
+      visibleFields.forEach((field: any) => {
+        if (field.type === "array" && field.arrayItemFields) {
+          arrayFields.push(field);
+        } else if (field.type === "object" && field.objectFields) {
+          objectFields.push(field);
+        } else {
+          regularFields.push(field);
+        }
+      });
+
+      return (
+        <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
+          <Row gutter={[16, 16]}>
+            {/* Render regular fields in order - 2 columns layout for financial analysis */}
+            {regularFields.map((field: any) => (
+              <Col key={field.id} xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+            
+            {/* Object fields - full width */}
+            {objectFields.map((field: any) => (
+              <Col key={field.id} xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+            
+            {/* Array fields - always full width */}
+            {arrayFields.map((field: any) => (
+              <Col
+                key={field.id}
+                xs={24}
+                sm={24}
+                md={24}
+                lg={24}
+                xl={24}
+                xxl={24}
+              >
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+          </Row>
+        </Form>
+      );
+    }
+
+    // For non-financial sections, use the standard layout
     // Separate regular fields from array fields (arrays take full width)
-    const regularStandaloneFields = standaloneFields.filter(
+    const regularStandaloneFields = visibleFields.filter(
       (field: any) => field.type !== "array" || !field.arrayItemFields
     );
-    const arrayFields = standaloneFields.filter(
+    const arrayFields = visibleFields.filter(
       (field: any) => field.type === "array" && field.arrayItemFields
     );
 
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
         <Row gutter={[16, 16]}>
-          {/* Grouped financial fields - all groups rendered together with debit on left, credit on right */}
-          {groupedFields.length > 0 && renderAllGroupedFields(groupedFields)}
-
           {/* Regular standalone fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
           {regularStandaloneFields.map((field: any) => (
             <Col key={field.id} xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
