@@ -188,7 +188,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const endUseOfFunds = verificationData.endUseOfFunds || {};
   const otherObservations = verificationData.otherObservations || {};
   const overallPositivesOrNegatives = verificationData.overallPositivesOrNegatives || {};
-  const tradeReferences = ensureArray(verificationData.tradeReferences);
+  const tradeReferences = ensureArray(verificationData.tradeReferences.tradeReferences || []);
 
   const personalDetailsTable = renderTwoColumnTable([
     {
@@ -545,19 +545,19 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const endUseOfFundsTable =    `
       <div>
-      <p style="${paragraphStyle}"><strong><u>End Use of Funds</u></strong>${formatMultiline(endUseOfFunds)}</p> 
+      <p style="${paragraphStyle}"><strong><u>End Use of Funds</u></strong><br>${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
         
       </div>`;
 
   const otherObservationsTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong>${formatMultiline(otherObservations)}</p>
+      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong><br>${formatMultiline(otherObservations.otherObservations || "")}</p>
     </div>
   `;
 
   const overallPositivesOrNegativesTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong>${formatMultiline(overallPositivesOrNegatives)}</p>
+      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(
@@ -603,7 +603,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Other Liabilities Including CC Limits (Own/Co Applicants)", liabilitiesTable)}
       ${renderSection("Budget Analysis", budgetTable)}
       ${endUseOfFundsTable}
-      ${renderTextSection("Other Observations:", otherObservations)}
+      ${otherObservationsTable}
       ${overallPositivesOrNegativesTable}
       ${renderSection("Trade References - Not Provided", tradeReferenceTable)}
       ${noteBlock}
