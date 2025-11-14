@@ -279,11 +279,11 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedSuppliers: {
-            type: "string",
+            type: "integer",
             title: "No of fixed suppliers",
           },
           creditPeriodDays: {
-            type: "string",
+            type: "integer",
             title: "Credit period",
           },
           cashChequeProportion: {
@@ -305,7 +305,7 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact details",
                 },
                 location: {
@@ -330,11 +330,11 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedCustomers: {
-            type: "string",
+            type: "integer",
             title: "No of fixed customers",
           },
           creditPeriodDays: {
-            type: "string",
+            type: "integer",
             title: "Credit period",
           },
           cashChequeProportion: {
@@ -356,7 +356,7 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact details",
                 },
                 location: {

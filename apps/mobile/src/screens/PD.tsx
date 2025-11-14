@@ -39,7 +39,6 @@ const FIELD_KEY_MAPPINGS = {
     'applicantMobile',
     'applicantContactNumber',
     'applicantPhoneNumber',
-    'loanAmountRequired',
   ],
   applicationNumber: [
     'applicationNumber',
@@ -49,7 +48,11 @@ const FIELD_KEY_MAPPINGS = {
     'proposalNumber',
     'loanAccountNo',
   ],
-  loanAmount: ['loanAmount', 'loanAmountRequested'],
+  loanAmount: [
+    'loanAmount',
+    'loanAmountRequested',
+    'endUseOfTheLoanAndLoanAmountRequired',
+  ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: ['repaymentBankName'],
   address: [
@@ -73,12 +76,10 @@ const FIELD_KEY_MAPPINGS = {
   ],
 };
 
-// Function to check if a field key matches any pattern in the mapping
-const matchesFieldPattern = (fieldKey: string, patterns: string[]): boolean => {
+// Function to check if a field key matches exactly any pattern in the mapping
+const matchesFieldExact = (fieldKey: string, patterns: string[]): boolean => {
   const fieldKeyLower = fieldKey.toLowerCase();
-  return patterns.some(pattern =>
-    fieldKeyLower.includes(pattern.toLowerCase()),
-  );
+  return patterns.some(pattern => fieldKeyLower === pattern.toLowerCase());
 };
 
 // Function to get initial data based on schema structure (DYNAMIC APPROACH)
@@ -88,7 +89,7 @@ const getInitialDataByBank = (
   loggedInUserName?: string,
 ) => {
   if (!userData || !schema) return {};
-  console.log('userData', userData);
+  // console.log('userData', userData);
   // Extract common data from userData
   const commonData: Record<string, any> = {
     applicantName:
@@ -117,11 +118,11 @@ const getInitialDataByBank = (
       // Iterate through section fields
       if (section.schema?.properties) {
         Object.keys(section.schema.properties).forEach(fieldKey => {
-          // Check each field against our mappings
+          // Check each field against our mappings (exact match only)
           for (const [commonKey, patterns] of Object.entries(
             FIELD_KEY_MAPPINGS,
           )) {
-            if (matchesFieldPattern(fieldKey, patterns)) {
+            if (matchesFieldExact(fieldKey, patterns)) {
               // Special handling for coordinates
               if (commonKey === 'coordinates') {
                 // For coordinates field, try to get from commonData or leave empty
@@ -143,18 +144,18 @@ const getInitialDataByBank = (
             }
           }
 
-          // Special case: pdDoneBy or nameOfPersonMet
+          // Special case: pdDoneBy or verifierName (exact match only)
+          const fieldKeyLower = fieldKey.toLowerCase();
           if (
-            fieldKey.includes('pdDone') ||
-            fieldKey.includes('pdDoneBy') ||
-            // fieldKey.includes('nameOfPersonMet') ||
-            fieldKey.includes('verifierName')
+            fieldKeyLower === 'pddoneby' ||
+            fieldKeyLower === 'pddone' ||
+            fieldKeyLower === 'verifiername'
           ) {
             initialData[section.id][fieldKey] = loggedInUserName || '';
           }
 
-          // Special case: bankName
-          if (fieldKey.includes('bank') && fieldKey.includes('name')) {
+          // Special case: bankName (exact match only)
+          if (fieldKeyLower === 'bankname') {
             initialData[section.id][fieldKey] = userData?.loan?.bankName || '';
           }
 
@@ -204,7 +205,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  // console.log('sectionData', sectionData);
+  console.log('sectionData', sectionData);
 
   // Log sectionData whenever it changes
   // useEffect(() => {
@@ -387,7 +388,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       try {
         const schema = await loadMobilePDFormsSchema(
-          userData?.templateName ?? bankName,
+          userData?.loan?.templateName ?? bankName,
         );
         if (schema) {
           setSchemaForm(schema);
