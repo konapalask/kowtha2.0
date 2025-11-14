@@ -54,6 +54,7 @@ const statusOptions = [
   { label: "Assigned", value: "Assigned" },
   // { label: 'UnderFV', value: 'UnderFV' },
   { label: "FVCompleted", value: "FVCompleted" },
+  { label: "Appointment Postponed", value: "Appointment Postponed" },
   // { label: 'Approved', value: 'Approved' },
   // { label: 'Rejected', value: 'Rejected' },
 ];
@@ -71,6 +72,7 @@ export interface FilterValue {
   bankName?: string;
   templateName?: string;
   businessStatus?: string;
+  postponed?: boolean;
 }
 
 interface FilterOverlayProps {
@@ -99,8 +101,11 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
   const availableFilterOptions = currentDepartment === "PD" ? pdFilterOptions : filterOptions;
   const [selectedFilters, setSelectedFilters] = useState<string[]>(
     Object.keys(filters).filter(
-      (key) => filters[key as keyof FilterValue] !== undefined
-    )
+      (key) => {
+        const value = filters[key as keyof FilterValue];
+        return value !== undefined && value !== "";
+      }
+    ).map(key => key === "postponed" ? "status" : key)
   );
   const [isOpen, setIsOpen] = useState(false);
 
@@ -115,6 +120,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onFilterChange({
             ...filters,
             status: undefined,
+            postponed: undefined,
           });
           break;
         case "applicationNumber":
@@ -183,6 +189,10 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
   const handleClearFilter = (key: keyof FilterValue) => {
     const newFilters = { ...filters };
     delete newFilters[key];
+    // If clearing status, also clear postponed
+    if (key === "status") {
+      delete newFilters.postponed;
+    }
     onFilterChange(newFilters);
     setSelectedFilters((prev) => prev.filter((k) => k !== key));
   };
@@ -228,10 +238,24 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             <Select
               style={{ minWidth: 200 }}
               options={statusOptions}
-              value={filters.status}
-              onChange={(value: string) =>
-                handleFilterValueChange("status", value || undefined)
-              }
+              value={filters.status || (filters.postponed ? "Appointment Postponed" : undefined)}
+              onChange={(value: string | null) => {
+                if (value === "Appointment Postponed") {
+                  // When Appointment Postponed is selected, set postponed=true and clear status
+                  onFilterChange({
+                    ...filters,
+                    postponed: true,
+                    status: undefined,
+                  });
+                } else {
+                  // When any other status is selected or cleared, clear postponed and set status
+                  onFilterChange({
+                    ...filters,
+                    postponed: undefined,
+                    status: value || undefined,
+                  });
+                }
+              }}
               placeholder="Select Status"
               allowClear
             />
@@ -401,7 +425,19 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
       );
     }
 
-    if (filters.status) {
+    if (filters.postponed) {
+      activeFilters.push(
+        <Tag key="postponed" closable onClose={() => {
+          onFilterChange({
+            ...filters,
+            postponed: undefined,
+          });
+          setSelectedFilters((prev) => prev.filter((k) => k !== "status"));
+        }}>
+          Status: Appointment Postponed
+        </Tag>
+      );
+    } else if (filters.status) {
       activeFilters.push(
         <Tag key="status" closable onClose={() => handleClearFilter("status")}>
           Status: {filters.status}

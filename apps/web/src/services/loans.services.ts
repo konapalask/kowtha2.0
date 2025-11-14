@@ -55,6 +55,7 @@ interface LoanFilters {
   applicationNumber?: string;
   employeeCode?: string;
   employeeName?: string;
+  postponed?: boolean;
 }
 
 export const getLoansApi = (

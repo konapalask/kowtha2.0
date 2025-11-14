@@ -1,6 +1,6 @@
 import { useTabContext } from "@/pages/verify/[id]";
 import { getS3ImageUrl } from "@/utils/utility";
-import { CloseCircleOutlined, EditOutlined } from "@ant-design/icons";
+import { CloseCircleOutlined, EditOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -20,6 +20,7 @@ import {
   Radio,
   Select,
   DatePicker,
+  TimePicker,
 } from "antd";
 
 const { TextArea } = Input;
@@ -257,9 +258,60 @@ export const BusinessVerificationDetails: React.FC<
   );
   const [loading, setLoading] = useState(false);
 
+  // Effect to restore scroll position after data refresh
+  useEffect(() => {
+    if (savedSectionRef.current && savedSectionScrollRef.current !== null) {
+      const sectionId = savedSectionRef.current;
+      const scrollPosition = savedSectionScrollRef.current;
+      
+      // Try multiple times to find the element (DOM might not be ready immediately)
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      const tryScroll = () => {
+        attempts++;
+        const sectionElement = document.getElementById(`section-${sectionId}`);
+        
+        if (sectionElement) {
+          // Found the element, scroll to it
+          // Use requestAnimationFrame for smoother scroll
+          requestAnimationFrame(() => {
+            sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Add a small offset to account for any fixed headers
+            setTimeout(() => {
+              const rect = sectionElement.getBoundingClientRect();
+              const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+              const targetY = rect.top + scrollTop - 20; // 20px offset
+              window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }, 100);
+          });
+          
+          // Clear the refs
+          savedSectionRef.current = null;
+          savedSectionScrollRef.current = null;
+        } else if (attempts < maxAttempts) {
+          // Element not found yet, try again after a short delay
+          setTimeout(tryScroll, 100);
+        } else {
+          // Max attempts reached, fallback to stored scroll position
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+          savedSectionRef.current = null;
+          savedSectionScrollRef.current = null;
+        }
+      };
+      
+      // Start trying after initial delay
+      setTimeout(tryScroll, 200);
+    }
+  }, [verificationData, completeVerificationData]); // Trigger when data updates
+
   // New dynamic form states
   const [schemaForm, setSchemaForm] = useState<WebFormDefinition | null>(null);
   const [useNewApproach, setUseNewApproach] = useState(false);
+  
+  // Ref to track section that was just saved (for scroll restoration)
+  const savedSectionRef = React.useRef<string | null>(null);
+  const savedSectionScrollRef = React.useRef<number | null>(null);
   const [useGenericApproach, setUseGenericApproach] = useState(false);
   const [formLoading, setFormLoading] = useState(true);
   const [dynamicFormData, setDynamicFormData] = useState<WebFormData>({});
@@ -1133,6 +1185,16 @@ export const BusinessVerificationDetails: React.FC<
 
     // Handle save for a specific section
     const handleSectionSave = async (sectionId: string) => {
+      // Store current scroll position and section ID for restoration after save
+      const scrollPosition = window.scrollY || window.pageYOffset;
+      savedSectionRef.current = sectionId;
+      savedSectionScrollRef.current = scrollPosition;
+      
+      // Ensure section stays expanded
+      if (!activeSections.includes(sectionId)) {
+        setActiveSections([...activeSections, sectionId]);
+      }
+
       try {
         // Get current form values from the form instance for the section being saved
         const formInstance = formInstancesRef.current[sectionId];
@@ -1448,8 +1510,8 @@ export const BusinessVerificationDetails: React.FC<
             `Section "${schema?.sections?.find((s: any) => s.id === sectionId)?.label}" saved successfully`
           );
 
-          // Refresh verification data
-          fetchVerificationData?.();
+          // Refresh verification data - scroll restoration will happen in useEffect
+          await fetchVerificationData?.();
         } catch (error: any) {
           console.error("Error saving section to backend:", error);
           const errorMessage =
@@ -1578,9 +1640,10 @@ export const BusinessVerificationDetails: React.FC<
                 />
               }
             >
-              {/* <Form layout="vertical"> */}
-              {/* Render form fields based on section schema */}
-              <FormSectionRenderer
+              <div id={`section-${section.id}`}>
+                {/* <Form layout="vertical"> */}
+                {/* Render form fields based on section schema */}
+                <FormSectionRenderer
                 section={section}
                 data={useMemo(
                   () => ({
@@ -1608,6 +1671,7 @@ export const BusinessVerificationDetails: React.FC<
                 isActive={activeSections.includes(section.id)}
               />
               {/* </Form> */}
+              </div>
             </Collapse.Panel>
           ))}
         </Collapse>
@@ -1959,7 +2023,8 @@ export const BusinessVerificationDetails: React.FC<
 
       // Fields with formulas are read-only
       const isFormulaField = !!field.formula;
-      const fieldReadOnly = readOnly || field.readOnly || isFormulaField;
+      // Allow editing of readOnly fields (auto fields), but keep formula fields and form-level readOnly
+      const fieldReadOnly = readOnly || isFormulaField;
 
       // Handle array fields
       if (field.type === "array" && field.arrayItemFields) {
@@ -2028,55 +2093,161 @@ export const BusinessVerificationDetails: React.FC<
             </Form.Item>
           );
 
+        case "time":
+          // Handle time field (schema service converts format: "time" to type: "time")
+          return (
+            <Form.Item
+              key={fieldId}
+              name={fieldId}
+              label={showLabel ? field.label : undefined}
+              getValueProps={(value) => {
+                // Convert HH:mm AM/PM or HH:mm to dayjs object
+                if (!value) return { value: undefined };
+                if (dayjs.isDayjs(value)) return { value };
+                // Handle HH:mm AM/PM format
+                const timeStr = String(value).trim();
+                // Try parsing with AM/PM
+                const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+                const match = timeStr.match(timeRegex);
+                if (match) {
+                  let hours = parseInt(match[1], 10);
+                  const minutes = parseInt(match[2], 10);
+                  const period = match[3].toUpperCase();
+                  if (period === "PM" && hours !== 12) {
+                    hours += 12;
+                  } else if (period === "AM" && hours === 12) {
+                    hours = 0;
+                  }
+                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                }
+                // Try parsing HH:mm format
+                const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+                if (hhmmMatch) {
+                  const hours = parseInt(hhmmMatch[1], 10);
+                  const minutes = parseInt(hhmmMatch[2], 10);
+                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                }
+                return { value: undefined };
+              }}
+              getValueFromEvent={(time) => {
+                // Convert dayjs object to HH:mm AM/PM format when saving
+                if (!time) return undefined;
+                return time.format("hh:mm A");
+              }}
+            >
+              <TimePicker
+                disabled={fieldReadOnly}
+                placeholder={`Select ${field.label}`}
+                format="hh:mm A"
+                style={{ width: "100%" }}
+                suffixIcon={<ClockCircleOutlined />}
+              />
+            </Form.Item>
+          );
+
         case "text":
         case "string":
-          // Check if schema explicitly defines format as "time"
-          const hasTimeFormat = field.format === "time" || field.schema?.format === "time";
+          // PURE SCHEMA-BASED: Match mobile logic exactly
+          // Mobile checks: property.format === 'date' || 'time' || 'date-time' || 'datetime'
           
-          // More specific time field detection - only match if it's clearly a time field
-          const isTimeField =
-            hasTimeFormat ||
-            ((field.label?.toLowerCase().match(/\b(time|appointment)\b/) ||
-              fieldId.toLowerCase().match(/\b(time|appointment)\b/)) &&
-            !field.label?.toLowerCase().includes("date") &&
-            !fieldId.toLowerCase().includes("date") &&
-            // Exclude fields that mention time in description but aren't time fields
-            !field.label?.toLowerCase().includes("observed at the time") &&
-            !field.label?.toLowerCase().includes("at the time of"));
-
-          const isDateField =
-            !isExcludedFromDate &&
-            (field.label?.toLowerCase().includes("date") ||
-              field.label?.toLowerCase().includes("visit") ||
-              fieldId.toLowerCase().includes("date")) &&
-            !isTimeField;
-
-          if (isTimeField) {
+          // Check format property for time field (fallback for fields that weren't converted)
+          if (field.format === "time") {
             return (
               <Form.Item
                 key={fieldId}
                 name={fieldId}
                 label={showLabel ? field.label : undefined}
-                getValueFromEvent={(e) => {
-                
-                  return convertTimeFromHTML5Format(e.target.value);
-                }}
                 getValueProps={(value) => {
-                  return {
-                    value: convertTimeToHTML5Format(value || ""),
-                  };
+                  // Convert HH:mm AM/PM or HH:mm to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle HH:mm AM/PM format
+                  const timeStr = String(value).trim();
+                  // Try parsing with AM/PM
+                  const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+                  const match = timeStr.match(timeRegex);
+                  if (match) {
+                    let hours = parseInt(match[1], 10);
+                    const minutes = parseInt(match[2], 10);
+                    const period = match[3].toUpperCase();
+                    if (period === "PM" && hours !== 12) {
+                      hours += 12;
+                    } else if (period === "AM" && hours === 12) {
+                      hours = 0;
+                    }
+                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  }
+                  // Try parsing HH:mm format
+                  const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+                  if (hhmmMatch) {
+                    const hours = parseInt(hhmmMatch[1], 10);
+                    const minutes = parseInt(hhmmMatch[2], 10);
+                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  }
+                  return { value: undefined };
+                }}
+                getValueFromEvent={(time) => {
+                  // Convert dayjs object to HH:mm AM/PM format when saving
+                  if (!time) return undefined;
+                  return time.format("hh:mm A");
                 }}
               >
-                <Input
+                <TimePicker
                   disabled={fieldReadOnly}
                   placeholder={`Select ${field.label}`}
-                  type="time"
+                  format="hh:mm A"
+                  style={{ width: "100%" }}
+                  suffixIcon={<ClockCircleOutlined />}
                 />
               </Form.Item>
             );
           }
-
-          if (isDateField) {
+          
+          // Check format property for datetime field (date-time or datetime)
+          if (field.format === "date-time" || field.format === "datetime") {
+            return (
+              <Form.Item
+                key={fieldId}
+                name={fieldId}
+                label={showLabel ? field.label : undefined}
+                getValueProps={(value) => {
+                  // Convert DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A format
+                  const dateTimeStr = String(value).trim();
+                  // Try parsing with time
+                  const parsed = dayjs(dateTimeStr, ["DD-MM-YYYY HH:mm A", "DD/MM/YYYY HH:mm A", "DD-MM-YYYY hh:mm A", "DD/MM/YYYY hh:mm A", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mm:ss"], true);
+                  if (parsed.isValid()) {
+                    return { value: parsed };
+                  }
+                  // Fallback: try date only
+                  const parts = dateTimeStr.split(/[-\/]/);
+                  if (parts.length === 3) {
+                    const [day, month, year] = parts;
+                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  }
+                  return { value: undefined };
+                }}
+                getValueFromEvent={(date) => {
+                  // Convert dayjs object to DD/MM/YYYY HH:mm A format when saving
+                  if (!date) return undefined;
+                  return date.format("DD/MM/YYYY HH:mm A");
+                }}
+              >
+                <DatePicker
+                  disabled={fieldReadOnly}
+                  placeholder={`Select ${field.label}`}
+                  format="DD/MM/YYYY HH:mm A"
+                  showTime={{ format: "HH:mm A" }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            );
+          }
+          
+          // Check format property for date field (date only)
+          if (field.format === "date") {
             return (
               <Form.Item
                 key={fieldId}
@@ -2113,12 +2284,9 @@ export const BusinessVerificationDetails: React.FC<
             );
           }
 
-          // Check if it should be a textarea
-          if (
-            field.type === "textarea" ||
-            field.ui?.widget === "textarea" ||
-            field.ui?.widget === "richtext"
-          ) {
+          // Check ui.widget for textarea (schema-defined widget type)
+          if (field.ui?.widget === "textarea" || field.ui?.widget === "richtext") {
+            const minRows = field.ui?.rows || 2;
             return (
               <Form.Item
                 key={fieldId}
@@ -2128,21 +2296,23 @@ export const BusinessVerificationDetails: React.FC<
                 <TextArea
                   disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
-                  rows={field.textAreaRows || field.ui?.rows || 3}
+                  autoSize={{ minRows: minRows, maxRows: 10 }}
                 />
               </Form.Item>
             );
           }
 
+          // Default: Use TextArea with autoSize (so it can grow, but starts as single line)
           return (
             <Form.Item
               key={fieldId}
               name={fieldId}
               label={showLabel ? field.label : undefined}
             >
-              <Input
-                disabled={readOnly || field.readOnly}
+              <TextArea
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
+                autoSize={{ minRows: 1, maxRows: 8 }}
               />
             </Form.Item>
           );
@@ -2242,7 +2412,7 @@ export const BusinessVerificationDetails: React.FC<
               label={showLabel ? field.label : undefined}
             >
               <Input
-                disabled={readOnly || field.readOnly}
+                disabled={readOnly}
                 placeholder={field.placeholder || field.label}
               />
             </Form.Item>
@@ -2767,7 +2937,7 @@ export const BusinessVerificationDetails: React.FC<
         return (
           <Form.Item key={itemFieldId} name={fieldKey} label={itemField.label}>
             <Select
-              disabled={readOnly || itemField.readOnly}
+              disabled={readOnly}
               placeholder={`Select ${itemField.label}`}
             >
               {itemField.enum.map((option: string) => (
@@ -2782,6 +2952,72 @@ export const BusinessVerificationDetails: React.FC<
 
       // Handle different field types within array items
       switch (itemField.type) {
+        case "boolean":
+          return (
+            <Form.Item
+              key={itemFieldId}
+              name={fieldKey}
+              label={itemField.label}
+            >
+              <Radio.Group disabled={readOnly}>
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+              </Radio.Group>
+            </Form.Item>
+          );
+
+        case "time":
+          // Handle time field (schema service converts format: "time" to type: "time")
+          return (
+            <Form.Item
+              key={itemFieldId}
+              name={fieldKey}
+              label={itemField.label}
+              getValueProps={(value) => {
+                // Convert HH:mm AM/PM or HH:mm to dayjs object
+                if (!value) return { value: undefined };
+                if (dayjs.isDayjs(value)) return { value };
+                // Handle HH:mm AM/PM format
+                const timeStr = String(value).trim();
+                // Try parsing with AM/PM
+                const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+                const match = timeStr.match(timeRegex);
+                if (match) {
+                  let hours = parseInt(match[1], 10);
+                  const minutes = parseInt(match[2], 10);
+                  const period = match[3].toUpperCase();
+                  if (period === "PM" && hours !== 12) {
+                    hours += 12;
+                  } else if (period === "AM" && hours === 12) {
+                    hours = 0;
+                  }
+                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                }
+                // Try parsing HH:mm format
+                const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+                if (hhmmMatch) {
+                  const hours = parseInt(hhmmMatch[1], 10);
+                  const minutes = parseInt(hhmmMatch[2], 10);
+                  return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                }
+                return { value: undefined };
+              }}
+              getValueFromEvent={(time) => {
+                // Convert dayjs object to HH:mm AM/PM format when saving
+                if (!time) return undefined;
+                return time.format("hh:mm A");
+              }}
+            >
+              <TimePicker
+                disabled={readOnly}
+                placeholder={`Select ${itemField.label}`}
+                format="hh:mm A"
+                style={{ width: "100%" }}
+                suffixIcon={<ClockCircleOutlined />}
+              />
+            </Form.Item>
+          );
+
         case "number":
         case "integer":
           return (
@@ -2791,7 +3027,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <InputNumber
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 style={{ width: "100%" }}
                 placeholder={itemField.placeholder || itemField.label}
                 formatter={
@@ -2841,7 +3077,7 @@ export const BusinessVerificationDetails: React.FC<
               }}
             >
               <DatePicker
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={`Select ${itemField.label}`}
                 format="DD/MM/YYYY"
                 style={{ width: "100%" }}
@@ -2850,45 +3086,107 @@ export const BusinessVerificationDetails: React.FC<
           );
 
         case "string":
-          const isArrayItemTimeField =
-            (itemField.label?.toLowerCase().includes("time") ||
-              itemFieldId.toLowerCase().includes("time")) &&
-            !itemField.label?.toLowerCase().includes("date") &&
-            !itemFieldId.toLowerCase().includes("date");
-
-          const isArrayItemDateField =
-            (itemField.label?.toLowerCase().includes("date") ||
-              itemField.label?.toLowerCase().includes("visit") ||
-              itemFieldId.toLowerCase().includes("date")) &&
-            !isArrayItemTimeField;
-
-          if (isArrayItemTimeField) {
+          // PURE SCHEMA-BASED: Match mobile logic exactly
+          // Mobile checks: property.format === 'date' || 'time' || 'date-time' || 'datetime'
+          
+          // Check format property for time field
+          if (itemField.format === "time") {
             return (
               <Form.Item
                 key={itemFieldId}
                 name={fieldKey}
                 label={itemField.label}
-                getValueFromEvent={(e) => {
-                  // Convert HH:MM to HH:MM AM/PM when saving
-                  return convertTimeFromHTML5Format(e.target.value);
-                }}
                 getValueProps={(value) => {
-                  // Convert HH:MM AM/PM to HH:MM when displaying
-                  return {
-                    value: convertTimeToHTML5Format(value || ""),
-                  };
+                  // Convert HH:mm AM/PM or HH:mm to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle HH:mm AM/PM format
+                  const timeStr = String(value).trim();
+                  // Try parsing with AM/PM
+                  const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+                  const match = timeStr.match(timeRegex);
+                  if (match) {
+                    let hours = parseInt(match[1], 10);
+                    const minutes = parseInt(match[2], 10);
+                    const period = match[3].toUpperCase();
+                    if (period === "PM" && hours !== 12) {
+                      hours += 12;
+                    } else if (period === "AM" && hours === 12) {
+                      hours = 0;
+                    }
+                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  }
+                  // Try parsing HH:mm format
+                  const hhmmMatch = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+                  if (hhmmMatch) {
+                    const hours = parseInt(hhmmMatch[1], 10);
+                    const minutes = parseInt(hhmmMatch[2], 10);
+                    return { value: dayjs().hour(hours).minute(minutes).second(0) };
+                  }
+                  return { value: undefined };
+                }}
+                getValueFromEvent={(time) => {
+                  // Convert dayjs object to HH:mm AM/PM format when saving
+                  if (!time) return undefined;
+                  return time.format("hh:mm A");
                 }}
               >
-                <Input
-                  disabled={readOnly || itemField.readOnly}
+                <TimePicker
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
-                  type="time"
+                  format="hh:mm A"
+                  style={{ width: "100%" }}
+                  suffixIcon={<ClockCircleOutlined />}
                 />
               </Form.Item>
             );
           }
-
-          if (isArrayItemDateField) {
+          
+          // Check format property for datetime field (date-time or datetime)
+          if (itemField.format === "date-time" || itemField.format === "datetime") {
+            return (
+              <Form.Item
+                key={itemFieldId}
+                name={fieldKey}
+                label={itemField.label}
+                getValueProps={(value) => {
+                  // Convert DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A to dayjs object
+                  if (!value) return { value: undefined };
+                  if (dayjs.isDayjs(value)) return { value };
+                  // Handle DD-MM-YYYY HH:mm A or DD/MM/YYYY HH:mm A format
+                  const dateTimeStr = String(value).trim();
+                  // Try parsing with time
+                  const parsed = dayjs(dateTimeStr, ["DD-MM-YYYY HH:mm A", "DD/MM/YYYY HH:mm A", "DD-MM-YYYY hh:mm A", "DD/MM/YYYY hh:mm A", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mm:ss"], true);
+                  if (parsed.isValid()) {
+                    return { value: parsed };
+                  }
+                  // Fallback: try date only
+                  const parts = dateTimeStr.split(/[-\/]/);
+                  if (parts.length === 3) {
+                    const [day, month, year] = parts;
+                    return { value: dayjs(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`) };
+                  }
+                  return { value: undefined };
+                }}
+                getValueFromEvent={(date) => {
+                  // Convert dayjs object to DD/MM/YYYY HH:mm A format when saving
+                  if (!date) return undefined;
+                  return date.format("DD/MM/YYYY HH:mm A");
+                }}
+              >
+                <DatePicker
+                  disabled={readOnly}
+                  placeholder={`Select ${itemField.label}`}
+                  format="DD/MM/YYYY HH:mm A"
+                  showTime={{ format: "HH:mm A" }}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            );
+          }
+          
+          // Check format property for date field (date only)
+          if (itemField.format === "date") {
             return (
               <Form.Item
                 key={itemFieldId}
@@ -2916,7 +3214,7 @@ export const BusinessVerificationDetails: React.FC<
                 }}
               >
                 <DatePicker
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={`Select ${itemField.label}`}
                   format="DD/MM/YYYY"
                   style={{ width: "100%" }}
@@ -2925,11 +3223,9 @@ export const BusinessVerificationDetails: React.FC<
             );
           }
 
-          // Check if it should be a textarea
-          if (
-            itemField.ui?.widget === "textarea" ||
-            itemField.ui?.widget === "richtext"
-          ) {
+          // Check ui.widget for textarea (schema-defined widget type)
+          if (itemField.ui?.widget === "textarea" || itemField.ui?.widget === "richtext") {
+            const minRows = itemField.ui?.rows || 2;
             return (
               <Form.Item
                 key={itemFieldId}
@@ -2937,23 +3233,25 @@ export const BusinessVerificationDetails: React.FC<
                 label={itemField.label}
               >
                 <TextArea
-                  disabled={readOnly || itemField.readOnly}
+                  disabled={readOnly}
                   placeholder={itemField.placeholder || itemField.label}
-                  rows={itemField.ui?.rows || 3}
+                  autoSize={{ minRows: minRows, maxRows: 10 }}
                 />
               </Form.Item>
             );
           }
 
+          // Default: Use TextArea with autoSize (so it can grow, but starts as single line)
           return (
             <Form.Item
               key={itemFieldId}
               name={fieldKey}
               label={itemField.label}
             >
-              <Input
-                disabled={readOnly || itemField.readOnly}
+              <TextArea
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
+                autoSize={{ minRows: 1, maxRows: 8 }}
               />
             </Form.Item>
           );
@@ -2965,7 +3263,7 @@ export const BusinessVerificationDetails: React.FC<
               name={fieldKey}
               label={itemField.label}
             >
-              <Radio.Group disabled={readOnly || itemField.readOnly}>
+              <Radio.Group disabled={readOnly}>
                 <Radio value={true}>Yes</Radio>
                 <Radio value={false}>No</Radio>
               </Radio.Group>
@@ -2980,7 +3278,7 @@ export const BusinessVerificationDetails: React.FC<
               label={itemField.label}
             >
               <Input
-                disabled={readOnly || itemField.readOnly}
+                disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
               />
             </Form.Item>

@@ -57,7 +57,7 @@ export const SimpleDynamicForm: React.FC<SimpleDynamicFormProps> = ({
 
     const commonProps = {
       placeholder: `Enter ${field.label}`,
-      disabled: field.readOnly || !editMode,
+      disabled: !editMode, // Allow editing of readOnly fields when in edit mode
     };
 
     switch (field.type) {

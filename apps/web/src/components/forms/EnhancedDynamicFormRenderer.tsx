@@ -198,9 +198,10 @@ export const EnhancedDynamicFormRenderer: React.FC<
   };
 
   const renderField = (field: WebFieldDefinition, sectionId: string) => {
-    const isFieldReadOnly = readOnly || field.readOnly;
+    // Allow editing of readOnly fields (auto fields), but respect form-level readOnly
+    const isFieldReadOnly = readOnly;
 
-    // For readOnly fields, render as plain text instead of form controls
+    // For form-level readOnly, render as plain text instead of form controls
     if (isFieldReadOnly) {
       const value = form.getFieldValue([sectionId, field.id]);
       const isEmpty = !validateNonEmpty(value);
@@ -405,7 +406,7 @@ export const EnhancedDynamicFormRenderer: React.FC<
                   style={{ width: "100%", justifyContent: "space-between" }}
                 >
                   <Text strong>{`${field.label} ${index + 1}`}</Text>
-                  {!readOnly && !field.readOnly && items.length > 1 && (
+                  {!readOnly && items.length > 1 && (
                     <Button
                       icon={<DeleteOutlined />}
                       onClick={() => removeItem(index)}
@@ -420,7 +421,8 @@ export const EnhancedDynamicFormRenderer: React.FC<
               {/* Dynamically render array item fields based on schema */}
               {field.arrayItemFields &&
                 field.arrayItemFields.map((itemField: WebFieldDefinition) => {
-                  const isItemFieldReadOnly = readOnly || itemField.readOnly;
+                  // Allow editing of readOnly fields (auto fields), but respect form-level readOnly
+                  const isItemFieldReadOnly = readOnly;
 
                   // Validation rules for array item fields
                   const itemValidationRules = [];
@@ -515,7 +517,7 @@ export const EnhancedDynamicFormRenderer: React.FC<
             </Row>
           </Card>
         ))}
-        {!readOnly && !field.readOnly && (
+        {!readOnly && (
           <Button
             icon={<PlusOutlined />}
             onClick={addItem}
