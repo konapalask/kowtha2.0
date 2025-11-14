@@ -2381,7 +2381,7 @@ export const BusinessVerificationDetails: React.FC<
                 <TextArea
                   disabled={fieldReadOnly}
                   placeholder={field.placeholder || field.label}
-                  autoSize={{ minRows: minRows, maxRows: 10 }}
+                  autoSize={{ minRows: minRows }}
                 />
               </Form.Item>
             );
@@ -2397,7 +2397,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={field.placeholder || field.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -2503,7 +2503,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={field.placeholder || field.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -3370,7 +3370,7 @@ export const BusinessVerificationDetails: React.FC<
                 <TextArea
                   disabled={readOnly}
                   placeholder={itemField.placeholder || itemField.label}
-                  autoSize={{ minRows: minRows, maxRows: 10 }}
+                  autoSize={{ minRows: minRows }}
                 />
               </Form.Item>
             );
@@ -3386,7 +3386,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
@@ -3415,7 +3415,7 @@ export const BusinessVerificationDetails: React.FC<
               <TextArea
                 disabled={readOnly}
                 placeholder={itemField.placeholder || itemField.label}
-                autoSize={{ minRows: 1, maxRows: 8 }}
+                autoSize={{ minRows: 1 }}
               />
             </Form.Item>
           );
