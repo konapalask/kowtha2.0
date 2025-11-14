@@ -54,7 +54,7 @@ const FIELD_KEY_MAPPINGS = {
     'endUseOfTheLoanAndLoanAmountRequired',
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
-  bankName: ['repaymentBankName'],
+  bankName: [],
   address: [
     'applicantAddress',
     'initiatedAddress',

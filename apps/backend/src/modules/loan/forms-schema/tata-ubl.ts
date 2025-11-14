@@ -60,7 +60,6 @@ export const tataUblSchema = {
               repaymentBankName: {
                 type: "string",
                 title: "Bank name",
-                readOnly: true,
               },
               typeSAAccount: {
                 type: "string",
