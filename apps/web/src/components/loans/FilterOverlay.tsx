@@ -18,7 +18,7 @@ const { RangePicker } = DatePicker;
 interface FilterOption {
   key: string;
   label: string;
-  type: "status" | "applicationNumber" | "assignee" | "dateRange" | "text" | "select" | "businessStatus";
+  type: "status" | "applicationNumber" | "assignee" | "dateRange" | "text" | "select";
 }
 
 const filterOptions: FilterOption[] = [
@@ -43,9 +43,7 @@ const pdFilterOptions: FilterOption[] = [
   { key: "applicantName", label: "Applicant Name", type: "text" },
   { key: "applicantMobile", label: "Mobile", type: "text" },
   { key: "bankName", label: "Bank Name", type: "select" },
-  { key: "templateName", label: "Template Name", type: "select" },
   { key: "assignee", label: "Assignee", type: "assignee" },
-  { key: "businessStatus", label: "Business Status", type: "businessStatus" },
   { key: "dateRange", label: "Date Range", type: "dateRange" },
 ];
 
@@ -82,13 +80,6 @@ interface FilterOverlayProps {
   pdBankOptions?: Array<{ label: string; value: string }>;
   templateOptions?: Array<{ label: string; value: string }>;
 }
-
-const businessStatusOptions = [
-  { label: "Pending", value: "Pending" },
-  { label: "In Progress", value: "In Progress" },
-  { label: "Completed", value: "Completed" },
-  { label: "Postponed", value: "Postponed" },
-];
 
 const FilterOverlay: React.FC<FilterOverlayProps> = ({
   filters,
@@ -152,18 +143,6 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onFilterChange({
             ...filters,
             bankName: undefined,
-          });
-          break;
-        case "templateName":
-          onFilterChange({
-            ...filters,
-            templateName: undefined,
-          });
-          break;
-        case "businessStatus":
-          onFilterChange({
-            ...filters,
-            businessStatus: undefined,
           });
           break;
         case "dateRange":
@@ -317,38 +296,7 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
             />
           );
         }
-        if (option.key === "templateName") {
-          return (
-            <Select
-              style={{ minWidth: 200 }}
-              options={templateOptions}
-              value={filters.templateName}
-              onChange={(value: string) =>
-                handleFilterValueChange("templateName", value || undefined)
-              }
-              placeholder="Select Template Name"
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-              }
-              allowClear
-            />
-          );
-        }
         return null;
-      case "businessStatus":
-        return (
-          <Select
-            style={{ minWidth: 200 }}
-            options={businessStatusOptions}
-            value={filters.businessStatus}
-            onChange={(value: string) =>
-              handleFilterValueChange("businessStatus", value || undefined)
-            }
-            placeholder="Select Business Status"
-            allowClear
-          />
-        );
       case "assignee":
         return (
           <Space direction="vertical">
@@ -513,30 +461,6 @@ const FilterOverlay: React.FC<FilterOverlayProps> = ({
           onClose={() => handleClearFilter("bankName")}
         >
           Bank: {filters.bankName}
-        </Tag>
-      );
-    }
-
-    if (filters.templateName) {
-      activeFilters.push(
-        <Tag
-          key="templateName"
-          closable
-          onClose={() => handleClearFilter("templateName")}
-        >
-          Template: {filters.templateName}
-        </Tag>
-      );
-    }
-
-    if (filters.businessStatus) {
-      activeFilters.push(
-        <Tag
-          key="businessStatus"
-          closable
-          onClose={() => handleClearFilter("businessStatus")}
-        >
-          Business Status: {filters.businessStatus}
         </Tag>
       );
     }
