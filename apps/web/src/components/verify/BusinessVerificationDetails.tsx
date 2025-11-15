@@ -1610,9 +1610,10 @@ export const BusinessVerificationDetails: React.FC<
             return false;
           }
 
-          // Check arrays - must have at least one item with at least one non-empty field
+          // Check arrays - empty array is a valid change (means array was cleared)
           if (Array.isArray(value)) {
-            if (value.length === 0) return false;
+            // Empty array is a change (user removed all items)
+            if (value.length === 0) return true;
             // Check if any item in the array has at least one non-empty field
             return value.some((item: any) => {
               if (!item || typeof item !== "object") return false;
@@ -1644,7 +1645,7 @@ export const BusinessVerificationDetails: React.FC<
             alignItems: "center",
           }}
         >
-          <span>{sectionLabel}</span>
+          <span style={{ fontWeight: "bold" }}>{sectionLabel}</span>
           {(role === "Verifier" ||
             role === "Admin" ||
             role === "VerificationExecutive") &&
@@ -1917,6 +1918,11 @@ export const BusinessVerificationDetails: React.FC<
 
     // Helper functions for financial analysis field grouping
     const isFinancialAnalysisSection = () => {
+      // Exclude detailed financial analysis as it has its own special rendering
+      if (section.id === "financialAnalysisDetailed" || 
+          section.label?.toLowerCase().includes("detailed financial analysis with balance sheet")) {
+        return false;
+      }
       return (
         section.id === "financialAnalysis" ||
         section.id === "financialAnalysisComprehensive" ||
@@ -2493,6 +2499,134 @@ export const BusinessVerificationDetails: React.FC<
             </Form.Item>
           );
 
+        case "object":
+          // Handle nested object fields (e.g., repaymentFrom with repaymentBankName, typeSAAccount, accountNo)
+          if (field.objectFields && field.objectFields.length > 0) {
+            return (
+              <div key={fieldId} style={{ marginBottom: 16 }}>
+                {showLabel && (
+                  <div style={{ marginBottom: 8 }}>
+                    <Text strong>
+                      {field.label}
+                      {isRequired ? " *" : ""}
+                    </Text>
+                  </div>
+                )}
+                <Card size="small" style={{ backgroundColor: "#fafafa" }}>
+                  <Row gutter={[16, 16]}>
+                    {field.objectFields.map((objectField: any) => {
+                      const objectFieldReadOnly = readOnly || objectField.readOnly || false;
+                      const objectFieldRequired = objectField.required || false;
+                      
+                      // Render nested field based on its type
+                      const renderNestedField = () => {
+                        switch (objectField.type) {
+                          case "text":
+                          case "string":
+                            return (
+                              <Input
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                                maxLength={objectField.maxLength}
+                              />
+                            );
+                          
+                          case "number":
+                          case "integer":
+                            return (
+                              <InputNumber
+                                disabled={objectFieldReadOnly}
+                                style={{ width: "100%" }}
+                                placeholder={objectField.placeholder || objectField.label}
+                                formatter={
+                                  objectField.formatter?.useIndianFormat
+                                    ? (value) => {
+                                        if (!value) return "";
+                                        const num = parseFloat(String(value));
+                                        return new Intl.NumberFormat("en-IN", {
+                                          minimumFractionDigits:
+                                            objectField.formatter?.minDecimalPlaces || 0,
+                                          maximumFractionDigits:
+                                            objectField.formatter?.maxDecimalPlaces || 2,
+                                        }).format(num);
+                                      }
+                                    : undefined
+                                }
+                                parser={(value) => value?.replace(/\$\s?|(,*)/g, "") || ""}
+                              />
+                            );
+                          
+                          case "select":
+                            return (
+                              <Select
+                                disabled={objectFieldReadOnly}
+                                placeholder={`Select ${objectField.label}`}
+                              >
+                                {objectField.options?.map((option: string) => (
+                                  <Select.Option key={option} value={option}>
+                                    {option}
+                                  </Select.Option>
+                                ))}
+                                {objectField.enum?.map((option: string) => (
+                                  <Select.Option key={option} value={option}>
+                                    {option}
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            );
+                          
+                          case "textarea":
+                            return (
+                              <TextArea
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                                rows={objectField.textAreaRows || 3}
+                                maxLength={objectField.maxLength}
+                              />
+                            );
+                          
+                          default:
+                            return (
+                              <Input
+                                disabled={objectFieldReadOnly}
+                                placeholder={objectField.placeholder || objectField.label}
+                              />
+                            );
+                        }
+                      };
+
+                      return (
+                        <Col
+                          key={objectField.id}
+                          span={objectField.type === "textarea" ? 24 : 12}
+                        >
+                          <Form.Item
+                            name={[fieldId, objectField.id]}
+                            label={objectField.label}
+                            rules={
+                              objectFieldRequired
+                                ? [
+                                    {
+                                      required: true,
+                                      message: `${objectField.label} is required`,
+                                    },
+                                  ]
+                                : []
+                            }
+                          >
+                            {renderNestedField()}
+                          </Form.Item>
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                </Card>
+              </div>
+            );
+          }
+          // Fallback if objectFields is not defined
+          return null;
+
         default:
           return (
             <Form.Item
@@ -2670,11 +2804,6 @@ export const BusinessVerificationDetails: React.FC<
                       </div>
                     </div>
                   ))}
-                  {debitFields.length === 0 && (
-                    <Text type="secondary" style={{ fontStyle: "italic" }}>
-                      No debit fields
-                    </Text>
-                  )}
                 </div>
               </Col>
 
@@ -2717,11 +2846,6 @@ export const BusinessVerificationDetails: React.FC<
                       </div>
                     </div>
                   ))}
-                  {creditFields.length === 0 && (
-                    <Text type="secondary" style={{ fontStyle: "italic" }}>
-                      No credit fields
-                    </Text>
-                  )}
                 </div>
               </Col>
             </Row>
@@ -2744,26 +2868,72 @@ export const BusinessVerificationDetails: React.FC<
       return true;
     });
 
-    // Group financial analysis fields if this is a financial section
-    const { grouped: groupedFields, standalone: standaloneFields } =
-      isFinancialAnalysisSection()
-        ? groupFinancialFields(visibleFields)
-        : { grouped: [], standalone: visibleFields };
+    // For financial analysis sections, render fields in their original order (like mobile)
+    // Don't use grouping - just render sequentially to match mobile app
+    if (isFinancialAnalysisSection()) {
+      // Separate fields by type for proper layout
+      const regularFields: any[] = [];
+      const arrayFields: any[] = [];
+      const objectFields: any[] = [];
 
+      visibleFields.forEach((field: any) => {
+        if (field.type === "array" && field.arrayItemFields) {
+          arrayFields.push(field);
+        } else if (field.type === "object" && field.objectFields) {
+          objectFields.push(field);
+        } else {
+          regularFields.push(field);
+        }
+      });
+
+      return (
+        <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
+          <Row gutter={[16, 16]}>
+            {/* Render regular fields in order - 2 columns layout for financial analysis */}
+            {regularFields.map((field: any) => (
+              <Col key={field.id} xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+            
+            {/* Object fields - full width */}
+            {objectFields.map((field: any) => (
+              <Col key={field.id} xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+            
+            {/* Array fields - always full width */}
+            {arrayFields.map((field: any) => (
+              <Col
+                key={field.id}
+                xs={24}
+                sm={24}
+                md={24}
+                lg={24}
+                xl={24}
+                xxl={24}
+              >
+                {renderSingleField(field.id, field, true)}
+              </Col>
+            ))}
+          </Row>
+        </Form>
+      );
+    }
+
+    // For non-financial sections, use the standard layout
     // Separate regular fields from array fields (arrays take full width)
-    const regularStandaloneFields = standaloneFields.filter(
+    const regularStandaloneFields = visibleFields.filter(
       (field: any) => field.type !== "array" || !field.arrayItemFields
     );
-    const arrayFields = standaloneFields.filter(
+    const arrayFields = visibleFields.filter(
       (field: any) => field.type === "array" && field.arrayItemFields
     );
 
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
         <Row gutter={[16, 16]}>
-          {/* Grouped financial fields - all groups rendered together with debit on left, credit on right */}
-          {groupedFields.length > 0 && renderAllGroupedFields(groupedFields)}
-
           {/* Regular standalone fields - responsive grid: 3 cols (xxl/xl), 2 cols (md), 1 col (sm/xs) */}
           {regularStandaloneFields.map((field: any) => (
             <Col key={field.id} xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
@@ -2936,16 +3106,48 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     const removeItem = (index: number) => {
-      // Don't allow removing if only one item exists
-      if (items.length <= 1) {
-        return;
-      }
-
       // Get current form values before removal
       const currentFormValues = form.getFieldsValue();
 
       // Filter out the removed item
       const newItems = items.filter((_: any, i: number) => i !== index);
+
+      // If no items remain, clear all form values for this array field and set empty array
+      if (newItems.length === 0) {
+        // Clear all form values for this array field
+        const allFormValues = form.getFieldsValue();
+        const keysToRemove: string[] = [];
+        
+        Object.keys(allFormValues).forEach((key) => {
+          if (key.startsWith(`${field.id}[`)) {
+            keysToRemove.push(key);
+          }
+        });
+
+        // Remove all keys for this array field
+        keysToRemove.forEach((key) => {
+          form.setFieldValue(key, undefined);
+        });
+
+        // Update items state to empty array
+        setItems([]);
+
+        // Update uncommitted changes with empty array
+        setSectionUncommittedChanges((prev: any) => ({
+          ...prev,
+          [sectionId]: {
+            ...prev[sectionId],
+            [field.id]: [],
+          },
+        }));
+
+        // Trigger change handler
+        setTimeout(() => {
+          const updatedFormValues = form.getFieldsValue();
+          handleArrayFormChange({}, updatedFormValues);
+        }, 100);
+        return;
+      }
 
       // Build new form values with reindexed items
       // Items after the removed index need to shift down
