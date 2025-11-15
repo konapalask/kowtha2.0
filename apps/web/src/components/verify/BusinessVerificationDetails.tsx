@@ -1610,9 +1610,10 @@ export const BusinessVerificationDetails: React.FC<
             return false;
           }
 
-          // Check arrays - must have at least one item with at least one non-empty field
+          // Check arrays - empty array is a valid change (means array was cleared)
           if (Array.isArray(value)) {
-            if (value.length === 0) return false;
+            // Empty array is a change (user removed all items)
+            if (value.length === 0) return true;
             // Check if any item in the array has at least one non-empty field
             return value.some((item: any) => {
               if (!item || typeof item !== "object") return false;
@@ -3105,16 +3106,48 @@ export const BusinessVerificationDetails: React.FC<
     };
 
     const removeItem = (index: number) => {
-      // Don't allow removing if only one item exists
-      if (items.length <= 1) {
-        return;
-      }
-
       // Get current form values before removal
       const currentFormValues = form.getFieldsValue();
 
       // Filter out the removed item
       const newItems = items.filter((_: any, i: number) => i !== index);
+
+      // If no items remain, clear all form values for this array field and set empty array
+      if (newItems.length === 0) {
+        // Clear all form values for this array field
+        const allFormValues = form.getFieldsValue();
+        const keysToRemove: string[] = [];
+        
+        Object.keys(allFormValues).forEach((key) => {
+          if (key.startsWith(`${field.id}[`)) {
+            keysToRemove.push(key);
+          }
+        });
+
+        // Remove all keys for this array field
+        keysToRemove.forEach((key) => {
+          form.setFieldValue(key, undefined);
+        });
+
+        // Update items state to empty array
+        setItems([]);
+
+        // Update uncommitted changes with empty array
+        setSectionUncommittedChanges((prev: any) => ({
+          ...prev,
+          [sectionId]: {
+            ...prev[sectionId],
+            [field.id]: [],
+          },
+        }));
+
+        // Trigger change handler
+        setTimeout(() => {
+          const updatedFormValues = form.getFieldsValue();
+          handleArrayFormChange({}, updatedFormValues);
+        }, 100);
+        return;
+      }
 
       // Build new form values with reindexed items
       // Items after the removed index need to shift down
