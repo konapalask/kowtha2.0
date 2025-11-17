@@ -73,13 +73,39 @@ export const WorkVerificationDetails: React.FC<
       ? "positive"
       : completeVerificationData?.approvedStatus === "Negative"
         ? "negative"
-        : null
+        : completeVerificationData?.approvedStatus === "CreditRefer"
+          ? "credit_refer"
+          : null
   );
+
+  // Sync verdict state when approvedStatus changes
+  useEffect(() => {
+    if (completeVerificationData?.approvedStatus === "Positive") {
+      setVerdict("positive");
+    } else if (completeVerificationData?.approvedStatus === "Negative") {
+      setVerdict("negative");
+    } else if (completeVerificationData?.approvedStatus === "CreditRefer") {
+      setVerdict("credit_refer");
+    } else {
+      setVerdict(null);
+    }
+  }, [completeVerificationData?.approvedStatus]);
   // const [loading, setLoading] = useState<boolean>(false);
 
   const handleSave = async () => {
+    let status: string;
+    if (verdict === "positive") {
+      status = "Positive";
+    } else if (verdict === "negative") {
+      status = "Negative";
+    } else if (verdict === "credit_refer") {
+      status = "CreditRefer";
+    } else {
+      status = "Positive"; // default fallback
+    }
+
     const payload = {
-      status: verdict === "positive" ? "Positive" : "Negative",
+      status,
       path: editorContent,
     };
     patchFinalVerdict(id as string, "Work", payload)

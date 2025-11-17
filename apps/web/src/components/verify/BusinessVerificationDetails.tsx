@@ -247,6 +247,20 @@ export const BusinessVerificationDetails: React.FC<
       setEditorContent(contentToSet);
     }
   }, [completeVerificationData?.synopsis]);
+
+  // Sync verdict state when approvedStatus changes
+  useEffect(() => {
+    if (completeVerificationData?.approvedStatus === "Positive") {
+      setVerdict("positive");
+    } else if (completeVerificationData?.approvedStatus === "Negative") {
+      setVerdict("negative");
+    } else if (completeVerificationData?.approvedStatus === "CreditRefer") {
+      setVerdict("credit_refer");
+    } else {
+      setVerdict(null);
+    }
+  }, [completeVerificationData?.approvedStatus]);
+
   const [changedData, setChangedData] = useState<any>({});
   const [open, setOpen] = useState(false);
   const [verdict, setVerdict] = useState(
@@ -254,7 +268,9 @@ export const BusinessVerificationDetails: React.FC<
       ? "positive"
       : completeVerificationData?.approvedStatus === "Negative"
         ? "negative"
-        : null
+        : completeVerificationData?.approvedStatus === "CreditRefer"
+          ? "credit_refer"
+          : null
   );
   const [loading, setLoading] = useState(false);
 
@@ -336,8 +352,19 @@ export const BusinessVerificationDetails: React.FC<
   const formInstancesRef = React.useRef<{ [key: string]: any }>({});
 
   const handleSave = async () => {
+    let status: string;
+    if (verdict === "positive") {
+      status = "Positive";
+    } else if (verdict === "negative") {
+      status = "Negative";
+    } else if (verdict === "credit_refer") {
+      status = "CreditRefer";
+    } else {
+      status = "Positive"; // default fallback
+    }
+
     patchFinalVerdict(id as string, "Business", {
-      status: verdict === "positive" ? "Positive" : "Negative",
+      status,
       path: editorContent,
     })
       .then((response) => {
