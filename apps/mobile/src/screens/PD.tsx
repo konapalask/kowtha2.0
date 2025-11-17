@@ -52,6 +52,7 @@ const FIELD_KEY_MAPPINGS = {
     'loanAmount',
     'loanAmountRequested',
     'endUseOfTheLoanAndLoanAmountRequired',
+    'loanAmountApplied',
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
@@ -64,6 +65,7 @@ const FIELD_KEY_MAPPINGS = {
     'officeAddress',
     'initiatedPremises',
     'addressOfFirm',
+    'businessPremises',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -73,6 +75,7 @@ const FIELD_KEY_MAPPINGS = {
     'geoCoordinates',
     'siteCoordinates',
     'latitudeLongitude',
+    'latitudeAndLongitude',
   ],
 };
 
@@ -544,17 +547,25 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const handleSectionDataChange = useCallback(
-    (sectionId: string, data: any) => {
+    async (sectionId: string, data: any) => {
       setSectionData((prevSectionData: any) => {
         const updatedSectionData = {
           ...prevSectionData,
           [sectionId]: data,
         };
-        // Save the updated data
+        // Save the updated data when Save button is clicked
         saveFormData(updatedSectionData);
         return updatedSectionData;
       });
-      // Removed auto-collapse - sections stay open while editing
+
+      // Show success message to confirm save
+      Toast.show({
+        type: 'success',
+        text1: 'Section Saved',
+        text2: 'Your changes have been saved successfully',
+        visibilityTime: 2000,
+        position: 'top',
+      });
     },
     [saveFormData],
   );

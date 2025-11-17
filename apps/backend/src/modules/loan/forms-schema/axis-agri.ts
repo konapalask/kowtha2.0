@@ -192,11 +192,6 @@ export const axisAgriSchema = {
               },
             },
           },
-          additionalDetails: {
-            type: "string",
-            title: "Additional Details / Conduct / TOD if availed",
-            ui: { widget: "textarea", rows: 2 },
-          },
           isItATakeover: {
             type: "string",
             title: "Is it a Takeover?",
