@@ -78,13 +78,13 @@ export const axisBankSchema = {
     },
     {
       id: "familyBackground",
-      label: "Borrower Details",
+      label: "Family Background",
       schema: {
         type: "object",
         properties: {
           familyMembers: {
             type: "array",
-            title: "Family Background",
+            title: "Family Members",
             items: {
               type: "object",
               properties: {
@@ -242,7 +242,6 @@ export const axisBankSchema = {
           stockSeen: {
             type: "string",
             title: "Stock seen",
-            enum: ["Yes", "No"],
           },
           noOfMachinesSeen: {
             type: "integer",
@@ -259,12 +258,8 @@ export const axisBankSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Details",
-                },
-                location: {
-                  type: "string",
-                  title: "Location",
                 },
                 averageDebtorDays: {
                   type: "integer",
@@ -284,12 +279,8 @@ export const axisBankSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact Details",
-                },
-                location: {
-                  type: "string",
-                  title: "Location",
                 },
                 averageCreditorDays: {
                   type: "integer",
@@ -500,6 +491,242 @@ export const axisBankSchema = {
         },
       },
     },
+
+    {
+      id: "pdDetails",
+      label: "PD Details",
+      schema: {
+        type: "object",
+        properties: {
+          pdOfficerName: {
+            type: "string",
+            title: "PD Officer Name",
+          },
+          // pdOfficerSignature: {
+          //   type: "string",
+          //   title: "PD Officer Signature",
+          // },
+        },
+      },
+    },
+ 
+    {
+      id: "annexure1",
+      label: "Annexure 1",
+      schema: {
+        type: "object",
+        properties: {
+          monthlTurnOver: {
+            type: "number",
+            title: "Monthly Turnover (Totalmonthlybilling)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalPurchases: {
+            type: "number",
+            title: "Total Purchases (Monthly purchases, costofacquisition etc.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          grossAndNetMargin: {
+            type: "number",
+            title: "Gross and Net margin of business",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          cashFlowAnalysisDuringPD: {
+            type: "object",
+            title: "Estimated income - Cash flow analysis during PD",
+            properties: {
+              monthlyToGrossReceiptsEstimated: {
+                type: "number",
+                title: "Monthly TO / Gross Receipts (estimated)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              anyOtherIncome: {
+                type: "number",
+                title: "Any other income (monthly)(commison rental etc.)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessDirectExpenses: {
+                type: "number",
+                title: "Less: Direct expenses (Purchase cost, cost of goods sold, selling expenses)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessRentalExpenses: {
+                type: "number",
+                title: "Less: Indirect expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessStaffSalary: {
+                type: "number",
+                title: "Less: Staff Salary",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessElectricity: {
+                type: "number",
+                title: "Less: Electricity/mobile/travelexpenses.",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessAnyotherExpenses: {
+                type: "number",
+                title: "Less: Any other expenses than mentioned above",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              foodExpenses: {
+                type: "number",
+                title: "Food Expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              childrenEducation: {
+                type: "number",
+                title: "Children education",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              houseRent: {
+                type: "number",
+                title: "House rent(if any)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              medicalExpenses: {
+                type: "number",
+                title: "Medical expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              otherHouseHoldExpenses: {
+                type: "number",
+                title: "Other household expenses",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessSavingsInvestmentsInsurancePremium: {
+                type: "number",
+                title: "Less: Savings / investments / insurance premium",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              lessExistingEmisObligations: {
+                type: "number",
+                title: "Less: Existing EMIs (obligations)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              emiAllocatedFoTheProposedLoan: {
+                type: "number",
+                title: "EMI allocated for the proposed loan",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              netSurplus: {
+                type: "number",
+                title: "Net Surplus income post all expenses & obligations",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+            },
+          },
+          loansTakenFromFamilyFriends: {
+            type: "number",
+            title: "Loans taken from family, friends business associates etc.",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
+      },
+    },
+
+
     financialsSchema,
   ],
 } as const;
