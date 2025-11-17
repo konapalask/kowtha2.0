@@ -74,8 +74,14 @@ export const arkaFincapSchema = {
             title: "Type of Collateral",
           },
           marketValueOfCollateral: {
-            type: "string",
+            type: "number",
             title: "Market Value of Collateral Security",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           collateralPropertyAddress: {
             type: "string",
