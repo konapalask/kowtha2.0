@@ -632,6 +632,24 @@ export const rblSchema = {
       },
       required: true,
     },
+    {
+      id: "coordinates",
+      label: "Coordinates",
+      schema: {
+        type: "object",
+        properties: {
+          latitude: {
+            type: "number",
+            title: "Latitude",
+          },
+          longitude: {
+            type: "number",
+            title: "Longitude",
+          },
+        },
+      },
+      required: false,
+    }, 
     statement4Schema,
   ],
 } as const;

@@ -203,6 +203,16 @@ export const ambitSchema = {
                 relationship: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -217,7 +227,7 @@ export const ambitSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {

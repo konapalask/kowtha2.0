@@ -276,8 +276,14 @@ export const cholaSchema = {
                   title: "A/c Type",
                 },
                 averageBalance: {
-                  type: "string",
+                  type: "number",
                   title: "Avg balance",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
               },
             },

@@ -1,4 +1,10 @@
-import React, {useState, useEffect, useLayoutEffect, useCallback} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   View,
   Text,
@@ -52,6 +58,8 @@ const FIELD_KEY_MAPPINGS = {
     'loanAmount',
     'loanAmountRequested',
     'endUseOfTheLoanAndLoanAmountRequired',
+    'loanAmountApplied',
+    'requestedLoanAmount',
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
@@ -64,6 +72,8 @@ const FIELD_KEY_MAPPINGS = {
     'officeAddress',
     'initiatedPremises',
     'addressOfFirm',
+    'businessPremises',
+    'shopAddress',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -73,6 +83,7 @@ const FIELD_KEY_MAPPINGS = {
     'geoCoordinates',
     'siteCoordinates',
     'latitudeLongitude',
+    'latitudeAndLongitude',
   ],
 };
 
@@ -206,6 +217,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
   console.log('sectionData', sectionData);
+
+  // Refs for scrolling to sections
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionRefs = useRef<Record<string, View | null>>({});
+  const formContainerRef = useRef<View | null>(null);
 
   // Log sectionData whenever it changes
   // useEffect(() => {
@@ -432,9 +448,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev: any) => {
       const isCurrentlyExpanded = prev[sectionId];
+      const willBeExpanded = !isCurrentlyExpanded;
+
+      // Scroll to section when opening it
+      if (willBeExpanded) {
+        setTimeout(() => {
+          const sectionRef = sectionRefs.current[sectionId];
+          const scrollView = scrollViewRef.current;
+
+          if (sectionRef && scrollView) {
+            // Use measureLayout to get position relative to ScrollView
+            sectionRef.measureLayout(
+              scrollView as any,
+              (x, y) => {
+                scrollView.scrollTo({
+                  y: Math.max(0, y - 20), // Add small offset, ensure non-negative
+                  animated: true,
+                });
+              },
+              () => {
+                // Fallback: error callback (measureLayout failed)
+                console.warn('Could not measure section layout');
+              },
+            );
+          }
+        }, 200); // Delay to ensure section is fully rendered
+      }
+
       return {
         investigable: prev.investigable,
-        [sectionId]: !isCurrentlyExpanded,
+        [sectionId]: willBeExpanded,
       };
     });
   };
@@ -544,17 +587,25 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const handleSectionDataChange = useCallback(
-    (sectionId: string, data: any) => {
+    async (sectionId: string, data: any) => {
       setSectionData((prevSectionData: any) => {
         const updatedSectionData = {
           ...prevSectionData,
           [sectionId]: data,
         };
-        // Save the updated data
+        // Save the updated data when Save button is clicked
         saveFormData(updatedSectionData);
         return updatedSectionData;
       });
-      // Removed auto-collapse - sections stay open while editing
+
+      // Show success message to confirm save
+      Toast.show({
+        type: 'success',
+        text1: 'Section Saved',
+        text2: 'Your changes have been saved successfully',
+        visibilityTime: 2000,
+        position: 'top',
+      });
     },
     [saveFormData],
   );
@@ -854,6 +905,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       />
 
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
@@ -877,11 +929,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
         {investigable && (
           <>
-            <View style={styles.formContainer}>
+            <View ref={formContainerRef} style={styles.formContainer}>
               {schemaForm?.sections?.map((sec: any) => {
                 const isExpanded = expandedSections[sec.id] || false;
                 return (
-                  <View key={sec.id} style={styles.sectionContainer}>
+                  <View
+                    key={sec.id}
+                    ref={ref => {
+                      sectionRefs.current[sec.id] = ref;
+                    }}
+                    style={styles.sectionContainer}>
                     <TouchableOpacity
                       style={styles.sectionHeader}
                       onPress={() => toggleSection(sec.id)}>
@@ -915,7 +972,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
               })}
 
               {/* Photo Capture Section - Common for all forms */}
-              <View style={styles.sectionContainer}>
+              <View
+                ref={ref => {
+                  sectionRefs.current['photoCapture'] = ref;
+                }}
+                style={styles.sectionContainer}>
                 <TouchableOpacity
                   style={styles.sectionHeader}
                   onPress={() => toggleSection('photoCapture')}>

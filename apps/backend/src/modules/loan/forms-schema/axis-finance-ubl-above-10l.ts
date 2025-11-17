@@ -40,6 +40,7 @@ export const axisFinanceUblAbove10lSchema = {
           concernName: {
             type: "string",
             title: "Name of Concern",
+            readOnly: true,
           },
           constitution: {
             type: "string",
@@ -134,6 +135,16 @@ export const axisFinanceUblAbove10lSchema = {
                 relation: {
                   type: "string",
                   title: "Relation with applicant",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -513,7 +524,8 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 mortgaged: {
                   type: "string",
-                  title: "Mortgaged (Yes/No)",
+                  title: "Mortgaged",
+                  enum: ["Yes", "No"],
                 },
               },
             },
