@@ -273,13 +273,13 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         )}.`
       : formatMultiline(source?.amountAndPurposeOfLoan);
 
-  const geoCoordinates = html_data?.geoCoordinates || {};
+  const geoCoordinates = source.coordinates || {};
 
   const familySummary = combineTextSegments([
-    { label: "About Applicant:", value: familyDetails.aboutApplicant },
-    { label: "About Co-applicant:", value: familyDetails.aboutCoApplicant },
+    { label: "<strong>About Applicant:</strong>", value: familyDetails.aboutApplicant },
+    { label: "<strong>About Co-applicant:</strong>", value: familyDetails.aboutCoApplicant },
     {
-      label: "And their family details:",
+      label: "<strong>And their family details:</strong>",
       value: familyDetails.andTheirFamilyDetails,
     },
   ]);
@@ -339,13 +339,13 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderParagraph(`Client Name: ${applicantName || ""}`)}
       ${renderParagraph(`Client Address: ${clientAddress || ""}`)}
 
-      <h2 style="${subHeadingStyle}">Sub:&nbsp;LIP Visit(s) Report</h2>
+      <h2 style="${subHeadingStyle}">Sub:&nbsp;<u>LIP Visit(s) Report</u></h2>
       ${renderParagraph("Sir,")}
       ${renderParagraph(
         "Please refer to your instructions on the captioned matter. In this connection, we submit our report as under:"
       )}
 
-      ${renderHeading("Case Details")}
+      ${renderSubHeading("Case Details")}
       ${renderTwoColumnTable([
         {
           label: "Reference Number (LOS ID)",
