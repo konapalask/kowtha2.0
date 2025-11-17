@@ -228,17 +228,26 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>12</strong></p></td>
-                    <td rowspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Bank Details</strong></p></td>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Primary Banker</strong></p></td>
-                    <td colspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Nature of Account</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Avg. Bal</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>12</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Bank Details</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px" colspan="10">
+                    <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+                        <tr>
+                            <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Primary Banker</strong></p></td>
+                            <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Nature of Account</strong></p></td>
+                            <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Avg. Bal</strong></p></td>
+                        </tr>
+                        ${ensureArray(verificationData.bankDetails?.bankDetails).map((bank: any) => `
+                            <tr>
+                                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.primaryBanker || ""}</p></td>
+                                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.natureOfAccount || ""}</p></td>
+                                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${bank.avgBal || ""}</p></td>
+                            </tr>
+                        `).join("")}
+                    </table>
+                    </td>
                 </tr>
-                <tr>
-                    <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.bankDetails?.primaryBanker || ""}</p></td>
-                    <td colspan="5" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.bankDetails?.natureOfAccount || ""}</p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.bankDetails?.avgBal || ""}</p></td>
-                </tr>
+
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"></td>
                     <td style="border:1px solid #ccc;padding:8px"></td>
@@ -249,12 +258,12 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>13</strong></p></td>
                     <td rowspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Sales and Profit Details</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Turnover (FY 2024-25)</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.turnoverFY202425 || ""}</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})</strong></p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.turnoverPreviousFinancialYear) || ""}</p></td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Exp. Turnover (FY 2024-25)</strong></p></td>
-                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.salesAndProfitDetails?.expTurnoverFY202526 || ""}</p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Exp. Turnover (FY ${new Date().getFullYear()}-${new Date().getFullYear() + 1})</strong></p></td>
+                    <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.salesAndProfitDetails?.expectedTurnoverCurrentFinancialYear) || ""}</p></td>
                 </tr>
                 <tr>
                     <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Turnover / Sales</strong></p></td>
@@ -545,8 +554,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>27</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Third Party Confirmation</strong></p></td>
                     <td colspan="3" style="border:1px solid #ccc;padding:8px">
-                        <p style="margin:8px 0;line-height:1.5">Got ${verificationData.siteVisitObservations?.thirdPartyConfirmationYears || ""} years positive response about the applicant -</p>
-                        <p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.thirdPartyConfirmationDetails || ""}</p>
+                        <p style="margin:8px 0;line-height:1.5">${verificationData.siteVisitObservations?.thirdPartyConfirmation || ""}</p>
                     </td>
                 </tr>
             </table>
@@ -562,7 +570,11 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Pan Card</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.panCard || ""}</p></td>
                 </tr>
-                            
+                <tr>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>29</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Document Seen</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${verificationData.otherObservations?.documentSeen || ""}</p></td>
+                </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>30</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>
