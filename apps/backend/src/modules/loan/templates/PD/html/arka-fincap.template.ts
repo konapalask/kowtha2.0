@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate } from "./pd-base.template";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   // Extract sections using constants
@@ -24,7 +24,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const employees = verificationData.employees || {};
   const concerns = verificationData.concerns || {};
   const otherObservations = verificationData.otherObservations?.otherObservations || [];
-  const otherIncomes = verificationData.otherIncomes || [];
+  const otherIncomes = verificationData.otherIncomes || []; 
   const neighborCheck = verificationData.neighborCheck || {};
   const status = verificationData.status || {};
 
@@ -267,8 +267,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderConcernsSummary = () => {
     const summary = getValue(concerns.concernsSummary);
     return summary
-      ? summary
-      : '<div style="font-size:12px;color:#666;">Not Provided</div>';
+      ? summary.split("\n").map((line: string) => `<li>${line.trim()}</li>`).join("")
+       : '<div>Not Provided</div>';
   };
 
   const getValue = (...candidates: any[]) => {
@@ -811,7 +811,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherIncomes).map((income: any) => `<p style="margin:8px 0;line-height:1.5">${income?.otherIncome || ""}</p>`).join("<br>")}
+                ${ensureArray(otherIncomes).map((income: any) => `<li>${income?.otherIncome || ""}</li>`).join("<br>")}
                 </td>
             </tr>
             <tr>
@@ -830,15 +830,6 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             
         <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
         <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
-        <p style="margin:8px 0;line-height:1.5">  </p>
-            <p style="margin:8px 0;line-height:1.5"><strong></strong></p>
-        <div style="margin-bottom: 20px;"></div>
-        <p style="margin:8px 0;line-height:1.5"><strong>Photos</strong>:</p>
-            ${
-              html_data.imagesData && html_data.imagesData.trim().length > 0
-                ? html_data.imagesData
-                : '<div style="font-size:12px;color:#666;">No photographs uploaded</div>'
-            }
-    </div>    
+     ${pdBaseTemplateFooter(html_data)}
   `;
 };
