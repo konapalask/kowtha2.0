@@ -14,7 +14,7 @@ export const herohousingSelfSchema = {
             title: "Loan account No.",
             readOnly: true,
           },
-          nameOfCustomer: {
+          applicantName: {
             type: "string",
             title: "Name of customer",
             readOnly: true,
@@ -27,10 +27,6 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Relationship with customer",
           },
-          reasonIfCustomerNotAvailable: {
-            type: "string",
-            title: "Reason if customer not available during visit",
-          },
           pdVisitDate: {
             type: "string",
             format: "date",
@@ -41,10 +37,6 @@ export const herohousingSelfSchema = {
             format: "time",
             title: "PD visit time",
           },
-          // pdVisitDateAndTime: {
-          //   type: "string",
-          //   title: "PD visit date and time (legacy field)",
-          // },
           pdAddress: {
             type: "string",
             title: "PD address & location",
@@ -52,19 +44,18 @@ export const herohousingSelfSchema = {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
           latitude: {
             type: "string",
             title: "Latitude of business address",
+            readOnly: true,
           },
           longitude: {
             type: "string",
             title: "Longitude of business address",
+            readOnly: true,
           },
-          // latLongOfOfficeAddress: {
-          //   type: "string",
-          //   title: "Lat/Long of office address (legacy)",
-          // },
           requestedLoanAmount: {
             type: "number",
             title: "Requested loan amount",
@@ -74,6 +65,7 @@ export const herohousingSelfSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
         },
       },
@@ -106,7 +98,7 @@ export const herohousingSelfSchema = {
           },
           familyMembers: {
             type: "array",
-            title: "Family details (including dependents)",
+            title: "Family details",
             items: {
               type: "object",
               properties: {
@@ -142,64 +134,7 @@ export const herohousingSelfSchema = {
                   type: "string",
                   title: "Income details / dependent",
                 },
-                incomeDetailsDependent: {
-                  type: "string",
-                  title: "Income details / dependent (legacy)",
-                },
               },
-            },
-          },
-          familyDetails: {
-            type: "array",
-            title: "Family details (legacy)",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                relationshipWithApplicant: {
-                  type: "string",
-                  title: "Relationship with applicant",
-                },
-                age: {
-                  type: "integer",
-                  title: "Age",
-                },
-                qualification: {
-                  type: "string",
-                  title: "Qualification",
-                  enum: [
-                    "Below 10th",
-                    "10th pass",
-                    "12th pass",
-                    "Diploma/ITI certification",
-                    "Graduate",
-                    "PG/Professional Certification",
-                  ],
-                },
-                occupation: {
-                  type: "string",
-                  title: "Occupation (Job/Business)",
-                },
-                incomeDetailsDependent: {
-                  type: "string",
-                  title: "Income details / dependent",
-                },
-              },
-            },
-          },
-          totalDependants: {
-            type: "integer",
-            title: "No. of dependants",
-          },
-          familyBackgroundNotes: {
-            type: "string",
-            title: "Family background notes",
-            ui: {
-              widget: "textarea",
-              rows: 4,
             },
           },
         },
@@ -214,10 +149,6 @@ export const herohousingSelfSchema = {
           currentBusinessName: {
             type: "string",
             title: "Current business name",
-          },
-          businessName: {
-            type: "string",
-            title: "Business name (legacy)",
           },
           constitution: {
             type: "string",
@@ -339,12 +270,12 @@ export const herohousingSelfSchema = {
               "Brief about supplier and customer and geographic reach/presence",
           },
           noOfTotalSuppliersAndCustomers: {
-            type: "integer",
+            type: "string",
             title:
               "No of total suppliers and details of terms for credit period ",
           },
           noOfTotalCustomers: {
-            type: "integer",
+            type: "string",
             title:
               "No of total customers and details of terms for credit period ",
           },
@@ -578,10 +509,6 @@ export const herohousingSelfSchema = {
             title:
               "Google check and any negative observation/feedback/dedupe match or any other feedback",
           },
-          supportingDocumentsCollected: {
-            type: "string",
-            title: "Supporting documents collected",
-          },
         },
       },
     },
@@ -752,6 +679,42 @@ export const herohousingSelfSchema = {
           electricityExpensesComments: {
             type: "string",
             title: "Electricity expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          travelAndTransportationExpenses: {
+            type: "number",
+            title: "Travel and transportation expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          travelAndTransportationExpensesComments: {
+            type: "string",
+            title: "Travel and transportation expenses comments",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          RepairsAndMaintenanceExpenses: {
+            type: "number",
+            title: "Repairs and maintenance expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          RepairsAndMaintenanceExpensesComments: {
+            type: "string",
+            title: "Repairs and maintenance expenses comments",
             ui: {
               widget: "textarea",
               rows: 2,

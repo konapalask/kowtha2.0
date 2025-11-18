@@ -67,9 +67,7 @@ const bulletList = (items: string[]) =>
 
 const optionalParagraph = (value: any, formatter?: (input: any) => string) =>
   hasValue(value)
-    ? wrapParagraph(
-        formatter ? formatter(value) : formatMultiline(value)
-      )
+    ? wrapParagraph(formatter ? formatter(value) : formatMultiline(value))
     : "";
 
 const renderInstructionTable = (
@@ -98,8 +96,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 
   const headerHtml = headers
     .map(
-      (header) =>
-        `<td style="${cellStyle};font-weight:bold;">${header}</td>`
+      (header) => `<td style="${cellStyle};font-weight:bold;">${header}</td>`
     )
     .join("");
 
@@ -120,7 +117,9 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   `;
 };
 
-const joinDetails = (pairs: Array<[string, any, ((value: any) => string)?]>) => {
+const joinDetails = (
+  pairs: Array<[string, any, ((value: any) => string)?]>
+) => {
   const items = pairs
     .map(([label, value, formatter]) => {
       if (!hasValue(value)) return null;
@@ -149,9 +148,7 @@ export const heroHousingSelfTemplate = (
     {};
 
   const borrowerProfile =
-    verificationData.borrowerProfile ||
-    verificationData.borrowerDetails ||
-    {};
+    verificationData.borrowerProfile || verificationData.borrowerDetails || {};
 
   const currentBusiness =
     verificationData.currentBusinessDetails ||
@@ -190,14 +187,10 @@ export const heroHousingSelfTemplate = (
     {};
 
   const loanObligations =
-    verificationData.loanObligations ||
-    verificationData.detailsOfLoans ||
-    {};
+    verificationData.loanObligations || verificationData.detailsOfLoans || {};
 
   const banking =
-    verificationData.bankingDetails ||
-    verificationData.banking ||
-    {};
+    verificationData.bankingDetails || verificationData.banking || {};
 
   const documentChecks =
     verificationData.documentVerificationChecks ||
@@ -205,9 +198,7 @@ export const heroHousingSelfTemplate = (
     {};
 
   const finalStatus =
-    verificationData.finalStatus ||
-    verificationData.finalPdStatus ||
-    {};
+    verificationData.finalStatus || verificationData.finalPdStatus || {};
 
   const incomeAssessment =
     verificationData.incomeAssessment ||
@@ -233,11 +224,15 @@ export const heroHousingSelfTemplate = (
   const loanSummaryTable = renderInstructionTable([
     {
       left: `<p style="${paragraphStyle}"><strong>Loan account No.</strong></p>`,
-      right: wrapParagraph(formatMultiline(summary.loanAccountNo || html_data.applicationNumber || "")),
+      right: wrapParagraph(
+        formatMultiline(
+          summary.loanAccountNo || html_data.applicationNumber || ""
+        )
+      ),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Name of customer</strong></p>`,
-      right: wrapParagraph(formatMultiline(summary.nameOfCustomer || "")),
+      right: wrapParagraph(formatMultiline(summary.applicantName || "")),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Person met in PD and relationship with Applicant</strong></p>`,
@@ -253,7 +248,10 @@ export const heroHousingSelfTemplate = (
       left: `<p style="${paragraphStyle}"><strong>PD Visit date and time</strong></p>`,
       right: wrapParagraph(
         formatMultiline(
-          [summary.pdVisitDate || summary.pdVisitDateAndTime, summary.pdVisitTime]
+          [
+            summary.pdVisitDate || summary.pdVisitDateAndTime,
+            summary.pdVisitTime,
+          ]
             .filter(hasValue)
             .join(", ")
         )
@@ -265,14 +263,15 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Lat log of business address</strong></p>`,
-      right: hasValue(latitude) || hasValue(longitude)
-        ? [
-            latitude && wrapParagraph(formatMultiline(latitude)),
-            longitude && wrapParagraph(formatMultiline(longitude)),
-          ]
-            .filter(Boolean)
-            .join("")
-        : wrapParagraph("Not provided"),
+      right:
+        hasValue(latitude) || hasValue(longitude)
+          ? [
+              latitude && wrapParagraph(formatMultiline(latitude)),
+              longitude && wrapParagraph(formatMultiline(longitude)),
+            ]
+              .filter(Boolean)
+              .join("")
+          : wrapParagraph("Not provided"),
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Requested loan amount</strong></p>`,
@@ -317,14 +316,11 @@ export const heroHousingSelfTemplate = (
         )
       : "",
     hasValue(borrowerProfile.familyBackgroundNotes)
-      ? wrapParagraph(
-          formatMultiline(borrowerProfile.familyBackgroundNotes)
-        )
+      ? wrapParagraph(formatMultiline(borrowerProfile.familyBackgroundNotes))
       : "",
   ].join("");
 
-  const familyValue =
-      familyTableHtml;
+  const familyValue = familyTableHtml;
 
   const borrowerValue = joinDetails([
     ["Qualification of customer", borrowerProfile.qualificationOfCustomer],
@@ -332,7 +328,10 @@ export const heroHousingSelfTemplate = (
   ]);
 
   const currentBusinessValue = joinDetails([
-    ["Current business name", currentBusiness.currentBusinessName || currentBusiness.businessName],
+    [
+      "Current business name",
+      currentBusiness.currentBusinessName || currentBusiness.businessName,
+    ],
     ["Constitution", currentBusiness.constitution],
     ["Nature of business / services", currentBusiness.natureOfBusiness],
     ["Running since", currentBusiness.runningSince],
@@ -348,7 +347,10 @@ export const heroHousingSelfTemplate = (
   ]);
 
   const businessPremisesValue = joinDetails([
-    ["Address of business premises", businessPremises.addressOfBusinessPremises],
+    [
+      "Address of business premises",
+      businessPremises.addressOfBusinessPremises,
+    ],
     [
       "Ownership details",
       businessPremises.ownershipDetails ||
@@ -357,7 +359,8 @@ export const heroHousingSelfTemplate = (
     [
       "Size / area of business premises",
       businessPremises.businessPremisesSize ||
-        businessPremises.sizeAreaOfBusinessPremises,
+        businessPremises.sizeAreaOfBusinessPremises ||
+        businessPremises.sizeOfBusinessPremises,
     ],
     [
       "Business operations / footfall / stock",
@@ -373,7 +376,10 @@ export const heroHousingSelfTemplate = (
       businessOperations.employeesAndSalaries ||
         businessOperations.noOfEmployeeAndSalaryDetails,
     ],
-    ["Quantum of stock", businessOperations.stockQuantum || businessOperations.quantumOfStock],
+    [
+      "Quantum of stock",
+      businessOperations.stockQuantum || businessOperations.quantumOfStock,
+    ],
     [
       "Machinery and assets seen",
       businessOperations.machineryAndAssets ||
@@ -384,8 +390,14 @@ export const heroHousingSelfTemplate = (
       businessOperations.turnoverHistory ||
         businessOperations.turnoverOfLastThreeYears,
     ],
-    ["Product / service gross margin ratio", businessOperations.productServiceGrossMarginRatio],
-    ["Product / service net margin ratio", businessOperations.productServiceNetMarginRatio],
+    [
+      "Product / service gross margin ratio",
+      businessOperations.productServiceGrossMarginRatio,
+    ],
+    [
+      "Product / service net margin ratio",
+      businessOperations.productServiceNetMarginRatio,
+    ],
     [
       "Expansion or new products/services introduced",
       businessOperations.expansionOrChanges ||
@@ -406,7 +418,8 @@ export const heroHousingSelfTemplate = (
     ],
     [
       "No. of suppliers",
-      supplierCustomer.totalSuppliers || supplierCustomer.noOfTotalSuppliersAndCustomers,
+      supplierCustomer.totalSuppliers ||
+        supplierCustomer.noOfTotalSuppliersAndCustomers,
     ],
     ["Supplier credit terms", supplierCustomer.supplierCreditTerms],
     [
@@ -419,10 +432,7 @@ export const heroHousingSelfTemplate = (
       supplierCustomer.billingCycleAndReceiptMode ||
         supplierCustomer.billingPeriodAndReceiptMode,
     ],
-    [
-      "Total debtors & creditors",
-      supplierCustomer.totalDebtorsAndCreditors,
-    ],
+    ["Total debtors & creditors", supplierCustomer.totalDebtorsAndCreditors],
   ]);
 
   const tradeReferences = ensureArray(
@@ -442,7 +452,10 @@ export const heroHousingSelfTemplate = (
     : "";
 
   const propertyDetailsValue = joinDetails([
-    ["Whether customer visited the property", propertyDetails.customerVisitedProperty],
+    [
+      "Whether customer visited the property",
+      propertyDetails.customerVisitedProperty,
+    ],
     ["Type of property", propertyDetails.propertyType],
     ["Property occupancy / usage", propertyDetails.propertyOccupancy],
     ["Source of property purchase", propertyDetails.propertyPurchaseSource],
@@ -454,14 +467,8 @@ export const heroHousingSelfTemplate = (
   ]);
 
   const investmentAssetsValue = joinDetails([
-    [
-      "Investment habits & monthly savings",
-      investmentAssets.investmentHabits,
-    ],
-    [
-      "Current residence ownership / rent",
-      investmentAssets.residenceOwnership,
-    ],
+    ["Investment habits & monthly savings", investmentAssets.investmentHabits],
+    ["Current residence ownership / rent", investmentAssets.residenceOwnership],
     [
       "Assets built till date",
       investmentAssets.assetsBuilt ||
@@ -498,10 +505,7 @@ export const heroHousingSelfTemplate = (
       "Sale / purchase registers, kutcha records, inventory observations",
       documentChecks.recordsAndInventoryObservation,
     ],
-    [
-      "Neighbour / independent checks",
-      documentChecks.thirdPartyChecks,
-    ],
+    ["Neighbour / independent checks", documentChecks.thirdPartyChecks],
     [
       "Additional involvement checks",
       documentChecks.additionalInvolvementCheck,
@@ -511,7 +515,6 @@ export const heroHousingSelfTemplate = (
       documentChecks.complianceAndBranding,
     ],
     ["External / Google feedback", documentChecks.externalFeedback],
-    ["Supporting documents collected", documentChecks.supportingDocumentsCollected],
   ]);
 
   const finalStatusValue = joinDetails([
@@ -519,13 +522,17 @@ export const heroHousingSelfTemplate = (
     ["Comments / reason", finalStatus.statusComments],
   ]);
 
-  const incomeItems = ensureArray(incomeAssessment.lineItems).map((item: any) => [ ]);
+  const incomeItems = ensureArray(incomeAssessment.lineItems).map(
+    (item: any) => []
+  );
 
   if (hasValue(incomeAssessment.salesReceiptsMonthlyAverage)) {
     incomeItems.push([
       "<strong>Sales/receipt (Monthly average)</strong>",
       formatCurrency(incomeAssessment.salesReceiptsMonthlyAverage),
-      formatMultiline(incomeAssessment.salesReceiptsMonthlyAverageComments || ""),
+      formatMultiline(
+        incomeAssessment.salesReceiptsMonthlyAverageComments || ""
+      ),
     ]);
   }
   if (hasValue(incomeAssessment.otherIncome)) {
@@ -577,11 +584,31 @@ export const heroHousingSelfTemplate = (
       formatMultiline(incomeAssessment.electricityExpensesComments || ""),
     ]);
   }
+  if (hasValue(incomeAssessment.travelAndTransportationExpenses)) {
+    incomeItems.push([
+      "<strong>Travel and transportation expenses</strong>",
+      formatCurrency(incomeAssessment.travelAndTransportationExpenses),
+      formatMultiline(
+        incomeAssessment.travelAndTransportationExpensesComments || ""
+      ),
+    ]);
+  }
+  if (hasValue(incomeAssessment.RepairsAndMaintenanceExpenses)) {
+    incomeItems.push([
+      "<strong>Repairs and maintenance expenses</strong>",
+      formatCurrency(incomeAssessment.RepairsAndMaintenanceExpenses),
+      formatMultiline(
+        incomeAssessment.RepairsAndMaintenanceExpensesComments || ""
+      ),
+    ]);
+  }
   if (hasValue(incomeAssessment.otherMiscellaneousExpenses)) {
     incomeItems.push([
       "<strong>Other miscellaneous expenses</strong>",
       formatCurrency(incomeAssessment.otherMiscellaneousExpenses),
-      formatMultiline(incomeAssessment.otherMiscellaneousExpensesComments || ""),
+      formatMultiline(
+        incomeAssessment.otherMiscellaneousExpensesComments || ""
+      ),
     ]);
   }
   if (hasValue(incomeAssessment.otherFamilyExpenses)) {
@@ -617,7 +644,7 @@ export const heroHousingSelfTemplate = (
 
   const incomeTable = renderInnerTable(
     ["Particular", "Amount (Rs.) Monthly", "Comments"],
-    incomeItems 
+    incomeItems
   );
 
   const profileRows = [
@@ -631,111 +658,133 @@ export const heroHousingSelfTemplate = (
       right: borrowerValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p>${bulletList([
-        "Family details – Including dependents",
-        "Family background (Parents and siblings including all dependents)",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Family details</strong></p>${bulletList(
+        [
+          "Family details – Including dependents",
+          "Family background (Parents and siblings including all dependents)",
+        ]
+      )}`,
       right: familyValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Current business details: --</strong></p>${bulletList([
-        "Current business name",
-        "Constitution",
-        "Nature of business/product or services details",
-        "Running since",
-        "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Current business details: --</strong></p>${bulletList(
+        [
+          "Current business name",
+          "Constitution",
+          "Nature of business/product or services details",
+          "Running since",
+          "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
+        ]
+      )}`,
       right: currentBusinessValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>${bulletList([
-        "Address of business premises and additional places of business",
-        "Ownership of all above business premises (Also mention rent amount and landlord name in case rented)",
-        "Size/area of business premises",
-        "Comment on the business operations/footfall of customer/stock etc and share observation if any",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of business premises</strong></p>${bulletList(
+        [
+          "Address of business premises and additional places of business",
+          "Ownership of all above business premises (Also mention rent amount and landlord name in case rented)",
+          "Size/area of business premises",
+          "Comment on the business operations/footfall of customer/stock etc and share observation if any",
+        ]
+      )}`,
       right: businessPremisesValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>${bulletList([
-        "Brief about the product/services dealing",
-        "No. of employee and salary details",
-        "Quantum of stock",
-        "No of Machinery and assets seen",
-        "Turnover of last three years and current year till date (Total actual turnover of customer)",
-        "Product/service Gross Margins ratio ",
-        "Product/service Net Margins ratio",
-        "Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue",
-        "Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Details about business details</strong></p>${bulletList(
+        [
+          "Brief about the product/services dealing",
+          "No. of employee and salary details",
+          "Quantum of stock",
+          "No of Machinery and assets seen",
+          "Turnover of last three years and current year till date (Total actual turnover of customer)",
+          "Product/service Gross Margins ratio ",
+          "Product/service Net Margins ratio",
+          "Any expansion or new product or change in business line in last 2 Years including change in business premises and any expected impact on the current revenue",
+          "Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback",
+        ]
+      )}`,
       right: businessOperationsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>${bulletList([
-        "Brief about supplier and customer and geographic reach/presence",
-        "No of total suppliers and details of terms for credit period",
-        "No of total customers and details of terms for credit period",
-        "Billing period/cycle and receipt mode (Billing on consignment basis/ monthly basis/ progress of work basis) also comment if any advance is received",
-        "Total debtors and creditors as on date and any default/write off in past",
-        "Please collect reference of min 2 suppliers and 2 customers with their phone no. and business name",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of supplier and customer</strong></p>${bulletList(
+        [
+          "Brief about supplier and customer and geographic reach/presence",
+          "No of total suppliers and details of terms for credit period",
+          "No of total customers and details of terms for credit period",
+          "Billing period/cycle and receipt mode (Billing on consignment basis/ monthly basis/ progress of work basis) also comment if any advance is received",
+          "Total debtors and creditors as on date and any default/write off in past",
+          "Please collect reference of min 2 suppliers and 2 customers with their phone no. and business name",
+        ]
+      )}`,
       right: `${supplierCustomerList}${tradeReferenceValue}`,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>${bulletList([
-        "Whether customer visited the property",
-        "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
-        "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent) ",
-        "Source of property purchase (through dealer, builder/reference/relative)",
-        "Name of seller and any relationship with customer",
-        "Type of property/structure and area",
-        "What is actual deal value and sale deed value, OCR source ",
-        "Whether seller is having any loan on the property",
-        "When seller bought the property",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of Property –</strong></p>${bulletList(
+        [
+          "Whether customer visited the property",
+          "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
+          "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent) ",
+          "Source of property purchase (through dealer, builder/reference/relative)",
+          "Name of seller and any relationship with customer",
+          "Type of property/structure and area",
+          "What is actual deal value and sale deed value, OCR source ",
+          "Whether seller is having any loan on the property",
+          "When seller bought the property",
+        ]
+      )}`,
       right: propertyDetailsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>${bulletList([
-        "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
-        "Whether current residence is owned or rented and rent amount if any",
-        "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Investment and properties -</strong></p>${bulletList(
+        [
+          "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
+          "Whether current residence is owned or rented and rent amount if any",
+          "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
+        ]
+      )}`,
       right: investmentAssetsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>End use of property/fund –</strong></p>${bulletList([
-        "Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases ",
-        "Clear and detailed end use of fund in LAP cases",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>End use of property/fund –</strong></p>${bulletList(
+        [
+          "Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases ",
+          "Clear and detailed end use of fund in LAP cases",
+        ]
+      )}`,
       right: endUseValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>${bulletList([
-        "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue",
-        "Repayment account from which all these EMI are getting paid",
-        "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
-        "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
-        "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Details of loans –</strong></p>${bulletList(
+        [
+          "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue",
+          "Repayment account from which all these EMI are getting paid",
+          "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
+          "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
+          "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
+        ]
+      )}`,
       right: loanObligationsValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Banking –</strong></p>${bulletList([
-        "Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening ",
-        "Please check any saving account of applicant and co applicant and provide the details of these accounts",
-        "% of total receipt routed through banking",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Banking –</strong></p>${bulletList(
+        [
+          "Please check and mention details of all his bank account, account open date, Name of bank account in which major business transactions are happening ",
+          "Please check any saving account of applicant and co applicant and provide the details of these accounts",
+          "% of total receipt routed through banking",
+        ]
+      )}`,
       right: bankingValue,
     },
     {
-      left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>${bulletList([
-        "Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations",
-        "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period",
-        "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
-        "Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations",
-        "Google check and any negative observation/feedback/dedupe match or any other feedback",
-      ])}`,
+      left: `<p style="${paragraphStyle}"><strong>Document verification and other checks</strong></p>${bulletList(
+        [
+          "Please check all relevant sale/purchase register/bills/Kutcha records, Inventory in line with those record, Payroll register and share observations",
+          "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and ownership to be confirmed in the name of customer with existence period",
+          "Additional check to be done from reference that any other person or family member involved in the business/manage the business",
+          "Please check all QR code, license, permits, name board, contact number etc and all these belongs to customer and share observations",
+          "Google check and any negative observation/feedback/dedupe match or any other feedback",
+        ]
+      )}`,
       right: documentChecksValue,
     },
     {
