@@ -353,6 +353,9 @@ export const axisBankSchema = {
             show: {
               customerIdentityEstablished: "Yes",
             },
+            required: {
+              customerIdentityEstablished: "Yes",
+            },
           },
           charteredACDetails: {
             type: "string",
@@ -509,7 +512,7 @@ export const axisBankSchema = {
         },
       },
     },
- 
+
     {
       id: "annexure1",
       label: "Annexure 1",
@@ -528,7 +531,8 @@ export const axisBankSchema = {
           },
           totalPurchases: {
             type: "number",
-            title: "Total Purchases (Monthly purchases, costofacquisition etc.)",
+            title:
+              "Total Purchases (Monthly purchases, costofacquisition etc.)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -572,7 +576,8 @@ export const axisBankSchema = {
               },
               lessDirectExpenses: {
                 type: "number",
-                title: "Less: Direct expenses (Purchase cost, cost of goods sold, selling expenses)",
+                title:
+                  "Less: Direct expenses (Purchase cost, cost of goods sold, selling expenses)",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -725,7 +730,6 @@ export const axisBankSchema = {
         },
       },
     },
-
 
     financialsSchema,
   ],
