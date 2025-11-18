@@ -55,65 +55,73 @@ export default function Verify() {
   // Pagination state
   const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const [paginationMeta, setPaginationMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+  });
 
   // Restore page from query string on mount
   useEffect(() => {
     if (router.query.page) {
       const page = parseInt(router.query.page as string, 10);
-      if (!isNaN(page)) setCurrentPage(page);
+      if (!isNaN(page) && page > 0) setCurrentPage(page);
     }
   }, [router.query.page]);
 
+  // Fetch loans when page or department changes
   useEffect(() => {
-    getVerifierLoansApi()
-      ?.then((res: any) => {
-        const newLoans = res?.data?.data ?? [];
-        setLoans(newLoans);
-      })
-      ?.catch((err) => {
+    const fetchLoans = async () => {
+      setLoading(true);
+      try {
+        const res = await getVerifierLoansApi(currentPage, pageSize);
+        // Handle new API response structure: {items: [...], meta: {...}}
+        const responseData = res?.data?.data || res?.data || res;
+        const items = responseData?.items || responseData?.data || [];
+        const meta = responseData?.meta || {
+          total: items.length,
+          page: currentPage,
+          limit: pageSize,
+          totalPages: Math.ceil(items.length / pageSize),
+        };
+
+        setLoans(Array.isArray(items) ? items : []);
+        setPaginationMeta(meta);
+      } catch (err) {
         console.log(err);
-      });
-  }, [currentDepartment]); // Add currentDepartment as dependency
-
-  const filteredLoans =
-    loans?.filter((loan) => {
-      if (currentDepartment === "PD") {
-        const currentRole = getCurrentDepartmentRole();
-        if (currentRole === "Admin" || currentRole === "Verifier") {
-          // Find Business verification
-          const businessVerification = loan?.verifications?.find(
-            (v: any) => v.type === "Business"
-          );
-          if (!businessVerification || !businessVerification.initialSubmitted) {
-            return false;
-          }
-        }
+        setLoans([]);
+        setPaginationMeta({
+          total: 0,
+          page: 1,
+          limit: pageSize,
+          totalPages: 0,
+        });
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Filter by status
-      const statusMatch = [
-        "Unassigned",
-        "Assigned",
-        "FVCompleted",
-        "Approved",
-        "Rejected",
-        "Pending",
-      ].includes(loan?.status ?? "");
+    fetchLoans();
+  }, [currentDepartment, currentPage, pageSize]);
 
-      // Filter by application number
-      const applicationNumberMatch = !searchApplicationNumber || 
-        (loan?.applicationNumber?.toLowerCase() || "").includes(
-          searchApplicationNumber.toLowerCase()
-        );
+  const filteredLoans = Array.isArray(loans)
+    ? loans.filter((loan) => {
+        // Filter by application number
+        const applicationNumberMatch = !searchApplicationNumber || 
+          (loan?.applicationNumber?.toLowerCase() || "").includes(
+            searchApplicationNumber.toLowerCase()
+          );
 
-      // Filter by applicant name
-      const applicantNameMatch = !searchApplicantName || 
-        (loan?.applicantName?.toLowerCase() || "").includes(
-          searchApplicantName.toLowerCase()
-        );
+        // Filter by applicant name
+        const applicantNameMatch = !searchApplicantName || 
+          (loan?.applicantName?.toLowerCase() || "").includes(
+            searchApplicantName.toLowerCase()
+          );
 
-      return statusMatch && applicationNumberMatch && applicantNameMatch;
-    }) ?? [];
+        return applicationNumberMatch && applicantNameMatch;
+      })
+    : [];
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -219,18 +227,21 @@ export default function Verify() {
       key: "actions",
       align: "center",
       render: (_, record) => {
-        const statusTags = getStatusTags(record);
-        const hasInvestigations = statusTags && statusTags.props && statusTags.props.children && statusTags.props.children.some((child: any) => child !== null);
+        // View button enabled for: FVCompleted, Approved, Rejected
+        // View button disabled for: Unassigned, Assigned, UnderFV
+        const enabledStatuses = ["FVCompleted", "Approved", "Rejected"];
+        const isEnabled = enabledStatuses.includes(record?.status ?? "");
+        
         return (
           <Button
             type="link"
             icon={<EyeOutlined />}
             onClick={() => {
-              if (hasInvestigations) {
+              if (isEnabled) {
                 record?.id && router?.push?.(`/verify/${record.id}?page=${currentPage}`);
               }
             }}
-            disabled={!hasInvestigations}
+            disabled={!isEnabled}
           >
             View
           </Button>
@@ -242,24 +253,25 @@ export default function Verify() {
   ];
 
   // Table pagination config
-  const paginationConfig =
-    filteredLoans.length >= pageSize
-      ? {
-          current: currentPage,
-          pageSize,
-          showSizeChanger: false,
-          showTotal: (total: number) => `Total ${total ?? 0} items`,
-          position: ["bottomCenter" as "bottomCenter"],
-          onChange: (page: number) => {
-            setCurrentPage(page);
-            // Update query string
-            router.replace({
-              pathname: router.pathname,
-              query: { ...router.query, page },
-            }, undefined, { shallow: true });
-          },
-        }
-      : false;
+  const paginationConfig = paginationMeta.totalPages > 0
+    ? {
+        current: paginationMeta.page,
+        pageSize: paginationMeta.limit,
+        total: paginationMeta.total,
+        showSizeChanger: false,
+        showTotal: (total: number, range: [number, number]) => 
+          `${range[0]}-${range[1]} of ${total} items`,
+        position: ["bottomCenter" as "bottomCenter"],
+        onChange: (page: number) => {
+          setCurrentPage(page);
+          // Update query string
+          router.replace({
+            pathname: router.pathname,
+            query: { ...router.query, page },
+          }, undefined, { shallow: true });
+        },
+      }
+    : false;
 
   // Reset to first page when search changes
   useEffect(() => {
