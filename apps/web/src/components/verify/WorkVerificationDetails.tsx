@@ -248,6 +248,7 @@ export const WorkVerificationDetails: React.FC<
     });
   };
 
+
   return (
     <>
       {/* Basic Details Section */}

@@ -25,7 +25,9 @@ import {
   Select,
   DatePicker,
   TimePicker,
+  Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 import React, { useEffect, useState, useCallback, useMemo } from "react";
@@ -44,6 +46,7 @@ import {
   asstVerifierSubmitApi,
   submitFinancialAnalysis,
   updateSynopsis,
+  getPresignedUploadUrl,
 } from "@/services/verifier.services";
 
 // Import new dynamic form system
@@ -1060,6 +1063,75 @@ export const BusinessVerificationDetails: React.FC<
         handlePhotoRemoval(id);
       },
     });
+  };
+
+  const handlePhotoUpload = async (file: File) => {
+    try {
+      if (!file.type.startsWith("image/")) {
+        message.error("Please upload an image file");
+        return false;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        message.error("File size should not exceed 10MB");
+        return false;
+      }
+
+      const timestamp = new Date().getTime();
+      const randomStr = Math.random().toString(36).substring(7);
+      const fileName = `verification/${id}/${timestamp}-${randomStr}.jpg`;
+
+      const { url: presignedUrl } = await getPresignedUploadUrl(
+        fileName,
+        file.type
+      );
+
+      const fileBlob = await file.arrayBuffer();
+
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        body: fileBlob,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+      }
+
+      const newItem = {
+        id: `${timestamp}-${randomStr}`,
+        s3ImageUrl: fileName,
+        type: "photo",
+        timestamp: new Date().toISOString(),
+        isCamera: false,
+        documentType: "Other",
+      };
+
+      const existingItems =
+        completeVerificationData?.verificationData?.uploadedItems || [];
+
+      const updatedData = {
+        verificationData: {
+          ...completeVerificationData?.verificationData,
+          uploadedItems: [...existingItems, newItem],
+        },
+      };
+
+      await verifierEditApi(id as string, "Business", updatedData);
+      message.success("Photo uploaded successfully!");
+      
+      fetchVerificationData();
+
+      return false;
+    } catch (error: any) {
+      console.error("Error uploading photo:", error);
+      message.error(
+        error?.message || "Failed to upload photo. Please try again."
+      );
+      return false;
+    }
   };
 
   const { Text } = Typography;
@@ -3776,7 +3848,27 @@ export const BusinessVerificationDetails: React.FC<
 
             {/* Photo Capture Section - Grouped by Document Type */}
             <section style={{ marginBottom: 24 }}>
-              <Card title="Photo Capture">
+              <Card
+                title="Photo Capture"
+                extra={
+                  !(!!verificationData?.approvedStatus || hasEditRequest) ? (
+                    <Upload
+                      accept="image/*"
+                      showUploadList={false}
+                      beforeUpload={handlePhotoUpload}
+                      multiple={false}
+                    >
+                      <Button
+                        type="primary"
+                        icon={<UploadOutlined />}
+                        size="small"
+                      >
+                        Upload Photo
+                      </Button>
+                    </Upload>
+                  ) : null
+                }
+              >
                 {(() => {
                   // Group photos by document type
                   const groupedPhotos = (data?.uploadedItems || []).reduce(
