@@ -48,6 +48,9 @@ import {
   BANK_NAMES,
   getAllTemplateOptions,
   bankSchemas,
+  getBankConfigFromTemplate,
+  getBankNameFromTemplate,
+  getSchemaFromTemplate,
 } from "./forms-schema";
 import { financialsSchema } from "./financials-schema/generic";
 
@@ -355,7 +358,7 @@ export class LoanController {
     UserRole.FieldExecutive,
     UserRole.VerificationExecutive
   )
-  @ApiOperation({ summary: "Get loans assigned to verifier" })
+  @ApiOperation({ summary: "Get loans assigned to verifier (paginated, default 10 per page)", })
   @ApiResponse({
     status: 200,
     description:
@@ -363,12 +366,25 @@ export class LoanController {
   })
   async getLoansByVerifier(
     @Request() req: AuthenticatedRequest,
-    @Query("department") department: string
+    @Query("department") department?: string,
+    @Query("page") pageParam?: string,
+    @Query("limit") limitParam?: string
   ) {
+    const pageNumber = Math.max(
+      1,
+      Number.isNaN(Number(pageParam)) ? 1 : Number(pageParam)
+    );
+    const limitNumber = Math.max(
+      1,
+      limitParam && !Number.isNaN(Number(limitParam)) ? Number(limitParam) : 10
+    );
+
     const result = await this.loanService.getLoansByVerifier(
       req.user.id,
-      department as Department,
-      req.user.role
+      (department as Department) ?? Department.PD,
+      req.user.role,
+      pageNumber,
+      limitNumber
     );
     return {
       status: 200,
@@ -1328,7 +1344,7 @@ export class LoanController {
     if (!bankName) {
       return {
         status: 400,
-        message: "Bank name is required",
+        message: "Bank name or template name is required",
         data: null,
       };
     }
