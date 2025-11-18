@@ -120,7 +120,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.nameOfCustomer || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general?.applicantName || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px">
@@ -134,7 +134,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD Visit date and time</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdVisitDate || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdVisitDateAndTimepd || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD address</strong></p></td>
@@ -142,7 +142,7 @@ export const herohousingSalariedTemplate = (
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${ general.latLongOfOfficeAddress || ""}</p></td>
+          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${ general.latitudeLongitude || ""}</p></td>
         </tr>
         <tr>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
