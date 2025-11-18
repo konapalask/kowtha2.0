@@ -417,17 +417,17 @@ const Feedback: React.FC<FeedbackProps> = ({
               formats={["list"]}
             />
 
-            {/* Submit Synopsis Button - Between synopsis and feedback */}
-            <div
-              style={{
-                padding: "16px 24px",
-                borderTop: "1px solid #f0f0f0",
-                background: "#f8f9fa",
-              }}
-            >
-              <Row justify="end">
-                <Col>
-                  {role !== "VerificationExecutive" ? (
+            {/* Submit Synopsis Button - Between synopsis and feedback - Hidden for VerificationExecutive */}
+            {role !== "VerificationExecutive" && (
+              <div
+                style={{
+                  padding: "16px 24px",
+                  borderTop: "1px solid #f0f0f0",
+                  background: "#f8f9fa",
+                }}
+              >
+                <Row justify="end">
+                  <Col>
                     <Button
                       type="primary"
                       size="small"
@@ -488,40 +488,10 @@ const Feedback: React.FC<FeedbackProps> = ({
                           ? "Save"
                           : "Submit Synopsis"}
                     </Button>
-                  ) : (
-                    <Button
-                      type="primary"
-                      size="small"
-                      onClick={() => {
-                        const synopsisPlain = convertPointsToText(editorContent);
-                        if (!synopsisPlain || synopsisPlain === "") {
-                          message.warning("Please enter synopsis content before saving.");
-                          return;
-                        }
-                        // message.success("Synopsis saved locally. It will be submitted with verification.");
-                      }}
-                      disabled={
-                        disabled ||
-                        !editorContent ||
-                        editorContent.trim() === "<ul><li><br></li></ul>"
-                      }
-                      style={{
-                        background: "#1e40af",
-                        border: "none",
-                        borderRadius: "6px",
-                        height: "32px",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        boxShadow: "0 2px 8px rgba(30, 64, 175, 0.3)",
-                        color: "#ffffff",
-                      }}
-                    >
-                      Save Synopsis
-                    </Button>
-                  )}
-                </Col>
-              </Row>
-            </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
 
             <div
               style={{

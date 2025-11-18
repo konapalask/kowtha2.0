@@ -50,6 +50,14 @@ export const getPresignedDownloadUrl = async (path: string) => {
   return await getWithDepartment(`/s3/presigned-download-url`);
 };
 
+export const getPresignedUploadUrl = async (path: string, contentType: string) => {
+  const response = await postWithDepartment(`/s3/presigned-upload-url`, {
+    path,
+    contentType,
+  });
+  return response.data;
+};
+
 export const getEditRequestsApi = async (status: string, loanId: string) => {
   return await getWithDepartment(`/edit-requests`, {
     params: { status, loanId },
