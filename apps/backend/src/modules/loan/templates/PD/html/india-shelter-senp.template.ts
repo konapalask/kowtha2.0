@@ -82,23 +82,25 @@ const renderBooleanGrid = (items: Array<{ label: string; value: any }>) => {
   return rows.join("");
 };
 
-const renderSimpleList = (values: string[]) =>
-  values.length
-    ? `<ul style="margin:6px 0 6px 18px;padding:0;">${values
-        .map(
-          (entry) =>
-            `<li style="margin-bottom:4px;color:#2f3b52;">${formatMultiline(
-              entry
-            )}</li>`
-        )
-        .join("")}</ul>`
-    : "Not provided";
+const renderSimpleList = (values: string[] | undefined | null) => {
+  if (!values || !Array.isArray(values) || values.length === 0) {
+    return "Not provided";
+  }
+  return `<ul style="margin:6px 0 6px 18px;padding:0;">${values
+    .map(
+      (entry) =>
+        `<li style="margin-bottom:4px;color:#2f3b52;">${formatMultiline(
+          entry
+        )}</li>`
+    )
+    .join("")}</ul>`;
+};
 
 const renderArrayTable = (
   headers: string[],
-  rows: string[][]
+  rows: string[][] | undefined | null
 ): string => {
-  if (!rows.length) {
+  if (!rows || !Array.isArray(rows) || !rows.length) {
     return `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   }
   const headerRow = headers
@@ -135,7 +137,7 @@ export const indiaShelterSenpTemplate = (
   const shops = ensureArray(verificationData.shopAssets?.shops);
   const vehicles = ensureArray(verificationData.vehicleAssets?.vehicles);
   const precious = ensureArray(verificationData.preciousMetals?.holdings);
-  const livestock = ensureArray(verificationData.livestockAssets?.livestock);
+  const livestock = verificationData.livestockAssets?.livestock || [];
   const business = verificationData.businessDetails || {};
   const businessIncome = verificationData.businessIncome || {};
   const otherMonthlyIncome = verificationData.otherMonthlyIncome || {};
@@ -394,7 +396,7 @@ export const indiaShelterSenpTemplate = (
     formatCurrency(item.marketValue),
   ]);
 
-  const livestockRows = livestock.map((item: any) => [
+  const livestockRows = ensureArray(livestock).map((item: any) => [
     item.typeOfAnimals,
     item.quantity,
     item.purpose,
@@ -648,12 +650,9 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle};font-weight:bold;" colspan="1">Net Monthly Profit (= A - B)</td>
         <td style="${valueCellStyle};font-weight:bold;" colspan="3">${formatCurrency(businessIncome.netMonthlyProfit)}</td>
       </tr>
-      ${renderKeyValueRow(
-        "Other Monthly Income",
-        otherMonthlyIncome.otherMonthlyIncome,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr> 
+        <td style="${labelCellStyle};font-weight:bold;" colspan="4">Other Monthly Income</td>
+      </tr>
       <tr>
         <td style="${labelCellStyle}">Rental Income - Cash</td>
         <td style="${valueCellStyle}">${formatCurrency(
@@ -709,7 +708,7 @@ export const indiaShelterSenpTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
-        renderSimpleList(loanPurpose.purposes),
+        renderSimpleList(ensureArray(loanPurpose.purposes)),
         undefined,
         { colSpan: 3 }
       )}

@@ -938,7 +938,7 @@ export const indiaShelterSenpSchema = {
             },
           },
           propertyArea: {
-            type: "string",
+            type: "number",
             title: "Area (in Sq. ft.)",
           },
           ownershipDuration: {

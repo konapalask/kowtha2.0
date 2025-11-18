@@ -575,7 +575,7 @@ export class PDTemplateService {
       return smfgSmeTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("NIWAS")) {
+    if (matchesTemplate("NIWAS SALARIED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -587,7 +587,7 @@ export class PDTemplateService {
       return niwasSalariedTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("NIWAS")) {
+    if (matchesTemplate("NIWAS SENP")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -619,8 +619,7 @@ export class PDTemplateService {
       return arkaFincapTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("HERO HOUSING")) {
-      console.log("llllllllllllll")
+    if (matchesTemplate("HERO HOUSING SELF")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -632,7 +631,7 @@ export class PDTemplateService {
       return heroHousingSelfTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("HERO HOUSING")) {
+    if (matchesTemplate("HERO HOUSING SALARIED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -644,7 +643,7 @@ export class PDTemplateService {
       return herohousingSalariedTemplate(verification, html_data);
     }
 
-      if (matchesTemplate("INDIA SHELTER")) {
+      if (matchesTemplate("INDIA SHELTER SENP")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -656,7 +655,7 @@ export class PDTemplateService {
       return indiaShelterSenpTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("INDIA SHELTER")) {
+    if (matchesTemplate("INDIA SHELTER SALARIED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -752,7 +751,7 @@ export class PDTemplateService {
       return ambitMsmeTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SALARIED")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -764,7 +763,7 @@ export class PDTemplateService {
       return janaSalariedTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SENP ABOVE 50L")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -776,7 +775,7 @@ export class PDTemplateService {
       return janaSenpAbove50lTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED")) {
+    if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SENP BELOW 50L")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -947,6 +946,13 @@ export class PDTemplateService {
         htmlTemplate,
         footerName
       );
+      const footerNameFromTemplate = getFooterNameFromTemplate(templateName);
+      console.log("Footer name resolution: yes", {
+        templateName,
+        bankName,
+        footerNameFromTemplate,
+        finalFooterName: footerName
+      });
 
       await this.loggingService.info(
         "Verification PDF generated successfully",

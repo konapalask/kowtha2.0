@@ -228,17 +228,17 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   };
 
   const renderNeighborTable = () => {
-    const neighbors = neighborCheck.neighbors;
-    if (Array.isArray(neighbors) && neighbors.length) {
+    const neighbors = neighborCheck?.neighbors || [];
+    if (Array.isArray(neighbors)) {
       const rows = neighbors
         .map(
           (entry: any) => `
           <tr>
             <td style="border:1px solid #ccc;padding:6px;">${
-              getValue(entry.name) || "Not Provided"
+              getValue(entry?.name) || "Not Provided"
             }</td>
             <td style="border:1px solid #ccc;padding:6px;">${
-              getValue(entry.feedback) || "Not Provided"
+              getValue(entry?.feedback) || "Not Provided"
             }</td>
           </tr>
         `
@@ -267,7 +267,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderConcernsSummary = () => {
     const summary = getValue(concerns.concernsSummary);
     return summary
-      ? summary.split("\n").map((line: string) => `<li style="margin:8px 0;line-height:1.5">${line}</li>`).join("")
+      ? summary.split("\n").map((line: string) => `<li style="margin-left:8px;line-height:1.5">${line}</li>`).join("")
        : '<div>Not Provided</div>';
   };
 
@@ -804,14 +804,14 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
                 ${ensureArray(otherObservations).map(
-                  (item: any) => `<li style="margin:8px 0;line-height:1.5">${ item?.observation || ""}</li>`
+                  (item: any) => `<li style="margin-left:8px;line-height:1.5">${ item?.observation || ""}</li>`
                 ).join("<br>")}
                 </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherIncomes).map((income: any) => `<li style="margin:8px 0;line-height:1.5">${income?.otherIncome || ""}</li>`).join("<br>")}
+                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<li style="margin-left:8px;line-height:1.5">${income?.otherIncome || ""}</li>`).join("<br>")}
                 </td>
             </tr>
             <tr>
