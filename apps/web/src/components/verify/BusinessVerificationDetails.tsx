@@ -390,7 +390,9 @@ export const BusinessVerificationDetails: React.FC<
 
   useEffect(() => {
     const fetchImageUrls = async () => {
+      // For VerificationExecutive: prioritize savedSectionData.uploadedItems
       const uploadedItems =
+        (role === "VerificationExecutive" && savedSectionData?.uploadedItems) ||
         verificationData?.uploadedItems ||
         verificationData?.verificationData?.uploadedItems;
 
@@ -410,6 +412,8 @@ export const BusinessVerificationDetails: React.FC<
 
     fetchImageUrls();
   }, [
+    role,
+    savedSectionData?.uploadedItems,
     verificationData?.uploadedItems,
     verificationData?.verificationData?.uploadedItems,
   ]);
@@ -888,7 +892,10 @@ export const BusinessVerificationDetails: React.FC<
         }
       });
 
+      // Get uploadedItems from multiple sources, prioritizing savedSectionData for VerificationExecutive
+      const uploadedItemsFromSaved = savedSectionData?.uploadedItems;
       const uploadedItems =
+        uploadedItemsFromSaved ||
         existingVerificationData?.uploadedItems ||
         verificationData?.verificationData?.uploadedItems ||
         verificationData?.uploadedItems ||
@@ -946,7 +953,13 @@ export const BusinessVerificationDetails: React.FC<
 
   // Extract the form data directly
   const rawApiData = verificationData?.verificationData || verificationData;
-  const data = rawApiData;
+  
+  const data = role === "VerificationExecutive" && savedSectionData?.uploadedItems
+    ? {
+        ...rawApiData,
+        uploadedItems: savedSectionData.uploadedItems,
+      }
+    : rawApiData;
 
   // Debug logging
   // console.log("🔍 BusinessVerificationDetails Debug:");
@@ -1029,9 +1042,38 @@ export const BusinessVerificationDetails: React.FC<
   };
 
   const handlePhotoRemoval = async (pid: any) => {
-    // const updatedItems = data.uploadedItems.filter(
-    //   (i: any) => i.id !== item.id
-    // );
+  
+    // Store scroll position and section ID for restoration after save (same as section save)
+    const scrollPosition = window.scrollY || window.pageYOffset;
+    savedSectionRef.current = "photoCapture";
+    savedSectionScrollRef.current = scrollPosition;
+
+    if (role === "VerificationExecutive") {
+      const currentItems = savedSectionData?.uploadedItems ||
+        completeVerificationData?.verificationData?.uploadedItems ||
+        verificationData?.verificationData?.uploadedItems ||
+        [];
+      
+      const updatedItems = currentItems.filter(
+        (photo: any) => photo?.id !== pid
+      );
+
+      // Update savedSectionData
+      setSavedSectionData((prev: any) => ({
+        ...prev,
+        uploadedItems: updatedItems,
+      }));
+
+      // Also update the completeVerificationData state locally for immediate UI update
+      if (completeVerificationData?.verificationData) {
+        completeVerificationData.verificationData.uploadedItems = updatedItems;
+      }
+
+      message.success("Photo deleted successfully!");
+      return;
+    }
+
+    // For Verifier/Admin: Update via API
     const updatedItems =
       completeVerificationData?.verificationData?.uploadedItems?.filter(
         (photo: any) => photo?.id !== pid
@@ -1048,8 +1090,14 @@ export const BusinessVerificationDetails: React.FC<
     };
     // console.log(updatedData);
     verifierEditApi(id as string, "Business", updatedData)
-      .then((res) => fetchVerificationData())
-      .catch((error) => console.log(`Error:`, error));
+      .then((res) => {
+        message.success("Photo deleted successfully!");
+        fetchVerificationData();
+      })
+      .catch((error) => {
+        console.log(`Error:`, error);
+        message.error("Failed to delete photo. Please try again.");
+      });
   };
 
   const handleDeleteClick = (id: any) => {
@@ -1112,6 +1160,31 @@ export const BusinessVerificationDetails: React.FC<
       const existingItems =
         completeVerificationData?.verificationData?.uploadedItems || [];
 
+      // Store scroll position and section ID for restoration after save (same as section save)
+      const scrollPosition = window.scrollY || window.pageYOffset;
+      savedSectionRef.current = "photoCapture";
+      savedSectionScrollRef.current = scrollPosition;
+
+      // For VerificationExecutive: Save locally only (no API call)
+      if (role === "VerificationExecutive") {
+        // Update local state with new photo
+        const updatedItems = [...existingItems, newItem];
+        setSavedSectionData((prev: any) => ({
+          ...prev,
+          uploadedItems: updatedItems,
+        }));
+        
+        // Also update the completeVerificationData state locally for immediate UI update
+        if (completeVerificationData?.verificationData) {
+          completeVerificationData.verificationData.uploadedItems = updatedItems;
+        }
+        
+        message.success("Photo uploaded successfully!");
+        fetchVerificationData();
+        return false;
+      }
+
+      // For Verifier/Admin: Save to backend API
       const updatedData = {
         verificationData: {
           ...completeVerificationData?.verificationData,
@@ -3847,7 +3920,7 @@ export const BusinessVerificationDetails: React.FC<
             />
 
             {/* Photo Capture Section - Grouped by Document Type */}
-            <section style={{ marginBottom: 24 }}>
+            <section id="section-photoCapture" style={{ marginBottom: 24 }}>
               <Card
                 title="Photo Capture"
                 extra={
@@ -4044,7 +4117,7 @@ export const BusinessVerificationDetails: React.FC<
             />
 
             {/* Photo Capture Section */}
-            <section style={{ marginBottom: 24 }}>
+            <section id="section-photoCapture" style={{ marginBottom: 24 }}>
               <Card title="Photo Capture">
                 <div
                   style={{
