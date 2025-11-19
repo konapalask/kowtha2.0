@@ -86,6 +86,11 @@ export class LoanController {
             page: { type: "number" },
             limit: { type: "number" },
             totalPages: { type: "number" },
+            approvedStatus: {
+              type: "string",
+              enum: Object.values(ApprovedStatus),
+              nullable: true,
+            },
           },
         },
       },
@@ -1244,6 +1249,7 @@ export class LoanController {
       verificationType,
       verificationData,
       synopsis,
+      approvedStatus,
       ...financialAnalysisData
     } = submitDto;
 
@@ -1252,7 +1258,8 @@ export class LoanController {
       verificationType,
       verificationData,
       financialAnalysisData,
-      synopsis
+      synopsis,
+      approvedStatus
     );
     return {
       status: 200,

@@ -2894,7 +2894,8 @@ export class LoanService {
     verificationType: VerificationType,
     verificationData: any,
     financialAnalysisData: any,
-    synopsis?: string
+    synopsis?: string,
+    approvedStatus?: ApprovedStatus
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -2931,6 +2932,7 @@ export class LoanService {
           verificationData,
           financialAnalysis: mergedFinancialAnalysis,
           ...(synopsis !== undefined && { synopsis }),
+          ...(approvedStatus !== undefined && { approvedStatus }),
           initialSubmitted: true,
           status: VerificationStatus.Completed,
           updatedAt: new Date(),
