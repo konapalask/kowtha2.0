@@ -147,14 +147,47 @@ export const rblSchema = {
           aboutApplicant: {
             type: "string",
             title: "About Applicant",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
           aboutCoApplicant: {
             type: "string",
             title: "About Co-applicant:",
+            ui: {
+              widget: "textarea",
+              rows: 4,
+            },
           },
           andTheirFamilyDetails: {
-            type: "string",
+            type: "array",
             title: "And their family details:",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                age: {
+                  type: "integer",
+                  title: "Age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
+                },
+             },
+            },
           },
         },
       },

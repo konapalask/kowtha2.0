@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import pLimit from "p-limit";
+// Dynamic import for p-limit to handle ES module
+let limit: any;
 import { Buffer } from "buffer"; // Import the Buffer type
 import * as puppeteer from "puppeteer";
 import { Logger } from "@nestjs/common";
@@ -41,8 +42,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
-
-const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
 export class LoanService {
@@ -1385,6 +1384,13 @@ export class LoanService {
         throw new Error(
           "Verification not found or not assigned to this field executive"
         );
+      }
+      // Initialize limit if not already done
+      if (!limit) {
+        // Use Function constructor to avoid TypeScript transpiling to require()
+        const dynamicImport = new Function('specifier', 'return import(specifier)');
+        const pLimit = await dynamicImport('p-limit');
+        limit = pLimit.default(3); // allow 3 workers at a time (tune this)
       }
       // Process all images in verificationData if it exists
       if (verificationData?.uploadedItems) {
@@ -2894,7 +2900,8 @@ export class LoanService {
     verificationType: VerificationType,
     verificationData: any,
     financialAnalysisData: any,
-    synopsis?: string
+    synopsis?: string,
+    approvedStatus?: ApprovedStatus
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -2931,6 +2938,7 @@ export class LoanService {
           verificationData,
           financialAnalysis: mergedFinancialAnalysis,
           ...(synopsis !== undefined && { synopsis }),
+          ...(approvedStatus !== undefined && { approvedStatus }),
           initialSubmitted: true,
           status: VerificationStatus.Completed,
           updatedAt: new Date(),

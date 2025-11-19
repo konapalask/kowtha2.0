@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString, IsObject, IsEnum } from 'class-validator';
-import { VerificationType } from '@prisma/client';
+import { VerificationType, ApprovedStatus } from '@prisma/client';
 
 export class SubmitVerificationExecutiveDto {
   @ApiProperty({ description: 'Type of verification', enum: VerificationType })
@@ -15,6 +15,15 @@ export class SubmitVerificationExecutiveDto {
   @IsOptional()
   @IsString()
   synopsis?: string;
+
+  @ApiProperty({
+    description: 'Approval status provided by Verification Executive',
+    enum: ApprovedStatus,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ApprovedStatus)
+  approvedStatus?: ApprovedStatus;
   
   @ApiProperty({ description: 'Opening Stock amount', required: false })
   @IsOptional()
