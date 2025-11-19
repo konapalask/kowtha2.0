@@ -656,8 +656,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             shouldTouch: true,
             shouldValidate: true,
           });
-          // Persist immediately so toggling sections does not revert
-          onSubmit(getValues());
+          // Don't save immediately - wait for user to click "Save Section"
         };
 
         const handleRemoveItem = (indexToRemove: number) => {
@@ -692,8 +691,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             shouldTouch: true,
             shouldValidate: true,
           });
-          // Persist immediately so toggling sections does not revert
-          onSubmit(getValues());
+          // Don't save immediately - wait for user to click "Save Section"
         };
 
         return (
