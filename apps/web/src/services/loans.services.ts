@@ -107,8 +107,10 @@ export const importLoansApi = (file: File) => {
   });
 };
 
-export const getVerifierLoansApi = () => {
-  return getWithDepartment(`/loans/get-verifier-loans`);
+export const getVerifierLoansApi = (page: number = 1, limit: number = 10) => {
+  return getWithDepartment(`/loans/get-verifier-loans`, {
+    params: { page, limit },
+  });
 };
 
 export const assignExecutivesApi = (loanId: number, payload: any) => {
