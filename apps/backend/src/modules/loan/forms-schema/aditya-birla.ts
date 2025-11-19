@@ -253,7 +253,7 @@ export const adityaBirlaSchema = {
                   ],
                 },
                 age: { type: "integer", title: "Age" },
-                businessName: { type: "string", title: "Business name" },
+                occupation: { type: "string", title: "Occupation" },
                 education: {
                   type: "string",
                   title: "Education",
@@ -278,8 +278,8 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          salesBills: { type: "number", title: "Sales bills" },
-          purchaseBills: { type: "number", title: "Purchase bills" },
+          salesBills: { type: "string", title: "Sales bills" },
+          purchaseBills: { type: "string", title: "Purchase bills" },
           neighbourCheckName: { type: "string", title: "Neighbour check name" },
           neighbourCheckNumber: {
             type: "string",
@@ -301,6 +301,11 @@ export const adityaBirlaSchema = {
             type: "string",
             title: "Observation",
             ui: { widget: "textarea", rows: 6 },
+          },
+          concernsDeviations: {
+            type: "string",
+            title: "Concerns / Deviations",
+            ui: { widget: "textarea", rows: 4 },
           },
           statusOfPd: { type: "string", title: "Status" },
           loanAmountApplied: {

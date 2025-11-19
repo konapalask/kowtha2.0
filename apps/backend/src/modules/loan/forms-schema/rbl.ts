@@ -548,18 +548,6 @@ export const rblSchema = {
             type: "string",
             title: "End Use",
           },
-          ownContribution: {
-            type: "string",
-            title: "Own contribution",
-          },
-          particulars: {
-            type: "string",
-            title: "Particulars",
-          },
-          remarksAdditional: {
-            type: "string",
-            title: "Remarks",
-          },
         },
       },
       required: true,
@@ -649,7 +637,7 @@ export const rblSchema = {
         },
       },
       required: false,
-    }, 
+    },
     statement4Schema,
   ],
 } as const;

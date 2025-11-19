@@ -125,7 +125,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
   const basic = verificationData.basicInformation || {};
-  const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || [];
+  const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || {};
   const familyMembers = ensureArray(
     verificationData.applicantsFamilyDetails?.familyMembers
   ).map((member: any) => [
@@ -174,9 +174,12 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     : [];
 
   const assets = assetsArray.length
-    ? assetsArray.map(
-        (asset: any) => `<li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li>`
-      ).join("")
+    ? assetsArray
+        .map(
+          (asset: any) =>
+            `<li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li>`
+        )
+        .join("")
     : "<li>Not provided</li>";
 
   // Handle nested structures for customer references
@@ -211,19 +214,16 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     (item: any) => `<li>${formatMultiline(item?.recommendations || "")}</li>`
   );
 
-  const businessList = Array.isArray(aboutBusiness)
-    ? aboutBusiness
-        .map((item: any) =>
-          hasValue(item?.aboutTheApplicant)
-            ? `<li>${formatMultiline(item.aboutTheApplicant)}</li>`
-            : ""
-        )
-        .join("")
-    : hasValue(aboutBusiness?.details)
-      ? `<li>${formatMultiline(aboutBusiness.details)}</li>`
-      : hasValue(aboutBusiness)
-        ? `<li>${formatMultiline(aboutBusiness)}</li>`
-        : "";
+  const businessList = [
+    hasValue(aboutBusiness?.aboutTheApplicant)
+      ? `<li><strong>About the Applicant:</strong> ${formatMultiline(aboutBusiness.aboutTheApplicant)}</li>`
+      : "",
+    hasValue(aboutBusiness?.aboutTheBusiness)
+      ? `<li><strong>About the Business:</strong> ${formatMultiline(aboutBusiness.aboutTheBusiness)}</li>`
+      : "",
+  ]
+    .filter((item) => item !== "")
+    .join("");
 
   const generalSection = renderKeyValueTable([
     [
@@ -282,16 +282,21 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
       <ul>
-      ${ensureArray(customerReferences).map(
-        (item: any) => `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
-      ).join("")}
+      ${ensureArray(customerReferences)
+        .map(
+          (item: any) =>
+            `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
+        )
+        .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
       <ul>
-      ${ensureArray(otherIncomes).map(
-        (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
-      ).join("")}
+      ${ensureArray(otherIncomes)
+        .map(
+          (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
+        )
+        .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Existing Loan Details:</strong></p>
@@ -301,11 +306,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
 
       <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
-      ${
-        formatMultiline(
-          verificationData.itrFinancialDetails
-            ?.itrReceiptsVerificationInformation || ""
-        )}
+      ${formatMultiline(
+        verificationData.itrFinancialDetails
+          ?.itrReceiptsVerificationInformation || ""
+      )}
 
       <p style="${paragraphStyle}"><strong>Comfort Factor: -</strong></p>
       <ul>

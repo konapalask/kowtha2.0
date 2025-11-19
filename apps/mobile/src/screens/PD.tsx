@@ -53,6 +53,7 @@ const FIELD_KEY_MAPPINGS = {
     'referenceNumber',
     'proposalNumber',
     'loanAccountNo',
+    'applicationReferenceNo',
   ],
   loanAmount: [
     'loanAmount',
@@ -60,6 +61,7 @@ const FIELD_KEY_MAPPINGS = {
     'endUseOfTheLoanAndLoanAmountRequired',
     'loanAmountApplied',
     'requestedLoanAmount',
+    'loanAmountRequired',
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
@@ -84,6 +86,9 @@ const FIELD_KEY_MAPPINGS = {
     'siteCoordinates',
     'latitudeLongitude',
     'latitudeAndLongitude',
+    'geoLocation',
+    'officeGeoTag',
+    'customerGeoTag',
   ],
 };
 
@@ -317,6 +322,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   // Fetch current coordinates on component mount
   useEffect(() => {
+    if (!schemaForm) return; // Wait for schema to load
+
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 15000,
@@ -325,33 +332,44 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const {latitude, longitude} = location;
         const coordinates = `${latitude},${longitude}`;
 
-        // Update section data with coordinates based on bank
+        // Find coordinate-related fields in schema and populate them
         setSectionData((prev: any) => {
-          const bankNameLower = bankName?.toLowerCase() || '';
           const updates: any = {...prev};
 
-          // RBL bank - coordinates in particulars section
-          if (bankNameLower.includes('rbl')) {
-            updates.particulars = {
-              ...prev.particulars,
-              coordinates: coordinates,
-            };
-          }
-
-          // Axis Finance UBL - siteCoordinates in thirdPartyCheck section
-          if (bankNameLower.includes('axis finance ubl')) {
-            updates.thirdPartyCheck = {
-              ...prev.thirdPartyCheck,
-              siteCoordinates: coordinates,
-            };
-          }
-
-          // Tata UBL - latitudeLongitude in finalStatus section
-          if (bankNameLower.includes('tata ubl')) {
-            updates.finalStatus = {
-              ...prev.finalStatus,
-              latitudeLongitude: coordinates,
-            };
+          // Iterate through schema sections to find coordinate fields
+          if (schemaForm?.sections) {
+            schemaForm.sections.forEach((section: any) => {
+              if (section.schema?.properties) {
+                Object.keys(section.schema.properties).forEach(fieldKey => {
+                  // Check if field matches coordinate patterns
+                  if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.coordinates)
+                  ) {
+                    // Populate combined coordinates field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: coordinates,
+                    };
+                  } else if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude)
+                  ) {
+                    // Populate latitude field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: latitude.toString(),
+                    };
+                  } else if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
+                  ) {
+                    // Populate longitude field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: longitude.toString(),
+                    };
+                  }
+                });
+              }
+            });
           }
 
           return updates;
@@ -361,37 +379,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         console.error('Error getting location:', error);
         // Set a fallback message if location is not available
         setSectionData((prev: any) => {
-          const bankNameLower = bankName?.toLowerCase() || '';
           const updates: any = {...prev};
 
-          // RBL bank
-          if (bankNameLower.includes('rbl')) {
-            updates.particulars = {
-              ...prev.particulars,
-              coordinates: 'Location not available',
-            };
-          }
-
-          // Axis Finance UBL
-          if (bankNameLower.includes('axis finance ubl')) {
-            updates.thirdPartyCheck = {
-              ...prev.thirdPartyCheck,
-              siteCoordinates: 'Location not available',
-            };
-          }
-
-          // Tata UBL
-          if (bankNameLower.includes('tata ubl')) {
-            updates.finalStatus = {
-              ...prev.finalStatus,
-              latitudeLongitude: 'Location not available',
-            };
+          // Find coordinate-related fields in schema and set fallback
+          if (schemaForm?.sections) {
+            schemaForm.sections.forEach((section: any) => {
+              if (section.schema?.properties) {
+                Object.keys(section.schema.properties).forEach(fieldKey => {
+                  // Check if field matches coordinate patterns
+                  if (
+                    matchesFieldExact(
+                      fieldKey,
+                      FIELD_KEY_MAPPINGS.coordinates,
+                    ) ||
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude) ||
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
+                  ) {
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: 'Location not available',
+                    };
+                  }
+                });
+              }
+            });
           }
 
           return updates;
         });
       });
-  }, [bankName]);
+  }, [schemaForm, bankName]);
 
   useEffect(() => {
     console.log(userData);

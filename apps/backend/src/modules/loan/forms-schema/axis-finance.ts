@@ -95,7 +95,7 @@ export const axisFinanceSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {
@@ -126,7 +126,7 @@ export const axisFinanceSchema = {
         properties: {
           currentAddressDetails: {
             type: "string",
-            title: "Current Address Details",
+            title: "Current Residence Address Details",
           },
           ownershipAndNameOfOwners: {
             type: "string",
@@ -183,7 +183,7 @@ export const axisFinanceSchema = {
             enum: ["Proprietory", "Partnership", "Pvt. Ltd"],
           },
           keyManagerToTheBusiness: {
-            type: "integer",
+            type: "string",
             title: "Key Manager to the Business",
           },
           noOfYearsInBusinessEmployment: {
@@ -225,20 +225,6 @@ export const axisFinanceSchema = {
           totalSalariesPerMonth: {
             type: "number",
             title: "Total Salaries per Month",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          accountingYear: {
-            type: "integer",
-            title: "Accounting Year",
-          },
-          estimatedTotalCosts: {
-            type: "number",
-            title: "Estimated Total Costs",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -347,6 +333,19 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
+          otherIncome: {
+            type: "string",
+            title: "Other Income",
+          },
+        },
+      },
+    },
+    {
+      id: "assets",
+      label: "Assets & Investments",
+      schema: {
+        type: "object",
+        properties: {
           licPaymentInsuranceMediclaim: {
             type: "string",
             title: "LIC Payment / Insurance / Mediclaim",
@@ -394,7 +393,7 @@ export const axisFinanceSchema = {
                 },
                 amount: {
                   type: "number",
-                  title: "O/S Amount",
+                  title: "LOAN AMOUNT",
                 },
                 emi: {
                   type: "number",
@@ -417,33 +416,33 @@ export const axisFinanceSchema = {
       schema: {
         type: "object",
         properties: {
-          totalMonthlyExpensesPerMonth: {
-            type: "string",
-            title: "Total Monthly Expenses per Month",
-          },
-          overAllFamilyExpenses: {
-            type: "string",
-            title: "Over All Family Expenses",
-          },
-          plOrAutoLoanEMI: {
+          affordableEmi: {
             type: "number",
-            title: "PL or Auto Loan EMI",
-          },
-          otherLoanEmi: {
-            type: "number",
-            title: "Other Loan EMI",
-          },
-          totalMonthlyIncomePerMonth: {
-            type: "string",
-            title: "Total Monthly Income per Month",
+            title: "Affordable EMI",
           },
           netSurplus: {
             type: "string",
             title: "Net Surplus",
           },
-          affordableEmi: {
+          totalMonthlyIncomePerMonth: {
+            type: "string",
+            title: "Total Monthly Income per Month",
+          },
+          otherLoanEmi: {
             type: "number",
-            title: "Affordable EMI",
+            title: "Other Loan EMI",
+          },
+          plOrAutoLoanEMI: {
+            type: "number",
+            title: "PL or Auto Loan EMI",
+          },
+          overAllFamilyExpenses: {
+            type: "string",
+            title: "Over All Family Expenses",
+          },
+          totalMonthlyExpensesPerMonth: {
+            type: "string",
+            title: "Total Monthly Expenses per Month",
           },
         },
       },

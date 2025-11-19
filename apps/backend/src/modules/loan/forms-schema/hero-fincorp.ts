@@ -295,48 +295,48 @@ export const heroFincorpSchema = {
       id: "existingLoanDetails",
       label: "Existing Loans",
       schema: {
-        type:"object",
+        type: "object",
         properties: {
           existingLoans: {
             type: "array",
             title: "Existing Loans",
-        items: {
-          type: "object",
-          properties: {
-            financialInstitution: {
-              type: "string",
-              title: "Financial Institution",
-            },
-            loanAmount: {
-              type: "number",
-              title: "Loan Amount",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+            items: {
+              type: "object",
+              properties: {
+                financialInstitution: {
+                  type: "string",
+                  title: "Financial Institution",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                natureOfLoan: {
+                  type: "string",
+                  title: "Nature of Loan",
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
               },
             },
-            natureOfLoan: {
-              type: "string",
-              title: "Nature of Loan",
-            },
-            emi: {
-              type: "number",
-              title: "EMI",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              },
-            },
-          },
           },
         },
       },
-    }
-  },
+    },
     {
       id: "loanAnalysis",
       label: "Loan Analysis",

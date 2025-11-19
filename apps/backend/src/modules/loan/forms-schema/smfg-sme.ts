@@ -143,14 +143,6 @@ export const smfgSmeSchema = {
             type: "string",
             title: "Type of Customer",
           },
-          businessStartDate: {
-            type: "string",
-            title: "Business Started Since",
-          },
-          promoterExperience: {
-            type: "string",
-            title: "Promoter Experience (Years)",
-          },
           stabilityYears: {
             type: "integer",
             title: "Stability in Same Business (Years)",
@@ -211,7 +203,8 @@ export const smfgSmeSchema = {
           },
           salesConcentration: {
             type: "string",
-            title: "Is sales concentration >50% on one party?",
+            title:
+              "Whether sales concentration is >50% on one party. If yes name of Party and contact no",
           },
           businessCycleDebtors: {
             type: "string",
@@ -257,10 +250,6 @@ export const smfgSmeSchema = {
               type: "string",
               title: "Customer",
             },
-          },
-          registrationCertifications: {
-            type: "string",
-            title: "Registration / Certification Details",
           },
           taxApplicability: {
             type: "string",
@@ -342,7 +331,7 @@ export const smfgSmeSchema = {
     },
     {
       id: "bankingBehaviour",
-      label: "Banking Behaviour",
+      label: "Banking Details",
       schema: {
         type: "object",
         properties: {
@@ -357,10 +346,6 @@ export const smfgSmeSchema = {
                   type: "string",
                   title: "Account Type",
                   enum: ["Current", "Savings", "CC/OD"],
-                },
-                operatingSince: {
-                  type: "string",
-                  title: "Operating Since",
                 },
                 vintage: { type: "string", title: "Vintage of account" },
                 minBalance: { type: "string", title: "CC/OD Min Balance" },

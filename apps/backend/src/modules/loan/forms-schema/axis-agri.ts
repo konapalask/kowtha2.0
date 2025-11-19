@@ -35,7 +35,6 @@ export const axisAgriSchema = {
           incorporationDate: {
             type: "string",
             title: "Incorporation Date",
-            format: "date",
           },
         },
         required: ["referenceNumber", "nameOfFirm"],
@@ -88,25 +87,10 @@ export const axisAgriSchema = {
           typeOfIndustry: {
             type: "string",
             title: "Type of Industry",
-            enum: [
-              "Agriculture",
-              "Manufacturing",
-              "Trading",
-              "Service",
-              "Other",
-            ],
           },
           natureOfBusiness: {
             type: "string",
             title: "Nature of Business",
-            enum: [
-              "Manufacturing",
-              "Trading",
-              "Service",
-              "Retail",
-              "Wholesale",
-              "Other",
-            ],
           },
           managementDetails: {
             type: "string",
@@ -153,7 +137,7 @@ export const axisAgriSchema = {
           },
           documentsProvidedDuringVisit: {
             type: "string",
-            title: "Documnets Provided during Visit",
+            title: "Documents Provided during Visit",
             ui: { widget: "textarea", rows: 2 },
           },
         },
@@ -199,6 +183,21 @@ export const axisAgriSchema = {
           otherLoanObligations: {
             type: "string",
             title: "Any other loan obligations of the firm",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          currentAccountIfAny: {
+            type: "string",
+            title: "Current Account if any",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          collateralSecurityDetails: {
+            type: "string",
+            title: "Collateral Security Details",
+            ui: { widget: "textarea", rows: 2 },
+          },
+          existingBankingRelationsWithAxisIfAny: {
+            type: "string",
+            title: "Existing Banking Relations with Axis if any",
             ui: { widget: "textarea", rows: 2 },
           },
         },
@@ -278,7 +277,7 @@ export const axisAgriSchema = {
           pdFinalStatus: {
             type: "string",
             title: "PD Final Status",
-            enum: ["Positive", "Negative", "Referred", "Pending"],
+            enum: ["Positive", "Negative", "Referred"],
           },
           pdVendorDetails: {
             type: "string",

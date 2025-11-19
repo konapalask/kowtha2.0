@@ -96,13 +96,14 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
   const history = verificationData.history || {};
   const businessActivities = verificationData.businessActivities || {};
   const businessSetup = verificationData.businessSetup || {};
-  const detailsOfAllLoansAsOn = verificationData.detailsOfAllLoansAsOn.details || {};
-  const personalAssetsOfProprietor = verificationData.personalAssetsOfProprietor.details || {};
+  const detailsOfAllLoansAsOn =
+    verificationData.detailsOfAllLoansAsOn.details || {};
+  const personalAssetsOfProprietor =
+    verificationData.personalAssetsOfProprietor.details || {};
   const detailsOfCustomers = verificationData.detailsOfCustomers.details || {};
   const detailsOfSuppliers = verificationData.detailsOfSuppliers.details || {};
   const sisterCompanies = verificationData.sisterCompanies.details || {};
-  const insuranceCompanyName = verificationData.insuranceCompanyName || {};
-  const insuranceDetails = verificationData.insuranceDetails.details || {};
+  const insuranceDetails = verificationData.insuranceDetails || {};
   const performanceDetails = verificationData.performanceDetails || {};
   const otherBusinessInterests = verificationData.otherBusinessInterests || {};
   const bankingDetails = verificationData.bankingDetails || {};
@@ -187,33 +188,19 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
     ${renderKeyValue(
       "Office Set-up with Overall Look",
-      ensureArray(businessSetup.officeSetUpWithOverallLook)
-        .map((item: any) => formatMultiline(item.detail))
-        .join("<br>"),
+      formatMultiline(businessSetup.officeSetUpWithOverallLook),
       undefined,
       { colspan: 3 }
     )}
     ${renderKeyValue(
       "Expenses",
-      ensureArray(businessSetup.expenses)
-        .map((item: any) => formatMultiline(item.expenseDetail))
-        .join("<br>"),
+      formatMultiline(businessSetup.expenses),
       undefined,
       { colspan: 3 }
     )}
     ${renderKeyValue(
       "Transactions",
-      ensureArray(businessSetup.transactions)
-        .map((item: any) => formatMultiline(item.transactionDetail))
-        .join("<br>"),
-      undefined,
-      { colspan: 3 }
-    )}
-    ${renderKeyValue(
-      "Transactions",
-      ensureArray(businessSetup.transactions)
-        .map((item: any) => formatMultiline(item.transactionDetail))
-        .join("<br>"),
+      formatMultiline(businessSetup.transactions),
       undefined,
       { colspan: 3 }
     )}
@@ -343,7 +330,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Insurance Details</h2>
-    <p>Insurance Company Name:- ${insuranceCompanyName.insuranceCompanyName} <br> Due they are taking the exemptions by taking the Children Education Fee: ${insuranceCompanyName.dueExemptions}</p>
+    <p>Insurance Company Name:- ${insuranceDetails.insuranceCompanyName} <br> Due they are taking the exemptions by taking the Children Education Fee: ${insuranceDetails.dueExemptions}</p>
     <table style="${tableStyle}">
     <tr>
     <td style="${labelCellStyle}">S.No</td>
@@ -353,7 +340,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <td style="${labelCellStyle}">Sum Assured</td>
     <td style="${labelCellStyle}">Assured Covered</td>
     </tr>
-    ${insuranceDetails
+    ${insuranceDetails.details
       .map(
         (item: any, index: number) => `
       <tr>

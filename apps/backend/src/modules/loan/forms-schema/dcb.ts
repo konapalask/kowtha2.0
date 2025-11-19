@@ -199,54 +199,27 @@ export const dcbSchema = {
         type: "object",
         properties: {
           officeSetUpWithOverallLook: {
-            type: "array",
+            type: "string",
             title: "Office Set-up with Overall Look",
-            items: {
-              type: "object",
-              properties: {
-                detail: {
-                  type: "string",
-                  title: "Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           expenses: {
-            type: "array",
+            type: "string",
             title: "Expenses",
-            items: {
-              type: "object",
-              properties: {
-                expenseDetail: {
-                  type: "string",
-                  title: "Expense Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           transactions: {
-            type: "array",
+            type: "string",
             title: "Transactions",
-            items: {
-              type: "object",
-              properties: {
-                transactionDetail: {
-                  type: "string",
-                  title: "Transaction Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           plantAndMachinery: {
@@ -456,10 +429,9 @@ export const dcbSchema = {
       },
       required: true,
     },
-
     {
-      id: "insuranceCompanyName",
-      label: "Insurance Company Name",
+      id: "insuranceDetails",
+      label: "Insurance Details",
       schema: {
         type: "object",
         properties: {
@@ -472,19 +444,9 @@ export const dcbSchema = {
             title:
               "Due they are taking the exemptions by taking the Children Education Fee:",
           },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "insuranceDetails",
-      label: "Insurance Details",
-      schema: {
-        type: "object",
-        properties: {
           details: {
             type: "array",
-            title: "Sister Compnies.",
+            title: "Insurance Details",
             items: {
               type: "object",
               properties: {
@@ -768,7 +730,7 @@ export const dcbSchema = {
               type: "object",
               properties: {
                 months: {
-                  type: "integer",
+                  type: "string",
                   title: "Months",
                 },
                 purchasesRs: {

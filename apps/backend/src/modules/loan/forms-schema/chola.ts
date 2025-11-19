@@ -75,21 +75,20 @@ export const cholaSchema = {
       schema: {
         type: "object",
         properties: {
-          aboutEntries: {
-            type: "array",
-            title: "About the Applicant & Business",
-            items: {
-              type: "object",
-              properties: {
-                aboutTheApplicant: {
-                  type: "string",
-                  title: "About the Applicant & Business",
-                  ui: {
-                    widget: "textarea",
-                    rows: 8,
-                  },
-                },
-              },
+          aboutTheApplicant: {
+            type: "string",
+            title: "About the Applicant",
+            ui: {
+              widget: "textarea",
+              rows: 8,
+            },
+          },
+          aboutTheBusiness: {
+            type: "string",
+            title: "About the Business",
+            ui: {
+              widget: "textarea",
+              rows: 8,
             },
           },
         },

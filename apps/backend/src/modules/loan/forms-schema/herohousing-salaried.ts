@@ -250,6 +250,10 @@ export const herohousingSalariedSchema = {
             type: "string",
             title: "When seller bought the property",
           },
+          sellerLoanOnProperty: {
+            type: "string",
+            title: "Whether seller is having any loan on the property",
+          },
         },
       },
     },
