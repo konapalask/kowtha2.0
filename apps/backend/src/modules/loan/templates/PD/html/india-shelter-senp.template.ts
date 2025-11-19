@@ -37,7 +37,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -147,9 +147,7 @@ export const indiaShelterSenpTemplate = (
     verificationData.currentLoanDetails?.currentLoans
   );
   const costFunds = verificationData.costAndFunds || {};
-  const banking = ensureArray(
-    verificationData.bankingDetails?.bankingAccounts
-  );
+  const banking = ensureArray(verificationData.bankingDetails?.bankingAccounts);
   const otherFamilyMembers = ensureArray(
     verificationData.otherFamilyMembers?.familyMembers
   );
@@ -160,18 +158,10 @@ export const indiaShelterSenpTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       <tr><th style="${headerStyle}" colspan="4">PD SHEET - SENP</th></tr>
-      ${renderKeyValueRow(
-        "Loan Number",
-        general.loanNumber,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Branch",
-        general.branch,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Loan Number", general.loanNumber, undefined, {
+        colSpan: 3,
+      })}
+      ${renderKeyValueRow("Branch", general.branch, undefined, { colSpan: 3 })}
     </table>
   `;
 
@@ -184,36 +174,27 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Loan Product",
-        basic.loanProduct,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Loan Product", basic.loanProduct, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Name of the Applicant",
         basic.applicantName,
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Marital Status",
-        basic.maritalStatus,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Marital Status", basic.maritalStatus, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Educational Qualification",
         basic.educationalQualification,
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Category",
-        basic.category,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Category", basic.category, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Total No. of Family Members",
         basic.totalFamilyMembers,
@@ -251,12 +232,9 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Area (in Sq ft)",
-        residence.areaSqft,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Area (in Sq ft)", residence.areaSqft, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Monthly Rent & Security Deposit (if rented)",
         residence.monthlyRentDeposit,
@@ -281,12 +259,9 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Native Place",
-        residence.nativePlace,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Native Place", residence.nativePlace, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "If LAP—Electricity bill in customer name availability?",
         residence.electricityBillInCustomerName,
@@ -494,12 +469,9 @@ export const indiaShelterSenpTemplate = (
           business.placeOfIncorporation
         )}</td>
       </tr>
-      ${renderKeyValueRow(
-        "Address of the PD",
-        business.pdAddress,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Address of the PD", business.pdAddress, undefined, {
+        colSpan: 3,
+      })}
       <tr>
         <td style="${labelCellStyle}">Total Work Experience (Years)</td>
         <td style="${valueCellStyle}">${formatMultiline(
@@ -757,12 +729,6 @@ export const indiaShelterSenpTemplate = (
         <td style="${valueCellStyle}">${usageList}</td>
       </tr>
       ${renderKeyValueRow(
-        "If Others, specify usage",
-        collateral.usageOtherNotes,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
         "Property Address",
         collateral.propertyAddress,
         undefined,
@@ -814,9 +780,7 @@ export const indiaShelterSenpTemplate = (
               loan.sanctionAmount
             )}</td>
             <td style="${valueCellStyle}">${formatCurrency(loan.emi)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              loan.emisPaid
-            )}</td>
+            <td style="${valueCellStyle}">${formatMultiline(loan.emisPaid)}</td>
             <td style="${valueCellStyle}">${formatMultiline(
               loan.balanceTenor
             )}</td>
@@ -1017,9 +981,7 @@ export const indiaShelterSenpTemplate = (
             <td style="${valueCellStyle}">${formatMultiline(
               ref.knowingSince
             )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              ref.feedback
-            )}</td>
+            <td style="${valueCellStyle}">${formatMultiline(ref.feedback)}</td>
           </tr>
         `
               )
@@ -1045,30 +1007,21 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 5 }
       )}
-      ${renderKeyValueRow(
-        "Date of Visit",
-        pdReview.visitDate,
-        undefined,
-        { colSpan: 5 }
-      )}
-      ${renderKeyValueRow(
-        "Time of Visit",
-        pdReview.visitTime,
-        undefined,
-        { colSpan: 5 }
-      )}
+      ${renderKeyValueRow("Date of Visit", pdReview.visitDate, undefined, {
+        colSpan: 5,
+      })}
+      ${renderKeyValueRow("Time of Visit", pdReview.visitTime, undefined, {
+        colSpan: 5,
+      })}
       ${renderKeyValueRow(
         "Signature of the PD Officer",
         pdReview.officerSignature,
         undefined,
         { colSpan: 5 }
       )}
-      ${renderKeyValueRow(
-        "PD Status",
-        pdReview.pdStatus,
-        undefined,
-        { colSpan: 5 }
-      )}
+      ${renderKeyValueRow("PD Status", pdReview.pdStatus, undefined, {
+        colSpan: 5,
+      })}
     </table>
   `;
 

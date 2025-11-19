@@ -17,22 +17,6 @@ export const indiaShelterSalariedSchema = {
             type: "string",
             title: "Branch",
           },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
         },
       },
       required: true,
@@ -55,6 +39,7 @@ export const indiaShelterSalariedSchema = {
           applicantName: {
             type: "string",
             title: "Applicant Name",
+            readOnly: true,
           },
           applicantDob: {
             type: "string",
@@ -155,22 +140,12 @@ export const indiaShelterSalariedSchema = {
             title: "Area (in Sq ft)",
           },
           monthlyRentDeposit: {
-            type: "number",
+            type: "string",
             title: "Monthly Rent & Security Deposit (if rented)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           purchasePriceMv: {
-            type: "number",
+            type: "string",
             title: "Purchase price & MV (if owned)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           yearsInCurrentCity: {
             type: "string",
@@ -234,29 +209,11 @@ export const indiaShelterSalariedSchema = {
         type: "object",
         properties: {
           purposes: {
-            type: "array",
-            title: "Purpose of Loan",
-            uniqueItems: true,
-            items: {
-              type: "string",
-              enum: [
-                "Flat Purchase",
-                "House Purchase",
-                "Plot Purchase",
-                "Construction of Residential House Property",
-                "Business Development",
-                "Improvement / Extension",
-                "Balance Transfer",
-                "Plot + Construction",
-              ],
-            },
-          },
-          otherPurpose: {
             type: "string",
-            title: "Other Purpose (if any)",
+            title: "Purpose of Loan",
             ui: {
               widget: "textarea",
-              rows: 2,
+              rows: 3,
             },
           },
           minimumLoanAmount: {
@@ -300,17 +257,12 @@ export const indiaShelterSalariedSchema = {
             ],
           },
           usageAfterPurchase: {
-            type: "array",
-            title: "Usage of Property After Purchase",
-            uniqueItems: true,
-            items: {
-              type: "string",
-              enum: ["Self-Occupancy", "Investment", "Renting Purpose", "Others"],
-            },
-          },
-          usageOtherNotes: {
             type: "string",
-            title: "If Others, specify usage",
+            title: "Usage of Property After Purchase",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           propertyAddress: {
             type: "string",
@@ -404,10 +356,6 @@ export const indiaShelterSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          existingRelationshipWithIndiashelter: {
-            type: "string",
-            title: "Existing Relationship with Indiashelter",
-          },
           employerName: {
             type: "string",
             title: "Employer Name",
@@ -466,6 +414,7 @@ export const indiaShelterSalariedSchema = {
           officeGeoTag: {
             type: "string",
             title: "Customer Location (Office / Business GEO Tag)",
+            readOnly: true,
           },
           previousEmployment: {
             type: "string",
@@ -516,7 +465,7 @@ export const indiaShelterSalariedSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 contactNumber: {

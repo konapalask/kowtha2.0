@@ -113,22 +113,12 @@ export const indiaShelterSenpSchema = {
             title: "Area (in Sq ft)",
           },
           monthlyRentDeposit: {
-            type: "number",
+            type: "string",
             title: "Monthly Rent & Security Deposit (if rented)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           purchasePriceMv: {
-            type: "number",
+            type: "string",
             title: "Purchase price & MV (if owned)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
           },
           yearsInCurrentCity: {
             type: "string",
@@ -917,17 +907,12 @@ export const indiaShelterSenpSchema = {
             enum: ["Ready to move", "Under Construction", "Construction Yet to Start"],
           },
           usageAfterPurchase: {
-            type: "array",
-            title: "Usage of Property after Purchase",
-            uniqueItems: true,
-            items: {
-              type: "string",
-              enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"],
-            },
-          },
-          usageOtherNotes: {
             type: "string",
-            title: "If Others, specify usage",
+            title: "Usage of Property after Purchase",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
           },
           propertyAddress: {
             type: "string",
