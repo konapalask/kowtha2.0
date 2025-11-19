@@ -53,6 +53,7 @@ const FIELD_KEY_MAPPINGS = {
     'referenceNumber',
     'proposalNumber',
     'loanAccountNo',
+    'applicationReferenceNo',
   ],
   loanAmount: [
     'loanAmount',
@@ -85,6 +86,9 @@ const FIELD_KEY_MAPPINGS = {
     'siteCoordinates',
     'latitudeLongitude',
     'latitudeAndLongitude',
+    'geoLocation',
+    'officeGeoTag',
+    'customerGeoTag',
   ],
 };
 
