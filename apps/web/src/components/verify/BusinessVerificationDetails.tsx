@@ -912,10 +912,20 @@ export const BusinessVerificationDetails: React.FC<
       const synopsis =
         editorContent || "Business verification completed successfully";
 
+      let approvedStatus: "Positive" | "Negative" | "CreditRefer" | null = null;
+      if (verdict === "positive") {
+        approvedStatus = "Positive";
+      } else if (verdict === "negative") {
+        approvedStatus = "Negative";
+      } else if (verdict === "credit_refer")        {
+        approvedStatus = "CreditRefer";
+      }
+
       const payload = {
         verificationType: "Business",
         verificationData: verificationDataPayload,
         synopsis,
+        approvedStatus,
       };
 
       console.log("Submitting payload:", JSON.stringify(payload, null, 2));
