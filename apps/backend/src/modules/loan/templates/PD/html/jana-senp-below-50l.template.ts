@@ -105,7 +105,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
   const observations = verificationData.observations || {};
   const pdStatus = verificationData.pdStatus || {};
   const interviewerDetails = verificationData.interviewerDetails || {};
-
+  const geoTagDetails = verificationData.geoTagDetails || {};
 
 
   return `
@@ -836,7 +836,13 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           </table>
         </td>
       </tr>
-
+      <tr>
+        <td style="${labelCellStyle}">Geo Tag Details</td>
+        <td style="border:1px solid #ccc;padding:8px">
+          <p><strong><u>Enclosed:</u></strong></p>
+          <p>${geoTagDetails?.coordinates}</p>
+        </td>
+      </tr>
     </table>
     </div>
 

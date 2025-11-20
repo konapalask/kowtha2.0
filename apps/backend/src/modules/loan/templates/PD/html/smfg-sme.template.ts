@@ -140,6 +140,13 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     ensureArray(financials.majorCustomers).map((entry: any) => entry)
   );
 
+  const essQuestionKeys = [
+    "entityInvolvementCommercialEtc",
+    "entityInvolvementForceLabourEtc",
+    "entityConsent",
+    "entityPollutants",
+    "entityESSGuidelines",
+  ];
   const questionList = [
     "Is the entity involved in any commercial pest control operation, use any Ozone depleting substance, hazardous chemicals, bio medical waste, Dyes, forest products, tobacco, alcohol, weapons, gambling, radioactive materials, unbounded asbestos, harmful fishing practice, commercial logging.",
     "Does the entity involve in Child or forced Labour or business involve displacement of people, impact on indigenous people or established in land designated as forest or forest products",
@@ -147,13 +154,11 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     "Does the entity involves in proper mechanism for treatment or disposal of waste and does not emit air, water or noise pollutants.",
     "Does the Entity comply with the above ESS guidelines",
   ];
-  const essRows = ensureArray(ess.essResponses).map(
-    (item: any, index: number) => [
-      String.fromCharCode(97 + index) + ".",
-      questionList[index] || "",
-      item.response || "",
-    ]
-  );
+  const essRows = essQuestionKeys.map((key, index) => [
+    String.fromCharCode(97 + index) + ".",
+    questionList[index] || "",
+    formatMultiline(ess[key]),
+  ]);
 
   const loanRows = existingLoans.map((loan: any) => [
     loan.loanType || "",
@@ -177,6 +182,8 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       <tr>
         <td style="${labelCellStyle}">Branch Name</td>
         <td style="${valueCellStyle}">${formatMultiline(general.branchName)}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">Application Reference No.</td>
         <td style="${valueCellStyle}">${formatMultiline(
           general.applicationReferenceNo
@@ -184,11 +191,9 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       </tr>
       <tr>
         <td style="${labelCellStyle}">Applicant Name</td>
-        <td style="${valueCellStyle}">${formatMultiline(
+        <td style="${valueCellStyle}" colspan="3">${formatMultiline(
           general.applicantName
         )}</td>
-        <td style="${labelCellStyle}"></td>
-        <td style="${valueCellStyle}"></td>
       </tr>
       ${renderKeyValueRow(
         "Applicant Office Address",
@@ -227,17 +232,21 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         <td style="${valueCellStyle}">${formatMultiline(
           personal.ownershipStatus
         )}</td>
+      </tr>
+      <tr>
         <td style="${labelCellStyle}">Area of the house property and estimated market value</td>
-        <td style="${valueCellStyle}">
+        <td style="${valueCellStyle}" colspan="3">
           ${formatMultiline(personal.houseArea)}<br>
           ${formatCurrency(personal.houseMarketValue)}
         </td>
-      </tr>
+      </tr> 
       <tr>
         <td style="${labelCellStyle}">No. of Years at same Residence</td>
         <td style="${valueCellStyle}">${formatMultiline(
           personal.yearsAtResidence
         )}</td>
+        </tr>
+        <tr>
         <td style="${labelCellStyle}">No. of years in same city</td>
         <td style="${valueCellStyle}">${formatMultiline(personal.yearsInCity)}</td>
       </tr>
@@ -352,13 +361,18 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         financials.manufacturingProcess,
         undefined,
         { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Whether sales concentration is >50% on one party. If yes name of Party and contact no",
-        financials.salesConcentration,
-        undefined,
-        { colSpan: 3 }
-      )}
+      )} 
+      <tr>
+            <td style="${labelCellStyle}">Whether sales concentration is >50% on one party. If yes name of Party and contact no</td>
+            <td style="${valueCellStyle}">
+                  ${
+                    financials.salesConcentration
+                      ? `Yes <br> <strong>Name of Party:</strong> ${financials.salesConcentrationPartyName} <br> <strong>Contact Number of Party:</strong> ${financials.salesConcentrationPartyContactNo}`
+                      : "No"
+                  }
+            </td>
+      </tr>
+
       ${renderKeyValueRow(
         "Business Cycle -How many days credit allowed to Debtors and what are actual debtors amount as on date",
         financials.businessCycleDebtors,
@@ -420,7 +434,12 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="3">Environmental & Social Safeguards (ESS)</th></tr>
       ${renderArrayTable(["#", "Question", "Response"], essRows)}
-      ${renderKeyValueRow("Others", ess.essOthers, undefined, { colSpan: 3 })}
+      ${renderKeyValueRow(
+        "Others:",
+        ess.otherESSNotes,
+        undefined,
+        { colSpan: 3 }
+      )}
     </table>
   `;
 
