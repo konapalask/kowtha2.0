@@ -49,12 +49,12 @@ import { janaSalariedTemplate } from "./templates/PD/html/jana-salaried.template
 import { janaSenpAbove50lTemplate } from "./templates/PD/html/jana-senp-above-50l.template";
 import { janaSenpBelow50lTemplate } from "./templates/PD/html/jana-senp-below-50l.template";
 
+import * as templatesPD from "./templates/PD/html/_index";
+
 import {
   validateVerificationData,
   logDataStructure,
 } from "./templates/PD/html/template-validator";
-
-
 
 @Injectable()
 export class PDTemplateService {
