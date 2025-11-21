@@ -26,7 +26,7 @@ export class FinancialAnalysisTemplatesService {
    
   async exportFinancialAnalysisToExcel(loanId: number, bankName: string): Promise<Buffer> {
     const ExcelJS = await import('exceljs');
-
+    console.log("bankName", bankName);
     try {
       // Fetch verification with financial analysis and loan details
       const verification = await this.prisma.verification.findFirst({
@@ -49,7 +49,7 @@ export class FinancialAnalysisTemplatesService {
       }
       
       // Financial analysis is stored in verification.financialAnalysis, not in verificationData
-      const financialAnalysis = (verification.financialAnalysis as any) || {};
+      const financialAnalysis = (verification.verificationData as any)?.financialAnalysis || {};
       const loan = verification.loan;
       
       // Log for debugging if financial analysis is empty
@@ -62,30 +62,35 @@ export class FinancialAnalysisTemplatesService {
       }
       
       if (this.isServiceBusinessFormat(bankName)) {
+        console.log("service business format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isDetailedBalanceSheetFormat(bankName)) {
+        console.log("detailed balance sheet format");
         return await this.generateDetailedBalanceSheetFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isProprietorGstFormat(bankName)) {
+        console.log("proprietor gst format");
         return await this.generateProprietorGstFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isGpPbditFormat(bankName)) {
+        console.log("gp pbdit format");
         return await this.generateGpPbditFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isComprehensiveFormat(bankName)) {
+        console.log("comprehensive format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
@@ -97,6 +102,7 @@ export class FinancialAnalysisTemplatesService {
           loanId,
           bankName,
         });
+        console.log("standard format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
@@ -245,16 +251,24 @@ export class FinancialAnalysisTemplatesService {
 
     // Add data rows
     for (let i = 0; i < Math.max(leftItems.length, rightItems.length); i++) {
-      const leftItem = leftItems[i] || { label: '', key: '' };
-      const rightItem = rightItems[i] || { label: '', key: '' };
+      const leftItem = leftItems[i] || { label: '', key: '', actualKey: '' };
+      const rightItem = rightItems[i] || { label: '', key: '', actualKey: '' };
+
+      // Helper function to get value, handling empty strings and null/undefined
+      const getValue = (key: string): any => {
+        if (!key) return '';
+        const value = financialAnalysis[key];
+        if (value === null || value === undefined || value === '') return '';
+        return value;
+      };
 
       const row = worksheet.addRow([
         leftItem.label,
-        leftItem.actualKey ? financialAnalysis[leftItem.actualKey] || '' : '',
-        leftItem.key ? financialAnalysis[leftItem.key] || '' : '',
+        getValue(leftItem.actualKey),
+        getValue(leftItem.key),
         rightItem.label,
-        rightItem.actualKey ? financialAnalysis[rightItem.actualKey] || '' : '',
-        rightItem.key ? financialAnalysis[rightItem.key] || '' : '',
+        getValue(rightItem.actualKey),
+        getValue(rightItem.key),
       ]);
 
       if (leftItem.isBold || rightItem.isBold) {
@@ -278,15 +292,21 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: 'middle' };
       });
 
-      // Align numbers to the right
+      // Align numbers to the right and format numeric values
       [2, 3, 5, 6].forEach((colNum) => {
-        if (row.getCell(colNum).value) {
-          row.getCell(colNum).alignment = {
+        const cell = row.getCell(colNum);
+        const value = cell.value;
+        if (value !== null && value !== undefined && value !== '') {
+          cell.alignment = {
             horizontal: 'right',
             vertical: 'middle',
           };
-          if (typeof row.getCell(colNum).value === 'number') {
-            row.getCell(colNum).numFmt = '#,##0.00';
+          if (typeof value === 'number') {
+            cell.numFmt = '#,##0.00';
+          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+            // Handle string numbers
+            cell.value = Number(value);
+            cell.numFmt = '#,##0.00';
           }
         }
       });
