@@ -23,17 +23,18 @@ const formatMultiline = (value: any): string => {
   return String(value).replace(/\n+/g, "<br>");
 };
 
-
 const formatObservations = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   const text = String(value);
   // Split by newlines and format as dotted bullets
-  const lines = text.split(/\n+/).filter((line: string) => line.trim().length > 0);
+  const lines = text
+    .split(/\n+/)
+    .filter((line: string) => line.trim().length > 0);
   if (lines.length === 0) return "Not provided";
   return lines.map((line: string) => `• ${line.trim()}`).join("<br>");
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -63,10 +64,11 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const businessProfile = verificationData.businessProfile || {};
   const familyMembers = verificationData.familyMembers?.familyMembers || [];
   const observations = verificationData.observations || {};
-  const employeesInfrastructure = verificationData.employeesInfrastructure || {};
+  const employeesInfrastructure =
+    verificationData.employeesInfrastructure || {};
 
   const templateName = html_data?.bankName || "Aditya Birla";
-  
+
   return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content aditya-birla-template">
@@ -163,37 +165,52 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         <td style="${labelCellStyle}">Business</td>
         <td style="${labelCellStyle}">Education</td>  
       </tr>
-      ${ensureArray(familyMembers).map((member: any) => `
+      ${ensureArray(familyMembers)
+        .map(
+          (member: any) => `
         <tr>
           <td style="${valueCellStyle}">${formatMultiline(member.name)}</td>
           <td style="${valueCellStyle}">${formatMultiline(member.relation)}</td>
           <td style="${valueCellStyle}">${formatMultiline(member.age)}</td>
-          <td style="${valueCellStyle}">${formatMultiline(member.businessName)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(member.occupation)}</td>
           <td style="${valueCellStyle}">${formatMultiline(member.education)}</td>
         </tr>
-      `).join("\n")}
+      `
+        )
+        .join("\n")}
       </table>
 
       <table style="${tableStyle}">
         ${renderKeyValue("Sales Bills", observations.salesBills || observations.salesBills || "NP")}
         ${renderKeyValue("Purchase Bills", observations.purchaseBills || observations.purchaseBills || "Not Provided")}
-        ${renderKeyValue("Neighbour check with name", (() => {
-          const thirdPartyCheck = verificationData.thirdPartyCheck || {};
-          const checks = Array.isArray(thirdPartyCheck.checks) ? thirdPartyCheck.checks : [];
-          const neighborCheck = checks.find((check: any) => 
-            check.relationship === "Neighbor" || check.relationship?.toLowerCase().includes("neighbor")
-          );
-          if (neighborCheck && neighborCheck.tpcName) {
-            return `${neighborCheck.tpcName || ""} - ${neighborCheck.mobileNumber || ""}`.trim();
-          }
-          // Fallback to direct observation fields
-          if (observations.neighbourCheckName || observations.neighbourCheck) {
-            return `${observations.neighbourCheckName || ""} - ${observations.neighbourCheckNumber || ""}`.trim();
-          }
-          return "Not provided";
-        })())}
+        ${renderKeyValue(
+          "Neighbour check with name",
+          (() => {
+            const thirdPartyCheck = verificationData.thirdPartyCheck || {};
+            const checks = Array.isArray(thirdPartyCheck.checks)
+              ? thirdPartyCheck.checks
+              : [];
+            const neighborCheck = checks.find(
+              (check: any) =>
+                check.relationship === "Neighbor" ||
+                check.relationship?.toLowerCase().includes("neighbor")
+            );
+            if (neighborCheck && neighborCheck.tpcName) {
+              return `${neighborCheck.tpcName || ""} - ${neighborCheck.mobileNumber || ""}`.trim();
+            }
+            // Fallback to direct observation fields
+            if (
+              observations.neighbourCheckName ||
+              observations.neighbourCheck
+            ) {
+              return `${observations.neighbourCheckName || ""} - ${observations.neighbourCheckNumber || ""}`.trim();
+            }
+            return "Not provided";
+          })()
+        )}
         ${renderKeyValue("CIBIL Details", observations.cibilDetails)}
-        ${renderKeyValue("Previous Loans", 
+        ${renderKeyValue(
+          "Previous Loans",
           formatMultiline(observations.previousLoans)
         )}
         ${renderKeyValue("Banking Details", observations.bankingDetails)}
@@ -203,6 +220,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Other income", observations.otherIncome)}
         ${renderKeyValue("Business Machinery", observations.businessMachinery || "NA")}
         ${renderKeyValue("Observation", formatObservations(observations.observation || "Not provided"))}
+        ${renderKeyValue("Concerns / Deviations", formatObservations(observations.concernsDeviations || "Not provided"))}
         ${renderKeyValue("Status", observations.statusOfPd || "Not provided")}
 
 

@@ -42,10 +42,6 @@ export const idfcPlSchema = {
             title: "Marital Status",
             enum: ["Married", "Divorced", "Bachelor"],
           },
-          branch: {
-            type: "string",
-            title: "Branch",
-          },
         },
         required: ["nameOfTheApplicant", "sdfcId", "visitedAddress"],
       },
@@ -177,23 +173,6 @@ export const idfcPlSchema = {
               maxDecimalPlaces: 2,
             },
           },
-          salaryAccountBank: {
-            type: "string",
-            title: "Salary Account Bank",
-          },
-          salaryAccountNumber: {
-            type: "string",
-            title: "Salary Account Number",
-          },
-          salaryCreditMode: {
-            type: "string",
-            title: "Salary Credit Mode",
-            enum: ["Bank Transfer", "Cheque", "Cash", "Other"],
-          },
-          incomeObservation: {
-            type: "string",
-            title: "Income Observation / Remarks",
-          },
           familyMembers: {
             type: "array",
             title: "Family Members",
@@ -221,7 +200,7 @@ export const idfcPlSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {
@@ -238,31 +217,6 @@ export const idfcPlSchema = {
         },
       },
       required: true,
-    },
-    {
-      id: "documentsObserved",
-      label: "Documents Observed",
-      schema: {
-        type: "object",
-        properties: {
-          residenceDocuments: {
-            type: "array",
-            title: "Residence Documents",
-            items: {
-              type: "string",
-              title: "Document",
-            },
-          },
-          officeDocuments: {
-            type: "array",
-            title: "Office Documents",
-            items: {
-              type: "string",
-              title: "Document",
-            },
-          },
-        },
-      },
     },
     {
       id: "bankingDetails",
@@ -356,18 +310,6 @@ export const idfcPlSchema = {
             type: "integer",
             title: "Years at Current Residence",
           },
-          residenceObservation: {
-            type: "string",
-            title: "Residence Observation / Notes",
-          },
-          assetsOwnedList: {
-            type: "array",
-            title: "Assets Owned",
-            items: {
-              type: "string",
-              title: "Asset Detail",
-            },
-          },
           assetsOwned: {
             type: "string",
             title: "Assets Owned (Summary)",
@@ -402,10 +344,6 @@ export const idfcPlSchema = {
           endUse: {
             type: "string",
             title: "End Use",
-          },
-          interviewDetails: {
-            type: "string",
-            title: "Interview Details",
           },
           nameOfInterviewer: {
             type: "string",

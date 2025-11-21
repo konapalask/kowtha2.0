@@ -6,7 +6,8 @@ const cellLabelStyle =
   "border:1px solid #d0d7de;padding:8px 10px;width:34%;font-weight:600;background:#f5f7fa;vertical-align:top;color:#1f2d3d;line-height:1.5";
 const cellValueStyle =
   "border:1px solid #d0d7de;padding:8px 10px;vertical-align:top;color:#2f3b52;line-height:1.5";
-const paragraphStyle = "margin:6px 0;line-height:1.55;font-size:12px;color:#2f3b52";
+const paragraphStyle =
+  "margin:6px 0;line-height:1.55;font-size:12px;color:#2f3b52";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -34,7 +35,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -115,7 +116,9 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
 const renderFamilyTable = (members: any[]) => {
   const rows = ensureArray(members).map((member: any) => [
     formatMultiline(member?.name || ""),
-    formatMultiline(member?.relationship || member?.relationshipWithApplicant || ""),
+    formatMultiline(
+      member?.relationship || member?.relationshipWithApplicant || ""
+    ),
     formatMultiline(member?.age || ""),
     formatMultiline(member?.qualification || member?.education || ""),
     formatMultiline(member?.occupation || ""),
@@ -149,9 +152,7 @@ const renderObligationsTable = (loans: any[]) => {
         (hasValue(loan?.emi) ? formatCurrency(loan?.emi) : "") ||
         ""
     ),
-    formatMultiline(
-      loan?.loanAmount ? formatCurrency(loan?.loanAmount) : ""
-    ),
+    formatMultiline(loan?.loanAmount ? formatCurrency(loan?.loanAmount) : ""),
   ]);
 
   return renderInnerTable(
@@ -194,8 +195,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
   ).map((doc) => formatMultiline(doc));
 
   const assetsOwned = ensureArray(
-    assets?.assets ||
-      residence?.assetsOwnedList ||
+    residence?.assetsOwned ||
       (assets?.assetsOwned ? [assets.assetsOwned] : []) ||
       []
   ).map((entry: any) => formatMultiline(entry));
@@ -219,7 +219,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
     ["Number of Employees", employment.numberOfEmployees],
     ["Department", employment.department],
     ["Designation", employment.designation],
-    ["Years in Current Company", employment.yearsInCurrentCompany], 
+    ["Years in Current Company", employment.yearsInCurrentCompany],
     [
       "Previous Job Details / Total Experience",
       employment.previousJobDetailsWorkExperienceTotalYearsOfExperience,
@@ -235,17 +235,31 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
     ["Third Party Check", employment.thirdPartyCheck],
   ];
 
-
   const incomeRows: Array<[string, any, ((value: any) => string)?]> = [
     ["Gross Salary", income.grossSalary, formatCurrency],
     ["Net Salary", income.netSalary, formatCurrency],
     ["Overtime Details (if any)", income.overtimeDetailsIfAny],
     ["Monthly Expenses", income.monthlyExpenses, formatCurrency],
     ["Monthly Net Income", income.monthlyNetIncome, formatCurrency],
-    ["Total No. of Family Members", renderFamilyTable(income.familyMembers || income.familyMembersRelationshipAgeNameSalary || [])],
-    ["Earning Family Members Income Details", income.earningFamilyMembersIncomeDetails, formatCurrency],
+    [
+      "Total No. of Family Members",
+      renderFamilyTable(
+        income.familyMembers ||
+          income.familyMembersRelationshipAgeNameSalary ||
+          []
+      ),
+    ],
+    [
+      "Earning Family Members Income Details",
+      income.earningFamilyMembersIncomeDetails,
+      formatCurrency,
+    ],
     ["No. of Dependents", income.noOfDependents],
-    ["Any Other Source of Income (Monthly/Annual)", income.anyOtherSourceOfIncomeMonthlyAnnual, formatCurrency],
+    [
+      "Any Other Source of Income (Monthly/Annual)",
+      income.anyOtherSourceOfIncomeMonthlyAnnual,
+      formatCurrency,
+    ],
   ];
 
   const bankingRows: Array<[string, any, ((value: any) => string)?]> = [

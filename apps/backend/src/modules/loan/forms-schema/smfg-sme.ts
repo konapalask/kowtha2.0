@@ -143,14 +143,6 @@ export const smfgSmeSchema = {
             type: "string",
             title: "Type of Customer",
           },
-          businessStartDate: {
-            type: "string",
-            title: "Business Started Since",
-          },
-          promoterExperience: {
-            type: "string",
-            title: "Promoter Experience (Years)",
-          },
           stabilityYears: {
             type: "integer",
             title: "Stability in Same Business (Years)",
@@ -210,8 +202,33 @@ export const smfgSmeSchema = {
             ui: { widget: "textarea", rows: 3 },
           },
           salesConcentration: {
+            type: "boolean",
+            title:
+              "Whether sales concentration is >50% on one party.",
+          },
+          salesConcentrationPartyName: {
             type: "string",
-            title: "Is sales concentration >50% on one party?",
+            title: "Name of Party",
+            dependencies: {
+              show: {
+                salesConcentration: true,
+              },
+              required: {
+                salesConcentration: true,
+              },
+            },
+          },
+          salesConcentrationPartyContactNo: {
+            type: "number",
+            title: "Contact Number of Party",
+            dependencies: {
+              show: {
+                salesConcentration: true,
+              },
+              required: {
+                salesConcentration: true,
+              },
+            },
           },
           businessCycleDebtors: {
             type: "string",
@@ -258,10 +275,6 @@ export const smfgSmeSchema = {
               title: "Customer",
             },
           },
-          registrationCertifications: {
-            type: "string",
-            title: "Registration / Certification Details",
-          },
           taxApplicability: {
             type: "string",
             title: "Applicability of VAT / Excise / Service Tax",
@@ -279,22 +292,32 @@ export const smfgSmeSchema = {
       schema: {
         type: "object",
         properties: {
-          essResponses: {
-            type: "array",
-            title: "ESS Checklist Responses",
-            items: {
-              type: "object",
-              properties: {
-                question: { type: "string", title: "Question" },
-                response: {
-                  type: "string",
-                  title: "Response",
-                  enum: ["Yes", "No"],
-                },
-              },
-            },
+          entityInvolvementCommercialEtc: {
+            type: "string",
+            title: "Is the entity involved in any commercial pest control operation, use any Ozone depleting substance, hazardous chemicals, bio medical waste, Dyes, forest products, tobacco, alcohol, weapons, gambling, radioactive materials, unbounded asbestos, harmful fishing practice, commercial logging.",
+            enum: ["Yes", "No"],
           },
-          essOthers: {
+          entityInvolvementForceLabourEtc: {
+            type: "string",
+            title: "Does the entity involve in Child or forced Labour or business involve displacement of people, impact on indigenous people or established in land designated as forest or forest products",
+            enum: ["Yes", "No"],
+          },
+          entityConsent: {
+            type: "string",
+            title: "Does the entity have required consent of establishment from State pollution control board and other government authorities on establishment in Wetland Area, near National Park, Sanctuaries or Forest areas, ASI certificate for establishment up to 300 meters near a protected monument or cultural heritage, 500 meters near Coastal Regulation Zone",
+            enum: ["Yes", "No"],
+          },
+          entityPollutants: {
+            type: "string",
+            title: "Does the entity involves in proper mechanism for treatment or disposal of waste and does not emit air, water or noise pollutants.",
+            enum: ["Yes", "No"],
+          },
+          entityESSGuidelines: {
+            type: "string",
+            title: "Does the Entity comply with the above ESS guidelines",
+            enum: ["Yes", "No"],
+          },
+          otherESSNotes: {
             type: "string",
             title: "Other ESS notes",
             ui: { widget: "textarea", rows: 2 },
@@ -342,7 +365,7 @@ export const smfgSmeSchema = {
     },
     {
       id: "bankingBehaviour",
-      label: "Banking Behaviour",
+      label: "Banking Details",
       schema: {
         type: "object",
         properties: {
@@ -357,10 +380,6 @@ export const smfgSmeSchema = {
                   type: "string",
                   title: "Account Type",
                   enum: ["Current", "Savings", "CC/OD"],
-                },
-                operatingSince: {
-                  type: "string",
-                  title: "Operating Since",
                 },
                 vintage: { type: "string", title: "Vintage of account" },
                 minBalance: { type: "string", title: "CC/OD Min Balance" },
@@ -385,7 +404,7 @@ export const smfgSmeSchema = {
             title: "Detailed Purpose / End Use of Loan Amount",
             ui: { widget: "textarea", rows: 2 },
           },
-          appliedLoanAmount: {
+          loanAmountApplied: {
             type: "number",
             title: "Applied Loan Amount",
             formatter: {

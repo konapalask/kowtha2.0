@@ -155,7 +155,22 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Family Background (Details of family members, major income earning member, dependents details etc.)</strong></p></td>
-                <td style="${valueCellStyle}">${renderFamilyMembers()}</td>
+                <td style="border:1px solid #ccc;padding:8px">
+                <table style="${tableStyle}">
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Name</strong></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Relation</strong></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Age</strong></p></td>
+                     </tr>
+                     ${familyMembersList.map((member: any) => `
+                        <tr>
+                            <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${member.name || ""}</p></td>
+                            <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${member.relationToApplicant || ""}</p></td>
+                            <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${member.age || ""}</p></td>
+                        </tr>
+                     `).join("")}
+                </table>
+                </td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Total Family members (Nos)</strong></p></td>
@@ -215,7 +230,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Nature of business Trading / manufacturing /<br />services / others: please specify)</strong></p></td>
-                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.businessFinancialProfile?.natureOfBusiness || verificationData.businessDetails?.natureOfBusiness || ""}</p></td>
+                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.businessFinancialProfile?.natureOfBusiness === "Others" ? "Others - " + verificationData.businessFinancialProfile?.natureOfBusinessOther : verificationData.businessFinancialProfile?.natureOfBusiness ||  ""}</p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Product / services offered.</strong></p></td>
@@ -233,11 +248,11 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Other details business observed during the visit:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
                     <ul>
-                        <li>Business name board seen: ${verificationData.otherDetailsObserved?.businessNameBoardSeen === true ? "Yes" : "No"}</li>
-                        <li>No of employees seen: ${verificationData.otherDetailsObserved?.noOfEmployeesSeen || verificationData.businessDetails?.numberOfWorkers || ""}</li>
-                        <li>Business activity seen: ${verificationData.otherDetailsObserved?.businessActivitySeen === true ? "Yes" : verificationData.businessDetails?.businessActivityObserved || ""}</li>
-                        <li>Stock seen: ${verificationData.otherDetailsObserved?.stockSeen === true ? "Yes" : verificationData.businessDetails?.stockLevelObserved || ""}</li>
-                        <li>No. of machines seen: ${verificationData.otherDetailsObserved?.noOfMachinesSeen || ""}</li>
+                        <li><strong>Business name board seen:</strong> ${verificationData.otherDetailsObserved?.businessNameBoardSeen || ""}</li>
+                        <li><strong>No of employees seen:</strong> ${verificationData.otherDetailsObserved?.noOfEmployeesSeen || ""}</li>
+                        <li><strong>Business activity seen:</strong> ${verificationData.otherDetailsObserved?.businessActivitySeen || ""}</li>
+                        <li><strong>Stock seen:</strong> ${verificationData.otherDetailsObserved?.stockSeen || ""}</li>
+                        <li><strong>No. of machines seen:</strong> ${verificationData.otherDetailsObserved?.noOfMachinesSeen || ""}</li>
                     </ul>
                 </td>
             </tr>
@@ -245,7 +260,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Top 3 clients (customers) (Average debtor days).</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
                     <ul>
-                        ${(verificationData.otherDetailsObserved?.top3ClientsCustomers || verificationData.businessDetails?.regularCustomers || []).map((customer: any) => `<li>${customer.nameOfRegularCustomers || customer.name || ""} - ${customer.contactNumberOfRegularCustomers || customer.contactDetails || ""} - ${customer.averageDebtorDays || ""} days</li>`).join("") || ""}
+                        ${(verificationData.otherDetailsObserved?.top3ClientsCustomers || verificationData.businessDetails?.regularCustomers || []).map((customer: any) => `<li>${customer.nameOfRegularCustomers || customer.name || ""} ${customer.contactDetails?"- "+customer.contactDetails : ""}  ${customer.averageDebtorDays? " - "+customer.averageDebtorDays+" days" : ""} </li>`).join("") || ""}
                     </ul>
                 </td>
             </tr>
@@ -253,7 +268,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Top 3 clients (suppliers) (Average creditor days).</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
                     <ul>
-                        ${(verificationData.otherDetailsObserved?.top3ClientsSuppliers || verificationData.businessDetails?.regularSuppliers || []).map((supplier: any) => `<li>${supplier.nameOfRegularSuppliers || supplier.name || ""} - ${supplier.contactNumberOfRegularSuppliers || supplier.contactDetails || ""} - ${supplier.averageCreditorDays || ""} days</li>`).join("") || ""}
+                        ${(verificationData.otherDetailsObserved?.top3ClientsSuppliers || verificationData.businessDetails?.regularSuppliers || []).map((supplier: any) => `<li>${supplier.nameOfRegularSuppliers || supplier.name || ""} ${supplier.contactDetails?"- "+supplier.contactDetails : ""}  ${supplier.averageCreditorDays? " - "+supplier.averageCreditorDays+" days" : ""} </li>`).join("") || ""}
                     </ul>
                 </td>
             </tr>
@@ -269,7 +284,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other observations / remarks during visit:</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
                     <ul>
-                        <li><strong>${verificationData.otherDetailsObserved?.otherObservationsRemarks || ""}</strong></li>
+                        <li>${verificationData.otherDetailsObserved?.otherObservationsRemarks || ""}</li>
                     </ul>
                 </td>
             </tr>
@@ -287,15 +302,14 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>2) Sales fluctuations (Seasonal business)</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <p style="margin:8px 0;line-height:1.5">Peak sales months: ${verificationData.commonPoints?.peakSalesMonths || "Not assessed"}</p>
-                    <p style="margin:8px 0;line-height:1.5">Low sales months: ${verificationData.commonPoints?.lowSalesMonths || "Not assessed"}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Peak sales months:</strong> ${verificationData.commonPoints?.peakSalesMonths || "Not assessed"}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Low sales months:</strong> ${verificationData.commonPoints?.lowSalesMonths || "Not assessed"}</p>
                 </td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>3) Customer Identity established during PD</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.customerIdentityEstablished || "Not assessed"}</p>
-                    ${verificationData.commonPoints?.customerIdentityEstablished === "Yes" && verificationData.commonPoints?.customerIdentityDetails ? `<p style="margin:8px 0;line-height:1.5">If yes, established through document: ${verificationData.commonPoints.customerIdentityDetails}</p>` : ""}
+                    <p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.customerIdentityEstablished === "Yes" ? "Yes <br> "+verificationData.commonPoints?.customerIdentityDetails : verificationData.commonPoints?.customerIdentityEstablished === "No" ? "No <br> "+verificationData.commonPoints?.customerIdentityDetails : "Not assessed"}</p>
                 </td>
             </tr>
             <tr>
@@ -304,7 +318,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td  colspan="2" style="${labelCellStyle}"><strong>5) Details of existing loans confirmed during PD</strong></td>
-            <td> 
+            <td style="border:1px solid #ccc;padding:8px"> 
              <table style="${tableStyle}">
                 <tr>
                     <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Loan type</strong></p></td>
@@ -334,11 +348,11 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>7) Details of Working capital (OD/CC) if any</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <p style="margin:8px 0;line-height:1.5">Bank Name: ${verificationData.commonPoints?.workingCapitalBankName || ""}</p>
-                    <p style="margin:8px 0;line-height:1.5">Limit: ${verificationData.commonPoints?.workingCapitalLimit || ""}</p>
-                    <p style="margin:8px 0;line-height:1.5">Utilisation: ${verificationData.commonPoints?.workingCapitalUtilisation || ""}</p>
-                    <p style="margin:8px 0;line-height:1.5">Collateral: ${verificationData.commonPoints?.workingCapitalCollateral || ""}</p>
-                    <p style="margin:8px 0;line-height:1.5">Details of linked loans (if any): ${verificationData.commonPoints?.workingCapitalLinkedLoans || ""}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Bank Name:</strong> ${verificationData.commonPoints?.workingCapitalBankName || ""}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Limit:</strong> ${verificationData.commonPoints?.workingCapitalLimit || ""}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Utilisation:</strong> ${verificationData.commonPoints?.workingCapitalUtilisation || ""}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Collateral:</strong> ${verificationData.commonPoints?.workingCapitalCollateral || ""}</p>
+                    <p style="margin:8px 0;line-height:1.5"><strong>Details of linked loans (if any):</strong> ${verificationData.commonPoints?.workingCapitalLinkedLoans || ""}</p>
                 </td>
             </tr>
             <tr>
@@ -353,7 +367,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Banking details:</strong></p></td>
-               <td>
+               <td style="border:1px solid #ccc;padding:8px">
                <table style="${tableStyle}">
                 <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Bank Name</strong></p></td>
@@ -375,13 +389,144 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Details of collateral</strong></p></td>
-                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Address of property: ${verificationData.bankingDetails?.addressOfProperty || ""}</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Address of property:</strong> ${verificationData.bankingDetails?.addressOfProperty || ""}</p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Status of PD (Positive, Negative, Credit Manager visit<br />needed)</strong></p></td>
                 <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.bankingDetails?.statusOfPD || ""}</strong></p></td>
             </tr>
         </table>
+        <table style="${tableStyle}">
+            <tr>
+                <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.pdDetails?.pdOfficerName || ""}</strong></p></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.pdDetails?.pdOfficerSignature || ""}</strong></p></td>
+            </tr>
+        </table>
+
+
+        <!-- Annexure 1 -->
+        <table style="${tableStyle}">
+            <tr>
+                    <td colspan="3" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5;text-align:center;"><strong>ANNEXURE1: Income assessment for Asha Home Loans</strong></p></td>
+            </tr>
+            <tr>
+                <td colspan="3" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5;text-align:center;"><strong>Product Specific PD(Applicable for Assessed income cases)</strong></p></td>
+            </tr>
+
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Monthly Turnover (Total monthly billing)</strong></p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.monthlTurnOver || 0)} <br>(As assessed during the PD through records maintained at business place).</p></td>
+            </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Total Purchases (Monthly purchases, costofacquisition etc.)</strong></p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.totalPurchases || 0)} <br>(As assessed during the PD through records maintained at business place).</p></td>
+            </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross and Net margin of business.</strong></p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.grossAndNetMargin || 0)}<br> approx (Confirmed by customer during PD).</p></td>
+            </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Estimated income</strong></p></td>
+                <td style="border:1px solid #ccc;padding:8px">
+                <table style="${tableStyle}">
+                <tr>
+                    <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5;text-align:center;"><strong>Cash flow analysis during PD</strong></p></td>
+                </tr>
+                <tr>
+                    <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Particulars</strong></p></td>
+                    <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Amount INR</strong></p></td>
+                </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Monthly TO / Gross Receipts (estimated)</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.monthlyToGrossReceiptsEstimated || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Any other income (monthly)(commison rental etc.)</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.anyOtherIncome || 0)}</p></td>
+                    </tr>
+                    <tr>
+                      <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Gross monthly income(total)</strong></p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Direct expenses (Purchase cost, cost of goods sold, selling expenses)</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessDirectExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Rental expenses</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessRentalExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Staff Salary</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessStaffSalary || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Electricity/mobile/travelexpenses.</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessElectricity || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Any other expenses than mentioned above</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessAnyotherExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Income left for domestic expenses</strong></p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Monthly Household Expenses</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"></p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  a) Food Expenses</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.foodExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  b) Children Education</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.childrenEducation || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  c) House rent(if any)</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.houseRent || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  d) Medical expenses</p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.medicalExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  e) Other household expenses</p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.otherHouseHoldExpenses || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Net monthly income post all expenses</strong></p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: a)Savings / investments / insurance premium etc.</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessSavingsInvestmentsInsurancePremium || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>b) Existing EMIs (obligations)</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessExistingEmisObligations || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>c) EMI allocated for the proposed loan</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.emiAllocatedFoTheProposedLoan || 0)}</p></td>
+                    </tr>
+                    <tr>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Net Surplus income post all expenses & obligations</strong></p></td>
+                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.netSurplus || 0)}</p></td>
+                    </tr>
+                </table>
+                </td>
+
+            </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5;text-align:center;"><strong>Loans taken from family, friends business associates etc.</strong></p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.loansTakenFromFamilyFriends || 0)}</p></td>
+            </tr>
+        </table>
+
     </div>
     ${pdBaseTemplateFooter(html_data)}
 

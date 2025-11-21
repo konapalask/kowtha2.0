@@ -794,8 +794,10 @@ export class LoanService {
   async getLoansByVerifier(
     verifierId: number,
     department: Department,
-    role: any
-  ) {
+    role: any,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaginatedResponse<any>> {
     try {
       const verifier = await this.prisma.user.findUnique({
         where: { id: verifierId },
@@ -867,13 +869,34 @@ export class LoanService {
 
       const loans = Array.from(loanMap.values());
 
+      const safeLimit = Math.max(1, Number.isFinite(limit) ? limit : 10);
+      const total = loans.length;
+      const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+      const safePage = Math.min(
+        totalPages,
+        Math.max(1, Number.isFinite(page) ? page : 1)
+      );
+      const startIndex = (safePage - 1) * safeLimit;
+      const paginatedLoans = loans.slice(startIndex, startIndex + safeLimit);
+
       await this.loggingService.info("Retrieved loans by verifier", {
         verifierId,
         role,
-        count: loans.length,
+        total,
+        page: safePage,
+        limit: safeLimit,
+        count: paginatedLoans.length,
       });
 
-      return loans;
+      return {
+        items: paginatedLoans,
+        meta: {
+          total,
+          page: safePage,
+          limit: safeLimit,
+          totalPages,
+        },
+      };
     } catch (error) {
       await this.loggingService.error("Failed to get loans by verifier", {
         verifierId,
@@ -2871,7 +2894,8 @@ export class LoanService {
     verificationType: VerificationType,
     verificationData: any,
     financialAnalysisData: any,
-    synopsis?: string
+    synopsis?: string,
+    approvedStatus?: ApprovedStatus
   ) {
     try {
       const verification = await this.prisma.verification.findFirst({
@@ -2908,6 +2932,7 @@ export class LoanService {
           verificationData,
           financialAnalysis: mergedFinancialAnalysis,
           ...(synopsis !== undefined && { synopsis }),
+          ...(approvedStatus !== undefined && { approvedStatus }),
           initialSubmitted: true,
           status: VerificationStatus.Completed,
           updatedAt: new Date(),

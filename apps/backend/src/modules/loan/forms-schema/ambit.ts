@@ -166,7 +166,7 @@ export const ambitSchema = {
         type: "object",
         properties: {
           noOfVisit: {
-            type: "integer",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
@@ -203,6 +203,16 @@ export const ambitSchema = {
                 relationship: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -217,7 +227,7 @@ export const ambitSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {
@@ -321,24 +331,12 @@ export const ambitSchema = {
             title: "Automation Level",
           },
           receipts: {
-            type: "number",
+            type: "string",
             title: "Receipts",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
           payments: {
-            type: "number",
+            type: "string",
             title: "Payments",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
         },
       },
@@ -394,24 +392,12 @@ export const ambitSchema = {
         type: "object",
         properties: {
           netMargin: {
-            type: "number",
+            type: "string",
             title: "Net Margin",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
           expenditure: {
-            type: "number",
+            type: "string",
             title: "Expenditure",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
           },
           employees: {
             type: "integer",

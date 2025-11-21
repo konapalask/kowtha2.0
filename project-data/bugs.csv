@@ -1,0 +1,200 @@
+hero housing - self employed,
+"autopopulated answers like application number, applicant name...... etc are not populated in app, web & PDF and also not able to edit",All,
+PD Visit date and time - both options duplicated in app & web,Web&Mobile,SOLVED - Removed duplicate PD visit date/time fields
+Lat log of business address - these options are appeared multiple times in app & web,All,SOLVED - Removed duplicate lat/long fields
+Borrower details - duplicated in app & web,Web&Mobile,SOLVED - Removed duplicate borrower details
+Family details - appeared multiple times in app & web,Web&Mobile,SOLVED - Removed duplicate family details
+family background notes; number of dependents - these options available in app&web but not in original templete/format,Web&Mobile,
+business Name - duplicated in app & web,Web&Mobile,SOLVED - Removed duplicate business name
+No of total suppliers and details of terms for credit period - in app & web pls give this as discriptive so that we can add both numeric and alphabets,Web&Mobile,SOLVED - Changed to string (descriptive)
+No of total customers and details of terms for credit period - in app & web pls give this as discriptive so that we can add both numeric and alphabets,Web&Mobile,SOLVED - Changed to string (descriptive)
+supporing documents collected - these options available in app but not in original templete/format,Mobile,
+"Income assessment details - pls add Travelling & Transportation, Repairs & Maintanance options also along with rent, electricity.....etc or give option to add extraincomes/expences, what ever the name of expence/income and amount",Web&Mobile,
+Income assessment details(Income assessment line items) - there is option to add Particular;Amount (Rs.) Monthly;Comments in app and web but ther are nowhere appearing in PDF. please disciss with team is these options necessery.,
+"there is no option to add comments for all options in income calculation table(sales, purchase, other income... etc) except for Net monthly income coomments, obligations coomments, Net residual income coomments",Web&Mobile,
+Reason if customer not available during visit - this is an extra option available in both app & web but not in PDF. also in the web it was given as to select the date instead of populating the answer filled in app. shall we keep this option or remove once discuss with team.,
+PD visit time - in the app it was given as discriptive but in the web it was given to selct the time. dispritive answer in app is also not populating in web.,Web,
+Latitude of business address; Longitude of business address - theser are not autopopulating in app & web. instead we have to enter manually.,Web&Mobile,
+No. of dependants - this is an extra option available in both app & web but not in PDF. shall we keep this option or remove once discuss with team.,Web&Mobile,
+Family background notes - this is an extra option available in both app & web but not in PDF. shall we keep this option or remove once discuss with team.,
+there are somany questions duplicated in app & web with tiled (legacy),Web&Mobile,SOLVED - Removed all legacy fields
+Turnover of last three years and current year till date (Total actual turnover of customer) - in the web it was given as to select the date instead of populating the answer filled in app,Mobile,
+Total debtors and creditors as on date (mention defaults/write offs) - in the web it was given as to select the date instead of populating the answer filled in app,Web,
+Whether customer visited the property - in the web it was given as to select the date instead of populating the answer filled in app,Web,
+Property is occupied by whom and reason if not self-occupied - in the web it was given as to select the date instead of populating the answer filled in app,Web,
+When seller bought the property - in the web it was given as to select the time instead of populating the answer filled in app,Web,
+each time when the details were saved the page is going to top. repeatedly happen in this format,Web,
+"Supporting documents collected - this is an extra option available in both app, web & PDF. shall we keep this option or remove once discuss with team.",All,
+the questions also appear at the right side of the PDF along with the answers. shall we keep or remove pls discuss with team. this happening from Current business details to the last question Final PD status. can we remove the questions in the right side of the pdf and position the answers to adjecent to that respective question in the left side of the pdf,Backend,
+Size / area of business premises - answer not generating in PDF.,Backend,
+"Details of supplier and customer - all question & answers and added supplier/customer details (along with Name, business name, relation, contact ) are not generating in PDF. instead it is appearing as ""not provided"" even though we have added somany details.",Backend,
+"Field Visit Time; PD Verified By (Officer); PD Verified Date - these three options appearing in the PDF below the photos, but there are not in the originally given format/templete.",Backend,
+remove the financial analysis as same is available in tabuala form in PDF (or) change the financial analysis as discussed in the meeting. financial analysisi attched in the first apk testing file was good just Gross profit and net profit positions to be appear below the table intead of at top.,Backend,
+,
+Axis Finance-hl,
+green tics not appearing and also save option not avaialbel in the app. but we are able to submit the case in app,
+"""CURRENT ADDRESS DETAILS"" in PLACE OF RESIDENCE/OFFICE - change the question as ""CURRENT RESIDENCE ADDRESS DETAILS"" in app", SOLVED - Renamed to Current Residence Address Details
+"""Key Manager to the business"" in the SELF EMPLOYED / SALARIED tab - give the option discriptive. usually we enter Key person name & his mobiel number. in app", SOLVED - Changed to string (descriptive)
+EMPLOYEE / OTHER MAJOR COST - No of employees & Total Salaries per month are the only questions to be under this tab in app,
+BUSINESS DATA - tabula form required as per the given templet (fyi - Accounting year; Estimated; Previous Financial year are headings of the table colounms.) in the app,
+Other Income - this is a complete diffrent question like other business income not a heading to the assest table. in app,
+"change the heading ""Other Income"" with Assests & Investments. other income and lic/shares/other properties...etc are completely diffrent questions in the app",
+Outstading amount in OTHER LIABILITIES tab - replace the name with LOAN AMOUNT in the app, SOLVED - Renamed to LOAN AMOUNT
+BUDGET ANALYSIS - in the app the questions are in reverse order., SOLVED - Reversed order of questions
+Overall Positives/Negatives; ESTIMATED INCOME - these questions are not avalable in the app. but once check how these appear in web & PDF,
+we have submitted the case (LA-565523/TPV-00152920 - LAXMAN MALOTH) in the app but it is not showing in verify tab of the web.,
+,
+IDFC - HL & ML,
+there are somany questions duplicated in app & web with tiled (legacy), SOLVED - Removed all legacy fields
+"in general details there are questions not related to the idfc format. those are lattitude, longitude, region, location, branch.",SOLVED - Removed latitude, longitude, region, location, branch
+other assets - extra questions in the app check how appear in web & pdf,
+check note point whether available in the PDF or not.,
+LA-565948/TPV-00153577; LA-565555/TPV-00152647 - cases submitted in the app but it is not showing in verify tab of the web.,
+,
+icici,
+LA-565118/TPV-00152585 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+chola,
+About the applicant and its business - in the app given as discritive and able to add N number of points. check how it appears in web & pdf and also we need about applicant and about business as diffrent queations, SOLVED - Split into About Applicant and About Business fields
+"Assets - questionnaire missing in app. only ""assets"" tab available no questions available in it - in app",
+"Customers - questionnaire missing in app. only ""customers"" tab available no questions available in it - in app",
+"otherincome - questionnaire missing in app. only ""otherincome"" tab available no questions available in it - in app",
+"Existing Loan details - questionnaire missing in app. only ""Existing Loan details"" tab available no questions available in it - in app",
+"Banking Details - questionnaire missing in app. only ""Banking Details"" tab available no questions available in it - in app",
+"Comfort Factor- questionnaire missing in app. only ""Comfort Factor"" tab available no questions available in it - in app",
+"Discomfort Factor- questionnaire missing in app. only ""Discomfort Factor"" tab available no questions available in it - in app",
+"Recommendations- questionnaire missing in app. only ""Recommendations"" tab available no questions available in it - in app",
+Loan Requested - amount not autopopulating in app and also not able to edit,
+unable to submit the case in the app due to above errors,
+,
+axis finance ubl above 10 lakhs,
+"About the Business - given as to add points wise instead of discriptive. once chek in how apear in web, pdf then diside to keep it or change.",
+Note: Amounts mentioned above are approx - does this note point appearin pdf. not available in app,
+LA_566132 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+HERO FINCORP,
+"The following data and explanation are based on the verbal information provided to us during the course of thevisit - this disclimer appear as a seperate qiestion in the app nut it is not a question. check how appwar in web, pds",
+"About the Business - given as to add points wise instead of discriptive. once chek in how apear in web, pdf then diside to keep it or change.",
+"DocumentsObserved - given as to add points wise instead of discriptive. once chek in how apear in web, pdf then diside to keep it or change.",
+"OTHER BUSINESS/INCOME - given as to add points wise instead of discriptive. once chek in how apear in web, pdf then diside to keep it or change.",
+"in the app synopsis option given at the end along with financial ananlysis. how it appear in web, pdf. does this required or not.",
+"along with synopsis ""business name"" & ""partners name"" are also given. check why these are in app not available in format. check how appear in web, pdf.",
+"check p&l and banace sheet in web, excel downloaded in web with templet. there are unrelated questions/incomes/expencec/names observed in app in financial analasys.",
+565636 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+IDFC FIRST-PL,
+branch - additional question given in app which is not available in this original format,SOLVED - Removed branch field
+"there are additional questions in the app which are not from the original format. check with the web, pdf then deside to keep or remove. those questions are - salary account bank, salary account number, salary credit mode, income observation/remarks, documents observed, interview details, remarks for residence & assets details.",SOLVED - Removed specified additional fields
+"SFDC ID (application no.) - not autopopulated in the app, also not able to edit. because of that error unable to submit the case in the app.",
+,
+india shelter - self employed,
+Monthly Rent & Security Deposit (if Rented) - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+Purchase price& MV (if owned) - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+customer location (office/business geo tag) - geo tag not populated in the app,
+"Usage of Property after Purchase - given as discriptive. so pls remove ""if others"" questions in it.", SOLVED - Removed if others question
+LA-566084/TPV-00153602 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+india shelter - salaried,
+"General information - questions not as per given format (pls remove region, location, latt, long)", SOLVED - Removed region, location, latitude, longitude
+Monthly Rent & Security Deposit (if Rented) - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+Purchase price& MV (if owned) - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+"Existing Relationship with Indiashelter - position of the question is not as per format - check how appear in web, pdf",
+in the app questionnair tab is not in the order of given format - check how appear in web & pdf,
+"Purpose of Loan - given as discriptive. so pls remove ""if others"" questions in it.",
+"Usage of Property after Purchase - given as discriptive. so pls remove ""if others"" questions in it.", SOLVED - Removed if others question
+"Existing Relationship with Indiashelter - remove this question from ""Employer details"" tab as is is already in ""financial profile""",
+customer location (office/business geo tag) - geo tag not populated in the app,
+LA-564011/TPV-00153255 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+axis agri,
+Incorporation Date - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+Type of Industry - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+Nature of business - pls give it as discriptive, SOLVED - Changed to string (descriptive)
+Documents Provided - spelling mistake in app, SOLVED - Fixed spelling (Documents)
+"PD Final Status - pls remove ""pending"" option in the app",
+"Current Account if any, . Collateral Security Details, Existing Banking Relations with Axis if any - these questions are missing in app",
+"Reference Number, Name of Firm - not autopopulated in the app, also not able to edit. because of that error unable to submit the case in the app.",
+10000065195 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+jana bank senp below 50L,
+"Current monthly Salary - change this into ""Current monthly Salary (to be filled in salaried income profile) "" in app. and also all the questions in this tab has to be discriptive answers instead of option/numeric/date.",
+Specific for Cash Salaried Profile - give all the questions in this tab has to be discriptive answers instead of option/numeric/date., SOLVED - Changed all fields to descriptive
+Clients - No. of Fixed Clients; Credit Period ; Cash-Cheque Proportion - pls give these 3 questions in ddiscriptive answerble format, SOLVED - Changed to string (descriptive)
+Vendors - No. of Fixed Vendor ; Credit Period ; Cash-Cheque Proportion - pls give these 3 questions in ddiscriptive answerble format, SOLVED - Changed to string (descriptive)
+"in the Income Assessment tab - change 'Last 3 months salary' into ""Last 3 months"" - we mention the month name in this question",
+"Level of Activity & Stocks along with Observation - given as to add points wise instead of discriptive. once chek in how apear in web, pdf then diside to keep it or change.",
+"Interviewer’s Comments along with the explanations to credit comments - check how it appears in web, pdf (in app comfirts, discomfirts given which is not available in format)",
+Geo Tag details - missing in app,
+LA-564588/TPV-00151788 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+jana bank salaried,
+Note:Amounts mentioned above are approx - check wheher this note point appear in pdf (not appearing in app) (this note appear 4 times in report),
+"EMI Paid Bank - pls give this as discriptive (this question is in ""Loan Details"" tab)", SOLVED - Changed to string (descriptive)
+Third Party Confirmation - all details has to be filled by pd executive no autopopulation required (in the app applicant business name populating).,
+Third Party Confirmation - pls give add more tpc check option in app.,
+Geo Tag details - missing in app,
+LA-565904/TPV-00153226 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+SMFG SME,
+Application Reference No - not autopopulated in app also unabe to edit,
+"""business started since"" and ""promotors experience"" - in the app these two questions are in ""Business Information"" tab. but not in original format. so check how appear in web, pdf.",
+"Locality of Business/Office, Whether Residence cum office set up, Name board seen if yes what was written - these three questions position changed in app due to ""business information"" part of the format devided in to two parts in app. check how appear in web, pdf",
+"Whether sales concentration is >50% on one party - change this question with ""Whether sales concentration is >50% on one party. If yes name of Party and contact no""", SOLVED - Updated question text
+"the questions from ""Business Information"" part of the priginal format devided in to two parts in app. those are ""Business Information"" and ""financial & oprations details"". check how appear in web, pdf",
+"registration / certifiacte details - extra questioin given in app. not available in format. check how appear in web, pds",
+Environmental and Social Safeguards (ESS) - in the app given as to add both question & answers by executive but the questions in the given formats are fixed. please give the questionnaire as per the given format.,
+"""banking behavious"" - change this question with ""Banking Details""",
+"""operating since"" - this is additional question given in banking details tab in the app. but not available in the original fomat. pls remove it in app.",
+financial analysis attched in the app is good. in this format only - cost of material consumed amount was not deducted from the sales (formula mistake/caculation error) in the app,
+LA-566011/TPV-00153414 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+yes bank,
+"RESIDENCE/BUSINESS ADDRESS DETAILS - check how appearin in web, PDF.",
+"in the annexure-1 the last question was ""commute plan/reason for buying far property"". it does not clealy stae the queation actually in the given format. pls change it as",
+LA-565950/TPV-00153386 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+hero housing salaried,
+Lat log of office address - not autopopulated in the app,
+"Whether seller is having any loan on the property - missing from ""Details of Property"" tab in app",SOLVED - Added seller loan field
+pls check the question position in the right side of the pfd. we observed a problem in seld employed format,
+refer selef employed format issues also while check ing the salaried format.,
+LA-565958/TPV-00153211 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+DCB NAMK,
+"Office set-up with overall look; EXPENSES; Transactions - these three questions are related to business synopsis. in the app these are given to add points wise instead of discriptive. so check how appear in the web, PDF. then deside to keep or change.",
+"Insurance Company Name - change the heading name as ""Insurance Details"". and also remove the sub heading ""sister company"" from insurence details. in the app. check how appear in web, PDF (for sister company sunheading).",
+Loan Required - mobile number autopopulated in the app. pls change.,
+Verification - check whether the note point appearing in the pdf,
+"Verification - pls change the ""month"" ad discriptive instead of numeric. we metion month name in it.",
+"in the app synopsis option given at the end along with financial ananlysis. how it appear in web, pdf. does this required or not.",
+"along with synopsis ""business name"" also given. check why these are in app not available in format. check how appear in web, pdf.",
+in the expeces part of the financial analysis in app only esriamated options given but not given option to fill last 2 years auduted financial years values. check how it appear & work in the web & downloaded excelsheet from web.,
+"check p&l and banace sheet in web, excel downloaded in web with templet.",
+balance sheet missing in app. for this formats.,
+LA-564239/TPV-00150118 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+aditya birla,
+"in family member details change the ""business name"" option into ""ocupation"" - in app",
+Sales Bills; Purchase Bills - give these quesations as discriptive answerble instead of numeric, SOLVED - Changed to string (descriptive)
+"Concerns / Deviations - missing in app. pls add this question after the ""observations""", SOLVED - Added Concerns/Deviations field
+"Loan Details - there is heading in the format but not given in app. check how appear in web, pdf then deciside to add or keep same in app.",
+"Applicant’s Monthly Expenses of the business - whole details od expences and incomes missing in app. check whether available in web, pdf.",
+"daily income calculation table also missing in app. check whether available in web, pdf.",
+LA-565057 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+ambit - hl,
+No. of Visit - give these quesations as discriptive answerble instead of numeric, SOLVED - Changed to string (descriptive)
+Receipts; Payments - give these quesations as discriptive answerble instead of numeric, SOLVED - Changed to string (descriptive)
+Net Margin; Expenditure; - give these quesations as discriptive answerble instead of numeric, SOLVED - Changed to string (descriptive)
+LA-564202/TPV-00151999 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+axis finance ubl below 10 lakhs,
+whole format in the app is wrong. its look like arka fincap & above 50 lakhs formats are mixed in it.,
+LA-564771/TPV-00152267 - case submitted in the app but it is not showing in verify tab of the web.,
+,
+incred,
+"Debtors, Creditors & Stock tab - in the app pls give subheadings as Debtors, Creditors, Stock for each parts.", SOLVED - Added subheadings for Debtors, Creditors, Stock
+"chit funds, pvt finance & hans loand etc. - check how appear in webm pdf",
+ESTIMATED INCOME - whole details missing in app. check how apear in the web.,
+in the app there are calculations error in the fiancial analysis -cost of material consumed amount was not deducted from the sales (formula mistake/caculation error) in the app,
+LA-564788/TPV-00151438 - unable to submit the case in the app due to error name of applicant field is empty. but that field is already autopopulated from initiation data.,

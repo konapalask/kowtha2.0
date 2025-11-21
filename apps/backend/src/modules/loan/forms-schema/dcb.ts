@@ -32,7 +32,7 @@ export const dcbSchema = {
             title: "Years of Service",
           },
         },
-        required: ["name"],
+        required: ["applicantName"],
       },
       required: true,
     },
@@ -97,40 +97,40 @@ export const dcbSchema = {
           details: {
             type: "array",
             title: "Details of Directors & Proprietor",
-            items: {          
+            items: {
               type: "object",
-            properties: {
-              nameOfShareholder: {
-                type: "string",
-                title: "Name",
+              properties: {
+                nameOfShareholder: {
+                  type: "string",
+                  title: "Name",
+                },
+                ageOfShareholder: {
+                  type: "integer",
+                  title: "Age",
+                },
+                qualifications: {
+                  type: "string",
+                  title: "Qualifications",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
+                },
+                responsibilities: {
+                  type: "string",
+                  title: "Responsibilities",
+                },
+                shareholdingPatternIn: {
+                  type: "number",
+                  title: "Share holding Pattern (in %)",
+                },
               },
-              ageOfShareholder: {
-                type: "integer",
-                title: "Age",
-              },
-              qualifications: {
-                type: "string",
-                title: "Qualifications",
-                enum: [
-                  "Below 10th",
-                  "10th pass",
-                  "12th pass",
-                  "Diploma/ITI certification",
-                  "Graduate",
-                  "PG/Professional Certification"
-                ],
-              },
-              responsibilities: {
-                type: "string",
-                title: "Responsibilities",
-              },
-              shareholdingPatternIn: {
-                type: "number",
-                title: "Share holding Pattern (in %)",
-              },
+            },
           },
-        },
-      },
         },
       },
       required: true,
@@ -199,54 +199,27 @@ export const dcbSchema = {
         type: "object",
         properties: {
           officeSetUpWithOverallLook: {
-            type: "array",
+            type: "string",
             title: "Office Set-up with Overall Look",
-            items: {
-              type: "object",
-              properties: {
-                detail: {
-                  type: "string",
-                  title: "Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           expenses: {
-            type: "array",
+            type: "string",
             title: "Expenses",
-            items: {
-              type: "object",
-              properties: {
-                expenseDetail: {
-                  type: "string",
-                  title: "Expense Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           transactions: {
-            type: "array",
+            type: "string",
             title: "Transactions",
-            items: {
-              type: "object",
-              properties: {
-                transactionDetail: {
-                  type: "string",
-                  title: "Transaction Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           plantAndMachinery: {
@@ -286,28 +259,28 @@ export const dcbSchema = {
           details: {
             type: "array",
             title: "Details of All Loans as on Date Of Visit",
-            items: {          
-            type: "object",
-           properties: {
-              bank: {
-                type: "string",
-                title: "Bank",
+            items: {
+              type: "object",
+              properties: {
+                bank: {
+                  type: "string",
+                  title: "Bank",
+                },
+                typeOfLoan: {
+                  type: "string",
+                  title: "Type of Loan",
+                },
+                loanAmount: {
+                  type: "number",
+                  title: "o/s Amount/",
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                },
               },
-              typeOfLoan: {
-                type: "string",
-                title: "Type of Loan",
-              },
-              loanAmount: {
-                type: "number",
-                title: "o/s Amount/",
-              },
-              emi: {
-                type: "number",
-                title: "EMI",
-              },
+            },
           },
-        },
-      },
         },
       },
       required: true,
@@ -321,27 +294,27 @@ export const dcbSchema = {
           details: {
             type: "array",
             title: "Personal Assets of Proprietor",
-        items: {
-          type: "object",
-          properties: {
-            asset: {
-              type: "string",
-              title: "Asset",
-            },
-            value: {
-              type: "number",
-              title: "Value",
-              formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
+            items: {
+              type: "object",
+              properties: {
+                asset: {
+                  type: "string",
+                  title: "Asset",
+                },
+                value: {
+                  type: "number",
+                  title: "Value",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
               },
             },
           },
         },
-      },
-    },
       },
       required: true,
     },
@@ -354,25 +327,26 @@ export const dcbSchema = {
         properties: {
           details: {
             type: "array",
-            title: "Details of Customers / Clients: Not Applicable- Walk in Customers.",
-        items: {
-          type: "object",
-          properties: {
-            nameOfCustomers: {
-              type: "string",
-              title: "Name of Customers",
-            },
-            location: {
-              type: "string",
-              title: "Location",
-            },
-            contactNo: {
-              type: "number",
-              title: "Contact No",
+            title:
+              "Details of Customers / Clients: Not Applicable- Walk in Customers.",
+            items: {
+              type: "object",
+              properties: {
+                nameOfCustomers: {
+                  type: "string",
+                  title: "Name of Customers",
+                },
+                location: {
+                  type: "string",
+                  title: "Location",
+                },
+                contactNo: {
+                  type: "number",
+                  title: "Contact No",
+                },
+              },
             },
           },
-        },
-      },
         },
       },
       required: true,
@@ -404,7 +378,7 @@ export const dcbSchema = {
               },
             },
           },
-            },
+        },
       },
       required: true,
     },
@@ -417,7 +391,7 @@ export const dcbSchema = {
           details: {
             type: "array",
             title: "Sister Compnies.",
-                items: {
+            items: {
               type: "object",
               properties: {
                 nameOfSisterCompanies: {
@@ -455,10 +429,9 @@ export const dcbSchema = {
       },
       required: true,
     },
-
     {
-      id: "insuranceCompanyName",
-      label: "Insurance Company Name",
+      id: "insuranceDetails",
+      label: "Insurance Details",
       schema: {
         type: "object",
         properties: {
@@ -466,51 +439,41 @@ export const dcbSchema = {
             type: "string",
             title: "Insurance Company Name",
           },
-          dueExemptions:{
+          dueExemptions: {
             type: "string",
-            title: "Due they are taking the exemptions by taking the Children Education Fee:"
-
-          }
-        },
-      },
-      required: true,
-    },
-    {
-      id: "insuranceDetails",
-      label: "Insurance Details",
-      schema: {
-        type: "object",
-        properties: {
+            title:
+              "Due they are taking the exemptions by taking the Children Education Fee:",
+          },
           details: {
             type: "array",
-            title: "Sister Compnies.",
-        items: {
-          type: "object",
-          properties: {
-            assetsCovered: {
-              type: "string",
-              title: "Assets Covered",
-            },
-            coverNoteNoPolicyNo: {
-              type: "string",
-              title: "Cover Note No. / Policy No",
-            },
-            validUpTo: {
-              type: "string",
-              title: "Valid up to",
-            },
-            sumAssured: {
-              type: "number",
-              title: "Sum Assured",
-            },
-            assuredCovered: {
-              type: "string",
-              title: "Assured Covered",
+            title: "Insurance Details",
+            items: {
+              type: "object",
+              properties: {
+                assetsCovered: {
+                  type: "string",
+                  title: "Assets Covered",
+                },
+                coverNoteNoPolicyNo: {
+                  type: "string",
+                  title: "Cover Note No. / Policy No",
+                },
+                validUpTo: {
+                  type: "string",
+                  title: "Valid up to",
+                },
+                sumAssured: {
+                  type: "number",
+                  title: "Sum Assured",
+                },
+                assuredCovered: {
+                  type: "string",
+                  title: "Assured Covered",
+                },
+              },
             },
           },
         },
-      },
-    },
       },
     },
     {
@@ -767,7 +730,7 @@ export const dcbSchema = {
               type: "object",
               properties: {
                 months: {
-                  type: "integer",
+                  type: "string",
                   title: "Months",
                 },
                 purchasesRs: {

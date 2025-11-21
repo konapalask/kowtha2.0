@@ -21,8 +21,11 @@ const subHeadingStyle =
   "font-size:20px;font-weight:bold;margin:14px 0 6px 0;color:#333";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-const cellStyle = "border:1px solid #ccc;padding:8px";
-const headerCellStyle = `${cellStyle};font-weight:bold`;
+  const labelCellStyle =
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+const valueCellStyle =
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
+  const headerCellStyle = `${labelCellStyle};font-weight:bold`;
 
 const displayValue = (value: any): string => {
   if (value === null || value === undefined) return "";
@@ -77,8 +80,8 @@ const renderTwoColumnTable = (rows: KeyValueRow[]) => {
             formatter !== undefined ? formatter(value) : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${label}</p></td>
-            <td style="${cellStyle}"><p style="${paragraphStyle}">${
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${label}</p></td>
+            <td style="${valueCellStyle}"><p style="${paragraphStyle}">${
               resolved || ""
             }</p></td>
           </tr>`;
@@ -96,7 +99,7 @@ const renderSingleColumnTable = (values: string[]) => {
         .map(
           (value) => `
         <tr>
-          <td style="${cellStyle}"><p style="${paragraphStyle}">${value}</p></td>
+          <td style="${valueCellStyle}"><p style="${paragraphStyle}">${value}</p></td>
         </tr>`
         )
         .join("")}
@@ -136,7 +139,7 @@ const renderMultiColumnTable = (
                       column.formatter !== undefined
                         ? column.formatter(rawValue, item)
                         : formatMultiline(rawValue);
-                    return `<td style="${cellStyle}"><p style="${paragraphStyle}">${
+                    return `<td style="${valueCellStyle}"><p style="${paragraphStyle}">${
                       rendered || ""
                     }</p></td>`;
                   })
@@ -145,7 +148,7 @@ const renderMultiColumnTable = (
             `;
           })
           .join("")
-      : `<tr><td colspan="${columns.length}" style="${cellStyle}"><p style="${paragraphStyle}">${emptyMessage}</p></td></tr>`;
+      : `<tr><td colspan="${columns.length}" style="${valueCellStyle}"><p style="${paragraphStyle}">${emptyMessage}</p></td></tr>`;
 
   return `
     <table style="${tableStyle}">
@@ -153,6 +156,11 @@ const renderMultiColumnTable = (
       ${bodyRows}
     </table>
   `;
+};
+const ensureArray = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  return [value];
 };
 
 const combineTextSegments = (segments: Array<{ label?: string; value?: any }>) => {
@@ -270,16 +278,16 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         )}.`
       : formatMultiline(source?.amountAndPurposeOfLoan);
 
-  const geoCoordinates = html_data?.geoCoordinates || {};
+  const geoCoordinates = source.coordinates || {};
 
-  const familySummary = combineTextSegments([
-    { label: "About Applicant:", value: familyDetails.aboutApplicant },
-    { label: "About Co-applicant:", value: familyDetails.aboutCoApplicant },
+  const familySummary = [
+    { label: "<strong>About Applicant:</strong>", value: familyDetails.aboutApplicant },
+    { label: "<strong>About Co-applicant:</strong>", value: familyDetails.aboutCoApplicant },
     {
-      label: "And their family details:",
+      label: "<strong>And their family details:</strong>",
       value: familyDetails.andTheirFamilyDetails,
     },
-  ]);
+  ];
 
   const ownContributionTable =
     ownContributionEntries.length > 0
@@ -336,13 +344,13 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderParagraph(`Client Name: ${applicantName || ""}`)}
       ${renderParagraph(`Client Address: ${clientAddress || ""}`)}
 
-      <h2 style="${subHeadingStyle}">Sub:&nbsp;LIP Visit(s) Report</h2>
+      <h2 style="${subHeadingStyle}">Sub:&nbsp;<u>LIP Visit(s) Report</u></h2>
       ${renderParagraph("Sir,")}
       ${renderParagraph(
         "Please refer to your instructions on the captioned matter. In this connection, we submit our report as under:"
       )}
 
-      ${renderHeading("Case Details")}
+      ${renderSubHeading("Case Details")}
       ${renderTwoColumnTable([
         {
           label: "Reference Number (LOS ID)",
@@ -400,7 +408,38 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
 
       ${renderSubHeading("Family Details")}
       ${familySummary
-        ? renderSingleColumnTable([familySummary])
+        ? `<table style="${tableStyle}">
+            <tr>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label}</p></td>
+            <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[0].value)}</p></td>
+            </tr>
+            <tr>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[1].label}</p></td>
+            <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[1].value)}</p></td>
+            </tr>
+            <tr>
+              <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[2].label}</p></td>
+              <td style="border:1px solid #ccc;padding:8px">
+                <table style="${tableStyle}">
+                  <tr>
+                  <td style="${labelCellStyle}"><p style="${paragraphStyle}">Name</p></td>
+                  <td style="${labelCellStyle}"><p style="${paragraphStyle}">Relationship</p></td>
+                  <td style="${labelCellStyle}"><p style="${paragraphStyle}">Age</p></td>
+                  <td style="${labelCellStyle}"><p style="${paragraphStyle}">Qualification</p></td>
+                  <td style="${labelCellStyle}"><p style="${paragraphStyle}">Occupation</p></td>
+                  </tr>
+                  ${ensureArray(familySummary[2].value).map((item: any) => `
+                    <tr>
+                      <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.name}</p></td>
+                      <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.relationship}</p></td>
+                      <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.age}</p></td>
+                      <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.qualification}</p></td>
+                      <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.occupation}</p></td>
+                    </tr>
+                  `).join("")}
+                  </table> 
+                </td>
+                </tr> `
         : renderSingleColumnTable(["Family details not provided"])}
 
       ${renderSubHeading("Business Details (Separate for additional business)")}
@@ -557,7 +596,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
           },
           { header: "Years of ownership", key: "yearsOfOwnership" },
         ],
-        netWorthEntries.map((entry, index) => ({
+        netWorthEntries?.map((entry, index) => ({
           ...entry,
           srNo: index + 1,
         })),

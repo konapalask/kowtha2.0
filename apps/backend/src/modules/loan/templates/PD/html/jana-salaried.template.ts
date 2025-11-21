@@ -30,13 +30,18 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
 };
 
-const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+const renderKeyValue = (
+  label: string,
+  value: any,
+  formatter?: (value: any) => string,
+  options?: { colspan?: number }
+) => {
   const rendered = formatter ? formatter(value) : formatMultiline(value);
   return `
     <tr>
@@ -54,37 +59,37 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
       <tr>
         ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
       </tr>
-      ${rows.map((row) => `
+      ${rows
+        .map(
+          (row) => `
         <tr>
           ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 };
 
-
 export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
+  const general = verificationData.general;
+  const familyDetails = verificationData.familyDetails;
+  const residenceDetails = verificationData.residenceDetails;
+  const applicantDetails = verificationData.applicantDetails;
+  const networthDetails = verificationData.networthDetails;
+  const loanDetails = verificationData.loanDetails;
+  const existingRelationship = verificationData.existingRelationship;
+  const bankingDetails = verificationData.bankingDetails;
+  const creditCardDetails = verificationData.creditCardDetails;
+  const loanAmountAndPurpose = verificationData.loanAmountAndPurpose;
+  const securityOffered = verificationData.securityOffered;
+  const otherIncome = verificationData.otherIncome;
+  const thirdPartyConfirmation = verificationData.thirdPartyConfirmation;
+  const documentsVerified = verificationData.documentsVerified;
+  const otherObservations = verificationData.otherObservations;
 
-    const general = verificationData.general;
-    const familyDetails = verificationData.familyDetails;
-    const residenceDetails = verificationData.residenceDetails;
-    const applicantDetails = verificationData.applicantDetails;
-    const networthDetails = verificationData.networthDetails;
-    const loanDetails = verificationData.loanDetails;
-    const existingRelationship = verificationData.existingRelationship;
-    const bankingDetails = verificationData.bankingDetails;
-    const creditCardDetails = verificationData.creditCardDetails;
-    const loanAmountAndPurpose = verificationData.loanAmountAndPurpose;
-    const securityOffered = verificationData.securityOffered;
-    const otherIncome = verificationData.otherIncome;
-    const thirdPartyConfirmation = verificationData.thirdPartyConfirmation;
-    const documentsVerified = verificationData.documentsVerified;
-    const otherObservations = verificationData.otherObservations;
-
-
-
-    return `
+  return `
     ${pdBaseTemplate()}
 
     <div class="template-content">
@@ -94,39 +99,39 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         <tr>
           <td style="${labelCellStyle}">Name of the Applicant with DOB</td>
-          <td style="${valueCellStyle}">${general.applicantName} (${general.applicationNumber}) <br> ${general.dateOfBirthOfApplicant}</td>
+          <td style="${valueCellStyle}">${general?.applicantName} (${general?.applicationNumber}) <br> ${general?.dateOfBirthOfApplicant}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Name of Spouse with DOB</td>
-          <td style="${valueCellStyle}">${general.spouseName} <br> ${general.dateOfBirthOfSpouse}</td>
+          <td style="${valueCellStyle}">${general?.spouseName} <br> ${general?.dateOfBirthOfSpouse}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Does Spouse Work? (If yes then give brief)</td>
-          <td style="${valueCellStyle}">${general.doesSpouseWork} <br> ${general.spouseWorkDetails}</td>
+          <td style="${valueCellStyle}">${general?.doesSpouseWork} <br> ${general?.spouseWorkDetails}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Qualification</td>
-          <td style="${valueCellStyle}">${general.qualification}</td>
+          <td style="${valueCellStyle}">${general?.qualification}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Employer Name & Address</td>
-          <td style="${valueCellStyle}">${general.employerName} <br> <br> ${general.employerAddress}</td>
+          <td style="${valueCellStyle}">${general?.employerName} <br> <br> ${general?.employerAddress}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">PD place</td>
-          <td style="${valueCellStyle}">${general.pdPlace}</td>
+          <td style="${valueCellStyle}">${general?.pdPlace}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Designation</td>
-          <td style="${valueCellStyle}">${general.designation}</td>
+          <td style="${valueCellStyle}">${general?.designation}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Current Monthly Salary (Net)</td>
-          <td style="${valueCellStyle}">${general.currentMonthlySalary}</td>
+          <td style="${valueCellStyle}">${general?.currentMonthlySalary}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">No. of yrs in present employment</td>
-          <td style="${valueCellStyle}">${general.yearsInPresentEmployment}</td>
+          <td style="${valueCellStyle}">${general?.yearsInPresentEmployment}</td>
         </tr>  
         <tr>
           <td style="${labelCellStyle}">No.of people in family</td>
@@ -141,7 +146,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Income per month (approx.)</td>
                 <td style="${labelCellStyle}">Dependent</td>
               </tr>
-              ${familyDetails.familyMembers?.map((member: any) => `
+              ${familyDetails?.familyMembers
+                ?.map(
+                  (member: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${member.name}</td>
                   <td style="${valueCellStyle}">${member.relation}</td>
@@ -151,13 +158,15 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${member.incomePerMonth}</td>
                   <td style="${valueCellStyle}">${member.dependent}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
           </td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">No.of non-earning Family Members/dependents</td>
-          <td style="${valueCellStyle}">${familyDetails.nonearningFamilyMembers}</td>
+          <td style="${valueCellStyle}">${familyDetails?.nonearningFamilyMembers}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Residence Details</td>
@@ -174,33 +183,33 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Mortgaged</td>
               </tr>
               <tr>
-                <td style="${valueCellStyle}">${residenceDetails.ownership}</td>
-                <td style="${valueCellStyle}">${residenceDetails.areaInSqFt}</td>
-                <td style="${valueCellStyle}">${residenceDetails.purchaseYear}</td>
-                <td style="${valueCellStyle}">${residenceDetails.purchaseCost}</td>
-                <td style="${valueCellStyle}">${residenceDetails.currentMarketValue}</td>
-                <td style="${valueCellStyle}">${residenceDetails.ownerRelationship}</td>
-                <td style="${valueCellStyle}">${residenceDetails.tenant}</td>
-                <td style="${valueCellStyle}">${residenceDetails.mortgaged}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.ownership}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.areaInSqFt}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.purchaseYear}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.purchaseCost}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.currentMarketValue}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.ownerRelationship}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.tenant}</td>
+                <td style="${valueCellStyle}">${residenceDetails?.mortgaged}</td>
               </tr>
             </table>
           </td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Applicant's Job Profile</td>
-          <td style="${valueCellStyle}">${formatMultiline(applicantDetails.applicantJobProfile)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(applicantDetails?.applicantJobProfile)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">About the company</td>
-          <td style="${valueCellStyle}">${formatMultiline(applicantDetails.aboutTheCompany)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(applicantDetails?.aboutTheCompany)}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Previous Employment</td>
-          <td style="${valueCellStyle}">${applicantDetails.previousEmploymentDetails}</td>
+          <td style="${valueCellStyle}">${applicantDetails?.previousEmploymentDetails}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Spouse's Job Profile</td>
-          <td style="${valueCellStyle}">${applicantDetails.spouseJobProfile}</td>
+          <td style="${valueCellStyle}">${applicantDetails?.spouseJobProfile}</td>
         </tr>
 
         <tr>
@@ -216,7 +225,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Owner Name</td>
                 <td style="${labelCellStyle}">Mortgaged</td>
               </tr>
-              ${networthDetails.netWorth?.map((item: any) => `
+              ${networthDetails?.netWorth
+                ?.map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.address}</td>
                   <td style="${valueCellStyle}">${item.areaInSqFt}</td>
@@ -226,23 +237,25 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${item.ownerName}</td>
                   <td style="${valueCellStyle}">${item.mortgaged}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
 
               <tr>
                 <td style="${labelCellStyle}" colspan="3">Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Fund Holdings, Shares, Bonds, Securities -</td>
-                <td style="${valueCellStyle}" colspan="4">${networthDetails.liquidMoveableAssets}</td>
+                <td style="${valueCellStyle}" colspan="4">${networthDetails?.liquidMoveableAssets}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}" colspan="3">Life Insurance, Mediclaim, Property/Asset Insurance (Premium & Sum Assured) -</td>
-                <td style="${valueCellStyle}" colspan="4">${networthDetails.insurances}</td>
+                <td style="${valueCellStyle}" colspan="4">${networthDetails?.insurances}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}" colspan="3">Capital Invested in any Business, Loans & Advances given -</td>
-                <td style="${valueCellStyle}" colspan="4">${networthDetails.capitalInvestedBusiness}</td>
+                <td style="${valueCellStyle}" colspan="4">${networthDetails?.capitalInvestedBusiness}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}" colspan="3">Car, Bike and any Other Vehicles (Company Name and Model) -</td>
-                <td style="${valueCellStyle}" colspan="4">${networthDetails.vehicles}</td>
+                <td style="${valueCellStyle}" colspan="4">${networthDetails?.vehicles}</td>
               </tr>
             </table>
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
@@ -264,7 +277,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">EMI Paid Bank</td>
                 <td style="${labelCellStyle}">Secured Against which Asset</td>
               </tr>
-              ${loanDetails.loanDetails.map((item: any) => `
+              ${loanDetails?.loanDetails
+                .map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.bankName}</td>
                   <td style="${valueCellStyle}">${item.typeOfLoan}</td>
@@ -276,13 +291,15 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${formatCurrency(item.emiPaidBank)}</td>
                   <td style="${valueCellStyle}">${item.securedAgainstAsset}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
           </td>
         </tr>
 
-        ${renderKeyValue("Existing Relationship with Jana Small Finance Bank Ltd.", existingRelationship.existingRelationship, )}
+        ${renderKeyValue("Existing Relationship with Jana Small Finance Bank Ltd.", existingRelationship?.existingRelationship || "Not provided")}
           
         <tr>
           <td style="${labelCellStyle}">Banking Habits</td>
@@ -294,22 +311,26 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Account Type</td>
                 <td style="${labelCellStyle}">Operating Since (Year)</td>
               </tr>
-              ${bankingDetails.bankingDetails.map((item: any) => `
+              ${bankingDetails?.bankingDetails
+                .map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.bankName}</td>
                   <td style="${valueCellStyle}">${item.branchName}</td>
                   <td style="${valueCellStyle}">${item.accountType} </td>
                   <td style="${valueCellStyle}">${item.operatingSinceYear}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
           </td>
         </tr>
 
-        ${renderKeyValue("Credit Card Details", creditCardDetails.creditCardDetails, )}
+        ${renderKeyValue("Credit Card Details", creditCardDetails?.creditCardDetails || "Not provided")}
         <tr>
           <td style="${labelCellStyle}">Loan Amount and Purpose</td>
-          <td style="${valueCellStyle}">${formatCurrency(loanAmountAndPurpose.loanAmount)} <br> ${loanAmountAndPurpose.purposeOfLoan}</td>
+          <td style="${valueCellStyle}">${formatCurrency(loanAmountAndPurpose?.loanAmount || "Not provided")} <br> ${loanAmountAndPurpose?.purposeOfLoan || "Not provided"}</td>
         </tr>
 
         <tr>
@@ -318,7 +339,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}" >Address</td>
-                <td style="${valueCellStyle}" colspan="6">${securityOffered.address}</td>
+                <td style="${valueCellStyle}" colspan="6">${securityOffered?.address || "Not provided"}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Area in Sq Ft</td>
@@ -329,7 +350,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Owner Name</td>
                 <td style="${labelCellStyle}">Mortgaged</td>
               </tr>
-              ${securityOffered.securityDetails.map((item: any) => `
+              ${securityOffered?.securityDetails
+                .map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.areaInSqFt}</td>
                   <td style="${valueCellStyle}">${item.agreementValue}</td>
@@ -339,7 +362,9 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${item.ownerName}</td>
                   <td style="${valueCellStyle}">${item.mortgaged}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
           </td>
@@ -354,13 +379,17 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Details</td>
                 <td style="${labelCellStyle}">Reference</td>
               </tr>
-              ${otherIncome.otherIncomes.map((item: any) => `
+              ${otherIncome?.otherIncomes
+                .map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${formatCurrency(item.incomeAmount)}</td>
                   <td style="${valueCellStyle}">${item.details}</td>
                   <td style="${valueCellStyle}">${item.reference}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
             <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note: Amounts Mentioned above are approx</strong></p>
           </td>
@@ -378,14 +407,24 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Feedback on Borrower</td>
                 <td style="${labelCellStyle}">Feedback on Business</td>
               </tr>
+              ${
+                thirdPartyConfirmation?.thirdPartyConfirmations?.length > 0
+                  ? thirdPartyConfirmation.thirdPartyConfirmations
+                      .map(
+                        (item: any) => `
                 <tr>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.individualOrBusinessName}</td>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.address}</td>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.contactNo}</td>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.knowingSince}</td>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.feedbackOnBorrower}</td>
-                  <td style="${valueCellStyle}">${thirdPartyConfirmation.feedbackOnBusiness}</td>
+                  <td style="${valueCellStyle}">${item.individualOrBusinessName || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(item.address || "Not provided")}</td>
+                  <td style="${valueCellStyle}">${item.contactNo || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${item.knowingSince || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${item.feedbackOnBorrower || "Not provided"}</td>
+                  <td style="${valueCellStyle}">${item.feedbackOnBusiness || "Not provided"}</td>
                 </tr>
+              `
+                      )
+                      .join("")
+                  : `<tr><td style="${valueCellStyle}" colspan="6">Not provided</td></tr>`
+              }
             </table>
           </td>
         </tr>
@@ -401,14 +440,18 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Document Type</td>
                 <td style="${labelCellStyle}">Remarks</td>
               </tr>
-              ${documentsVerified.documentsVerified.map((item: any) => `
+              ${documentsVerified?.documentsVerified
+                .map(
+                  (item: any) => `
                 <tr>
                   <td style="${valueCellStyle}">${item.documentCategory}</td>
                   <td style="${valueCellStyle}">${item.documentName}</td>
                   <td style="${valueCellStyle}">${item.documentType}</td>
                   <td style="${valueCellStyle}">${item.remarks}</td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </table>
           </td>
         </tr>
@@ -421,32 +464,32 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Case Strengths</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${formatMultiline(otherObservations.caseStrengths)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(otherObservations?.caseStrengths || "Not provided")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Case Weakness</td>
                 </tr>
                 <tr>
-                <td style="${valueCellStyle}">${formatMultiline(otherObservations.caseWeakness)}</td>
+                <td style="${valueCellStyle}">${formatMultiline(otherObservations?.caseWeakness || "Not provided")}</td>
               </tr>
             </table> 
           </td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">PD Status</td>
-          <td style="${valueCellStyle}">${(otherObservations.pdStatus)}</td>
+          <td style="${valueCellStyle}">${otherObservations?.pdStatus || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Name of Agency Executive</td>
-          <td style="${valueCellStyle}">${otherObservations.nameOfAgencyExecutive}</td>
+          <td style="${valueCellStyle}">${otherObservations?.nameOfAgencyExecutive || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Date & Time of Visit</td>
-          <td style="${valueCellStyle}">${otherObservations.dateOfVisit} At ${otherObservations.timeOfVisit}</td>
+          <td style="${valueCellStyle}">${otherObservations?.dateOfVisit || "Not provided"} At ${otherObservations?.timeOfVisit || "Not provided"}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Checked By</td>
-          <td style="${valueCellStyle}">${otherObservations.checkedBy}</td>
+          <td style="${valueCellStyle}">${otherObservations?.checkedBy || "Not provided"}</td>
         </tr>
       </table>
     </div>
@@ -454,5 +497,4 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
     ${pdBaseTemplateFooter(html_data)}
 
   `;
-}
-
+};

@@ -195,7 +195,6 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     }
   };
 
-  const isInitialMount = useRef(true);
   const [datePickerState, setDatePickerState] = useState<{
     visible: boolean;
     fieldKey: string | null;
@@ -325,34 +324,27 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, setValue, schema.properties]);
 
-  // Use watch subscription to avoid infinite loops
-  useEffect(() => {
-    const subscription = watch(value => {
-      // Skip the initial call on mount to avoid calling onSubmit with default values
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-      }
+  // Handle save button click - removed auto-save on change
+  const handleSave = () => {
+    const formValues = getValues();
 
-      // Convert string values back to numbers and ensure array integrity before submitting
-      const denormalizedData = denormalizeFormData(value as AnyObject);
+    // Convert string values back to numbers and ensure array integrity before submitting
+    const denormalizedData = denormalizeFormData(formValues as AnyObject);
 
-      // Validate array items have unique IDs before submission
-      Object.entries(denormalizedData).forEach(([key, val]) => {
-        if (Array.isArray(val)) {
-          if (!validateArrayItemIds(val)) {
-            console.warn(
-              `Array field ${key} has missing or duplicate IDs, fixing...`,
-            );
-            denormalizedData[key] = ensureArrayItemsHaveIds(val);
-          }
+    // Validate array items have unique IDs before submission
+    Object.entries(denormalizedData).forEach(([key, val]) => {
+      if (Array.isArray(val)) {
+        if (!validateArrayItemIds(val)) {
+          console.warn(
+            `Array field ${key} has missing or duplicate IDs, fixing...`,
+          );
+          denormalizedData[key] = ensureArrayItemsHaveIds(val);
         }
-      });
-
-      onSubmit(denormalizedData);
+      }
     });
-    return () => subscription.unsubscribe();
-  }, [watch, onSubmit]);
+
+    onSubmit(denormalizedData);
+  };
 
   const showDatePicker = (
     fieldKey: string,
@@ -664,8 +656,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             shouldTouch: true,
             shouldValidate: true,
           });
-          // Persist immediately so toggling sections does not revert
-          onSubmit(getValues());
+          // Don't save immediately - wait for user to click "Save Section"
         };
 
         const handleRemoveItem = (indexToRemove: number) => {
@@ -700,8 +691,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
             shouldTouch: true,
             shouldValidate: true,
           });
-          // Persist immediately so toggling sections does not revert
-          onSubmit(getValues());
+          // Don't save immediately - wait for user to click "Save Section"
         };
 
         return (
@@ -1107,6 +1097,11 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
           }
           return <View key={fieldId}>{renderField(fieldId, property)}</View>;
         })}
+        <View style={styles.saveButtonContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save Section</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <DateTimePickerModal
         isVisible={datePickerState.visible}
@@ -1231,6 +1226,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '500',
+  },
+  saveButtonContainer: {
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+  },
+  saveButton: {
+    backgroundColor: '#fff',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    height: 40,
+  },
+  saveButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -60,7 +60,6 @@ export const tataUblSchema = {
               repaymentBankName: {
                 type: "string",
                 title: "Bank name",
-                readOnly: true,
               },
               typeSAAccount: {
                 type: "string",
@@ -88,7 +87,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Address",
             readOnly: true,
-          },
+           },
           rentedOwned: {
             type: "string",
             title: "Rented/Owned",
@@ -163,7 +162,7 @@ export const tataUblSchema = {
         properties: {
           addressOfPDAndPersonMet: {
             type: "string",
-            title: "Address of PD and persona met",
+            title: "Address of PD and person met",
             ui: { widget: "textarea", rows: 4 },
           },
         },
@@ -286,22 +285,31 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          primaryBanker: {
-            type: "string",
-            title: "Primary Banker",
-          },
-          natureOfAccount: {
-            type: "string",
-            title: "Nature of Account",
-          },
-          avgBal: {
-            type: "number",
-            title: "Avg. Bal",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
+          bankDetails: {
+            type: "array",
+            title: "Bank Details",
+            items: {
+              type: "object",
+              properties: {
+                primaryBanker: {
+                  type: "string",
+                  title: "Primary Banker",
+                },
+                natureOfAccount: {
+                  type: "string",
+                  title: "Nature of Account",
+                },
+                avgBal: {
+                  type: "number",
+                  title: "Avg. Bal",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+              },
             },
           },
         },
@@ -314,13 +322,25 @@ export const tataUblSchema = {
       schema: {
         type: "object",
         properties: {
-          turnoverFY202425: {
-            type: "string",
-            title: "Turnover (FY 2024-25)",
+          turnoverPreviousFinancialYear: {
+            type: "number",
+            title: `Turnover (FY ${new Date().getFullYear() - 1}-${new Date().getFullYear()})`,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
-          expTurnoverFY202526: {
-            type: "string",
-            title: "Exp. Turnover (FY 2025-26)",
+          expectedTurnoverCurrentFinancialYear: {
+            type: "number",
+            title: `Expected Turnover (FY ${new Date().getFullYear()}-${new Date().getFullYear() + 1})`,
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
           },
           monthlyTurnoverSales: {
             type: "number",
@@ -697,6 +717,10 @@ export const tataUblSchema = {
             type: "string",
             title: "Pan Card",
           },
+          documentSeen: {
+            type: "string",
+            title: "Document Seen",
+          },
           finalStatus: {
             type: "string",
             title: "Final Status",
@@ -704,10 +728,15 @@ export const tataUblSchema = {
           dateOfPD: {
             type: "string",
             title: "Date of PD",
+            format: "date",
           },
           personMet: {
             type: "string",
             title: "Person met at the time of PD",
+          },
+          personDesignation: {
+            type: "string",
+            title: "Person Designation",
           },
           phoneNoOfApplicant: {
             type: "string",

@@ -84,11 +84,15 @@ const renderTwoColumnTable = (rows: KeyValueRow[]) => {
 
   return `
     <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:35%;">Accounting Year</td>
+      </tr>
+      <tr>
+        <td style="${headerCellStyle};width:35%;">Estimated Total Costs</td>
+      </tr>
       ${items
         .map(({ label, value, formatter }) => {
-          const rendered = formatter
-            ? formatter(value)
-            : displayValue(value);
+          const rendered = formatter ? formatter(value) : displayValue(value);
           return `
             <tr>
               <td style="${headerCellStyle};width:35%;">${label}</td>
@@ -120,10 +124,7 @@ const renderMultiColumnTable = (
     <table style="${tableStyle}">
       <tr>
         ${columns
-          .map(
-            ({ header }) =>
-              `<td style="${headerCellStyle}">${header}</td>`
-          )
+          .map(({ header }) => `<td style="${headerCellStyle}">${header}</td>`)
           .join("")}
       </tr>
       ${items
@@ -183,12 +184,17 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const businessData = verificationData.businessData || {};
   const coApplicantIncome = verificationData.coApplicantIncome || {};
   const otherIncome = verificationData.otherIncome || {};
-  const liabilitiesRaw = verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
+  const assets = verificationData.assets || {};
+  const liabilitiesRaw =
+    verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
   const budget = verificationData.budgetAnalysis || {};
   const endUseOfFunds = verificationData.endUseOfFunds || {};
   const otherObservations = verificationData.otherObservations || {};
-  const overallPositivesOrNegatives = verificationData.overallPositivesOrNegatives || {};
-  const tradeReferences = ensureArray(verificationData.tradeReferences.tradeReferences || []);
+  const overallPositivesOrNegatives =
+    verificationData.overallPositivesOrNegatives || {};
+  const tradeReferences = ensureArray(
+    verificationData.tradeReferences.tradeReferences || []
+  );
 
   const personalDetailsTable = renderTwoColumnTable([
     {
@@ -226,9 +232,17 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   let familyMembers = [];
   if (Array.isArray(familySection)) {
     familyMembers = familySection;
-  } else if (familySection && familySection.familyMembers && Array.isArray(familySection.familyMembers)) {
+  } else if (
+    familySection &&
+    familySection.familyMembers &&
+    Array.isArray(familySection.familyMembers)
+  ) {
     familyMembers = familySection.familyMembers;
-  } else if (familySection && Object.keys(familySection).length > 0 && familySection.name) {
+  } else if (
+    familySection &&
+    Object.keys(familySection).length > 0 &&
+    familySection.name
+  ) {
     familyMembers = [familySection];
   }
 
@@ -244,7 +258,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       },
       {
         header: "Age",
-        valueGetter: (item) => item.age ? `${item.age}yrs` : "",
+        valueGetter: (item) => (item.age ? `${item.age}yrs` : ""),
       },
       {
         header: "Education",
@@ -262,7 +276,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const familySummaryTable = renderTwoColumnTable([
     {
       label: "NO. OF. DEPENDANTS",
-      value: familySection.noOfDependants || familySection.totalDependants || "-",
+      value:
+        familySection.noOfDependants || familySection.totalDependants || "-",
     },
     {
       label: "GENERAL LIFESTYLE/PERSONALITY",
@@ -300,7 +315,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
     {
       label: "Nature of Business Entity / Employer Details",
-      value: employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd,
+      value:
+        employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd,
     },
     {
       label: "Key Manager to the Business",
@@ -331,15 +347,6 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "TOTAL SALARIES PER MONTH",
       value: employeeCosts.totalSalariesPerMonth,
-      formatter: formatCurrency,
-    },
-    {
-      label: "ACCOUNTING YEAR",
-      value: employeeCosts.accountingYear,
-    },
-    {
-      label: "ESTIMATED TOTAL COSTS",
-      value: employeeCosts.estimatedTotalCosts,
       formatter: formatCurrency,
     },
   ]);
@@ -394,7 +401,6 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-
   const coApplicantIncomeTable = renderTwoColumnTable([
     {
       label: "Co-Applicant Income",
@@ -405,34 +411,41 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const otherIncomeTable = renderTwoColumnTable([
     {
+      label: "Other Income",
+      value: otherIncome.otherIncome,
+    },
+  ]);
+
+  const assetsTable = renderTwoColumnTable([
+    {
       label: "LIC / Insurance / Mediclaim",
-      value: otherIncome.licPaymentInsuranceMediclaim,
+      value: assets.licPaymentInsuranceMediclaim,
     },
     {
       label: "Share / Mutual Fund Investments",
-      value: otherIncome.shareMutualFundInvestments,
+      value: assets.shareMutualFundInvestments,
     },
     {
       label: "Cars / Two-Wheelers Owned",
-      value: otherIncome.carsTwoWheelersOwned,
+      value: assets.carsTwoWheelersOwned,
     },
     {
       label: "Other Properties Owned",
-      value: otherIncome.otherPropertiesOwned,
+      value: assets.otherPropertiesOwned,
     },
     {
       label: "Other Assets Owned",
-      value: otherIncome.otherAssetsOwned,
+      value: assets.otherAssetsOwned,
     },
   ]);
 
   const liabilitiesEntries = Array.isArray(liabilitiesRaw)
     ? liabilitiesRaw
     : Array.isArray(liabilitiesRaw?.items)
-    ? liabilitiesRaw.items
-    : hasValue(liabilitiesRaw)
-    ? ensureArray(liabilitiesRaw)
-    : [];
+      ? liabilitiesRaw.items
+      : hasValue(liabilitiesRaw)
+        ? ensureArray(liabilitiesRaw)
+        : [];
 
   // Ensure labels and a placeholder row render even when there are no items
   const liabilitiesItems =
@@ -481,19 +494,20 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const budgetRows = [
     {
       sno: 1,
-      label: "Total Monthly Net Income per month (Business income + Other Income)",
-      value: budget.totalMonthlyIncomePerMonth,
+      label: "Affordable EMI",
+      value: budget.affordableEmi,
+      formatter: formatCurrency,
     },
     {
       sno: 2,
-      label: "Overall Family Expenses per month",
-      value: budget.overAllFamilyExpenses,
+      label: "Net Surplus",
+      value: budget.netSurplus,
     },
     {
       sno: 3,
-      label: "PL / Auto Loan EMI",
-      value: budget.plOrAutoLoanEMI,
-      formatter: formatCurrency,
+      label:
+        "Total Monthly Net Income per month (Business income + Other Income)",
+      value: budget.totalMonthlyIncomePerMonth,
     },
     {
       sno: 4,
@@ -502,20 +516,20 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       formatter: formatCurrency,
     },
     {
-      sno: "",
+      sno: 5,
+      label: "PL / Auto Loan EMI",
+      value: budget.plOrAutoLoanEMI,
+      formatter: formatCurrency,
+    },
+    {
+      sno: 6,
+      label: "Overall Family Expenses per month",
+      value: budget.overAllFamilyExpenses,
+    },
+    {
+      sno: 7,
       label: "Total Monthly Expenses per month",
       value: budget.totalMonthlyExpensesPerMonth,
-    },
-    {
-      sno: "",
-      label: "Net Surplus",
-      value: budget.netSurplus,
-    },
-    {
-      sno: "",
-      label: "Affordable EMI",
-      value: budget.affordableEmi,
-      formatter: formatCurrency,
     },
   ];
 
@@ -543,7 +557,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     </table>
   `;
 
-  const endUseOfFundsTable =    `
+  const endUseOfFundsTable = `
       <div>
       <p style="${paragraphStyle}"><strong><u>End Use of Funds</u></strong><br>${formatMultiline(endUseOfFunds.endUseOfFunds)}</p> 
         
@@ -600,6 +614,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderBusinessSection("BUSINESS DATA", combinedBusinessTable)}
       ${renderSection("Co-Applicant Income", coApplicantIncomeTable)}
       ${renderSection("Other Income", otherIncomeTable)}
+      ${renderSection("Assets & Investments", assetsTable)}
       ${renderSection("Other Liabilities Including CC Limits (Own/Co Applicants)", liabilitiesTable)}
       ${renderSection("Budget Analysis", budgetTable)}
       ${endUseOfFundsTable}

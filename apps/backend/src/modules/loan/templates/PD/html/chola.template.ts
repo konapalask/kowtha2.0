@@ -3,7 +3,9 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-const cellStyle =
+const labelCellStyle =
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+const valueCellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
@@ -62,8 +64,8 @@ const renderKeyValueTable = (
             : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}">${wrapParagraph(label)}</td>
-            <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
+            <td style="${labelCellStyle}">${wrapParagraph(label)}</td>
+            <td style="${valueCellStyle}">${wrapParagraph(rendered)}</td>
           </tr>`;
         })
         .join("")}
@@ -81,8 +83,8 @@ const renderInstructionTable = (
         .map(
           ({ instruction, value }) => `
         <tr>
-          <td style="${cellStyle}">${instruction}</td>
-          <td style="${cellStyle}">${value}</td>
+          <td style="${labelCellStyle}">${instruction}</td>
+          <td style="${valueCellStyle}">${value}</td>
         </tr>`
         )
         .join("")}
@@ -97,14 +99,14 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerRow = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
+        `<td style="${labelCellStyle};font-weight:bold;background:#f5f5f5;">${header}</td>`
     )
     .join("");
   const rowsHtml = rows
     .map(
       (row) =>
         `<tr>${row
-          .map((cell) => `<td style="${cellStyle}">${cell}</td>`)
+          .map((cell) => `<td style="${valueCellStyle}">${cell}</td>`)
           .join("")}</tr>`
     )
     .join("");
@@ -123,7 +125,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   const istDate = format(zonedDate, "dd-MM-yyyy hh:mm:ss a xxx", { timeZone });
 
   const basic = verificationData.basicInformation || {};
-  const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || [];
+  const aboutBusiness = verificationData.aboutTheApplicantAndItsBusiness || {};
   const familyMembers = ensureArray(
     verificationData.applicantsFamilyDetails?.familyMembers
   ).map((member: any) => [
@@ -172,9 +174,12 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     : [];
 
   const assets = assetsArray.length
-    ? assetsArray.map(
-        (asset: any) => `<li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li>`
-      ).join("")
+    ? assetsArray
+        .map(
+          (asset: any) =>
+            `<li>${formatMultiline(asset?.assetDetails || asset?.details || "")}</li>`
+        )
+        .join("")
     : "<li>Not provided</li>";
 
   // Handle nested structures for customer references
@@ -209,19 +214,16 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     (item: any) => `<li>${formatMultiline(item?.recommendations || "")}</li>`
   );
 
-  const businessList = Array.isArray(aboutBusiness)
-    ? aboutBusiness
-        .map((item: any) =>
-          hasValue(item?.aboutTheApplicant)
-            ? `<li>${formatMultiline(item.aboutTheApplicant)}</li>`
-            : ""
-        )
-        .join("")
-    : hasValue(aboutBusiness?.details)
-      ? `<li>${formatMultiline(aboutBusiness.details)}</li>`
-      : hasValue(aboutBusiness)
-        ? `<li>${formatMultiline(aboutBusiness)}</li>`
-        : "";
+  const businessList = [
+    hasValue(aboutBusiness?.aboutTheApplicant)
+      ? `<li><strong>About the Applicant:</strong> ${formatMultiline(aboutBusiness.aboutTheApplicant)}</li>`
+      : "",
+    hasValue(aboutBusiness?.aboutTheBusiness)
+      ? `<li><strong>About the Business:</strong> ${formatMultiline(aboutBusiness.aboutTheBusiness)}</li>`
+      : "",
+  ]
+    .filter((item) => item !== "")
+    .join("");
 
   const generalSection = renderKeyValueTable([
     [
@@ -280,16 +282,21 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
       <ul>
-      ${ensureArray(customerReferences).map(
-        (item: any) => `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
-      ).join("")}
+      ${ensureArray(customerReferences)
+        .map(
+          (item: any) =>
+            `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
+        )
+        .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
       <ul>
-      ${ensureArray(otherIncomes).map(
-        (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
-      ).join("")}
+      ${ensureArray(otherIncomes)
+        .map(
+          (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
+        )
+        .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Existing Loan Details:</strong></p>
@@ -299,11 +306,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
 
       <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
-      ${
-        formatMultiline(
-          verificationData.itrFinancialDetails
-            ?.itrReceiptsVerificationInformation || ""
-        )}
+      ${formatMultiline(
+        verificationData.itrFinancialDetails
+          ?.itrReceiptsVerificationInformation || ""
+      )}
 
       <p style="${paragraphStyle}"><strong>Comfort Factor: -</strong></p>
       <ul>

@@ -14,17 +14,9 @@ export const idfcHlMlSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
-          nameOfTheApplicant: {
-            type: "string",
-            title: "Name of the Applicant (legacy)",
-          },
           nameOfCoApplicants: {
             type: "string",
             title: "Name of the Co-Applicant/s",
-          },
-          nameOfTheCoApplicantS: {
-            type: "string",
-            title: "Name of the Co-Applicant/s (legacy)",
           },
           referenceNumber: {
             type: "string",
@@ -74,38 +66,10 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Owned/ Rental",
           },
-          ownedRental: {
-            type: "string",
-            title: "Owned/ Rental (legacy)",
-          },
           nameBoardSeen: {
             type: "string",
             title: "Whether Name Board Seen",
             enum: ["Yes", "No"],
-          },
-          whetherNameBoardSeen: {
-            type: "string",
-            title: "Whether Name Board Seen (legacy)",
-          },
-          latitude: {
-            type: "string",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "string",
-            title: "Longitude",
-          },
-          region: {
-            type: "string",
-            title: "Region",
-          },
-          location: {
-            type: "string",
-            title: "Location",
-          },
-          branch: {
-            type: "string",
-            title: "Branch",
           },
         },
       },
@@ -128,7 +92,7 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "PAN No.",
             pattern: "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
-            description: "PAN format: ABCDE1234F"
+            description: "PAN format: ABCDE1234F",
           },
           educationalQualification: {
             type: "string",
@@ -139,7 +103,7 @@ export const idfcHlMlSchema = {
               "12th pass",
               "Diploma/ITI certification",
               "Graduate",
-              "PG/Professional Certification"
+              "PG/Professional Certification",
             ],
           },
           roleInBusiness: {
@@ -177,7 +141,7 @@ export const idfcHlMlSchema = {
           },
           familyDetailsText: {
             type: "string",
-            title: "Family Details (Narrative)",
+            title: "Family Details ",
             ui: {
               widget: "textarea",
               rows: 4,
@@ -238,7 +202,8 @@ export const idfcHlMlSchema = {
           },
           businessManagedBy: {
             type: "string",
-            title: "Business actively managed by (Self/Others; If others, name & relationship)",
+            title:
+              "Business actively managed by (Self/Others; If others, name & relationship)",
           },
           numberOfYearsInBusiness: {
             type: "string",
@@ -448,10 +413,6 @@ export const idfcHlMlSchema = {
           otherBusiness: {
             type: "string",
             title: "Other Business if any",
-          },
-          rentalIncome: {
-            type: "string",
-            title: "Rental Income (if any)",
           },
           rentalProperties: {
             type: "array",

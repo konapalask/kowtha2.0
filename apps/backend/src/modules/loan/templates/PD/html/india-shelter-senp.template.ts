@@ -37,7 +37,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -82,23 +82,25 @@ const renderBooleanGrid = (items: Array<{ label: string; value: any }>) => {
   return rows.join("");
 };
 
-const renderSimpleList = (values: string[]) =>
-  values.length
-    ? `<ul style="margin:6px 0 6px 18px;padding:0;">${values
-        .map(
-          (entry) =>
-            `<li style="margin-bottom:4px;color:#2f3b52;">${formatMultiline(
-              entry
-            )}</li>`
-        )
-        .join("")}</ul>`
-    : "Not provided";
+const renderSimpleList = (values: string[] | undefined | null) => {
+  if (!values || !Array.isArray(values) || values.length === 0) {
+    return "Not provided";
+  }
+  return `<ul style="margin:6px 0 6px 18px;padding:0;">${values
+    .map(
+      (entry) =>
+        `<li style="margin-bottom:4px;color:#2f3b52;">${formatMultiline(
+          entry
+        )}</li>`
+    )
+    .join("")}</ul>`;
+};
 
 const renderArrayTable = (
   headers: string[],
-  rows: string[][]
+  rows: string[][] | undefined | null
 ): string => {
-  if (!rows.length) {
+  if (!rows || !Array.isArray(rows) || !rows.length) {
     return `<tr><td style="${valueCellStyle}" colspan="${headers.length}">Not provided</td></tr>`;
   }
   const headerRow = headers
@@ -135,7 +137,7 @@ export const indiaShelterSenpTemplate = (
   const shops = ensureArray(verificationData.shopAssets?.shops);
   const vehicles = ensureArray(verificationData.vehicleAssets?.vehicles);
   const precious = ensureArray(verificationData.preciousMetals?.holdings);
-  const livestock = ensureArray(verificationData.livestockAssets?.livestock);
+  const livestock = verificationData.livestockAssets?.livestock || [];
   const business = verificationData.businessDetails || {};
   const businessIncome = verificationData.businessIncome || {};
   const otherMonthlyIncome = verificationData.otherMonthlyIncome || {};
@@ -145,9 +147,7 @@ export const indiaShelterSenpTemplate = (
     verificationData.currentLoanDetails?.currentLoans
   );
   const costFunds = verificationData.costAndFunds || {};
-  const banking = ensureArray(
-    verificationData.bankingDetails?.bankingAccounts
-  );
+  const banking = ensureArray(verificationData.bankingDetails?.bankingAccounts);
   const otherFamilyMembers = ensureArray(
     verificationData.otherFamilyMembers?.familyMembers
   );
@@ -158,18 +158,10 @@ export const indiaShelterSenpTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       <tr><th style="${headerStyle}" colspan="4">PD SHEET - SENP</th></tr>
-      ${renderKeyValueRow(
-        "Loan Number",
-        general.loanNumber,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Branch",
-        general.branch,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Loan Number", general.loanNumber, undefined, {
+        colSpan: 3,
+      })}
+      ${renderKeyValueRow("Branch", general.branch, undefined, { colSpan: 3 })}
     </table>
   `;
 
@@ -182,36 +174,27 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Loan Product",
-        basic.loanProduct,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Loan Product", basic.loanProduct, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Name of the Applicant",
         basic.applicantName,
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Marital Status",
-        basic.maritalStatus,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Marital Status", basic.maritalStatus, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Educational Qualification",
         basic.educationalQualification,
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Category",
-        basic.category,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Category", basic.category, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Total No. of Family Members",
         basic.totalFamilyMembers,
@@ -249,12 +232,9 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Area (in Sq ft)",
-        residence.areaSqft,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Area (in Sq ft)", residence.areaSqft, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "Monthly Rent & Security Deposit (if rented)",
         residence.monthlyRentDeposit,
@@ -279,12 +259,9 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Native Place",
-        residence.nativePlace,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Native Place", residence.nativePlace, undefined, {
+        colSpan: 3,
+      })}
       ${renderKeyValueRow(
         "If LAP—Electricity bill in customer name availability?",
         residence.electricityBillInCustomerName,
@@ -394,7 +371,7 @@ export const indiaShelterSenpTemplate = (
     formatCurrency(item.marketValue),
   ]);
 
-  const livestockRows = livestock.map((item: any) => [
+  const livestockRows = ensureArray(livestock).map((item: any) => [
     item.typeOfAnimals,
     item.quantity,
     item.purpose,
@@ -492,12 +469,9 @@ export const indiaShelterSenpTemplate = (
           business.placeOfIncorporation
         )}</td>
       </tr>
-      ${renderKeyValueRow(
-        "Address of the PD",
-        business.pdAddress,
-        undefined,
-        { colSpan: 3 }
-      )}
+      ${renderKeyValueRow("Address of the PD", business.pdAddress, undefined, {
+        colSpan: 3,
+      })}
       <tr>
         <td style="${labelCellStyle}">Total Work Experience (Years)</td>
         <td style="${valueCellStyle}">${formatMultiline(
@@ -648,12 +622,9 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle};font-weight:bold;" colspan="1">Net Monthly Profit (= A - B)</td>
         <td style="${valueCellStyle};font-weight:bold;" colspan="3">${formatCurrency(businessIncome.netMonthlyProfit)}</td>
       </tr>
-      ${renderKeyValueRow(
-        "Other Monthly Income",
-        otherMonthlyIncome.otherMonthlyIncome,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr> 
+        <td style="${labelCellStyle};font-weight:bold;" colspan="4">Other Monthly Income</td>
+      </tr>
       <tr>
         <td style="${labelCellStyle}">Rental Income - Cash</td>
         <td style="${valueCellStyle}">${formatCurrency(
@@ -709,7 +680,7 @@ export const indiaShelterSenpTemplate = (
       <tr><th style="${subHeaderStyle}" colspan="4">Loan Details & Purpose</th></tr>
       ${renderKeyValueRow(
         "Purpose of Loan",
-        renderSimpleList(loanPurpose.purposes),
+        renderSimpleList(ensureArray(loanPurpose.purposes)),
         undefined,
         { colSpan: 3 }
       )}
@@ -757,12 +728,6 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Usage of Property after Purchase</td>
         <td style="${valueCellStyle}">${usageList}</td>
       </tr>
-      ${renderKeyValueRow(
-        "If Others, specify usage",
-        collateral.usageOtherNotes,
-        undefined,
-        { colSpan: 3 }
-      )}
       ${renderKeyValueRow(
         "Property Address",
         collateral.propertyAddress,
@@ -815,9 +780,7 @@ export const indiaShelterSenpTemplate = (
               loan.sanctionAmount
             )}</td>
             <td style="${valueCellStyle}">${formatCurrency(loan.emi)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              loan.emisPaid
-            )}</td>
+            <td style="${valueCellStyle}">${formatMultiline(loan.emisPaid)}</td>
             <td style="${valueCellStyle}">${formatMultiline(
               loan.balanceTenor
             )}</td>
@@ -1018,9 +981,7 @@ export const indiaShelterSenpTemplate = (
             <td style="${valueCellStyle}">${formatMultiline(
               ref.knowingSince
             )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              ref.feedback
-            )}</td>
+            <td style="${valueCellStyle}">${formatMultiline(ref.feedback)}</td>
           </tr>
         `
               )
@@ -1046,30 +1007,21 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 5 }
       )}
-      ${renderKeyValueRow(
-        "Date of Visit",
-        pdReview.visitDate,
-        undefined,
-        { colSpan: 5 }
-      )}
-      ${renderKeyValueRow(
-        "Time of Visit",
-        pdReview.visitTime,
-        undefined,
-        { colSpan: 5 }
-      )}
+      ${renderKeyValueRow("Date of Visit", pdReview.visitDate, undefined, {
+        colSpan: 5,
+      })}
+      ${renderKeyValueRow("Time of Visit", pdReview.visitTime, undefined, {
+        colSpan: 5,
+      })}
       ${renderKeyValueRow(
         "Signature of the PD Officer",
         pdReview.officerSignature,
         undefined,
         { colSpan: 5 }
       )}
-      ${renderKeyValueRow(
-        "PD Status",
-        pdReview.pdStatus,
-        undefined,
-        { colSpan: 5 }
-      )}
+      ${renderKeyValueRow("PD Status", pdReview.pdStatus, undefined, {
+        colSpan: 5,
+      })}
     </table>
   `;
 

@@ -68,7 +68,8 @@ export const herohousingSalariedSchema = {
           },
           professionalJourney: {
             type: "string",
-            title: "Complete professional journey (service/ business details of each activity post qualification to till date)",
+            title:
+              "Complete professional journey (service/ business details of each activity post qualification to till date)",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -102,7 +103,10 @@ export const herohousingSalariedSchema = {
                 },
                 age: { type: "integer", title: "Age" },
                 qualification: { type: "string", title: "Qualification" },
-                occupation: { type: "string", title: "Occupation (job/business)" },
+                occupation: {
+                  type: "string",
+                  title: "Occupation (job/business)",
+                },
                 incomeDetails: {
                   type: "string",
                   title: "Income details / dependent",
@@ -120,7 +124,7 @@ export const herohousingSalariedSchema = {
         type: "object",
         properties: {
           nameOfEmployer: { type: "string", title: "Name of Employer" },
-          workingSince: { type: "string", title: "Working since" },
+          workingSince: { type: "integer", title: "Working since" },
           typeOfEmployment: {
             type: "string",
             title: "Type of employment",
@@ -156,10 +160,11 @@ export const herohousingSalariedSchema = {
             title: "Nature of business / services",
             ui: { widget: "textarea", rows: 2 },
           },
-          runningSince: { type: "string", title: "Running since" },
+          runningSince: { type: "integer", title: "Running since" },
           partnersDetails: {
             type: "string",
-            title: "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
+            title:
+              "Details of partners, director, shareholders with family background and other details (For each partner if constitution is other than proprietorship firm)",
           },
           setupDetails: {
             type: "string",
@@ -192,7 +197,8 @@ export const herohousingSalariedSchema = {
           },
           propertyType: {
             type: "string",
-            title: "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
+            title:
+              "Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)",
             enum: [
               "Ready",
               "Plot",
@@ -203,17 +209,14 @@ export const herohousingSalariedSchema = {
           },
           propertyOccupancy: {
             type: "string",
-            title: "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)",
+            title:
+              "Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)",
           },
-        sourceOfPropertyPurchase: {
+          sourceOfPropertyPurchase: {
             type: "string",
-            title: "Source of property purchase (through dealer, builder/reference/relative)",
-            enum: [
-              "Dealer",
-              "Builder",
-              "Reference",
-              "Relative",
-            ],
+            title:
+              "Source of property purchase (through dealer, builder/reference/relative)",
+            enum: ["Dealer", "Builder", "Reference", "Relative"],
           },
           sellerDetails: {
             type: "string",
@@ -247,10 +250,13 @@ export const herohousingSalariedSchema = {
             type: "string",
             title: "When seller bought the property",
           },
-          
+          sellerLoanOnProperty: {
+            type: "string",
+            title: "Whether seller is having any loan on the property",
+          },
         },
       },
-      },
+    },
 
     {
       id: "investmentAndProperties",
@@ -260,12 +266,14 @@ export const herohousingSalariedSchema = {
         properties: {
           investmentHabits: {
             type: "string",
-            title: "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
+            title:
+              "What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving",
             ui: { widget: "textarea", rows: 3 },
           },
           currentResidenceOwnership: {
             type: "string",
-            title: "Whether current residence is owned or rented and rent amount if any",
+            title:
+              "Whether current residence is owned or rented and rent amount if any",
             ui: { widget: "textarea", rows: 2 },
           },
           rentedAmountIfAny: {
@@ -279,7 +287,8 @@ export const herohousingSalariedSchema = {
           },
           detailsOfAssetsBuiltTillDate: {
             type: "string",
-            title: "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
+            title:
+              "Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)",
           },
         },
       },
@@ -293,7 +302,8 @@ export const herohousingSalariedSchema = {
         properties: {
           proposedEndUseOfProperty: {
             type: "string",
-            title: "Proposed end use of property (self-occupation/investment etc) for HL/P+C/Self construction cases",
+            title:
+              "Proposed end use of property (self-occupation/investment etc) for HL/P+C/Self construction cases",
           },
           detailedEndUseOfFundInLapCases: {
             type: "string",
@@ -312,23 +322,28 @@ export const herohousingSalariedSchema = {
         properties: {
           detailsOfLoansPresentlyServicing: {
             type: "string",
-            title: "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue, repayment account from which all these EMI are getting paid",
+            title:
+              "Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue, repayment account from which all these EMI are getting paid",
           },
           repaymentAccount: {
             type: "string",
-            title: "Repayment account from which all these EMI are getting paid",
+            title:
+              "Repayment account from which all these EMI are getting paid",
           },
           pastLoanEndUse: {
             type: "string",
-            title: "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
+            title:
+              "What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use and impact on the business revenue",
           },
           checkIfAnyHomeLoanLap: {
             type: "string",
-            title: "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
+            title:
+              "Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any CC/OD limit or any other facility in the name of customer",
           },
           anyBouncingInLoans: {
             type: "string",
-            title: "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
+            title:
+              "Comment whether there is any bouncing in loans and if yes, period and reason of such bounces",
           },
           loanNotes: {
             type: "string",
@@ -338,37 +353,49 @@ export const herohousingSalariedSchema = {
         },
       },
     },
-    
-   {
-    id: "bankingDetails",
-    label: "Banking Details",
-    schema: {
-      type: "object",
-      properties: {
-        bankAccounts: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              bankDetails: { type: "string", title: "Bank details" },
-              accountOpenDate: { type: "string", title: "Account open date", format: "date" },
-              nameOfBankAccount: { type: "string", title: "Name of bank account in where salary is credited (if bank salary)" },
+
+    {
+      id: "bankingDetails",
+      label: "Banking Details",
+      schema: {
+        type: "object",
+        properties: {
+          bankAccounts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                bankDetails: { type: "string", title: "Bank details" },
+                accountOpenDate: {
+                  type: "string",
+                  title: "Account open date",
+                  format: "date",
+                },
+                nameOfBankAccount: {
+                  type: "string",
+                  title:
+                    "Name of bank account in where salary is credited (if bank salary)",
+                },
+              },
             },
           },
-        },
-        savingAccounts: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              savingsAccountDetails: { type: "string", title: "Please check any saving account of applicant and co applicant and provide the details of these accounts" },
+          savingAccounts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                savingsAccountDetails: {
+                  type: "string",
+                  title:
+                    "Please check any saving account of applicant and co applicant and provide the details of these accounts",
+                },
+              },
             },
           },
         },
       },
     },
-  },
-    
+
     {
       id: "documentVerificationAndOtherChecks",
       label: "Document verification and other checks",
@@ -377,24 +404,30 @@ export const herohousingSalariedSchema = {
         properties: {
           checkPayrollRegisterAndAttendanceRegister: {
             type: "string",
-            title: "Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations",
+            title:
+              "Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations",
           },
           thirdPartyCheck: {
             type: "string",
-            title: "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period",
+            title:
+              "TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period",
             ui: { widget: "textarea", rows: 2 },
           },
           familyRelationshipCheckWithEmployer: {
             type: "string",
-            title: "Additional check to be done from reference if there is any family relationship with employer and employee",
+            title:
+              "Additional check to be done from reference if there is any family relationship with employer and employee",
           },
-          checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer: {
-            type: "string",
-            title: "Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations",
-          },
+          checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer:
+            {
+              type: "string",
+              title:
+                "Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations",
+            },
           googleCheckAnyNegativeObservationsFeedbackDedupeMatch: {
             type: "string",
-            title: "Google check and any negative observation/feedback/dedupe match or any other feedback",
+            title:
+              "Google check and any negative observation/feedback/dedupe match or any other feedback",
           },
         },
       },

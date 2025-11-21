@@ -105,7 +105,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
   const observations = verificationData.observations || {};
   const pdStatus = verificationData.pdStatus || {};
   const interviewerDetails = verificationData.interviewerDetails || {};
-
+  const geoTagDetails = verificationData.geoTagDetails || {};
 
 
   return `
@@ -116,7 +116,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
     <table style="${tableStyle}">
       <tr>
         <td style="${labelCellStyle}">Application Number</td>
-        <td style="${valueCellStyle}">${applicationDetails.applicationNumber}</td>
+        <td style="${valueCellStyle}">${applicationDetails?.applicationNumber}</td>
       </tr>
 
       <tr>
@@ -131,7 +131,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Earning (Yes/No)</td>
               <td style="${labelCellStyle}">Approx. Income</td>
             </tr>
-            ${ensureArray(borrowerFamilyDetails.borrowerFamilyDetails).map((borrower: any) => `
+            ${ensureArray(borrowerFamilyDetails?.borrowerFamilyDetails).map((borrower: any) => `
               <tr>  
                 <td style="${valueCellStyle}">${borrower.name}</td>
                 <td style="${valueCellStyle}">${borrower.relationWithApplicant}</td>
@@ -154,8 +154,8 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Visited Address</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${formatMultiline(addressDetails.initiatedAddress)}</td>
-              <td style="${valueCellStyle}">${formatMultiline(addressDetails.visitedAddress)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(addressDetails?.initiatedAddress)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(addressDetails?.visitedAddress)}</td>
             </tr>
           </table>
         </td>
@@ -168,23 +168,23 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Applicant</td>
-              <td style="${valueCellStyle}">${borrowerprofile.applicantName} (${borrowerprofile.applicantDateOfBirth})</td>
+              <td style="${valueCellStyle}">${borrowerprofile?.applicantName} (${borrowerprofile?.applicantDateOfBirth})</td>
               </tr>
               <tr>
               <td style="${labelCellStyle}">Co-Applicant</td>
-              <td style="${valueCellStyle}">${borrowerprofile.coApplicantName} (${borrowerprofile.coApplicantDateOfBirth})</td>
+              <td style="${valueCellStyle}">${borrowerprofile?.coApplicantName} (${borrowerprofile?.coApplicantDateOfBirth})</td>
             </tr>
           </table>
         </td>
       </tr>
 
-      ${renderKeyValue("Residence Details & Stability at Current Residence", formatMultiline(residenceDetails.residenceDetails))}
+      ${renderKeyValue("Residence Details & Stability at Current Residence", formatMultiline(residenceDetails?.residenceDetails))}
 
-      ${renderKeyValue("Residence Ownership", residenceOwnershipDetails.residenceOwnership)}
+      ${renderKeyValue("Residence Ownership", residenceOwnershipDetails?.residenceOwnership)}
 
-      ${renderKeyValue("Name of Firm (employer/business)", nameOfFirm.nameOfFirm)}
+      ${renderKeyValue("Name of Firm (employer/business)", nameOfFirm?.nameOfFirm)}
 
-      ${renderKeyValue("Designation of Borrower/ownership type of business", designation.designation)}
+      ${renderKeyValue("Designation of Borrower/ownership type of business", designation?.designation)}
 
 
       <tr>
@@ -202,7 +202,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Coming into Loan Structure</td>
               <td style="${labelCellStyle}">Function Handled</td>
             </tr>
-            ${ensureArray(shareholdingDetails.shareholdingDetails).map((shareholder: any) => `
+            ${ensureArray(shareholdingDetails?.shareholdingDetails).map((shareholder: any) => `
               <tr>
                 <td style="${valueCellStyle}">${shareholder.shareholderName}</td>
                 <td style="${valueCellStyle}">${shareholder.relationWithApplicant}</td>
@@ -219,22 +219,22 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Employment/ Business Details & Stability Business premises details</td>
-        <td style="${valueCellStyle}">${formatMultiline(employmentOrBusinessDetails.employmentDetails)} <br> ${formatMultiline(employmentOrBusinessDetails.businessPremises)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(employmentOrBusinessDetails?.employmentDetails)} <br> ${formatMultiline(employmentOrBusinessDetails?.businessPremises)}</td>
       </tr>
 
       <tr>
         <td style="${labelCellStyle}">Business Profile /Employment job profile along with previous business/employment details</td>
-        <td style="${valueCellStyle}">${formatMultiline(jobProfile.businessOrEmploymentProfile)} <br> ${formatMultiline(jobProfile.previousBusinessOrEmploymentDetails)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(jobProfile?.businessOrEmploymentProfile)} <br> ${formatMultiline(jobProfile?.previousBusinessOrEmploymentDetails)}</td>
       </tr>
 
       <tr>
         <td style="${labelCellStyle}">Average Stock Maintained</td>
-        <td style="${valueCellStyle}">${formatCurrency(averageStockMaintained.averageStockMaintained)}</td>
+        <td style="${valueCellStyle}">${formatCurrency(averageStockMaintained?.averageStockMaintained)}</td>
       </tr>
 
       <tr>
         <td style="${labelCellStyle}">Working Hours</td>
-        <td style="${valueCellStyle}">${formatMultiline(workingHours.workingHours)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(workingHours?.workingHours)}</td>
       </tr>
 
       <tr>
@@ -250,12 +250,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Status of Labour</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${employmentDetails.noOfEmployees}</td>
-              <td style="${valueCellStyle}">${formatCurrency(employmentDetails.salaryPerMonthPerEmployee)}</td>
-              <td style="${valueCellStyle}">${employmentDetails.statusOfEmployee}</td>
-              <td style="${valueCellStyle}">${employmentDetails.noOfLabours}</td>
-              <td style="${valueCellStyle}">${formatCurrency(employmentDetails.wagesPerMonthOrDay)}</td>
-              <td style="${valueCellStyle}">${employmentDetails.statusOfLabour}</td>
+              <td style="${valueCellStyle}">${employmentDetails?.noOfEmployees}</td>
+              <td style="${valueCellStyle}">${formatCurrency(employmentDetails?.salaryPerMonthPerEmployee)}</td>
+              <td style="${valueCellStyle}">${employmentDetails?.statusOfEmployee}</td>
+              <td style="${valueCellStyle}">${employmentDetails?.noOfLabours}</td>
+              <td style="${valueCellStyle}">${formatCurrency(employmentDetails?.wagesPerMonthOrDay)}</td>
+              <td style="${valueCellStyle}">${employmentDetails?.statusOfLabour}</td>
             </tr>
           </table>
         </td> 
@@ -267,7 +267,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Mode of salary paid by employer – Cash/ Bank credit</td>
-              <td style="${valueCellStyle}" colspan="3">${currentMonthlySalary.modeOfSalaryPayment}</td>
+              <td style="${valueCellStyle}" colspan="3">${currentMonthlySalary?.modeOfSalaryPayment}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Last 3 Month Salary</td>
@@ -276,10 +276,10 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Date of Credit</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${currentMonthlySalary.last3MonthSalary}</td>
-              <td style="${valueCellStyle}">${formatCurrency(currentMonthlySalary.netSalaryAsPerSalarySlipOrCertificate)}</td>
-              <td style="${valueCellStyle}">${formatCurrency(currentMonthlySalary.netSalaryAsPeBankCredits)}</td>
-              <td style="${valueCellStyle}">${currentMonthlySalary.dateOfCredit}</td>
+              <td style="${valueCellStyle}">${currentMonthlySalary?.last3MonthSalary}</td>
+              <td style="${valueCellStyle}">${formatCurrency(currentMonthlySalary?.netSalaryAsPerSalarySlipOrCertificate)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(currentMonthlySalary?.netSalaryAsPeBankCredits)}</td>
+              <td style="${valueCellStyle}">${currentMonthlySalary?.dateOfCredit}</td>
             </tr>
           </table>
         </td>
@@ -295,7 +295,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Amount</td>
               <td style="${labelCellStyle}">Remarks (pls. Specify)</td>
             </tr>
-            ${ensureArray(otherIncome).map((income: any) => `
+            ${ensureArray(otherIncome?.otherIncome).map((income: any) => `
               <tr>
                 <td style="${valueCellStyle}">${income.typeOfIncome}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.incomeAmount)}</td>
@@ -315,39 +315,39 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               </tr>
             <tr>
               <td style="${labelCellStyle}">Did the PD agent met the employer (Y/N) (Name of the employer & mobile number)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.didPdAgentMetTheEmployer} <br> ${specificForCashSalariedProfile.employerName} <br> ${specificForCashSalariedProfile.mobileNumberOfEmployer}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.didPdAgentMetTheEmployer} <br> ${specificForCashSalariedProfile?.employerName} <br> ${specificForCashSalariedProfile?.mobileNumberOfEmployer}</td>
             </tr> 
             <tr>
               <td style="${labelCellStyle}">Does the employer maintain the attendance register (Y/N) <br> </td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.employerMaintainAttendanceSheet}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.employerMaintainAttendanceSheet}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">If yes, is the name of the borrower reflecting in the attendance register (Y/N) & for how many months (try to check last 6 months attendance register)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.nameOfBorrowerReflectingInAttendance} , ${specificForCashSalariedProfile.howManyMonthsReflectingInAttendance}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.nameOfBorrowerReflectingInAttendance} , ${specificForCashSalariedProfile?.howManyMonthsReflectingInAttendance}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks for employment confirmation with other employees working in the same firm. Minimum 2 references to be obtain. (Name & mobile number of the reference people to be documented)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.attendanceReferenceChecksinSameFirm.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.attendanceReferenceChecksinSameFirm?.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.attendanceNeighboursReferenceChecks.map((reference: any) => `${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.attendanceNeighboursReferenceChecks?.map((reference: any) => `${reference.nameOfNeighbour} , ${reference.mobileNumberNeighbour} , ${reference.feedbackOnApplicant}`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N) If yes, verify the salary paid to the borrower and capture photos in the PD report</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.proofOfSalaryMaintenance}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.proofOfSalaryMaintenance}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If no, then do reference checks with other employees working in the same firm for salary confirmation. Minimum 2 references to be obtained. (Name & mobile number of the reference people to be documented).</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.salaryReferenceCheckInSameFirm.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.salaryReferenceCheckInSameFirm?.map((reference: any) => `${reference.nameOfReferencePeople} , ${reference.mobileNumberReferencePeople}`).join("<br> ")}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Any variation in the salary paid amount as per salary certificate & as per salary register verified during the visit.</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.variationInSalary}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.variationInSalary}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Does the employer has GST number? (Y/N). If yes, Try to collect GST of the employer.</td>
-              <td style="${valueCellStyle}">${specificForCashSalariedProfile.employeHasGSTNumber} - ${specificForCashSalariedProfile.gstNumber}</td>
+              <td style="${valueCellStyle}">${specificForCashSalariedProfile?.employeHasGSTNumber} - ${specificForCashSalariedProfile?.gstNumber}</td>
             </tr>
           </table>
         </td>
@@ -356,7 +356,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Main Business, Products and End use of the same</td>
-        <td style="${valueCellStyle}">${formatMultiline(businessAndProuctsAndEndUseOfTheSame.endUseOfProducts)}</td>
+        <td style="${valueCellStyle}">${formatMultiline(businessAndProuctsAndEndUseOfTheSame?.endUseOfProducts)}</td>
       </tr>
 
       <tr>
@@ -365,15 +365,15 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">No of Fixed Clients</td>
-              <td style="${valueCellStyle}" colspan="3">${clientDetails.noOfFixedClients}</td>
+              <td style="${valueCellStyle}" colspan="3">${clientDetails?.noOfFixedClients}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Credit Period</td>
-              <td style="${valueCellStyle}" colspan="3">${clientDetails.creditPeriod}</td>
+              <td style="${valueCellStyle}" colspan="3">${clientDetails?.creditPeriod}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Cash - Cheque proportion</td>
-              <td style="${valueCellStyle}" colspan="3">${clientDetails.cashChequeProportion}</td>
+              <td style="${valueCellStyle}" colspan="3">${clientDetails?.cashChequeProportion}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Name (top 3 customers)</td>
@@ -381,7 +381,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Location</td>
               <td style="${labelCellStyle}">Ref. Check</td>
             </tr>
-            ${ensureArray(clientDetails.top3customers).map((customer: any) => `
+            ${ensureArray(clientDetails?.top3customers).map((customer: any) => `
               <tr>
                 <td style="${valueCellStyle}">${customer.nameOfClient}</td>
                 <td style="${valueCellStyle}">${customer.contactDetails}</td>
@@ -400,15 +400,15 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">No of Fixed Vendors</td>
-              <td style="${valueCellStyle}" colspan="3">${vendorDetails.noOfFixedVendor}</td>
+              <td style="${valueCellStyle}" colspan="3">${vendorDetails?.noOfFixedVendor}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Credit Period</td>
-              <td style="${valueCellStyle}" colspan="3">${vendorDetails.creditPeriod}</td>
+              <td style="${valueCellStyle}" colspan="3">${vendorDetails?.creditPeriod}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Cash - Cheque proportion</td>
-              <td style="${valueCellStyle}" colspan="3">${vendorDetails.cashChequeProportion}</td>
+              <td style="${valueCellStyle}" colspan="3">${vendorDetails?.cashChequeProportion}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Name (top 3 vendors)</td>
@@ -416,12 +416,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Location</td>
               <td style="${labelCellStyle}">Ref. Check</td>
             </tr>
-            ${ensureArray(vendorDetails.top3vendors).map((vendor: any) => `
+            ${ensureArray(vendorDetails?.top3vendors).map((vendor: any) => `
               <tr>
-                <td style="${valueCellStyle}">${vendor.nameOfVendor}</td>
-                <td style="${valueCellStyle}">${vendor.contactDetails}</td>
-                <td style="${valueCellStyle}">${vendor.location}</td>
-                <td style="${valueCellStyle}">${vendor.referenceCheck}</td>
+                <td style="${valueCellStyle}">${vendor?.nameOfVendor}</td>
+                <td style="${valueCellStyle}">${vendor?.contactDetails}</td>
+                <td style="${valueCellStyle}">${vendor?.location}</td>
+                <td style="${valueCellStyle}">${vendor?.referenceCheck}</td>
               </tr>
             `).join("")}
           </table>
@@ -440,7 +440,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Feedback on Borrower</td>
               <td style="${labelCellStyle}">Feedback on Business</td>
             </tr>
-            ${ensureArray(thirdPartyChecks.thirdPartyChecks).map((check: any) => `
+            ${ensureArray(thirdPartyChecks?.thirdPartyChecks).map((check: any) => `
               <tr>
                 <td style="${valueCellStyle}">${check?.individualOrBusinessName || ""}</td>
                 <td style="${valueCellStyle}">${check?.address || ""}</td>
@@ -466,7 +466,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Net Profit Margin</td>
               <td style="${labelCellStyle}">GST Paid (in Rupees)</td>
             </tr>
-            ${ensureArray(incomeAssessment.incomedetails).map((income: any) => `
+            ${ensureArray(incomeAssessment?.incomedetails).map((income: any) => `
               <tr>
                 <td style="${valueCellStyle}">${formatCurrency(income.last3MonthSalary)}</td>
                 <td style="${valueCellStyle}">${formatCurrency(income.sales)}</td>
@@ -481,46 +481,46 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Total Monthly Sales/Revenue</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.totalMonthlySalesOrRevenue)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.totalMonthlySalesOrRevenue)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Less: Monthly Business Expenses</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.monthlyBusinessExpenses)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.monthlyBusinessExpenses)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Net Business Income</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.netBusinessIncome)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.netBusinessIncome)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Less: Current Obligations</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.currentObligations)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.currentObligations)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Less: Family Expenses</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.familyExpenses)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.familyExpenses)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Net Disposal Income</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.netDisposalIncome)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.netDisposalIncome)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="4"></td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Annual Sales</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.annualSales)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.annualSales)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Annual GST Paid</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.annualGstPaid)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.annualGstPaid)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Annual Gross Profit</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.annualGrossProfit)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.annualGrossProfit)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2">Annual Net Profit</td>
-              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment.annualNetProfit)}</td>
+              <td style="${valueCellStyle}" colspan="2">${formatCurrency(incomeAssessment?.annualNetProfit)}</td>
             </tr>
           </table>
         </td>
@@ -535,35 +535,35 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               </tr>
               <tr>
                 <td style="${labelCellStyle}">How many contracts completed in last 6 months</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.contractsCompleted}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.contractsCompleted}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">In what mode, payment is getting against these contracts.</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.modeOfPayment}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.modeOfPayment}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Document name of client, mobile number, type of contract & contract value in PD report</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.clientDetails.nameOfClient} - ${specificForContractorProfile.clientDetails.mobileNumberOfClient} - ${specificForContractorProfile.clientDetails.typeOfContract} - ${formatCurrency(specificForContractorProfile.clientDetails.contractValue)}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.clientDetails?.nameOfClient} - ${specificForContractorProfile?.clientDetails?.mobileNumberOfClient} - ${specificForContractorProfile?.clientDetails?.typeOfContract} - ${formatCurrency(specificForContractorProfile?.clientDetails?.contractValue)}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Randomly call 2 to 3 clients to verify the contract details and document the feedback in the PD report along with details of the client called for confirmation.</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.clientReferenceCheck.map((client: any) => `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`).join("<br> ")}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.clientReferenceCheck?.map((client: any) => `${client.nameOfClient} - ${client.mobileNumberOfClient} - ${formatCurrency(client.feedbackOnClient)}`).join("<br> ")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Neighbour two reference checks to confirm applicant’s employer information is correct. (name & contact number along with feedback to be documented)</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.neighbourReferenceCheck.map((neighbour: any) => `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`).join("<br> ")}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.neighbourReferenceCheck?.map((neighbour: any) => `${neighbour.nameOfNeighbour} - ${neighbour.mobileNumberOfNeighbour} - ${neighbour.feedbackDetails}`).join("<br> ")}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Stability or vintage in the same line of business</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.stabilityInTheSameBusiness}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.stabilityInTheSameBusiness}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Direct contractor or doing sub-contracting work</td>
-                <td style="${valueCellStyle}">${specificForContractorProfile.directOrSubContractor}</td>
+                <td style="${valueCellStyle}">${specificForContractorProfile?.directOrSubContractor}</td>
               </tr>
               <tr>
                 <td style="${labelCellStyle}">Advance amount paid to workers</td>
-                <td style="${valueCellStyle}">${formatCurrency(specificForContractorProfile.advanceAmountPaid)}</td>
+                <td style="${valueCellStyle}">${formatCurrency(specificForContractorProfile?.advanceAmountPaid)}</td>
               </tr>
           </table>
         </td>
@@ -571,7 +571,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Level of Activity & Stocks along with Observation</td>
-        <td style="${valueCellStyle}">${ensureArray(levelOfActivity.levelOfActivity).map((activity: any) => `${activity.observations}`).join("<br> ")}</td>
+        <td style="${valueCellStyle}">${ensureArray(levelOfActivity?.levelOfActivity)?.map((activity: any) => `${activity.observations}`).join("<br> ")}</td>
       </tr>
 
       <tr>
@@ -580,35 +580,35 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Collateral Address</td>
-              <td style="${valueCellStyle}">${mortgageDetails.collateralAddress}</td>
+              <td style="${valueCellStyle}">${mortgageDetails?.collateralAddress}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Area</td>
-              <td style="${valueCellStyle}">${mortgageDetails.areaInSqYards} Sq. Yards</td>
+              <td style="${valueCellStyle}">${mortgageDetails?.areaInSqYards} Sq. Yards</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Agreement Value (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails.agreementValue)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails?.agreementValue)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Actual Purchase Cost (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails.actualPurchaseCost)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails?.actualPurchaseCost)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Market Value (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails.marketValue)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails?.marketValue)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">OCR (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails.ocrValue)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails?.ocrValue)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">OCR Paid till date (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails.ocrPaidTillDate)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(mortgageDetails?.ocrPaidTillDate)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Source of OCR</td>
-              <td style="${valueCellStyle}">${mortgageDetails.ocrSource}</td>
+              <td style="${valueCellStyle}">${mortgageDetails?.ocrSource}</td>
             </tr>
           </table>
         </td>
@@ -621,39 +621,39 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">HL Purchase</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.hlPurchase}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.hlPurchase}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">HL Repair or Renovation</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.hlRepair}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.hlRepair}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">HL Construction</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.hlConstruction}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.hlConstruction}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">HL Plot + Construction</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.hlPlotAndConstruction}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.hlPlotAndConstruction}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">HL Working Capital</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.hlWorkingCapital}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.hlWorkingCapital}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Asset Acquisition and Expansion</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.assetAcquisition}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.assetAcquisition}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Market Development and growth</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.marketDevelopment}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.marketDevelopment}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Debt Management and Financial Efficiency</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.debtManagement}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.debtManagement}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">BT and Top Up</td>
-              <td style="${valueCellStyle}">${endUseOfLoan.btAndTopUp}</td>
+              <td style="${valueCellStyle}">${endUseOfLoan?.btAndTopUp}</td>
             </tr>
           </table>
         </td>
@@ -665,7 +665,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Asset Details</td>
-              <td style="${valueCellStyle}">${formatMultiline(assetDetails.assetDetails)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(assetDetails?.assetDetails)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}"><u>Type of Asset</u></td>
@@ -673,31 +673,31 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
             </tr>
             <tr>
               <td style="${labelCellStyle}">Properties (Flat, Individual House, Commercial, Agri land, vacant residential land, etc.)</td>
-              <td style="${valueCellStyle}">${assetDetails.propertiesValue} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.propertiesValue} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Life Insurance</td>
-              <td style="${valueCellStyle}">${assetDetails.lifeInsurance} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.lifeInsurance} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Medical Insurance</td>
-              <td style="${valueCellStyle}">${assetDetails.medicalInsurance} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.medicalInsurance} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">SIP</td>
-              <td style="${valueCellStyle}">${assetDetails.sipValue} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.sipValue} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">FD</td>
-              <td style="${valueCellStyle}">${assetDetails.fdValue} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.fdValue} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Vehicle</td>
-              <td style="${valueCellStyle}">${assetDetails.vehicleValue} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.vehicleValue} Lakhs</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Others</td>
-              <td style="${valueCellStyle}">${assetDetails.otherAssetsValue} Lakhs</td>
+              <td style="${valueCellStyle}">${assetDetails?.otherAssetsValue} Lakhs</td>
             </tr>
           </table>
         </td>
@@ -717,16 +717,16 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">MOB</td>
               <td style="${labelCellStyle}">EMI Paid Bank</td>
             </tr>
-            ${ensureArray(loanDetails.loanDetails).map((loan: any) => `
+            ${ensureArray(loanDetails?.loanDetails)?.map((loan: any) => `
               <tr>
-                <td style="${valueCellStyle}">${loan.nameOfBank}</td>
-                <td style="${valueCellStyle}">${loan.typeOfLoan}</td>
-                <td style="${valueCellStyle}">${formatCurrency(loan.loanAmount)}</td>
-                <td style="${valueCellStyle}">${formatCurrency(loan.osBalance)}</td>
-                <td style="${valueCellStyle}">${formatCurrency(loan.emi)}</td>
-                <td style="${valueCellStyle}">${loan.tenure} months</td>
-                <td style="${valueCellStyle}">${loan.monthOnBooks}</td>
-                <td style="${valueCellStyle}">${loan.emiPaidBank}</td>
+                <td style="${valueCellStyle}">${loan?.nameOfBank}</td>
+                <td style="${valueCellStyle}">${loan?.typeOfLoan}</td>
+                <td style="${valueCellStyle}">${formatCurrency(loan?.loanAmount)}</td>
+                <td style="${valueCellStyle}">${formatCurrency(loan?.osBalance)}</td>
+                <td style="${valueCellStyle}">${formatCurrency(loan?.emi)}</td>
+                <td style="${valueCellStyle}">${loan?.tenure} months</td>
+                <td style="${valueCellStyle}">${loan?.monthOnBooks}</td>
+                <td style="${valueCellStyle}">${loan?.emiPaidBank}</td>
               </tr>
             `).join("")}
           </table>
@@ -743,12 +743,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <td style="${labelCellStyle}">Account Type</td>
           <td style="${labelCellStyle}">Open Since (Year)</td>
         </tr>
-        ${ensureArray(bankingDetails.details).map((bank: any) => `
+        ${ensureArray(bankingDetails?.details)?.map((bank: any) => `
           <tr>
-          <td style="${valueCellStyle}">${bank.bankName}</td>
-          <td style="${valueCellStyle}">${bank.branchName}</td>
-          <td style="${valueCellStyle}">${bank.accountType}</td>
-          <td style="${valueCellStyle}">${bank.openSinceYear}</td>
+          <td style="${valueCellStyle}">${bank?.bankName}</td>
+          <td style="${valueCellStyle}">${bank?.branchName}</td>
+          <td style="${valueCellStyle}">${bank?.accountType}</td>
+          <td style="${valueCellStyle}">${bank?.openSinceYear}</td>
         </tr>
         `).join("")}
           </table>
@@ -761,11 +761,11 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Loan Amount Required (in Lakhs)</td>
-              <td style="${valueCellStyle}">${formatCurrency(loanAmountAndEndUseOfLoan.loanAmountRequired)}</td>
+              <td style="${valueCellStyle}">${formatCurrency(loanAmountAndEndUseOfLoan?.loanAmountRequired)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">End Use of Loan (Amount & Detailed End Use)</td>
-              <td style="${valueCellStyle}">${formatMultiline(loanAmountAndEndUseOfLoan.endUseDetailsOfLoan)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(loanAmountAndEndUseOfLoan?.endUseDetailsOfLoan)}</td>
             </tr>
           </table>
         </td>
@@ -773,7 +773,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Existing Relation with this lender Bank/FI</td>
-        <td style="${valueCellStyle}">${existingRelationWithLender.relationshipWithLender}</td>
+        <td style="${valueCellStyle}">${existingRelationWithLender?.relationshipWithLender}</td>
       </tr>
 
       <tr>
@@ -785,12 +785,12 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Document Name</td>
               <td style="${labelCellStyle}">Document Type</td>
               <td style="${labelCellStyle}">Remarks</td>
-              ${ensureArray(documentsSeen.documentsSeen).map((document: any) => `
+              ${ensureArray(documentsSeen?.documentsSeen)?.map((document: any) => `
                 <tr>
-                  <td style="${valueCellStyle}">${document.documentCategory}</td>
-                  <td style="${valueCellStyle}">${document.documentName}</td>
-                  <td style="${valueCellStyle}">${document.documentType}</td>
-                  <td style="${valueCellStyle}">${formatMultiline(document.documentRemarks)}</td>
+                  <td style="${valueCellStyle}">${document?.documentCategory}</td>
+                  <td style="${valueCellStyle}">${document?.documentName}</td>
+                  <td style="${valueCellStyle}">${document?.documentType}</td>
+                  <td style="${valueCellStyle}">${formatMultiline(document?.documentRemarks)}</td>
                 </tr>
               `).join("")}
           </table>
@@ -803,11 +803,11 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
           <table style="${tableStyle}">
             <tr>
               <td style="${labelCellStyle}">Comforts</td>
-              <td style="${valueCellStyle}">${formatMultiline(interviewerComments.comforts)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(interviewerComments?.comforts)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">Discomforts</td>
-              <td style="${valueCellStyle}">${formatMultiline(interviewerComments.discomforts)}</td>
+              <td style="${valueCellStyle}">${formatMultiline(interviewerComments?.discomforts)}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}" colspan="2"><i>Note: As per business calculations we estimated his monthly cash flow</i></td>
@@ -819,7 +819,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Pd Status (Positive/Negative/Refer)</td>
-        <td style="${valueCellStyle}">${pdStatus.status}</td>
+        <td style="${valueCellStyle}">${pdStatus?.status}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Interviewer Details</td>
@@ -830,13 +830,19 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
               <td style="${labelCellStyle}">Visit Date and Time</td>
             </tr>
             <tr>
-              <td style="${valueCellStyle}">${interviewerDetails.interviewerName}</td>
-              <td style="${valueCellStyle}">${interviewerDetails.dateAndTimeOfInterview}</td>
+              <td style="${valueCellStyle}">${interviewerDetails?.interviewerName}</td>
+              <td style="${valueCellStyle}">${interviewerDetails?.dateAndTimeOfInterview}</td>
             </tr>
           </table>
         </td>
       </tr>
-
+      <tr>
+        <td style="${labelCellStyle}">Geo Tag Details</td>
+        <td style="border:1px solid #ccc;padding:8px">
+          <p><strong><u>Enclosed:</u></strong></p>
+          <p>${geoTagDetails?.coordinates}</p>
+        </td>
+      </tr>
     </table>
     </div>
 

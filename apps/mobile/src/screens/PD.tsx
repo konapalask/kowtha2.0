@@ -1,4 +1,10 @@
-import React, {useState, useEffect, useLayoutEffect, useCallback} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   View,
   Text,
@@ -39,7 +45,6 @@ const FIELD_KEY_MAPPINGS = {
     'applicantMobile',
     'applicantContactNumber',
     'applicantPhoneNumber',
-    'loanAmountRequired',
   ],
   applicationNumber: [
     'applicationNumber',
@@ -48,10 +53,18 @@ const FIELD_KEY_MAPPINGS = {
     'referenceNumber',
     'proposalNumber',
     'loanAccountNo',
+    'applicationReferenceNo',
   ],
-  loanAmount: ['loanAmount', 'loanAmountRequested'],
+  loanAmount: [
+    'loanAmount',
+    'loanAmountRequested',
+    'endUseOfTheLoanAndLoanAmountRequired',
+    'loanAmountApplied',
+    'requestedLoanAmount',
+    'loanAmountRequired',
+  ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
-  bankName: ['repaymentBankName'],
+  bankName: [],
   address: [
     'applicantAddress',
     'initiatedAddress',
@@ -61,6 +74,8 @@ const FIELD_KEY_MAPPINGS = {
     'officeAddress',
     'initiatedPremises',
     'addressOfFirm',
+    'businessPremises',
+    'shopAddress',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],
@@ -70,15 +85,17 @@ const FIELD_KEY_MAPPINGS = {
     'geoCoordinates',
     'siteCoordinates',
     'latitudeLongitude',
+    'latitudeAndLongitude',
+    'geoLocation',
+    'officeGeoTag',
+    'customerGeoTag',
   ],
 };
 
-// Function to check if a field key matches any pattern in the mapping
-const matchesFieldPattern = (fieldKey: string, patterns: string[]): boolean => {
+// Function to check if a field key matches exactly any pattern in the mapping
+const matchesFieldExact = (fieldKey: string, patterns: string[]): boolean => {
   const fieldKeyLower = fieldKey.toLowerCase();
-  return patterns.some(pattern =>
-    fieldKeyLower.includes(pattern.toLowerCase()),
-  );
+  return patterns.some(pattern => fieldKeyLower === pattern.toLowerCase());
 };
 
 // Function to get initial data based on schema structure (DYNAMIC APPROACH)
@@ -88,7 +105,7 @@ const getInitialDataByBank = (
   loggedInUserName?: string,
 ) => {
   if (!userData || !schema) return {};
-  console.log('userData', userData);
+  // console.log('userData', userData);
   // Extract common data from userData
   const commonData: Record<string, any> = {
     applicantName:
@@ -117,11 +134,11 @@ const getInitialDataByBank = (
       // Iterate through section fields
       if (section.schema?.properties) {
         Object.keys(section.schema.properties).forEach(fieldKey => {
-          // Check each field against our mappings
+          // Check each field against our mappings (exact match only)
           for (const [commonKey, patterns] of Object.entries(
             FIELD_KEY_MAPPINGS,
           )) {
-            if (matchesFieldPattern(fieldKey, patterns)) {
+            if (matchesFieldExact(fieldKey, patterns)) {
               // Special handling for coordinates
               if (commonKey === 'coordinates') {
                 // For coordinates field, try to get from commonData or leave empty
@@ -143,18 +160,18 @@ const getInitialDataByBank = (
             }
           }
 
-          // Special case: pdDoneBy or nameOfPersonMet
+          // Special case: pdDoneBy or verifierName (exact match only)
+          const fieldKeyLower = fieldKey.toLowerCase();
           if (
-            fieldKey.includes('pdDone') ||
-            fieldKey.includes('pdDoneBy') ||
-            // fieldKey.includes('nameOfPersonMet') ||
-            fieldKey.includes('verifierName')
+            fieldKeyLower === 'pddoneby' ||
+            fieldKeyLower === 'pddone' ||
+            fieldKeyLower === 'verifiername'
           ) {
             initialData[section.id][fieldKey] = loggedInUserName || '';
           }
 
-          // Special case: bankName
-          if (fieldKey.includes('bank') && fieldKey.includes('name')) {
+          // Special case: bankName (exact match only)
+          if (fieldKeyLower === 'bankname') {
             initialData[section.id][fieldKey] = userData?.loan?.bankName || '';
           }
 
@@ -204,7 +221,12 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   // console.log('sectionData', sectionData);
   const [uploadedItems, setUploadedItems] = useState<UploadedItem[]>([]);
   const [investigable, setInvestigable] = useState<boolean | null>(null);
-  // console.log('sectionData', sectionData);
+  console.log('sectionData', sectionData);
+
+  // Refs for scrolling to sections
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionRefs = useRef<Record<string, View | null>>({});
+  const formContainerRef = useRef<View | null>(null);
 
   // Log sectionData whenever it changes
   // useEffect(() => {
@@ -300,6 +322,8 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
   // Fetch current coordinates on component mount
   useEffect(() => {
+    if (!schemaForm) return; // Wait for schema to load
+
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 15000,
@@ -308,33 +332,44 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         const {latitude, longitude} = location;
         const coordinates = `${latitude},${longitude}`;
 
-        // Update section data with coordinates based on bank
+        // Find coordinate-related fields in schema and populate them
         setSectionData((prev: any) => {
-          const bankNameLower = bankName?.toLowerCase() || '';
           const updates: any = {...prev};
 
-          // RBL bank - coordinates in particulars section
-          if (bankNameLower.includes('rbl')) {
-            updates.particulars = {
-              ...prev.particulars,
-              coordinates: coordinates,
-            };
-          }
-
-          // Axis Finance UBL - siteCoordinates in thirdPartyCheck section
-          if (bankNameLower.includes('axis finance ubl')) {
-            updates.thirdPartyCheck = {
-              ...prev.thirdPartyCheck,
-              siteCoordinates: coordinates,
-            };
-          }
-
-          // Tata UBL - latitudeLongitude in finalStatus section
-          if (bankNameLower.includes('tata ubl')) {
-            updates.finalStatus = {
-              ...prev.finalStatus,
-              latitudeLongitude: coordinates,
-            };
+          // Iterate through schema sections to find coordinate fields
+          if (schemaForm?.sections) {
+            schemaForm.sections.forEach((section: any) => {
+              if (section.schema?.properties) {
+                Object.keys(section.schema.properties).forEach(fieldKey => {
+                  // Check if field matches coordinate patterns
+                  if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.coordinates)
+                  ) {
+                    // Populate combined coordinates field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: coordinates,
+                    };
+                  } else if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude)
+                  ) {
+                    // Populate latitude field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: latitude.toString(),
+                    };
+                  } else if (
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
+                  ) {
+                    // Populate longitude field
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: longitude.toString(),
+                    };
+                  }
+                });
+              }
+            });
           }
 
           return updates;
@@ -344,37 +379,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         console.error('Error getting location:', error);
         // Set a fallback message if location is not available
         setSectionData((prev: any) => {
-          const bankNameLower = bankName?.toLowerCase() || '';
           const updates: any = {...prev};
 
-          // RBL bank
-          if (bankNameLower.includes('rbl')) {
-            updates.particulars = {
-              ...prev.particulars,
-              coordinates: 'Location not available',
-            };
-          }
-
-          // Axis Finance UBL
-          if (bankNameLower.includes('axis finance ubl')) {
-            updates.thirdPartyCheck = {
-              ...prev.thirdPartyCheck,
-              siteCoordinates: 'Location not available',
-            };
-          }
-
-          // Tata UBL
-          if (bankNameLower.includes('tata ubl')) {
-            updates.finalStatus = {
-              ...prev.finalStatus,
-              latitudeLongitude: 'Location not available',
-            };
+          // Find coordinate-related fields in schema and set fallback
+          if (schemaForm?.sections) {
+            schemaForm.sections.forEach((section: any) => {
+              if (section.schema?.properties) {
+                Object.keys(section.schema.properties).forEach(fieldKey => {
+                  // Check if field matches coordinate patterns
+                  if (
+                    matchesFieldExact(
+                      fieldKey,
+                      FIELD_KEY_MAPPINGS.coordinates,
+                    ) ||
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude) ||
+                    matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
+                  ) {
+                    updates[section.id] = {
+                      ...prev[section.id],
+                      [fieldKey]: 'Location not available',
+                    };
+                  }
+                });
+              }
+            });
           }
 
           return updates;
         });
       });
-  }, [bankName]);
+  }, [schemaForm, bankName]);
 
   useEffect(() => {
     console.log(userData);
@@ -387,7 +421,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       try {
         const schema = await loadMobilePDFormsSchema(
-          userData?.templateName ?? bankName,
+          userData?.loan?.templateName ?? bankName,
         );
         if (schema) {
           setSchemaForm(schema);
@@ -431,9 +465,36 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev: any) => {
       const isCurrentlyExpanded = prev[sectionId];
+      const willBeExpanded = !isCurrentlyExpanded;
+
+      // Scroll to section when opening it
+      if (willBeExpanded) {
+        setTimeout(() => {
+          const sectionRef = sectionRefs.current[sectionId];
+          const scrollView = scrollViewRef.current;
+
+          if (sectionRef && scrollView) {
+            // Use measureLayout to get position relative to ScrollView
+            sectionRef.measureLayout(
+              scrollView as any,
+              (x, y) => {
+                scrollView.scrollTo({
+                  y: Math.max(0, y - 20), // Add small offset, ensure non-negative
+                  animated: true,
+                });
+              },
+              () => {
+                // Fallback: error callback (measureLayout failed)
+                console.warn('Could not measure section layout');
+              },
+            );
+          }
+        }, 200); // Delay to ensure section is fully rendered
+      }
+
       return {
         investigable: prev.investigable,
-        [sectionId]: !isCurrentlyExpanded,
+        [sectionId]: willBeExpanded,
       };
     });
   };
@@ -543,17 +604,25 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const handleSectionDataChange = useCallback(
-    (sectionId: string, data: any) => {
+    async (sectionId: string, data: any) => {
       setSectionData((prevSectionData: any) => {
         const updatedSectionData = {
           ...prevSectionData,
           [sectionId]: data,
         };
-        // Save the updated data
+        // Save the updated data when Save button is clicked
         saveFormData(updatedSectionData);
         return updatedSectionData;
       });
-      // Removed auto-collapse - sections stay open while editing
+
+      // Show success message to confirm save
+      Toast.show({
+        type: 'success',
+        text1: 'Section Saved',
+        text2: 'Your changes have been saved successfully',
+        visibilityTime: 2000,
+        position: 'top',
+      });
     },
     [saveFormData],
   );
@@ -853,6 +922,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       />
 
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
@@ -876,11 +946,16 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
         {investigable && (
           <>
-            <View style={styles.formContainer}>
+            <View ref={formContainerRef} style={styles.formContainer}>
               {schemaForm?.sections?.map((sec: any) => {
                 const isExpanded = expandedSections[sec.id] || false;
                 return (
-                  <View key={sec.id} style={styles.sectionContainer}>
+                  <View
+                    key={sec.id}
+                    ref={ref => {
+                      sectionRefs.current[sec.id] = ref;
+                    }}
+                    style={styles.sectionContainer}>
                     <TouchableOpacity
                       style={styles.sectionHeader}
                       onPress={() => toggleSection(sec.id)}>
@@ -914,7 +989,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
               })}
 
               {/* Photo Capture Section - Common for all forms */}
-              <View style={styles.sectionContainer}>
+              <View
+                ref={ref => {
+                  sectionRefs.current['photoCapture'] = ref;
+                }}
+                style={styles.sectionContainer}>
                 <TouchableOpacity
                   style={styles.sectionHeader}
                   onPress={() => toggleSection('photoCapture')}>

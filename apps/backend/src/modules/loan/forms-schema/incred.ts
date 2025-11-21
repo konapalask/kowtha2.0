@@ -53,7 +53,7 @@ export const incredSchema = {
             },
           },
         },
-        required: ["applicationNo", "nameOfTheApplicantConcern"],
+        required: ["applicationNo", "nameOfApplicant"],
       },
       required: true,
     },
@@ -165,6 +165,7 @@ export const incredSchema = {
         properties: {
           debtors: {
             type: "object",
+            title: "Debtors",
             properties: {
               fy2020to2021: {
                 type: "number",
@@ -188,6 +189,7 @@ export const incredSchema = {
           },
           creditors: {
             type: "object",
+            title: "Creditors",
             properties: {
               fy2020to2021: {
                 type: "number",
@@ -205,12 +207,14 @@ export const incredSchema = {
               },
               noOfDays: {
                 type: "integer",
-                title: "Credit Period allowed by Creditors/Supplies - No. of Days",
+                title:
+                  "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
             },
           },
           stock: {
             type: "object",
+            title: "Stock",
             properties: {
               fy2020to2021: {
                 type: "number",
@@ -228,7 +232,8 @@ export const incredSchema = {
               },
               noOfDays: {
                 type: "integer",
-                title: "Credit Period allowed by Creditors/Supplies - No. of Days",
+                title:
+                  "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
             },
           },
@@ -311,7 +316,7 @@ export const incredSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {
@@ -319,9 +324,9 @@ export const incredSchema = {
                   title: "Occupation",
                 },
               },
+            },
           },
         },
-      },
       },
     },
     {
@@ -338,7 +343,7 @@ export const incredSchema = {
             type: "string",
             title: "General Lifestyle/Personality",
           },
-        }, 
+        },
       },
       required: true,
     },
@@ -382,7 +387,7 @@ export const incredSchema = {
             type: "array",
             title: "Other Liabilities / Loans (Applicant/Co-Applicants)",
             items: {
-          type: "object",
+              type: "object",
               properties: {
                 financier: {
                   type: "string",
@@ -412,17 +417,17 @@ export const incredSchema = {
                     minDecimalPlaces: 0,
                   },
                 },
-                  willCloseContinue: {
-                    type: "string",
-                    title: "Will Close / Continue",
-                    enum: ["Close", "Continue"],
-                  },
+                willCloseContinue: {
+                  type: "string",
+                  title: "Will Close / Continue",
+                  enum: ["Close", "Continue"],
+                },
               },
             },
           },
         },
       },
-    },   
+    },
     {
       id: "chitFundetc",
       label: "Chit fund, Private Finance and Hand loans etc",
@@ -439,7 +444,7 @@ export const incredSchema = {
           },
         },
       },
-    }, 
+    },
     {
       id: "otherAssets",
       label: "Other Assets",
@@ -458,7 +463,7 @@ export const incredSchema = {
       },
     },
     {
-      id:"otherSourcesOfIncome",
+      id: "otherSourcesOfIncome",
       label: "Other Sources of Income",
       schema: {
         type: "object",
@@ -474,7 +479,7 @@ export const incredSchema = {
         },
       },
     },
-    
+
     {
       id: "references",
       label: "References",

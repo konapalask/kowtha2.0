@@ -155,14 +155,14 @@ export const bankSchemas: BankSchemaConfig[] = [
     bankName: "HeroHousing-Salaried",
     schema: herohousingSalariedSchema,
     templatesAndFooters: {
-      "HERO HOUSING" : "HERO HOUSING FINANCE LIMITED" ,
+      "HERO HOUSING SALARIED" : "HERO HOUSING FINANCE LIMITED" ,
     },
   },
   {
     bankName: "HeroHousing-Self",
     schema: herohousingSelfSchema,
     templatesAndFooters: {
-      "HERO HOUSING" : "HERO HOUSING FINANCE LIMITED" ,
+      "HERO HOUSING SELF" : "HERO HOUSING FINANCE LIMITED" ,
     },
   },
   {
@@ -198,14 +198,14 @@ export const bankSchemas: BankSchemaConfig[] = [
     bankName: "India Shelter SENP",
     schema: indiaShelterSenpSchema,
     templatesAndFooters: {
-      "INDIA SHELTER" : "India Shelter Finance Corporation Ltd." ,
+      "INDIA SHELTER SENP" : "India Shelter Finance Corporation Ltd." ,
     },
   },
   {
     bankName: "India Shelter Salaried",
     schema: indiaShelterSalariedSchema,
     templatesAndFooters: {
-      "INDIA SHELTER" : "India Shelter Finance Corporation Ltd." ,
+      "INDIA SHELTER SALARIED" : "India Shelter Finance Corporation Ltd." ,
     },
   },
   {
@@ -219,35 +219,35 @@ export const bankSchemas: BankSchemaConfig[] = [
     bankName: "Jana Salaried",
     schema: janaSalariedSchema,
     templatesAndFooters: {
-      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+      "JANA SMALL FINANCE BANK LIMITED SALARIED" : "JANA SMALL FINANCE BANK LIMITED" ,
     },
   },
   {
     bankName: "Jana Senp Above 50l",
     schema: janaSenpAbove50lSchema,
     templatesAndFooters: {
-      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+      "JANA SMALL FINANCE BANK LIMITED SENP ABOVE 50L" : "JANA SMALL FINANCE BANK LIMITED" ,
     },
   },
   {
     bankName: "Jana Senp Below 50l",
     schema: janaSenpBelow50lSchema,
     templatesAndFooters: {
-      "JANA SMALL FINANCE BANK LIMITED" : "JANA SMALL FINANCE BANK LIMITED" ,
+      "JANA SMALL FINANCE BANK LIMITED SENP BELOW 50L" : "JANA SMALL FINANCE BANK LIMITED" ,
     },
   },
   {
     bankName: "Niwas Salaried",
     schema: niwasSalariedSchema,
     templatesAndFooters: {
-      "NIWAS" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
+      "NIWAS SALARIED" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
     },
   },
   {
     bankName: "Niwas Senp",
     schema: niwasSenpSchema,
     templatesAndFooters: {
-      "NIWAS" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
+      "NIWAS SENP" : "NIWAS HOUSING FINANCE PRIVATE LIMITED" ,
     },
   },
   {

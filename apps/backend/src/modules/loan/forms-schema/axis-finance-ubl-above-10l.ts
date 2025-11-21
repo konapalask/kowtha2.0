@@ -40,6 +40,7 @@ export const axisFinanceUblAbove10lSchema = {
           concernName: {
             type: "string",
             title: "Name of Concern",
+            readOnly: true,
           },
           constitution: {
             type: "string",
@@ -134,6 +135,16 @@ export const axisFinanceUblAbove10lSchema = {
                 relation: {
                   type: "string",
                   title: "Relation with applicant",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "integer",
@@ -279,11 +290,11 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedSuppliers: {
-            type: "string",
+            type: "integer",
             title: "No of fixed suppliers",
           },
           creditPeriodDays: {
-            type: "string",
+            type: "integer",
             title: "Credit period",
           },
           cashChequeProportion: {
@@ -305,7 +316,7 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact details",
                 },
                 location: {
@@ -330,11 +341,11 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedCustomers: {
-            type: "string",
+            type: "integer",
             title: "No of fixed customers",
           },
           creditPeriodDays: {
-            type: "string",
+            type: "integer",
             title: "Credit period",
           },
           cashChequeProportion: {
@@ -356,7 +367,7 @@ export const axisFinanceUblAbove10lSchema = {
                   title: "Name",
                 },
                 contactDetails: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact details",
                 },
                 location: {
@@ -513,7 +524,8 @@ export const axisFinanceUblAbove10lSchema = {
                 },
                 mortgaged: {
                   type: "string",
-                  title: "Mortgaged (Yes/No)",
+                  title: "Mortgaged",
+                  enum: ["Yes", "No"],
                 },
               },
             },

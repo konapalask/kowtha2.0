@@ -81,11 +81,11 @@ export const adityaBirlaSchema = {
             title: "Contact number",
           },
           tin: { type: "string", title: "TIN" },
-          pan: { 
-            type: "string", 
+          pan: {
+            type: "string",
             title: "PAN",
             pattern: "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
-            description: "PAN format: ABCDE1234F"
+            description: "PAN format: ABCDE1234F",
           },
           certificateOfIncorporation: {
             type: "string",
@@ -190,9 +190,17 @@ export const adityaBirlaSchema = {
         properties: {
           applicantSummary: { type: "string", title: "Applicant summary" },
           nativePlace: { type: "string", title: "Native Place" },
-          businessName: { type: "string", title: "Business name" },
+          businessName: {
+            type: "string",
+            title: "Business name",
+            readOnly: true,
+          },
           previousExperience: { type: "string", title: "Previous experience" },
-          businessPremises: { type: "string", title: "Business premises" },
+          businessPremises: {
+            type: "string",
+            title: "Business premises",
+            readOnly: true,
+          },
           ifRented: { type: "string", title: "If rented" },
           businessPremisesInSqFt: {
             type: "string",
@@ -230,11 +238,24 @@ export const adityaBirlaSchema = {
               type: "object",
               properties: {
                 name: { type: "string", title: "Name" },
-                relation: { type: "string", title: "Relation" },
+                relation: {
+                  type: "string",
+                  title: "Relation",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
+                },
                 age: { type: "integer", title: "Age" },
-                businessName: { type: "string", title: "Business name" },
-                education: { 
-                  type: "string", 
+                occupation: { type: "string", title: "Occupation" },
+                education: {
+                  type: "string",
                   title: "Education",
                   enum: [
                     "Below 10th",
@@ -242,8 +263,8 @@ export const adityaBirlaSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
-                  ]
+                    "PG/Professional Certification",
+                  ],
                 },
               },
             },
@@ -257,8 +278,8 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          salesBills: { type: "number", title: "Sales bills" },
-          purchaseBills: { type: "number", title: "Purchase bills" },
+          salesBills: { type: "string", title: "Sales bills" },
+          purchaseBills: { type: "string", title: "Purchase bills" },
           neighbourCheckName: { type: "string", title: "Neighbour check name" },
           neighbourCheckNumber: {
             type: "string",
@@ -281,6 +302,11 @@ export const adityaBirlaSchema = {
             title: "Observation",
             ui: { widget: "textarea", rows: 6 },
           },
+          concernsDeviations: {
+            type: "string",
+            title: "Concerns / Deviations",
+            ui: { widget: "textarea", rows: 4 },
+          },
           statusOfPd: { type: "string", title: "Status" },
           loanAmountApplied: {
             type: "number",
@@ -291,9 +317,14 @@ export const adityaBirlaSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
 
-          purposeOfLoan: { type: "string", title: "Purpose of loan" },
+          purposeOfLoan: {
+            type: "string",
+            title: "Purpose of loan",
+            readOnly: true,
+          },
         },
       },
     },
