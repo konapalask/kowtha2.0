@@ -435,6 +435,7 @@ export const idfcHlMlSchema = {
                 rentAgreementAvailable: {
                   type: "string",
                   title: "Rent agreement available (Y/N)",
+                  enum: ["Yes", "No"],
                 },
                 monthlyRent: {
                   type: "string",
@@ -530,6 +531,24 @@ export const idfcHlMlSchema = {
             title: "Date",
             format: "date",
           },
+        },
+      },
+    },
+    {
+      id: "detailsConfirmation",
+      label: "Details Confirmation",
+      schema: {
+        type: "object",
+        properties: {
+          detailsCheckedSameOrNot: { type: "string", title: "The details provided in the application form and the details provided by the customer at the time of discussion are same", enum: ["Yes", "No"] },
+          detailsNotSameReason: { type: "string", title: "If NO please provide the details",dependencies: {
+            show: {
+              detailsCheckedSameOrNot: "No",
+            },
+            required: {
+              detailsCheckedSameOrNot: "No",
+            },
+          }, ui: { widget: "textarea", rows: 3 } },
         },
       },
     },

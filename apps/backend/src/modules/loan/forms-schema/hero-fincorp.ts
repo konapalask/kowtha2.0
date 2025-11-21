@@ -66,15 +66,6 @@ export const heroFincorpSchema = {
             type: "string",
             title: "Person Met",
           },
-          verifierNotes: {
-            type: "string",
-            title:
-              "Verbal declaration / notes based on information provided by applicant",
-            ui: {
-              widget: "textarea",
-              rows: 4,
-            },
-          },
         },
       },
     },
@@ -152,24 +143,15 @@ export const heroFincorpSchema = {
       label: "About the Business",
       schema: {
         type: "object",
-        properties: {
-          businessProfile: {
-            type: "array",
-            title: "Business Details",
-            items: {
-              type: "object",
-              properties: {
-                detail: {
-                  type: "string",
-                  title: "Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
+          properties: {
+            aboutTheBusiness: {
+              type: "string",
+              title: "Detail",
+              ui: {
+                widget: "textarea",
+                rows: 3,
               },
             },
-          },
         },
       },
     },
@@ -214,11 +196,11 @@ export const heroFincorpSchema = {
             },
           },
           documentsObserved: {
-            type: "array",
+            type: "string",
             title: "Documents Observed",
-            items: {
-              type: "string",
-              title: "Document",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
           },
           automationLevel: {
@@ -384,11 +366,11 @@ export const heroFincorpSchema = {
             },
           },
           otherBusinessIncome: {
-            type: "array",
+            type: "string",
             title: "Other Business / Income",
-            items: {
-              type: "string",
-              title: "Income Detail",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           status: {
