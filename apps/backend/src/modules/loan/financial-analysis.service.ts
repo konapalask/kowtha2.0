@@ -415,7 +415,7 @@ export class FinancialAnalysisTemplatesService {
     financialAnalysis: any,
     loan: any
   ): Promise<Buffer> {
-
+    console.log("financialAnalysis", financialAnalysis);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
@@ -487,8 +487,119 @@ export class FinancialAnalysisTemplatesService {
       };
     });
 
-    // Add P&L data rows...
-    // This would continue with the detailed structure from image 3
+    // Helper function to get value safely
+    const getValue = (key: string): any => {
+      if (!key) return '';
+      const value = financialAnalysis[key];
+      if (value === null || value === undefined || value === '') return '';
+      return value;
+    };
+
+    // Helper function to add a data row
+    const addDataRow = (
+      leftLabel: string,
+      leftNote: string | number,
+      leftAudited: string | number,
+      leftAssessed: string | number,
+      rightLabel: string,
+      rightNote: string | number,
+      rightAudited: string | number,
+      rightEstimated: string | number,
+      isBold = false
+    ) => {
+      const row = worksheet.addRow([
+        leftLabel,
+        leftNote,
+        leftAudited,
+        leftAssessed,
+        rightLabel,
+        rightNote,
+        rightAudited,
+        rightEstimated,
+      ]);
+
+      if (isBold) {
+        row.font = { bold: true };
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF4B084' },
+          };
+        });
+      }
+
+      row.eachCell((cell) => {
+        this.applyBorder(cell);
+        cell.alignment = { vertical: 'middle' };
+      });
+
+      // Format numeric columns (C, D, G, H)
+      [3, 4, 7, 8].forEach((colNum) => {
+        const cell = row.getCell(colNum);
+        const value = cell.value;
+        if (value !== null && value !== undefined && value !== '') {
+          cell.alignment = {
+            horizontal: 'right',
+            vertical: 'middle',
+          };
+          if (typeof value === 'number') {
+            cell.numFmt = '#,##0.00';
+          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+            cell.value = Number(value);
+            cell.numFmt = '#,##0.00';
+          }
+        }
+      });
+    };
+
+    // Add P&L data rows - Left side (Expenditure/Assessed) and Right side (Income/Estimated)
+    
+    // Income section (Right side - Estimated column)
+    addDataRow('', '', '', '', 'Gross Receipts', '', '', getValue('grossReceipts'));
+    addDataRow('', '', '', '', 'Other Income', '', '', getValue('otherIncome'));
+    addDataRow('', '', '', '', 'Sub-total (Income)', '', '', getValue('incomeSubtotal'), true);
+    
+    // Cost section (Left side - Assessed column)
+    addDataRow('Cost of material consumed', '', '', getValue('costOfMaterialConsumed'), '', '', '', '');
+    addDataRow('Cost to Receipts %', '', '', getValue('costToReceiptsPercentage'), '', '', '', '');
+    
+    // Gross Profit (Right side)
+    addDataRow('', '', '', '', 'Gross Profit as per assumption', '', '', getValue('grossProfitAsPerAssumption'), true);
+    addDataRow('', '', '', '', 'GP ratio %', '', '', getValue('gpRatio'));
+    
+    // Expenditure section (Left side - Assessed column)
+    addDataRow('Salary', '', '', getValue('salary'), '', '', '', '');
+    addDataRow('Rent', '', '', getValue('rent'), '', '', '', '');
+    addDataRow('Electricity', '', '', getValue('electricity'), '', '', '', '');
+    addDataRow('Travelling', '', '', getValue('travelling'), '', '', '', '');
+    addDataRow('Other Expenses', '', '', getValue('otherExpenses'), '', '', '', '');
+    addDataRow('Sub-total (Expenditure)', '', '', getValue('expenditureSubtotal'), '', '', '', '', true);
+    
+    // Net Profit before interest, tax & Depreciation (Right side)
+    addDataRow('', '', '', '', 'Net Profit before interest, tax & Depreciation', '', '', getValue('netProfitBeforeInterestTaxDepreciation'), true);
+    addDataRow('', '', '', '', 'PBDIT Margin %', '', '', getValue('pbditMargin'));
+    
+    // Finance Expenses (Left side)
+    addDataRow('Finance Expenses', '', '', getValue('financeExpenses'), '', '', '', '');
+    
+    // Net Profit before tax & Depreciation (Right side)
+    addDataRow('', '', '', '', 'Net Profit before tax & Depreciation', '', '', getValue('netProfitBeforeTaxDepreciation'), true);
+    
+    // Depreciation (Left side)
+    addDataRow('Depreciation', '', '', getValue('depreciation'), '', '', '', '');
+    
+    // Net Profit Before Tax (Right side)
+    addDataRow('', '', '', '', 'Net Profit Before Tax', '', '', getValue('netProfitBeforeTax'), true);
+    
+    // Income Tax (Left side)
+    addDataRow('Income Tax', '', '', getValue('incomeTax'), '', '', '', '');
+    
+    // Net Profit After Tax (Right side)
+    addDataRow('', '', '', '', 'Net Profit After Tax', '', '', getValue('netProfitAfterTax'), true);
+    
+    // Total expenses including cost of sales (Left side)
+    addDataRow('Total expenses including cost of sales', '', '', getValue('totalExpensesInclCostOfSales'), '', '', '', '', true);
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);

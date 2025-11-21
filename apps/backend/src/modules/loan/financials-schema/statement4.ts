@@ -40,7 +40,6 @@ export const statement4Schema = {
           minDecimalPlaces: 0,
         },
       },
-
       purchasesAssessed: {
         type: "number",
         title: "Purchases - Assessed",

@@ -36,7 +36,6 @@ export class CreateLoanController {
       throw new UnauthorizedException('Invalid API key');
     }
     
-    
     try {
       const decryptedData = decrypt(encryptedData);
       this.logger.debug(`Decrypted data: ${JSON.stringify(decryptedData)}`);
