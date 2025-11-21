@@ -1,3 +1,4 @@
+import { baseTemplate } from "../../FI/base.template";
 import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
@@ -170,6 +171,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   const personalDiscussion =
     verificationData.personalDiscussion ||
     verificationData.personalDiscussionDetails ||
+    {};
+  const detailsConfirmation =
+    verificationData.detailsConfirmation ||
     {};
 
   const familyMembers = ensureArray(personal.familyMembers).map((member: any) => [
@@ -533,7 +537,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       content: wrapParagraph(formatMultiline(personalDiscussion.strengths || "")),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>Other observation (example: GST Returns, Bank Statement, ITRs, Food License, etc.)</strong></p>`,
+      instruction: `<p style="${paragraphStyle}"><strong>Other observation</strong></p>`,
       content:
         (hasValue(personalDiscussion.otherObservation)
           ? wrapParagraph(formatMultiline(personalDiscussion.otherObservation))
@@ -559,11 +563,10 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
 
   const personalDiscussionTable = renderInstructionTable(personalDiscussionRows);
 
-  const noteBlock = `
-    <div style="font-size:12px;line-height:1.6;margin-top:16px;">
-      <p style="margin:8px 0;"><strong>Photos:</strong></p>
-    </div>
+  const detailsConfirmationRows =  `<p style="${paragraphStyle}"><strong>The details provided in the application form and the details provided by the customer at the time of discussion are same</strong> - ${detailsConfirmation.detailsCheckedSameOrNot || ""}</p>
+  ${detailsConfirmation.detailsCheckedSameOrNot === "No" ? `<p><strong>Details:</strong> ${detailsConfirmation.detailsNotSameReason.split("\n").map((line: string) => `<p style="margin-left: 8px;">${line}</p>`).join("") || ""}</p>` : ""}
   `;
+
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -591,11 +594,11 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
       ${wrapParagraph("<strong>Other Assets:</strong>")}
       ${wrapParagraph(
-        formatMultiline(termLoansSection.otherAssets || "-")
+        termLoansSection.otherAssets.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || "-"
       )}
       ${wrapParagraph("<strong>Other Business if any:</strong>")}
       ${wrapParagraph(
-        formatMultiline(termLoansSection.otherBusiness || "-")
+        termLoansSection.otherBusiness.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || "-"
       )}
       ${wrapParagraph("<strong>Rental Income If any:</strong>")}
       ${rentalTable}
@@ -605,10 +608,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
 
       ${wrapParagraph("<strong>VII] Personal Discussion Details:-</strong>")}
       ${personalDiscussionTable}
+      ${detailsConfirmationRows}
 
-      <img style="max-width: 240px; height: auto; margin-top: 6px;" src="${html_data.imageDataUri}" alt="Kowtha Signature" />
-
-      <p>PHOTOS:</P>
       </div>
+      ${pdBaseTemplateFooter(html_data)}
   `;
 };
