@@ -1,5 +1,5 @@
 export const statement3Schema = {
-  id: "financialAnalysisComprehensive",
+  id: "financialAnalysis",
   label: "Comprehensive Actuals vs Estimated Analysis",
   schema: {
     type: "object",

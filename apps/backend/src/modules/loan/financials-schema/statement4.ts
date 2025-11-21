@@ -1,5 +1,5 @@
 export const statement4Schema = {
-  id: "financialAnalysisDetailed",
+  id: "financialAnalysis",
   label: "Detailed Financial Analysis with Balance Sheet",
   schema: {
     type: "object",
