@@ -49,7 +49,7 @@ export class FinancialAnalysisTemplatesService {
       }
       
       // Financial analysis is stored in verification.financialAnalysis, not in verificationData
-      const financialAnalysis = (verification.verificationData as any)?.financialAnalysis || {};
+      const financialAnalysis = (verification.verificationData as any)?.financialAnalysisDetailed || {};
       const loan = verification.loan;
       
       // Log for debugging if financial analysis is empty
@@ -613,29 +613,1030 @@ export class FinancialAnalysisTemplatesService {
     financialAnalysis: any,
     loan: any
   ): Promise<Buffer> {
+    console.log("financialAnalysis", financialAnalysis);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
-    // Similar structure to service format but with GST tables added at bottom
-    // Implementation continues...
+    // Set up columns for P&L with comparison columns
+    worksheet.columns = [
+      { width: 30 }, // A - Particulars (left)
+      { width: 15 }, // B - 2023 Actuals
+      { width: 15 }, // C - 2024 Actuals
+      { width: 12 }, // D - Change %
+      { width: 15 }, // E - Estimated
+      { width: 30 }, // F - Particulars (right)
+      { width: 15 }, // G - 2023 Actuals
+      { width: 15 }, // H - 2024 Actuals
+      { width: 12 }, // I - Change %
+      { width: 15 }, // J - Estimated
+    ];
+
+    // Helper function to get value safely
+    const getValue = (key: string): any => {
+      if (!key) return '';
+      const value = financialAnalysis[key];
+      if (value === null || value === undefined || value === '') return '';
+      return value;
+    };
+
+    // Helper function to format percentage
+    const formatPercentage = (value: any): any => {
+      if (value === null || value === undefined || value === '') return '';
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+        return Number(value);
+      }
+      return '';
+    };
+
+    // Title
+    const titleRow = worksheet.addRow([
+      `M/s. ${financialAnalysis.businessName || loan.applicantName || 'XXX'}`,
+    ]);
+    worksheet.mergeCells('A1:E1');
+    titleRow.font = { bold: true, size: 14 };
+    titleRow.alignment = { horizontal: 'center' };
+
+    // Subtitle
+    const subTitleRow = worksheet.addRow([
+      'Estimated Profit & Loss Account for the Year Ended 31st March 2026',
+    ]);
+    worksheet.mergeCells('A2:E2');
+    subTitleRow.font = { bold: true, size: 12 };
+    subTitleRow.alignment = { horizontal: 'center' };
+    subTitleRow.height = 25;
+
+    worksheet.addRow([]);
+
+    // Column headers row
+    const columnHeaderRow = worksheet.addRow([
+      'PARTICULARS',
+      '2023 Actuals',
+      '2024 Actuals',
+      'Change %',
+      'Estimated',
+      'PARTICULARS',
+      '2023 Actuals',
+      '2024 Actuals',
+      'Change %',
+      'Estimated',
+    ]);
+    columnHeaderRow.font = { bold: true };
+    columnHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    columnHeaderRow.eachCell((cell) => {
+      this.applyBorder(cell);
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFD9E1F2' },
+      };
+    });
+
+    // Helper function to add a data row
+    const addDataRow = (
+      leftLabel: string,
+      left2023: any,
+      left2024: any,
+      leftChange: any,
+      leftEstimated: any,
+      rightLabel: string,
+      right2023: any,
+      right2024: any,
+      rightChange: any,
+      rightEstimated: any,
+      isBold = false
+    ) => {
+      const row = worksheet.addRow([
+        leftLabel,
+        left2023,
+        left2024,
+        formatPercentage(leftChange),
+        leftEstimated,
+        rightLabel,
+        right2023,
+        right2024,
+        formatPercentage(rightChange),
+        rightEstimated,
+      ]);
+
+      if (isBold) {
+        row.font = { bold: true };
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF4B084' },
+          };
+        });
+      }
+
+      row.eachCell((cell) => {
+        this.applyBorder(cell);
+        cell.alignment = { vertical: 'middle' };
+      });
+
+      // Format numeric columns (B, C, E, G, H, J)
+      [2, 3, 5, 7, 8, 10].forEach((colNum) => {
+        const cell = row.getCell(colNum);
+        const value = cell.value;
+        if (value !== null && value !== undefined && value !== '') {
+          cell.alignment = {
+            horizontal: 'right',
+            vertical: 'middle',
+          };
+          if (typeof value === 'number') {
+            cell.numFmt = '#,##0.00';
+          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+            cell.value = Number(value);
+            cell.numFmt = '#,##0.00';
+          }
+        }
+      });
+
+      // Format percentage columns (D, I)
+      [4, 9].forEach((colNum) => {
+        const cell = row.getCell(colNum);
+        const value = cell.value;
+        if (value !== null && value !== undefined && value !== '') {
+          cell.alignment = {
+            horizontal: 'right',
+            vertical: 'middle',
+          };
+          if (typeof value === 'number') {
+            cell.numFmt = '0.00';
+          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+            cell.value = Number(value);
+            cell.numFmt = '0.00';
+          }
+        }
+      });
+    };
+
+    // Add P&L data rows - Left side (Expenditure) and Right side (Income)
+    
+    // Opening Stock (Left)
+    addDataRow(
+      'To Opening Stock',
+      getValue('openingStock_2023'),
+      getValue('openingStock_2024'),
+      getValue('openingStockChange'),
+      getValue('openingStockEstimated'),
+      '', '', '', '', ''
+    );
+
+    // Sales (Right)
+    addDataRow(
+      '',
+      '', '', '', '',
+      'By Sales',
+      getValue('sales_2023'),
+      getValue('sales_2024'),
+      getValue('salesChange'),
+      getValue('salesEstimated')
+    );
+
+    // Purchases (Left)
+    addDataRow(
+      'To Purchases',
+      getValue('purchases_2023'),
+      getValue('purchases_2024'),
+      getValue('purchasesChange'),
+      getValue('purchasesEstimated'),
+      '', '', '', '', ''
+    );
+
+    // Closing Stock (Right)
+    addDataRow(
+      '',
+      '', '', '', '',
+      'By Closing Stock',
+      getValue('closingStock_2023'),
+      getValue('closingStock_2024'),
+      getValue('closingStockChange'),
+      getValue('closingStockEstimated')
+    );
+
+    // Gas & Liquid Items (Left)
+    addDataRow(
+      'To Gas & Liquid Items',
+      getValue('gasLiquidItems_2023'),
+      getValue('gasLiquidItems_2024'),
+      getValue('gasLiquidItemsChange'),
+      getValue('gasLiquidItemsEstimated'),
+      '', '', '', '', ''
+    );
+
+    // Majuri Charges (Left)
+    addDataRow(
+      'To Majuri Charges',
+      getValue('majuriCharges_2023'),
+      getValue('majuriCharges_2024'),
+      getValue('majuriChargesChange'),
+      getValue('majuriChargesEstimated'),
+      '', '', '', '', ''
+    );
+
+    // Gross Profit (Right)
+    addDataRow(
+      '',
+      '', '', '', '',
+      'By Gross Profit',
+      getValue('grossProfit_2023'),
+      getValue('grossProfit_2024'),
+      getValue('grossProfitChange'),
+      getValue('grossProfitEstimated'),
+      true
+    );
+
+    // Empty row
+    addDataRow('', '', '', '', '', '', '', '', '', '');
+
+    // Indirect Expenses (Left side)
+    addDataRow(
+      'To Salaries',
+      '', '', '',
+      getValue('salariesEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Bonus',
+      '', '', '',
+      getValue('bonusEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Shop Rents',
+      '', '', '',
+      getValue('shopRentsEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Electricity Charges',
+      '', '', '',
+      getValue('electricityChargesEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Coal, Gas & Liquid',
+      '', '', '',
+      getValue('coalGasLiquidEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Spares & Machinery',
+      '', '', '',
+      getValue('sparesMachineryEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Bank Interest',
+      '', '', '',
+      getValue('bankInterestEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Bank Charges',
+      '', '', '',
+      getValue('bankChargesEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Finance Charges/Professional Tax',
+      '', '', '',
+      getValue('financeChargesEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To GST Late Fee',
+      '', '', '',
+      getValue('gstLateFeeEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Auditor Fee',
+      '', '', '',
+      getValue('auditorFeeEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Telephone Charges',
+      '', '', '',
+      getValue('telephoneChargesEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Travelling Exp/Transport',
+      '', '', '',
+      getValue('travellingExpEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Vehicle Maintenance & Machinery',
+      '', '', '',
+      getValue('vehicleMaintenanceEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Depreciation',
+      '', '', '',
+      getValue('depreciationEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Interest',
+      '', '', '',
+      getValue('interestEstimated'),
+      '', '', '', '', ''
+    );
+
+    addDataRow(
+      'To Sadar',
+      '', '', '',
+      getValue('sadarEstimated'),
+      '', '', '', '', ''
+    );
+
+    // Empty row
+    addDataRow('', '', '', '', '', '', '', '', '', '');
+
+    // Net Profit (Right)
+    addDataRow(
+      '',
+      '', '', '', '',
+      'To Net Profit',
+      '', '', '',
+      getValue('netProfitEstimated'),
+      true
+    );
+
+    // Empty rows before monthly calculations
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+
+    // Monthly Calculations Section
+    const monthlyHeaderRow = worksheet.addRow([
+      'Monthly Calculations',
+      '', '', '', '',
+      '', '', '', '', '',
+    ]);
+    const monthlyHeaderRowNum = monthlyHeaderRow.number;
+    worksheet.mergeCells(`A${monthlyHeaderRowNum}:E${monthlyHeaderRowNum}`);
+    monthlyHeaderRow.getCell(1).font = { bold: true, size: 12 };
+    monthlyHeaderRow.getCell(1).alignment = { horizontal: 'center' };
+    monthlyHeaderRow.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD9E1F2' },
+    };
+    this.applyBorder(monthlyHeaderRow.getCell(1));
+
+    const monthlyDataRow = worksheet.addRow([
+      'Monthly Turnover',
+      getValue('monthlyTurnover'),
+      '', '', '',
+      'Monthly Payments',
+      getValue('monthlyPayments'),
+      '', '', '',
+    ]);
+    monthlyDataRow.eachCell((cell, colNumber) => {
+      if (colNumber === 1 || colNumber === 6) {
+        cell.font = { bold: true };
+      }
+      this.applyBorder(cell);
+      if (colNumber === 2 || colNumber === 7) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '#,##0.00';
+        }
+      }
+    });
+
+    const monthlyNetProfitRow = worksheet.addRow([
+      'Monthly Net Profit',
+      getValue('monthlyNetProfit'),
+      '', '', '',
+      '', '', '', '', '',
+    ]);
+    monthlyNetProfitRow.getCell(1).font = { bold: true };
+    monthlyNetProfitRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 2) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '#,##0.00';
+        }
+      }
+    });
+
+    // Empty rows before margin percentages
+    worksheet.addRow([]);
+
+    // Margin Percentages Section
+    const marginHeaderRow = worksheet.addRow([
+      'Margin Percentages',
+      '', '', '', '',
+      '', '', '', '', '',
+    ]);
+    const marginHeaderRowNum = marginHeaderRow.number;
+    worksheet.mergeCells(`A${marginHeaderRowNum}:E${marginHeaderRowNum}`);
+    marginHeaderRow.getCell(1).font = { bold: true, size: 12 };
+    marginHeaderRow.getCell(1).alignment = { horizontal: 'center' };
+    marginHeaderRow.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD9E1F2' },
+    };
+    this.applyBorder(marginHeaderRow.getCell(1));
+
+    const marginDataRow = worksheet.addRow([
+      'Gross Profit %',
+      getValue('gpPercentage'),
+      '', '', '',
+      'Net Profit %',
+      getValue('npPercentage'),
+      '', '', '',
+    ]);
+    marginDataRow.eachCell((cell, colNumber) => {
+      if (colNumber === 1 || colNumber === 6) {
+        cell.font = { bold: true };
+      }
+      this.applyBorder(cell);
+      if (colNumber === 2 || colNumber === 7) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '0.00';
+        }
+      }
+    });
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);
   }
 
   /**
-   * GP/PBDIT Format
+   * GP/PBDIT Format - Detailed Financial Analysis with Balance Sheet
    */
   private async generateGpPbditFormat(
     ExcelJS: any,
     financialAnalysis: any,
     loan: any
   ): Promise<Buffer> {
+    console.log("financialAnalysis", financialAnalysis);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
-    // Implementation for GP/PBDIT format from image 5
-    // This would include all the detailed calculations
+    // Set up columns for P&L and Balance Sheet side by side
+    worksheet.columns = [
+      { width: 25 }, // A - Particulars (left)
+      { width: 10 }, // B - Note
+      { width: 15 }, // C - Audited Income
+      { width: 12 }, // D - Assessed/Estimated
+      { width: 25 }, // E - Particulars (right)
+      { width: 10 }, // F - Note
+      { width: 15 }, // G - Audited Income
+      { width: 12 }, // H - Estimated
+    ];
+
+    // Helper function to get value safely
+    const getValue = (key: string): any => {
+      if (!key) return '';
+      const value = financialAnalysis[key];
+      if (value === null || value === undefined || value === '') return '';
+      return value;
+    };
+
+    // Helper function to get nested value from balanceSheet
+    const getBalanceSheetValue = (key: string): any => {
+      if (!financialAnalysis.balanceSheet) return '';
+      const value = financialAnalysis.balanceSheet[key];
+      if (value === null || value === undefined || value === '') return '';
+      // Handle nested objects - return empty string for now as they need special handling
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        return '';
+      }
+      // Handle string numbers
+      if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+        return Number(value);
+      }
+      return value;
+    };
+
+    // Title
+    const titleRow = worksheet.addRow([
+      `M/s. ${financialAnalysis.businessName || loan.applicantName || 'XXX'}`,
+    ]);
+    worksheet.mergeCells('A1:D1');
+    titleRow.font = { bold: true, size: 14 };
+    titleRow.alignment = { horizontal: 'center' };
+
+    // Partners row
+    const partnerRow = worksheet.addRow([
+      `Partners : ${financialAnalysis.partnersNames || 'XXX'}`,
+    ]);
+    worksheet.mergeCells('A2:D2');
+    partnerRow.font = { bold: true, size: 11 };
+    partnerRow.alignment = { horizontal: 'center' };
+
+    // Balance Sheet title on right
+    worksheet.getCell('E1').value = `Balance Sheet as on 31st March 2024`;
+    worksheet.mergeCells('E1:H1');
+    worksheet.getCell('E1').font = { bold: true, size: 12 };
+    worksheet.getCell('E1').alignment = { horizontal: 'center' };
+
+    worksheet.getCell('E2').value = `${financialAnalysis.partnersNames || 'XXX'}`;
+    worksheet.mergeCells('E2:H2');
+    worksheet.getCell('E2').font = { bold: true };
+    worksheet.getCell('E2').alignment = { horizontal: 'center' };
+
+    // Subtitle
+    const subTitleRow = worksheet.addRow([
+      'Estimated Profit & Loss Account for the Year Ended 31st March 2026',
+    ]);
+    worksheet.mergeCells('A3:D3');
+    subTitleRow.font = { bold: true };
+    subTitleRow.alignment = { horizontal: 'center' };
+
+    // Headers for P&L
+    const headerRow = worksheet.addRow([
+      'PARTICULARS',
+      'Note',
+      'Audited Income',
+      'Assessed',
+      'PARTICULARS',
+      'Note',
+      'Audited Income',
+      'Estimated',
+    ]);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerRow.eachCell((cell) => {
+      this.applyBorder(cell);
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFD9E1F2' },
+      };
+    });
+
+    // Helper function to add a data row
+    const addDataRow = (
+      leftLabel: string,
+      leftNote: string | number,
+      leftAudited: string | number,
+      leftAssessed: string | number,
+      rightLabel: string,
+      rightNote: string | number,
+      rightAudited: string | number,
+      rightEstimated: string | number,
+      isBold = false
+    ) => {
+      const row = worksheet.addRow([
+        leftLabel,
+        leftNote,
+        leftAudited,
+        leftAssessed,
+        rightLabel,
+        rightNote,
+        rightAudited,
+        rightEstimated,
+      ]);
+
+      if (isBold) {
+        row.font = { bold: true };
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF4B084' },
+          };
+        });
+      }
+
+      row.eachCell((cell) => {
+        this.applyBorder(cell);
+        cell.alignment = { vertical: 'middle' };
+      });
+
+      // Format numeric columns (C, D, G, H)
+      [3, 4, 7, 8].forEach((colNum) => {
+        const cell = row.getCell(colNum);
+        const value = cell.value;
+        if (value !== null && value !== undefined && value !== '') {
+          cell.alignment = {
+            horizontal: 'right',
+            vertical: 'middle',
+          };
+          if (typeof value === 'number') {
+            cell.numFmt = '#,##0.00';
+          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+            cell.value = Number(value);
+            cell.numFmt = '#,##0.00';
+          }
+        }
+      });
+    };
+
+    // Add P&L data rows - Left side (Expenditure) and Right side (Income)
+    
+    // Opening Stock (Left)
+    addDataRow(
+      'To Opening Stock',
+      '',
+      getValue('openingStockAudited'),
+      getValue('openingStockAssessed'),
+      '', '', '', ''
+    );
+
+    // Sales (Right)
+    addDataRow(
+      '',
+      '', '', '',
+      'By Sales',
+      '',
+      getValue('salesAudited'),
+      getValue('salesEstimated')
+    );
+
+    // Purchases (Left)
+    addDataRow(
+      'To Purchases',
+      '',
+      getValue('purchasesAudited'),
+      getValue('purchasesAssessed'),
+      '', '', '', ''
+    );
+
+    // Services (Right)
+    addDataRow(
+      '',
+      '', '', '',
+      'By Services',
+      '',
+      getValue('servicesAudited'),
+      getValue('servicesEstimated')
+    );
+
+    // Closing Stock (Right)
+    addDataRow(
+      '',
+      '', '', '',
+      'By Closing Stock',
+      '',
+      getValue('closingStockAudited'),
+      getValue('closingStockEstimated')
+    );
+
+    // Gross Profit (Left - Assessed, Right - Estimated)
+    addDataRow(
+      'To Gross Profit',
+      '',
+      '',
+      getValue('grossProfitAssessed'),
+      'By Gross Profit',
+      '',
+      getValue('byGrossProfitAudited'),
+      getValue('byGrossProfitEstimated'),
+      true
+    );
+
+    // Grand Total (Left)
+    addDataRow(
+      'Grand Total',
+      '',
+      '',
+      getValue('grandTotal'),
+      '', '', '', '',
+      true
+    );
+
+    // Empty row
+    addDataRow('', '', '', '', '', '', '', '');
+
+    // Indirect Expenses (Left side)
+    addDataRow(
+      'To Electricity',
+      '',
+      '',
+      getValue('electricity'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'To Rent',
+      '',
+      '',
+      getValue('rent'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'To Salaries',
+      '',
+      '',
+      getValue('salaries'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'To Travelling Charges',
+      '',
+      '',
+      getValue('travellingCharges'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'To Other Expenses',
+      '',
+      '',
+      getValue('otherExpenses'),
+      '', '', '', ''
+    );
+
+    // Empty row
+    addDataRow('', '', '', '', '', '', '', '');
+
+    // Net Profit (Right)
+    addDataRow(
+      '',
+      '', '', '',
+      'To Net Profit',
+      '',
+      '',
+      getValue('netProfit'),
+      true
+    );
+
+    // Empty rows before Balance Sheet
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+
+    // Balance Sheet Section - Liabilities (Left) and Assets (Right)
+    
+    // Balance Sheet Headers
+    const balanceSheetHeaderRow = worksheet.addRow([
+      'LIABILITIES',
+      '', '', '',
+      'ASSETS',
+      '', '', '',
+    ]);
+    balanceSheetHeaderRow.font = { bold: true, size: 12 };
+    balanceSheetHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    balanceSheetHeaderRow.eachCell((cell, colNumber) => {
+      if (colNumber === 1 || colNumber === 5) {
+        this.applyBorder(cell);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFD9E1F2' },
+        };
+      }
+    });
+    worksheet.mergeCells(`A${balanceSheetHeaderRow.number}:D${balanceSheetHeaderRow.number}`);
+    worksheet.mergeCells(`E${balanceSheetHeaderRow.number}:H${balanceSheetHeaderRow.number}`);
+
+    // Liabilities (Left side)
+    addDataRow(
+      'Capital Account',
+      '',
+      '',
+      getBalanceSheetValue('capitalAccount'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'Sundry Creditors',
+      '',
+      '',
+      getBalanceSheetValue('sundryCreditors'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'Provisions',
+      '',
+      '',
+      getBalanceSheetValue('provisions'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'Audit Payable',
+      '',
+      '',
+      getBalanceSheetValue('auditPayable'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'Accountant Fees',
+      '',
+      '',
+      getBalanceSheetValue('accountantFees'),
+      '', '', '', ''
+    );
+
+    addDataRow(
+      'New Loan',
+      '',
+      '',
+      getBalanceSheetValue('newLoan'),
+      '', '', '', ''
+    );
+
+    // Assets (Right side)
+    addDataRow(
+      '',
+      '', '', '',
+      'Loans and Advances',
+      '',
+      '',
+      getBalanceSheetValue('loansAndAdvances')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'Current Assets',
+      '',
+      '',
+      getBalanceSheetValue('currentAssets')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'GST Refund',
+      '',
+      '',
+      getBalanceSheetValue('gstRefund')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'GST Set Off',
+      '',
+      '',
+      getBalanceSheetValue('gstSetOff')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'DCB Bank',
+      '',
+      '',
+      getBalanceSheetValue('dcbBank')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'Cash in Hand',
+      '',
+      '',
+      getBalanceSheetValue('cashInHand')
+    );
+
+    addDataRow(
+      '',
+      '', '', '',
+      'Additional Property',
+      '',
+      '',
+      getBalanceSheetValue('additionalProperty')
+    );
+
+    // Empty rows before payment calculations
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+
+    // Payment Calculations Section
+    const paymentHeaderRow = worksheet.addRow([
+      'Payment Calculations',
+      '', '', '',
+      '', '', '', '',
+    ]);
+    const paymentHeaderRowNum = paymentHeaderRow.number;
+    worksheet.mergeCells(`A${paymentHeaderRowNum}:D${paymentHeaderRowNum}`);
+    paymentHeaderRow.getCell(1).font = { bold: true, size: 12 };
+    paymentHeaderRow.getCell(1).alignment = { horizontal: 'center' };
+    paymentHeaderRow.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD9E1F2' },
+    };
+    this.applyBorder(paymentHeaderRow.getCell(1));
+
+    const totalPaymentsRow = worksheet.addRow([
+      'Total Payments',
+      '',
+      '',
+      getValue('totalPayments'),
+      '', '', '', '',
+    ]);
+    totalPaymentsRow.getCell(1).font = { bold: true };
+    totalPaymentsRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 4) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '#,##0.00';
+        }
+      }
+    });
+
+    // Empty rows before margins
+    worksheet.addRow([]);
+
+    // Margin Percentages Section
+    const marginHeaderRow = worksheet.addRow([
+      'Margin Percentages',
+      '', '', '',
+      '', '', '', '',
+    ]);
+    const marginHeaderRowNum = marginHeaderRow.number;
+    worksheet.mergeCells(`A${marginHeaderRowNum}:D${marginHeaderRowNum}`);
+    marginHeaderRow.getCell(1).font = { bold: true, size: 12 };
+    marginHeaderRow.getCell(1).alignment = { horizontal: 'center' };
+    marginHeaderRow.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD9E1F2' },
+    };
+    this.applyBorder(marginHeaderRow.getCell(1));
+
+    const gpMarginRow = worksheet.addRow([
+      'GP Margin %',
+      '',
+      '',
+      getValue('gpMargin'),
+      '', '', '', '',
+    ]);
+    gpMarginRow.getCell(1).font = { bold: true };
+    gpMarginRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 4) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '0.00';
+        }
+      }
+    });
+
+    const npMarginRow = worksheet.addRow([
+      'NP Margin %',
+      '',
+      '',
+      getValue('npMargin'),
+      '', '', '', '',
+    ]);
+    npMarginRow.getCell(1).font = { bold: true };
+    npMarginRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 4) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '0.00';
+        }
+      }
+    });
+
+    const netProfitMarginRow = worksheet.addRow([
+      'Net Profit Margin',
+      '',
+      '',
+      getValue('netProfitMargin'),
+      '', '', '', '',
+    ]);
+    netProfitMarginRow.getCell(1).font = { bold: true };
+    netProfitMarginRow.eachCell((cell, colNumber) => {
+      this.applyBorder(cell);
+      if (colNumber === 4) {
+        cell.alignment = { horizontal: 'right' };
+        if (cell.value && typeof cell.value === 'number') {
+          cell.numFmt = '#,##0.00';
+        }
+      }
+    });
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);
