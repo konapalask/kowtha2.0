@@ -49,7 +49,7 @@ export class FinancialAnalysisTemplatesService {
       }
       
       // Financial analysis is stored in verification.financialAnalysis, not in verificationData
-      const financialAnalysis = (verification.verificationData as any)?.financialAnalysisDetailed || {};
+      const financialAnalysis = (verification.verificationData as any)?.financialAnalysis || {};
       const loan = verification.loan;
       
       // Log for debugging if financial analysis is empty
