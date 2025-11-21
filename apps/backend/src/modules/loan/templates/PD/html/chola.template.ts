@@ -216,10 +216,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
-      ? `<li><strong>About the Applicant:</strong> ${formatMultiline(aboutBusiness.aboutTheApplicant)}</li>`
+      ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${aboutBusiness?.aboutTheApplicant?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || ""}</p>`
       : "",
     hasValue(aboutBusiness?.aboutTheBusiness)
-      ? `<li><strong>About the Business:</strong> ${formatMultiline(aboutBusiness.aboutTheBusiness)}</li>`
+      ? `<p style="${paragraphStyle}"><strong>About the Business:</strong><br>${aboutBusiness?.aboutTheBusiness?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || ""}</p>`
       : "",
   ]
     .filter((item) => item !== "")
@@ -268,9 +268,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       ${generalSection}
 
       <p style="${paragraphStyle}"><strong>About the Applicant & Business:</strong></p>
-      <ul>
         ${businessList || "<li>Not provided</li>"}
-      </ul>
 
       <p style="${paragraphStyle}"><strong>Applicant's Family Details:</strong></p>
       ${familyTable}

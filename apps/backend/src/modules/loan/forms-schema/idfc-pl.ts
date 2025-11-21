@@ -14,7 +14,7 @@ export const idfcPlSchema = {
             title: "Name of the Applicant",
             readOnly: true,
           },
-          sdfcId: {
+          applicationId: {
             type: "string",
             title: "SDFC ID",
             readOnly: true,
@@ -23,7 +23,7 @@ export const idfcPlSchema = {
             type: "string",
             title: "Person Contacted",
           },
-          visitedAddress: {
+          addressVisited: {
             type: "string",
             title: "Visited Address",
             readOnly: true,
@@ -328,7 +328,7 @@ export const idfcPlSchema = {
     },
     {
       id: "loanDetailsBil",
-      label: "Loan Details (BIL)",
+      label: "BIL Loan Details",
       schema: {
         type: "object",
         properties: {
@@ -357,7 +357,7 @@ export const idfcPlSchema = {
             type: "string",
             title: "Status of this Case (Positive / Negative / Credit Refer)",
           },
-          interviewerSRemarks: {
+          interviewersRemarks: {
             type: "string",
             title: "Interviewer's Remarks",
           },

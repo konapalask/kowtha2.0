@@ -182,17 +182,17 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
       ? `${latitude || "N/A"}, ${longitude || "N/A"}`
       : "";
 
-  const residenceDocuments = ensureArray(
-    income?.documentsSeenAtResidence ||
-      verificationData.documentsObserved?.residenceDocuments ||
-      []
-  ).map((doc) => formatMultiline(doc));
+  // const residenceDocuments = ensureArray(
+  //   income?.documentsSeenAtResidence ||
+  //     verificationData.documentsObserved?.residenceDocuments ||
+  //     []
+  // ).map((doc) => formatMultiline(doc));
 
-  const officeDocuments = ensureArray(
-    income?.documentsSeenAtOffice ||
-      verificationData.documentsObserved?.officeDocuments ||
-      []
-  ).map((doc) => formatMultiline(doc));
+  // const officeDocuments = ensureArray(
+  //   income?.documentsSeenAtOffice ||
+  //     verificationData.documentsObserved?.officeDocuments ||
+  //     []
+  // ).map((doc) => formatMultiline(doc));
 
   const assetsOwned = ensureArray(
     residence?.assetsOwned ||
@@ -202,9 +202,9 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
 
   const generalRows: Array<[string, any, ((value: any) => string)?]> = [
     ["Name of the Applicant", general.nameOfTheApplicant],
-    ["SDFC ID", general.sdfcId],
+    ["SDFC ID", general.applicationId],
     ["Person Contacted", general.personContacted],
-    ["Visited Address", general.visitedAddress],
+    ["Visited Address", general.addressVisited],
     ["Date / Time of Visit", general.dateOfVisitTimeOfVisit],
     [
       "Alternate Contact Number",
@@ -325,7 +325,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
         ["Name of Interviewer", bil.nameOfInterviewer || ""],
         ["Designation & Signature", bil.designationSignature || ""],
         ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || ""],
-        ["Interviewer's Remarks", bil.interviewerSRemarks || ""],
+        ["Interviewer's Remarks", bil.interviewersRemarks || ""],
       ])}
 
       ${sectionTitle("Disclaimer Clause")}
