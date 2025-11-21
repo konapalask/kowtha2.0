@@ -1183,6 +1183,17 @@ export const janaSenpBelow50lSchema = {
         },
       },
     },
+    {
+      id: "GeoTagDetails",
+      label: "Geo Tag Details",
+      schema: {
+        type: "object",
+        properties: {
+          coordinates: { type: "string", title: "Other Observations", readOnly: true },
+        },
+      },
+    },
+
   ],
 } as const;
 export default janaSenpBelow50lSchema;
