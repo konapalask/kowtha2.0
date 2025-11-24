@@ -49,16 +49,16 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title:
               "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
-              enum: [
-                "Below 10",
-                "10th Pass",
-                "12th Pass",
-                "Diploma",
-                "ITI Certification",
-                "Graduate",
-                "PG",
-                "Professional Certification",
-              ],
+            enum: [
+              "Below 10",
+              "10th Pass",
+              "12th Pass",
+              "Diploma",
+              "ITI Certification",
+              "Graduate",
+              "PG",
+              "Professional Certification",
+            ],
           },
           category: {
             type: "string",
@@ -511,13 +511,7 @@ export const indiaShelterSenpSchema = {
           businessFirmType: {
             type: "string",
             title: "Type of Business Firm",
-            enum: [
-              "Proprietorship",
-              "Partnership",
-              "LTD",
-              "PVT LTD",
-              "Others",
-            ],
+            enum: ["Proprietorship", "Partnership", "LTD", "PVT LTD", "Others"],
           },
           shareholding: {
             type: "string",
@@ -581,12 +575,7 @@ export const indiaShelterSenpSchema = {
           premisesOwnership: {
             type: "string",
             title: "Business Premises Ownership",
-            enum: [
-              "Self-Owned",
-              "Family-Owned",
-              "Joint Ownership",
-              "Rented",
-            ],
+            enum: ["Self-Owned", "Family-Owned", "Joint Ownership", "Rented"],
           },
           stocksAssetsSeen: {
             type: "string",
@@ -904,7 +893,11 @@ export const indiaShelterSenpSchema = {
           propertyStatus: {
             type: "string",
             title: "Status of Property to be Purchased",
-            enum: ["Ready to move", "Under Construction", "Construction Yet to Start"],
+            enum: [
+              "Ready to move",
+              "Under Construction",
+              "Construction Yet to Start",
+            ],
           },
           usageAfterPurchase: {
             type: "string",
@@ -1137,7 +1130,7 @@ export const indiaShelterSenpSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 contactNumber: {
@@ -1200,7 +1193,8 @@ export const indiaShelterSenpSchema = {
                 },
                 photoWithApplicant: {
                   type: "string",
-                  title: "Photo with Applicant (Yes/No / Notes)",
+                  title: "Photo with Applicant",
+                  enum: ["Yes", "No"],
                 },
               },
             },

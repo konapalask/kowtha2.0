@@ -110,22 +110,23 @@ export const iciciSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 incomeHolder: {
                   type: "string",
-                  title: "Income Holder (Yes/No)",
+                  title: "Income Holder",
                   enum: ["Yes", "No"],
                 },
                 propertyOwnership: {
                   type: "string",
-                  title: "Property Ownership (Yes/No)",
+                  title: "Property Ownership",
                   enum: ["Yes", "No"],
                 },
                 incomeSource: {
                   type: "string",
-                  title: "Income Source (Business/Rental/Salary)",
+                  title: "Income Source",
+                  enum: ["Business", "Rental", "Salary"],
                 },
                 remarks: {
                   type: "string",
@@ -186,7 +187,7 @@ export const iciciSchema = {
               },
             },
           },
-          
+
           familyDetailsWithDependents: {
             type: "string",
             title: "Family Details with No. of Dependents",
@@ -388,7 +389,8 @@ export const iciciSchema = {
           },
           coApplicantMonthlyTO: {
             type: "number",
-            title: "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+            title:
+              "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
           },
           coApplicantCostOfRawMaterial: {
             type: "number",
@@ -400,7 +402,8 @@ export const iciciSchema = {
           },
           coApplicantOtherIncome: {
             type: "number",
-            title: "Co-Applicant - Any Other Regular Income Other than Business",
+            title:
+              "Co-Applicant - Any Other Regular Income Other than Business",
           },
           coApplicantGrossMonthlyIncome: {
             type: "number",
@@ -440,7 +443,8 @@ export const iciciSchema = {
           },
           coApplicantHouseholdExpensesOther: {
             type: "number",
-            title: "Co-Applicant - Household Expenses: Others household expenses",
+            title:
+              "Co-Applicant - Household Expenses: Others household expenses",
           },
           coApplicantNetMonthlyIncome: {
             type: "number",
@@ -448,7 +452,8 @@ export const iciciSchema = {
           },
           coApplicantSavingsInvestments: {
             type: "number",
-            title: "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
+            title:
+              "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
           },
           coApplicantExistingEmi: {
             type: "number",
@@ -555,7 +560,7 @@ export const iciciSchema = {
         properties: {
           itrFiling: {
             type: "string",
-            title: "ITR Filling (Yes/No)",
+            title: "ITR Filling",
             enum: ["Yes", "No"],
           },
           itrAmountDeclared: {

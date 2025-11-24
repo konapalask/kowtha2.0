@@ -87,7 +87,7 @@ export const tataUblSchema = {
             type: "string",
             title: "Address",
             readOnly: true,
-           },
+          },
           rentedOwned: {
             type: "string",
             title: "Rented/Owned",
@@ -564,12 +564,12 @@ export const tataUblSchema = {
           politicalConnection: {
             type: "string",
             title: "Political Connection",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           anyCourtCases: {
             type: "string",
             title: "Any Court Cases",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           businessIndustry: {
             type: "string",
@@ -650,22 +650,22 @@ export const tataUblSchema = {
           namePlateDisplayed: {
             type: "string",
             title: "Name Plate Displayed",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           officeWellFurnished: {
             type: "string",
             title: "Office Well Furnished?",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           businessActivitySeen: {
             type: "string",
             title: "Business Activity Seen",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           difficultyInLocatingPremises: {
             type: "string",
             title: "Difficulty in locating premises?",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           neighborhood: {
             type: "string",
@@ -678,17 +678,17 @@ export const tataUblSchema = {
           abnormalIncreaseDecreaseInTurnover: {
             type: "string",
             title: "Abnormal Increase/Decrease in Turnover",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           anyDecreaseInNetWorth: {
             type: "string",
             title: "Any Decrease in Net worth",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           stockSeenDuringPD: {
             type: "string",
             title: "Stock Seen During PD?",
-            enum: ["Yes", "no"],
+            enum: ["Yes", "No"],
           },
           noOfEmployeesSeenDuringPD: {
             type: "integer",
@@ -757,7 +757,6 @@ export const tataUblSchema = {
         },
       },
     },
-
 
     financialsSchema,
   ],

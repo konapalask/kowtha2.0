@@ -229,7 +229,11 @@ export const janaSalariedSchema = {
                   title: "Market Value (in Lakhs)",
                 },
                 ownerName: { type: "string", title: "Owner Name" },
-                mortgaged: { type: "string", title: "Mortgaged (Yes/No)" },
+                mortgaged: {
+                  type: "string",
+                  title: "Mortgaged",
+                  enum: ["Yes", "No"],
+                },
               },
             },
           },
@@ -603,7 +607,6 @@ export const janaSalariedSchema = {
         },
       },
     },
-
   ],
 } as const;
 

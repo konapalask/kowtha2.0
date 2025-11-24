@@ -503,7 +503,8 @@ export const axisFinanceUblBelow10lSchema = {
                 },
                 mortgaged: {
                   type: "string",
-                  title: "Mortgaged (Yes/No)",
+                  title: "Mortgaged",
+                  enum: ["Yes", "No"],
                 },
               },
             },

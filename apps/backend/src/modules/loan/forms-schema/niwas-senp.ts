@@ -18,9 +18,8 @@ export const niwasSenpSchema = {
           },
           educationalQualification: {
             type: "string",
-            title:
-              "Educational Qualification",
-              enum: ["Below 10th", "10th", "12th", "Diploma", "Graduate", "PG"],
+            title: "Educational Qualification",
+            enum: ["Below 10th", "10th", "12th", "Diploma", "Graduate", "PG"],
           },
           category: {
             type: "string",
@@ -102,34 +101,68 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          smartphone: { type: "string", title: "Smartphone (Yes/No)", enum: ["Yes", "No"] },
-          washingMachine: { type: "string", title: "Washing Machine (Yes/No)", enum: ["Yes", "No"] },
-          carRcNo: { type: "string", title: "Car RC No. (Yes/No)", enum: ["Yes", "No"] },
-          twoWheeler: { type: "string", title: "Two Wheeler (Yes/No)", enum: ["Yes", "No"] },
-          autoCab: { type: "string", title: "Auto/Cab (Yes/No)", enum: ["Yes", "No"] },
+          smartphone: {
+            type: "string",
+            title: "Smartphone",
+            enum: ["Yes", "No"],
+          },
+          washingMachine: {
+            type: "string",
+            title: "Washing Machine",
+            enum: ["Yes", "No"],
+          },
+          carRcNo: { type: "string", title: "Car RC No.", enum: ["Yes", "No"] },
+          twoWheeler: {
+            type: "string",
+            title: "Two-Wheeler",
+            enum: ["Yes", "No"],
+          },
+          autoCab: { type: "string", title: "Auto/Cab", enum: ["Yes", "No"] },
           computerLaptop: {
             type: "string",
-            title: "Computer / Laptop (Yes/No)", enum: ["Yes", "No"] },
-          ac: { type: "string", title: "AC (Yes/No)" ,enum: ["Yes", "No"]},
-          fridge: { type: "string", title: "Fridge (Yes/No)" ,enum: ["Yes", "No"]},
-          induction: { type: "string", title: "Induction (Yes/No)" ,enum: ["Yes", "No"]},
-          insurance: { type: "string", title: "Insurance (LIC)" ,enum: ["Yes", "No"]},
-          fixedDeposit: { type: "string", title: "Fixed Deposit" ,enum: ["Yes", "No"]},
-          chitFunds: { type: "string", title: "Chit Funds" ,enum: ["Yes", "No"]},
-          postOfficeSavings: { type: "string", title: "Post Office Savings" ,enum: ["Yes", "No"]},
+            title: "Computer / Laptop",
+            enum: ["Yes", "No"],
+          },
+          ac: { type: "string", title: "AC", enum: ["Yes", "No"] },
+          fridge: { type: "string", title: "Fridge", enum: ["Yes", "No"] },
+          induction: {
+            type: "string",
+            title: "Induction",
+            enum: ["Yes", "No"],
+          },
+          insurance: {
+            type: "string",
+            title: "Insurance (LIC)",
+            enum: ["Yes", "No"],
+          },
+          fixedDeposit: {
+            type: "string",
+            title: "Fixed Deposit",
+            enum: ["Yes", "No"],
+          },
+          chitFunds: {
+            type: "string",
+            title: "Chit Funds",
+            enum: ["Yes", "No"],
+          },
+          postOfficeSavings: {
+            type: "string",
+            title: "Post Office Savings",
+            enum: ["Yes", "No"],
+          },
           postOfficeSavingsMonthly: {
             type: "string",
-            title: "Post Office savings monthly (Yes/No)",
+            title: "Post Office savings monthly",
             enum: ["Yes", "No"],
           },
           recurringDeposit: {
             type: "string",
-            title: "Recurring Deposit (Yes/No)",
+            title: "Recurring Deposit",
             enum: ["Yes", "No"],
           },
           consumptionHabits: {
             type: "string",
-            title: "Consumption of Nicotine / Alcohol (Yes/No)",
+            title: "Consumption of Nicotine / Alcohol",
             enum: ["Yes", "No"],
           },
         },
@@ -141,7 +174,10 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          businessName: { type: "string", title: "Name of Current Business Firm" },
+          businessName: {
+            type: "string",
+            title: "Name of Current Business Firm",
+          },
           businessConstitution: {
             type: "string",
             title: "Type of Business Firm",
@@ -176,7 +212,10 @@ export const niwasSenpSchema = {
             type: "number",
             title: "Total work experience",
           },
-          officialEmail: { type: "string", title: "Official / Business email ID" },
+          officialEmail: {
+            type: "string",
+            title: "Official / Business email ID",
+          },
           contactNumber: { type: "integer", title: "Contact number" },
         },
       },
@@ -190,13 +229,18 @@ export const niwasSenpSchema = {
           typeOfIndustry: {
             type: "string",
             title: "Type of industry",
-            enum: ["Small Manufacturing Unit from Home/other premises", "Trading", "Services", "Other"],
+            enum: [
+              "Small Manufacturing Unit from Home/other premises",
+              "Trading",
+              "Services",
+              "Other",
+            ],
           },
 
           businessProfile: {
             type: "string",
             title: "Business Profile",
-            enum:[
+            enum: [
               "Car Driver",
               "Auto Garage",
               "Two Wheeler Auto Driver",
@@ -217,17 +261,22 @@ export const niwasSenpSchema = {
               "Vegetable & Fruit Vendor",
               "Others, Please Specify",
             ],
-           
           },
           businessPremisesOwnership: {
             type: "string",
             title: "BusinessPremises Ownership",
-            enum: ["Self-Owned", "Family-Owned", "Joint Ownership", "Rented", "NA"],
+            enum: [
+              "Self-Owned",
+              "Family-Owned",
+              "Joint Ownership",
+              "Rented",
+              "NA",
+            ],
           },
           areaOfOffice: {
             type: "string",
             title: "Area of office",
-            enum: ["<=250 Sq.ft", "251 to 400 Sq.ft", ">400 Sq.ft","NA"],
+            enum: ["<=250 Sq.ft", "251 to 400 Sq.ft", ">400 Sq.ft", "NA"],
           },
           stocksAssetsSeen: {
             type: "string",
@@ -240,7 +289,13 @@ export const niwasSenpSchema = {
           localityOfBusiness: {
             type: "string",
             title: "Locality of business Premises",
-            enum: ["Residential", "Commercial", "Industrial", "Corporate Hub/Office Space", "Other"],
+            enum: [
+              "Residential",
+              "Commercial",
+              "Industrial",
+              "Corporate Hub/Office Space",
+              "Other",
+            ],
           },
           annualTurnover: {
             type: "number",
@@ -272,44 +327,44 @@ export const niwasSenpSchema = {
           designationOfEmployeeStaffMember: {
             type: "string",
             title: "Designation of Employee/Staff member",
+          },
+          noOfEmployeesInThatRole: {
+            type: "number",
+            title: "No. of Employees in that role",
+          },
+          yearsAtCurrentPremises: {
+            type: "number",
+            title: "No. of Years for which Business Running in this Premises",
+          },
+          earlierOperatingAddress: {
+            type: "string",
+            title:
+              "If less than 3 years - Provide address details from where it was operating earlier",
+          },
+          popularityInLocalMarket: {
+            type: "string",
+            title: "Popularity in Local Market",
+            enum: ["Average", "Good", "High"],
+          },
+          noOfCompetitorsInNearbyMarket: {
+            type: "string",
+            title: "No. of Competitors in Nearby Market",
+          },
+          finalProductServiceOfBusiness: {
+            type: "string",
+            title: "Final Product/Service of Business",
+          },
+          businessStartedBy: {
+            type: "string",
+            title: "Business Started by",
+            enum: ["Self", "Father/ Other Family member", "Mother", "Others"],
+          },
+          sourceOfInitialFunds: {
+            type: "string",
+            title: "If Self Started, Source of initial Funds",
+            enum: ["Own Funding", "Borrowed from Family", "Loan", "Others"],
+          },
         },
-        noOfEmployeesInThatRole: {
-          type: "number",
-          title: "No. of Employees in that role",
-        },
-        yearsAtCurrentPremises: {
-          type: "number",
-          title: "No. of Years for which Business Running in this Premises",
-        },
-        earlierOperatingAddress: {
-          type: "string",
-          title: "If less than 3 years - Provide address details from where it was operating earlier",
-        },
-        popularityInLocalMarket: {
-          type: "string",
-          title: "Popularity in Local Market",
-          enum: ["Average", "Good", "High"],
-        },
-        noOfCompetitorsInNearbyMarket: {
-          type: "string",
-          title: "No. of Competitors in Nearby Market",
-
-        },
-        finalProductServiceOfBusiness: {
-          type: "string",
-          title: "Final Product/Service of Business",
-        },
-        businessStartedBy: {
-          type: "string",
-          title: "Business Started by",
-          enum: ["Self", "Father/ Other Family member","Mother", "Others"],
-      },
-      sourceOfInitialFunds: {
-        type: "string",
-        title: "If Self Started, Source of initial Funds",
-        enum: ["Own Funding", "Borrowed from Family", "Loan", "Others"],
-      },
-     },
       },
     },
 
@@ -324,22 +379,38 @@ export const niwasSenpSchema = {
             items: {
               type: "object",
               properties: {
-                employerBusinessName: { type: "string", title: "Employer/Business Name" },
+                employerBusinessName: {
+                  type: "string",
+                  title: "Employer/Business Name",
+                },
                 designation: { type: "string", title: "Designation" },
                 from: { type: "date", title: "From" },
                 to: { type: "date", title: "To" },
-                reasonForMovement: { type: "string", title: "Reason for Movement" },
-                contactPersonNameNumber: { type: "object", title: "Contact Person Name & Number", properties: {
-                  contactPersonName: { type: "string", title: "Contact Person Name" },
-                  contactPersonNumber: { type: "integer", title: "Contact Person Number" },
-                } },
+                reasonForMovement: {
+                  type: "string",
+                  title: "Reason for Movement",
+                },
+                contactPersonNameNumber: {
+                  type: "object",
+                  title: "Contact Person Name & Number",
+                  properties: {
+                    contactPersonName: {
+                      type: "string",
+                      title: "Contact Person Name",
+                    },
+                    contactPersonNumber: {
+                      type: "integer",
+                      title: "Contact Person Number",
+                    },
+                  },
+                },
               },
             },
           },
         },
       },
     },
-  
+
     {
       id: "businessIncomeComputationMonthly",
       label: "Business Income Computation (Monthly Basis)",
@@ -348,114 +419,188 @@ export const niwasSenpSchema = {
         properties: {
           revenue: {
             type: "object",
-            sales: { type: "number", title: "Sales" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            totalMonthlyRevenueA: { type: "number", title: "Total Monthly Revenue (A)" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
+            sales: {
+              type: "number",
+              title: "Sales",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            totalMonthlyRevenueA: {
+              type: "number",
+              title: "Total Monthly Revenue (A)",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
           },
           expenditure: {
             type: "object",
-            purchases: { type: "number", title: "Purchases" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            rent: { type: "number", title: "Rent" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            electricity: { type: "number", title: "Electricity" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            transportation: { type: "number", title: "Transportation" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            otherExpenses: { type: "number", title: "Other Expenses" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
-            totalMonthlyExpensesB: { type: "number", title: "Total Monthly Expenses (B)" , formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            } },
+            purchases: {
+              type: "number",
+              title: "Purchases",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            rent: {
+              type: "number",
+              title: "Rent",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            electricity: {
+              type: "number",
+              title: "Electricity",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            transportation: {
+              type: "number",
+              title: "Transportation",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            otherExpenses: {
+              type: "number",
+              title: "Other Expenses",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
+            totalMonthlyExpensesB: {
+              type: "number",
+              title: "Total Monthly Expenses (B)",
+              formatter: {
+                useIndianFormat: true,
+                locale: "en-IN",
+                maxDecimalPlaces: 2,
+                minDecimalPlaces: 0,
+              },
+            },
           },
-          netMonthlyProfitAB: { type: "number", title: "Net Monthly Profit (=A-B)" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          otherMonthlyIncome: { type: "number", title: "Other Monthly Income" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          rentalIncomeCash: { type: "number", title: "Rental Income - Cash" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          rentalIncomeCheque: { type: "number", title: "Rental Income - Cheque" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          incentivesCash: { type: "string", title: "Incentives / Perks - Cash" },
-          incentivesCheque: { type: "number", title: "Incentives / Perks - Cheque" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          monthlyBonusCash: { type: "number", title: "Monthly Bonus - Cash" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          monthlyBonusCheque: { type: "number", title: "Monthly Bonus - Cheque" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          otherMonthlyIncomeSourceType: { type: "string", title: "Others, please specify source type" },
-          otherMonthlyIncomeCash: { type: "number", title: "Other Monthly Income - Cash" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          otherMonthlyIncomeCheque: { type: "number", title: "Other Monthly Income - Cheque" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
+          netMonthlyProfitAB: {
+            type: "number",
+            title: "Net Monthly Profit (=A-B)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherMonthlyIncome: {
+            type: "number",
+            title: "Other Monthly Income",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          rentalIncomeCash: {
+            type: "number",
+            title: "Rental Income - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          rentalIncomeCheque: {
+            type: "number",
+            title: "Rental Income - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          incentivesCash: {
+            type: "string",
+            title: "Incentives / Perks - Cash",
+          },
+          incentivesCheque: {
+            type: "number",
+            title: "Incentives / Perks - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          monthlyBonusCash: {
+            type: "number",
+            title: "Monthly Bonus - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          monthlyBonusCheque: {
+            type: "number",
+            title: "Monthly Bonus - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherMonthlyIncomeSourceType: {
+            type: "string",
+            title: "Others, please specify source type",
+          },
+          otherMonthlyIncomeCash: {
+            type: "number",
+            title: "Other Monthly Income - Cash",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherMonthlyIncomeCheque: {
+            type: "number",
+            title: "Other Monthly Income - Cheque",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
         },
       },
     },
@@ -473,24 +618,36 @@ export const niwasSenpSchema = {
               properties: {
                 typeOfLoan: { type: "string", title: "Type of Loan" },
                 bankName: { type: "string", title: "Bank Name" },
-                loanAmount: { type: "number", title: "Loan Amount" , formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                } },
-                emi: { type: "number", title: "EMI" , formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                } },
-                tenureRemaining: { type: "number", title: "Tenure Remaining" , formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                } },
+                loanAmount: {
+                  type: "number",
+                  title: "Loan Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                emi: {
+                  type: "number",
+                  title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
+                tenureRemaining: {
+                  type: "number",
+                  title: "Tenure Remaining",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
               },
             },
           },
@@ -504,36 +661,73 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          purposeOfLoan: { type: "string", title: "Purpose of Loan", enum: ["Flat Purchase", "House Purchase", "Plot Purchase", "Construction of Residential House Property", "Improvement/Extension", "Balance Transfer", "Plot + Construction", "Hand Loan Clearance"] },
-          minimumLoanAmountRequired: { type: "number", title: "Minimum Loan Amount Required" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          tenureRequired: { type: "number", title: "Tenure Required" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          monthlyHouseholdExpenses: { type: "number", title: "Monthly Household Expenses" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          comfortableEmi: { type: "number", title: "Comfortable EMI" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          statusOfPropertyToBePurchased: { type: "string", title: "Status of Property to be Purchased" , enum: ["Ready", "Under Construction", "Construction Yet to Start"]},
-          usageOfPropertyAfterPurchase: { type: "string", title: "Usage of Property After Purchase" , enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"]},
-   },
-  },
-},
+          purposeOfLoan: {
+            type: "string",
+            title: "Purpose of Loan",
+            enum: [
+              "Flat Purchase",
+              "House Purchase",
+              "Plot Purchase",
+              "Construction of Residential House Property",
+              "Improvement/Extension",
+              "Balance Transfer",
+              "Plot + Construction",
+              "Hand Loan Clearance",
+            ],
+          },
+          minimumLoanAmountRequired: {
+            type: "number",
+            title: "Minimum Loan Amount Required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          tenureRequired: {
+            type: "number",
+            title: "Tenure Required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          monthlyHouseholdExpenses: {
+            type: "number",
+            title: "Monthly Household Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          comfortableEmi: {
+            type: "number",
+            title: "Comfortable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          statusOfPropertyToBePurchased: {
+            type: "string",
+            title: "Status of Property to be Purchased",
+            enum: ["Ready", "Under Construction", "Construction Yet to Start"],
+          },
+          usageOfPropertyAfterPurchase: {
+            type: "string",
+            title: "Usage of Property After Purchase",
+            enum: ["Self-Occupancy", "Investment", "Others", "Renting Purpose"],
+          },
+        },
+      },
+    },
 
     {
       id: "costAndFunds",
@@ -541,52 +735,79 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          fundsRequired: { type: "number", title: "Funds required" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
+          fundsRequired: {
+            type: "number",
+            title: "Funds required",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
           sourceOfOwnFunds: {
             type: "string",
             title: "Source of own funds (OCR)",
           },
-          purchaseCost: { type: "number", title: "Purchase cost" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          savings: { type: "number", title: "Savings" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
+          purchaseCost: {
+            type: "number",
+            title: "Purchase cost",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          savings: {
+            type: "number",
+            title: "Savings",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
           constructionEstimate: {
             type: "number",
             title: "Construction estimate",
           },
           familyFriends: { type: "string", title: "Family/Friends" },
-          registrationStampDutyCharges: { type: "string", title: "Registration/Stamp Duty Charges" },
-          otherLoanAmountTaken: { type: "number", title: "Other Loan Amount Taken" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          otherExpenses: { type: "number", title: "Other Expenses" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
-          totalAmountSpent: { type: "number", title: "Total Amount Spent (Total of all the above)" , formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          } },
+          registrationStampDutyCharges: {
+            type: "string",
+            title: "Registration/Stamp Duty Charges",
+          },
+          otherLoanAmountTaken: {
+            type: "number",
+            title: "Other Loan Amount Taken",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          otherExpenses: {
+            type: "number",
+            title: "Other Expenses",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          totalAmountSpent: {
+            type: "number",
+            title: "Total Amount Spent (Total of all the above)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
           totalTransactionCost: {
             type: "number",
             title: "Total transaction cost (Total of all the above cost)",
@@ -595,18 +816,26 @@ export const niwasSenpSchema = {
             type: "object",
             title: "Mode of Payment to Seller (Cash / Cheque)",
             properties: {
-              cashAmount: { type: "number", title: "Cash Amount" , formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              } },
-              chequeAmount: { type: "number", title: "Cheque Amount" , formatter: {
-                useIndianFormat: true,
-                locale: "en-IN",
-                maxDecimalPlaces: 2,
-                minDecimalPlaces: 0,
-              } },
+              cashAmount: {
+                type: "number",
+                title: "Cash Amount",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              chequeAmount: {
+                type: "number",
+                title: "Cheque Amount",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
             },
           },
         },
@@ -691,7 +920,7 @@ export const niwasSenpSchema = {
                 },
                 photoWithApplicant: {
                   type: "string",
-                  title: "Photo with Applicant (Yes/No)",
+                  title: "Photo with Applicant",
                   enum: ["Yes", "No"],
                 },
               },
@@ -712,7 +941,10 @@ export const niwasSenpSchema = {
               type: "object",
               properties: {
                 name: { type: "string", title: "Name of the person" },
-                businessName: { type: "string", title: "Name of business firm" },
+                businessName: {
+                  type: "string",
+                  title: "Name of business firm",
+                },
                 address: { type: "string", title: "Address" },
                 yearsKnown: {
                   type: "number",
@@ -725,7 +957,7 @@ export const niwasSenpSchema = {
                 },
                 businessCardCollected: {
                   type: "string",
-                  title: "Business card collected (Yes/No)",
+                  title: "Business card collected",
                   enum: ["Yes", "No"],
                 },
               },
@@ -777,7 +1009,10 @@ export const niwasSenpSchema = {
           },
           pdOfficerName: { type: "string", title: "Name of PD Officer" },
           discussionDate: { type: "date", title: "Date of Discussion" },
-          pdOfficerSignature: { type: "string", title: "Signature of PD Officer" },
+          pdOfficerSignature: {
+            type: "string",
+            title: "Signature of PD Officer",
+          },
         },
       },
     },
