@@ -704,6 +704,7 @@ export const indiaShelterSalariedSchema = {
           visitTime: {
             type: "string",
             title: "Time of Visit",
+            format: "time",
           },
           officerSignature: {
             type: "string",
