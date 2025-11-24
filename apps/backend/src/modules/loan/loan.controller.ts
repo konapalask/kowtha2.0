@@ -373,7 +373,9 @@ export class LoanController {
     @Request() req: AuthenticatedRequest,
     @Query("department") department?: string,
     @Query("page") pageParam?: string,
-    @Query("limit") limitParam?: string
+    @Query("limit") limitParam?: string,
+    @Query("applicationNumber") applicationNumber?: string,
+    @Query("applicantName") applicantName?: string
   ) {
     const pageNumber = Math.max(
       1,
@@ -384,12 +386,18 @@ export class LoanController {
       limitParam && !Number.isNaN(Number(limitParam)) ? Number(limitParam) : 10
     );
 
+    const searchFilters = {
+      applicationNumber: applicationNumber?.trim() || undefined,
+      applicantName: applicantName?.trim() || undefined,
+    };
+
     const result = await this.loanService.getLoansByVerifier(
       req.user.id,
       (department as Department) ?? Department.PD,
       req.user.role,
       pageNumber,
-      limitNumber
+      limitNumber,
+      searchFilters
     );
     return {
       status: 200,
