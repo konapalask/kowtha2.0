@@ -91,9 +91,7 @@ export const indiaShelterSalariedTemplate = (
   const collateral = verificationData.collateralDetails || {};
   const references = ensureArray(verificationData.references?.references);
   const employer = verificationData.employerDetails || {};
-  const familyMembers = ensureArray(
-    verificationData.familyMembers?.familyMembers
-  );
+  const familyMembers = verificationData.familyMembers;
   const currentLoans = ensureArray(
     verificationData.currentLoanDetails?.currentLoans
   );
@@ -219,7 +217,7 @@ export const indiaShelterSalariedTemplate = (
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Years in Current City",
+        "Number of Years in Current City",
         residence.yearsInCurrentCity,
         undefined,
         { colSpan: 3 }
@@ -445,28 +443,18 @@ export const indiaShelterSalariedTemplate = (
         <td style="${labelCellStyle}">Staying with Applicant</td>
       </tr>
       ${
-        familyMembers.length
-          ? familyMembers
+        familyMembers?.familyMembers?.length
+          ? familyMembers?.familyMembers
               .map(
                 (member: any) => `
           <tr>
-            <td style="${valueCellStyle}">${formatMultiline(member.name)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              member.relationWithApplicant
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(member.age)}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              member.occupation
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              member.educationalQualification
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              member.contactNumber
-            )}</td>
-            <td style="${valueCellStyle}">${formatMultiline(
-              member.stayingWithApplicant
-            )}</td>
+            <td style="${valueCellStyle}">${member.name}</td>
+            <td style="${valueCellStyle}">${member.relationWithApplicant}</td>
+            <td style="${valueCellStyle}">${member.age}</td>
+            <td style="${valueCellStyle}">${member.occupation}</td>
+            <td style="${valueCellStyle}">${member.educationalQualification}</td>
+            <td style="${valueCellStyle}">${member.contactNumber}</td>
+            <td style="${valueCellStyle}">${member.stayingWithApplicant}</td>
           </tr>
         `
               )

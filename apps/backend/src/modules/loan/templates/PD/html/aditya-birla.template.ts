@@ -22,7 +22,17 @@ const formatMultiline = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   return String(value).replace(/\n+/g, "<br>");
 };
-
+const formatNumber = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return Number(value).toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  });
+};
+const formatCurrency = (value: any): string => {
+  if (!hasValue(value)) return "Not provided";
+  return `Rs. ${formatNumber(value).replace(/,/g, ",")}/-`;
+};
 const formatObservations = (value: any): string => {
   if (!hasValue(value)) return "Not provided";
   const text = String(value);
@@ -64,8 +74,9 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const businessProfile = verificationData.businessProfile || {};
   const familyMembers = verificationData.familyMembers?.familyMembers || [];
   const observations = verificationData.observations || {};
-  const employeesInfrastructure =
-    verificationData.employeesInfrastructure || {};
+  const loanDetails = verificationData.loanDetails || {};
+  const dailyIncomeCalculation = verificationData.dailyIncomeCalculation || {};
+  const expenses = verificationData.applicantsMonthlyExpensesOfTheBusiness || {};
 
   const templateName = html_data?.bankName || "Aditya Birla";
 
@@ -226,15 +237,92 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}">Loan Details</td>
-            <td style="${valueCellStyle}">Loan Amount: ${observations.loanAmountApplied} <br>Purpose of Loan: ${observations.purposeOfLoan}</td>
+            <td style="${valueCellStyle}">Loan Amount: ${loanDetails.loanAmountApplied} <br>Purpose of Loan: ${loanDetails.purposeOfLoan}</td>
         </tr>
-      </table>      
+      </table>     
+      
+      <table style="${tableStyle}">
+      <tr>
+        <td style="${labelCellStyle}">Particulars</td>
+        <td style="${labelCellStyle}">Units</td>
+        <td style="${labelCellStyle}">Charge</td>
+        <td style="${labelCellStyle}">Total</td>
+      </tr>
+      ${ensureArray(dailyIncomeCalculation?.details || []).map(
+        (detail: any) => `<tr>
+          <td style="${valueCellStyle}">${formatMultiline(detail.particulars)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(detail.units)}</td>
+          <td style="${valueCellStyle}">${formatMultiline(detail.charge)}</td>
+          <td style="${valueCellStyle}">${formatCurrency(detail.total)}</td>
+        </tr>`
+      ).join("\n")}
+      <tr>
+        <td style="${labelCellStyle}" colspan="3">Daily Gross Income (Total)</td>
+        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.dailyGrossIncome)}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}" colspan="3">Labour & Material (Total)</td>
+        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.labourAndMaterialEveryday)}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}" colspan="3">Net Income/Day (Total)</td>
+        <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.netIncomePerDay)}</td>
+      </tr>
+      </table>
+
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}"colspan="2">Applicant's Monthly Expenses of the business</td>      
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Sales</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.salesDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Purchase</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.purchaseDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Rent</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.rentDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Salary and Wages</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.salaryAndWagesDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Transport Charges</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.transportDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Electricity Bill</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.electricityDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Other Expenses</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.otherExpensesDetails || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Total Expenses</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.totalExpenses || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Net Profit</td>
+          <td style="${valueCellStyle}">${formatCurrency(expenses?.netProfit || 0)}</td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Net Margin</td>
+          <td style="${valueCellStyle}">${expenses?.netMargin + "%" || "Not provided"}</td>
+        </tr>
+        </table>
 
       <br><p> Signature of the Assesing Official: ________________________</p>
+      <p style="margin:0 0 24px;color:#333;">We taken the estimated figures based on customer feedback and the gross profit has been calculated taking into consideration market information gathered on our experience.</p>
       <p style="margin:20px 0 8px;font-weight:600;color:#222;">Disclaimer Clause:</p>
       <p style="margin:0 0 24px;color:#333;">
         This report (including any attachments) has been prepared based on verbal information provided by the person contacted. Aditya Birla Finance will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. M/s. Kowtha &amp; Co will not be held liable in any case.
       </p>
+      <p style="margin:0 0 24px;color:#333;">ADITYA BIRLA CAPITAL (Aditya Birla Housing Finance Ltd., will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, our efficient services will not be liable in any case.</p>
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;

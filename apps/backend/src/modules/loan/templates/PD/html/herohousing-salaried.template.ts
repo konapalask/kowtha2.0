@@ -118,37 +118,44 @@ export const herohousingSalariedTemplate = (
       
       <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Loan account No.</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>Loan account No.</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.loanAccountNo || ""}</p></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>Name of customer</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general?.applicantName || ""}</p></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;padding:8px;width:32%">
             <p style="margin:8px 0;line-height:1.5"><strong>Person met in PD and relationship with customer</strong></p>
+          </td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%">
+            <p style="margin:8px 0;line-height:1.5">${general.personMet || ""}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px;width:32%">
             <p style="margin:8px 0;line-height:1.5"><strong>Mention the reason if customer was not available during the visit</strong></p>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5">${general.personMet || ""}</p>
+          <td style="border:1px solid #ccc;padding:8px;width:32%">
             <p style="margin:8px 0;line-height:1.5">${general.reasonIfCustomerNotAvailable || ""}</p>
           </td>
         </tr>
+
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD Visit date and time</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>PD Visit date and time</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdVisitDateAndTimepd || ""}</p></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD address</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>PD address</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.pdAddress || ""}</p></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>Lat log of office address</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.latitudeLongitude || ""}</p></td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
+          <td style="border:1px solid #ccc;padding:8px;width:32%"><p style="margin:8px 0;line-height:1.5"><strong>Requested loan amount</strong></p></td>
           <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${general.requestedLoanAmount || ""}</p></td>
         </tr>
       </table>
@@ -187,7 +194,7 @@ export const herohousingSalariedTemplate = (
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Relationship with applicant</strong></p></td>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Age</strong></p></td>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Qualification</strong></p></td>
-                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Occupation (Job/Business)</strong> <br> /dependent</p></td>
+                <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Occupation (Job/Business)</strong> <br></p></td>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Income Details/dependent</strong></p></td>
               </tr>
               ${ensureArray(familyDetails.members)

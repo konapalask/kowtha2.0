@@ -304,38 +304,38 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
       </tr>
       <tr>
         <td style="${labelCellStyle}">Details of Proof of ownership (if available/documented)</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.detailsOfProofOfOwnership || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.detailsOfProofOfBusinessOwnership || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceProof || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessProof || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Rented premised verification status</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.rentedPremisedVerificationStatus || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.rentedPremisedVerificationStatus || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceRentedPremisedVerificationStatus || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessRentedPremisedVerificationStatus || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Rented per month (if rented)</td> 
-        <td style="${valueCellStyle}">${formatMultiline(addresses.rentPerMonthIfRented || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.rentPerMonthIfRented || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatCurrency(addresses.residenceRent || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatCurrency(addresses.businessRent || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.localityComment || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceLocality || "N/A")}</td>
         <td style="${valueCellStyle}">${formatMultiline(addresses.businessLocality || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Whether Property already Mortgage (if same is owned) – mention Bank/NBFC name</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.whetherPropertyAlreadyMortgage || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.whetherPropertyAlreadyMortgage || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceMortgage || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessMortgage || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">QR code check status (for retail counters on best effort basis) – Positive / Negative</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.qrCodeCheckStatusForRetailCountersOnBestEffortBasis || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.qrCodeCheckStatusForRetailCountersOnBestEffortBasis || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceQrCheck || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessQrCheck || "N/A")}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Premise visit comment (whichever visited), also attach visit Pics with selfie</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.premiseVisitComment || "N/A")}</td>
-        <td style="${valueCellStyle}">${formatMultiline(addresses.premiseVisitComment || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.residenceVisitComment || "N/A")}</td>
+        <td style="${valueCellStyle}">${formatMultiline(addresses.businessVisitComment || "N/A")}</td>
       </tr>
       </table>
 

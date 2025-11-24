@@ -136,7 +136,7 @@ export const smfgSmeSchema = {
           },
           partners: {
             type: "string",
-            title: "Partners / Directors and Share %",
+            title: "Name of Partners/Directors and share %",
             ui: { widget: "textarea", rows: 2 },
           },
           customerType: {
@@ -161,28 +161,7 @@ export const smfgSmeSchema = {
             title: "Business Premises Ownership",
             enum: ["Owned", "Rented", "Parental"],
           },
-          premiseType: {
-            type: "string",
-            title: "Locality of Business / Office",
-          },
-          isResidenceCumOffice: {
-            type: "string",
-            title: "Residence cum Office setup",
-            enum: ["Yes", "No"],
-          },
-          nameBoardSeen: {
-            type: "string",
-            title: "Name Board Seen? What was written",
-          },
-        },
-      },
-    },
-    {
-      id: "financials",
-      label: "Financials & Operations",
-      schema: {
-        type: "object",
-        properties: {
+
           monthlySales: {
             type: "number",
             title: "Actual Monthly Sales / Receipts",
@@ -255,33 +234,52 @@ export const smfgSmeSchema = {
               maxDecimalPlaces: 2,
             },
           },
-          numberOfEmployees: {
-            type: "integer",
-            title: "Number of Employees",
-          },
           majorSuppliers: {
             type: "array",
-            title: "Major Suppliers",
+            title: "Name and contact no of two major suppliers",
             items: {
-              type: "string",
-              title: "Supplier",
+              type: "object",
+              properties: {
+                name: { type: "string", title: "Name of Supplier" },
+                contactNo: { type: "number", title: "Contact No of Supplier" },
+              },
             },
           },
           majorCustomers: {
             type: "array",
-            title: "Major Customers",
+            title: "Name and contact no of two major buyers",
             items: {
-              type: "string",
-              title: "Customer",
+              type: "object",
+              properties: {
+                name: { type: "string", title: "Name of Buyer" },
+                contactNo: { type: "number", title: "Contact No of Buyer" },
+              },
             },
+          },
+          numberOfEmployees: {
+            type: "integer",
+            title: "Number of Employees",
+          },
+          nameBoardSeen: {
+            type: "string",
+            title: "Name Board Seen? What was written",
+          },          
+          premiseType: {
+            type: "string",
+            title: "Locality of Business / Office",
+          },
+          isResidenceCumOffice: {
+            type: "string",
+            title: "Whether Residence cum Office setup",
+            enum: ["Yes", "No"],
           },
           taxApplicability: {
             type: "string",
-            title: "Applicability of VAT / Excise / Service Tax",
+            title: "Applicability of VAT / Excise / Service Tax and rate of same",
           },
           latestTaxReturn: {
             type: "string",
-            title: "Latest Quarter VAT / Service Tax Paid",
+            title: "Latest Qtr VAT return value/Service tax paid",
           },
         },
       },

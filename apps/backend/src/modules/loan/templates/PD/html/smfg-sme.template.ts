@@ -110,7 +110,6 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
   const general = verificationData.generalInfo || {};
   const personal = verificationData.personalInformation || {};
   const business = verificationData.businessInformation || {};
-  const financials = verificationData.financials || {};
   const ess = verificationData.essChecklist || {};
   const existingLoans = ensureArray(
     verificationData.existingLoans?.existingLoans
@@ -121,23 +120,12 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
   const loanPurpose = verificationData.loanPurposeAndUse || {};
   const observations = verificationData.observations || {};
 
-  const familyList = renderList(
-    ensureArray(personal.familyMembers).map((member: any) => {
-      const dependent =
-        member.isDependent && member.isDependent.toLowerCase() === "yes"
-          ? " (Dependent)"
-          : "";
-      return `${member.name || ""} - ${member.age || ""} yrs, ${
-        member.occupation || ""
-      }${dependent}`;
-    })
-  );
 
   const suppliersList = renderList(
-    ensureArray(financials.majorSuppliers).map((entry: any) => entry)
+    ensureArray(business.majorSuppliers).map((entry: any) => entry)
   );
   const customersList = renderList(
-    ensureArray(financials.majorCustomers).map((entry: any) => entry)
+    ensureArray(business.majorCustomers).map((entry: any) => entry)
   );
 
   const essQuestionKeys = [
@@ -215,12 +203,27 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
   const personalTable = `
     <table style="${tableStyle}">
       <tr><th style="${subHeaderStyle}" colspan="4">Personal Information</th></tr>
-      ${renderKeyValueRow(
-        "Details of family members name, age and occupation: (pls tick on dependents)",
-        familyList,
-        undefined,
-        { colSpan: 3 }
-      )}
+      <tr>
+        <td style="${labelCellStyle}">Details of family members name, age and occupation: (pls tick on dependents)</td>
+        <td style="border:1px solid #ccc;padding:8px">
+          <table style="${tableStyle}">
+            <tr>
+              <td style="${labelCellStyle}">Name</td>
+              <td style="${labelCellStyle}">Age</td>
+              <td style="${labelCellStyle}">Occupation</td>
+              <td style="${labelCellStyle}">Dependent</td>
+            </tr>
+            ${personal?.familyMembers?.map((member: any) => `
+              <tr>
+              <td style="${valueCellStyle}">${member.name}</td>
+              <td style="${valueCellStyle}">${member.age} yrs</td>
+              <td style="${valueCellStyle}">${member.occupation}</td>
+              <td style="${valueCellStyle}">${member.isDependent}</td>
+              </tr>
+          `).join("")}
+          </table>
+        </td>
+      </tr>
       ${renderKeyValueRow(
         "Residence Address",
         personal.residenceAddress,
@@ -327,6 +330,83 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
+        "Actual Monthly Sales / Receipts as per customer",
+        business.monthlySales,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "What % sales is done on credit",
+        business.percentSalesOnCredit,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Manufacturing process/ Trading details",
+        business.manufacturingProcess,
+        undefined,
+        { colSpan: 3 }
+      )} 
+      <tr>
+            <td style="${labelCellStyle}">Whether sales concentration is >50% on one party. If yes name of Party and contact no</td>
+            <td style="${valueCellStyle}">
+                  ${
+                    business.salesConcentration
+                      ? `Yes <br> <strong>Name of Party:</strong> ${business.salesConcentrationPartyName} <br> <strong>Contact Number of Party:</strong> ${business.salesConcentrationPartyContactNo}`
+                      : "No"
+                  }
+            </td>
+      </tr>
+
+      ${renderKeyValueRow(
+        "Business Cycle -How many days credit allowed to Debtors and what are actual debtors amount as on date",
+        business.businessCycleDebtors,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Business Cycle - How many days credit allowed by creditors to CM and what are actual Creditors amount as on date",
+        business.businessCycleCreditors,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Business Cycle – What is stock valuation as on date",
+        business.stockValuation,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Gross & Net margins % in Business",
+        business.grossMargin,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Monthly Net saving after all expenses in Rs",
+        business.netSavings,
+        formatCurrency,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Name and contact no of two major suppliers",
+        business.majorSuppliers?.map((supplier: any) => `${supplier.name} - ${supplier.contactNo}`).join("<br>"),
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Name and contact no of two major buyers",
+        business.majorCustomers?.map((customer: any) => `${customer.name} - ${customer.contactNo}`).join("<br>"),
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
+        "Number of Employees",
+        business.numberOfEmployees,
+        undefined,
+        { colSpan: 3 }
+      )}
+      ${renderKeyValueRow(
         "Name Board Seen if yes what was written",
         business.nameBoardSeen,
         undefined,
@@ -345,85 +425,14 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
-        "Actual Monthly Sales / Receipts as per customer",
-        financials.monthlySales,
-        formatCurrency,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "What % sales is done on credit",
-        financials.percentSalesOnCredit,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Manufacturing process/ Trading details",
-        financials.manufacturingProcess,
-        undefined,
-        { colSpan: 3 }
-      )} 
-      <tr>
-            <td style="${labelCellStyle}">Whether sales concentration is >50% on one party. If yes name of Party and contact no</td>
-            <td style="${valueCellStyle}">
-                  ${
-                    financials.salesConcentration
-                      ? `Yes <br> <strong>Name of Party:</strong> ${financials.salesConcentrationPartyName} <br> <strong>Contact Number of Party:</strong> ${financials.salesConcentrationPartyContactNo}`
-                      : "No"
-                  }
-            </td>
-      </tr>
-
-      ${renderKeyValueRow(
-        "Business Cycle -How many days credit allowed to Debtors and what are actual debtors amount as on date",
-        financials.businessCycleDebtors,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Business Cycle - How many days credit allowed by creditors to CM and what are actual Creditors amount as on date",
-        financials.businessCycleCreditors,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Business Cycle – What is stock valuation as on date",
-        financials.stockValuation,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Gross & Net margins % in Business",
-        financials.grossMargin,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Monthly Net saving after all expenses in Rs",
-        financials.netSavings,
-        formatCurrency,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Name and contact no of two major suppliers",
-        financials.majorSuppliers,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
-        "Number of Employees",
-        financials.numberOfEmployees,
-        undefined,
-        { colSpan: 3 }
-      )}
-      ${renderKeyValueRow(
         "Applicability of VAT / Excise / Service tax and rate of same",
-        financials.taxApplicability,
+        business.taxApplicability,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Latest Qtr VAT return value/Service tax paid",
-        financials.latestTaxReturn,
+        business.latestTaxReturn,
         undefined,
         { colSpan: 3 }
       )}

@@ -27,15 +27,10 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Relationship with customer",
           },
-          pdVisitDate: {
+          pdVisitDateAndTime: {
             type: "string",
-            format: "date",
-            title: "PD visit date",
-          },
-          pdVisitTime: {
-            type: "string",
-            format: "time",
-            title: "PD visit time",
+            title: "PD visit date and time",
+            format: "datetime",
           },
           pdAddress: {
             type: "string",

@@ -29,7 +29,7 @@ export const axisFinanceSchema = {
             title: "Date",
             format: "date",
           },
-          loaAmountRequest: {
+          loanAmount: {
             type: "number",
             title: "Loan Amount Request",
             formatter: {
@@ -38,6 +38,7 @@ export const axisFinanceSchema = {
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
             },
+            readOnly: true,
           },
           placeOfInterview: {
             type: "string",
@@ -393,15 +394,28 @@ export const axisFinanceSchema = {
                 },
                 amount: {
                   type: "number",
-                  title: "LOAN AMOUNT",
+                  title: "O/S Amount",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 emi: {
                   type: "number",
                   title: "EMI",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
                 },
                 willCloseContinue: {
                   type: "string",
                   title: "Will Close / Continue",
+                  enum: ["Close", "Continue"],
                 },
               },
             },
@@ -523,6 +537,35 @@ export const axisFinanceSchema = {
       },
       required: true,
     },
+    {
+      id: "estimatedIncome",
+      label: "Estimated Income",
+      schema: {
+        type: "object",
+        properties: {
+          estimatedIncomeDetails: {
+            type: "string",
+            title: "Estimated Income Details",
+            ui: {
+              widget: "textarea",
+              rows: 6,
+            },
+          },
+          patOfTheBusinessConcern: {
+            type: "number",
+            title: "The PAT of the Business Concern (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
+      },
+    },
+
+
     statement2Schema,
   ],
 } as const;
