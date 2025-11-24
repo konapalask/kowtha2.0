@@ -134,14 +134,16 @@ export const axisFinanceUBLTemplate = (
     ]
   );
 
-  const businessPoints = ensureArray(
+  const businessPoints = formatMultiline(
     verificationData.businessOverview?.aboutBusiness
-  )
-    .map((entry: any) =>
-      hasValue(entry?.detail) ? formatMultiline(entry.detail) : ""
-    )
-    .filter(Boolean)
-    .join("<br>");
+  );
+  const businessPointsList =
+    businessPoints && businessPoints !== "Not provided"
+      ? businessPoints
+          .split(/<br\s*\/?>|\n/g)
+          .map((line: string) => line.trim())
+          .filter(Boolean)
+      : [];
 
   const documentsObserved = ensureArray(
     verificationData.businessOverview?.documentsObserved
@@ -363,9 +365,13 @@ export const axisFinanceUBLTemplate = (
       )}
 
       <p style="${paragraphStyle}"><strong>About the Business</strong></p>
-      ${renderKeyValueTable([
-        ["About the Business", businessPoints || "Not provided"],
-      ])}
+      <table style="${tableStyle}">
+      <tr>
+      <td width="25%" style="${cellStyle}"><strong>About the Business</strong></td>
+      <td style="${cellStyle}">${businessPointsList.length? `<ul style="margin: 0; padding-left: 20px;">${businessPointsList.map((line: string) =>`<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>`: "Not provided"}</td>
+      </tr>
+      </table>
+
 
       <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
       ${renderInnerTable(
@@ -378,7 +384,7 @@ export const axisFinanceUBLTemplate = (
             formatMultiline(doc?.remarks || ""),
           ]
         )
-      )}
+      ) ||""}
 
       <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
       ${renderKeyValueTable([

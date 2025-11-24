@@ -84,12 +84,7 @@ const renderTwoColumnTable = (rows: KeyValueRow[]) => {
 
   return `
     <table style="${tableStyle}">
-      <tr>
-        <td style="${headerCellStyle};width:35%;">Accounting Year</td>
-      </tr>
-      <tr>
-        <td style="${headerCellStyle};width:35%;">Estimated Total Costs</td>
-      </tr>
+      
       ${items
         .map(({ label, value, formatter }) => {
           const rendered = formatter ? formatter(value) : displayValue(value);
@@ -186,45 +181,45 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherIncome = verificationData.otherIncome || {};
   const assets = verificationData.assets || {};
   const liabilitiesRaw =
-    verificationData.otherLiabilitiesIncludingCcLimitsOwnCoApplicants || [];
+    verificationData?.otherLiabilitiesIncludingCcLimitsOwnCoApplicants?.otherLiabilities || [];
   const budget = verificationData.budgetAnalysis || {};
   const endUseOfFunds = verificationData.endUseOfFunds || {};
   const otherObservations = verificationData.otherObservations || {};
   const overallPositivesOrNegatives =
     verificationData.overallPositivesOrNegatives || {};
   const tradeReferences = ensureArray(
-    verificationData.tradeReferences.tradeReferences || []
+    verificationData?.tradeReferences?.tradeReferences || []
   );
-
+  const estimatedIncome = verificationData.estimatedIncome || {};
   const personalDetailsTable = renderTwoColumnTable([
     {
       label: "Name of the Applicant",
-      value: personal.applicantName,
+      value: personal?.applicantName,
     },
     {
       label: "Interviewed By",
-      value: personal.interviewedBy,
+      value: personal?.interviewedBy,
     },
     {
       label: "Person Contacted",
-      value: personal.personContacted,
+      value: personal?.personContacted,
     },
     {
       label: "Date",
-      value: formatDate(personal.pdDate),
+      value: formatDate(personal?.pdDate),
     },
     {
       label: "Loan Amount Request",
-      value: personal.loaAmountRequest,
+      value: personal?.loanAmount,
       formatter: formatCurrency,
     },
     {
       label: "Place of Interview",
-      value: personal.placeOfInterview,
+      value: personal?.placeOfInterview,
     },
     {
       label: "Contact Number",
-      value: personal.applicantMobile,
+      value: personal?.applicantMobile,
     },
   ]);
 
@@ -439,57 +434,29 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const liabilitiesEntries = Array.isArray(liabilitiesRaw)
-    ? liabilitiesRaw
-    : Array.isArray(liabilitiesRaw?.items)
-      ? liabilitiesRaw.items
-      : hasValue(liabilitiesRaw)
-        ? ensureArray(liabilitiesRaw)
-        : [];
-
-  // Ensure labels and a placeholder row render even when there are no items
-  const liabilitiesItems =
-    Array.isArray(liabilitiesEntries) && liabilitiesEntries.length > 0
-      ? liabilitiesEntries
-      : [
-          {
-            from: "-",
-            natureOfLoan: "-",
-            amount: "-",
-            emi: "-",
-            willCloseContinue: "-",
-          },
-        ];
-
-  const liabilitiesTable = renderMultiColumnTable(
-    [
-      {
-        header: "From",
-        valueGetter: (item) => item.from,
-      },
-      {
-        header: "Nature of Loan",
-        valueGetter: (item) =>
-          item.natureOfLoan || item.nature || item.natureOfLoanAccountNo,
-      },
-      {
-        header: "O/S Amount",
-        valueGetter: (item) => item.amount || item.oSAmount,
-        formatter: (value) => formatCurrency(value),
-      },
-      {
-        header: "EMI",
-        valueGetter: (item) => item.emi,
-        formatter: (value) => formatCurrency(value),
-      },
-      {
-        header: "Will Close / Continue",
-        valueGetter: (item) => item.willCloseContinue,
-      },
-    ],
-    liabilitiesItems,
-    "No other liabilities reported"
-  );
+  const liabilitiesTable =`
+    <div>
+      <p style="${paragraphStyle}"><strong><u>Other Liabilities Including CC Limits (Own/Co Applicants)</u></strong></p>
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${headerCellStyle};">From</td>
+          <td style="${headerCellStyle};">Nature of Loan</td>
+          <td style="${headerCellStyle};">O/S Amount</td>
+          <td style="${headerCellStyle};">EMI</td>
+          <td style="${headerCellStyle};">Will Close / Continue</td>
+        </tr>
+        ${ensureArray(liabilitiesRaw).map((liability, index) => `
+          <tr>
+            <td style="${cellStyle}">${liability.from}</td>
+            <td style="${cellStyle}">${liability.natureOfLoan}</td>
+            <td style="${cellStyle}">${formatCurrency(liability.amount)}</td>
+            <td style="${cellStyle}">${formatCurrency(liability.emi)}</td>
+            <td style="${cellStyle}">${liability.willCloseContinue}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    `;
 
   const budgetRows = [
     {
@@ -565,7 +532,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const otherObservationsTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong><br>${formatMultiline(otherObservations.otherObservations || "")}</p>
+      <p style="${paragraphStyle}"><strong><u>Other Observations</u></strong><br>${otherObservations?.otherObservations?.split("\n").map(line => `<li style="margin-left:10px;">${line}</li>`).join("")}</p>
     </div>
   `;
 
@@ -597,8 +564,20 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       <p style="margin:8px 0;">
         <strong>Disclaimer:</strong> The report contains information shared by the person contacted during the visit. Axis Finance will be solely responsible for decisions taken on the basis of this report and any liabilities directly or indirectly arising therefrom.
       </p>
+      <p style="margin:8px 0;">
+        TATA (Tata housing finance Ltd / Tata capital Ltd., will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions, efficient services will not be liable in any case.
+      </p>
     </div>
   `;
+
+  const estimatedIncomeTable = `
+    <div> 
+    <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
+    <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p>
+    ${estimatedIncome?.patOfTheBusinessConcern ? `<p style="${paragraphStyle}"><strong>The PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome?.patOfTheBusinessConcern)}</p>` : ""}
+    </div>
+  `;
+
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -607,7 +586,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Personal Details", personalDetailsTable)}
       ${renderSection("Family Background", familyMembersTable + familySummaryTable)}
       ${renderSection("Place of Residence/Office", residenceTable)}
-      ${renderTextSection("Company Profile", company.detailedProfileOfTheBusiness)}
+      ${renderTextSection("Company Profile", company?.detailedProfileOfTheBusiness?.split("\n").map(line => `<li style="margin-left:10px;">${line}</li>`).join(""))}
       ${renderSection("Self Employed/Salaried", employmentTable)}
       ${renderBusinessSection("BUSINESS DETAILS", businessDetailsTable)}
       ${renderBusinessSection("EMPLOYEE/OTHER MAJOR COST", employeeCostsTable)}
@@ -615,12 +594,13 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Co-Applicant Income", coApplicantIncomeTable)}
       ${renderSection("Other Income", otherIncomeTable)}
       ${renderSection("Assets & Investments", assetsTable)}
-      ${renderSection("Other Liabilities Including CC Limits (Own/Co Applicants)", liabilitiesTable)}
+      ${liabilitiesTable}
       ${renderSection("Budget Analysis", budgetTable)}
       ${endUseOfFundsTable}
       ${otherObservationsTable}
       ${overallPositivesOrNegativesTable}
-      ${renderSection("Trade References - Not Provided", tradeReferenceTable)}
+      ${renderSection("Trade References ", tradeReferenceTable)}
+      ${estimatedIncomeTable}
       ${noteBlock}
     </div>
   `;

@@ -330,7 +330,7 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Insurance Details</h2>
-    <p>Insurance Company Name:- ${insuranceDetails.insuranceCompanyName} <br> Due they are taking the exemptions by taking the Children Education Fee: ${insuranceDetails.dueExemptions}</p>
+    <p><strong>Insurance Company Name:-</strong> ${insuranceDetails.insuranceCompanyName} <br> <strong>Due they are taking the exemptions by taking the Children Education Fee:</strong> ${insuranceDetails.dueExemptions}</p>
     <table style="${tableStyle}">
     <tr>
     <td style="${labelCellStyle}">S.No</td>

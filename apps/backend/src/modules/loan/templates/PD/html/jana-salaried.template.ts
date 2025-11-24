@@ -88,6 +88,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
   const thirdPartyConfirmation = verificationData.thirdPartyConfirmation;
   const documentsVerified = verificationData.documentsVerified;
   const otherObservations = verificationData.otherObservations;
+  const geoTagDetails = verificationData?.geoTagDetails || {};
 
   return `
     ${pdBaseTemplate()}
@@ -288,7 +289,7 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
                   <td style="${valueCellStyle}">${formatCurrency(item.emi)}</td>
                   <td style="${valueCellStyle}">${item.tenure}</td>
                   <td style="${valueCellStyle}">${item.monthOnBooks}</td>
-                  <td style="${valueCellStyle}">${formatCurrency(item.emiPaidBank)}</td>
+                  <td style="${valueCellStyle}">${item.emiPaidBank || "Not provided"}</td>
                   <td style="${valueCellStyle}">${item.securedAgainstAsset}</td>
                 </tr>
               `
@@ -491,7 +492,18 @@ export const janaSalariedTemplate = (verificationData: any, html_data: any) => {
           <td style="${labelCellStyle}">Checked By</td>
           <td style="${valueCellStyle}">${otherObservations?.checkedBy || "Not provided"}</td>
         </tr>
+        <tr>
+        <td style="${labelCellStyle}">Site Coordinates</td>
+        <td style="border:1px solid #ccc;padding:8px">
+          <p>${geoTagDetails?.coordinates 
+            || geoTagDetails?.Coordinates 
+            || verificationData?.geoTagDetails?.coordinates
+            || verificationData?.GeoTagDetails?.coordinates
+            || "Not provided"}</p>
+        </td>
+      </tr>
       </table>
+
     </div>
 
     ${pdBaseTemplateFooter(html_data)}

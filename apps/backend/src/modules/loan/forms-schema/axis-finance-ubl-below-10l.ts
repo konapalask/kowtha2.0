@@ -226,20 +226,11 @@ export const axisFinanceUblBelow10lSchema = {
         type: "object",
         properties: {
           aboutBusiness: {
-            type: "array",
+            type: "string",
             title: "About the Business",
-            items: {
-              type: "object",
-              properties: {
-                detail: {
-                  type: "string",
-                  title: "Detail",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
+            ui: {
+              widget: "textarea",
+              rows: 8,
             },
           },
           documentsObserved: {

@@ -40,6 +40,14 @@ export const janaSalariedSchema = {
           spouseWorkDetails: {
             type: "string",
             title: "Spouse Work Details",
+            dependencies: {
+              show: {
+                doesSpouseWork: "Yes",
+              },
+              required: {
+                doesSpouseWork: "Yes",
+              },
+            },
             ui: { widget: "textarea", rows: 3 },
           },
           qualification: {
@@ -585,6 +593,17 @@ export const janaSalariedSchema = {
         },
       },
     },
+    {
+      id: "geoTagDetails",
+      label: "Site Coordinates",
+      schema: {
+        type: "object",
+        properties: {
+          coordinates: { type: "string", title: "Coordinates", readOnly: true },
+        },
+      },
+    },
+
   ],
 } as const;
 

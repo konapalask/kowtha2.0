@@ -72,16 +72,17 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
     const debtorsCreditorsStock = verificationData.debtorsCreditorsStock || {};
     const capitalInvestmentTillDate = verificationData.capitalInvestmentTillDate || {};
     const documentsObserved = verificationData.documentsObserved || {};
-    const familyMembers = verificationData.personalDetailsFamilyBackground.familyMembers || [];
+    const familyMembers = verificationData.personalDetailsFamilyBackground?.familyMembers || [];
     const noOfDependents = verificationData.noOfDependents || {};
     const residenceOfficeCollateralDetails = verificationData.residenceOfficeCollateralDetails || {};
-    const liabilities = verificationData.otherLiabilitiesLoansApplicantCoApplicants.details || {};
+    const liabilities = verificationData.otherLiabilitiesLoansApplicantCoApplicants?.details || [];
     const chitFundetc = verificationData.chitFundetc || {};
     const assets = verificationData.otherAssets || {};
     const otherSourcesOfIncome = verificationData.otherSourcesOfIncome || {};
-    const references = verificationData.references.details || {};
+    const references = verificationData.references?.details || [];
     const observationsRemarksDuringPd = verificationData.observationsRemarksDuringPd || {};
-
+    const estimatedIncome = verificationData.estimatedIncome || {};
+    const overallPositivesOrNegatives = verificationData.overallPositivesOrNegatives || {};
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -180,7 +181,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Qualification</td>
             <td style="${labelCellStyle}">Occupation</td>
         </tr>
-        ${familyMembers.map((member) => `
+        ${familyMembers?.map((member) => `
             <tr>
                 <td style="${valueCellStyle}">${member.name || ""}</td>
                 <td style="${valueCellStyle}">${member.relation || ""}</td>
@@ -238,7 +239,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Telephone No. / Address for Communication</td>
             <td style="${labelCellStyle}">Supplier / Buyer / Market Reference</td>
         </tr>
-        ${references.map((reference) => `
+        ${references?.map((reference) => `
             <tr>
                 <td style="${valueCellStyle}">${reference.nameOfThePerson}</td>
                 <td style="${valueCellStyle}">${reference.telephoneNoAddressForCommunication}</td>
@@ -251,8 +252,19 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Observations/Remarks During PD", formatMultiline(observationsRemarksDuringPd.observationsRemarksDuringPd))}
       </table>
 
-      ${pdBaseTemplateFooter(html_data)}
+      <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
+      <p style="margin:8px 0;line-height:1.5">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p> 
+      <p style="margin:8px 0;line-height:1.5"><strong>Gross Sales as per our assumptions</strong> ${formatCurrency(estimatedIncome.grossSalesAsPerOurAssumptions)}</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PBDIT Margin</strong> ${estimatedIncome?.pbditMargin + "%" || "Not provided"}</p>
+      <p style="margin:8px 0;line-height:1.5"><strong>PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome.patOfTheBusinessConcern)}</p>
+
+      <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+
+      <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
+      <p style="font-size:18px;"><strong>Disclaimer:</strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
 
     </div>
+    ${pdBaseTemplateFooter(html_data)}
+
   `;
 };

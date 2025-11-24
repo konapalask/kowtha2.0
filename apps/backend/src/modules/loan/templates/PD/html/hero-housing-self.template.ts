@@ -249,11 +249,10 @@ export const heroHousingSelfTemplate = (
       right: wrapParagraph(
         formatMultiline(
           [
-            summary.pdVisitDate || summary.pdVisitDateAndTime,
-            summary.pdVisitTime,
+            summary.pdVisitDateAndTime,
           ]
             .filter(hasValue)
-            .join(", ")
+            .join(" ")
         )
       ),
     },

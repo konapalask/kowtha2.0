@@ -209,7 +209,7 @@ export const yesBankSchema = {
     },
     {
       id: "addressDetails",
-      label: "Residence and Business Address Details",
+      label: "Residence/Business Address Details",
       schema: {
         type: "object",
         properties: {
@@ -218,78 +218,82 @@ export const yesBankSchema = {
             title: "Residence premise address",
             ui: { widget: "textarea", rows: 2 },
           },
-          residenceOwnershipStatus: {
-            type: "string",
-            title: "Residence ownership status",
-          },
-          residenceDuration: {
-            type: "string",
-            title: "Residence owned / rented since when",
-          },
-          residenceProof: {
-            type: "string",
-            title: "Residential proof of ownership",
-          },
-          residenceRent: {
-            type: "string",
-            title: "Residence rent per month (if rented)",
-          },
-          residenceLocality: {
-            type: "string",
-            title: "Residence locality comment",
-          },
-          residenceMortgage: {
-            type: "string",
-            title: "Residence mortgage status",
-          },
-          residenceQrCheck: {
-            type: "string",
-            title: "Residence QR code check status",
-          },
-          residenceVisitComment: {
-            type: "string",
-            title: "Residence visit comments / photos reference",
-          },
           businessPremiseAddress: {
             type: "string",
             title: "Business premise address",
             ui: { widget: "textarea", rows: 2 },
           },
+          residenceOwnershipStatus: {
+            type: "string",
+            title: "Residence ownership status",
+          },
           businessOwnershipStatus: {
             type: "string",
             title: "Business ownership status",
           },
+          residenceDuration: {
+            type: "string",
+            title: "Residence Owned /rented since when (number of Years)",
+          },
           businessDuration: {
             type: "string",
-            title: "Business owned / rented since when",
+            title: "Business Owned / rented since when (number of Years)",
           },
+          residenceProof: {
+            type: "string",
+            title: "Residence Details of Proof of ownership (if available/documented)",
+          },  
           businessProof: {
             type: "string",
-            title: "Business proof of ownership",
+            title: "Business Details of Proof of ownership (if available/documented)",
+          },
+          residenceRentedPremisedVerificationStatus: {
+            type: "string",
+            title: "Rented premised verification status",
+          },
+          businessRentedPremisedVerificationStatus: {
+            type: "string",
+            title: "Business rented premised verification status",
+          },
+          residenceRent: {
+            type: "string",
+            title: "Residence rent per month (if rented)",
           },
           businessRent: {
             type: "string",
             title: "Business rent per month (if rented)",
           },
+          residenceLocality: {
+            type: "string",
+            title: "Residence locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+          },
           businessLocality: {
             type: "string",
-            title: "Business locality comment",
+            title: "Business locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+          },
+          residenceMortgage: {
+            type: "string",
+            title: "Residence Mortgage (if same is owned) – mention Bank/NBFC name",
           },
           businessMortgage: {
             type: "string",
-            title: "Business mortgage status",
+            title: "Business Mortgage (if same is owned) – mention Bank/NBFC name",
+          },
+          residenceQrCheck: {
+            type: "string",
+            title: "Residence QR code check status",
           },
           businessQrCheck: {
             type: "string",
             title: "Business QR code check status",
           },
+          residenceVisitComment: {
+            type: "string",
+            title: "Residence visit comments / photos reference",
+          },
           businessVisitComment: {
             type: "string",
             title: "Business visit comments / photos reference",
-          },
-          earlierPremiseDetails: {
-            type: "string",
-            title: "Earlier premises details (if stability < 3 years)",
           },
         },
       },
@@ -463,7 +467,7 @@ export const yesBankSchema = {
           },
           downPaymentDone: {
             type: "string",
-            title: "Down payment details (if already done)",
+            title: "Source details of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
           },
           downPaymentAmount: {
             type: "number",
@@ -476,7 +480,7 @@ export const yesBankSchema = {
           },
           downPaymentSource: {
             type: "string",
-            title: "Source of funds for down payment",
+            title: "Source of funds for down payment (Individual savings, sale of another property, other Family members help etc.)",
           },
           purposeOfPurchase: {
             type: "string",
@@ -484,7 +488,7 @@ export const yesBankSchema = {
           },
           distanceFromWork: {
             type: "string",
-            title: "Distance from current business / residence",
+            title: "Distance of the property from current business and residence",
           },
           commutePlan: {
             type: "string",

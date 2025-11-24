@@ -92,7 +92,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
   const thirdPartyChecks = verificationData.thirdPartyChecks || [];
   const incomeAssessment = verificationData.incomeAssessment || {};
   const specificForContractorProfile = verificationData.specificForContractorProfile || {};
-  const levelOfActivity = verificationData.levelOfActivity || {};
+  const levelOfActivity = verificationData?.levelOfActivity || {};
   const mortgageDetails = verificationData.mortgageDetails || {};
   const endUseOfLoan = verificationData.endUseOfLoan || {};
   const assetDetails = verificationData.assetDetails || {};
@@ -105,7 +105,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
   const observations = verificationData.observations || {};
   const pdStatus = verificationData.pdStatus || {};
   const interviewerDetails = verificationData.interviewerDetails || {};
-  const geoTagDetails = verificationData.geoTagDetails || {};
+  const geoTagDetails = verificationData?.geoTagDetails || {};
 
 
   return `
@@ -571,7 +571,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Level of Activity & Stocks along with Observation</td>
-        <td style="${valueCellStyle}">${ensureArray(levelOfActivity?.levelOfActivity)?.map((activity: any) => `${activity.observations}`).join("<br> ")}</td>
+        <td style="${valueCellStyle}"><ul style="margin: 0; padding-left: 20px;">${levelOfActivity?.observations?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("")}</ul></td>
       </tr>
 
       <tr>
@@ -840,7 +840,11 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
         <td style="${labelCellStyle}">Geo Tag Details</td>
         <td style="border:1px solid #ccc;padding:8px">
           <p><strong><u>Enclosed:</u></strong></p>
-          <p>${geoTagDetails?.coordinates}</p>
+          <p>${geoTagDetails?.coordinates 
+            || geoTagDetails?.Coordinates 
+            || verificationData?.geoTagDetails?.coordinates
+            || verificationData?.GeoTagDetails?.coordinates
+            || "Not provided"}</p>
         </td>
       </tr>
     </table>

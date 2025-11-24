@@ -99,17 +99,17 @@ export const indiaShelterSalariedSchema = {
           },
           dependentsChildren: {
             type: "integer",
-            title: "Dependents - Children",
+            title: "No of Dependents - Children",
             minimum: 0,
           },
           dependentsAdults: {
             type: "integer",
-            title: "Dependents - Adults",
+            title: "No of Dependents - Adults",
             minimum: 0,
           },
           dependentsOthers: {
             type: "integer",
-            title: "Dependents - Others",
+            title: "No of Dependents - Others",
             minimum: 0,
           },
         },
@@ -132,7 +132,7 @@ export const indiaShelterSalariedSchema = {
           },
           yearsAtCurrentResidence: {
             type: "number",
-            title: "Years at Current Residence",
+            title: "No of Years at Current Residence",
             minimum: 0,
           },
           areaSqft: {
@@ -178,10 +178,6 @@ export const indiaShelterSalariedSchema = {
               rows: 3,
             },
           },
-          existingRelationshipWithIndiashelter: {
-            type: "string",
-            title: "Existing Relationship with Indiashelter",
-          },
           creditCardDetails: {
             type: "string",
             title: "Credit Card Details",
@@ -199,153 +195,9 @@ export const indiaShelterSalariedSchema = {
               maxDecimalPlaces: 2,
             },
           },
-        },
-      },
-    },
-    {
-      id: "loanPurpose",
-      label: "Loan Purpose & Requirement",
-      schema: {
-        type: "object",
-        properties: {
-          purposes: {
+          existingRelationshipWithIndiashelter: {
             type: "string",
-            title: "Purpose of Loan",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          minimumLoanAmount: {
-            type: "number",
-            title: "Minimum Loan Amount Required (Rs.)",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
-          tenureRequired: {
-            type: "string",
-            title: "Tenure required",
-          },
-          comfortableEmi: {
-            type: "number",
-            title: "Comfortable EMI",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "collateralDetails",
-      label: "Collateral Details",
-      schema: {
-        type: "object",
-        properties: {
-          propertyStatus: {
-            type: "string",
-            title: "Status of Property to be Purchased",
-            enum: [
-              "Ready to Move",
-              "Under Construction",
-              "Construction Yet to Start",
-            ],
-          },
-          usageAfterPurchase: {
-            type: "string",
-            title: "Usage of Property After Purchase",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          propertyAddress: {
-            type: "string",
-            title: "Property Address",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          propertyAreaSqft: {
-            type: "string",
-            title: "Area (in Sqft)",
-          },
-          ownershipDuration: {
-            type: "string",
-            title: "Ownership of the property from how many years?",
-          },
-          agreementValue: {
-            type: "number",
-            title: "Agreement value",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
-          ownContribution: {
-            type: "number",
-            title: "Own Contribution",
-            formatter: {
-              useIndianFormat: true,
-              locale: "en-IN",
-              maxDecimalPlaces: 2,
-            },
-          },
-        },
-      },
-    },
-    {
-      id: "references",
-      label: "Reference Details",
-      schema: {
-        type: "object",
-        properties: {
-          references: {
-            type: "array",
-            minItems: 1,
-            title: "References",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                address: {
-                  type: "string",
-                  title: "Address",
-                  ui: {
-                    widget: "textarea",
-                    rows: 2,
-                  },
-                },
-                relationship: {
-                  type: "string",
-                  title: "Relationship",
-                },
-                contactNumber: {
-                  type: "integer",
-                  title: "Contact Number",
-                },
-                email: {
-                  type: "string",
-                  title: "Email Address",
-                  format: "email",
-                },
-                yearsKnown: {
-                  type: "number",
-                  title: "Years Known",
-                  minimum: 0,
-                },
-              },
-            },
+            title: "Existing Relationship with Indiashelter",
           },
         },
       },
@@ -566,6 +418,154 @@ export const indiaShelterSalariedSchema = {
                 operatingSinceYears: {
                   type: "string",
                   title: "Operating Since (Years)",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "loanPurpose",
+      label: "Loan Details & Purpose",
+      schema: {
+        type: "object",
+        properties: {
+          purposes: {
+            type: "string",
+            title: "Purpose of Loan",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          minimumLoanAmount: {
+            type: "number",
+            title: "Minimum Loan Amount Required (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          tenureRequired: {
+            type: "string",
+            title: "Tenure required",
+          },
+          comfortableEmi: {
+            type: "number",
+            title: "Comfortable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "collateralDetails",
+      label: "Collateral Details",
+      schema: {
+        type: "object",
+        properties: {
+          propertyStatus: {
+            type: "string",
+            title: "Status of Property to be Purchased",
+            enum: [
+              "Ready to Move",
+              "Under Construction",
+              "Construction Yet to Start",
+            ],
+          },
+          usageAfterPurchase: {
+            type: "string",
+            title: "Usage of Property After Purchase",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          propertyAddress: {
+            type: "string",
+            title: "Property Address",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          propertyAreaSqft: {
+            type: "string",
+            title: "Area (in Sqft)",
+          },
+          ownershipDuration: {
+            type: "string",
+            title: "Ownership of the property from how many years?",
+          },
+          agreementValue: {
+            type: "number",
+            title: "Agreement value",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+          ownContribution: {
+            type: "number",
+            title: "Own Contribution",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "references",
+      label: "Reference Details",
+      schema: {
+        type: "object",
+        properties: {
+          references: {
+            type: "array",
+            minItems: 1,
+            title: "References",
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  title: "Name",
+                },
+                address: {
+                  type: "string",
+                  title: "Address",
+                  ui: {
+                    widget: "textarea",
+                    rows: 2,
+                  },
+                },
+                relationship: {
+                  type: "string",
+                  title: "Relationship",
+                },
+                contactNumber: {
+                  type: "integer",
+                  title: "Contact Number",
+                },
+                email: {
+                  type: "string",
+                  title: "Email Address",
+                  format: "email",
+                },
+                yearsKnown: {
+                  type: "number",
+                  title: "Years Known",
+                  minimum: 0,
                 },
               },
             },

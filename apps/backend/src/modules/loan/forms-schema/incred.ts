@@ -206,7 +206,7 @@ export const incredSchema = {
                 title: "Current Period / At Time of PD",
               },
               noOfDays: {
-                type: "integer",
+                type: "number",
                 title:
                   "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
@@ -231,7 +231,7 @@ export const incredSchema = {
                 title: "Current Period / At Time of PD",
               },
               noOfDays: {
-                type: "integer",
+                type: "number",
                 title:
                   "Credit Period allowed by Creditors/Supplies - No. of Days",
               },
@@ -524,6 +524,62 @@ export const incredSchema = {
               widget: "textarea",
               rows: 3,
             },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "estimatedIncome",
+      label: "Estimated Income",
+      schema: {
+        type: "object",
+        properties: {
+          estimatedIncomeDetails: {
+            type: "string",
+            title: "Estimated Income Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          grossSalesAsPerOurAssumptions: {
+            type: "number",
+            title: "Gross Sales as per our assumptions",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          pbditMargin: {
+            type: "string",
+            title: "PBDIT Margin",
+          },
+          patOfTheBusinessConcern: {
+            type: "number",
+            title: "PAT of the Business Concern (Rs.)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "overallPositivesOrNegatives",
+      label: "Overall Positives or Negatives",
+      schema: {
+        type: "object",
+        properties: {
+          overallPositivesOrNegatives: {
+            type: "string",
+            title: "Overall Positives or Negatives",
           },
         },
       },

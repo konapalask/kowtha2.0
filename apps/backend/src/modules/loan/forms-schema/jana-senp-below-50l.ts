@@ -806,19 +806,10 @@ export const janaSenpBelow50lSchema = {
       schema: {
         type: "object",
         properties: {
-          levelOfActivity: {
-            type: "array",
+          observations: {
+            type: "string",
             title: "Level of Activity & Stocks along with Observation",
-            items: {
-              type: "object",
-              properties: {
-                observations: {
-                  type: "string",
-                  title: "Observations",
-                  ui: { widget: "textarea", rows: 3 },
-                },
-              },
-            },
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
@@ -1184,12 +1175,12 @@ export const janaSenpBelow50lSchema = {
       },
     },
     {
-      id: "GeoTagDetails",
+      id: "geoTagDetails",
       label: "Geo Tag Details",
       schema: {
         type: "object",
         properties: {
-          coordinates: { type: "string", title: "Other Observations", readOnly: true },
+          coordinates: { type: "string", title: "Coordinates", readOnly: true },
         },
       },
     },
