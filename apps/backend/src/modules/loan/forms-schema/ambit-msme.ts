@@ -65,25 +65,13 @@ export const ambitMsmeSchema = {
         type: "object",
         properties: {
           initiatedAddress: {
-            type: "object",
-            properties: {
-              address: {
-                type: "string",
-                title: "Address",
-                ui: {
-                  widget: "textarea",
-                  rows: 2,
-                },
-              },
-              latitude: {
-                type: "number",
-                title: "Latitude",
-              },
-              longitude: {
-                type: "number",
-                title: "Longitude",
-              },
+            type: "string",
+            title: "Initiated Address",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
+            readOnly: true,
           },
           visitedAddress: {
             type: "object",
@@ -107,25 +95,13 @@ export const ambitMsmeSchema = {
             },
           },
           businessLicenseAddress: {
-            type: "object",
-            properties: {
-              address: {
-                type: "string",
-                title: "Address",
-                ui: {
-                  widget: "textarea",
-                  rows: 2,
-                },
-              },
-              latitude: {
-                type: "number",
-                title: "Latitude",
-              },
-              longitude: {
-                type: "number",
-                title: "Longitude",
-              },
+            type: "string",
+            title: "Business License Address",
+            ui: {
+              widget: "textarea",
+              rows: 2,
             },
+            readOnly: true,
           },
         },
       },
