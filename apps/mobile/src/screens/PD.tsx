@@ -54,6 +54,7 @@ const FIELD_KEY_MAPPINGS = {
     'proposalNumber',
     'loanAccountNo',
     'applicationReferenceNo',
+    'loanNumber',
   ],
   loanAmount: [
     'loanAmount',
@@ -353,18 +354,28 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
                   } else if (
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.latitude)
                   ) {
-                    // Populate latitude field
+                    // Populate latitude field - check schema type
+                    const fieldSchema = section.schema.properties[fieldKey];
+                    const latitudeValue =
+                      fieldSchema?.type === 'number'
+                        ? latitude
+                        : latitude.toString();
                     updates[section.id] = {
-                      ...prev[section.id],
-                      [fieldKey]: latitude.toString(),
+                      ...(updates[section.id] || prev[section.id] || {}),
+                      [fieldKey]: latitudeValue,
                     };
                   } else if (
                     matchesFieldExact(fieldKey, FIELD_KEY_MAPPINGS.longitude)
                   ) {
-                    // Populate longitude field
+                    // Populate longitude field - check schema type
+                    const fieldSchema = section.schema.properties[fieldKey];
+                    const longitudeValue =
+                      fieldSchema?.type === 'number'
+                        ? longitude
+                        : longitude.toString();
                     updates[section.id] = {
-                      ...prev[section.id],
-                      [fieldKey]: longitude.toString(),
+                      ...(updates[section.id] || prev[section.id] || {}),
+                      [fieldKey]: longitudeValue,
                     };
                   }
                 });

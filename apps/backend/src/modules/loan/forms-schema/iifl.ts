@@ -165,8 +165,8 @@ export const iiflSchema = {
                 name: { type: "string", title: "Name" },
                 relationship: { type: "string", title: "Relationship" },
                 age: { type: "integer", title: "Age" },
-                qualification: { 
-                  type: "string", 
+                qualification: {
+                  type: "string",
                   title: "Qualification",
                   enum: [
                     "Below 10th",
@@ -174,8 +174,8 @@ export const iiflSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
-                  ]
+                    "PG/Professional Certification",
+                  ],
                 },
                 occupation: { type: "string", title: "Occupation" },
               },
@@ -247,7 +247,8 @@ export const iiflSchema = {
         properties: {
           businessVintageDocumentsProvided: {
             type: "string",
-            title: "Business Vintage Documents Provided (Yes/No)",
+            title: "Business Vintage Documents Provided",
+            enum: ["Yes", "No"],
           },
           businessNameBoard: {
             type: "string",
@@ -259,11 +260,13 @@ export const iiflSchema = {
           },
           kachaRecordsProvided: {
             type: "string",
-            title: "Kacha Records Provided (Yes/No)",
+            title: "Kacha Records Provided",
+            enum: ["Yes", "No"],
           },
           upiPaymentsProvided: {
             type: "string",
-            title: "UPI Payments Provided (Yes/No)",
+            title: "UPI Payments Provided",
+            enum: ["Yes", "No"],
           },
           addressMatch: {
             type: "string",

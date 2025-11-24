@@ -44,8 +44,9 @@ export const janaSenpBelow50lSchema = {
                   ],
                 },
                 earningMember: {
-                  type: "boolean",
-                  title: "Earning Member<br>(Yes/No)",
+                  type: "string",
+                  title: "Earning Member",
+                  enum: ["Yes", "No"],
                 },
                 approxIncome: {
                   type: "number",

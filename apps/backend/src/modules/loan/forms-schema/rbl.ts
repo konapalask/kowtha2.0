@@ -186,7 +186,7 @@ export const rblSchema = {
                   type: "string",
                   title: "Occupation",
                 },
-             },
+              },
             },
           },
         },
@@ -662,10 +662,12 @@ export const rblSchema = {
           latitude: {
             type: "number",
             title: "Latitude",
+            readOnly: true,
           },
           longitude: {
             type: "number",
             title: "Longitude",
+            readOnly: true,
           },
         },
       },
