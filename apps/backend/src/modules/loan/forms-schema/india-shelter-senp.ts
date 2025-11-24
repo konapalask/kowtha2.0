@@ -39,6 +39,7 @@ export const indiaShelterSenpSchema = {
           applicantName: {
             type: "string",
             title: "Name of the Applicant",
+            readOnly: true,
           },
           maritalStatus: {
             type: "string",
@@ -49,14 +50,12 @@ export const indiaShelterSenpSchema = {
             type: "string",
             title: "Educational Qualification",
             enum: [
-              "Below 10",
-              "10th Pass",
-              "12th Pass",
-              "Diploma",
-              "ITI Certification",
+              "Below 10th",
+              "10th pass",
+              "12th pass",
+              "Diploma/ITI certification",
               "Graduate",
-              "PG",
-              "Professional Certification",
+              "PG/Professional Certification",
             ],
           },
           category: {
@@ -511,6 +510,7 @@ export const indiaShelterSenpSchema = {
           businessName: {
             type: "string",
             title: "Name of Current Business Firm",
+            readOnly: true,
           },
           businessFirmType: {
             type: "string",
@@ -532,6 +532,7 @@ export const indiaShelterSenpSchema = {
           commencementDate: {
             type: "string",
             title: "Date of commencement of Business",
+            format: "date",
           },
           placeOfIncorporation: {
             type: "string",
@@ -548,6 +549,7 @@ export const indiaShelterSenpSchema = {
               widget: "textarea",
               rows: 2,
             },
+            readOnly: true,
           },
           totalWorkExperienceYears: {
             type: "number",
