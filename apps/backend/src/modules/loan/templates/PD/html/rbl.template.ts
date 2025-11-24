@@ -21,16 +21,17 @@ const subHeadingStyle =
   "font-size:20px;font-weight:bold;margin:14px 0 6px 0;color:#333";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-  const labelCellStyle =
+const labelCellStyle =
   "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
 const valueCellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
-  const headerCellStyle = `${labelCellStyle};font-weight:bold`;
+const headerCellStyle = `${labelCellStyle};font-weight:bold`;
 
 const displayValue = (value: any): string => {
   if (value === null || value === undefined) return "";
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "";
+  if (typeof value === "number")
+    return Number.isFinite(value) ? String(value) : "";
   if (Array.isArray(value)) {
     return value
       .map((entry) => displayValue(entry))
@@ -133,8 +134,8 @@ const renderMultiColumnTable = (
                     const rawValue = column.valueGetter
                       ? column.valueGetter(item)
                       : column.key
-                      ? item?.[column.key]
-                      : undefined;
+                        ? item?.[column.key]
+                        : undefined;
                     const rendered =
                       column.formatter !== undefined
                         ? column.formatter(rawValue, item)
@@ -163,7 +164,9 @@ const ensureArray = (value: any): any[] => {
   return [value];
 };
 
-const combineTextSegments = (segments: Array<{ label?: string; value?: any }>) => {
+const combineTextSegments = (
+  segments: Array<{ label?: string; value?: any }>
+) => {
   return segments
     .map(({ label, value }) => {
       if (!value) return "";
@@ -179,7 +182,8 @@ const hasMeaningfulValue = (value: any): boolean => {
   if (typeof value === "number") return true;
   if (typeof value === "boolean") return true;
   if (typeof value === "string") return value.trim().length > 0;
-  if (Array.isArray(value)) return value.some((entry) => hasMeaningfulValue(entry));
+  if (Array.isArray(value))
+    return value.some((entry) => hasMeaningfulValue(entry));
   if (typeof value === "object") {
     return Object.values(value).some((entry) => hasMeaningfulValue(entry));
   }
@@ -204,8 +208,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const employeeDetails = source.employeeDetails ?? {};
   const tradeReferencesSuppliers = source.tradeReferences?.suppliers ?? [];
   const tradeReferencesCustomers = source.tradeReferences?.customers ?? [];
-  const otherSources =
-    source.otherSourcesOfIncome?.otherSourcesOfIncome ?? [];
+  const otherSources = source.otherSourcesOfIncome?.otherSourcesOfIncome ?? [];
   const loanEntries = source.loansDetails?.loansDetails ?? [];
   const netWorthEntries = source.netWorth?.netWorth ?? [];
   const applicantsMainBankingDetails =
@@ -215,17 +218,17 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     Array.isArray(rawBankingDetails) && rawBankingDetails.length > 0
       ? rawBankingDetails
       : hasAnyField(applicantsMainBankingDetails, [
-          "bankName",
-          "accountHolderName",
-          "accountHoldername",
-          "accountType",
-          "noOfYear",
-          "limitOfCCOD",
-          "limitOfCcOd",
-          "remarks",
-        ])
-      ? [applicantsMainBankingDetails]
-      : [];
+            "bankName",
+            "accountHolderName",
+            "accountHoldername",
+            "accountType",
+            "noOfYear",
+            "limitOfCCOD",
+            "limitOfCcOd",
+            "remarks",
+          ])
+        ? [applicantsMainBankingDetails]
+        : [];
 
   const rawOwnContribution = source.ownContributions;
   const ownContributionEntries =
@@ -233,13 +236,13 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     rawOwnContribution?.ownContributions.length > 0
       ? rawOwnContribution.ownContributions
       : hasAnyField(rawOwnContribution, [
-          "particulars",
-          "Particulars",
-          "remarks",
-          "Remarks",
-        ])
-      ? [rawOwnContribution]
-      : [];
+            "particulars",
+            "Particulars",
+            "remarks",
+            "Remarks",
+          ])
+        ? [rawOwnContribution]
+        : [];
 
   const losId =
     caseDetails.applicationNumber ||
@@ -268,8 +271,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     "";
 
   const amountPurposeText =
-    html_data?.loanDetails?.loanAmount &&
-    html_data?.loanDetails?.purposeOfLoan
+    html_data?.loanDetails?.loanAmount && html_data?.loanDetails?.purposeOfLoan
       ? `He wants Loan amount of ${
           formatCurrency(html_data.loanDetails.loanAmount) ||
           formatMultiline(html_data.loanDetails.loanAmount)
@@ -281,8 +283,14 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const geoCoordinates = source.coordinates || {};
 
   const familySummary = [
-    { label: "<strong>About Applicant:</strong>", value: familyDetails.aboutApplicant },
-    { label: "<strong>About Co-applicant:</strong>", value: familyDetails.aboutCoApplicant },
+    {
+      label: "<strong>About Applicant:</strong>",
+      value: familyDetails.aboutApplicant,
+    },
+    {
+      label: "<strong>About Co-applicant:</strong>",
+      value: familyDetails.aboutCoApplicant,
+    },
     {
       label: "<strong>And their family details:</strong>",
       value: familyDetails.andTheirFamilyDetails,
@@ -293,8 +301,14 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     ownContributionEntries.length > 0
       ? renderMultiColumnTable(
           [
-            { header: "Particulars", valueGetter: (item) => item?.particulars || item?.Particulars },
-            { header: "Remarks", valueGetter: (item) => item?.remarks || item?.Remarks },
+            {
+              header: "Particulars",
+              valueGetter: (item) => item?.particulars || item?.Particulars,
+            },
+            {
+              header: "Remarks",
+              valueGetter: (item) => item?.remarks || item?.Remarks,
+            },
           ],
           ownContributionEntries,
           "No own contribution details provided"
@@ -308,7 +322,8 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
             { header: "Bank Name", valueGetter: (item) => item?.bankName },
             {
               header: "Account Holder name",
-              valueGetter: (item) => item?.accountHolderName || item?.accountHoldername,
+              valueGetter: (item) =>
+                item?.accountHolderName || item?.accountHoldername,
             },
             {
               header: "Account type",
@@ -384,7 +399,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         },
         {
           label: "Contact No",
-          value: meetingDetails.contactNo || caseDetails.contactNo,
+          value: meetingDetails.applicantContactNumber || caseDetails.contactNo,
         },
         {
           label: "Date of Visit",
@@ -407,8 +422,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       )}
 
       ${renderSubHeading("Family Details")}
-      ${familySummary
-        ? `<table style="${tableStyle}">
+      ${
+        familySummary
+          ? `<table style="${tableStyle}">
             <tr>
             <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label}</p></td>
             <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[0].value)}</p></td>
@@ -428,7 +444,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Qualification</p></td>
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Occupation</p></td>
                   </tr>
-                  ${ensureArray(familySummary[2].value).map((item: any) => `
+                  ${ensureArray(familySummary[2].value)
+                    .map(
+                      (item: any) => `
                     <tr>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.name}</p></td>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.relationship}</p></td>
@@ -436,11 +454,14 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.qualification}</p></td>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.occupation}</p></td>
                     </tr>
-                  `).join("")}
+                  `
+                    )
+                    .join("")}
                   </table> 
                 </td>
                 </tr> `
-        : renderSingleColumnTable(["Family details not provided"])}
+          : renderSingleColumnTable(["Family details not provided"])
+      }
 
       ${renderSubHeading("Business Details (Separate for additional business)")}
       ${renderTwoColumnTable([
@@ -458,7 +479,10 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         { label: "Shop Ownership", value: businessDetails.shopOwnership },
         { label: "Godown", value: businessDetails.godownAddress },
         { label: "Godown Ownership", value: businessDetails.godownOwnership },
-        { label: "Nature of Business", value: businessDetails.natureOfBusiness },
+        {
+          label: "Nature of Business",
+          value: businessDetails.natureOfBusiness,
+        },
         {
           label:
             "Product Details (please also comment on Vintage of the product deals by the firm & Future changes if any)",
@@ -535,9 +559,16 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderSubHeading("Loans Details")}
       ${renderMultiColumnTable(
         [
-          { header: "Name of Bank / Institution", key: "nameOfBankInstitution" },
+          {
+            header: "Name of Bank / Institution",
+            key: "nameOfBankInstitution",
+          },
           { header: "Product", key: "product" },
-          { header: "Loan amount", key: "loanAmount", formatter: formatCurrency },
+          {
+            header: "Loan amount",
+            key: "loanAmount",
+            formatter: formatCurrency,
+          },
           { header: "EMI", key: "emi", formatter: formatCurrency },
           {
             header: "POS",
@@ -552,8 +583,10 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       )}
 
       ${renderSubHeading("Applicant's main Banking Details")}
-      ${applicantBankingTable ||
-      renderSingleColumnTable(["Applicant banking details not provided"])}
+      ${
+        applicantBankingTable ||
+        renderSingleColumnTable(["Applicant banking details not provided"])
+      }
       ${
         applicantsMainBankingDetails.endUse
           ? renderParagraph(
@@ -564,11 +597,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
           : ""
       }
 
-      ${
-        amountPurposeText
-          ? renderSingleColumnTable([amountPurposeText])
-          : ""
-      }
+      ${amountPurposeText ? renderSingleColumnTable([amountPurposeText]) : ""}
 
       ${renderSubHeading("Own contribution")}
       ${
@@ -587,7 +616,11 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderMultiColumnTable(
         [
           { header: "Sr. No", key: "srNo" },
-          { header: "Type of property / Other investments like gold , LIC , FC etc.,", key: "typeOfProperty" },
+          {
+            header:
+              "Type of property / Other investments like gold , LIC , FC etc.,",
+            key: "typeOfProperty",
+          },
           { header: "Owner name", key: "ownerName" },
           {
             header: "Approx. Market value",
@@ -629,5 +662,5 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
       ${renderSubHeading("Photographs taken during visit")}
     </div>
     ${pdBaseTemplateFooter(html_data)}
-  `;  
+  `;
 };

@@ -27,6 +27,7 @@ export const smfgSmeSchema = {
             type: "string",
             title: "Applicant Office Address",
             ui: { widget: "textarea", rows: 2 },
+            readonly: true,
           },
           personMetName: {
             type: "string",
@@ -37,7 +38,7 @@ export const smfgSmeSchema = {
             title: "Person Met - Designation",
           },
           personMetMobileNo: {
-            type: "string",
+            type: "integer",
             title: "Person Met - Mobile No",
           },
         },
@@ -121,7 +122,11 @@ export const smfgSmeSchema = {
       schema: {
         type: "object",
         properties: {
-          businessName: { type: "string", title: "Name of Business" },
+          businessName: {
+            type: "string",
+            title: "Name of Business",
+            readOnly: true,
+          },
           natureOfBusiness: { type: "string", title: "Nature of Business" },
           constitution: {
             type: "string",
@@ -182,8 +187,7 @@ export const smfgSmeSchema = {
           },
           salesConcentration: {
             type: "boolean",
-            title:
-              "Whether sales concentration is >50% on one party.",
+            title: "Whether sales concentration is >50% on one party.",
           },
           salesConcentrationPartyName: {
             type: "string",
@@ -263,7 +267,7 @@ export const smfgSmeSchema = {
           nameBoardSeen: {
             type: "string",
             title: "Name Board Seen? What was written",
-          },          
+          },
           premiseType: {
             type: "string",
             title: "Locality of Business / Office",
@@ -275,7 +279,8 @@ export const smfgSmeSchema = {
           },
           taxApplicability: {
             type: "string",
-            title: "Applicability of VAT / Excise / Service Tax and rate of same",
+            title:
+              "Applicability of VAT / Excise / Service Tax and rate of same",
           },
           latestTaxReturn: {
             type: "string",
@@ -292,22 +297,26 @@ export const smfgSmeSchema = {
         properties: {
           entityInvolvementCommercialEtc: {
             type: "string",
-            title: "Is the entity involved in any commercial pest control operation, use any Ozone depleting substance, hazardous chemicals, bio medical waste, Dyes, forest products, tobacco, alcohol, weapons, gambling, radioactive materials, unbounded asbestos, harmful fishing practice, commercial logging.",
+            title:
+              "Is the entity involved in any commercial pest control operation, use any Ozone depleting substance, hazardous chemicals, bio medical waste, Dyes, forest products, tobacco, alcohol, weapons, gambling, radioactive materials, unbounded asbestos, harmful fishing practice, commercial logging.",
             enum: ["Yes", "No"],
           },
           entityInvolvementForceLabourEtc: {
             type: "string",
-            title: "Does the entity involve in Child or forced Labour or business involve displacement of people, impact on indigenous people or established in land designated as forest or forest products",
+            title:
+              "Does the entity involve in Child or forced Labour or business involve displacement of people, impact on indigenous people or established in land designated as forest or forest products",
             enum: ["Yes", "No"],
           },
           entityConsent: {
             type: "string",
-            title: "Does the entity have required consent of establishment from State pollution control board and other government authorities on establishment in Wetland Area, near National Park, Sanctuaries or Forest areas, ASI certificate for establishment up to 300 meters near a protected monument or cultural heritage, 500 meters near Coastal Regulation Zone",
+            title:
+              "Does the entity have required consent of establishment from State pollution control board and other government authorities on establishment in Wetland Area, near National Park, Sanctuaries or Forest areas, ASI certificate for establishment up to 300 meters near a protected monument or cultural heritage, 500 meters near Coastal Regulation Zone",
             enum: ["Yes", "No"],
           },
           entityPollutants: {
             type: "string",
-            title: "Does the entity involves in proper mechanism for treatment or disposal of waste and does not emit air, water or noise pollutants.",
+            title:
+              "Does the entity involves in proper mechanism for treatment or disposal of waste and does not emit air, water or noise pollutants.",
             enum: ["Yes", "No"],
           },
           entityESSGuidelines: {

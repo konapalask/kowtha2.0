@@ -83,10 +83,12 @@ export const idfcHlMlSchema = {
           applicantName: {
             type: "string",
             title: "Name of the Applicant",
+            readOnly: true,
           },
           phoneNumber: {
             type: "integer",
             title: "Phone No. of the Applicant",
+            readOnly: true,
           },
           panNumber: {
             type: "string",
@@ -123,6 +125,16 @@ export const idfcHlMlSchema = {
                 relationship: {
                   type: "string",
                   title: "Relationship",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
                 },
                 age: {
                   type: "string",
@@ -131,20 +143,20 @@ export const idfcHlMlSchema = {
                 qualification: {
                   type: "string",
                   title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
                 },
                 occupation: {
                   type: "string",
                   title: "Occupation",
                 },
               },
-            },
-          },
-          familyDetailsText: {
-            type: "string",
-            title: "Family Details ",
-            ui: {
-              widget: "textarea",
-              rows: 4,
             },
           },
           residenceAddress: {
@@ -434,7 +446,7 @@ export const idfcHlMlSchema = {
                 },
                 rentAgreementAvailable: {
                   type: "string",
-                  title: "Rent agreement available (Y/N)",
+                  title: "Rent agreement available",
                   enum: ["Yes", "No"],
                 },
                 monthlyRent: {
@@ -456,10 +468,12 @@ export const idfcHlMlSchema = {
           loanAmountApplied: {
             type: "string",
             title: "Amount of loan applied",
+            readonly: true,
           },
           purposeOfLoan: {
             type: "string",
-            title: "Purpose of loan (End use)",
+            title: "Purpose of loan",
+            readOnly: true,
           },
           collateralOffered: {
             type: "string",
@@ -540,15 +554,25 @@ export const idfcHlMlSchema = {
       schema: {
         type: "object",
         properties: {
-          detailsCheckedSameOrNot: { type: "string", title: "The details provided in the application form and the details provided by the customer at the time of discussion are same", enum: ["Yes", "No"] },
-          detailsNotSameReason: { type: "string", title: "If NO please provide the details",dependencies: {
-            show: {
-              detailsCheckedSameOrNot: "No",
+          detailsCheckedSameOrNot: {
+            type: "string",
+            title:
+              "The details provided in the application form and the details provided by the customer at the time of discussion are same",
+            enum: ["Yes", "No"],
+          },
+          detailsNotSameReason: {
+            type: "string",
+            title: "If NO please provide the details",
+            dependencies: {
+              show: {
+                detailsCheckedSameOrNot: "No",
+              },
+              required: {
+                detailsCheckedSameOrNot: "No",
+              },
             },
-            required: {
-              detailsCheckedSameOrNot: "No",
-            },
-          }, ui: { widget: "textarea", rows: 3 } },
+            ui: { widget: "textarea", rows: 3 },
+          },
         },
       },
     },

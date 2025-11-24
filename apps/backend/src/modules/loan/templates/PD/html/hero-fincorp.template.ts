@@ -104,7 +104,8 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const basic = verificationData.basicDetails || {};
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
-  const businessProfileData = verificationData.businessProfile?.aboutTheBusiness || {};
+  const businessProfileData =
+    verificationData.businessProfile?.aboutTheBusiness || {};
   const financialSummary = verificationData.financialSummary || {};
   const relationships = verificationData.relationships || {};
   // Handle nested structures for existing loans
@@ -172,7 +173,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     familyRows
   );
 
-  const documentsList = financialSummary.documentsObserved ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary.documentsObserved.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided";
+  const documentsList = financialSummary.documentsObserved
+    ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary.documentsObserved
+        .split("\n")
+        .map((line: string) => line.trim())
+        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+        .join("")}</ul>`
+    : "Not provided";
 
   // Handle nested structures for customers
   const customersData =
@@ -230,11 +237,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ensureArray(loanAnalysis.endUse).map((item: any) => formatMultiline(item))
   );
 
-  const securityList = renderList(
-    ensureArray(loanAnalysis.securityOffered).map((item: any) =>
-      formatMultiline(item)
-    )
-  );
+  const securityList = loanAnalysis.securityOffered
+    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis.securityOffered
+        .split("\n")
+        .map((line: string) => line.trim())
+        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+        .join("")}</ul>`
+    : "Not provided";
 
   const observationList = renderList(
     ensureArray(loanAnalysis.observations).map((item: any) =>
@@ -246,7 +255,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ensureArray(loanAnalysis.concerns).map((item: any) => formatMultiline(item))
   );
 
-  const otherBusinessList = loanAnalysis.otherBusinessIncome ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis.otherBusinessIncome.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided";
+  const otherBusinessList = loanAnalysis.otherBusinessIncome
+    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis.otherBusinessIncome
+        .split("\n")
+        .map((line: string) => line.trim())
+        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+        .join("")}</ul>`
+    : "Not provided";
 
   const statusTable = renderTwoColumnTable([
     ["Status of this case", loanAnalysis.status],
@@ -274,7 +289,17 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${familyTable}
 
       ${sectionTitle("About the Business")}
-      ${businessProfileData ? `<ul style="margin: 0; padding-left: 20px;">${businessProfileData.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}
+      ${
+        businessProfileData
+          ? `<ul style="margin: 0; padding-left: 20px;">${businessProfileData
+              .split("\n")
+              .map((line: string) => line.trim())
+              .map(
+                (line: string) => `<li style="margin-left: 8px;">${line}</li>`
+              )
+              .join("")}</ul>`
+          : "Not provided"
+      }
 
       ${sectionTitle("Financial Summary")}
       ${financialSummaryTable}
