@@ -51,6 +51,7 @@ export const rblSchema = {
           addressVisited: {
             type: "string",
             title: "Address Visited",
+            readOnly: true,
           },
           personMet: {
             type: "string",

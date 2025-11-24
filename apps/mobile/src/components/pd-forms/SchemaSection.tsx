@@ -708,7 +708,14 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                     : item._id || `${fieldId}-${index}`
                 }
                 style={styles.repeaterItem}>
-                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                <View style={styles.repeaterItemHeader}>
+                  <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                  <TouchableOpacity
+                    style={styles.removeButtonInline}
+                    onPress={() => handleRemoveItem(index)}>
+                    <Text style={styles.removeButtonTextInline}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
                 {/* Handle arrays of objects */}
                 {property.items?.properties &&
                   Object.entries(property.items.properties).map(
@@ -849,11 +856,6 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                     }}
                   />
                 )}
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => handleRemoveItem(index)}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
               </View>
             ))}
             <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
@@ -1163,13 +1165,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   repeaterContainer: {
-    marginVertical: 8,
+    marginVertical: 12,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
   },
   repeaterLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   repeaterItem: {
     borderWidth: 1,
@@ -1177,12 +1184,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fafafa',
+  },
+  repeaterItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   repeaterItemLabel: {
     fontSize: 12,
     color: '#666',
-    marginBottom: 8,
     fontWeight: '500',
   },
   schemaErrorBox: {
@@ -1225,6 +1237,19 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: '#fff',
     fontSize: 12,
+    fontWeight: '500',
+  },
+  removeButtonInline: {
+    backgroundColor: '#ff3b30',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeButtonTextInline: {
+    color: '#fff',
+    fontSize: 11,
     fontWeight: '500',
   },
   saveButtonContainer: {

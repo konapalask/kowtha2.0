@@ -47,8 +47,7 @@ export const indiaShelterSenpSchema = {
           },
           educationalQualification: {
             type: "string",
-            title:
-              "Educational Qualification (Below 10 / 10th Pass / 12th Pass / Diploma / ITI Certification / Graduate / PG / Professional Certification)",
+            title: "Educational Qualification",
             enum: [
               "Below 10",
               "10th Pass",
@@ -261,8 +260,13 @@ export const indiaShelterSenpSchema = {
                 },
                 landType: {
                   type: "string",
-                  title:
-                    "Type (Agricultural / Commercial / Residential / Industrial)",
+                  title: "Type",
+                  enum: [
+                    "Agricultural",
+                    "Commercial",
+                    "Residential",
+                    "Industrial",
+                  ],
                 },
                 marketValue: {
                   type: "number",

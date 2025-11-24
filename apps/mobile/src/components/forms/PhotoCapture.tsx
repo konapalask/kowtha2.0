@@ -18,6 +18,20 @@ import {
   MediaType,
   Asset,
 } from 'react-native-image-picker';
+// Safe import for DocumentPicker - handle case where module might not be available
+let DocumentPicker: any = null;
+try {
+  const DocumentPickerModule = require('@react-native-documents/picker');
+  // Handle different export structures
+  if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
+    DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
+  } else if (DocumentPickerModule) {
+    DocumentPicker = DocumentPickerModule;
+  }
+} catch (error) {
+  console.warn('@react-native-documents/picker not available:', error);
+  DocumentPicker = null;
+}
 import RNLocation from 'react-native-get-location';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geocoding from 'react-native-geocoding';
@@ -27,6 +41,8 @@ import {getImageUploadPresignedUrl} from '../../services/field.services';
 import Icons from 'react-native-vector-icons/AntDesign';
 import compress from 'react-native-compressor';
 import dayjs from 'dayjs';
+import Pdf from 'react-native-pdf';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 
 const DEFAULT_MAX_UPLOADS = 20;
 
@@ -43,6 +59,8 @@ const DOCUMENT_TYPES = [
 interface ExtendedUploadedItem extends UploadedItem {
   isOverlayNeeded?: boolean;
   documentType?: string;
+  fileType?: 'photo' | 'pdf' | 'docx';
+  fileName?: string;
 }
 
 type PhotoCaptureProps = {
@@ -351,17 +369,20 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     );
   };
 
-  const uploadImageForDocumentForm = async (
+  const uploadFileForDocumentForm = async (
     formId: string,
-    images: Array<{
+    files: Array<{
       uri: string;
       type: string;
+      name?: string;
+      mimeType?: string;
       locationOrOverlay: {
         latitude?: number;
         longitude?: number;
         isOverlayNeeded: boolean;
       };
       isCamera?: boolean;
+      isDocument?: boolean;
     }>,
   ) => {
     const form = documentForms.find(f => f.id === formId);
@@ -371,31 +392,93 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       setIsUploading(true);
       const newItems: ExtendedUploadedItem[] = [];
 
-      for (const image of images) {
-        // Compress the image before upload
-        const compressedUri = await handleImageCompression(image.uri);
+      for (const file of files) {
+        let fileUri = file.uri;
+        let fileType: 'photo' | 'pdf' | 'docx' = 'photo';
+        let mimeType = 'image/jpeg';
+        let fileExtension = '.jpg';
+        let fileName = '';
+
+        // Determine file type and handle accordingly
+        if (file.isDocument) {
+          // Handle PDF/DOCX documents
+          const originalName = file.name || '';
+          if (originalName.toLowerCase().endsWith('.pdf')) {
+            fileType = 'pdf';
+            mimeType = 'application/pdf';
+            fileExtension = '.pdf';
+            fileName = originalName;
+          } else if (
+            originalName.toLowerCase().endsWith('.docx') ||
+            originalName.toLowerCase().endsWith('.doc')
+          ) {
+            fileType = 'docx';
+            mimeType =
+              file.mimeType ||
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            fileExtension = '.docx';
+            fileName = originalName;
+          } else {
+            // Fallback to PDF if unknown
+            fileType = 'pdf';
+            mimeType = file.mimeType || 'application/pdf';
+            fileExtension = '.pdf';
+            fileName = originalName || 'document.pdf';
+          }
+        } else {
+          // Handle images - compress before upload
+          fileUri = await handleImageCompression(file.uri);
+          fileType = 'photo';
+          mimeType = 'image/jpeg';
+          fileExtension = '.jpg';
+        }
 
         // Generate a unique filename
         const timestamp = new Date().getTime();
-        const fileName = `verification/${loanId}/${timestamp}-${Math.random()
-          .toString(36)
-          .substring(7)}.jpg`;
+        const s3FileName = file.isDocument
+          ? `verification/${loanId}/${timestamp}-${Math.random()
+              .toString(36)
+              .substring(7)}${fileExtension}`
+          : `verification/${loanId}/${timestamp}-${Math.random()
+              .toString(36)
+              .substring(7)}.jpg`;
 
         // Get presigned URL
         const {
           data: {url: presignedUrl},
-        } = await getImageUploadPresignedUrl(fileName, 'image/jpeg');
+        } = await getImageUploadPresignedUrl(s3FileName, mimeType);
 
-        // Convert image to blob
-        const imageResponse = await fetch(compressedUri);
-        const blob = await imageResponse.blob();
+        // Convert file to blob - use ReactNativeBlobUtil for content:// URIs (documents)
+        let blob: Blob;
+        if (
+          file.isDocument &&
+          (fileUri.startsWith('content://') || fileUri.startsWith('file://'))
+        ) {
+          // For documents, use react-native-blob-util to read the file
+          const fileData = await ReactNativeBlobUtil.fs.readFile(
+            fileUri,
+            'base64',
+          );
+          const binaryString = atob(fileData);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          // Create Blob from Uint8Array - bypass TypeScript strict checking
+          // @ts-ignore - Blob constructor accepts Uint8Array at runtime
+          blob = new Blob([bytes], {type: mimeType});
+        } else {
+          // For regular file:// URIs (images), use standard fetch
+          const fileResponse = await fetch(fileUri);
+          blob = await fileResponse.blob();
+        }
 
         // Upload to S3 using PUT request
         const uploadResponse = await fetch(presignedUrl, {
           method: 'PUT',
           body: blob,
           headers: {
-            'Content-Type': 'image/jpeg',
+            'Content-Type': mimeType,
           },
         });
 
@@ -409,47 +492,50 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         // Create new item with S3 URL and document type
         const newItem: ExtendedUploadedItem = {
           id: Date.now().toString() + Math.random().toString(36).substring(2),
-          uri: compressedUri,
-          s3ImageUrl: fileName,
-          type: 'photo',
+          uri: fileUri,
+          s3ImageUrl: s3FileName,
+          type: fileType === 'photo' ? 'photo' : 'document',
           timestamp: new Date().toISOString(),
-          isCamera: image.isCamera || false,
-          isOverlayNeeded: image.locationOrOverlay.isOverlayNeeded,
+          isCamera: file.isCamera || false,
+          isOverlayNeeded: file.locationOrOverlay.isOverlayNeeded,
           documentType: form.documentType,
+          fileType: fileType,
+          fileName: file.isDocument ? fileName : undefined,
         };
 
-        // Add location details if available and valid
-        const lat = image.locationOrOverlay.latitude;
-        const lng = image.locationOrOverlay.longitude;
+        // Add location details if available and valid (only for photos)
+        if (fileType === 'photo') {
+          const lat = file.locationOrOverlay.latitude;
+          const lng = file.locationOrOverlay.longitude;
 
-        // Validate that latitude and longitude are valid numbers (not NaN, not null, not undefined)
-        const isValidLat =
-          lat !== null &&
-          lat !== undefined &&
-          !Number.isNaN(lat) &&
-          Number.isFinite(lat);
-        const isValidLng =
-          lng !== null &&
-          lng !== undefined &&
-          !Number.isNaN(lng) &&
-          Number.isFinite(lng);
+          // Validate that latitude and longitude are valid numbers
+          const isValidLat =
+            lat !== null &&
+            lat !== undefined &&
+            !Number.isNaN(lat) &&
+            Number.isFinite(lat);
+          const isValidLng =
+            lng !== null &&
+            lng !== undefined &&
+            !Number.isNaN(lng) &&
+            Number.isFinite(lng);
 
-        if (isValidLat && isValidLng) {
-          try {
-            const locationDetails = await getLocationDetails(lat, lng);
-            newItem.latitude = lat;
-            newItem.longitude = lng;
-            newItem.locality = locationDetails.locality;
-            newItem.pincode = locationDetails.pincode;
-          } catch (locationError) {
-            console.error('Error getting location details:', locationError);
-            newItem.latitude = lat;
-            newItem.longitude = lng;
-            newItem.locality = 'Unknown';
-            newItem.pincode = 'Unknown';
+          if (isValidLat && isValidLng) {
+            try {
+              const locationDetails = await getLocationDetails(lat, lng);
+              newItem.latitude = lat;
+              newItem.longitude = lng;
+              newItem.locality = locationDetails.locality;
+              newItem.pincode = locationDetails.pincode;
+            } catch (locationError) {
+              console.error('Error getting location details:', locationError);
+              newItem.latitude = lat;
+              newItem.longitude = lng;
+              newItem.locality = 'Unknown';
+              newItem.pincode = 'Unknown';
+            }
           }
         }
-        // If lat/lng are invalid, don't set them at all (they'll be undefined)
         newItems.push(newItem);
       }
 
@@ -466,12 +552,12 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       setUploadedItems(updatedItems);
       onUploadedItemsChange(updatedItems);
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading file:', error);
       Alert.alert(
         'Error',
         error instanceof Error
           ? error.message
-          : 'Failed to upload image. Please try again.',
+          : 'Failed to upload file. Please try again.',
       );
     } finally {
       setIsUploading(false);
@@ -511,12 +597,13 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   {
                     text: 'OK',
                     onPress: () => {
-                      uploadImageForDocumentForm(formId, [
+                      uploadFileForDocumentForm(formId, [
                         {
                           uri: photoUri,
                           type: 'photo',
                           locationOrOverlay: {isOverlayNeeded: false},
                           isCamera: true,
+                          isDocument: false,
                         },
                       ]);
                     },
@@ -532,7 +619,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
             timeout: 15000,
           });
 
-          uploadImageForDocumentForm(formId, [
+          uploadFileForDocumentForm(formId, [
             {
               uri: photoUri,
               type: 'photo',
@@ -542,6 +629,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 isOverlayNeeded: true,
               },
               isCamera: true,
+              isDocument: false,
             },
           ]);
         } catch (error) {
@@ -550,22 +638,24 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
             'Location Error',
             'Failed to get location. Uploading without geotag.',
           );
-          uploadImageForDocumentForm(formId, [
+          uploadFileForDocumentForm(formId, [
             {
               uri: photoUri,
               type: 'photo',
               locationOrOverlay: {isOverlayNeeded: false},
               isCamera: true,
+              isDocument: false,
             },
           ]);
         }
       } else {
-        uploadImageForDocumentForm(formId, [
+        uploadFileForDocumentForm(formId, [
           {
             uri: photoUri,
             type: 'photo',
             locationOrOverlay: {isOverlayNeeded: false},
             isCamera: true,
+            isDocument: false,
           },
         ]);
       }
@@ -592,12 +682,57 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           type: 'photo',
           locationOrOverlay: {isOverlayNeeded: false}, // Gallery images never get overlay
           isCamera: false,
+          isDocument: false,
         }));
-        await uploadImageForDocumentForm(formId, imagesToUpload);
+        await uploadFileForDocumentForm(formId, imagesToUpload);
       }
     } catch (error) {
       console.error('Error selecting photo:', error);
       Alert.alert('Error', 'Failed to select photo');
+    }
+  };
+
+  const handleDocumentPickerForForm = async (formId: string) => {
+    const form = documentForms.find(f => f.id === formId);
+    if (!form) return;
+
+    // Check if DocumentPicker is available
+    if (!DocumentPicker) {
+      Alert.alert(
+        'Document Picker Not Available',
+        '@react-native-documents/picker is not available. Please restart Metro bundler and rebuild the app.',
+      );
+      return;
+    }
+
+    try {
+      const result = await DocumentPicker.pick({
+        type: [
+          DocumentPicker.types.pdf,
+          DocumentPicker.types.docx,
+          DocumentPicker.types.doc,
+        ],
+        allowMultiSelection: true,
+      });
+
+      if (result && result.length > 0) {
+        const documentsToUpload = result.map((doc: any) => ({
+          uri: doc.uri,
+          type: doc.type || '',
+          name: doc.name || '',
+          mimeType: doc.mimeType || '',
+          locationOrOverlay: {isOverlayNeeded: false}, // Documents never get overlay
+          isCamera: false,
+          isDocument: true,
+        }));
+        await uploadFileForDocumentForm(formId, documentsToUpload);
+      }
+    } catch (error: any) {
+      if (DocumentPicker.isCancel && DocumentPicker.isCancel(error)) {
+        // User cancelled the picker
+        return;
+      }
+      console.error('Error selecting document:', error);
     }
   };
 
@@ -807,6 +942,29 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 )}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (isUploading || !DocumentPicker) && styles.buttonDisabled,
+              ]}
+              onPress={() => handleDocumentPickerForForm(form.id)}
+              disabled={isUploading || !DocumentPicker}>
+              <Text style={styles.buttonText}>
+                {isUploading ? (
+                  'Uploading...'
+                ) : (
+                  <Icons
+                    name="filetext1"
+                    size={32}
+                    color={
+                      DocumentPicker
+                        ? colors.button.secondary.text
+                        : colors.text.secondary
+                    }
+                  />
+                )}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {form.uploadedItems.length > 0 && (
@@ -836,24 +994,45 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   <TouchableOpacity
                     style={styles.imageWrapper}
                     onPress={() => openDocumentViewer(item)}>
-                    <Image
-                      source={{uri: item.uri}}
-                      style={styles.image}
-                      resizeMode="contain"
-                      onError={error => {
-                        console.log('Image load error:', error);
-                        console.log('Image URI:', item.uri);
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', item.uri);
-                      }}
-                    />
-                    {!item.uri && (
-                      <View style={styles.imagePlaceholder}>
-                        <Text style={styles.imagePlaceholderText}>
-                          No Image
+                    {item.fileType === 'pdf' || item.fileType === 'docx' ? (
+                      <View style={styles.documentContainer}>
+                        <Icons
+                          name={
+                            item.fileType === 'pdf' ? 'pdffile1' : 'filetext1'
+                          }
+                          size={48}
+                          color={colors.primary}
+                        />
+                        <Text style={styles.documentName} numberOfLines={2}>
+                          {item.fileName ||
+                            `${item.fileType.toUpperCase()} Document`}
+                        </Text>
+                        <Text style={styles.documentType}>
+                          {item.fileType.toUpperCase()}
                         </Text>
                       </View>
+                    ) : (
+                      <>
+                        <Image
+                          source={{uri: item.uri}}
+                          style={styles.image}
+                          resizeMode="contain"
+                          onError={error => {
+                            console.log('Image load error:', error);
+                            console.log('Image URI:', item.uri);
+                          }}
+                          onLoad={() => {
+                            console.log('Image loaded successfully:', item.uri);
+                          }}
+                        />
+                        {!item.uri && (
+                          <View style={styles.imagePlaceholder}>
+                            <Text style={styles.imagePlaceholderText}>
+                              No Image
+                            </Text>
+                          </View>
+                        )}
+                      </>
                     )}
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -883,16 +1062,47 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
           {selectedImage && (
             <View style={styles.viewerContent}>
-              <Image
-                source={{uri: selectedImage.uri}}
-                style={styles.viewerImage}
-                resizeMode="contain"
-              />
+              {selectedImage.fileType === 'pdf' ? (
+                <Pdf
+                  source={{uri: selectedImage.uri, cache: true}}
+                  style={styles.viewerPdf}
+                  onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`Number of pages: ${numberOfPages}`);
+                  }}
+                  onPageChanged={(page, numberOfPages) => {
+                    console.log(`Current page: ${page}`);
+                  }}
+                  onError={error => {
+                    console.log('PDF load error:', error);
+                  }}
+                />
+              ) : selectedImage.fileType === 'docx' ? (
+                <View style={styles.documentPreviewContainer}>
+                  <Icons name="filetext1" size={64} color={colors.primary} />
+                  <Text style={styles.documentPreviewText}>
+                    DOCX files cannot be previewed in-app
+                  </Text>
+                  <Text style={styles.documentPreviewFileName}>
+                    {selectedImage.fileName || 'Document.docx'}
+                  </Text>
+                </View>
+              ) : (
+                <Image
+                  source={{uri: selectedImage.uri}}
+                  style={styles.viewerImage}
+                  resizeMode="contain"
+                />
+              )}
 
               <View style={styles.viewerInfo}>
                 <Text style={styles.viewerDocumentType}>
                   {selectedImage.documentType}
                 </Text>
+                {selectedImage.fileName && (
+                  <Text style={styles.viewerFileName}>
+                    {selectedImage.fileName}
+                  </Text>
+                )}
                 <Text style={styles.viewerTimestamp}>
                   {dayjs(selectedImage.timestamp).format('DD-MM-YYYY HH:mm')}
                 </Text>
@@ -939,6 +1149,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+    gap: 8,
   },
   button: {
     flex: 1,
@@ -946,7 +1157,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 8,
     borderWidth: 1,
     borderColor: colors.button.secondary.borderColor,
   },
@@ -1259,6 +1469,43 @@ const styles = StyleSheet.create({
     height: '70%',
     borderRadius: 8,
   },
+  viewerPdf: {
+    flex: 1,
+    width: '100%',
+    height: '70%',
+    borderRadius: 8,
+  },
+  documentPreviewContainer: {
+    flex: 1,
+    width: '100%',
+    height: '70%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 20,
+  },
+  documentPreviewText: {
+    fontSize: 16,
+    color: colors.text.inverse,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  documentPreviewFileName: {
+    fontSize: 14,
+    color: colors.text.inverse,
+    marginTop: 8,
+    opacity: 0.8,
+    textAlign: 'center',
+  },
+  viewerFileName: {
+    fontSize: 14,
+    color: colors.text.inverse,
+    marginBottom: 8,
+    opacity: 0.9,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
   viewerInfo: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 8,
@@ -1306,6 +1553,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.input.background,
     marginBottom: 16,
     color: colors.text.primary,
+  },
+  documentContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.input.background,
+    padding: 16,
+  },
+  documentName: {
+    fontSize: 12,
+    color: colors.text.primary,
+    fontWeight: '500',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  documentType: {
+    fontSize: 10,
+    color: colors.text.secondary,
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
 

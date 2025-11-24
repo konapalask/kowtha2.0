@@ -30,13 +30,18 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
 };
 
-const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+const renderKeyValue = (
+  label: string,
+  value: any,
+  formatter?: (value: any) => string,
+  options?: { colspan?: number }
+) => {
   const rendered = formatter ? formatter(value) : formatMultiline(value);
   return `
     <tr>
@@ -54,43 +59,48 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
       <tr>
         ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
       </tr>
-      ${rows.map((row) => `
+      ${rows
+        .map(
+          (row) => `
         <tr>
           ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 };
 
 export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
-    const general = verificationData.general || {};
-    const addressDetails = verificationData.addressDetails || {};
-    const initiatedAddress = addressDetails.initiatedAddress || {};
-    const visitedAddress = addressDetails.visitedAddress || {};
-    const businessLicenseAddress = addressDetails.businessLicenseAddress || {};
-    const residentialDetails = verificationData.residentialDetails || {};
-    const propertyDetails = verificationData.propertyDetails || {};
-    const generalInfo = verificationData.generalInfo || {};
-    const applicantDetails = verificationData.applicantDetails || {};
-    const familyDetails = verificationData.familyDetails || {};
-    const businessDetails = verificationData.businessDetails || {};
-    const incomeAssessment = verificationData.incomeAssessment || {};
-    const suppliersDetails = verificationData.suppliersDetails || {};
-    const customersDetails = verificationData.customersDetails || {};
-    const neighbourChecks = verificationData.NeighbourChecks || {};
-    const otherChecks = verificationData.otherChecks || {};
-    const stockMaintained = verificationData.averageStockMaintained || {};
-    const businessOrIncomeDetails = verificationData.businessOrIncomeDetails || {};
-    const assetsDetails = verificationData.assetsDetails || {};
-    const endUseOfLoan = verificationData.endUseOfLoan || {};
-    const loanDetails = verificationData.loanDetails || {};
-    const strengthsAndWeaknesses = verificationData.strenghtsAndWeaknesses || {};
-    const documentsSeen = verificationData.documentsSeen || {};
-    const bankingDetails = verificationData.bankingDetails || {};
-    const otherObservations = verificationData.otherObservations || {};
-    
-    return `
+  const general = verificationData.general || {};
+  const addressDetails = verificationData.addressDetails || {};
+  const initiatedAddress = addressDetails.initiatedAddress || {};
+  const visitedAddress = addressDetails.visitedAddress || {};
+  const businessLicenseAddress = addressDetails.businessLicenseAddress || {};
+  const residentialDetails = verificationData.residentialDetails || {};
+  const propertyDetails = verificationData.propertyDetails || {};
+  const generalInfo = verificationData.generalInfo || {};
+  const applicantDetails = verificationData.applicantDetails || {};
+  const familyDetails = verificationData.familyDetails || {};
+  const businessDetails = verificationData.businessDetails || {};
+  const incomeAssessment = verificationData.incomeAssessment || {};
+  const suppliersDetails = verificationData.suppliersDetails || {};
+  const customersDetails = verificationData.customersDetails || {};
+  const neighbourChecks = verificationData.NeighbourChecks || {};
+  const otherChecks = verificationData.otherChecks || {};
+  const stockMaintained = verificationData.averageStockMaintained || {};
+  const businessOrIncomeDetails =
+    verificationData.businessOrIncomeDetails || {};
+  const assetsDetails = verificationData.assetsDetails || {};
+  const endUseOfLoan = verificationData.endUseOfLoan || {};
+  const loanDetails = verificationData.loanDetails || {};
+  const strengthsAndWeaknesses = verificationData.strenghtsAndWeaknesses || {};
+  const documentsSeen = verificationData.documentsSeen || {};
+  const bankingDetails = verificationData.bankingDetails || {};
+  const otherObservations = verificationData.otherObservations || {};
+
+  return `
     ${pdBaseTemplate(html_data)}
     <div class="template-content ambit-msme-template">
         <h1 style="margin:0 0 16px;color:#1f2a37;font-size:24px; text-align:center">Personal Discussion sheet cum income assessment</h1>
@@ -107,7 +117,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Name of the proprietor as per Business license", general?.nameOfTheProprietor)}
         <tr>
           <td style="${labelCellStyle}">Initiated Address</td>
-          <td style="${valueCellStyle}">${initiatedAddress?.address || ""}${initiatedAddress?.latitude !== undefined && initiatedAddress?.latitude !== null ? `<br>Latitude: ${initiatedAddress.latitude}` : ""}${initiatedAddress?.longitude !== undefined && initiatedAddress?.longitude !== null ? `<br>Longitude: ${initiatedAddress.longitude}` : ""}</td>
+          <td style="${valueCellStyle}">${initiatedAddress}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Visited Address</td>
@@ -115,7 +125,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Business License Address</td>
-          <td style="${valueCellStyle}">${businessLicenseAddress?.address || ""}${businessLicenseAddress?.latitude !== undefined && businessLicenseAddress?.latitude !== null ? `<br>Latitude: ${businessLicenseAddress.latitude}` : ""}${businessLicenseAddress?.longitude !== undefined && businessLicenseAddress?.longitude !== null ? `<br>Longitude: ${businessLicenseAddress.longitude}` : ""}</td>
+          <td style="${valueCellStyle}">${businessLicenseAddress}</td>
         </tr>
         
         <tr>
@@ -123,7 +133,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
           <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
-                <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${residentialDetails.address+", "+residentialDetails.latitude+", "+residentialDetails.longitude}</td>
+                <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${residentialDetails.address + ", " + residentialDetails.latitude + ", " + residentialDetails.longitude}</td>
                 
               </tr>
               <tr>
@@ -150,7 +160,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
-                        <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${propertyDetails.address+", "+propertyDetails.latitude+", "+propertyDetails.longitude}</td>
+                        <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${propertyDetails.address + ", " + propertyDetails.latitude + ", " + propertyDetails.longitude}</td>
                         ${renderKeyValue("Type of Property", propertyDetails.typeOfProperty)}
                         ${renderKeyValue("Property owner name", propertyDetails.ownerName)}
                         ${renderKeyValue("Nature of uses", propertyDetails.natureOfUses)}
@@ -203,7 +213,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}">Income per month (approx.)</td>
                         <td style="${labelCellStyle}">Dependent</td>
                     </tr>
-                ${ensureArray(familyDetails.details).map((family) => `
+                ${ensureArray(familyDetails.details)
+                  .map(
+                    (family) => `
                     <tr>
                         <td style="${valueCellStyle}">${family.name}</td>
                         <td style="${valueCellStyle}">${family.relation}</td>
@@ -213,7 +225,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}">${family.incomePerMonth}</td>
                         <td style="${valueCellStyle}">${family.dependent}</td>
                     </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
                 </table>
                 </td>
             </tr>
@@ -241,14 +255,18 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}">Location</td>
                         <td style="${labelCellStyle}">Feedback</td>
                     </tr>
-                    ${ensureArray(suppliersDetails.suppliersDetails).map((supplier) => `
+                    ${ensureArray(suppliersDetails.suppliersDetails)
+                      .map(
+                        (supplier) => `
                         <tr>
                             <td style="${valueCellStyle}">${supplier.name}</td>
                             <td style="${valueCellStyle}">${supplier.contactNumber}</td>
                             <td style="${valueCellStyle}">${supplier.location}</td>
                             <td style="${valueCellStyle}">${supplier.feedback}</td>
                         </tr>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                     
                     <tr>
                     <td style="${labelCellStyle}" colspan="4">Customer Details:-</td>
@@ -258,14 +276,18 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}">Location</td>
                         <td style="${labelCellStyle}">Feedback</td>
                     </tr>
-                    ${ensureArray(customersDetails.customersDetails).map((customer) => `
+                    ${ensureArray(customersDetails.customersDetails)
+                      .map(
+                        (customer) => `
                         <tr>
                             <td style="${valueCellStyle}">${customer.name}</td>
                             <td style="${valueCellStyle}">${customer.contactNumber}</td>
                             <td style="${valueCellStyle}">${customer.location}</td>
                             <td style="${valueCellStyle}">${customer.feedback}</td>
                         </tr>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
 
                     <tr>
                     <td style="${labelCellStyle}" colspan="4">Neighbour Details:-</td>
@@ -275,14 +297,18 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}">Location</td>
                         <td style="${labelCellStyle}">Feedback</td>
                     </tr>
-                    ${ensureArray(neighbourChecks.neighbourChecks).map((neighbour) => `
+                    ${ensureArray(neighbourChecks.neighbourChecks)
+                      .map(
+                        (neighbour) => `
                         <tr>
                             <td style="${valueCellStyle}">${neighbour.neighbourName}</td>
                             <td style="${valueCellStyle}">${neighbour.contactNumber}</td>
                             <td style="${valueCellStyle}">${neighbour.location}</td>
                             <td style="${valueCellStyle}">${neighbour.feedback}</td>
                         </tr>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                         <tr>
                             <td style="${labelCellStyle}" colspan="4"></td>
                         </tr>
@@ -290,12 +316,16 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}"colspan="2">Other Checks from Neighbour</td>
                         <td style="${labelCellStyle}" colspan="2">Remarks</td>
                     </tr>
-                    ${ensureArray(otherChecks.otherChecks).map((check) => `
+                    ${ensureArray(otherChecks.otherChecks)
+                      .map(
+                        (check) => `
                         <tr>
                             <td style="${valueCellStyle}" colspan="2">${check.otherChecks}</td>
                             <td style="${valueCellStyle}" colspan="2">${check.remarks}</td>
                         </tr>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                     </table>
                 </td>
             </tr>
@@ -325,7 +355,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${labelCellStyle}">Current Status</td>
                         <td style="${labelCellStyle}">Pledge/Free</td>
                     </tr>
-                    ${ensureArray(assetsDetails.assetsDetails).map((asset) => `
+                    ${ensureArray(assetsDetails.assetsDetails)
+                      .map(
+                        (asset) => `
                     <tr>
                         <td style="${valueCellStyle}">${asset.assetType}</td>
                         <td style="${valueCellStyle}">${asset.ownerName}</td>
@@ -333,7 +365,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}">${asset.currentSratus}</td>
                         <td style="${valueCellStyle}">${asset.pledgeOrFree}</td>
                     </tr>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                     </table>
                 </td>
             </tr>
@@ -360,7 +394,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                     <td style="${labelCellStyle}">Tenure</td>
                     <td style="${labelCellStyle}">Emi Clearance Bank Name</td>
                 </tr>
-                ${ensureArray(loanDetails.loanDetails).map((loan) => `
+                ${ensureArray(loanDetails.loanDetails)
+                  .map(
+                    (loan) => `
                     <tr>
                         <td style="${valueCellStyle}">${loan.bankName}</td>
                         <td style="${valueCellStyle}">${loan.typeOfLoan}</td>
@@ -370,7 +406,9 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}">${loan.tenure}</td>
                         <td style="${valueCellStyle}">${loan.emiClearanceBankName}</td>
                     </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
                 </table>
             </td>
         </tr>
@@ -404,14 +442,18 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                     <td style="${labelCellStyle}">Open Since (Year)</td>
                     <td style="${labelCellStyle}">OD/CC Limit</td>
                 </tr>
-                ${ensureArray(bankingDetails.bankingDetails).map((bank) => `
+                ${ensureArray(bankingDetails.bankingDetails)
+                  .map(
+                    (bank) => `
                     <tr>
                         <td style="${valueCellStyle}">${bank.bankName}</td>
                         <td style="${valueCellStyle}">${bank.accountType}</td>
                         <td style="${valueCellStyle}">${bank.openSinceYear}</td>
                         <td style="${valueCellStyle}">${bank.odOrCcLimit}</td>
                     </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
                 </table>
             </td>
         </tr>
