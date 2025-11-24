@@ -143,15 +143,15 @@ export const heroFincorpSchema = {
       label: "About the Business",
       schema: {
         type: "object",
-          properties: {
-            aboutTheBusiness: {
-              type: "string",
-              title: "Detail",
-              ui: {
-                widget: "textarea",
-                rows: 3,
-              },
+        properties: {
+          aboutTheBusiness: {
+            type: "string",
+            title: "Detail",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
+          },
         },
       },
     },
@@ -336,9 +336,9 @@ export const heroFincorpSchema = {
           securityOffered: {
             type: "array",
             title: "Security Offered",
-            items: {
-              type: "string",
-              title: "Security Detail",
+            ui: {
+              widget: "textarea",
+              rows: 3,
             },
           },
           address: {

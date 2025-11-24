@@ -57,9 +57,10 @@ export const rblSchema = {
             type: "string",
             title: "Person Met",
           },
-          contactNo: {
+          applicantContactNumber: {
             type: "integer",
             title: "Contact No",
+            readOnly: true,
           },
           dateOfVisit: {
             type: "string",
