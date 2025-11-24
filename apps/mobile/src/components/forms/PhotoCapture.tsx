@@ -18,9 +18,16 @@ import {
   MediaType,
   Asset,
 } from 'react-native-image-picker';
-let DocumentPicker: any;
+// Safe import for DocumentPicker - handle case where module might not be available
+let DocumentPicker: any = null;
 try {
-  DocumentPicker = require('@react-native-documents/picker');
+  const DocumentPickerModule = require('@react-native-documents/picker');
+  // Handle different export structures
+  if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
+    DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
+  } else if (DocumentPickerModule) {
+    DocumentPicker = DocumentPickerModule;
+  }
 } catch (error) {
   console.warn('@react-native-documents/picker not available:', error);
   DocumentPicker = null;
@@ -35,6 +42,7 @@ import Icons from 'react-native-vector-icons/AntDesign';
 import compress from 'react-native-compressor';
 import dayjs from 'dayjs';
 import Pdf from 'react-native-pdf';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 
 const DEFAULT_MAX_UPLOADS = 20;
 
@@ -440,9 +448,30 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           data: {url: presignedUrl},
         } = await getImageUploadPresignedUrl(s3FileName, mimeType);
 
-        // Convert file to blob
-        const fileResponse = await fetch(fileUri);
-        const blob = await fileResponse.blob();
+        // Convert file to blob - use ReactNativeBlobUtil for content:// URIs (documents)
+        let blob: Blob;
+        if (
+          file.isDocument &&
+          (fileUri.startsWith('content://') || fileUri.startsWith('file://'))
+        ) {
+          // For documents, use react-native-blob-util to read the file
+          const fileData = await ReactNativeBlobUtil.fs.readFile(
+            fileUri,
+            'base64',
+          );
+          const binaryString = atob(fileData);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          // Create Blob from Uint8Array - bypass TypeScript strict checking
+          // @ts-ignore - Blob constructor accepts Uint8Array at runtime
+          blob = new Blob([bytes], {type: mimeType});
+        } else {
+          // For regular file:// URIs (images), use standard fetch
+          const fileResponse = await fetch(fileUri);
+          blob = await fileResponse.blob();
+        }
 
         // Upload to S3 using PUT request
         const uploadResponse = await fetch(presignedUrl, {
@@ -666,6 +695,15 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   const handleDocumentPickerForForm = async (formId: string) => {
     const form = documentForms.find(f => f.id === formId);
     if (!form) return;
+
+    // Check if DocumentPicker is available
+    if (!DocumentPicker) {
+      Alert.alert(
+        'Document Picker Not Available',
+        '@react-native-documents/picker is not available. Please restart Metro bundler and rebuild the app.',
+      );
+      return;
+    }
 
     try {
       const result = await DocumentPicker.pick({
