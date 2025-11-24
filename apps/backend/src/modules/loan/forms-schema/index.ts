@@ -67,6 +67,11 @@ export const bankSchemas: BankSchemaConfig[] = [
     schema: axisFinanceSchema,
     templatesAndFooters: {
       "AXIS FINANCE-HL" : "AXIS FINANCE LIMITED" ,
+      "SAMMAAN" : "Sammaan Finserve Limited" ,
+      "SMFG-ML (MICRO & MASS)" : "SMFG INDIA CREDIT COMPANY LIMITED" ,
+      "SMFG-HL" : "SMFG INDIA HOME FINANCE COMPANY LIMITED" ,
+      "TATA CAPITAL-FSL" : "TATA CAPITAL LIMITED" ,
+      "TATA CAPITAL-HFL" : "TATA CAPITAL HOUSING FINANCE LIMITED" ,
     },
   },
   {
@@ -135,11 +140,6 @@ export const bankSchemas: BankSchemaConfig[] = [
       "NIPUN" : "Nipun Projects and Finance Private Limited" ,
       "PIRAMAL (PD, AIP, LIP)" : "Piramal Finance Limited" ,
       "PNB" : "PNB HOUSING FINANCE LIMITED" ,
-      "SAMMAAN" : "Sammaan Finserve Limited" ,
-      "SMFG-ML (MICRO & MASS)" : "SMFG INDIA CREDIT COMPANY LIMITED" ,
-      "SMFG-HL" : "SMFG INDIA HOME FINANCE COMPANY LIMITED" ,
-      "TATA CAPITAL-FSL" : "TATA CAPITAL LIMITED" ,
-      "TATA CAPITAL-HFL" : "TATA CAPITAL HOUSING FINANCE LIMITED" ,
       "TRUHOME (PD & LIP)" : "TRUHOME FINANCE LIMITED" ,
       "VERITAS" : "VERITAS FINANCE LIMITED" ,
     },
