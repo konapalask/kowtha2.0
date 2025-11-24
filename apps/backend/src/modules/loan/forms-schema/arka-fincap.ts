@@ -64,6 +64,17 @@ export const arkaFincapSchema = {
             type: "string",
             title: "Person Met",
           },
+          loanAmount: {
+            type: "number",
+            title: "Loan Amount",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+            readOnly: true,
+          },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
@@ -143,7 +154,7 @@ export const arkaFincapSchema = {
                     "12th pass",
                     "Diploma/ITI certification",
                     "Graduate",
-                    "PG/Professional Certification"
+                    "PG/Professional Certification",
                   ],
                 },
                 occupation: {
