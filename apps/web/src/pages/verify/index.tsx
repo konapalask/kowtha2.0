@@ -75,7 +75,10 @@ export default function Verify() {
     const fetchLoans = async () => {
       setLoading(true);
       try {
-        const res = await getVerifierLoansApi(currentPage, pageSize);
+        const res = await getVerifierLoansApi(currentPage, pageSize, {
+          applicationNumber: searchApplicationNumber,
+          applicantName: searchApplicantName,
+        });
         // Handle new API response structure: {items: [...], meta: {...}}
         const responseData = res?.data?.data || res?.data || res;
         const items = responseData?.items || responseData?.data || [];
@@ -103,25 +106,7 @@ export default function Verify() {
     };
 
     fetchLoans();
-  }, [currentDepartment, currentPage, pageSize]);
-
-  const filteredLoans = Array.isArray(loans)
-    ? loans.filter((loan) => {
-        // Filter by application number
-        const applicationNumberMatch = !searchApplicationNumber || 
-          (loan?.applicationNumber?.toLowerCase() || "").includes(
-            searchApplicationNumber.toLowerCase()
-          );
-
-        // Filter by applicant name
-        const applicantNameMatch = !searchApplicantName || 
-          (loan?.applicantName?.toLowerCase() || "").includes(
-            searchApplicantName.toLowerCase()
-          );
-
-        return applicationNumberMatch && applicantNameMatch;
-      })
-    : [];
+  }, [currentDepartment, currentPage, pageSize, searchApplicationNumber, searchApplicantName]);
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -316,7 +301,7 @@ export default function Verify() {
           className="striped-table"
           // rowClassName={(_,index)=>index%2===0?"":"striped-row"}
           columns={columns}
-          dataSource={filteredLoans}
+          dataSource={loans}
           rowKey={(record) =>
             record?.id?.toString() ?? Math.random().toString()
           }

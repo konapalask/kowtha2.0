@@ -107,9 +107,25 @@ export const importLoansApi = (file: File) => {
   });
 };
 
-export const getVerifierLoansApi = (page: number = 1, limit: number = 10) => {
+export const getVerifierLoansApi = (
+  page: number = 1,
+  limit: number = 10,
+  filters?: {
+    applicationNumber?: string;
+    applicantName?: string;
+  }
+) => {
+  const params: any = { page, limit };
+
+  if (filters?.applicationNumber && filters.applicationNumber.trim() !== "") {
+    params.applicationNumber = filters.applicationNumber.trim();
+  }
+  if (filters?.applicantName && filters.applicantName.trim() !== "") {
+    params.applicantName = filters.applicantName.trim();
+  }
+  
   return getWithDepartment(`/loans/get-verifier-loans`, {
-    params: { page, limit },
+    params,
   });
 };
 
