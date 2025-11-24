@@ -796,7 +796,11 @@ export class LoanService {
     department: Department,
     role: any,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    filters?: {
+      applicationNumber?: string;
+      applicantName?: string;
+    }
   ): Promise<PaginatedResponse<any>> {
     try {
       const verifier = await this.prisma.user.findUnique({
@@ -810,6 +814,25 @@ export class LoanService {
       const where: Prisma.VerificationWhereInput = {
         department: department,
       };
+
+      const loanFilters: Prisma.LoanWhereInput = {};
+      if (filters?.applicationNumber) {
+        loanFilters.applicationNumber = {
+          contains: filters.applicationNumber,
+          mode: "insensitive",
+        };
+      }
+      if (filters?.applicantName) {
+        loanFilters.applicantName = {
+          contains: filters.applicantName,
+          mode: "insensitive",
+        };
+      }
+      if (Object.keys(loanFilters).length > 0) {
+        where.loan = {
+          is: loanFilters,
+        };
+      }
 
       const userRole = role.find((r: any) => r.department === department);
 
@@ -886,6 +909,7 @@ export class LoanService {
         page: safePage,
         limit: safeLimit,
         count: paginatedLoans.length,
+        filters,
       });
 
       return {
