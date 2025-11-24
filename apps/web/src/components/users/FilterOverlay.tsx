@@ -20,6 +20,7 @@ const roleOptions = [
   { label: 'Operations Executive', value: 'OperationsExecutive' },
   { label: 'Field Executive', value: 'FieldExecutive' },
   { label: 'Verifier', value: 'Verifier' },
+  { label: 'Verification Executive', value: 'VerificationExecutive' },
 ];
 
 interface FilterOverlayProps {
