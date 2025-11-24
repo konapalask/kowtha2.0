@@ -77,6 +77,8 @@ const FIELD_KEY_MAPPINGS = {
     'addressOfFirm',
     'businessPremises',
     'shopAddress',
+    'pdinitiatedAddress',
+    'applicantOfficeAddress',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],

@@ -3,10 +3,10 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
-  const labelCellStyle =
+const labelCellStyle =
   "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
 const valueCellStyle =
-  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5"; 
+  "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
 
 const hasValue = (value: any): boolean => {
@@ -67,7 +67,9 @@ const bulletList = (items: string[]) =>
         .join("")}</ul>`
     : "";
 
-const renderKeyValueTable = (rows: Array<[string, any, ((value: any) => string)?]>) => {
+const renderKeyValueTable = (
+  rows: Array<[string, any, ((value: any) => string)?]>
+) => {
   if (!rows.length) return "";
   return `
     <table style="${tableStyle}">
@@ -156,38 +158,38 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     {};
 
   const financial =
-    verificationData.financialDetails ||
-    verificationData.financial ||
-    {};
+    verificationData.financialDetails || verificationData.financial || {};
 
   const termLoansSection =
     verificationData.termLoans || verificationData.loansAndBankingDetails || {};
 
   const loanDetails =
-    verificationData.loanDetails ||
-    verificationData.loanInformation ||
-    {};
+    verificationData.loanDetails || verificationData.loanInformation || {};
 
   const personalDiscussion =
     verificationData.personalDiscussion ||
     verificationData.personalDiscussionDetails ||
     {};
-  const detailsConfirmation =
-    verificationData.detailsConfirmation ||
-    {};
+  const detailsConfirmation = verificationData.detailsConfirmation || {};
 
-  const familyMembers = ensureArray(personal.familyMembers).map((member: any) => [
-    formatMultiline(member.name || ""),
-    formatMultiline(member.relationship || member.relationshipWithApplicant || ""),
-    formatMultiline(member.age || ""),
-    formatMultiline(member.qualification || ""),
-    formatMultiline(member.occupation || ""),
-  ]);
+  const familyMembers = ensureArray(personal.familyMembers).map(
+    (member: any) => [
+      formatMultiline(member.name || ""),
+      formatMultiline(
+        member.relationship || member.relationshipWithApplicant || ""
+      ),
+      formatMultiline(member.age || ""),
+      formatMultiline(member.qualification || ""),
+      formatMultiline(member.occupation || ""),
+    ]
+  );
 
   const generalTable = renderKeyValueTable([
     [
       "Name of the Applicant",
-      general.nameOfApplicant || general.nameOfTheApplicant || html_data?.loanDetails?.applicantName,
+      general.nameOfApplicant ||
+        general.nameOfTheApplicant ||
+        html_data?.loanDetails?.applicantName,
     ],
     [
       "Name of the Co-Applicant/s",
@@ -200,15 +202,15 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     ["Product", general.product],
     ["Customer Category", general.customerCategory],
     ["Date of Initiation", formatDate(general.dateOfInitiation)],
-    ["Date of Customer Availability", formatDate(general.dateOfCustomerAvailability)],
+    [
+      "Date of Customer Availability",
+      formatDate(general.dateOfCustomerAvailability),
+    ],
     ["Date of PD", formatDate(general.dateOfPd)],
     ["Number of Visits Made", general.numberOfVisitsMade],
     ["Person Met", general.personMet],
     ["Place and Address of Visit", general.placeAndAddressOfVisit],
-    [
-      "Owned/ Rental",
-      general.ownershipStatus || general.ownedRental,
-    ],
+    ["Owned/ Rental", general.ownershipStatus || general.ownedRental],
     [
       "Whether Name Board Seen",
       general.nameBoardSeen || general.whetherNameBoardSeen,
@@ -232,33 +234,33 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Educational Qualification</strong></p>`,
-      content: wrapParagraph(formatMultiline(personal.educationalQualification || "")),
+      content: wrapParagraph(
+        formatMultiline(personal.educationalQualification || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Role in Business</strong></p>`,
       content: wrapParagraph(formatMultiline(personal.roleInBusiness || "")),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>Details of Family Members</strong></p>${bulletList([
-        "Family details – Including dependents",
-        "Family background (Parents and siblings including all dependents)",
-      ])}`,
-      content:
-        (familyMembers.length
-          ? renderInnerTable(
-              [
-                "Name",
-                "Relationship with applicant",
-                "Age",
-                "Qualification",
-                "Occupation (Job/Business)",
-              ],
-              familyMembers
-            )
-          : "") +
-        (hasValue(personal.familyDetailsText)
-          ? wrapParagraph(formatMultiline(personal.familyDetailsText))
-          : ""),
+      instruction: `<p style="${paragraphStyle}"><strong>Details of Family Members</strong></p>${bulletList(
+        [
+          "Family details – Including dependents",
+          "Family background (Parents and siblings including all dependents)",
+        ]
+      )}`,
+      content: familyMembers.length
+        ? renderInnerTable(
+            [
+              "Name",
+              "Relationship with applicant",
+              "Age",
+              "Qualification",
+              "Occupation (Job/Business)",
+            ],
+            familyMembers
+          )
+        : "",
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Residence Address</strong></p>`,
@@ -270,7 +272,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>No. of years in the same address</strong></p>`,
-      content: wrapParagraph(formatMultiline(personal.yearsInSameAddress || "")),
+      content: wrapParagraph(
+        formatMultiline(personal.yearsInSameAddress || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>No of years in the same City</strong></p>`,
@@ -282,7 +286,11 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Name of the co-applicants and relationship</strong></p>`,
-      content: wrapParagraph(formatMultiline(personal.coApplicantRelationship || general.nameOfCoApplicants || "")),
+      content: wrapParagraph(
+        formatMultiline(
+          personal.coApplicantRelationship || general.nameOfCoApplicants || ""
+        )
+      ),
     },
   ];
 
@@ -295,43 +303,63 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Constitution</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.constitution || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.constitution || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Brief on business model and Nature of Business</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.businessModel || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.businessModel || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Year of Incorporation</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.yearOfIncorporation || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.yearOfIncorporation || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Business actively managed by (Self/Others)</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.businessManagedBy || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.businessManagedBy || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Number of years in Business/ Service</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.numberOfYearsInBusiness || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.numberOfYearsInBusiness || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Total Work Experience</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.totalWorkExperience || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.totalWorkExperience || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Business started by Self Or Family Business</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.businessStartedBy || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.businessStartedBy || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Previous Work Experience</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.previousWorkExperience || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.previousWorkExperience || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>If the business entity is a Pvt. Ltd. then Name of the directors and their share holding</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.directorShareholding || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.directorShareholding || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Registered with Shop & Establishment act? if Yes Regn NO</strong></p>`,
-      content: wrapParagraph(formatMultiline(businessDetails.shopEstablishmentRegistration || "")),
+      content: wrapParagraph(
+        formatMultiline(businessDetails.shopEstablishmentRegistration || "")
+      ),
     },
   ];
 
@@ -340,18 +368,27 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   const operationalRows = [
     {
       instruction: `<p style="${paragraphStyle}"><strong>Nature of Business / Line of activity</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.natureOfBusiness || "")),
+      content: wrapParagraph(
+        formatMultiline(operational.natureOfBusiness || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Relevant Experience/ Qualification</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.relevantExperience || "")),
+      content: wrapParagraph(
+        formatMultiline(operational.relevantExperience || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Describe Business Process</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.businessProcess || ""))
+      content: wrapParagraph(
+        formatMultiline(operational.businessProcess || "")
+      ),
     },
-    {instruction: `<p style="${paragraphStyle}"><strong>Activity level at the time of visit</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.activityLevelAtVisit || "")),
+    {
+      instruction: `<p style="${paragraphStyle}"><strong>Activity level at the time of visit</strong></p>`,
+      content: wrapParagraph(
+        formatMultiline(operational.activityLevelAtVisit || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Details of Product</strong></p>`,
@@ -359,7 +396,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Source of Raw Material</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.rawMaterialSource || "")),
+      content: wrapParagraph(
+        formatMultiline(operational.rawMaterialSource || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Names of Customers with contact No.</strong></p>`,
@@ -371,11 +410,15 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Employee Strength and Actual seen at the time of Visit</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.employeeStrength || "")),
+      content: wrapParagraph(
+        formatMultiline(operational.employeeStrength || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Strengths and Weaknesses of Business</strong></p>`,
-      content: wrapParagraph(formatMultiline(operational.businessStrengthsWeaknesses || "")),
+      content: wrapParagraph(
+        formatMultiline(operational.businessStrengthsWeaknesses || "")
+      ),
     },
   ];
 
@@ -391,9 +434,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       [
         "Gross Income per year",
         formatCurrency(
-          financial.grossIncomePerYearActual ||
-            financial.grossIncome ||
-            ""
+          financial.grossIncomePerYearActual || financial.grossIncome || ""
         ),
         formatCurrency(
           financial.grossIncomePerYearEstimated ||
@@ -404,9 +445,7 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       [
         "Net Income per year",
         formatCurrency(
-          financial.netIncomePerYearActual ||
-            financial.netIncome ||
-            ""
+          financial.netIncomePerYearActual || financial.netIncome || ""
         ),
         formatCurrency(
           financial.netIncomePerYearEstimated ||
@@ -447,7 +486,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     ]
   );
 
-  const termLoans = ensureArray(termLoansSection.termLoans || termLoansSection.termLoansDetails).map((loan: any) => [
+  const termLoans = ensureArray(
+    termLoansSection.termLoans || termLoansSection.termLoansDetails
+  ).map((loan: any) => [
     formatMultiline(loan.institution || loan.institutionName || ""),
     formatMultiline(loan.loanType || ""),
     formatMultiline(loan.monthlyEmi || loan.monthlyPrincipal || ""),
@@ -534,19 +575,22 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   const personalDiscussionRows = [
     {
       instruction: `<p style="${paragraphStyle}"><strong>Strengths</strong></p>`,
-      content: wrapParagraph(formatMultiline(personalDiscussion.strengths || "")),
+      content: wrapParagraph(
+        formatMultiline(personalDiscussion.strengths || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Other observation</strong></p>`,
       content:
         (hasValue(personalDiscussion.otherObservation)
           ? wrapParagraph(formatMultiline(personalDiscussion.otherObservation))
-          : "") +
-        wrapParagraph(""),
+          : "") + wrapParagraph(""),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Overall outcome of the Personal Discussion</strong></p>`,
-      content: wrapParagraph(formatMultiline(personalDiscussion.overallOutcome || "")),
+      content: wrapParagraph(
+        formatMultiline(personalDiscussion.overallOutcome || "")
+      ),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Remarks</strong></p>`,
@@ -561,12 +605,22 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     },
   ];
 
-  const personalDiscussionTable = renderInstructionTable(personalDiscussionRows);
+  const personalDiscussionTable = renderInstructionTable(
+    personalDiscussionRows
+  );
 
-  const detailsConfirmationRows =  `<p style="${paragraphStyle}"><strong>The details provided in the application form and the details provided by the customer at the time of discussion are same</strong> - ${detailsConfirmation.detailsCheckedSameOrNot || ""}</p>
-  ${detailsConfirmation.detailsCheckedSameOrNot === "No" ? `<p><strong>Details:</strong> ${detailsConfirmation.detailsNotSameReason.split("\n").map((line: string) => `<p style="margin-left: 8px;">${line}</p>`).join("") || ""}</p>` : ""}
+  const detailsConfirmationRows = `<p style="${paragraphStyle}"><strong>The details provided in the application form and the details provided by the customer at the time of discussion are same</strong> - ${detailsConfirmation.detailsCheckedSameOrNot || ""}</p>
+  ${
+    detailsConfirmation.detailsCheckedSameOrNot === "No"
+      ? `<p><strong>Details:</strong> ${
+          detailsConfirmation.detailsNotSameReason
+            .split("\n")
+            .map((line: string) => `<p style="margin-left: 8px;">${line}</p>`)
+            .join("") || ""
+        }</p>`
+      : ""
+  }
   `;
-
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -594,11 +648,17 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
       ${wrapParagraph("<strong>Other Assets:</strong>")}
       ${wrapParagraph(
-        termLoansSection.otherAssets.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || "-"
+        termLoansSection.otherAssets
+          .split("\n")
+          .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
+          .join("") || "-"
       )}
       ${wrapParagraph("<strong>Other Business if any:</strong>")}
       ${wrapParagraph(
-        termLoansSection.otherBusiness.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || "-"
+        termLoansSection.otherBusiness
+          .split("\n")
+          .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
+          .join("") || "-"
       )}
       ${wrapParagraph("<strong>Rental Income If any:</strong>")}
       ${rentalTable}

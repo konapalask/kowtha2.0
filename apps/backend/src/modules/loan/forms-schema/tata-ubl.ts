@@ -739,7 +739,7 @@ export const tataUblSchema = {
             title: "Person Designation",
           },
           phoneNoOfApplicant: {
-            type: "string",
+            type: "integer",
             title: "Phone No. of Applicant",
           },
           pdDoneBy: {

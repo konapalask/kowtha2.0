@@ -51,14 +51,16 @@ export const rblSchema = {
           addressVisited: {
             type: "string",
             title: "Address Visited",
+            readOnly: true,
           },
           personMet: {
             type: "string",
             title: "Person Met",
           },
-          contactNo: {
+          applicantContactNumber: {
             type: "integer",
             title: "Contact No",
+            readOnly: true,
           },
           dateOfVisit: {
             type: "string",

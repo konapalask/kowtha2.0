@@ -157,7 +157,7 @@ export const axisFinanceSchema = {
         properties: {
           detailedProfileOfTheBusiness: {
             type: "string",
-            title: "Enter details of business",
+            title: "Enter details of company/business",
             ui: {
               widget: "textarea",
               rows: 6,
@@ -564,7 +564,6 @@ export const axisFinanceSchema = {
         },
       },
     },
-
 
     statement2Schema,
   ],

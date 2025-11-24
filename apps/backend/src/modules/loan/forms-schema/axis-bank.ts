@@ -46,10 +46,15 @@ export const axisBankSchema = {
             title: "PD Address Type (Residence/Office/Factory/Godown)",
             enum: ["Residence", "Office", "Factory", "Godown"],
           },
-          applicantAddress: {
+          initiatedAddress: {
             type: "string",
-            title: "Full Address",
+            title: "Initiated Address",
             readOnly: true,
+            ui: { widget: "textarea", rows: 3 },
+          },
+          visitedAddress: {
+            type: "string",
+            title: "Visited Address",
             ui: { widget: "textarea", rows: 3 },
           },
           applicantContactNumber: {
