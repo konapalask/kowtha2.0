@@ -12,6 +12,7 @@ export const indiaShelterSenpSchema = {
           loanNumber: {
             type: "string",
             title: "Loan Number",
+            readOnly: true,
           },
           branch: {
             type: "string",
