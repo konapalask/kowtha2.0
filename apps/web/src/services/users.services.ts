@@ -36,20 +36,25 @@ export const getVerifiersApi = async () => {
 
 export const createUserApi = async (userData: any) => {
   try {
-    // Step 1: Create user without role
+
     const department = userData.defaultDepartment || userData.department;
+    const payload: any = {
+      name: userData.name,
+      mobile: userData.mobile,
+      departmentRoles: userData.departmentRoles,
+      employeeCode: userData.employeeCode,
+      officeId: userData.officeId,
+      status: userData.status || "Active",
+      locality: userData.locality
+    };
+    
+    if (userData.email && userData.email.trim() !== "") {
+      payload.email = userData.email.trim();
+    }
+    
     const createUserResponse = await postWithDepartment(
       "/accounts/users/",
-      {
-        name: userData.name,
-        mobile: userData.mobile,
-        email: userData.email,
-        departmentRoles: userData.departmentRoles,
-        employeeCode: userData.employeeCode,
-        officeId: userData.officeId,
-        status: userData.status || "Active",
-        locality: userData.locality
-      },
+      payload,
       { params: { department } }
     );
 
@@ -86,18 +91,24 @@ export const assignUserRoleApi = async (userId: number, role: string, department
 export const updateUserApi = async (userId: number, userData: any) => {
   // PATCH /accounts/users/{id}/?department=DEPT
   const department = userData.defaultDepartment || userData.department;
+ 
+  const payload: any = {
+    name: userData.name,
+    mobile: userData.mobile,
+    employeeCode: userData.employeeCode,
+    officeId: userData.officeId,
+    status: userData.status,
+    locality: userData.locality,
+    defaultDepartment: userData.defaultDepartment,
+  };
+ 
+  if (userData.email && userData.email.trim() !== "") {
+    payload.email = userData.email.trim();
+  }
+  
   const updateResponse = await patchWithDepartment(
     `/accounts/users/${userId}/`,
-    {
-      name: userData.name,
-      mobile: userData.mobile,
-      email: userData.email,
-      employeeCode: userData.employeeCode,
-      officeId: userData.officeId,
-      status: userData.status,
-      locality: userData.locality,
-      defaultDepartment: userData.defaultDepartment,
-    },
+    payload,
     { params: { department } }
   );
 
