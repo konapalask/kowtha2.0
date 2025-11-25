@@ -1,3 +1,5 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const janaSenpBelow50lSchema = {
   id: 29,
   bankName: "Jana Senp Below 50l",
@@ -1185,7 +1187,7 @@ export const janaSenpBelow50lSchema = {
         },
       },
     },
-
+    financialsSchema,
   ],
 } as const;
 export default janaSenpBelow50lSchema;
