@@ -539,7 +539,8 @@ export class PDTemplateService {
       return axisBankTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("AXIS FINANCE-HL")) {
+    if (matchesTemplate("AXIS FINANCE-HL") || matchesTemplate("SAMMAAN") || matchesTemplate("SMFG-ML (MICRO & MASS)") ||
+        matchesTemplate("SMFG-HL") || matchesTemplate("TATA CAPITAL-FSL") || matchesTemplate("TATA CAPITAL-HFL")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -605,9 +606,7 @@ export class PDTemplateService {
         matchesTemplate("INDUSIND") || matchesTemplate("KOTAK") || matchesTemplate("MUTHOOT-HL") ||
         matchesTemplate("MUTHOOT FINCORP (PD & LIP)") || matchesTemplate("NIDO HOME FINANCE") ||
         matchesTemplate("NORTHERN ARC") || matchesTemplate("NIPUN") || matchesTemplate("PIRAMAL (PD, AIP, LIP)") ||
-        matchesTemplate("PNB") || matchesTemplate("SAMMAAN") || matchesTemplate("SMFG-ML (MICRO & MASS)") ||
-        matchesTemplate("SMFG-HL") || matchesTemplate("TATA CAPITAL-FSL") || matchesTemplate("TATA CAPITAL-HFL") ||
-        matchesTemplate("TRUHOME (PD & LIP)") || matchesTemplate("VERITAS")) {
+        matchesTemplate("PNB") || matchesTemplate("TRUHOME (PD & LIP)") || matchesTemplate("VERITAS")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
