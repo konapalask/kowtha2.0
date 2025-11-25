@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   FlatList,
+  NativeModules,
 } from 'react-native';
 import {
   launchCamera,
@@ -18,6 +19,7 @@ import {
   MediaType,
   Asset,
 } from 'react-native-image-picker';
+const {BuildConfigModule} = NativeModules;
 // Safe import for DocumentPicker - handle case where module might not be available
 let DocumentPicker: any = null;
 try {
@@ -96,6 +98,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
   const [showDocumentViewer, setShowDocumentViewer] = useState(false);
   const [selectedImage, setSelectedImage] =
     useState<ExtendedUploadedItem | null>(null);
+  const [isInternal, setIsInternal] = useState<boolean>(false);
 
   useEffect(() => {
     const initializeGeocoding = async () => {
@@ -109,6 +112,20 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     };
 
     initializeGeocoding();
+  }, []);
+
+  useEffect(() => {
+    // Check if this is an internal build
+    const checkIsInternal = async () => {
+      try {
+        const result = await BuildConfigModule.isInternal();
+        setIsInternal(result === true);
+      } catch (error) {
+        console.error('Error checking isInternal:', error);
+        setIsInternal(false);
+      }
+    };
+    checkIsInternal();
   }, []);
 
   // Sync uploadedItems and reconstruct documentForms when initialItems changes
@@ -975,29 +992,31 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 )}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                (isUploading || !DocumentPicker) && styles.buttonDisabled,
-              ]}
-              onPress={() => handleDocumentPickerForForm(form.id)}
-              disabled={isUploading || !DocumentPicker}>
-              <Text style={styles.buttonText}>
-                {isUploading ? (
-                  'Uploading...'
-                ) : (
-                  <Icons
-                    name="filetext1"
-                    size={32}
-                    color={
-                      DocumentPicker
-                        ? colors.button.secondary.text
-                        : colors.text.secondary
-                    }
-                  />
-                )}
-              </Text>
-            </TouchableOpacity>
+            {isInternal && (
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  (isUploading || !DocumentPicker) && styles.buttonDisabled,
+                ]}
+                onPress={() => handleDocumentPickerForForm(form.id)}
+                disabled={isUploading || !DocumentPicker}>
+                <Text style={styles.buttonText}>
+                  {isUploading ? (
+                    'Uploading...'
+                  ) : (
+                    <Icons
+                      name="filetext1"
+                      size={32}
+                      color={
+                        DocumentPicker
+                          ? colors.button.secondary.text
+                          : colors.text.secondary
+                      }
+                    />
+                  )}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {form.uploadedItems.length > 0 && (

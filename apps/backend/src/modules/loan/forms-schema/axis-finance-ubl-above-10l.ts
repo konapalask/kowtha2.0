@@ -63,9 +63,10 @@ export const axisFinanceUblAbove10lSchema = {
               rows: 3,
             },
           },
-          phoneNumber: {
+          applicantContactNumber: {
             type: "integer",
             title: "Phone No.",
+            readOnly: true,
           },
           appointmentFixed: {
             type: "string",
@@ -77,7 +78,7 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Structure of Loan",
           },
           numberOfVisits: {
-            type: "integer",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
@@ -243,7 +244,7 @@ export const axisFinanceUblAbove10lSchema = {
             ui: {
               widget: "textarea",
               rows: 8,
-              },
+            },
           },
           documentsObserved: {
             type: "array",
@@ -281,15 +282,15 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedSuppliers: {
-            type: "integer",
+            type: "string",
             title: "No of fixed suppliers",
           },
           creditPeriodDays: {
-            type: "integer",
+            type: "string",
             title: "Credit period",
           },
           cashChequeProportion: {
-            type: "number",
+            type: "string",
             title: "Cash - Cheque proportion",
             formatter: {
               maxDecimalPlaces: 2,
@@ -332,15 +333,15 @@ export const axisFinanceUblAbove10lSchema = {
         type: "object",
         properties: {
           numberOfFixedCustomers: {
-            type: "integer",
+            type: "string",
             title: "No of fixed customers",
           },
           creditPeriodDays: {
-            type: "integer",
+            type: "string",
             title: "Credit period",
           },
           cashChequeProportion: {
-            type: "number",
+            type: "string",
             title: "Cash - Cheque proportion",
             formatter: {
               maxDecimalPlaces: 2,

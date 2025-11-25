@@ -30,13 +30,18 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
 };
 
-const renderKeyValue = (label: string, value: any, formatter?: (value: any) => string, options?: { colspan?: number }) => {
+const renderKeyValue = (
+  label: string,
+  value: any,
+  formatter?: (value: any) => string,
+  options?: { colspan?: number }
+) => {
   const rendered = formatter ? formatter(value) : formatMultiline(value);
   return `
     <tr>
@@ -54,35 +59,45 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
       <tr>
         ${headers.map((header) => `<th style="${labelCellStyle}">${header}</th>`).join("")}
       </tr>
-      ${rows.map((row) => `
+      ${rows
+        .map(
+          (row) => `
         <tr>
           ${row.map((cell) => `<td style="${valueCellStyle}">${cell}</td>`).join("")}
         </tr>
-      `).join("")}
+      `
+        )
+        .join("")}
     </table>
   `;
 };
 
 export const incredTemplate = (verificationData: any, html_data: any) => {
-
-    const general = verificationData.general || {};
-    const applicantAndBusinessDetails = verificationData.applicantAndBusinessDetails || {};
-    const asPerAssessment = verificationData.asPerAssessment || {};
-    const noOfEmployees = verificationData.noOfEmployees || {};
-    const debtorsCreditorsStock = verificationData.debtorsCreditorsStock || {};
-    const capitalInvestmentTillDate = verificationData.capitalInvestmentTillDate || {};
-    const documentsObserved = verificationData.documentsObserved || {};
-    const familyMembers = verificationData.personalDetailsFamilyBackground?.familyMembers || [];
-    const noOfDependents = verificationData.noOfDependents || {};
-    const residenceOfficeCollateralDetails = verificationData.residenceOfficeCollateralDetails || {};
-    const liabilities = verificationData.otherLiabilitiesLoansApplicantCoApplicants?.details || [];
-    const chitFundetc = verificationData.chitFundetc || {};
-    const assets = verificationData.otherAssets || {};
-    const otherSourcesOfIncome = verificationData.otherSourcesOfIncome || {};
-    const references = verificationData.references?.details || [];
-    const observationsRemarksDuringPd = verificationData.observationsRemarksDuringPd || {};
-    const estimatedIncome = verificationData.estimatedIncome || {};
-    const overallPositivesOrNegatives = verificationData.overallPositivesOrNegatives || {};
+  const general = verificationData.general || {};
+  const applicantAndBusinessDetails =
+    verificationData.applicantAndBusinessDetails || {};
+  const asPerAssessment = verificationData.asPerAssessment || {};
+  const noOfEmployees = verificationData.noOfEmployees || {};
+  const debtorsCreditorsStock = verificationData.debtorsCreditorsStock || {};
+  const capitalInvestmentTillDate =
+    verificationData.capitalInvestmentTillDate || {};
+  const documentsObserved = verificationData.documentsObserved || {};
+  const familyMembers =
+    verificationData.personalDetailsFamilyBackground?.familyMembers || [];
+  const noOfDependents = verificationData.noOfDependents || {};
+  const residenceOfficeCollateralDetails =
+    verificationData.residenceOfficeCollateralDetails || {};
+  const liabilities =
+    verificationData.otherLiabilitiesLoansApplicantCoApplicants?.details || [];
+  const chitFundetc = verificationData.chitFundetc || {};
+  const assets = verificationData.otherAssets || {};
+  const otherSourcesOfIncome = verificationData.otherSourcesOfIncome || {};
+  const references = verificationData.references?.details || [];
+  const observationsRemarksDuringPd =
+    verificationData.observationsRemarksDuringPd || {};
+  const estimatedIncome = verificationData.estimatedIncome || {};
+  const overallPositivesOrNegatives =
+    verificationData.overallPositivesOrNegatives || {};
 
   return `
     ${pdBaseTemplate(html_data)}
@@ -96,7 +111,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Person Meet/owner of the business with Contact No", general.personMeetOwnerOfTheBusinessWithContactNo)}
         ${renderKeyValue("Date & time of Visit", general.dateTimeOfVisit)}
         ${renderKeyValue("PD Done by with Designation", general.pdDoneByWithDesignation)}
-        ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtAppliedAndPurpose)}
+        ${renderKeyValue("Loan Amt. Applied and Purpose", general.loanAmtApplied + " - " + general.purposeOfLoan)}
 
         ${renderKeyValue("About the Applicant/Business", formatMultiline(applicantAndBusinessDetails.aboutTheApplicantOrBusiness))}
         ${renderKeyValue("About the Co-Applicant", formatMultiline(applicantAndBusinessDetails.aboutTheCoApplicant))}
@@ -181,7 +196,9 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Qualification</td>
             <td style="${labelCellStyle}">Occupation</td>
         </tr>
-        ${familyMembers?.map((member) => `
+        ${familyMembers
+          ?.map(
+            (member) => `
             <tr>
                 <td style="${valueCellStyle}">${member.name || ""}</td>
                 <td style="${valueCellStyle}">${member.relation || ""}</td>
@@ -189,7 +206,9 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                 <td style="${valueCellStyle}">${member.qualification || ""}</td>
                 <td style="${valueCellStyle}">${member.occupation || ""}</td>
             </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
 
         ${renderKeyValue("No. of Dependents", noOfDependents.noOfDependents, undefined, { colspan: 5 })}
         ${renderKeyValue("General Lifestyle/Personality", noOfDependents.generalLifestylePersonality, undefined, { colspan: 5 })}
@@ -212,7 +231,9 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">EMI</td>
             <td style="${labelCellStyle}">Will Close / Continue</td>
         </tr>
-        ${liabilities.map((liability) => `
+        ${liabilities
+          .map(
+            (liability) => `
             <tr>
                 <td style="${valueCellStyle}">${liability.financier}</td>
                 <td style="${valueCellStyle}">${liability.natureOfLoan}</td>
@@ -220,7 +241,9 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
                 <td style="${valueCellStyle}">${formatCurrency(liability.emi)}</td>
                 <td style="${valueCellStyle}">${liability.willCloseContinue}</td>
             </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
         <tr>
             ${renderKeyValue("Chit fund, Private Finance and Hand loans etc", chitFundetc.chitFundetc, undefined, { colspan: 5 })}
         </tr>
@@ -239,13 +262,17 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
             <td style="${labelCellStyle}">Telephone No. / Address for Communication</td>
             <td style="${labelCellStyle}">Supplier / Buyer / Market Reference</td>
         </tr>
-        ${references?.map((reference) => `
+        ${references
+          ?.map(
+            (reference) => `
             <tr>
                 <td style="${valueCellStyle}">${reference.nameOfThePerson}</td>
                 <td style="${valueCellStyle}">${reference.telephoneNoAddressForCommunication}</td>
                 <td style="${valueCellStyle}">${reference.supplierOrBuyerOrMarketReference}</td>
             </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
       </table>
 
       <table style="${tableStyle}">

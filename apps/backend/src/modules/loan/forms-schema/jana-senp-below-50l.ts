@@ -355,7 +355,8 @@ export const janaSenpBelow50lSchema = {
         properties: {
           didPdAgentMetTheEmployer: {
             type: "string",
-            title: "Did the PD agent met the employer? (Y/N)",
+            title: "Did the PD agent met the employer?",
+            enum: ["Yes", "No"],
           },
           employerName: { type: "string", title: "Name of the employer" },
           mobileNumberOfEmployer: {
@@ -365,12 +366,14 @@ export const janaSenpBelow50lSchema = {
 
           employerMaintainAttendanceSheet: {
             type: "string",
-            title: "Does Employer maintain attendance sheet (Y/N)",
+            title: "Does Employer maintain attendance sheet",
+            enum: ["Yes", "No"],
           },
           nameOfBorrowerReflectingInAttendance: {
             type: "string",
             title:
-              "f yes, is the name of the borrower reflecting in the attendance register (Y/N)",
+              "f yes, is the name of the borrower reflecting in the attendance register",
+            enum: ["Yes", "No"],
           },
           howManyMonthsReflectingInAttendance: {
             type: "string",
@@ -425,7 +428,8 @@ export const janaSenpBelow50lSchema = {
           proofOfSalaryMaintenance: {
             type: "string",
             title:
-              "Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower (Y/N) If yes, verify the salary paid to the borrower and capture photos in the PD report",
+              "Does the employer maintain any salary register or any salary paid receipt/voucher or any other documentary proof for salary being paid to the borrower If yes, verify the salary paid to the borrower and capture photos in the PD report",
+            enum: ["Yes", "No"],
           },
 
           salaryReferenceCheckInSameFirm: {
@@ -455,7 +459,8 @@ export const janaSenpBelow50lSchema = {
           },
           employeHasGSTNumber: {
             type: "string",
-            title: "Does the employer has GST number? (Y/N)",
+            title: "Does the employer has GST number?",
+            enum: ["Yes", "No"],
           },
           gstNumber: {
             type: "string",

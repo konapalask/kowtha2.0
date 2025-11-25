@@ -484,7 +484,7 @@ export const axisBankSchema = {
           },
           anyChequeBounces: {
             type: "string",
-            title: "Banking performance- Any cheque bounces seen (Y/N)",
+            title: "Banking performance- Any cheque bounces seen ",
             enum: ["Yes", "No"],
           },
           addressOfProperty: {

@@ -448,6 +448,7 @@ export const indiaShelterSalariedSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           tenureRequired: {
             type: "string",

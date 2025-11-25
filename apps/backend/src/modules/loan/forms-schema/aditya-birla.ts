@@ -190,10 +190,9 @@ export const adityaBirlaSchema = {
         properties: {
           applicantSummary: { type: "string", title: "Applicant summary" },
           nativePlace: { type: "string", title: "Native Place" },
-          businessName: {
+          businessSince: {
             type: "string",
-            title: "Business name",
-            readOnly: true,
+            title: "Business since",
           },
           previousExperience: { type: "string", title: "Previous experience" },
           businessPremises: {
@@ -342,37 +341,58 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          details:{
+          details: {
             type: "array",
             title: "Details",
             items: {
               type: "object",
               properties: {
                 particulars: { type: "string", title: "Particulars" },
-                units: { type: "string", title: "Units"},
-                charge: { type: "string", title: "Charge"},
-                total: { type: "number", title: "Total",formatter: {useIndianFormat: true,locale: "en-IN",maxDecimalPlaces: 2,minDecimalPlaces: 0,}},
+                units: { type: "string", title: "Units" },
+                charge: { type: "string", title: "Charge" },
+                total: {
+                  type: "number",
+                  title: "Total",
+                  formatter: {
+                    useIndianFormat: true,
+                    locale: "en-IN",
+                    maxDecimalPlaces: 2,
+                    minDecimalPlaces: 0,
+                  },
+                },
               },
             },
           },
-          dailyGrossIncome: { type: "number", title: "Daily Gross Income (Total)",formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          }, },
-          labourAndMaterialEveryday: { type: "number", title: "Labour & Material (Total)",formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          }, },
-          netIncomePerDay: { type: "number", title: "Net Income/Day (Total)",formatter: {
-            useIndianFormat: true,
-            locale: "en-IN",
-            maxDecimalPlaces: 2,
-            minDecimalPlaces: 0,
-          }, },
+          dailyGrossIncome: {
+            type: "number",
+            title: "Daily Gross Income (Total)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          labourAndMaterialEveryday: {
+            type: "number",
+            title: "Labour & Material (Total)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netIncomePerDay: {
+            type: "number",
+            title: "Net Income/Day (Total)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
         },
       },
     },
@@ -382,61 +402,97 @@ export const adityaBirlaSchema = {
       schema: {
         type: "object",
         properties: {
-          salesDetails: { type: "number", title: "Sales",formatter: {
+          salesDetails: {
+            type: "number",
+            title: "Sales",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-          purchaseDetails: { type: "number", title: "Purchase",formatter: {
+            },
+          },
+          purchaseDetails: {
+            type: "number",
+            title: "Purchase",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            rentDetails: { type: "number", title: "Rent",formatter: {
+            },
+          },
+          rentDetails: {
+            type: "number",
+            title: "Rent",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            salaryAndWagesDetails: { type: "number", title: "Salary and Wages",formatter: {
+            },
+          },
+          salaryAndWagesDetails: {
+            type: "number",
+            title: "Salary and Wages",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            transportDetails: { type: "number", title: "Transport Charges",formatter: {
+            },
+          },
+          transportDetails: {
+            type: "number",
+            title: "Transport Charges",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            electricityDetails: { type: "number", title: "Electricity Bill",formatter: {
+            },
+          },
+          electricityDetails: {
+            type: "number",
+            title: "Electricity Bill",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            otherExpensesDetails: { type: "number", title: "Other Expenses",formatter: {
+            },
+          },
+          otherExpensesDetails: {
+            type: "number",
+            title: "Other Expenses",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            totalExpenses: { type: "number", title: "Total Expenses",formatter: {
+            },
+          },
+          totalExpenses: {
+            type: "number",
+            title: "Total Expenses",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            netProfit: { type: "number", title: "Net Profit",formatter: {
+            },
+          },
+          netProfit: {
+            type: "number",
+            title: "Net Profit",
+            formatter: {
               useIndianFormat: true,
               locale: "en-IN",
               maxDecimalPlaces: 2,
               minDecimalPlaces: 0,
-            }, },
-            netMargin: { type: "number", title: "Net Margin"},
+            },
+          },
+          netMargin: { type: "number", title: "Net Margin" },
         },
       },
     },
