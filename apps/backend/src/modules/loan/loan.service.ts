@@ -53,17 +53,17 @@ export class LoanService {
     private loggingService: LoggingService,
     private logger: Logger,
     private s3Service: S3Service
-  ) { }
+  ) {}
 
   // Lazy loading to avoid circular dependencies
   private async getFinancialAnalysisTemplatesService() {
     if (!this.financialAnalysisTemplatesService) {
-      const { FinancialAnalysisTemplatesService } = await import('./financial-analysis.service');
-
-      this.financialAnalysisTemplatesService = new FinancialAnalysisTemplatesService(
-        this.prisma,
-        this.loggingService
+      const { FinancialAnalysisTemplatesService } = await import(
+        "./financial-analysis.service"
       );
+
+      this.financialAnalysisTemplatesService =
+        new FinancialAnalysisTemplatesService(this.prisma, this.loggingService);
     }
     return this.financialAnalysisTemplatesService;
   }
@@ -1410,20 +1410,27 @@ export class LoanService {
           "Verification not found or not assigned to this field executive"
         );
       }
-      // Process all images in verificationData if it exists
+      // Process only photos (not documents) in verificationData if it exists
+      // Documents (PDFs/DOCX) don't need geotag overlay processing
       if (verificationData?.uploadedItems) {
-        await Promise.all(
-          verificationData.uploadedItems.map((item: any) =>
-            limit(() =>
-              this.runWorker({
-                s3ImageUrl: item.s3ImageUrl,
-                latitude: parseFloat(item.latitude),
-                longitude: parseFloat(item.longitude),
-                timestamp: item.timestamp,
-              })
-            )
-          )
+        const photoItems = verificationData.uploadedItems.filter(
+          (item: any) => item.type === "photo" || !item.type || !item.fileType
         );
+
+        if (photoItems.length > 0) {
+          await Promise.all(
+            photoItems.map((item: any) =>
+              limit(() =>
+                this.runWorker({
+                  s3ImageUrl: item.s3ImageUrl,
+                  latitude: parseFloat(item.latitude),
+                  longitude: parseFloat(item.longitude),
+                  timestamp: item.timestamp,
+                })
+              )
+            )
+          );
+        }
       }
 
       // Update verification status
@@ -1984,7 +1991,7 @@ export class LoanService {
         );
         throw new NotFoundException("Verification not found");
       }
-      
+
       const updatedVerification = await this.prisma.verification.update({
         where: {
           id: verification.id,
@@ -2991,7 +2998,10 @@ export class LoanService {
     }
   }
 
-  async exportFinancialAnalysisToExcel(loanId: number, bankName?: string): Promise<Buffer> {
+  async exportFinancialAnalysisToExcel(
+    loanId: number,
+    bankName?: string
+  ): Promise<Buffer> {
     try {
       // If no bankName provided, fetch it from the loan
       if (!bankName) {
@@ -3000,17 +3010,21 @@ export class LoanService {
           select: { templateName: true },
         });
         if (!loan) {
-          throw new NotFoundException('Loan not found');
+          throw new NotFoundException("Loan not found");
         }
         bankName = loan.templateName;
       }
 
-      const templatesService = await this.getFinancialAnalysisTemplatesService();
+      const templatesService =
+        await this.getFinancialAnalysisTemplatesService();
 
-      return await templatesService.exportFinancialAnalysisToExcel(loanId, bankName);
+      return await templatesService.exportFinancialAnalysisToExcel(
+        loanId,
+        bankName
+      );
     } catch (error) {
       await this.loggingService.error(
-        'Failed to export financial analysis to Excel',
+        "Failed to export financial analysis to Excel",
         {
           loanId,
           bankName,
