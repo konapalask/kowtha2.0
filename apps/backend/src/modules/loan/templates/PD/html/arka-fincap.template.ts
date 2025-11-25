@@ -658,7 +658,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount and Purpose of Loan</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${combinedAmountPurpose || getValue(applicantDetails.amountAndPurposeOfLoan, verificationData.amountAndPurposeOfLoan)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount:</strong> ${formatCurrency(applicantDetails?.loanAmount)} <br> <strong>Purpose:</strong> ${combinedAmountPurpose || getValue(applicantDetails.amountAndPurposeOfLoan, verificationData.amountAndPurposeOfLoan)}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>

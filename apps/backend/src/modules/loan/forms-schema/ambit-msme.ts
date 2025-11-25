@@ -1,3 +1,5 @@
+import financialsSchema from "../financials-schema/generic";
+
 export const ambitMsmeSchema = {
   id: 27,
   bankName: "Ambit-MSME",
@@ -762,6 +764,7 @@ export const ambitMsmeSchema = {
         },
       },
     },
+    financialsSchema,
   ],
 } as const;
 
