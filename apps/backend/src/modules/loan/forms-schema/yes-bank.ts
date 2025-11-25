@@ -12,6 +12,7 @@ export const yesBankSchema = {
           mainApplicantName: {
             type: "string",
             title: "Name of the Main applicant",
+            readOnly: true,
           },
           relationWithApplicant: {
             type: "string",
@@ -21,10 +22,12 @@ export const yesBankSchema = {
             type: "string",
             title: "Address of the visit with landmark",
             ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
           },
           casId: {
             type: "string",
             title: "CAS ID",
+            readOnly: true,
           },
           product: {
             type: "string",
@@ -53,6 +56,7 @@ export const yesBankSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           tenorRequired: {
             type: "string",
@@ -110,6 +114,7 @@ export const yesBankSchema = {
           businessName: {
             type: "string",
             title: "Name of the Business / Employment",
+            readOnly: true,
           },
           businessConstitution: {
             type: "string",
