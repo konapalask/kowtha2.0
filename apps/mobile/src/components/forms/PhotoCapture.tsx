@@ -373,6 +373,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     formId: string,
     files: Array<{
       uri: string;
+      originalUri?: string; // Original content:// URI for upload
       type: string;
       name?: string;
       mimeType?: string;
@@ -393,7 +394,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       const newItems: ExtendedUploadedItem[] = [];
 
       for (const file of files) {
-        let fileUri = file.uri;
+        // Use originalUri for upload (content://) if available, otherwise use uri
+        let fileUri = file.originalUri || file.uri;
         let fileType: 'photo' | 'pdf' | 'docx' = 'photo';
         let mimeType = 'image/jpeg';
         let fileExtension = '.jpg';
@@ -448,51 +450,56 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           data: {url: presignedUrl},
         } = await getImageUploadPresignedUrl(s3FileName, mimeType);
 
-        // Convert file to blob - use ReactNativeBlobUtil for content:// URIs (documents)
-        let blob: Blob;
+        // Upload file - use ReactNativeBlobUtil for content:// URIs (documents)
+        let uploadResponse: any;
         if (
           file.isDocument &&
           (fileUri.startsWith('content://') || fileUri.startsWith('file://'))
         ) {
-          // For documents, use react-native-blob-util to read the file
-          const fileData = await ReactNativeBlobUtil.fs.readFile(
-            fileUri,
-            'base64',
+          // For documents, use react-native-blob-util to upload directly
+          // Read file and upload using ReactNativeBlobUtil.fetch with file URI
+          uploadResponse = await ReactNativeBlobUtil.fetch(
+            'PUT',
+            presignedUrl,
+            {
+              'Content-Type': mimeType,
+            },
+            fileUri, // Pass file URI directly - ReactNativeBlobUtil handles it
           );
-          const binaryString = atob(fileData);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          // Create Blob from Uint8Array - bypass TypeScript strict checking
-          // @ts-ignore - Blob constructor accepts Uint8Array at runtime
-          blob = new Blob([bytes], {type: mimeType});
         } else {
-          // For regular file:// URIs (images), use standard fetch
+          // For regular file:// URIs (images), use standard fetch with blob
           const fileResponse = await fetch(fileUri);
-          blob = await fileResponse.blob();
+          const blob = await fileResponse.blob();
+          uploadResponse = await fetch(presignedUrl, {
+            method: 'PUT',
+            body: blob,
+            headers: {
+              'Content-Type': mimeType,
+            },
+          });
         }
 
-        // Upload to S3 using PUT request
-        const uploadResponse = await fetch(presignedUrl, {
-          method: 'PUT',
-          body: blob,
-          headers: {
-            'Content-Type': mimeType,
-          },
-        });
+        // Check response status - handle both fetch and ReactNativeBlobUtil responses
+        const status = uploadResponse.status || uploadResponse.info()?.status;
+        const isOk =
+          uploadResponse.ok !== undefined
+            ? uploadResponse.ok
+            : status >= 200 && status < 300;
 
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
+        if (!isOk) {
+          const errorText = uploadResponse.text
+            ? await uploadResponse.text()
+            : uploadResponse.respInfo?.bodyString || 'Upload failed';
           throw new Error(
-            `Upload failed with status: ${uploadResponse.status}, message: ${errorText}`,
+            `Upload failed with status: ${status}, message: ${errorText}`,
           );
         }
 
         // Create new item with S3 URL and document type
+        // Use accessible URI (file://) for preview, not the content:// URI
         const newItem: ExtendedUploadedItem = {
           id: Date.now().toString() + Math.random().toString(36).substring(2),
-          uri: fileUri,
+          uri: file.uri, // Use accessible URI (file://) for preview
           s3ImageUrl: s3FileName,
           type: fileType === 'photo' ? 'photo' : 'document',
           timestamp: new Date().toISOString(),
@@ -716,15 +723,41 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       });
 
       if (result && result.length > 0) {
-        const documentsToUpload = result.map((doc: any) => ({
-          uri: doc.uri,
-          type: doc.type || '',
-          name: doc.name || '',
-          mimeType: doc.mimeType || '',
-          locationOrOverlay: {isOverlayNeeded: false}, // Documents never get overlay
-          isCamera: false,
-          isDocument: true,
-        }));
+        // Copy documents to temporary location for preview access
+        const documentsToUpload = await Promise.all(
+          result.map(async (doc: any) => {
+            let accessibleUri = doc.uri;
+
+            // If it's a content:// URI, copy to temp location for preview
+            if (doc.uri.startsWith('content://')) {
+              try {
+                const tempPath = `${
+                  ReactNativeBlobUtil.fs.dirs.CacheDir
+                }/${Date.now()}-${doc.name || 'document'}`;
+                await ReactNativeBlobUtil.fs.cp(doc.uri, tempPath);
+                accessibleUri = `file://${tempPath}`;
+              } catch (error) {
+                console.warn(
+                  'Failed to copy document to temp location:',
+                  error,
+                );
+                // Fall back to original URI
+                accessibleUri = doc.uri;
+              }
+            }
+
+            return {
+              uri: accessibleUri,
+              originalUri: doc.uri, // Keep original for upload
+              type: doc.type || '',
+              name: doc.name || '',
+              mimeType: doc.mimeType || '',
+              locationOrOverlay: {isOverlayNeeded: false}, // Documents never get overlay
+              isCamera: false,
+              isDocument: true,
+            };
+          }),
+        );
         await uploadFileForDocumentForm(formId, documentsToUpload);
       }
     } catch (error: any) {

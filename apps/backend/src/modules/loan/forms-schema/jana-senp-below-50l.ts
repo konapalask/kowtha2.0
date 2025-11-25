@@ -31,7 +31,20 @@ export const janaSenpBelow50lSchema = {
               type: "object",
               properties: {
                 name: { type: "string", title: "Name" },
-                relationWithApplicant: { type: "string", title: "Relation" },
+                relationWithApplicant: {
+                  type: "string",
+                  title: "Relation",
+                  enum: [
+                    "Father",
+                    "Mother",
+                    "Brother",
+                    "Sister",
+                    "Spouse",
+                    "Son",
+                    "Daughter",
+                    "Other",
+                  ],
+                },
                 age: { type: "number", title: "Age (Yrs)" },
                 qualification: {
                   type: "string",
@@ -94,7 +107,7 @@ export const janaSenpBelow50lSchema = {
       schema: {
         type: "object",
         properties: {
-          applicantName: { type: "string", title: "Applicant" },
+          applicantName: { type: "string", title: "Applicant", readOnly: true },
           applicantDateOfBirth: {
             type: "string",
             title: "Date of Birth",
@@ -985,13 +998,14 @@ export const janaSenpBelow50lSchema = {
                 typeOfLoan: { type: "string", title: "Type of Loan" },
                 loanAmount: {
                   type: "number",
-                  title: "Loan Amount (in Lakhs)",
+                  title: "Loan Amount",
                   formatter: {
                     useIndianFormat: true,
                     locale: "en-IN",
                     maxDecimalPlaces: 2,
                     minDecimalPlaces: 0,
                   },
+                  readOnly: true,
                 },
                 osBalance: {
                   type: "number",

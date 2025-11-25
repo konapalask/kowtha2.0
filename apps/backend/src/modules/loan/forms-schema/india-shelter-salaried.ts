@@ -12,6 +12,7 @@ export const indiaShelterSalariedSchema = {
           loanNumber: {
             type: "string",
             title: "Loan Number",
+            readOnly: true,
           },
           branch: {
             type: "string",
@@ -703,6 +704,7 @@ export const indiaShelterSalariedSchema = {
           visitTime: {
             type: "string",
             title: "Time of Visit",
+            format: "time",
           },
           officerSignature: {
             type: "string",
