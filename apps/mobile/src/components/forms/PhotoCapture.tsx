@@ -729,60 +729,108 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       return;
     }
 
+    // Check if pick method exists
+    if (!DocumentPicker.pick || typeof DocumentPicker.pick !== 'function') {
+      Alert.alert(
+        'Document Picker Error',
+        'Document picker is not properly initialized. Please restart the app.',
+      );
+      console.error('DocumentPicker.pick is not a function:', DocumentPicker);
+      return;
+    }
+
     try {
-      const result = await DocumentPicker.pick({
-        type: [
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.docx,
-          DocumentPicker.types.doc,
-        ],
-        allowMultiSelection: true,
-      });
+      // Check if types are available
+      const pickerTypes = DocumentPicker.types || {};
+      const allowedTypes = [
+        pickerTypes.pdf,
+        pickerTypes.docx,
+        pickerTypes.doc,
+      ].filter(Boolean); // Remove undefined values
 
-      if (result && result.length > 0) {
-        // Copy documents to temporary location for preview access
-        const documentsToUpload = await Promise.all(
-          result.map(async (doc: any) => {
-            let accessibleUri = doc.uri;
+      if (allowedTypes.length === 0) {
+        // Fallback: use mime types if types object is not available
+        const result = await DocumentPicker.pick({
+          type: [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+          ],
+          allowMultiSelection: true,
+        });
 
-            // If it's a content:// URI, copy to temp location for preview
-            if (doc.uri.startsWith('content://')) {
-              try {
-                const tempPath = `${
-                  ReactNativeBlobUtil.fs.dirs.CacheDir
-                }/${Date.now()}-${doc.name || 'document'}`;
-                await ReactNativeBlobUtil.fs.cp(doc.uri, tempPath);
-                accessibleUri = `file://${tempPath}`;
-              } catch (error) {
-                console.warn(
-                  'Failed to copy document to temp location:',
-                  error,
-                );
-                // Fall back to original URI
-                accessibleUri = doc.uri;
-              }
-            }
+        if (result && result.length > 0) {
+          await processDocumentPickerResult(formId, result);
+        }
+      } else {
+        const result = await DocumentPicker.pick({
+          type: allowedTypes,
+          allowMultiSelection: true,
+        });
 
-            return {
-              uri: accessibleUri,
-              originalUri: doc.uri, // Keep original for upload
-              type: doc.type || '',
-              name: doc.name || '',
-              mimeType: doc.mimeType || '',
-              locationOrOverlay: {isOverlayNeeded: false}, // Documents never get overlay
-              isCamera: false,
-              isDocument: true,
-            };
-          }),
-        );
-        await uploadFileForDocumentForm(formId, documentsToUpload);
+        if (result && result.length > 0) {
+          await processDocumentPickerResult(formId, result);
+        }
       }
     } catch (error: any) {
+      // Handle cancellation
       if (DocumentPicker.isCancel && DocumentPicker.isCancel(error)) {
-        // User cancelled the picker
+        // User cancelled the picker - this is normal, no need to show error
         return;
       }
+
+      // Handle other errors
       console.error('Error selecting document:', error);
+      const errorMessage =
+        error?.message ||
+        error?.toString() ||
+        'Failed to open document picker. Please try again.';
+
+      Alert.alert('Error', errorMessage, [{text: 'OK'}], {cancelable: true});
+    }
+  };
+
+  const processDocumentPickerResult = async (formId: string, result: any[]) => {
+    try {
+      // Copy documents to temporary location for preview access
+      const documentsToUpload = await Promise.all(
+        result.map(async (doc: any) => {
+          let accessibleUri = doc.uri;
+
+          // If it's a content:// URI, copy to temp location for preview
+          if (doc.uri && doc.uri.startsWith('content://')) {
+            try {
+              const tempPath = `${
+                ReactNativeBlobUtil.fs.dirs.CacheDir
+              }/${Date.now()}-${doc.name || 'document'}`;
+              await ReactNativeBlobUtil.fs.cp(doc.uri, tempPath);
+              accessibleUri = `file://${tempPath}`;
+            } catch (error) {
+              console.warn('Failed to copy document to temp location:', error);
+              // Fall back to original URI
+              accessibleUri = doc.uri;
+            }
+          }
+
+          return {
+            uri: accessibleUri,
+            originalUri: doc.uri, // Keep original for upload
+            type: doc.type || '',
+            name: doc.name || '',
+            mimeType: doc.mimeType || '',
+            locationOrOverlay: {isOverlayNeeded: false}, // Documents never get overlay
+            isCamera: false,
+            isDocument: true,
+          };
+        }),
+      );
+      await uploadFileForDocumentForm(formId, documentsToUpload);
+    } catch (error) {
+      console.error('Error processing document picker result:', error);
+      Alert.alert(
+        'Error',
+        'Failed to process selected documents. Please try again.',
+      );
     }
   };
 
@@ -998,7 +1046,17 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                   styles.button,
                   (isUploading || !DocumentPicker) && styles.buttonDisabled,
                 ]}
-                onPress={() => handleDocumentPickerForForm(form.id)}
+                onPress={async () => {
+                  try {
+                    await handleDocumentPickerForForm(form.id);
+                  } catch (error) {
+                    console.error('Error in document picker button:', error);
+                    Alert.alert(
+                      'Error',
+                      'An unexpected error occurred. Please try again.',
+                    );
+                  }
+                }}
                 disabled={isUploading || !DocumentPicker}>
                 <Text style={styles.buttonText}>
                   {isUploading ? (
