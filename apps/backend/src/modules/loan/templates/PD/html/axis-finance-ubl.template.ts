@@ -5,7 +5,7 @@ const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
 const cellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
-const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:12px;color:#333";
+const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:14px;color:#333";
 
 const hasValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -55,7 +55,7 @@ const renderKeyValueTable = (
             : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle}">${wrapParagraph(label)}</td>
+            <td style="${cellStyle};font-weight:bold;">${wrapParagraph(label)}</td>
             <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
           </tr>`;
         })
@@ -240,13 +240,8 @@ export const axisFinanceUBLTemplate = (
 
   // Handle both possible structures: bankingDetails.bankingDetails or bankingDetails array
   const bankingDetailsData = verificationData.bankingDetails || {};
-  const bankingAccountsArray = Array.isArray(bankingDetailsData)
-    ? bankingDetailsData
-    : Array.isArray(bankingDetailsData.bankingDetails)
-      ? bankingDetailsData.banks
-      : [];
-  const bankingAccounts = ensureArray(bankingAccountsArray).map(
-    (account: any) => [
+  const bankingAccounts = ensureArray(bankingDetailsData?.banks).map(
+        (account: any) => [
       account?.bankName || "",
       account?.branchName || "",
       account?.accountType || "",
@@ -286,7 +281,7 @@ export const axisFinanceUBLTemplate = (
   const generalTable = `
     <table style="${tableStyle}">
       <tr>
-        <td colspan="21" style="${cellStyle}"><p style="${paragraphStyle}"><strong>PERSONAL DISCUSSION SHEET</strong></p></td>
+        <td colspan="21" style="${cellStyle}"><p style="${paragraphStyle};font-size:14px;"><strong>PERSONAL DISCUSSION SHEET</strong></p></td>
       </tr>
       <tr>
         <td colspan="6" style="${cellStyle}"><strong>Region</strong></td>
@@ -315,9 +310,9 @@ export const axisFinanceUBLTemplate = (
         ["No. of Visit", basic.numberOfVisits],
         ["Person Met", basic.personMet],
         ["Visited By", basic.visitedBy],
-        ["About Applicant", basic.aboutApplicant],
-        ["Residential Details", basic.residentialDetails],
-        ["Co-Applicant Details", basic.coApplicantDetails],
+        ["About Applicant", formatMultiline(basic.aboutApplicant)],
+        ["Residential Details", formatMultiline(basic.residentialDetails)],
+        ["Co-Applicant Details", formatMultiline(basic.coApplicantDetails)],
       ]
         .map(
           ([label, value]) => `
@@ -335,7 +330,7 @@ export const axisFinanceUBLTemplate = (
     <div class="template-content">
       ${generalTable}
 
-      <p style="${paragraphStyle}"><strong>Family Details</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Family Details</strong></p>
       ${renderInnerTable(
         [
           "Name",
@@ -349,7 +344,7 @@ export const axisFinanceUBLTemplate = (
         familyMembers
       )}
 
-      <p style="${paragraphStyle}"><strong>Shareholding Details</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Shareholding Details</strong></p>
       ${renderInnerTable(
         [
           "Name of the Shareholder",
@@ -362,7 +357,7 @@ export const axisFinanceUBLTemplate = (
         shareholding
       )}
 
-      <p style="${paragraphStyle}"><strong>About the Business</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>About the Business</strong></p>
       <table style="${tableStyle}">
       <tr>
       <td width="25%" style="${cellStyle}"><strong>About the Business</strong></td>
@@ -371,7 +366,7 @@ export const axisFinanceUBLTemplate = (
       </table>
 
 
-      <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Documents Observed</strong></p>
       ${
         renderInnerTable(
           ["Document Category", "Document Name", "Document Type", "Remarks"],
@@ -386,7 +381,7 @@ export const axisFinanceUBLTemplate = (
         ) || ""
       }
 
-      <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Suppliers / Creditors</strong></p>
       ${renderKeyValueTable([
         [
           "No of fixed suppliers",
@@ -408,7 +403,7 @@ export const axisFinanceUBLTemplate = (
         ])
       )}
 
-      <p style="${paragraphStyle}"><strong>Clients / Debtors</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Clients / Debtors</strong></p>
       ${renderKeyValueTable([
         [
           "No of fixed customers",
@@ -440,7 +435,7 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle}"><strong>Expenditure - Salaries & Wages</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Expenditure - Salaries & Wages</strong></p>
       ${renderInnerTable(
         [
           "No. of Employees",
@@ -461,7 +456,7 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle}"><strong>Asset Details</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Asset Details</strong></p>
       <p style="${paragraphStyle}">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure:</p>
       
       ${renderInnerTable(
@@ -495,7 +490,7 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle}"><strong>Loan Details</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Loan Details</strong></p>
       ${renderInnerTable(
         [
           "Name of Bank / NBFC",
@@ -509,7 +504,7 @@ export const axisFinanceUBLTemplate = (
         existingLoans
       )}
 
-      <p style="${paragraphStyle}"><strong>Bank Details</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Bank Details</strong></p>
       ${renderInnerTable(
         ["Bank Name", "Branch Name", "Account Type", "Open since (Year)"],
         bankingAccounts
@@ -522,7 +517,7 @@ export const axisFinanceUBLTemplate = (
         ],
       ])}
 
-      <p style="${paragraphStyle}"><strong>Third Party Check</strong></p>
+      <p style="${paragraphStyle};font-size:14px;"><strong>Third Party Check</strong></p>
       ${renderInnerTable(
         [
           "Individual / Business Name",
@@ -554,7 +549,7 @@ export const axisFinanceUBLTemplate = (
           thirdPartySection.verifierSignature || "",
         ],
       ])}
-      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${formatMultiline(
+      <p style="${paragraphStyle};font-size:14px;"><strong>Disclaimer if any:</strong> ${formatMultiline(
         verificationData.recommendations?.disclaimer ||
           "We estimated financials, purely based on the valid documents provided by the applicant."
       )}</p>
