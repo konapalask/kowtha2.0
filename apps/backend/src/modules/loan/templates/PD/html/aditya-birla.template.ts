@@ -76,7 +76,8 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
   const observations = verificationData.observations || {};
   const loanDetails = verificationData.loanDetails || {};
   const dailyIncomeCalculation = verificationData.dailyIncomeCalculation || {};
-  const expenses = verificationData.applicantsMonthlyExpensesOfTheBusiness || {};
+  const expenses =
+    verificationData.applicantsMonthlyExpensesOfTheBusiness || {};
 
   const templateName = html_data?.bankName || "Aditya Birla";
 
@@ -149,7 +150,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         </td>
         <td colspan="2">
           ${renderKeyValue("Native Place", businessProfile.nativePlace)}
-          ${renderKeyValue("Business Since", businessProfile.businessName)}
+          ${renderKeyValue("Business Since", businessProfile.businessSince)}
           ${renderKeyValue("Previous Experience", businessProfile.previousExperience)}
           ${renderKeyValue("Business Premises", businessProfile.businessPremises)}
           ${renderKeyValue("if rented", businessProfile.ifRented)}
@@ -248,14 +249,16 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         <td style="${labelCellStyle}">Charge</td>
         <td style="${labelCellStyle}">Total</td>
       </tr>
-      ${ensureArray(dailyIncomeCalculation?.details || []).map(
-        (detail: any) => `<tr>
+      ${ensureArray(dailyIncomeCalculation?.details || [])
+        .map(
+          (detail: any) => `<tr>
           <td style="${valueCellStyle}">${formatMultiline(detail.particulars)}</td>
           <td style="${valueCellStyle}">${formatMultiline(detail.units)}</td>
           <td style="${valueCellStyle}">${formatMultiline(detail.charge)}</td>
           <td style="${valueCellStyle}">${formatCurrency(detail.total)}</td>
         </tr>`
-      ).join("\n")}
+        )
+        .join("\n")}
       <tr>
         <td style="${labelCellStyle}" colspan="3">Daily Gross Income (Total)</td>
         <td style="${valueCellStyle}">${formatCurrency(dailyIncomeCalculation.dailyGrossIncome)}</td>

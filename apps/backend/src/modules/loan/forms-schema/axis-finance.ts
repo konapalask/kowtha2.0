@@ -47,6 +47,7 @@ export const axisFinanceSchema = {
           applicantMobile: {
             type: "integer",
             title: "Contact Number",
+            readOnly: true,
           },
         },
       },

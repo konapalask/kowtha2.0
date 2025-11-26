@@ -33,7 +33,12 @@ import {colors} from '../constants/colors';
 
 // Field key mappings for automatic data population
 const FIELD_KEY_MAPPINGS = {
-  applicantName: ['applicantName', 'nameOfApplicant', 'nameOfTheApplicant'],
+  applicantName: [
+    'applicantName',
+    'nameOfApplicant',
+    'nameOfTheApplicant',
+    'mainApplicantName',
+  ],
   businessName: [
     'businessName',
     'nameOfConcern',
@@ -55,6 +60,7 @@ const FIELD_KEY_MAPPINGS = {
     'loanAccountNo',
     'applicationReferenceNo',
     'loanNumber',
+    'casId',
   ],
   loanAmount: [
     'loanAmount',
@@ -63,6 +69,9 @@ const FIELD_KEY_MAPPINGS = {
     'loanAmountApplied',
     'requestedLoanAmount',
     'loanAmountRequired',
+    'loanAppliedAmount',
+    'minimumLoanAmount',
+    'loanAmtApplied',
   ],
   purposeOfLoan: ['loanType', 'purposeOfLoan'],
   bankName: [],
@@ -79,6 +88,7 @@ const FIELD_KEY_MAPPINGS = {
     'shopAddress',
     'pdinitiatedAddress',
     'applicantOfficeAddress',
+    'visitedPremiseBusinessAddress',
   ],
   latitude: ['latitude', 'lat', 'siteLatitude', 'currentLatitude'],
   longitude: ['longitude', 'lng', 'long', 'siteLongitude', 'currentLongitude'],

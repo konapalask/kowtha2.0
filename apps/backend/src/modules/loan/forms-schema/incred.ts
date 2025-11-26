@@ -30,6 +30,7 @@ export const incredSchema = {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
           personMeetOwnerOfTheBusinessWithContactNo: {
             type: "string",
@@ -44,13 +45,21 @@ export const incredSchema = {
             type: "string",
             title: "PD Done by with Designation",
           },
-          loanAmtAppliedAndPurpose: {
-            type: "string",
-            title: "Loan Amt. Applied and Purpose",
-            ui: {
-              widget: "textarea",
-              rows: 3,
+          loanAmtApplied: {
+            type: "number",
+            title: "Loan Amt. Applied",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
             },
+            readOnly: true,
+          },
+          purposeOfLoan: {
+            type: "string",
+            title: "Purpose of Loan",
+            readOnly: true,
           },
         },
         required: ["applicationNo", "nameOfApplicant"],

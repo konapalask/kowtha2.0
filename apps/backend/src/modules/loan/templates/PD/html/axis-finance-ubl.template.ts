@@ -1,5 +1,5 @@
 import { format, toZonedTime } from "date-fns-tz";
-import { pdBaseTemplate , pdBaseTemplateFooter} from "./pd-base.template";
+import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
@@ -121,18 +121,16 @@ export const axisFinanceUBLTemplate = (
   const shareholdingArray = Array.isArray(shareholdingData)
     ? shareholdingData
     : Array.isArray(shareholdingData.shareholdingDetails)
-    ? shareholdingData.shareholdingDetails
-    : [];
-  const shareholding = ensureArray(shareholdingArray).map(
-    (item: any) => [
-      formatMultiline(item?.shareholderName || ""),
-      formatMultiline(item?.relationWithMainApplicant || ""),
-      formatMultiline(item?.designation || ""),
-      formatMultiline(item?.shareholdingPercentage || ""),
-      formatMultiline(item?.comingIntoLoanStructure || ""),
-      formatMultiline(item?.functionalRole || ""),
-    ]
-  );
+      ? shareholdingData.shareholdingDetails
+      : [];
+  const shareholding = ensureArray(shareholdingArray).map((item: any) => [
+    formatMultiline(item?.shareholderName || ""),
+    formatMultiline(item?.relationWithMainApplicant || ""),
+    formatMultiline(item?.designation || ""),
+    formatMultiline(item?.shareholdingPercentage || ""),
+    formatMultiline(item?.comingIntoLoanStructure || ""),
+    formatMultiline(item?.functionalRole || ""),
+  ]);
 
   const businessPoints = formatMultiline(
     verificationData.businessOverview?.aboutBusiness
@@ -228,41 +226,41 @@ export const axisFinanceUBLTemplate = (
   const existingLoansArray = Array.isArray(existingLoansData)
     ? existingLoansData
     : Array.isArray(existingLoansData.loans)
-    ? existingLoansData.loans
-    : [];
-  const existingLoans = ensureArray(existingLoansArray).map(
-    (loan: any) => [
-      formatMultiline(loan?.bankOrNbfcName || ""),
-      formatMultiline(loan?.typeOfLoan || ""),
-      formatCurrency(loan?.sanctionedAmount),
-      formatCurrency(loan?.outstandingBalance),
-      formatCurrency(loan?.emiAmount),
-      formatMultiline(loan?.emiPaidBank || ""),
-      formatMultiline(loan?.securedAgainstAsset || ""),
-    ]
-  );
+      ? existingLoansData.loans
+      : [];
+  const existingLoans = ensureArray(existingLoansArray).map((loan: any) => [
+    formatMultiline(loan?.bankOrNbfcName || ""),
+    formatMultiline(loan?.typeOfLoan || ""),
+    formatCurrency(loan?.sanctionedAmount),
+    formatCurrency(loan?.outstandingBalance),
+    formatCurrency(loan?.emiAmount),
+    formatMultiline(loan?.emiPaidBank || ""),
+    formatMultiline(loan?.securedAgainstAsset || ""),
+  ]);
 
   // Handle both possible structures: bankingDetails.bankingDetails or bankingDetails array
   const bankingDetailsData = verificationData.bankingDetails || {};
   const bankingAccountsArray = Array.isArray(bankingDetailsData)
     ? bankingDetailsData
     : Array.isArray(bankingDetailsData.bankingDetails)
-    ? bankingDetailsData.banks
-    : [];
+      ? bankingDetailsData.banks
+      : [];
   const bankingAccounts = ensureArray(bankingAccountsArray).map(
     (account: any) => [
       account?.bankName || "",
       account?.branchName || "",
       account?.accountType || "",
-      account?.openSince|| "",
+      account?.openSince || "",
     ]
   );
 
   // End use of loan might be in loanDetails or bankingDetails
-  const endUseOfLoan = verificationData.loanDetails?.endUseOfLoan 
-    || verificationData.bankingDetails?.endUseOfLoan
-    || (Array.isArray(verificationData.bankingDetails) && verificationData.bankingDetails[0]?.endUseOfLoan)
-    || "";
+  const endUseOfLoan =
+    verificationData.loanDetails?.endUseOfLoan ||
+    verificationData.bankingDetails?.endUseOfLoan ||
+    (Array.isArray(verificationData.bankingDetails) &&
+      verificationData.bankingDetails[0]?.endUseOfLoan) ||
+    "";
 
   const thirdPartySection = verificationData.thirdPartyCheck || {};
 
@@ -311,7 +309,7 @@ export const axisFinanceUBLTemplate = (
         ["Constitution", basic.constitution],
         ["Initiated Address", basic.initiatedAddress],
         ["Visited Address", basic.visitedAddress],
-        ["Phone no.", basic.phoneNumber],
+        ["Phone no.", basic.applicantContactNumber],
         ["Appointment Fixed", basic.appointmentFixed],
         ["Structure of Loan", basic.structureOfLoan],
         ["No. of Visit", basic.numberOfVisits],
@@ -368,23 +366,25 @@ export const axisFinanceUBLTemplate = (
       <table style="${tableStyle}">
       <tr>
       <td width="25%" style="${cellStyle}"><strong>About the Business</strong></td>
-      <td style="${cellStyle}">${businessPointsList.length? `<ul style="margin: 0; padding-left: 20px;">${businessPointsList.map((line: string) =>`<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>`: "Not provided"}</td>
+      <td style="${cellStyle}">${businessPointsList.length ? `<ul style="margin: 0; padding-left: 20px;">${businessPointsList.map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
       </tr>
       </table>
 
 
       <p style="${paragraphStyle}"><strong>Documents Observed</strong></p>
-      ${renderInnerTable(
-        ["Document Category", "Document Name", "Document Type", "Remarks"],
-        ensureArray(verificationData.businessOverview?.documentsObserved).map(
-          (doc: any) => [
-            formatMultiline(doc?.documentCategory || ""),
-            formatMultiline(doc?.documentName || ""),
-            formatMultiline(doc?.documentType || ""),
-            formatMultiline(doc?.remarks || ""),
-          ]
-        )
-      ) ||""}
+      ${
+        renderInnerTable(
+          ["Document Category", "Document Name", "Document Type", "Remarks"],
+          ensureArray(verificationData.businessOverview?.documentsObserved).map(
+            (doc: any) => [
+              formatMultiline(doc?.documentCategory || ""),
+              formatMultiline(doc?.documentName || ""),
+              formatMultiline(doc?.documentType || ""),
+              formatMultiline(doc?.remarks || ""),
+            ]
+          )
+        ) || ""
+      }
 
       <p style="${paragraphStyle}"><strong>Suppliers / Creditors</strong></p>
       ${renderKeyValueTable([

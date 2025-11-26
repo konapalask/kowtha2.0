@@ -12,6 +12,7 @@ export const yesBankSchema = {
           mainApplicantName: {
             type: "string",
             title: "Name of the Main applicant",
+            readOnly: true,
           },
           relationWithApplicant: {
             type: "string",
@@ -21,10 +22,12 @@ export const yesBankSchema = {
             type: "string",
             title: "Address of the visit with landmark",
             ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
           },
           casId: {
             type: "string",
             title: "CAS ID",
+            readOnly: true,
           },
           product: {
             type: "string",
@@ -33,14 +36,17 @@ export const yesBankSchema = {
           pdVisitDate: {
             type: "string",
             title: "PD visit date",
+            format: "date",
           },
           pdVisitTime: {
             type: "string",
             title: "PD visit time",
+            format: "time",
           },
-          contactNumber: {
-            type: "string",
+          applicantContactNumber: {
+            type: "integer",
             title: "Contact number",
+            readOnly: true,
           },
           loanAppliedAmount: {
             type: "number",
@@ -50,6 +56,7 @@ export const yesBankSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           tenorRequired: {
             type: "string",
@@ -72,12 +79,14 @@ export const yesBankSchema = {
         properties: {
           applicantBackground: {
             type: "string",
-            title: "Applicant – Business / Educational background / Past experience",
+            title:
+              "Applicant – Business / Educational background / Past experience",
             ui: { widget: "textarea", rows: 3 },
           },
           coApplicantBackground: {
             type: "string",
-            title: "Co-Applicant – Business / Employment / Educational background / Past experience",
+            title:
+              "Co-Applicant – Business / Employment / Educational background / Past experience",
             ui: { widget: "textarea", rows: 3 },
           },
           parentsBackground: {
@@ -90,7 +99,8 @@ export const yesBankSchema = {
           },
           siblingsBackground: {
             type: "string",
-            title: "Siblings Business / Employment background (if residing together)",
+            title:
+              "Siblings Business / Employment background (if residing together)",
           },
         },
       },
@@ -104,6 +114,7 @@ export const yesBankSchema = {
           businessName: {
             type: "string",
             title: "Name of the Business / Employment",
+            readOnly: true,
           },
           businessConstitution: {
             type: "string",
@@ -119,7 +130,8 @@ export const yesBankSchema = {
           },
           businessNarrative: {
             type: "string",
-            title: "Business profile (nature of industry, market, competition, seasonality etc.)",
+            title:
+              "Business profile (nature of industry, market, competition, seasonality etc.)",
             ui: { widget: "textarea", rows: 5 },
           },
           gstRegistration: {
@@ -186,7 +198,8 @@ export const yesBankSchema = {
           },
           otherAssetsInvestments: {
             type: "string",
-            title: "Other owned assets / Investments (property, land, FD, MF etc.)",
+            title:
+              "Other owned assets / Investments (property, land, FD, MF etc.)",
           },
           otherIncomeSources: {
             type: "string",
@@ -198,7 +211,8 @@ export const yesBankSchema = {
           },
           collateralDetails: {
             type: "string",
-            title: "Collateral details (Type, occupancy status, year of purchase, parental owned etc.)",
+            title:
+              "Collateral details (Type, occupancy status, year of purchase, parental owned etc.)",
           },
           mlapEndUse: {
             type: "string",
@@ -241,11 +255,13 @@ export const yesBankSchema = {
           },
           residenceProof: {
             type: "string",
-            title: "Residence Details of Proof of ownership (if available/documented)",
-          },  
+            title:
+              "Residence Details of Proof of ownership (if available/documented)",
+          },
           businessProof: {
             type: "string",
-            title: "Business Details of Proof of ownership (if available/documented)",
+            title:
+              "Business Details of Proof of ownership (if available/documented)",
           },
           residenceRentedPremisedVerificationStatus: {
             type: "string",
@@ -265,19 +281,23 @@ export const yesBankSchema = {
           },
           residenceLocality: {
             type: "string",
-            title: "Residence locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+            title:
+              "Residence locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
           },
           businessLocality: {
             type: "string",
-            title: "Business locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
+            title:
+              "Business locality comment (Middle class/Upper middle class/Lower middle class/Lower class/Tin roof)",
           },
           residenceMortgage: {
             type: "string",
-            title: "Residence Mortgage (if same is owned) – mention Bank/NBFC name",
+            title:
+              "Residence Mortgage (if same is owned) – mention Bank/NBFC name",
           },
           businessMortgage: {
             type: "string",
-            title: "Business Mortgage (if same is owned) – mention Bank/NBFC name",
+            title:
+              "Business Mortgage (if same is owned) – mention Bank/NBFC name",
           },
           residenceQrCheck: {
             type: "string",
@@ -361,7 +381,7 @@ export const yesBankSchema = {
                 nameOfPersonSpokenTo: {
                   type: "string",
                   title: "Name of person spoken to",
-                }, 
+                },
                 feedback: {
                   type: "string",
                   title:
@@ -467,7 +487,8 @@ export const yesBankSchema = {
           },
           downPaymentDone: {
             type: "string",
-            title: "Source details of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
+            title:
+              "Source details of OCR-(Individual Savings, Sale of another property, Other family members help, etc )",
           },
           downPaymentAmount: {
             type: "number",
@@ -480,7 +501,8 @@ export const yesBankSchema = {
           },
           downPaymentSource: {
             type: "string",
-            title: "Source of funds for down payment (Individual savings, sale of another property, other Family members help etc.)",
+            title:
+              "Source of funds for down payment (Individual savings, sale of another property, other Family members help etc.)",
           },
           purposeOfPurchase: {
             type: "string",
@@ -488,7 +510,8 @@ export const yesBankSchema = {
           },
           distanceFromWork: {
             type: "string",
-            title: "Distance of the property from current business and residence",
+            title:
+              "Distance of the property from current business and residence",
           },
           commutePlan: {
             type: "string",

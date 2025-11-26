@@ -448,6 +448,7 @@ export const indiaShelterSalariedSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           tenureRequired: {
             type: "string",
@@ -704,6 +705,7 @@ export const indiaShelterSalariedSchema = {
           visitTime: {
             type: "string",
             title: "Time of Visit",
+            format: "time",
           },
           officerSignature: {
             type: "string",
