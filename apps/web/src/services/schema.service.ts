@@ -325,7 +325,13 @@ const convertSchemaPropertiesToFields = (
       // Note: We'll handle "name" fields more carefully - only exclude if title contains person/customer
     ];
     if (excludedFromDateTimeFields.includes(fieldId)) {
-      field.type = "text";
+      if (!field.objectFields || field.objectFields.length === 0) {
+        field.type = "text";
+      }
+    }
+
+    if (field.objectFields && field.objectFields.length > 0) {
+      field.type = "object";
     }
     
     // Also exclude "name" field if it's in a context where it refers to a person/customer
