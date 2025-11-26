@@ -194,32 +194,32 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const personalDetailsTable = renderTwoColumnTable([
     {
       label: "Name of the Applicant",
-      value: personal?.applicantName,
+      value: personal?.applicantName || "Not Provided",
     },
     {
       label: "Interviewed By",
-      value: personal?.interviewedBy,
+      value: personal?.interviewedBy || "Not Provided",
     },
     {
       label: "Person Contacted",
-      value: personal?.personContacted,
+      value: personal?.personContacted || "Not Provided",
     },
     {
       label: "Date",
-      value: formatDate(personal?.pdDate),
+      value: formatDate(personal?.pdDate) || "Not Provided",
     },
     {
       label: "Loan Amount Request",
-      value: personal?.loanAmount,
+      value: personal?.loanAmount || "Not Provided",
       formatter: formatCurrency,
     },
     {
       label: "Place of Interview",
-      value: personal?.placeOfInterview,
+      value: personal?.placeOfInterview || "Not Provided",
     },
     {
       label: "Contact Number",
-      value: personal?.applicantMobile,
+      value: personal?.applicantMobile || "Not Provided",
     },
   ]);
 
@@ -245,23 +245,23 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     [
       {
         header: "Name",
-        valueGetter: (item) => item.name || item.memberName || "",
+        valueGetter: (item) => item.name || item.memberName || "Not Provided",
       },
       {
         header: "Relation",
-        valueGetter: (item) => item.relation || item.relationToApplicant || "",
+        valueGetter: (item) => item.relation || item.relationToApplicant || "Not Provided",
       },
       {
         header: "Age",
-        valueGetter: (item) => (item.age ? `${item.age}yrs` : ""),
+        valueGetter: (item) => (item.age ? `${item.age}yrs` : "Not Provided"),
       },
       {
         header: "Education",
-        valueGetter: (item) => item.education || item.qualification || "-",
+        valueGetter: (item) => item.education || item.qualification || "Not Provided",
       },
       {
         header: "Occupation",
-        valueGetter: (item) => item.occupation || "-",
+        valueGetter: (item) => item.occupation || "Not Provided",
       },
     ],
     familyMembers,
@@ -272,76 +272,76 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       label: "NO. OF. DEPENDANTS",
       value:
-        familySection.noOfDependants || familySection.totalDependants || "-",
+        familySection.noOfDependants || familySection.totalDependants || "Not Provided",
     },
     {
       label: "GENERAL LIFESTYLE/PERSONALITY",
-      value: familySection.generalLifestylePersonality || "-",
+      value: familySection.generalLifestylePersonality || "Not Provided",
     },
   ]);
 
   const residenceTable = renderTwoColumnTable([
     {
       label: "Current Address Details",
-      value: residence.currentAddressDetails,
+      value: residence.currentAddressDetails || "Not Provided",
     },
     {
       label: "Ownership and Name of Owners",
-      value: residence.ownershipAndNameOfOwners,
+      value: residence.ownershipAndNameOfOwners || "Not Provided",
     },
     {
       label: "Collateral Description and Type",
-      value: residence.collateralDescriptionAndType,
+      value: residence.collateralDescriptionAndType || "Not Provided",
     },
     {
       label: "Office Premises Details",
-      value: residence.officePremisesDetails,
+      value: residence.officePremisesDetails || "Not Provided",
     },
     {
       label: "Ownership and Name of Owners (NA for Salaried)",
-      value: residence.ownershipAndNameOfOwnersNaForSalaried,
+      value: residence.ownershipAndNameOfOwnersNaForSalaried || "Not Provided",
     },
   ]);
 
   const employmentTable = renderTwoColumnTable([
     {
       label: "Name of Business / Employment",
-      value: employment.nameOfBusinessEmployment,
+      value: employment.nameOfBusinessEmployment || "Not Provided",
     },
     {
       label: "Nature of Business Entity / Employer Details",
       value:
-        employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd,
+        employment.natureOfBusinessEntityEmployerDetailsProprietoryPartnershipPvtLtd || "Not Provided",
     },
     {
       label: "Key Manager to the Business",
-      value: employment.keyManagerToTheBusiness,
+      value: employment.keyManagerToTheBusiness || "Not Provided",
     },
     {
       label: "No. of Years in Business / Employment",
-      value: employment.noOfYearsInBusinessEmployment,
+      value: employment.noOfYearsInBusinessEmployment || "Not Provided",
     },
     {
       label: "Type of Business",
-      value: employment.typeOfBusiness,
+      value: employment.typeOfBusiness || "Not Provided",
     },
   ]);
 
   const businessDetailsTable = renderTwoColumnTable([
     {
       label: "MAIN CLIENTS",
-      value: businessDetails.mainClients,
+      value: businessDetails.mainClients || "Not Provided",
     },
   ]);
 
   const employeeCostsTable = renderTwoColumnTable([
     {
       label: "NO. OF EMPLOYEES",
-      value: employeeCosts.numberOfEmployees,
+      value: employeeCosts.numberOfEmployees || "Not Provided",
     },
     {
       label: "TOTAL SALARIES PER MONTH",
-      value: employeeCosts.totalSalariesPerMonth,
+      value: employeeCosts.totalSalariesPerMonth || "Not Provided",
       formatter: formatCurrency,
     },
   ]);
@@ -349,57 +349,57 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const combinedBusinessTable = renderTwoColumnTable([
     {
       label: "ANNUAL SALES",
-      value: businessData.annualSales,
+      value: businessData.annualSales || "Not Provided",
       formatter: formatCurrency,
     },
     {
       label: "OVERALL COSTS",
-      value: businessData.overallCosts,
+      value: businessData.overallCosts || "Not Provided",
       formatter: formatCurrency,
     },
     {
       label: "MAJOR COST HEADS",
-      value: businessData.majorCostHeads,
+      value: businessData.majorCostHeads || "Not Provided",
     },
     {
       label: "GROSS MARGIN %",
-      value: businessData.grossMargin,
+      value: businessData.grossMargin || "Not Provided",
     },
     {
       label: "PBDIT MARGIN %",
-      value: businessData.pbditMargin,
+      value: businessData.pbditMargin || "Not Provided",
     },
     {
       label: "DEBTORS CYCLE",
-      value: businessData.debtorsCycle,
+      value: businessData.debtorsCycle || "Not Provided",
     },
     {
       label: "CREDITORS CYCLE",
-      value: businessData.creditorsCycle,
+      value: businessData.creditorsCycle || "Not Provided",
     },
     {
       label: "CAPITAL INVESTED",
-      value: businessData.capitalInvested,
+      value: businessData.capitalInvested || "Not Provided",
       formatter: formatCurrency,
     },
     {
       label: "LOAN FUNDS (INCL. CC LIMIT)",
-      value: businessData.loanFundsInclCcLimit,
+      value: businessData.loanFundsInclCcLimit || "Not Provided",
     },
     {
       label: "STOCK MAINTAINED",
-      value: businessData.stockMaintained,
+      value: businessData.stockMaintained || "Not Provided",
     },
     {
       label: "BUSINESS BANK ACCOUNTS",
-      value: businessData.businessBankAccounts,
+      value: businessData.businessBankAccounts || "Not Provided",
     },
   ]);
 
   const coApplicantIncomeTable = renderTwoColumnTable([
     {
       label: "Co-Applicant Income",
-      value: coApplicantIncome.coApplicantIncome,
+      value: coApplicantIncome.coApplicantIncome || "Not Provided",
       formatter: formatCurrency,
     },
   ]);
@@ -407,30 +407,30 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
   const otherIncomeTable = renderTwoColumnTable([
     {
       label: "Other Income",
-      value: otherIncome.otherIncome,
+      value: otherIncome.otherIncome || "Not Provided",
     },
   ]);
 
   const assetsTable = renderTwoColumnTable([
     {
       label: "LIC / Insurance / Mediclaim",
-      value: assets.licPaymentInsuranceMediclaim,
+      value: assets.licPaymentInsuranceMediclaim || "Not Provided",
     },
     {
       label: "Share / Mutual Fund Investments",
-      value: assets.shareMutualFundInvestments,
+      value: assets.shareMutualFundInvestments || "Not Provided",
     },
     {
       label: "Cars / Two-Wheelers Owned",
-      value: assets.carsTwoWheelersOwned,
+      value: assets.carsTwoWheelersOwned || "Not Provided",
     },
     {
       label: "Other Properties Owned",
-      value: assets.otherPropertiesOwned,
+      value: assets.otherPropertiesOwned || "Not Provided",
     },
     {
       label: "Other Assets Owned",
-      value: assets.otherAssetsOwned,
+      value: assets.otherAssetsOwned || "Not Provided",
     },
   ]);
 
@@ -445,15 +445,16 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
           <td style="${headerCellStyle};">EMI</td>
           <td style="${headerCellStyle};">Will Close / Continue</td>
         </tr>
+        ${ensureArray(liabilitiesRaw).length > 0 ? `
         ${ensureArray(liabilitiesRaw).map((liability, index) => `
           <tr>
-            <td style="${cellStyle}">${liability.from}</td>
-            <td style="${cellStyle}">${liability.natureOfLoan}</td>
-            <td style="${cellStyle}">${formatCurrency(liability.amount)}</td>
-            <td style="${cellStyle}">${formatCurrency(liability.emi)}</td>
-            <td style="${cellStyle}">${liability.willCloseContinue}</td>
+            <td style="${cellStyle}">${liability.from || "Not Provided"}</td>
+            <td style="${cellStyle}">${liability.natureOfLoan || "Not Provided"}</td>
+            <td style="${cellStyle}">${formatCurrency(liability.amount || "Not Provided")}</td>
+            <td style="${cellStyle}">${formatCurrency(liability.emi || "Not Provided")}</td>
+            <td style="${cellStyle}">${liability.willCloseContinue || "Not Provided"}</td>
           </tr>
-        `).join("")}
+        `).join("")}`: `<tr><td colspan="5" style="${cellStyle};text-align:center;">No other liabilities provided</td></tr>`}
       </table>
     </div>
     `;
@@ -462,41 +463,41 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     {
       sno: 1,
       label: "Affordable EMI",
-      value: budget.affordableEmi,
+      value: budget.affordableEmi || "Not Provided",
       formatter: formatCurrency,
     },
     {
       sno: 2,
       label: "Net Surplus",
-      value: budget.netSurplus,
+      value: budget.netSurplus || "Not Provided",
     },
     {
       sno: 3,
       label:
         "Total Monthly Net Income per month (Business income + Other Income)",
-      value: budget.totalMonthlyIncomePerMonth,
+      value: budget.totalMonthlyIncomePerMonth || "Not Provided",
     },
     {
       sno: 4,
       label: "Other Loan EMI",
-      value: budget.otherLoanEmi,
+      value: budget.otherLoanEmi || "Not Provided",
       formatter: formatCurrency,
     },
     {
       sno: 5,
       label: "PL / Auto Loan EMI",
-      value: budget.plOrAutoLoanEMI,
+      value: budget.plOrAutoLoanEMI || "Not Provided",
       formatter: formatCurrency,
     },
     {
       sno: 6,
       label: "Overall Family Expenses per month",
-      value: budget.overAllFamilyExpenses,
+      value: budget.overAllFamilyExpenses || "Not Provided",
     },
     {
       sno: 7,
       label: "Total Monthly Expenses per month",
-      value: budget.totalMonthlyExpensesPerMonth,
+      value: budget.totalMonthlyExpensesPerMonth || "Not Provided",
     },
   ];
 
@@ -545,11 +546,11 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     [
       {
         header: "Name of the Person",
-        valueGetter: (item) => item.nameOfThePerson,
+        valueGetter: (item) => item.nameOfThePerson || "Not Provided",
       },
       {
         header: "Telephone No. / Address for Communication",
-        valueGetter: (item) => item.contactDetails,
+        valueGetter: (item) => item.contactDetails || "Not Provided",
       },
     ],
     tradeReferences,
@@ -572,8 +573,8 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const estimatedIncomeTable = `
     <div> 
-    <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>
-    <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails)}</p>
+    <p style="font-size:18px;font-weight:bold;"><u>Estimated Income</u></p>
+    <p style="${paragraphStyle}">${formatMultiline(estimatedIncome?.estimatedIncomeDetails || "Not Provided")}</p>
     ${estimatedIncome?.patOfTheBusinessConcern ? `<p style="${paragraphStyle}"><strong>The PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome?.patOfTheBusinessConcern)}</p>` : ""}
     </div>
   `;

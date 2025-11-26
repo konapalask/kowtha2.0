@@ -139,14 +139,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     verificationData.existingLoanDetails ||
     verificationData.existingLoans ||
     {};
-  const existingLoansArray = Array.isArray(existingLoansData)
-    ? existingLoansData
-    : Array.isArray(existingLoansData.existingLoans)
-      ? existingLoansData.existingLoans
-      : Array.isArray(existingLoansData.loans)
-        ? existingLoansData.loans
-        : [];
-  const existingLoans = ensureArray(existingLoansArray).map((loan: any) => [
+  const existingLoans = ensureArray(existingLoansData?.loanDetails).map((loan: any) => [
     formatMultiline(loan?.bankName || loan?.bankOrNbfcName || ""),
     formatMultiline(loan?.typeOfLoan || ""),
     formatCurrency(loan?.loanAmount || loan?.sanctionedAmount),
@@ -210,10 +203,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
     (item: any) => `<li>${formatMultiline(item?.discomfortFactor || "")}</li>`
   );
 
-  const recommendations = ensureArray(verificationData.Recommendations).map(
-    (item: any) => `<li>${formatMultiline(item?.recommendations || "")}</li>`
-  );
-
+  const recom = verificationData.Recommendations || {};
+  
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
       ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${aboutBusiness?.aboutTheApplicant?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || ""}</p>`
@@ -267,7 +258,7 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       <p style="${paragraphStyle}"><strong>LIQUID INCOME PROGRAM REPORT</strong></p>
       ${generalSection}
 
-      <p style="${paragraphStyle}"><strong>About the Applicant & Business:</strong></p>
+      <p style="${paragraphStyle}"><strong><u>About the Applicant & Business</u></strong></p>
         ${businessList || "<li>Not provided</li>"}
 
       <p style="${paragraphStyle}"><strong>Applicant's Family Details:</strong></p>
@@ -280,19 +271,19 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
 
       <p style="${paragraphStyle}"><strong>Customers - Reference numbers:</strong></p>
       <ul>
-      ${ensureArray(customerReferences)
+      ${ensureArray(customerReferences?.customerReferenceNumbers)
         .map(
           (item: any) =>
-            `<li>${formatMultiline(item?.customerReferenceNumber || "")}</li>`
+            `<li>${item?.customerReferenceNumber || ""}</li>`
         )
         .join("")}
       </ul>
 
       <p style="${paragraphStyle}"><strong>Other incomes:</strong></p>
       <ul>
-      ${ensureArray(otherIncomes)
+      ${ensureArray(otherIncomes?.otherIncomes)
         .map(
-          (item: any) => `<li>${formatMultiline(item?.otherIncome || "")}</li>`
+          (item: any) => `<li>${item?.otherIncome || ""}</li>`
         )
         .join("")}
       </ul>
@@ -304,10 +295,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
 
       <p style="${paragraphStyle}"><strong>ITR, Receipts, Verification, GP Margin & Expenses details:</strong></p>
-      ${formatMultiline(
+      <p style="margin-left: 8px;">${formatMultiline(
         verificationData.itrFinancialDetails
           ?.itrReceiptsVerificationInformation || ""
-      )}
+      )}</p>
 
       <p style="${paragraphStyle}"><strong>Comfort Factor: -</strong></p>
       <ul>
@@ -327,23 +318,14 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         }
       </ul>
 
-      <p style="${paragraphStyle}"><strong>Recommendations:</strong> ${
-        recommendations.length ? recommendations.join("<br>") : "Not provided"
-      }</p>
+      <p style="${paragraphStyle}"><strong>Recommendations:-</strong></p>
+      <ul>
+        ${ensureArray(recom?.recommendations)?.map((item: any) => `<li>${item?.recommendation || ""}</li>`).join("")}
+      </ul>
 
-      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> ${
-        verificationData.disclaimer ||
-        "We estimated financials, purely based on the valid documents provided by the applicant."
-      }</p>
-
-
-      <br><br>
-      <p style="${paragraphStyle}">Gross disposable income is sum of Net profit & interest depreciations</p>
-      <ul><li>Business premises photo with customer & Vendor's Self to be attached in this report.</li></ul>
-
-      <div style="page-break-before: always;"></div>
-      <p style="${paragraphStyle}"><strong>Business Photos:</strong></p>
+      <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> We estimated financials, purely based on the valid documents provided by the applicant.</p>
     </div>
+    ${pdBaseTemplateFooter(html_data)}
 
  
     `;

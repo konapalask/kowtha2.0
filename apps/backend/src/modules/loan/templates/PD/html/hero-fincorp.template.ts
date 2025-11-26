@@ -105,20 +105,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   const applicantProfile = verificationData.applicantProfile || {};
   // Handle nested structures for business profile
   const businessProfileData =
-    verificationData.businessProfile?.aboutTheBusiness || {};
+    verificationData.businessProfile || {};
   const financialSummary = verificationData.financialSummary || {};
   const relationships = verificationData.relationships || {};
   // Handle nested structures for existing loans
   const existingLoansData =
-    verificationData.existingLoanDetails ||
-    verificationData.existingLoans ||
-    {};
-  const existingLoansArray = Array.isArray(existingLoansData)
-    ? existingLoansData
-    : Array.isArray(existingLoansData.loans)
-      ? existingLoansData.loans
-      : [];
-  const existingLoans = ensureArray(existingLoansArray);
+    verificationData.existingLoanDetails || {};
+
   const loanAnalysis = verificationData.loanAnalysis || {};
   const generatedDate =
     html_data?.pdVerifiedDate ||
@@ -126,16 +119,16 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     new Date().toISOString().split("T")[0];
 
   const generalTable = renderTwoColumnTable([
-    ["Name of Applicant / Contact person", basic.applicantName],
-    ["Name of Concern", basic.concernName],
-    ["Office Address", basic.officeAddress],
-    ["Phone", basic.applicantPhoneNumber],
-    ["Appointment Fixed", basic.appointmentFixed],
-    ["Date of Visit", basic.dateOfVisit],
-    ["Structure of Loan", basic.structureOfLoan],
-    ["Loan Amount", basic.loanAmount, formatCurrency],
-    ["No. of Visit", basic.numberOfVisits],
-    ["Person Met", basic.personMet],
+    ["Name of Applicant / Contact person", basic.applicantName || "Not provided"],
+    ["Name of Concern", basic.concernName || "Not provided"],
+    ["Office Address", basic.officeAddress || "Not provided"],
+    ["Phone", basic.applicantPhoneNumber || "Not provided"],
+    ["Appointment Fixed", basic.appointmentFixed || "Not provided"],
+    ["Date of Visit", basic.dateOfVisit || "Not provided"],
+    ["Structure of Loan", basic.structureOfLoan || "Not provided"],
+    ["Loan Amount", basic.loanAmount || "Not provided", formatCurrency],
+    ["No. of Visit", basic.numberOfVisits || "Not provided"],
+    ["Person Met", basic.personMet || "Not provided"],
   ]);
 
   const applicantSummary = wrapParagraph(
@@ -214,7 +207,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       )}</li>`
   );
 
-  const existingLoansRows = existingLoans.map((loan: any) => [
+  const existingLoansRows = ensureArray(existingLoansData?.existingLoans).map((loan: any) => [
     formatMultiline(loan?.financialInstitution || ""),
     formatCurrency(loan?.loanAmount),
     formatMultiline(loan?.natureOfLoan || ""),
@@ -237,13 +230,12 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     ensureArray(loanAnalysis.endUse).map((item: any) => formatMultiline(item))
   );
 
-  const securityList = loanAnalysis.securityOffered
-    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis.securityOffered
-        .split("\n")
-        .map((line: string) => line.trim())
-        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-        .join("")}</ul>`
-    : "Not provided";
+  const securityList = loanAnalysis?.securityOffered?.length > 0
+    ? `<ul style="margin: 0; padding-left: 20px;">${ensureArray(loanAnalysis?.securityOffered)
+          .map((line: string) => line.trim())
+          .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
+          .join("")}</ul>`
+      : "Not provided"
 
   const observationList = renderList(
     ensureArray(loanAnalysis.observations).map((item: any) =>
@@ -279,25 +271,19 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       .hero-fincorp-section ul li { margin-bottom: 4px; }
     </style>
     <div class="template-content hero-fincorp-section">
-      ${sectionTitle("Name of Applicant")}
       ${generalTable}
 
       ${sectionTitle("About the Applicant")}
-      ${applicantSummary}
+      ${applicantProfile.applicantSummary ? `<ul style="margin: 0; padding-left: 20px;">${applicantProfile.applicantSummary.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Family Details</h3>
       ${familyTable}
 
       ${sectionTitle("About the Business")}
       ${
-        businessProfileData
-          ? `<ul style="margin: 0; padding-left: 20px;">${businessProfileData
-              .split("\n")
-              .map((line: string) => line.trim())
-              .map(
-                (line: string) => `<li style="margin-left: 8px;">${line}</li>`
-              )
-              .join("")}</ul>`
+        businessProfileData?.aboutTheBusiness
+          ? `<ul style="margin: 0; padding-left: 20px;">${formatMultiline(businessProfileData?.aboutTheBusiness).split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}
+            </ul>`
           : "Not provided"
       }
 
@@ -308,7 +294,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${documentsList}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Automation Level</h3>
-      ${wrapParagraph(formatMultiline(financialSummary.automationLevel || ""))}
+      ${financialSummary.automationLevel ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary.automationLevel.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}
 
       ${sectionTitle("Customers")}
       <ul>
@@ -325,13 +311,13 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       </ul>
 
       ${sectionTitle("Margins")}
-      ${wrapParagraph(formatMultiline(relationships.margins || "Not provided"))}
+      ${relationships.margins ? `<p style="margin: 0; padding-left: 8px;">${relationships.margins}</p>` : "Not provided"}
 
       ${sectionTitle("Employees")}
       ${wrapParagraph(formatMultiline(relationships.employeesCount || "Not provided"))}
 
       ${sectionTitle("Assets")}
-      ${wrapParagraph(formatMultiline(relationships.assets || "Not provided"))}
+      ${relationships.assets ? `<p style="margin: 0; padding-left: 8px;">${relationships.assets}</p>` : "Not provided"}
 
       ${sectionTitle("Loans")}
       ${renderInnerTable(
@@ -346,7 +332,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${securityList}
 
       ${sectionTitle("Address")}
-      ${wrapParagraph(formatMultiline(loanAnalysis.address || "Not provided"))}
+      ${loanAnalysis.address ? `<p style="margin: 0; padding-left: 8px;">${loanAnalysis.address}</p>` : "Not provided"}
 
       ${sectionTitle("Observation")}
       ${observationList}
