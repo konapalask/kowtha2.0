@@ -3,6 +3,8 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
+  const labelCellStyle =
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#b6bec3;vertical-align:top;width:25%";
 const cellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
 const paragraphStyle = "margin:8px 0;line-height:1.5;font-size:14px;color:#333";
@@ -55,7 +57,7 @@ const renderKeyValueTable = (
             : formatMultiline(value);
           return `
           <tr>
-            <td style="${cellStyle};font-weight:bold;">${wrapParagraph(label)}</td>
+            <td style="${labelCellStyle}">${wrapParagraph(label)}</td>
             <td style="${cellStyle}">${wrapParagraph(rendered)}</td>
           </tr>`;
         })
@@ -71,7 +73,7 @@ const renderInnerTable = (headers: string[], rows: string[][]) => {
   const headerRow = headers
     .map(
       (header) =>
-        `<td style="${cellStyle};font-weight:bold;background:#f5f5f5;text-align:center;">${header}</td>`
+        `<td style="${labelCellStyle}">${header}</td>`
     )
     .join("");
   const rowsHtml = rows
@@ -106,13 +108,13 @@ export const axisFinanceUBLTemplate = (
   const familyDetailsData = verificationData.familyDetails || {};
   const familyMembers = ensureArray(familyDetailsData.details).map(
     (member: any) => [
-      formatMultiline(member?.name || ""),
-      formatMultiline(member?.relation || ""),
-      formatMultiline(member?.age ? `${member.age} years` : ""),
-      formatMultiline(member?.qualification || ""),
-      formatMultiline(member?.occupation || ""),
-      formatCurrency(member?.incomePerMonth),
-      formatMultiline(member?.dependent || ""),
+      formatMultiline(member?.name || "Not provided"),
+      formatMultiline(member?.relation || "Not provided"),
+      formatMultiline(member?.age ? `${member.age} years` : "Not provided"),
+      formatMultiline(member?.qualification || "Not provided"),
+      formatMultiline(member?.occupation || "Not provided"),
+      formatCurrency(member?.incomePerMonth || "Not provided"),
+      formatMultiline(member?.dependent || "Not provided"),
     ]
   );
 
@@ -284,10 +286,10 @@ export const axisFinanceUBLTemplate = (
         <td colspan="21" style="${cellStyle}"><p style="${paragraphStyle};font-size:14px;"><strong>PERSONAL DISCUSSION SHEET</strong></p></td>
       </tr>
       <tr>
-        <td colspan="6" style="${cellStyle}"><strong>Region</strong></td>
-        <td colspan="5" style="${cellStyle}"><strong>Location</strong></td>
-        <td colspan="5" style="${cellStyle}"><strong>Branch</strong></td>
-        <td colspan="5" style="${cellStyle}"><strong>Ref No/Application No</strong></td>
+        <td colspan="6" style="${labelCellStyle}"><strong>Region</strong></td>
+        <td colspan="5" style="${labelCellStyle}"><strong>Location</strong></td>
+        <td colspan="5" style="${labelCellStyle}"><strong>Branch</strong></td>
+        <td colspan="5" style="${labelCellStyle}"><strong>Ref No/Application No</strong></td>
       </tr>
       <tr>
         <td colspan="6" style="${cellStyle}">${formatMultiline(basic.region)}</td>
@@ -317,7 +319,7 @@ export const axisFinanceUBLTemplate = (
         .map(
           ([label, value]) => `
         <tr>
-          <td style="${cellStyle}"><strong>${label}</strong></td>
+          <td style="${labelCellStyle}"><strong>${label}</strong></td>
           <td colspan="20" style="${cellStyle}">${formatMultiline(value)}</td>
         </tr>`
         )
@@ -457,7 +459,7 @@ export const axisFinanceUBLTemplate = (
       ])}
 
       <p style="${paragraphStyle};font-size:14px;"><strong>Asset Details</strong></p>
-      <p style="${paragraphStyle}">All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure:</p>
+      <p style="${paragraphStyle}"><i>All Immovable properties held that is Residential, Commercial, Land, Plot and any fixed structure:</i></p>
       
       ${renderInnerTable(
         [
