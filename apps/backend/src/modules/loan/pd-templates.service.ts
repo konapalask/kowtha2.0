@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
-import { 
-  formSchema, 
-  getFooterNameFromTemplate, 
+import {
+  formSchema,
+  getFooterNameFromTemplate,
   getBankNameFromTemplate,
   getSchemaFromTemplate,
-  bankSchemas 
+  bankSchemas,
 } from "./forms-schema";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
@@ -117,7 +117,10 @@ export class PDTemplateService {
     const resolveCoordinate = (value: any) => {
       if (value === undefined || value === null) return undefined;
       // Handle string "NaN" or "null" cases
-      if (typeof value === "string" && (value.toLowerCase() === "nan" || value.toLowerCase() === "null")) {
+      if (
+        typeof value === "string" &&
+        (value.toLowerCase() === "nan" || value.toLowerCase() === "null")
+      ) {
         return undefined;
       }
       const numeric = Number(value);
@@ -238,27 +241,14 @@ export class PDTemplateService {
         .map((group) => {
           const photosHtml = group.photos
             .map((photo) => {
-              const hasCoordinates = photo.latitude && photo.longitude;
               return `
-                <div style="width:48%;margin:1%;border:1px solid #ddd;padding:10px;text-align:center;display:inline-block;vertical-align:top;box-sizing:border-box;page-break-inside:avoid;">
-                  <img src="${photo.url}" alt="${group.documentType}" style="width:100%;height:260px;object-fit:contain;margin-bottom:8px;" />
-                  <div style="font-size:12px;color:#555;text-align:left;">
-                    ${
-                      hasCoordinates
-                        ? `<div><strong>Geo Tag:</strong> ${photo.latitude}, ${photo.longitude}</div>`
-                        : ""
-                    }
-                    ${
-                      photo.timestamp
-                        ? `<div><strong>Captured:</strong> ${photo.timestamp}</div>`
-                        : ""
-                    }
-                    ${
-                      photo.remarks
-                        ? `<div><strong>Remarks:</strong> ${photo.remarks}</div>`
-                        : ""
-                    }
-                  </div>
+                <div style="width:31%;margin:1%;border:1px solid #ddd;padding:8px;text-align:center;display:inline-block;vertical-align:top;box-sizing:border-box;page-break-inside:avoid;">
+                  <img src="${photo.url}" alt="${group.documentType}" style="width:100%;height:180px;object-fit:contain;margin-bottom:6px;" />
+                  ${
+                    photo.remarks
+                      ? `<div style="font-size:12px;color:#555;text-align:left;margin-top:6px;"><strong>Remarks:</strong> ${photo.remarks}</div>`
+                      : ""
+                  }
                 </div>
               `;
             })
@@ -421,16 +411,20 @@ export class PDTemplateService {
       if (!templateName) return false;
       return templateName === templateKey;
     };
-    
+
     // Match by templateName first, then fallback to bankName for backward compatibility
     const matchKey = templateName || bankName;
     console.log("templateName", templateName);
     console.log("bankName", bankName);
     console.log("matchKey", matchKey);
     // Banks with custom templates - match by templateName
-    if (matchesTemplate("AXIS FINANCE-UBL") || matchKey === "Axis Finance UBL Above 10L" || matchKey === "Axis Finance UBL Below 10L") {
+    if (
+      matchesTemplate("AXIS FINANCE-UBL") ||
+      matchKey === "Axis Finance UBL Above 10L" ||
+      matchKey === "Axis Finance UBL Below 10L"
+    ) {
       // const verificationData = (verification?.verificationData ||
-        // verification) as AxisFinanceUBLInterface;
+      // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -443,7 +437,7 @@ export class PDTemplateService {
     }
 
     if (matchesTemplate("RBL BANK (PD & LIP)")) {
-      // let verificationData = verification as RBLInterface; 
+      // let verificationData = verification as RBLInterface;
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -539,8 +533,14 @@ export class PDTemplateService {
       return axisBankTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("AXIS FINANCE-HL") || matchesTemplate("SAMMAAN") || matchesTemplate("SMFG-ML (MICRO & MASS)") ||
-        matchesTemplate("SMFG-HL") || matchesTemplate("TATA CAPITAL-FSL") || matchesTemplate("TATA CAPITAL-HFL")) {
+    if (
+      matchesTemplate("AXIS FINANCE-HL") ||
+      matchesTemplate("SAMMAAN") ||
+      matchesTemplate("SMFG-ML (MICRO & MASS)") ||
+      matchesTemplate("SMFG-HL") ||
+      matchesTemplate("TATA CAPITAL-FSL") ||
+      matchesTemplate("TATA CAPITAL-HFL")
+    ) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -600,13 +600,28 @@ export class PDTemplateService {
       return niwasSenpTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("ARKA FINCAP") || matchesTemplate("CENTRUM") || matchesTemplate("CENT BANK") || 
-        matchesTemplate("CLIX CAPITAL-HL") || matchesTemplate("CLIX CAPITAL-UBL") || matchesTemplate("EASY HL") ||
-        matchesTemplate("FED BANK (PD&LIP)") || matchesTemplate("GODREJ-HL") || matchesTemplate("GODREJ-UBL") ||
-        matchesTemplate("INDUSIND") || matchesTemplate("KOTAK") || matchesTemplate("MUTHOOT-HL") ||
-        matchesTemplate("MUTHOOT FINCORP (PD & LIP)") || matchesTemplate("NIDO HOME FINANCE") ||
-        matchesTemplate("NORTHERN ARC") || matchesTemplate("NIPUN") || matchesTemplate("PIRAMAL (PD, AIP, LIP)") ||
-        matchesTemplate("PNB") || matchesTemplate("TRUHOME (PD & LIP)") || matchesTemplate("VERITAS")) {
+    if (
+      matchesTemplate("ARKA FINCAP") ||
+      matchesTemplate("CENTRUM") ||
+      matchesTemplate("CENT BANK") ||
+      matchesTemplate("CLIX CAPITAL-HL") ||
+      matchesTemplate("CLIX CAPITAL-UBL") ||
+      matchesTemplate("EASY HL") ||
+      matchesTemplate("FED BANK (PD&LIP)") ||
+      matchesTemplate("GODREJ-HL") ||
+      matchesTemplate("GODREJ-UBL") ||
+      matchesTemplate("INDUSIND") ||
+      matchesTemplate("KOTAK") ||
+      matchesTemplate("MUTHOOT-HL") ||
+      matchesTemplate("MUTHOOT FINCORP (PD & LIP)") ||
+      matchesTemplate("NIDO HOME FINANCE") ||
+      matchesTemplate("NORTHERN ARC") ||
+      matchesTemplate("NIPUN") ||
+      matchesTemplate("PIRAMAL (PD, AIP, LIP)") ||
+      matchesTemplate("PNB") ||
+      matchesTemplate("TRUHOME (PD & LIP)") ||
+      matchesTemplate("VERITAS")
+    ) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -642,7 +657,7 @@ export class PDTemplateService {
       return herohousingSalariedTemplate(verification, html_data);
     }
 
-      if (matchesTemplate("INDIA SHELTER SENP")) {
+    if (matchesTemplate("INDIA SHELTER SENP")) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -690,8 +705,11 @@ export class PDTemplateService {
       return idfcHlMlTemplate(verification, html_data);
     }
 
-    if (matchesTemplate("ADITYA BIRLA-HL") || matchesTemplate("ADITYA BIRLA-ML") || matchesTemplate("ADITYA BIRLA-STSL")) {
-      
+    if (
+      matchesTemplate("ADITYA BIRLA-HL") ||
+      matchesTemplate("ADITYA BIRLA-ML") ||
+      matchesTemplate("ADITYA BIRLA-STSL")
+    ) {
       const html_data = await this.FormatPDImages(
         verification,
         bankName,
@@ -785,13 +803,13 @@ export class PDTemplateService {
       );
       return janaSenpBelow50lTemplate(verification, html_data);
     }
-  
+
     // Generic template for all other banks (uses schema-driven approach)
     try {
       // Get bankName and schema from templateName using helper functions
       let schemaBankName = bankName;
       let schemaToUse = schema;
-      
+
       if (templateName) {
         const foundBankName = getBankNameFromTemplate(templateName);
         if (foundBankName) {
@@ -802,13 +820,15 @@ export class PDTemplateService {
           schemaToUse = foundSchema;
         }
       }
-      
+
       // Fallback to formSchema if schema not found from templateName
       if (!schemaToUse) {
         schemaToUse = formSchema[schemaBankName as keyof typeof formSchema];
       }
       if (!schemaToUse) {
-        throw new NotFoundException(`Bank schema not found for: ${schemaBankName} (templateName: ${templateName || 'N/A'})`);
+        throw new NotFoundException(
+          `Bank schema not found for: ${schemaBankName} (templateName: ${templateName || "N/A"})`
+        );
       }
 
       const html_data = await this.FormatPDImages(
@@ -907,7 +927,10 @@ export class PDTemplateService {
         schema = formSchema[schemaBankName as keyof typeof formSchema];
       }
       if (schema) {
-        logDataStructure(verificationData, `${schemaBankName} Verification Data`);
+        logDataStructure(
+          verificationData,
+          `${schemaBankName} Verification Data`
+        );
         const validationResult = validateVerificationData(
           verificationData,
           schema,
@@ -939,7 +962,11 @@ export class PDTemplateService {
       );
 
       // Get footer name from templatesAndFooters using templateName, fallback to templateName, then bankName
-      const footerName = getFooterNameFromTemplate(templateName) || templateName || bankName || "Kowtha";
+      const footerName =
+        getFooterNameFromTemplate(templateName) ||
+        templateName ||
+        bankName ||
+        "Kowtha";
 
       const pdfBuffer = await this.loanService.PDFBufferGeneration(
         htmlTemplate,
@@ -950,7 +977,7 @@ export class PDTemplateService {
         templateName,
         bankName,
         footerNameFromTemplate,
-        finalFooterName: footerName
+        finalFooterName: footerName,
       });
 
       await this.loggingService.info(
@@ -1033,7 +1060,7 @@ export class PDTemplateService {
   //   financialAnalysis: any,
   //   schema?: any
   // ): Promise<any> {
-    
+
   //   if (bankName == "Axis Bank") {
   //     let verificationData = loan.verificationData as interfaces.AxisFinanceUBLInterface;
   //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );

@@ -222,8 +222,8 @@ const LoginScreen = () => {
                     // Auto-verify when OTP is filled - pass text directly to avoid race condition
                     if (text.length === 6) {
                       handleVerifyOtp(text);
-                    }
-                  }}
+                  }
+                }}
                   theme={{
                     containerStyle: {
                       gap: 8,

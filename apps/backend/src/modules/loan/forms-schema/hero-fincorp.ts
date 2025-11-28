@@ -375,7 +375,8 @@ export const heroFincorpSchema = {
           },
           status: {
             type: "string",
-            title: "Status of this case - Positive/Negative/Credit Refer",
+            title: "Status of this case",
+            enum: ["Positive", "Negative", "Credit Refer"],
           },
           place: {
             type: "string",
