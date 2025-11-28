@@ -381,7 +381,9 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
     {
       instruction: `<p style="${paragraphStyle}"><strong>Describe Business Process</strong></p>`,
       content: wrapParagraph(
-        formatMultiline(operational.businessProcess || "")
+        operational.businessProcess.split("\n")
+          .map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`)
+          .join("") || ""
       ),
     },
     {
@@ -455,33 +457,33 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ],
       [
         "Net Profit for last 2 years",
-        formatMultiline(financial.netProfitLastTwoYears || ""),
-        "",
+        formatCurrency(financial.netProfitLastTwoYears || ""),
+        formatCurrency(financial.netProfitLastTwoYearsEstimated || ""),
       ],
       [
         "Gross Business Margin %",
-        formatMultiline(financial.grossBusinessMarginPercent || ""),
-        "",
+        financial.grossBusinessMarginPercent || "" + "%",
+        financial.grossBusinessMarginPercentEstimated || "" + "%",
       ],
       [
         "Net Business Margin %",
-        formatMultiline(financial.netBusinessMarginPercent || ""),
-        "",
+        financial.netBusinessMarginPercent || "" + "%",
+        financial.netBusinessMarginPercentEstimated || "" + "%",
       ],
       [
         "No. of years filing ITRs",
-        formatMultiline(financial.yearsFilingITRs || ""),
-        "",
+        financial.yearsFilingItrs || "",
+        financial.yearsFilingItrsEstimated || "",
       ],
       [
         "Last 2 years ITRs",
-        formatMultiline(financial.lastTwoYearsItrs || ""),
-        "",
+        financial.lastTwoYearsItrs || "",
+        financial.lastTwoYearsItrsEstimated || "",
       ],
       [
         "Last 2 years Form 16 (Salaried)",
         formatMultiline(financial.lastTwoYearsForm16 || ""),
-        "",
+        formatMultiline(financial.lastTwoYearsForm16Estimated || ""),
       ],
     ]
   );
@@ -597,11 +599,17 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       content: wrapParagraph(formatMultiline(personalDiscussion.remarks || "")),
     },
     {
-      instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong><br><br><strong>Signature</strong><br><br><strong>Date</strong></p>`,
+      instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
       content:
-        wrapParagraph(formatMultiline(personalDiscussion.pdConductedBy || "")) +
-        wrapParagraph(formatMultiline(personalDiscussion.signature || "")) +
-        wrapParagraph(formatMultiline(personalDiscussion.pdDate || "")),
+        wrapParagraph(formatMultiline(personalDiscussion.pdConductedBy || "")) ,
+    },
+    {
+      instruction: `<p style="${paragraphStyle}"><strong>Signature</strong></p>`,
+      content: wrapParagraph(formatMultiline(personalDiscussion.signature || "")),
+    },
+    {
+      instruction: `<p style="${paragraphStyle}"><strong>Date</strong></p>`,
+      content: wrapParagraph(formatMultiline(personalDiscussion.pdDate || "")),
     },
   ];
 
@@ -613,23 +621,21 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
   ${
     detailsConfirmation.detailsCheckedSameOrNot === "No"
       ? `<p><strong>Details:</strong> ${
-          detailsConfirmation.detailsNotSameReason
-            .split("\n")
-            .map((line: string) => `<p style="margin-left: 8px;">${line}</p>`)
-            .join("") || ""
-        }</p>`
-      : ""
-  }
-  `;
+          detailsConfirmation?.detailsNotSameReason?.split("\n")
+          .map((line: string) => `<p style="margin-left: 8px;">${line}</p>`)
+          .join("") || ""
+      }</p>`
+    : ""
+}`;
 
-  return `
-    ${pdBaseTemplate(html_data)}
-    <div class="template-content">
-      ${wrapParagraph("<strong>IDFC Bank LTD – Personal Discussion Report</strong>")}
-      ${wrapParagraph("<strong>I] General Details:-</strong>")}
-      ${generalTable}
+return `
+${pdBaseTemplate(html_data)}
+<div class="template-content">
+${wrapParagraph("<strong>IDFC Bank LTD – Personal Discussion Report</strong>")}
+${wrapParagraph("<strong>I] General Details:-</strong>")}
+${generalTable}
 
-      ${wrapParagraph("<strong>II] Personal Details:-</strong>")}
+${wrapParagraph("<strong>II] Personal Details:-</strong>")}
       ${personalTable}
 
       ${wrapParagraph("<strong>III] Business/ Work Details:-</strong>")}
@@ -648,15 +654,13 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       ${bankingTable}
       ${wrapParagraph("<strong>Other Assets:</strong>")}
       ${wrapParagraph(
-        termLoansSection.otherAssets
-          .split("\n")
+        termLoansSection?.otherAssets?.split("\n")
           .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
           .join("") || "-"
       )}
       ${wrapParagraph("<strong>Other Business if any:</strong>")}
       ${wrapParagraph(
-        termLoansSection.otherBusiness
-          .split("\n")
+        termLoansSection?.otherBusiness?.split("\n")
           .map((line: string) => `<li style="margin-left: 20px;">${line}</li>`)
           .join("") || "-"
       )}
