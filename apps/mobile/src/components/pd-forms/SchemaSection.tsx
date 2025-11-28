@@ -709,7 +709,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 }
                 style={styles.repeaterItem}>
                 <View style={styles.repeaterItemHeader}>
-                  <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
                   <TouchableOpacity
                     style={styles.removeButtonInline}
                     onPress={() => handleRemoveItem(index)}>

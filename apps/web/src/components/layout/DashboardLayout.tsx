@@ -191,7 +191,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const menuItems = [
     ...(!(
-      getCurrentDepartmentRole() === "Verifier" ||
       getCurrentDepartmentRole() === "VerificationExecutive"
     )
       ? [

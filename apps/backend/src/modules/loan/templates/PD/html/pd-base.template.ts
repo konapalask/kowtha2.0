@@ -7,6 +7,7 @@ export const pdBaseTemplate = (html_data?: any) => {
         <style>
           body {
               font-family: Arial, sans-serif;
+              font-size: 16px;
               margin: 0;
               padding: 0;
               padding-bottom: 140px;
@@ -166,7 +167,7 @@ export const pdBaseTemplate = (html_data?: any) => {
               width: 100%;
               text-align: center;
               color: #7f8c8d;
-              font-size: 12px;
+              font-size: 14px;
               border-top: 1px solid #eee;
               padding: 12px 40px;
               background-color: #fff;
@@ -216,7 +217,7 @@ export const pdBaseTemplate = (html_data?: any) => {
               margin-bottom: 8px;
             }
             .photo-metadata {
-              font-size: 12px;
+              font-size: 14px;
               color: #555;
               text-align: left;
             }
@@ -225,7 +226,7 @@ export const pdBaseTemplate = (html_data?: any) => {
             }
             .verification-summary {
               margin: 24px 0;
-              font-size: 13px;
+              font-size: 15px;
             }
             .verification-summary table {
               width: 100%;

@@ -22,18 +22,41 @@ import {
 const {BuildConfigModule} = NativeModules;
 // Safe import for DocumentPicker - handle case where module might not be available
 let DocumentPicker: any = null;
-try {
-  const DocumentPickerModule = require('@react-native-documents/picker');
-  // Handle different export structures
-  if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
-    DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
-  } else if (DocumentPickerModule) {
-    DocumentPicker = DocumentPickerModule;
+let DocumentPickerInitialized = false;
+
+const initializeDocumentPicker = () => {
+  if (DocumentPickerInitialized) {
+    return DocumentPicker;
   }
-} catch (error) {
-  console.warn('@react-native-documents/picker not available:', error);
-  DocumentPicker = null;
-}
+
+  try {
+    const DocumentPickerModule = require('@react-native-documents/picker');
+    // Handle different export structures
+    if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
+      DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
+    } else if (DocumentPickerModule) {
+      DocumentPicker = DocumentPickerModule;
+    }
+
+    // Verify that pick method exists
+    if (DocumentPicker && typeof DocumentPicker.pick === 'function') {
+      DocumentPickerInitialized = true;
+      console.log('DocumentPicker initialized successfully');
+    } else {
+      console.warn('DocumentPicker module loaded but pick method not found');
+      DocumentPicker = null;
+    }
+  } catch (error) {
+    console.warn('@react-native-documents/picker not available:', error);
+    DocumentPicker = null;
+  }
+
+  DocumentPickerInitialized = true;
+  return DocumentPicker;
+};
+
+// Initialize on module load
+initializeDocumentPicker();
 import RNLocation from 'react-native-get-location';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geocoding from 'react-native-geocoding';
@@ -463,33 +486,80 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
               .substring(7)}.jpg`;
 
         // Get presigned URL
+        console.log('s3FileName', s3FileName);
+        console.log('mimeType', mimeType);
         const {
           data: {url: presignedUrl},
         } = await getImageUploadPresignedUrl(s3FileName, mimeType);
 
-        // Upload file - use ReactNativeBlobUtil for content:// URIs (documents)
+        // Upload file - use ReactNativeBlobUtil for documents (handles both content:// and file:// URIs)
         let uploadResponse: any;
-        if (
-          file.isDocument &&
-          (fileUri.startsWith('content://') || fileUri.startsWith('file://'))
-        ) {
-          // For documents, use react-native-blob-util to upload directly
-          // Read file and upload using ReactNativeBlobUtil.fetch with file URI
-          uploadResponse = await ReactNativeBlobUtil.fetch(
-            'PUT',
-            presignedUrl,
-            {
-              'Content-Type': mimeType,
-            },
-            fileUri, // Pass file URI directly - ReactNativeBlobUtil handles it
+        if (file.isDocument) {
+          // For documents (PDF/DOCX), use ReactNativeBlobUtil.config() to ensure Content-Type is set correctly
+          // ReactNativeBlobUtil handles both content:// and file:// URIs correctly
+          // console.log('fileUri', fileUri);
+          // console.log('uri', file.uri);
+          // console.log('mimeType for upload', mimeType);
+
+          // For PDFs, we need to use ReactNativeBlobUtil to read content:// URIs
+          // Standard fetch doesn't handle content:// URIs properly
+          // Read file as base64, then convert to binary and upload
+          let filePathToRead = fileUri;
+
+          // If it's a content:// URI, we need to copy it to a file:// path first
+          if (fileUri.startsWith('content://')) {
+            try {
+              const tempReadPath = `${
+                ReactNativeBlobUtil.fs.dirs.CacheDir
+              }/upload_${Date.now()}-${Math.random()
+                .toString(36)
+                .substring(7)}${fileExtension}`;
+              await ReactNativeBlobUtil.fs.cp(fileUri, tempReadPath);
+              filePathToRead = tempReadPath;
+            } catch (error) {
+              console.error('Failed to copy document for upload:', error);
+              throw new Error(
+                `Failed to prepare document file for upload: ${error}`,
+              );
+            }
+          }
+
+          // Ensure we have a file:// path (remove file:// prefix if present)
+          const cleanPath = filePathToRead.startsWith('file://')
+            ? filePathToRead.replace('file://', '')
+            : filePathToRead;
+
+          // Read file content as base64
+          const base64Data = await ReactNativeBlobUtil.fs.readFile(
+            cleanPath,
+            'base64',
           );
+
+          // Convert base64 to binary ArrayBuffer
+          const binaryString = atob(base64Data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const arrayBuffer = bytes.buffer;
+
+          // Upload using standard fetch with ArrayBuffer (binary data)
+          // This ensures Content-Type is set correctly to application/pdf
+          uploadResponse = await fetch(presignedUrl, {
+            method: 'PUT',
+            body: arrayBuffer,
+            headers: {
+              'Content-Type': mimeType, // Set to application/pdf for PDFs
+            },
+          });
+          // console.log('uploadResponse', uploadResponse);
         } else {
           // For regular file:// URIs (images), use standard fetch with blob
           const fileResponse = await fetch(fileUri);
           const blob = await fileResponse.blob();
           uploadResponse = await fetch(presignedUrl, {
             method: 'PUT',
-            body: blob,
+            body: file,
             headers: {
               'Content-Type': mimeType,
             },
@@ -720,42 +790,39 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     const form = documentForms.find(f => f.id === formId);
     if (!form) return;
 
+    // Try to initialize DocumentPicker if not already initialized
+    const picker = initializeDocumentPicker();
+
     // Check if DocumentPicker is available
-    if (!DocumentPicker) {
+    if (!picker) {
       Alert.alert(
         'Document Picker Not Available',
-        '@react-native-documents/picker is not available. Please restart Metro bundler and rebuild the app.',
+        'Document picker is not available. Please ensure the app is properly built and try again.',
+        [{text: 'OK'}],
       );
       return;
     }
 
     // Check if pick method exists
-    if (!DocumentPicker.pick || typeof DocumentPicker.pick !== 'function') {
+    if (!picker.pick || typeof picker.pick !== 'function') {
       Alert.alert(
         'Document Picker Error',
         'Document picker is not properly initialized. Please restart the app.',
+        [{text: 'OK'}],
       );
-      console.error('DocumentPicker.pick is not a function:', DocumentPicker);
+      console.error('DocumentPicker.pick is not a function:', picker);
       return;
     }
 
     try {
-      // Check if types are available
-      const pickerTypes = DocumentPicker.types || {};
-      const allowedTypes = [
-        pickerTypes.pdf,
-        pickerTypes.docx,
-        pickerTypes.doc,
-      ].filter(Boolean); // Remove undefined values
+      // Check if types are available - restrict to PDF only
+      const pickerTypes = picker.types || {};
+      const allowedTypes = [pickerTypes.pdf].filter(Boolean); // Only PDF
 
       if (allowedTypes.length === 0) {
-        // Fallback: use mime types if types object is not available
-        const result = await DocumentPicker.pick({
-          type: [
-            'application/pdf',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/msword',
-          ],
+        // Fallback: use mime type if types object is not available
+        const result = await picker.pick({
+          type: ['application/pdf'], // Only PDF
           allowMultiSelection: true,
         });
 
@@ -763,8 +830,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           await processDocumentPickerResult(formId, result);
         }
       } else {
-        const result = await DocumentPicker.pick({
-          type: allowedTypes,
+        const result = await picker.pick({
+          type: allowedTypes, // Only PDF
           allowMultiSelection: true,
         });
 
@@ -774,7 +841,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       }
     } catch (error: any) {
       // Handle cancellation
-      if (DocumentPicker.isCancel && DocumentPicker.isCancel(error)) {
+      if (picker.isCancel && picker.isCancel(error)) {
         // User cancelled the picker - this is normal, no need to show error
         return;
       }
@@ -1040,41 +1107,42 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 )}
               </Text>
             </TouchableOpacity>
-            {isInternal && (
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  (isUploading || !DocumentPicker) && styles.buttonDisabled,
-                ]}
-                onPress={async () => {
-                  try {
-                    await handleDocumentPickerForForm(form.id);
-                  } catch (error) {
-                    console.error('Error in document picker button:', error);
-                    Alert.alert(
-                      'Error',
-                      'An unexpected error occurred. Please try again.',
-                    );
-                  }
-                }}
-                disabled={isUploading || !DocumentPicker}>
-                <Text style={styles.buttonText}>
-                  {isUploading ? (
-                    'Uploading...'
-                  ) : (
-                    <Icons
-                      name="filetext1"
-                      size={32}
-                      color={
-                        DocumentPicker
-                          ? colors.button.secondary.text
-                          : colors.text.secondary
-                      }
-                    />
-                  )}
-                </Text>
-              </TouchableOpacity>
-            )}
+            {/* {isInternal && ( */}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (isUploading || !initializeDocumentPicker()) &&
+                  styles.buttonDisabled,
+              ]}
+              onPress={async () => {
+                try {
+                  await handleDocumentPickerForForm(form.id);
+                } catch (error) {
+                  console.error('Error in document picker button:', error);
+                  Alert.alert(
+                    'Error',
+                    'An unexpected error occurred. Please try again.',
+                  );
+                }
+              }}
+              disabled={isUploading || !initializeDocumentPicker()}>
+              <Text style={styles.buttonText}>
+                {isUploading ? (
+                  'Uploading...'
+                ) : (
+                  <Icons
+                    name="filetext1"
+                    size={32}
+                    color={
+                      initializeDocumentPicker()
+                        ? colors.button.secondary.text
+                        : colors.text.secondary
+                    }
+                  />
+                )}
+              </Text>
+            </TouchableOpacity>
+            {/* )} */}
           </View>
 
           {form.uploadedItems.length > 0 && (
