@@ -16,7 +16,8 @@ import { S3Service } from "src/modules/common/s3utils/s3.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { LoggingService } from "src/modules/common/logging/logging.service";
 // import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
-import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl.template";
+import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl-above-10l.template";
+import { axisFinanceUBLBelow10lTemplate } from "./templates/PD/html/axis-finance-ubl-below-10l.template";
 // import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
 // import { RBLInterface } from "./templates/PD/interface/rbl.interface";
 import { rblTemplate } from "./templates/PD/html/rbl.template";
@@ -70,6 +71,7 @@ export class PDTemplateService {
     bankName: string,
     applicationNumber: string,
     synopsis: string,
+    approvedStatus: string,
     financialAnalysis: any,
     loan?: any
   ): Promise<any> {
@@ -386,6 +388,8 @@ export class PDTemplateService {
       path: synopsis,
       financialAnalysis: financialAnalysis,
       status: status,
+      synopsis: synopsis,
+      approvedStatus: approvedStatus,
       imageDataUri: imageDataUri,
       imagesData: imagesData,
       fieldExecutive: fieldExecutive,
@@ -403,6 +407,7 @@ export class PDTemplateService {
     verification: any,
     loan: any,
     synopsis: string,
+    approvedStatus: string,
     financialAnalysis: any,
     schema?: any
   ): Promise<any> {
@@ -418,11 +423,15 @@ export class PDTemplateService {
     console.log("bankName", bankName);
     console.log("matchKey", matchKey);
     // Banks with custom templates - match by templateName
+<<<<<<< HEAD
     if (
       matchesTemplate("AXIS FINANCE-UBL") ||
       matchKey === "Axis Finance UBL Above 10L" ||
       matchKey === "Axis Finance UBL Below 10L"
     ) {
+=======
+    if (matchesTemplate("AXIS FINANCE-UBL ABOVE 10L") || matchKey === "Axis Finance UBL Above 10L") {
+>>>>>>> sandeep
       // const verificationData = (verification?.verificationData ||
       // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
@@ -430,10 +439,25 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
       return axisFinanceUBLTemplate(verification, html_data);
+    }
+    if (matchesTemplate("AXIS FINANCE-UBL BELOW 10L") || matchKey === "Axis Finance UBL Below 10L") {
+      // const verificationData = (verification?.verificationData ||
+        // verification) as AxisFinanceUBLInterface;
+      const html_data = await this.FormatPDImages(
+        verification,
+        bankName,
+        loan.applicationNumber,
+        synopsis,
+        approvedStatus,
+        financialAnalysis,
+        loan
+      );
+      return axisFinanceUBLBelow10lTemplate(verification, html_data);
     }
 
     if (matchesTemplate("RBL BANK (PD & LIP)")) {
@@ -443,6 +467,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -455,6 +480,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -467,6 +493,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -479,6 +506,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -491,6 +519,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -503,6 +532,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -515,6 +545,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -527,6 +558,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -546,6 +578,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -558,6 +591,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -570,6 +604,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -582,6 +617,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -594,6 +630,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -627,6 +664,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -639,6 +677,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -651,6 +690,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -663,6 +703,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -675,6 +716,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -687,6 +729,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -699,6 +742,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -715,6 +759,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -728,6 +773,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -740,6 +786,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -751,6 +798,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -762,6 +810,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -774,6 +823,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -786,6 +836,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -798,6 +849,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -836,6 +888,7 @@ export class PDTemplateService {
         bankName,
         loan.applicationNumber,
         synopsis,
+        approvedStatus,
         financialAnalysis,
         loan
       );
@@ -957,6 +1010,7 @@ export class PDTemplateService {
         verificationData,
         loan,
         verification.synopsis,
+        verification.approvedStatus,
         verification.financialAnalysis,
         schema
       );
