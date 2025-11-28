@@ -61,6 +61,7 @@ const FIELD_KEY_MAPPINGS = {
     'applicationReferenceNo',
     'loanNumber',
     'casId',
+    'prospectNo',
   ],
   loanAmount: [
     'loanAmount',

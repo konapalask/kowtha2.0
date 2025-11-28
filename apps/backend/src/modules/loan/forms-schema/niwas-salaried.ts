@@ -9,8 +9,12 @@ export const niwasSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          prospectNo: { type: "string", title: "Prospect No." },
-          nameOfApplicant: { type: "string", title: "Name of Applicant" },
+          prospectNo: { type: "string", title: "Prospect No.", readOnly: true },
+          nameOfApplicant: {
+            type: "string",
+            title: "Name of Applicant",
+            readonly: true,
+          },
           maritalStatus: {
             type: "string",
             title: "Marital Status",
@@ -105,7 +109,7 @@ export const niwasSalariedSchema = {
             title: "Washing Machine",
             enum: ["Yes", "No"],
           },
-          carRcNo: { type: "string", title: "Car RC No.", enum: ["Yes", "No"] },
+          carRcNo: { type: "string", title: "Car RC No." },
           twoWheeler: {
             type: "string",
             title: "Two-Wheeler",

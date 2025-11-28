@@ -30,7 +30,7 @@ const formatCurrency = (value: any): string => {
   return `Rs. ${numeric.toLocaleString("en-IN")}/-`;
 };
 
-const ensureArray = <T,>(value: T | T[] | null | undefined): T[] => {
+const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   if (Array.isArray(value)) return value;
   if (value === null || value === undefined) return [];
   return [value];
@@ -53,10 +53,7 @@ const renderKeyValue = (
   `;
 };
 
-const renderArrayTable = (
-  headers: string[],
-  rows: string[][]
-): string => {
+const renderArrayTable = (headers: string[], rows: string[][]): string => {
   const headerRow = headers
     .map(
       (header) =>
@@ -122,7 +119,6 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
     member.contactNumber || "",
     member.stayingWithApplicant || "",
   ]);
-  
 
   const existingLoanRows = existingLoans.map((loan: any) => [
     loan.typeOfLoan || "",
@@ -175,7 +171,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle} text-align:center;" colspan="2">Basic Details</td>
         </tr>
-        ${renderKeyValue("Name", general.name)}
+        ${renderKeyValue("Name", general.applicantName)}
         ${renderKeyValue("Marital Status", general.maritalStatus)}
         ${renderKeyValue(
           "Educational Qualification",

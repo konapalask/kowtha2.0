@@ -9,8 +9,12 @@ export const iiflSchema = {
       schema: {
         type: "object",
         properties: {
-          prospectNo: { type: "string", title: "Prospect No." },
-          nameOfApplicant: { type: "string", title: "Name of Applicant" },
+          prospectNo: { type: "string", title: "Prospect No.", readOnly: true },
+          nameOfApplicant: {
+            type: "string",
+            title: "Name of Applicant",
+            readonly: true,
+          },
           maritalStatus: {
             type: "string",
             title: "Marital Status",
@@ -107,6 +111,7 @@ export const iiflSchema = {
             type: "string",
             title: "Initiated Address",
             ui: { widget: "textarea", rows: 2 },
+            readOnly: true,
           },
           visitedAddress: {
             type: "string",
@@ -125,10 +130,12 @@ export const iiflSchema = {
           loanAmountRequired: {
             type: "string",
             title: "Loan Amount Required",
+            readOnly: true,
           },
           purposeOfLoan: {
             type: "string",
             title: "Purpose of Loan",
+            readOnly: true,
           },
           profileInitiated: {
             type: "string",
@@ -195,7 +202,11 @@ export const iiflSchema = {
             title: "Applicant’s Education",
           },
           nativePlace: { type: "string", title: "Native Place" },
-          businessName: { type: "string", title: "Business / Employer Name" },
+          businessName: {
+            type: "string",
+            title: "Business / Employer Name",
+            readonly: true,
+          },
           businessType: {
             type: "string",
             title: "Business Type / Constitution",
@@ -228,7 +239,8 @@ export const iiflSchema = {
           customers: { type: "string", title: "Customers" },
           businessPremises: {
             type: "string",
-            title: "Business Premises (Owned / Rented / Relative)",
+            title: "Business Premises",
+            enum: ["Owned", "Rented", "Relative"],
           },
           rentPaid: { type: "string", title: "Rent Paid (if any)" },
           neighborEnquiryResult: {
