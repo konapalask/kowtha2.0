@@ -162,6 +162,9 @@ export class FinancialAnalysisTemplatesService {
 
     const titleRow = worksheet.addRow([
       'Trading and Profit & Loss Account for the year ending 31.03.2026',
+      '', // Column B
+      '', // Column C
+      '', // Column D
     ]);
     worksheet.mergeCells('A1:D1');
     titleRow.font = { bold: true, size: 14 };
@@ -409,65 +412,47 @@ export class FinancialAnalysisTemplatesService {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Financial Analysis');
 
-    // Set up columns for P&L and Balance Sheet side by side
+    // Set up columns - single column format with Particulars and Value
     worksheet.columns = [
-      { width: 25 }, // A - Particulars
-      { width: 10 }, // B - Note
-      { width: 15 }, // C - Audited Income
-      { width: 12 }, // D - Assessed
-      { width: 25 }, // E - Particulars (right)
-      { width: 10 }, // F - Note
-      { width: 15 }, // G - Audited Income
-      { width: 12 }, // H - Estimated
+      { width: 40 }, // A - Particulars
+      { width: 20 }, // B - Value
     ];
 
     // Title
     const titleRow = worksheet.addRow([
       `M/s. ${financialAnalysis.businessName || 'XXX'}`,
+      '', // Column B
     ]);
-    worksheet.mergeCells('A1:D1');
+    worksheet.mergeCells('A1:B1');
     titleRow.font = { bold: true, size: 14 };
     titleRow.alignment = { horizontal: 'center' };
 
     // Second title row
     const partnerRow = worksheet.addRow([
       `Partners : ${financialAnalysis.partnersNames || 'Mrs. XXX'}`,
+      '', // Column B
     ]);
-    worksheet.mergeCells('A2:D2');
+    worksheet.mergeCells('A2:B2');
     partnerRow.font = { bold: true, size: 11 };
     partnerRow.alignment = { horizontal: 'center' };
 
-    // Balance Sheet title on right
-    worksheet.getCell('E1').value = `Balance Sheet as on 31st March 2024`;
-    worksheet.mergeCells('E1:H1');
-    worksheet.getCell('E1').font = { bold: true, size: 12 };
-    worksheet.getCell('E1').alignment = { horizontal: 'center' };
-
-    worksheet.getCell('E2').value = `${financialAnalysis.partnersNames || 'Mrs. Digava Savitha'}`;
-    worksheet.mergeCells('E2:H2');
-    worksheet.getCell('E2').font = { bold: true };
-    worksheet.getCell('E2').alignment = { horizontal: 'center' };
-
     const subTitleRow = worksheet.addRow([
       'Estimated Profit & Loss Account for the Year Ended 31st March 2026',
+      '', // Column B
     ]);
-    worksheet.mergeCells('A3:D3');
+    worksheet.mergeCells('A3:B3');
     subTitleRow.font = { bold: true };
     subTitleRow.alignment = { horizontal: 'center' };
 
-    // Headers for P&L
+    worksheet.addRow([]); // Empty row
+
+    // Headers
     const headerRow = worksheet.addRow([
       'PARTICULARS',
-      'Note',
-      'Audited Income',
-      'Assessed',
-      'PARTICULARS',
-      'Note',
-      'Audited Income',
-      'Estimated',
+      'VALUE',
     ]);
     headerRow.font = { bold: true };
-    headerRow.alignment = { horizontal: 'center' };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
     headerRow.eachCell((cell) => {
       this.applyBorder(cell);
       cell.fill = {
@@ -487,25 +472,13 @@ export class FinancialAnalysisTemplatesService {
 
     // Helper function to add a data row
     const addDataRow = (
-      leftLabel: string,
-      leftNote: string | number,
-      leftAudited: string | number,
-      leftAssessed: string | number,
-      rightLabel: string,
-      rightNote: string | number,
-      rightAudited: string | number,
-      rightEstimated: string | number,
+      label: string,
+      value: any,
       isBold = false
     ) => {
       const row = worksheet.addRow([
-        leftLabel,
-        leftNote,
-        leftAudited,
-        leftAssessed,
-        rightLabel,
-        rightNote,
-        rightAudited,
-        rightEstimated,
+        label,
+        value,
       ]);
 
       if (isBold) {
@@ -524,72 +497,70 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: 'middle' };
       });
 
-      // Format numeric columns (C, D, G, H)
-      [3, 4, 7, 8].forEach((colNum) => {
-        const cell = row.getCell(colNum);
-        const value = cell.value;
-        if (value !== null && value !== undefined && value !== '') {
-          cell.alignment = {
-            horizontal: 'right',
-            vertical: 'middle',
-          };
-          if (typeof value === 'number') {
-            cell.numFmt = '#,##0.00';
-          } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
-            cell.value = Number(value);
-            cell.numFmt = '#,##0.00';
-          }
+      // Format numeric column (B)
+      const valueCell = row.getCell(2);
+      const cellValue = valueCell.value;
+      if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
+        valueCell.alignment = {
+          horizontal: 'right',
+          vertical: 'middle',
+        };
+        if (typeof cellValue === 'number') {
+          valueCell.numFmt = '#,##0.00';
+        } else if (typeof cellValue === 'string' && !isNaN(Number(cellValue)) && cellValue.trim() !== '') {
+          valueCell.value = Number(cellValue);
+          valueCell.numFmt = '#,##0.00';
         }
-      });
+      }
     };
 
-    // Add P&L data rows - Left side (Expenditure/Assessed) and Right side (Income/Estimated)
+    // Add P&L data rows - single column format
     
-    // Income section (Right side - Estimated column)
-    addDataRow('', '', '', '', 'Gross Receipts', '', '', getValue('grossReceipts'));
-    addDataRow('', '', '', '', 'Other Income', '', '', getValue('otherIncome'));
-    addDataRow('', '', '', '', 'Sub-total (Income)', '', '', getValue('incomeSubtotal'), true);
+    // Income section
+    addDataRow('Gross Receipts', getValue('grossReceipts'));
+    addDataRow('Other Income', getValue('otherIncome'));
+    addDataRow('Sub-total (Income)', getValue('incomeSubtotal'), true);
     
-    // Cost section (Left side - Assessed column)
-    addDataRow('Cost of material consumed', '', '', getValue('costOfMaterialConsumed'), '', '', '', '');
-    addDataRow('Cost to Receipts %', '', '', getValue('costToReceiptsPercentage'), '', '', '', '');
+    // Cost section
+    addDataRow('Cost of material consumed', getValue('costOfMaterialConsumed'));
+    addDataRow('Cost to Receipts %', getValue('costToReceiptsPercentage'));
     
-    // Gross Profit (Right side)
-    addDataRow('', '', '', '', 'Gross Profit as per assumption', '', '', getValue('grossProfitAsPerAssumption'), true);
-    addDataRow('', '', '', '', 'GP ratio %', '', '', getValue('gpRatio'));
+    // Gross Profit
+    addDataRow('Gross Profit as per assumption', getValue('grossProfitAsPerAssumption'), true);
+    addDataRow('GP ratio %', getValue('gpRatio'));
     
-    // Expenditure section (Left side - Assessed column)
-    addDataRow('Salary', '', '', getValue('salary'), '', '', '', '');
-    addDataRow('Rent', '', '', getValue('rent'), '', '', '', '');
-    addDataRow('Electricity', '', '', getValue('electricity'), '', '', '', '');
-    addDataRow('Travelling', '', '', getValue('travelling'), '', '', '', '');
-    addDataRow('Other Expenses', '', '', getValue('otherExpenses'), '', '', '', '');
-    addDataRow('Sub-total (Expenditure)', '', '', getValue('expenditureSubtotal'), '', '', '', '', true);
+    // Expenditure section
+    addDataRow('Salary', getValue('salary'));
+    addDataRow('Rent', getValue('rent'));
+    addDataRow('Electricity', getValue('electricity'));
+    addDataRow('Travelling', getValue('travelling'));
+    addDataRow('Other Expenses', getValue('otherExpenses'));
+    addDataRow('Sub-total (Expenditure)', getValue('expenditureSubtotal'), true);
     
-    // Net Profit before interest, tax & Depreciation (Right side)
-    addDataRow('', '', '', '', 'Net Profit before interest, tax & Depreciation', '', '', getValue('netProfitBeforeInterestTaxDepreciation'), true);
-    addDataRow('', '', '', '', 'PBDIT Margin %', '', '', getValue('pbditMargin'));
+    // Net Profit before interest, tax & Depreciation
+    addDataRow('Net Profit before interest, tax & Depreciation', getValue('netProfitBeforeInterestTaxDepreciation'), true);
+    addDataRow('PBDIT Margin %', getValue('pbditMargin'));
     
-    // Finance Expenses (Left side)
-    addDataRow('Finance Expenses', '', '', getValue('financeExpenses'), '', '', '', '');
+    // Finance Expenses
+    addDataRow('Finance Expenses', getValue('financeExpenses'));
     
-    // Net Profit before tax & Depreciation (Right side)
-    addDataRow('', '', '', '', 'Net Profit before tax & Depreciation', '', '', getValue('netProfitBeforeTaxDepreciation'), true);
+    // Net Profit before tax & Depreciation
+    addDataRow('Net Profit before tax & Depreciation', getValue('netProfitBeforeTaxDepreciation'), true);
     
-    // Depreciation (Left side)
-    addDataRow('Depreciation', '', '', getValue('depreciation'), '', '', '', '');
+    // Depreciation
+    addDataRow('Depreciation', getValue('depreciation'));
     
-    // Net Profit Before Tax (Right side)
-    addDataRow('', '', '', '', 'Net Profit Before Tax', '', '', getValue('netProfitBeforeTax'), true);
+    // Net Profit Before Tax
+    addDataRow('Net Profit Before Tax', getValue('netProfitBeforeTax'), true);
     
-    // Income Tax (Left side)
-    addDataRow('Income Tax', '', '', getValue('incomeTax'), '', '', '', '');
+    // Income Tax
+    addDataRow('Income Tax', getValue('incomeTax'));
     
-    // Net Profit After Tax (Right side)
-    addDataRow('', '', '', '', 'Net Profit After Tax', '', '', getValue('netProfitAfterTax'), true);
+    // Net Profit After Tax
+    addDataRow('Net Profit After Tax', getValue('netProfitAfterTax'), true);
     
-    // Total expenses including cost of sales (Left side)
-    addDataRow('Total expenses including cost of sales', '', '', getValue('totalExpensesInclCostOfSales'), '', '', '', '', true);
+    // Total expenses including cost of sales
+    addDataRow('Total expenses including cost of sales', getValue('totalExpensesInclCostOfSales'), true);
 
     await this.addSignature(workbook, worksheet);
     return await this.finalizeWorkbook(workbook, loan.id);
