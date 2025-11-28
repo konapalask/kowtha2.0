@@ -355,7 +355,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
     return value;
   };
 
-  const appointmentFixed = formatTimeValue(appointmentFixedRaw);
+  const appointmentFixed = applicantDetails?.appointmentFixed;
 
   const dateOfVisit = getValue(
     applicantDetails.dateOfVisit,
@@ -592,7 +592,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                   formatCurrency(loan.emi || loan.installment) || "Not Provided"
                 }</td>
                 <td style="border:1px solid #ccc;padding:6px;">${
-                  getValue(loan.status, loan.loanStatus) || "Not Provided"
+                  loan.status || "Not Provided"
                 }</td>
               </tr>
             `
@@ -617,19 +617,19 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
         <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Application No</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicationNumber}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicationNo}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Applicant</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantName}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfApplicant}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Co-Applicant</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${coApplicantName}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.nameOfCoApplicant}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Phone Number</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantMobile}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.applicantPhoneNumber}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name of Concern</strong></p></td>
@@ -650,15 +650,15 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Appointment Fixed</strong></p></td>
                 <td colspan="2" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${appointmentFixed}</p></td>
-                <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: ${dateOfVisit || istDate.split(" ")[0]}</p></td>
+                <td colspan="4" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Date of Visit</strong>: ${applicantDetails?.dateOfVisit || istDate.split(" ")[0]}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Person Met</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(applicantDetails.personMet, verificationData.personMet)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.personMet}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount and Purpose of Loan</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount:</strong> ${formatCurrency(applicantDetails?.loanAmount)} <br> <strong>Purpose:</strong> ${combinedAmountPurpose || getValue(applicantDetails.amountAndPurposeOfLoan, verificationData.amountAndPurposeOfLoan)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Amount:</strong> ${formatCurrency(applicantDetails?.loanAmount)} <br> <strong>Purpose:</strong> ${applicantDetails?.purposeOfLoan || "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>
@@ -671,9 +671,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>About the Applicant</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
-                  aboutApplicantText ||
-                  `The applicant is ${applicantName}, a business owner who has been running the concern ${nameOfConcern} successfully. The applicant resides at ${residentialPremises}.`
-                }</p></td>
+                  applicantDetails?.aboutTheApplicant?.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") || "Not Provided"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top;width:25%"><p style="margin:8px 0;line-height:1.5"><strong>Family Details</strong></p></td>
@@ -709,7 +707,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px;vertical-align:top"><p style="margin:8px 0;line-height:1.5"><strong>About the Business</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
-                    ${renderBusinessNarrative()}
+                    ${aboutTheBusiness?.businessSummary?.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") || "Not Provided"}
                 </td>
             </tr>
             <tr>
@@ -750,9 +748,8 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Whether Business Registered under GST?</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${formatBooleanDisplay(
-                  gstRegistration.gstRegistered
-                )}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${
+                  gstRegistration?.gstRegistered}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>As per Audited individual ITR's</strong></p></td>
@@ -821,7 +818,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Status</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${
-                  getValue(html_data.status, status.status) || "Not Provided"
+                  status.status || "Not Provided"
                 }</strong></p></td>
             </tr>
             </table>

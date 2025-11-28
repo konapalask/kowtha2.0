@@ -604,5 +604,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${estimatedIncomeTable}
       ${noteBlock}
     </div>
+    ${pdBaseTemplateFooter(html_data)}
+
   `;
 };

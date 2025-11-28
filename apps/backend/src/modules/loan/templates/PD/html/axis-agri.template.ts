@@ -114,7 +114,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
   const pdDetails = verificationData.pdVisitDetails || {};
   const profile = verificationData.businessProfile || {};
   const banking = verificationData.bankingAndWorkingCapital || {};
-  const suppliersClients = ensureArray(verificationData.suppliersClients.suppliersClients || []);
+  const suppliersClients = ensureArray(verificationData.suppliersClients?.suppliersClients || []);
   const observations = verificationData.observations || {};
 
   const facilityRows = ensureArray(banking.facilities).map((facility: any) => [
@@ -270,18 +270,18 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Current Account if any",
-        profile.currentAccountIfAny,
+        banking.currentAccountIfAny,
         undefined,
         { colSpan: 3 }
       )}${renderKeyValueRow(
         "Collateral Security Details",
-        profile.collateralSecurityDetails,
+        banking.collateralSecurityDetails,
         undefined,
         { colSpan: 3 }
       )}
       ${renderKeyValueRow(
         "Existing Banking Relations with Axis (if any)",
-        profile.existingBankingRelationsWithAxisIfAny,
+        banking.existingBankingRelationsWithAxisIfAny,
         undefined,
         { colSpan: 3 }
       )}

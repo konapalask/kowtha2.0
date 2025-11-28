@@ -515,7 +515,7 @@ export const yesBankSchema = {
           },
           commutePlan: {
             type: "string",
-            title: "Commute plan / reason for buying far property",
+            title: "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
           },
         },
       },
