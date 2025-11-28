@@ -309,7 +309,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>3) Customer Identity established during PD</strong></p></td>
                 <td colspan="7" style="${valueCellStyle}">
-                    <p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.customerIdentityEstablished === "Yes" ? "Yes <br> "+verificationData.commonPoints?.customerIdentityDetails : verificationData.commonPoints?.customerIdentityEstablished === "No" ? "No <br> "+verificationData.commonPoints?.customerIdentityDetails : "Not assessed"}</p>
+                    <p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.customerIdentityEstablished === "Yes" ? "Yes <br> Established through documents: "+verificationData.commonPoints?.customerIdentityDetails : verificationData.commonPoints?.customerIdentityEstablished}</p>
                 </td>
             </tr>
             <tr>
@@ -329,7 +329,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                     <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Bank Name</strong></p></td>
                 </tr>
           
-            ${ensureArray(verificationData.commonPoints.detailsOfExistingLoans).map((loan: any) => `
+            ${ensureArray(verificationData.commonPoints?.detailsOfExistingLoans).map((loan: any) => `
                 <tr>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${loan.loanType || ""}</p></td>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(loan.loanAmount || 0)}</p></td>
@@ -374,7 +374,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>A/c type</strong></p></td>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Average Balances</strong></p></td>
               </tr>
-            ${ensureArray(verificationData.bankingDetails.bankingDetails).map((bank: any) => `
+            ${ensureArray(verificationData.bankingDetails?.bankingDetails).map((bank: any) => `
                 <tr>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${bank.bankName || ""}</p></td>
                     <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${bank.accountType || ""}</p></td>
