@@ -4,6 +4,9 @@ import {
   CloseCircleOutlined,
   EditOutlined,
   ClockCircleOutlined,
+  EyeOutlined,
+  DownloadOutlined,
+  FileOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -30,7 +33,7 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
@@ -232,6 +235,11 @@ export const BusinessVerificationDetails: React.FC<
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  const [pdfViewerVisible, setPdfViewerVisible] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
+  const [currentPdfFileName, setCurrentPdfFileName] = useState<string>("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const processedFilesRef = useRef<Set<string>>(new Set());
   const [editorContent, setEditorContent] = useState(() => {
     const synopsis = completeVerificationData?.synopsis;
     if (synopsis) {
@@ -1123,11 +1131,243 @@ export const BusinessVerificationDetails: React.FC<
     });
   };
 
+  const isDocumentItem = (item: any): boolean => {
+    return (
+      item.type === "document" ||
+      item.fileType === "pdf" ||
+      (item.fileName && item.fileName.toLowerCase().endsWith(".pdf"))
+    );
+  };
+
+
+  const getFileExtension = (item: any): string => {
+    if (item.fileType) return item.fileType.toLowerCase();
+    if (item.fileName) {
+      const parts = item.fileName.split(".");
+      if (parts.length > 1) return parts[parts.length - 1].toLowerCase();
+    }
+    return "jpg";
+  };
+
+  const handleViewDocument = async (item: any) => {
+    try {
+      const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      
+      setPdfLoading(true);
+      setPdfViewerVisible(true);
+      setCurrentPdfFileName(fileName);
+      
+      const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
+      
+      if (!presignedUrl) {
+        message.error("Failed to load document URL. Please try again.");
+        setPdfViewerVisible(false);
+        setPdfLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(presignedUrl, {
+          method: 'GET',
+          mode: 'cors',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        setCurrentPdfUrl(blobUrl);
+        setPdfLoading(false);
+      } catch (fetchError) {
+        console.error("Error fetching PDF blob:", fetchError);
+        setCurrentPdfUrl(presignedUrl);
+        setPdfLoading(false);
+        message.warning("PDF may not display properly. Use 'Open in New Tab' or 'Download' if needed.");
+      }
+    } catch (error) {
+      console.error("Error loading document:", error);
+      message.error("Failed to load document. Please try again.");
+      setPdfViewerVisible(false);
+      setPdfLoading(false);
+      setCurrentPdfUrl(null);
+    }
+  };
+
+  const handleDownloadDocument = async (item: any) => {
+    try {
+      const url = await getS3ImageUrl(item.s3ImageUrl);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      message.success("Document download started");
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      message.error("Failed to download document. Please try again.");
+    }
+  };
+
+  const handleMultipleFileUpload = async (info: any) => {
+    const { fileList } = info;
+    
+    const newFiles = fileList
+      .filter((f: any) => {
+        if (!f.originFileObj) return false;
+        const fileKey = `${f.name}-${f.size}-${f.uid}`;
+        if (processedFilesRef.current.has(fileKey)) return false;
+        processedFilesRef.current.add(fileKey);
+        return true;
+      })
+      .map((f: any) => f.originFileObj)
+      .filter((f: any) => f instanceof File);
+
+    if (newFiles.length === 0) return;
+
+    let successCount = 0;
+    let failCount = 0;
+    let allNewItems: any[] = [];
+    const existingItems =
+      completeVerificationData?.verificationData?.uploadedItems || [];
+
+    const scrollPosition = window.scrollY || window.pageYOffset;
+    savedSectionRef.current = "photoCapture";
+    savedSectionScrollRef.current = scrollPosition;
+
+    const uploadPromises = newFiles.map(async (file: File) => {
+      try {
+        const fileNameLower = file.name.toLowerCase();
+        const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
+        const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+
+        const dept = currentDepartment || curDept;
+        if (dept === "PD") {
+          if (!isImage && !isPdf) {
+            message.error(`${file.name}: Please upload a JPG image or PDF file only`);
+            failCount++;
+            return;
+          }
+        } else {
+          if (!isImage) {
+            message.error(`${file.name}: Please upload a JPG image file`);
+            failCount++;
+            return;
+          }
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          message.error(`${file.name}: File size should not exceed 10MB`);
+          failCount++;
+          return;
+        }
+
+        const timestamp = new Date().getTime();
+        const randomStr = Math.random().toString(36).substring(7);
+        
+        let fileExtension = "jpg";
+        if (isPdf) {
+          fileExtension = "pdf";
+        } else if (isImage) {
+          fileExtension = "jpg";
+        }
+        
+        const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
+
+        const { url: presignedUrl } = await getPresignedUploadUrl(
+          fileName,
+          file.type
+        );
+
+        const fileBlob = await file.arrayBuffer();
+
+        const uploadResponse = await fetch(presignedUrl, {
+          method: "PUT",
+          body: fileBlob,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+        }
+
+        const newItem = {
+          id: `${timestamp}-${randomStr}`,
+          s3ImageUrl: fileName,
+          type: isPdf ? "document" : "photo",
+          fileType: isPdf ? "pdf" : "jpg",
+          fileName: file.name,
+          timestamp: new Date().toISOString(),
+          isCamera: false,
+          documentType: "Other",
+        };
+
+        allNewItems.push(newItem);
+        successCount++;
+      } catch (error: any) {
+        console.error(`Error uploading ${file.name}:`, error);
+        message.error(`${file.name}: ${error?.message || "Failed to upload"}`);
+        failCount++;
+      }
+    });
+
+    await Promise.all(uploadPromises);
+
+    if (allNewItems.length > 0) {
+      const updatedItems = [...existingItems, ...allNewItems];
+      
+      if (role === "VerificationExecutive") {
+        setSavedSectionData((prev: any) => ({
+          ...prev,
+          uploadedItems: updatedItems,
+        }));
+        
+        if (completeVerificationData?.verificationData) {
+          completeVerificationData.verificationData.uploadedItems = updatedItems;
+        }
+      } else {
+        const updatedData = {
+          verificationData: {
+            ...completeVerificationData?.verificationData,
+            uploadedItems: updatedItems,
+          },
+        };
+        await verifierEditApi(id as string, "Business", updatedData);
+      }
+    }
+
+    if (successCount > 0) {
+      message.success(`${successCount} file(s) uploaded successfully!`);
+      fetchVerificationData();
+    }
+    if (failCount > 0 && successCount === 0) {
+      message.error(`${failCount} file(s) failed to upload`);
+    }
+    
+    processedFilesRef.current.clear();
+  };
+
   const handlePhotoUpload = async (file: File) => {
     try {
-      if (!file.type.startsWith("image/")) {
-        message.error("Please upload an image file");
-        return false;
+      const fileNameLower = file.name.toLowerCase();
+      const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
+      const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+
+        const dept = currentDepartment || curDept;
+      if (dept === "PD") {
+        if (!isImage && !isPdf) {
+          message.error("Please upload a JPG image or PDF file only");
+          return false;
+        }
+      } else {
+        if (!isImage) {
+          message.error("Please upload a JPG image file");
+          return false;
+        }
       }
 
       if (file.size > 10 * 1024 * 1024) {
@@ -1137,7 +1377,15 @@ export const BusinessVerificationDetails: React.FC<
 
       const timestamp = new Date().getTime();
       const randomStr = Math.random().toString(36).substring(7);
-      const fileName = `verification/${id}/${timestamp}-${randomStr}.jpg`;
+      
+      let fileExtension = "jpg";
+      if (isPdf) {
+        fileExtension = "pdf";
+      } else if (isImage) {
+        fileExtension = "jpg";
+      }
+      
+      const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
       const { url: presignedUrl } = await getPresignedUploadUrl(
         fileName,
@@ -1161,7 +1409,9 @@ export const BusinessVerificationDetails: React.FC<
       const newItem = {
         id: `${timestamp}-${randomStr}`,
         s3ImageUrl: fileName,
-        type: "photo",
+        type: isPdf ? "document" : "photo",
+        fileType: isPdf ? "pdf" : "jpg",
+        fileName: file.name,
         timestamp: new Date().toISOString(),
         isCamera: false,
         documentType: "Other",
@@ -1170,31 +1420,24 @@ export const BusinessVerificationDetails: React.FC<
       const existingItems =
         completeVerificationData?.verificationData?.uploadedItems || [];
 
-      // Store scroll position and section ID for restoration after save (same as section save)
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = "photoCapture";
       savedSectionScrollRef.current = scrollPosition;
 
-      // For VerificationExecutive: Save locally only (no API call)
       if (role === "VerificationExecutive") {
-        // Update local state with new photo
         const updatedItems = [...existingItems, newItem];
         setSavedSectionData((prev: any) => ({
           ...prev,
           uploadedItems: updatedItems,
         }));
         
-        // Also update the completeVerificationData state locally for immediate UI update
         if (completeVerificationData?.verificationData) {
           completeVerificationData.verificationData.uploadedItems = updatedItems;
         }
         
-        message.success("Photo uploaded successfully!");
-        fetchVerificationData();
-        return false;
+        return;
       }
 
-      // For Verifier/Admin: Save to backend API
       const updatedData = {
         verificationData: {
           ...completeVerificationData?.verificationData,
@@ -1203,17 +1446,9 @@ export const BusinessVerificationDetails: React.FC<
       };
 
       await verifierEditApi(id as string, "Business", updatedData);
-      message.success("Photo uploaded successfully!");
-      
-      fetchVerificationData();
-
-      return false;
     } catch (error: any) {
-      console.error("Error uploading photo:", error);
-      message.error(
-        error?.message || "Failed to upload photo. Please try again."
-      );
-      return false;
+      console.error("Error uploading file:", error);
+      throw new Error(error?.message || "Failed to upload file");
     }
   };
 
@@ -2111,6 +2346,208 @@ export const BusinessVerificationDetails: React.FC<
         section.label?.toLowerCase().includes("financial")
       );
     };
+
+    // Calculate total gross profit and total net profit based on financial analysis type
+    // Note: formValues is already declared above for formula calculations
+    const calculateFinancialTotals = useMemo(() => {
+      const sectionLabel = section.label?.toLowerCase() || "";
+      
+      // Check if this is a financial analysis section (including Type 4 which is excluded from grouping)
+      const isFinancialSection = 
+        section.id === "financialAnalysis" ||
+        section.id === "financialAnalysisComprehensive" ||
+        section.id === "financialAnalysisDetailed" ||
+        sectionLabel.includes("financial");
+
+      if (!isFinancialSection) {
+        return { totalGrossProfit: 0, totalNetProfit: 0 };
+      }
+      // Get current form values (formValues is declared above for formula calculations)
+      const currentFormValues = formValues || form.getFieldsValue();
+      const allData = { ...data, ...changedData[section.id] };
+      const mergedData = { ...allData, ...currentFormValues };
+
+      // Helper to safely parse number
+      const parseNum = (value: any): number => {
+        if (value === null || value === undefined || value === "") return 0;
+        const num = parseFloat(String(value));
+        return isNaN(num) ? 0 : num;
+      };
+
+      // Type 1: Generic/Standard Financial Analysis
+      if (
+        sectionLabel.includes("financial analysis") &&
+        !sectionLabel.includes("gp/pbdit") &&
+        !sectionLabel.includes("comprehensive") &&
+        !sectionLabel.includes("detailed")
+      ) {
+        const sales = parseNum(mergedData.sales);
+        const services = parseNum(mergedData.services);
+        const closingStock = parseNum(mergedData.closingStock);
+        const openingStock = parseNum(mergedData.openingStock);
+        const purchase = parseNum(mergedData.purchase);
+        const costOfServices = parseNum(mergedData.costOfServices);
+        const wages = parseNum(mergedData.wages);
+        const hamaliCharges = parseNum(mergedData.hamaliCharges);
+        const manufacturingExpenses = parseNum(mergedData.manufacturingExpenses);
+        const packingCharges = parseNum(mergedData.packingCharges);
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
+        const totalGrossProfit =
+          sales +
+          services +
+          closingStock -
+          (openingStock +
+            purchase +
+            costOfServices +
+            wages +
+            hamaliCharges +
+            manufacturingExpenses +
+            packingCharges);
+
+        // Net Profit = (Gross Profit + Other Incomes) - (Indirect Expenses)
+        const salaries = parseNum(mergedData.salaries);
+        const rent = parseNum(mergedData.rent);
+        const electricityCharges = parseNum(mergedData.electricityCharges);
+        const printingStationery = parseNum(mergedData.printingStationery);
+        const telephoneCharges = parseNum(mergedData.telephoneCharges);
+        const postageTelegram = parseNum(mergedData.postageTelegram);
+        const officeMaintenance = parseNum(mergedData.officeMaintenance);
+        const repairsMaintenance = parseNum(mergedData.repairsMaintenance);
+        const sadarExpenses = parseNum(mergedData.sadarExpenses);
+        const auditFee = parseNum(mergedData.auditFee);
+        const advertisement = parseNum(mergedData.advertisement);
+        const bankCharges = parseNum(mergedData.bankCharges);
+        const insurance = parseNum(mergedData.insurance);
+        const depreciation = parseNum(mergedData.depreciation);
+        const interestOnLoan = parseNum(mergedData.interestOnLoan);
+        const rentReceived = parseNum(mergedData.rentReceived);
+        const commissionReceived = parseNum(mergedData.commissionReceived);
+
+        const indirectExpenses =
+          salaries +
+          rent +
+          electricityCharges +
+          printingStationery +
+          telephoneCharges +
+          postageTelegram +
+          officeMaintenance +
+          repairsMaintenance +
+          sadarExpenses +
+          auditFee +
+          advertisement +
+          bankCharges +
+          insurance +
+          depreciation +
+          interestOnLoan;
+        const otherIncomes = rentReceived + commissionReceived;
+        const totalNetProfit = totalGrossProfit + otherIncomes - indirectExpenses;
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 2: GP/PBDIT Financial Analysis
+      if (sectionLabel.includes("gp/pbdit")) {
+        const grossReceipts = parseNum(mergedData.grossReceipts);
+        const otherIncome = parseNum(mergedData.otherIncome);
+        const costOfMaterialConsumed = parseNum(mergedData.costOfMaterialConsumed);
+        const grossProfitAsPerAssumption = parseNum(mergedData.grossProfitAsPerAssumption);
+
+        // Gross Profit = Gross Receipts + Other Income - Cost of Material Consumed
+        // Or use grossProfitAsPerAssumption if available
+        const totalGrossProfit =
+          grossProfitAsPerAssumption > 0
+            ? grossProfitAsPerAssumption
+            : grossReceipts + otherIncome - costOfMaterialConsumed;
+
+        // Net Profit = Net Profit After Tax (if available) or calculate from components
+        const netProfitAfterTax = parseNum(mergedData.netProfitAfterTax);
+        const netProfitBeforeTax = parseNum(mergedData.netProfitBeforeTax);
+        const totalNetProfit =
+          netProfitAfterTax > 0
+            ? netProfitAfterTax
+            : netProfitBeforeTax > 0
+            ? netProfitBeforeTax
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 3: Comprehensive Actuals vs Estimated Analysis
+      if (sectionLabel.includes("comprehensive")) {
+        const salesEstimated = parseNum(mergedData.salesEstimated);
+        const servicesEstimated = parseNum(mergedData.servicesEstimated);
+        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
+        const openingStockEstimated = parseNum(mergedData.openingStockEstimated);
+        const purchasesEstimated = parseNum(mergedData.purchasesEstimated);
+        const costOfServicesEstimated = parseNum(mergedData.costOfServicesEstimated);
+        const wagesEstimated = parseNum(mergedData.wagesEstimated);
+        const hamaliChargesEstimated = parseNum(mergedData.hamaliChargesEstimated);
+        const manufacturingExpensesEstimated = parseNum(
+          mergedData.manufacturingExpensesEstimated
+        );
+        const packingChargesEstimated = parseNum(mergedData.packingChargesEstimated);
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
+        const totalGrossProfit =
+          salesEstimated +
+          servicesEstimated +
+          closingStockEstimated -
+          (openingStockEstimated +
+            purchasesEstimated +
+            costOfServicesEstimated +
+            wagesEstimated +
+            hamaliChargesEstimated +
+            manufacturingExpensesEstimated +
+            packingChargesEstimated);
+
+        // Net Profit from estimated field or calculate
+        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
+        const totalNetProfit =
+          netProfitEstimated > 0
+            ? netProfitEstimated
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 4: Detailed Financial Analysis with Balance Sheet
+      if (sectionLabel.includes("detailed financial analysis with balance sheet")) {
+        const salesAudited = parseNum(mergedData.salesAudited);
+        const salesEstimated = parseNum(mergedData.salesEstimated);
+        const servicesAudited = parseNum(mergedData.servicesAudited);
+        const servicesEstimated = parseNum(mergedData.servicesEstimated);
+        const closingStockAudited = parseNum(mergedData.closingStockAudited);
+        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
+        const openingStockAssessed = parseNum(mergedData.openingStockAssessed);
+        const openingStockAudited = parseNum(mergedData.openingStockAudited);
+        const purchasesAssessed = parseNum(mergedData.purchasesAssessed);
+        const purchasesAudited = parseNum(mergedData.purchasesAudited);
+
+        // Use Estimated values for calculations (or Audited if Estimated not available)
+        const sales = salesEstimated > 0 ? salesEstimated : salesAudited;
+        const services = servicesEstimated > 0 ? servicesEstimated : servicesAudited;
+        const closingStock =
+          closingStockEstimated > 0 ? closingStockEstimated : closingStockAudited;
+        const openingStock =
+          openingStockAssessed > 0 ? openingStockAssessed : openingStockAudited;
+        const purchases = purchasesAssessed > 0 ? purchasesAssessed : purchasesAudited;
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases)
+        const totalGrossProfit = sales + services + closingStock - (openingStock + purchases);
+
+        // Net Profit from estimated field or calculate from gross profit
+        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
+        const totalNetProfit =
+          netProfitEstimated > 0
+            ? netProfitEstimated
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      return { totalGrossProfit: 0, totalNetProfit: 0 };
+    }, [data, changedData, section.id, section.label, form, formValues]);
 
     // Use side and variant attributes that are set by the schema conversion service
     // These are determined from the credit/debit arrays in the schema
@@ -3068,6 +3505,8 @@ export const BusinessVerificationDetails: React.FC<
         }
       });
 
+      const { totalGrossProfit, totalNetProfit } = calculateFinancialTotals;
+
       return (
         <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
           <Row gutter={[16, 16]}>
@@ -3099,6 +3538,84 @@ export const BusinessVerificationDetails: React.FC<
                 {renderSingleField(field.id, field, true)}
               </Col>
             ))}
+
+            {/* Total Gross Profit and Total Net Profit Display */}
+            {(totalGrossProfit !== 0 || totalNetProfit !== 0) && (
+              <>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0f9ff",
+                      border: "1px solid #0ea5e9",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Total Gross Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#0ea5e9",
+                          display: "block",
+                        }}
+                      >
+                        ₹{totalGrossProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0fdf4",
+                      border: "1px solid #22c55e",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Total Net Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#22c55e",
+                          display: "block",
+                        }}
+                      >
+                        ₹{totalNetProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+              </>
+            )}
           </Row>
         </Form>
       );
@@ -3112,6 +3629,12 @@ export const BusinessVerificationDetails: React.FC<
     const arrayFields = visibleFields.filter(
       (field: any) => field.type === "array" && field.arrayItemFields
     );
+
+    // Check if this is Type 4 (Detailed Financial Analysis with Balance Sheet) to show totals
+    const isType4FinancialAnalysis =
+      section.id === "financialAnalysisDetailed" ||
+      section.label?.toLowerCase().includes("detailed financial analysis with balance sheet");
+    const { totalGrossProfit, totalNetProfit } = calculateFinancialTotals;
 
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
@@ -3136,6 +3659,84 @@ export const BusinessVerificationDetails: React.FC<
               {renderSingleField(field.id, field, true)}
             </Col>
           ))}
+
+          {/* Total Gross Profit and Total Net Profit Display for Type 4 */}
+          {isType4FinancialAnalysis && (totalGrossProfit !== 0 || totalNetProfit !== 0) && (
+            <>
+              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                <Card
+                  size="small"
+                  style={{
+                    backgroundColor: "#f0f9ff",
+                    border: "1px solid #0ea5e9",
+                    marginTop: 16,
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: "12px",
+                        display: "block",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Total Gross Profit
+                    </Text>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "20px",
+                        color: "#0ea5e9",
+                        display: "block",
+                      }}
+                    >
+                      ₹{totalGrossProfit.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                  </div>
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                <Card
+                  size="small"
+                  style={{
+                    backgroundColor: "#f0fdf4",
+                    border: "1px solid #22c55e",
+                    marginTop: 16,
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: "12px",
+                        display: "block",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Total Net Profit
+                    </Text>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "20px",
+                        color: "#22c55e",
+                        display: "block",
+                      }}
+                    >
+                      ₹{totalNetProfit.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                  </div>
+                </Card>
+              </Col>
+            </>
+          )}
         </Row>
       </Form>
     );
@@ -3936,24 +4537,24 @@ export const BusinessVerificationDetails: React.FC<
                 extra={
                   !(!!verificationData?.approvedStatus || hasEditRequest) ? (
                     <Upload
-                      accept="image/*"
+                      accept={(currentDepartment || curDept) === "PD" ? "image/jpeg,.jpg,.jpeg,.pdf" : "image/jpeg,.jpg,.jpeg"}
                       showUploadList={false}
-                      beforeUpload={handlePhotoUpload}
-                      multiple={false}
+                      beforeUpload={() => false}
+                      onChange={handleMultipleFileUpload}
+                      multiple={true}
                     >
                       <Button
                         type="primary"
                         icon={<UploadOutlined />}
                         size="small"
                       >
-                        Upload Photo
+                        {(currentDepartment || curDept) === "PD" ? "Upload JPG/PDF" : "Upload Photo"}
                       </Button>
                     </Upload>
                   ) : null
                 }
               >
                 {(() => {
-                  // Group photos by document type
                   const groupedPhotos = (data?.uploadedItems || []).reduce(
                     (acc: any, item: any) => {
                       const docType = item.documentType || "Other";
@@ -3969,7 +4570,6 @@ export const BusinessVerificationDetails: React.FC<
                   return Object.entries(groupedPhotos).map(
                     ([docType, photos]: [string, any]) => (
                       <div key={docType} style={{ marginBottom: 24 }}>
-                        {/* Document Type Header */}
                         <div
                           style={{
                             background:
@@ -3988,7 +4588,6 @@ export const BusinessVerificationDetails: React.FC<
                           📄 {docType}
                         </div>
 
-                        {/* Photos Grid for this document type */}
                         <div
                           style={{
                             display: "grid",
@@ -3997,68 +4596,153 @@ export const BusinessVerificationDetails: React.FC<
                             gap: "16px",
                           }}
                         >
-                          {photos.map((item: any, idx: number) => (
-                            <div key={item.id} style={{ position: "relative" }}>
-                              <Image
-                                src={imageUrls[item.id] || ""}
-                                alt={`${docType} Photo ${idx + 1}`}
-                                style={{
-                                  width: "100%",
-                                  height: "200px",
-                                  objectFit: "cover",
-                                  borderRadius: "4px",
-                                  border: "2px solid #f0f0f0",
-                                }}
-                              />
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  background: "rgba(0, 0, 0, 0.7)",
-                                  color: "white",
-                                  padding: "6px 8px",
-                                  fontSize: "11px",
-                                  borderRadius: "0 0 4px 4px",
-                                }}
-                              >
-                                {docType} - Photo {idx + 1}{" "}
-                                {item?.isCamera ? "📷" : "🖼️"}
-                              </div>
-                              {!(
-                                !!verificationData?.approvedStatus ||
-                                hasEditRequest
-                              ) && (
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<CloseCircleOutlined />}
+                          {photos.map((item: any, idx: number) => {
+                            const isDoc = isDocumentItem(item);
+                            const fileExt = getFileExtension(item);
+                            
+                            return (
+                              <div key={item.id} style={{ position: "relative" }}>
+                                {isDoc ? (
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      height: "200px",
+                                      borderRadius: "4px",
+                                      border: "2px solid #f0f0f0",
+                                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      color: "white",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => handleViewDocument(item)}
+                                  >
+                                    <FileOutlined style={{ fontSize: "48px", marginBottom: "8px" }} />
+                                    <div style={{ fontSize: "12px", textAlign: "center", padding: "0 8px" }}>
+                                      {item.fileName || `${fileExt.toUpperCase()} Document`}
+                                    </div>
+                                    <div style={{ fontSize: "10px", marginTop: "4px", opacity: 0.9 }}>
+                                      Click to view
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <Image
+                                    src={imageUrls[item.id] || ""}
+                                    alt={`${docType} Photo ${idx + 1}`}
+                                    style={{
+                                      width: "100%",
+                                      height: "200px",
+                                      objectFit: "cover",
+                                      borderRadius: "4px",
+                                      border: "2px solid #f0f0f0",
+                                    }}
+                                  />
+                                )}
+                                
+                                {isDoc && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: 8,
+                                      left: 8,
+                                      display: "flex",
+                                      gap: "4px",
+                                    }}
+                                  >
+                                    <Button
+                                      type="text"
+                                      icon={<EyeOutlined />}
+                                      style={{
+                                        background: "rgba(255, 255, 255, 0.9)",
+                                        borderRadius: "4px",
+                                        width: "32px",
+                                        height: "32px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewDocument(item);
+                                      }}
+                                      title="View document"
+                                    />
+                                    <Button
+                                      type="text"
+                                      icon={<DownloadOutlined />}
+                                      style={{
+                                        background: "rgba(255, 255, 255, 0.9)",
+                                        borderRadius: "4px",
+                                        width: "32px",
+                                        height: "32px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDownloadDocument(item);
+                                      }}
+                                      title="Download document"
+                                    />
+                                  </div>
+                                )}
+                                
+                                {!(
+                                  !!verificationData?.approvedStatus ||
+                                  hasEditRequest
+                                ) && (
+                                  <Button
+                                    type="text"
+                                    danger
+                                    icon={<CloseCircleOutlined />}
+                                    style={{
+                                      position: "absolute",
+                                      top: 8,
+                                      right: 8,
+                                      background: "rgba(255, 255, 255, 0.9)",
+                                      borderRadius: "50%",
+                                      width: "28px",
+                                      height: "28px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                    }}
+                                    onClick={() => handleDeleteClick(item.id)}
+                                  />
+                                )}
+                                
+                                <div
                                   style={{
                                     position: "absolute",
-                                    top: 8,
-                                    right: 8,
-                                    background: "rgba(255, 255, 255, 0.9)",
-                                    borderRadius: "50%",
-                                    width: "28px",
-                                    height: "28px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    background: "rgba(0, 0, 0, 0.7)",
+                                    color: "white",
+                                    padding: "6px 8px",
+                                    fontSize: "11px",
+                                    borderRadius: "0 0 4px 4px",
                                   }}
-                                  onClick={() => handleDeleteClick(item.id)}
-                                />
-                              )}
-                            </div>
-                          ))}
+                                >
+                                  {docType} - {isDoc ? "Document" : "Photo"} {idx + 1}{" "}
+                                  {!isDoc && (item?.isCamera ? "📷" : "🖼️")}
+                                  {isDoc && "📄"}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )
                   );
                 })()}
 
-                {/* Show message if no photos */}
                 {(!data?.uploadedItems || data.uploadedItems.length === 0) && (
                   <div
                     style={{
@@ -4238,6 +4922,122 @@ export const BusinessVerificationDetails: React.FC<
           loading={loading}
           disabled={hasEditRequest}
         />
+      )}
+
+      {currentDepartment === "PD" && (
+        <Modal
+          open={pdfViewerVisible}
+          onCancel={() => {
+            if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
+              window.URL.revokeObjectURL(currentPdfUrl);
+            }
+            setPdfViewerVisible(false);
+            setCurrentPdfUrl(null);
+            setCurrentPdfFileName("");
+            setPdfLoading(false);
+          }}
+          footer={[
+            <Button
+              key="download"
+              icon={<DownloadOutlined />}
+              onClick={() => {
+                if (currentPdfUrl) {
+                  const link = document.createElement("a");
+                  link.href = currentPdfUrl;
+                  link.download = currentPdfFileName;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  message.success("Document download started");
+                }
+              }}
+            >
+              Download
+            </Button>,
+            <Button key="close" onClick={() => {
+              if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
+                window.URL.revokeObjectURL(currentPdfUrl);
+              }
+              setPdfViewerVisible(false);
+              setCurrentPdfUrl(null);
+              setCurrentPdfFileName("");
+              setPdfLoading(false);
+            }}>
+              Close
+            </Button>,
+          ]}
+          width="90%"
+          style={{ top: 20 }}
+          title={`View Document: ${currentPdfFileName}`}
+        >
+          <div style={{ height: "80vh", overflow: "auto" }}>
+            {pdfLoading ? (
+              <div style={{ padding: "40px", textAlign: "center" }}>
+                <p>Loading document...</p>
+              </div>
+            ) : currentPdfUrl ? (
+              <>
+                <iframe
+                  src={currentPdfUrl}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    border: "1px solid #eee",
+                    minHeight: "600px",
+                    display: "block",
+                  }}
+                  title={currentPdfFileName}
+                  onError={() => {
+                    message.warning("Unable to display document in browser. Use download or open in new tab.");
+                  }}
+                />
+                <div style={{ marginTop: "16px", textAlign: "center", padding: "10px" }}>
+                  <Space>
+                    <Button
+                      icon={<DownloadOutlined />}
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = currentPdfUrl;
+                        link.download = currentPdfFileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        message.success("Document download started");
+                      }}
+                    >
+                      Download
+                    </Button>
+                    <Button
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        window.open(currentPdfUrl, "_blank", "noopener,noreferrer");
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                  </Space>
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: "40px", textAlign: "center" }}>
+                <p style={{ color: "#ff4d4f", marginBottom: "16px" }}>
+                  Unable to load document. Please try again.
+                </p>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setPdfViewerVisible(false);
+                    setCurrentPdfUrl(null);
+                    setCurrentPdfFileName("");
+                    setPdfLoading(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );
