@@ -22,18 +22,41 @@ import {
 const {BuildConfigModule} = NativeModules;
 // Safe import for DocumentPicker - handle case where module might not be available
 let DocumentPicker: any = null;
-try {
-  const DocumentPickerModule = require('@react-native-documents/picker');
-  // Handle different export structures
-  if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
-    DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
-  } else if (DocumentPickerModule) {
-    DocumentPicker = DocumentPickerModule;
+let DocumentPickerInitialized = false;
+
+const initializeDocumentPicker = () => {
+  if (DocumentPickerInitialized) {
+    return DocumentPicker;
   }
-} catch (error) {
-  console.warn('@react-native-documents/picker not available:', error);
-  DocumentPicker = null;
-}
+
+  try {
+    const DocumentPickerModule = require('@react-native-documents/picker');
+    // Handle different export structures
+    if (DocumentPickerModule && typeof DocumentPickerModule === 'object') {
+      DocumentPicker = DocumentPickerModule.default || DocumentPickerModule;
+    } else if (DocumentPickerModule) {
+      DocumentPicker = DocumentPickerModule;
+    }
+
+    // Verify that pick method exists
+    if (DocumentPicker && typeof DocumentPicker.pick === 'function') {
+      DocumentPickerInitialized = true;
+      console.log('DocumentPicker initialized successfully');
+    } else {
+      console.warn('DocumentPicker module loaded but pick method not found');
+      DocumentPicker = null;
+    }
+  } catch (error) {
+    console.warn('@react-native-documents/picker not available:', error);
+    DocumentPicker = null;
+  }
+
+  DocumentPickerInitialized = true;
+  return DocumentPicker;
+};
+
+// Initialize on module load
+initializeDocumentPicker();
 import RNLocation from 'react-native-get-location';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Geocoding from 'react-native-geocoding';
@@ -720,28 +743,33 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     const form = documentForms.find(f => f.id === formId);
     if (!form) return;
 
+    // Try to initialize DocumentPicker if not already initialized
+    const picker = initializeDocumentPicker();
+
     // Check if DocumentPicker is available
-    if (!DocumentPicker) {
+    if (!picker) {
       Alert.alert(
         'Document Picker Not Available',
-        '@react-native-documents/picker is not available. Please restart Metro bundler and rebuild the app.',
+        'Document picker is not available. Please ensure the app is properly built and try again.',
+        [{text: 'OK'}],
       );
       return;
     }
 
     // Check if pick method exists
-    if (!DocumentPicker.pick || typeof DocumentPicker.pick !== 'function') {
+    if (!picker.pick || typeof picker.pick !== 'function') {
       Alert.alert(
         'Document Picker Error',
         'Document picker is not properly initialized. Please restart the app.',
+        [{text: 'OK'}],
       );
-      console.error('DocumentPicker.pick is not a function:', DocumentPicker);
+      console.error('DocumentPicker.pick is not a function:', picker);
       return;
     }
 
     try {
       // Check if types are available
-      const pickerTypes = DocumentPicker.types || {};
+      const pickerTypes = picker.types || {};
       const allowedTypes = [
         pickerTypes.pdf,
         pickerTypes.docx,
@@ -750,7 +778,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
 
       if (allowedTypes.length === 0) {
         // Fallback: use mime types if types object is not available
-        const result = await DocumentPicker.pick({
+        const result = await picker.pick({
           type: [
             'application/pdf',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -763,7 +791,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
           await processDocumentPickerResult(formId, result);
         }
       } else {
-        const result = await DocumentPicker.pick({
+        const result = await picker.pick({
           type: allowedTypes,
           allowMultiSelection: true,
         });
@@ -774,7 +802,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
       }
     } catch (error: any) {
       // Handle cancellation
-      if (DocumentPicker.isCancel && DocumentPicker.isCancel(error)) {
+      if (picker.isCancel && picker.isCancel(error)) {
         // User cancelled the picker - this is normal, no need to show error
         return;
       }
@@ -1044,7 +1072,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
               <TouchableOpacity
                 style={[
                   styles.button,
-                  (isUploading || !DocumentPicker) && styles.buttonDisabled,
+                  (isUploading || !initializeDocumentPicker()) &&
+                    styles.buttonDisabled,
                 ]}
                 onPress={async () => {
                   try {
@@ -1057,7 +1086,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                     );
                   }
                 }}
-                disabled={isUploading || !DocumentPicker}>
+                disabled={isUploading || !initializeDocumentPicker()}>
                 <Text style={styles.buttonText}>
                   {isUploading ? (
                     'Uploading...'
@@ -1066,7 +1095,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                       name="filetext1"
                       size={32}
                       color={
-                        DocumentPicker
+                        initializeDocumentPicker()
                           ? colors.button.secondary.text
                           : colors.text.secondary
                       }

@@ -5,8 +5,12 @@ export const statement3Schema = {
     type: "object",
     properties: {
       // Header Information
-      synopsis: { type: "string", title: "Synopsis of the verification" },
-      businessName: { type: "string", title: "Business Name" },
+      synopsis: {
+        type: "string",
+        title: "Synopsis of the verification",
+        ui: { widget: "textarea", rows: 3 },
+      },
+      businessName: { type: "string", title: "Business Name", readonly: true },
 
       // Opening Stock
       openingStock_2023: {
