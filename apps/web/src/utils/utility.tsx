@@ -3,11 +3,16 @@ import { USER_DETAILS } from "@/constants/defaultKeys";
 import { getPresignedDownloadUrl } from "@/services/verifier.services";
 import { useState, useEffect } from "react";
 
-export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {
-  // Remove any leading slashes from the s3ImageUrl
+export const getS3ImageUrl = async (s3ImageUrl: string): Promise<any> => {  
   try {
+    const cleanPath = s3ImageUrl.trim().replace(/^\/+/, "");
     const response = await axiosInstance.get(
-      `/s3/presigned-download-url?path=${s3ImageUrl}`
+      `/s3/presigned-download-url`,
+      {
+        params: {
+          path: cleanPath
+        }
+      }
     );
     // if (!response.data.ok) {
     //   throw new Error(response.data.message || 'Failed to get presigned URL');

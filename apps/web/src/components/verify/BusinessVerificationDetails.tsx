@@ -4,6 +4,9 @@ import {
   CloseCircleOutlined,
   EditOutlined,
   ClockCircleOutlined,
+  EyeOutlined,
+  DownloadOutlined,
+  FileOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -30,7 +33,7 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
 import EditRequestLogs from "./EditRequestLogs";
 import Footer from "./Footer";
@@ -232,6 +235,11 @@ export const BusinessVerificationDetails: React.FC<
   const { id } = router.query;
   const { activeTab } = useTabContext();
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  const [pdfViewerVisible, setPdfViewerVisible] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
+  const [currentPdfFileName, setCurrentPdfFileName] = useState<string>("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const processedFilesRef = useRef<Set<string>>(new Set());
   const [editorContent, setEditorContent] = useState(() => {
     const synopsis = completeVerificationData?.synopsis;
     if (synopsis) {
@@ -1123,11 +1131,240 @@ export const BusinessVerificationDetails: React.FC<
     });
   };
 
+  const isDocumentItem = (item: any): boolean => {
+    return (
+      item.type === "document" ||
+      item.fileType === "pdf" ||
+      (item.fileName && item.fileName.toLowerCase().endsWith(".pdf"))
+    );
+  };
+
+
+  const getFileExtension = (item: any): string => {
+    if (item.fileType) return item.fileType.toLowerCase();
+    if (item.fileName) {
+      const parts = item.fileName.split(".");
+      if (parts.length > 1) return parts[parts.length - 1].toLowerCase();
+    }
+    return "jpg";
+  };
+
+  const handleViewDocument = async (item: any) => {
+    try {
+      const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      
+      setPdfLoading(true);
+      setPdfViewerVisible(true);
+      setCurrentPdfFileName(fileName);
+      
+      const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
+      
+      if (!presignedUrl) {
+        message.error("Failed to load document URL. Please try again.");
+        setPdfViewerVisible(false);
+        setPdfLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(presignedUrl, {
+          method: 'GET',
+          mode: 'cors',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        setCurrentPdfUrl(blobUrl);
+        setPdfLoading(false);
+      } catch (fetchError) {
+        console.error("Error fetching PDF blob:", fetchError);
+        setCurrentPdfUrl(presignedUrl);
+        setPdfLoading(false);
+        message.warning("PDF may not display properly. Use 'Open in New Tab' or 'Download' if needed.");
+      }
+    } catch (error) {
+      console.error("Error loading document:", error);
+      message.error("Failed to load document. Please try again.");
+      setPdfViewerVisible(false);
+      setPdfLoading(false);
+      setCurrentPdfUrl(null);
+    }
+  };
+
+  const handleDownloadDocument = async (item: any) => {
+    try {
+      const url = await getS3ImageUrl(item.s3ImageUrl);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = item.fileName || item.s3ImageUrl.split("/").pop() || "document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      message.success("Document download started");
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      message.error("Failed to download document. Please try again.");
+    }
+  };
+
+  const handleMultipleFileUpload = async (info: any) => {
+    const { fileList } = info;
+    
+    const newFiles = fileList
+      .filter((f: any) => {
+        if (!f.originFileObj) return false;
+        const fileKey = `${f.name}-${f.size}-${f.uid}`;
+        if (processedFilesRef.current.has(fileKey)) return false;
+        processedFilesRef.current.add(fileKey);
+        return true;
+      })
+      .map((f: any) => f.originFileObj)
+      .filter((f: any) => f instanceof File);
+
+    if (newFiles.length === 0) return;
+
+    let successCount = 0;
+    let failCount = 0;
+    let allNewItems: any[] = [];
+    const existingItems =
+      completeVerificationData?.verificationData?.uploadedItems || [];
+
+    const scrollPosition = window.scrollY || window.pageYOffset;
+    savedSectionRef.current = "photoCapture";
+    savedSectionScrollRef.current = scrollPosition;
+
+    const uploadPromises = newFiles.map(async (file: File) => {
+      try {
+        const isImage = file.type === "image/jpeg" || file.type === "image/jpg" || file.name.toLowerCase().endsWith(".jpg") || file.name.toLowerCase().endsWith(".jpeg");
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+        if (currentDepartment === "PD") {
+          if (!isImage && !isPdf) {
+            message.error(`${file.name}: Please upload a JPG image or PDF file only`);
+            failCount++;
+            return;
+          }
+        } else {
+          if (!isImage) {
+            message.error(`${file.name}: Please upload a JPG image file`);
+            failCount++;
+            return;
+          }
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          message.error(`${file.name}: File size should not exceed 10MB`);
+          failCount++;
+          return;
+        }
+
+        const timestamp = new Date().getTime();
+        const randomStr = Math.random().toString(36).substring(7);
+        
+        let fileExtension = "jpg";
+        if (isPdf) {
+          fileExtension = "pdf";
+        } else if (isImage) {
+          fileExtension = "jpg";
+        }
+        
+        const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
+
+        const { url: presignedUrl } = await getPresignedUploadUrl(
+          fileName,
+          file.type
+        );
+
+        const fileBlob = await file.arrayBuffer();
+
+        const uploadResponse = await fetch(presignedUrl, {
+          method: "PUT",
+          body: fileBlob,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+        }
+
+        const newItem = {
+          id: `${timestamp}-${randomStr}`,
+          s3ImageUrl: fileName,
+          type: isPdf ? "document" : "photo",
+          fileType: isPdf ? "pdf" : "jpg",
+          fileName: file.name,
+          timestamp: new Date().toISOString(),
+          isCamera: false,
+          documentType: "Other",
+        };
+
+        allNewItems.push(newItem);
+        successCount++;
+      } catch (error: any) {
+        console.error(`Error uploading ${file.name}:`, error);
+        message.error(`${file.name}: ${error?.message || "Failed to upload"}`);
+        failCount++;
+      }
+    });
+
+    await Promise.all(uploadPromises);
+
+    if (allNewItems.length > 0) {
+      const updatedItems = [...existingItems, ...allNewItems];
+      
+      if (role === "VerificationExecutive") {
+        setSavedSectionData((prev: any) => ({
+          ...prev,
+          uploadedItems: updatedItems,
+        }));
+        
+        if (completeVerificationData?.verificationData) {
+          completeVerificationData.verificationData.uploadedItems = updatedItems;
+        }
+      } else {
+        const updatedData = {
+          verificationData: {
+            ...completeVerificationData?.verificationData,
+            uploadedItems: updatedItems,
+          },
+        };
+        await verifierEditApi(id as string, "Business", updatedData);
+      }
+    }
+
+    if (successCount > 0) {
+      message.success(`${successCount} file(s) uploaded successfully!`);
+      fetchVerificationData();
+    }
+    if (failCount > 0 && successCount === 0) {
+      message.error(`${failCount} file(s) failed to upload`);
+    }
+    
+    processedFilesRef.current.clear();
+  };
+
   const handlePhotoUpload = async (file: File) => {
     try {
-      if (!file.type.startsWith("image/")) {
-        message.error("Please upload an image file");
-        return false;
+      const fileNameLower = file.name.toLowerCase();
+      const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
+      const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+
+      if (currentDepartment === "PD") {
+        if (!isImage && !isPdf) {
+          message.error("Please upload a JPG image or PDF file only");
+          return false;
+        }
+      } else {
+        if (!isImage) {
+          message.error("Please upload a JPG image file");
+          return false;
+        }
       }
 
       if (file.size > 10 * 1024 * 1024) {
@@ -1137,7 +1374,15 @@ export const BusinessVerificationDetails: React.FC<
 
       const timestamp = new Date().getTime();
       const randomStr = Math.random().toString(36).substring(7);
-      const fileName = `verification/${id}/${timestamp}-${randomStr}.jpg`;
+      
+      let fileExtension = "jpg";
+      if (isPdf) {
+        fileExtension = "pdf";
+      } else if (isImage) {
+        fileExtension = "jpg";
+      }
+      
+      const fileName = `verification/${id}/${timestamp}-${randomStr}.${fileExtension}`;
 
       const { url: presignedUrl } = await getPresignedUploadUrl(
         fileName,
@@ -1161,7 +1406,9 @@ export const BusinessVerificationDetails: React.FC<
       const newItem = {
         id: `${timestamp}-${randomStr}`,
         s3ImageUrl: fileName,
-        type: "photo",
+        type: isPdf ? "document" : "photo",
+        fileType: isPdf ? "pdf" : "jpg",
+        fileName: file.name,
         timestamp: new Date().toISOString(),
         isCamera: false,
         documentType: "Other",
@@ -1170,31 +1417,24 @@ export const BusinessVerificationDetails: React.FC<
       const existingItems =
         completeVerificationData?.verificationData?.uploadedItems || [];
 
-      // Store scroll position and section ID for restoration after save (same as section save)
       const scrollPosition = window.scrollY || window.pageYOffset;
       savedSectionRef.current = "photoCapture";
       savedSectionScrollRef.current = scrollPosition;
 
-      // For VerificationExecutive: Save locally only (no API call)
       if (role === "VerificationExecutive") {
-        // Update local state with new photo
         const updatedItems = [...existingItems, newItem];
         setSavedSectionData((prev: any) => ({
           ...prev,
           uploadedItems: updatedItems,
         }));
         
-        // Also update the completeVerificationData state locally for immediate UI update
         if (completeVerificationData?.verificationData) {
           completeVerificationData.verificationData.uploadedItems = updatedItems;
         }
         
-        message.success("Photo uploaded successfully!");
-        fetchVerificationData();
-        return false;
+        return;
       }
 
-      // For Verifier/Admin: Save to backend API
       const updatedData = {
         verificationData: {
           ...completeVerificationData?.verificationData,
@@ -1203,17 +1443,9 @@ export const BusinessVerificationDetails: React.FC<
       };
 
       await verifierEditApi(id as string, "Business", updatedData);
-      message.success("Photo uploaded successfully!");
-      
-      fetchVerificationData();
-
-      return false;
     } catch (error: any) {
-      console.error("Error uploading photo:", error);
-      message.error(
-        error?.message || "Failed to upload photo. Please try again."
-      );
-      return false;
+      console.error("Error uploading file:", error);
+      throw new Error(error?.message || "Failed to upload file");
     }
   };
 
@@ -3936,24 +4168,24 @@ export const BusinessVerificationDetails: React.FC<
                 extra={
                   !(!!verificationData?.approvedStatus || hasEditRequest) ? (
                     <Upload
-                      accept="image/*"
+                      accept={currentDepartment === "PD" ? "image/jpeg,.jpg,.jpeg,.pdf" : "image/jpeg,.jpg,.jpeg"}
                       showUploadList={false}
-                      beforeUpload={handlePhotoUpload}
-                      multiple={false}
+                      beforeUpload={() => false}
+                      onChange={handleMultipleFileUpload}
+                      multiple={true}
                     >
                       <Button
                         type="primary"
                         icon={<UploadOutlined />}
                         size="small"
                       >
-                        Upload Photo
+                        {currentDepartment === "PD" ? "Upload JPG/PDF" : "Upload Photo"}
                       </Button>
                     </Upload>
                   ) : null
                 }
               >
                 {(() => {
-                  // Group photos by document type
                   const groupedPhotos = (data?.uploadedItems || []).reduce(
                     (acc: any, item: any) => {
                       const docType = item.documentType || "Other";
@@ -3969,7 +4201,6 @@ export const BusinessVerificationDetails: React.FC<
                   return Object.entries(groupedPhotos).map(
                     ([docType, photos]: [string, any]) => (
                       <div key={docType} style={{ marginBottom: 24 }}>
-                        {/* Document Type Header */}
                         <div
                           style={{
                             background:
@@ -3988,7 +4219,6 @@ export const BusinessVerificationDetails: React.FC<
                           📄 {docType}
                         </div>
 
-                        {/* Photos Grid for this document type */}
                         <div
                           style={{
                             display: "grid",
@@ -3997,68 +4227,153 @@ export const BusinessVerificationDetails: React.FC<
                             gap: "16px",
                           }}
                         >
-                          {photos.map((item: any, idx: number) => (
-                            <div key={item.id} style={{ position: "relative" }}>
-                              <Image
-                                src={imageUrls[item.id] || ""}
-                                alt={`${docType} Photo ${idx + 1}`}
-                                style={{
-                                  width: "100%",
-                                  height: "200px",
-                                  objectFit: "cover",
-                                  borderRadius: "4px",
-                                  border: "2px solid #f0f0f0",
-                                }}
-                              />
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  background: "rgba(0, 0, 0, 0.7)",
-                                  color: "white",
-                                  padding: "6px 8px",
-                                  fontSize: "11px",
-                                  borderRadius: "0 0 4px 4px",
-                                }}
-                              >
-                                {docType} - Photo {idx + 1}{" "}
-                                {item?.isCamera ? "📷" : "🖼️"}
-                              </div>
-                              {!(
-                                !!verificationData?.approvedStatus ||
-                                hasEditRequest
-                              ) && (
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<CloseCircleOutlined />}
+                          {photos.map((item: any, idx: number) => {
+                            const isDoc = isDocumentItem(item);
+                            const fileExt = getFileExtension(item);
+                            
+                            return (
+                              <div key={item.id} style={{ position: "relative" }}>
+                                {isDoc ? (
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      height: "200px",
+                                      borderRadius: "4px",
+                                      border: "2px solid #f0f0f0",
+                                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      color: "white",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => handleViewDocument(item)}
+                                  >
+                                    <FileOutlined style={{ fontSize: "48px", marginBottom: "8px" }} />
+                                    <div style={{ fontSize: "12px", textAlign: "center", padding: "0 8px" }}>
+                                      {item.fileName || `${fileExt.toUpperCase()} Document`}
+                                    </div>
+                                    <div style={{ fontSize: "10px", marginTop: "4px", opacity: 0.9 }}>
+                                      Click to view
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <Image
+                                    src={imageUrls[item.id] || ""}
+                                    alt={`${docType} Photo ${idx + 1}`}
+                                    style={{
+                                      width: "100%",
+                                      height: "200px",
+                                      objectFit: "cover",
+                                      borderRadius: "4px",
+                                      border: "2px solid #f0f0f0",
+                                    }}
+                                  />
+                                )}
+                                
+                                {isDoc && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: 8,
+                                      left: 8,
+                                      display: "flex",
+                                      gap: "4px",
+                                    }}
+                                  >
+                                    <Button
+                                      type="text"
+                                      icon={<EyeOutlined />}
+                                      style={{
+                                        background: "rgba(255, 255, 255, 0.9)",
+                                        borderRadius: "4px",
+                                        width: "32px",
+                                        height: "32px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewDocument(item);
+                                      }}
+                                      title="View document"
+                                    />
+                                    <Button
+                                      type="text"
+                                      icon={<DownloadOutlined />}
+                                      style={{
+                                        background: "rgba(255, 255, 255, 0.9)",
+                                        borderRadius: "4px",
+                                        width: "32px",
+                                        height: "32px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDownloadDocument(item);
+                                      }}
+                                      title="Download document"
+                                    />
+                                  </div>
+                                )}
+                                
+                                {!(
+                                  !!verificationData?.approvedStatus ||
+                                  hasEditRequest
+                                ) && (
+                                  <Button
+                                    type="text"
+                                    danger
+                                    icon={<CloseCircleOutlined />}
+                                    style={{
+                                      position: "absolute",
+                                      top: 8,
+                                      right: 8,
+                                      background: "rgba(255, 255, 255, 0.9)",
+                                      borderRadius: "50%",
+                                      width: "28px",
+                                      height: "28px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                    }}
+                                    onClick={() => handleDeleteClick(item.id)}
+                                  />
+                                )}
+                                
+                                <div
                                   style={{
                                     position: "absolute",
-                                    top: 8,
-                                    right: 8,
-                                    background: "rgba(255, 255, 255, 0.9)",
-                                    borderRadius: "50%",
-                                    width: "28px",
-                                    height: "28px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    background: "rgba(0, 0, 0, 0.7)",
+                                    color: "white",
+                                    padding: "6px 8px",
+                                    fontSize: "11px",
+                                    borderRadius: "0 0 4px 4px",
                                   }}
-                                  onClick={() => handleDeleteClick(item.id)}
-                                />
-                              )}
-                            </div>
-                          ))}
+                                >
+                                  {docType} - {isDoc ? "Document" : "Photo"} {idx + 1}{" "}
+                                  {!isDoc && (item?.isCamera ? "📷" : "🖼️")}
+                                  {isDoc && "📄"}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )
                   );
                 })()}
 
-                {/* Show message if no photos */}
                 {(!data?.uploadedItems || data.uploadedItems.length === 0) && (
                   <div
                     style={{
@@ -4238,6 +4553,122 @@ export const BusinessVerificationDetails: React.FC<
           loading={loading}
           disabled={hasEditRequest}
         />
+      )}
+
+      {currentDepartment === "PD" && (
+        <Modal
+          open={pdfViewerVisible}
+          onCancel={() => {
+            if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
+              window.URL.revokeObjectURL(currentPdfUrl);
+            }
+            setPdfViewerVisible(false);
+            setCurrentPdfUrl(null);
+            setCurrentPdfFileName("");
+            setPdfLoading(false);
+          }}
+          footer={[
+            <Button
+              key="download"
+              icon={<DownloadOutlined />}
+              onClick={() => {
+                if (currentPdfUrl) {
+                  const link = document.createElement("a");
+                  link.href = currentPdfUrl;
+                  link.download = currentPdfFileName;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  message.success("Document download started");
+                }
+              }}
+            >
+              Download
+            </Button>,
+            <Button key="close" onClick={() => {
+              if (currentPdfUrl && currentPdfUrl.startsWith("blob:")) {
+                window.URL.revokeObjectURL(currentPdfUrl);
+              }
+              setPdfViewerVisible(false);
+              setCurrentPdfUrl(null);
+              setCurrentPdfFileName("");
+              setPdfLoading(false);
+            }}>
+              Close
+            </Button>,
+          ]}
+          width="90%"
+          style={{ top: 20 }}
+          title={`View Document: ${currentPdfFileName}`}
+        >
+          <div style={{ height: "80vh", overflow: "auto" }}>
+            {pdfLoading ? (
+              <div style={{ padding: "40px", textAlign: "center" }}>
+                <p>Loading document...</p>
+              </div>
+            ) : currentPdfUrl ? (
+              <>
+                <iframe
+                  src={currentPdfUrl}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    border: "1px solid #eee",
+                    minHeight: "600px",
+                    display: "block",
+                  }}
+                  title={currentPdfFileName}
+                  onError={() => {
+                    message.warning("Unable to display document in browser. Use download or open in new tab.");
+                  }}
+                />
+                <div style={{ marginTop: "16px", textAlign: "center", padding: "10px" }}>
+                  <Space>
+                    <Button
+                      icon={<DownloadOutlined />}
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = currentPdfUrl;
+                        link.download = currentPdfFileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        message.success("Document download started");
+                      }}
+                    >
+                      Download
+                    </Button>
+                    <Button
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        window.open(currentPdfUrl, "_blank", "noopener,noreferrer");
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                  </Space>
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: "40px", textAlign: "center" }}>
+                <p style={{ color: "#ff4d4f", marginBottom: "16px" }}>
+                  Unable to load document. Please try again.
+                </p>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setPdfViewerVisible(false);
+                    setCurrentPdfUrl(null);
+                    setCurrentPdfFileName("");
+                    setPdfLoading(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );
