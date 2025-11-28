@@ -1239,10 +1239,12 @@ export const BusinessVerificationDetails: React.FC<
 
     const uploadPromises = newFiles.map(async (file: File) => {
       try {
-        const isImage = file.type === "image/jpeg" || file.type === "image/jpg" || file.name.toLowerCase().endsWith(".jpg") || file.name.toLowerCase().endsWith(".jpeg");
-        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        const fileNameLower = file.name.toLowerCase();
+        const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
+        const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
 
-        if (currentDepartment === "PD") {
+        const dept = currentDepartment || curDept;
+        if (dept === "PD") {
           if (!isImage && !isPdf) {
             message.error(`${file.name}: Please upload a JPG image or PDF file only`);
             failCount++;
@@ -1355,7 +1357,8 @@ export const BusinessVerificationDetails: React.FC<
       const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
       const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
 
-      if (currentDepartment === "PD") {
+        const dept = currentDepartment || curDept;
+      if (dept === "PD") {
         if (!isImage && !isPdf) {
           message.error("Please upload a JPG image or PDF file only");
           return false;
@@ -4168,7 +4171,7 @@ export const BusinessVerificationDetails: React.FC<
                 extra={
                   !(!!verificationData?.approvedStatus || hasEditRequest) ? (
                     <Upload
-                      accept={currentDepartment === "PD" ? "image/jpeg,.jpg,.jpeg,.pdf" : "image/jpeg,.jpg,.jpeg"}
+                      accept={(currentDepartment || curDept) === "PD" ? "image/jpeg,.jpg,.jpeg,.pdf" : "image/jpeg,.jpg,.jpeg"}
                       showUploadList={false}
                       beforeUpload={() => false}
                       onChange={handleMultipleFileUpload}
@@ -4179,7 +4182,7 @@ export const BusinessVerificationDetails: React.FC<
                         icon={<UploadOutlined />}
                         size="small"
                       >
-                        {currentDepartment === "PD" ? "Upload JPG/PDF" : "Upload Photo"}
+                        {(currentDepartment || curDept) === "PD" ? "Upload JPG/PDF" : "Upload Photo"}
                       </Button>
                     </Upload>
                   ) : null
