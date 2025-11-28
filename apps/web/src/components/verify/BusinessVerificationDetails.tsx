@@ -2347,6 +2347,208 @@ export const BusinessVerificationDetails: React.FC<
       );
     };
 
+    // Calculate total gross profit and total net profit based on financial analysis type
+    // Note: formValues is already declared above for formula calculations
+    const calculateFinancialTotals = useMemo(() => {
+      const sectionLabel = section.label?.toLowerCase() || "";
+      
+      // Check if this is a financial analysis section (including Type 4 which is excluded from grouping)
+      const isFinancialSection = 
+        section.id === "financialAnalysis" ||
+        section.id === "financialAnalysisComprehensive" ||
+        section.id === "financialAnalysisDetailed" ||
+        sectionLabel.includes("financial");
+
+      if (!isFinancialSection) {
+        return { totalGrossProfit: 0, totalNetProfit: 0 };
+      }
+      // Get current form values (formValues is declared above for formula calculations)
+      const currentFormValues = formValues || form.getFieldsValue();
+      const allData = { ...data, ...changedData[section.id] };
+      const mergedData = { ...allData, ...currentFormValues };
+
+      // Helper to safely parse number
+      const parseNum = (value: any): number => {
+        if (value === null || value === undefined || value === "") return 0;
+        const num = parseFloat(String(value));
+        return isNaN(num) ? 0 : num;
+      };
+
+      // Type 1: Generic/Standard Financial Analysis
+      if (
+        sectionLabel.includes("financial analysis") &&
+        !sectionLabel.includes("gp/pbdit") &&
+        !sectionLabel.includes("comprehensive") &&
+        !sectionLabel.includes("detailed")
+      ) {
+        const sales = parseNum(mergedData.sales);
+        const services = parseNum(mergedData.services);
+        const closingStock = parseNum(mergedData.closingStock);
+        const openingStock = parseNum(mergedData.openingStock);
+        const purchase = parseNum(mergedData.purchase);
+        const costOfServices = parseNum(mergedData.costOfServices);
+        const wages = parseNum(mergedData.wages);
+        const hamaliCharges = parseNum(mergedData.hamaliCharges);
+        const manufacturingExpenses = parseNum(mergedData.manufacturingExpenses);
+        const packingCharges = parseNum(mergedData.packingCharges);
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
+        const totalGrossProfit =
+          sales +
+          services +
+          closingStock -
+          (openingStock +
+            purchase +
+            costOfServices +
+            wages +
+            hamaliCharges +
+            manufacturingExpenses +
+            packingCharges);
+
+        // Net Profit = (Gross Profit + Other Incomes) - (Indirect Expenses)
+        const salaries = parseNum(mergedData.salaries);
+        const rent = parseNum(mergedData.rent);
+        const electricityCharges = parseNum(mergedData.electricityCharges);
+        const printingStationery = parseNum(mergedData.printingStationery);
+        const telephoneCharges = parseNum(mergedData.telephoneCharges);
+        const postageTelegram = parseNum(mergedData.postageTelegram);
+        const officeMaintenance = parseNum(mergedData.officeMaintenance);
+        const repairsMaintenance = parseNum(mergedData.repairsMaintenance);
+        const sadarExpenses = parseNum(mergedData.sadarExpenses);
+        const auditFee = parseNum(mergedData.auditFee);
+        const advertisement = parseNum(mergedData.advertisement);
+        const bankCharges = parseNum(mergedData.bankCharges);
+        const insurance = parseNum(mergedData.insurance);
+        const depreciation = parseNum(mergedData.depreciation);
+        const interestOnLoan = parseNum(mergedData.interestOnLoan);
+        const rentReceived = parseNum(mergedData.rentReceived);
+        const commissionReceived = parseNum(mergedData.commissionReceived);
+
+        const indirectExpenses =
+          salaries +
+          rent +
+          electricityCharges +
+          printingStationery +
+          telephoneCharges +
+          postageTelegram +
+          officeMaintenance +
+          repairsMaintenance +
+          sadarExpenses +
+          auditFee +
+          advertisement +
+          bankCharges +
+          insurance +
+          depreciation +
+          interestOnLoan;
+        const otherIncomes = rentReceived + commissionReceived;
+        const totalNetProfit = totalGrossProfit + otherIncomes - indirectExpenses;
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 2: GP/PBDIT Financial Analysis
+      if (sectionLabel.includes("gp/pbdit")) {
+        const grossReceipts = parseNum(mergedData.grossReceipts);
+        const otherIncome = parseNum(mergedData.otherIncome);
+        const costOfMaterialConsumed = parseNum(mergedData.costOfMaterialConsumed);
+        const grossProfitAsPerAssumption = parseNum(mergedData.grossProfitAsPerAssumption);
+
+        // Gross Profit = Gross Receipts + Other Income - Cost of Material Consumed
+        // Or use grossProfitAsPerAssumption if available
+        const totalGrossProfit =
+          grossProfitAsPerAssumption > 0
+            ? grossProfitAsPerAssumption
+            : grossReceipts + otherIncome - costOfMaterialConsumed;
+
+        // Net Profit = Net Profit After Tax (if available) or calculate from components
+        const netProfitAfterTax = parseNum(mergedData.netProfitAfterTax);
+        const netProfitBeforeTax = parseNum(mergedData.netProfitBeforeTax);
+        const totalNetProfit =
+          netProfitAfterTax > 0
+            ? netProfitAfterTax
+            : netProfitBeforeTax > 0
+            ? netProfitBeforeTax
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 3: Comprehensive Actuals vs Estimated Analysis
+      if (sectionLabel.includes("comprehensive")) {
+        const salesEstimated = parseNum(mergedData.salesEstimated);
+        const servicesEstimated = parseNum(mergedData.servicesEstimated);
+        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
+        const openingStockEstimated = parseNum(mergedData.openingStockEstimated);
+        const purchasesEstimated = parseNum(mergedData.purchasesEstimated);
+        const costOfServicesEstimated = parseNum(mergedData.costOfServicesEstimated);
+        const wagesEstimated = parseNum(mergedData.wagesEstimated);
+        const hamaliChargesEstimated = parseNum(mergedData.hamaliChargesEstimated);
+        const manufacturingExpensesEstimated = parseNum(
+          mergedData.manufacturingExpensesEstimated
+        );
+        const packingChargesEstimated = parseNum(mergedData.packingChargesEstimated);
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
+        const totalGrossProfit =
+          salesEstimated +
+          servicesEstimated +
+          closingStockEstimated -
+          (openingStockEstimated +
+            purchasesEstimated +
+            costOfServicesEstimated +
+            wagesEstimated +
+            hamaliChargesEstimated +
+            manufacturingExpensesEstimated +
+            packingChargesEstimated);
+
+        // Net Profit from estimated field or calculate
+        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
+        const totalNetProfit =
+          netProfitEstimated > 0
+            ? netProfitEstimated
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      // Type 4: Detailed Financial Analysis with Balance Sheet
+      if (sectionLabel.includes("detailed financial analysis with balance sheet")) {
+        const salesAudited = parseNum(mergedData.salesAudited);
+        const salesEstimated = parseNum(mergedData.salesEstimated);
+        const servicesAudited = parseNum(mergedData.servicesAudited);
+        const servicesEstimated = parseNum(mergedData.servicesEstimated);
+        const closingStockAudited = parseNum(mergedData.closingStockAudited);
+        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
+        const openingStockAssessed = parseNum(mergedData.openingStockAssessed);
+        const openingStockAudited = parseNum(mergedData.openingStockAudited);
+        const purchasesAssessed = parseNum(mergedData.purchasesAssessed);
+        const purchasesAudited = parseNum(mergedData.purchasesAudited);
+
+        // Use Estimated values for calculations (or Audited if Estimated not available)
+        const sales = salesEstimated > 0 ? salesEstimated : salesAudited;
+        const services = servicesEstimated > 0 ? servicesEstimated : servicesAudited;
+        const closingStock =
+          closingStockEstimated > 0 ? closingStockEstimated : closingStockAudited;
+        const openingStock =
+          openingStockAssessed > 0 ? openingStockAssessed : openingStockAudited;
+        const purchases = purchasesAssessed > 0 ? purchasesAssessed : purchasesAudited;
+
+        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases)
+        const totalGrossProfit = sales + services + closingStock - (openingStock + purchases);
+
+        // Net Profit from estimated field or calculate from gross profit
+        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
+        const totalNetProfit =
+          netProfitEstimated > 0
+            ? netProfitEstimated
+            : totalGrossProfit; // Fallback to gross profit if net profit not available
+
+        return { totalGrossProfit, totalNetProfit };
+      }
+
+      return { totalGrossProfit: 0, totalNetProfit: 0 };
+    }, [data, changedData, section.id, section.label, form, formValues]);
+
     // Use side and variant attributes that are set by the schema conversion service
     // These are determined from the credit/debit arrays in the schema
     const getFieldSide = (field: any): "debit" | "credit" | null => {
@@ -3303,6 +3505,8 @@ export const BusinessVerificationDetails: React.FC<
         }
       });
 
+      const { totalGrossProfit, totalNetProfit } = calculateFinancialTotals;
+
       return (
         <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
           <Row gutter={[16, 16]}>
@@ -3334,6 +3538,84 @@ export const BusinessVerificationDetails: React.FC<
                 {renderSingleField(field.id, field, true)}
               </Col>
             ))}
+
+            {/* Total Gross Profit and Total Net Profit Display */}
+            {(totalGrossProfit !== 0 || totalNetProfit !== 0) && (
+              <>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0f9ff",
+                      border: "1px solid #0ea5e9",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Total Gross Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#0ea5e9",
+                          display: "block",
+                        }}
+                      >
+                        ₹{totalGrossProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                  <Card
+                    size="small"
+                    style={{
+                      backgroundColor: "#f0fdf4",
+                      border: "1px solid #22c55e",
+                      marginTop: 16,
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Total Net Profit
+                      </Text>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "20px",
+                          color: "#22c55e",
+                          display: "block",
+                        }}
+                      >
+                        ₹{totalNetProfit.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+              </>
+            )}
           </Row>
         </Form>
       );
@@ -3347,6 +3629,12 @@ export const BusinessVerificationDetails: React.FC<
     const arrayFields = visibleFields.filter(
       (field: any) => field.type === "array" && field.arrayItemFields
     );
+
+    // Check if this is Type 4 (Detailed Financial Analysis with Balance Sheet) to show totals
+    const isType4FinancialAnalysis =
+      section.id === "financialAnalysisDetailed" ||
+      section.label?.toLowerCase().includes("detailed financial analysis with balance sheet");
+    const { totalGrossProfit, totalNetProfit } = calculateFinancialTotals;
 
     return (
       <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
@@ -3371,6 +3659,84 @@ export const BusinessVerificationDetails: React.FC<
               {renderSingleField(field.id, field, true)}
             </Col>
           ))}
+
+          {/* Total Gross Profit and Total Net Profit Display for Type 4 */}
+          {isType4FinancialAnalysis && (totalGrossProfit !== 0 || totalNetProfit !== 0) && (
+            <>
+              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                <Card
+                  size="small"
+                  style={{
+                    backgroundColor: "#f0f9ff",
+                    border: "1px solid #0ea5e9",
+                    marginTop: 16,
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: "12px",
+                        display: "block",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Total Gross Profit
+                    </Text>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "20px",
+                        color: "#0ea5e9",
+                        display: "block",
+                      }}
+                    >
+                      ₹{totalGrossProfit.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                  </div>
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+                <Card
+                  size="small"
+                  style={{
+                    backgroundColor: "#f0fdf4",
+                    border: "1px solid #22c55e",
+                    marginTop: 16,
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: "12px",
+                        display: "block",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Total Net Profit
+                    </Text>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "20px",
+                        color: "#22c55e",
+                        display: "block",
+                      }}
+                    >
+                      ₹{totalNetProfit.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                  </div>
+                </Card>
+              </Col>
+            </>
+          )}
         </Row>
       </Form>
     );
