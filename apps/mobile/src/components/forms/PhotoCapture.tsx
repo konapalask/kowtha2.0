@@ -1107,42 +1107,42 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
                 )}
               </Text>
             </TouchableOpacity>
-            {isInternal && (
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  (isUploading || !initializeDocumentPicker()) &&
-                    styles.buttonDisabled,
-                ]}
-                onPress={async () => {
-                  try {
-                    await handleDocumentPickerForForm(form.id);
-                  } catch (error) {
-                    console.error('Error in document picker button:', error);
-                    Alert.alert(
-                      'Error',
-                      'An unexpected error occurred. Please try again.',
-                    );
-                  }
-                }}
-                disabled={isUploading || !initializeDocumentPicker()}>
-                <Text style={styles.buttonText}>
-                  {isUploading ? (
-                    'Uploading...'
-                  ) : (
-                    <Icons
-                      name="filetext1"
-                      size={32}
-                      color={
-                        initializeDocumentPicker()
-                          ? colors.button.secondary.text
-                          : colors.text.secondary
-                      }
-                    />
-                  )}
-                </Text>
-              </TouchableOpacity>
-            )}
+            {/* {isInternal && ( */}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (isUploading || !initializeDocumentPicker()) &&
+                  styles.buttonDisabled,
+              ]}
+              onPress={async () => {
+                try {
+                  await handleDocumentPickerForForm(form.id);
+                } catch (error) {
+                  console.error('Error in document picker button:', error);
+                  Alert.alert(
+                    'Error',
+                    'An unexpected error occurred. Please try again.',
+                  );
+                }
+              }}
+              disabled={isUploading || !initializeDocumentPicker()}>
+              <Text style={styles.buttonText}>
+                {isUploading ? (
+                  'Uploading...'
+                ) : (
+                  <Icons
+                    name="filetext1"
+                    size={32}
+                    color={
+                      initializeDocumentPicker()
+                        ? colors.button.secondary.text
+                        : colors.text.secondary
+                    }
+                  />
+                )}
+              </Text>
+            </TouchableOpacity>
+            {/* )} */}
           </View>
 
           {form.uploadedItems.length > 0 && (
