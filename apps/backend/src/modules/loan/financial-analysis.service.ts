@@ -26,7 +26,6 @@ export class FinancialAnalysisTemplatesService {
    
   async exportFinancialAnalysisToExcel(loanId: number, bankName: string): Promise<Buffer> {
     const ExcelJS = await import('exceljs');
-    console.log("bankName", bankName);
     try {
       // Fetch verification with financial analysis and loan details
       const verification = await this.prisma.verification.findFirst({
@@ -62,35 +61,30 @@ export class FinancialAnalysisTemplatesService {
       }
       
       if (this.isServiceBusinessFormat(bankName)) {
-        console.log("service business format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isDetailedBalanceSheetFormat(bankName)) {
-        console.log("detailed balance sheet format");
         return await this.generateDetailedBalanceSheetFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isProprietorGstFormat(bankName)) {
-        console.log("proprietor gst format");
         return await this.generateProprietorGstFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isGpPbditFormat(bankName)) {
-        console.log("gp pbdit format");
         return await this.generateGpPbditFormat(
           ExcelJS,
           financialAnalysis,
           loan
         );
       } else if (this.isComprehensiveFormat(bankName)) {
-        console.log("comprehensive format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
@@ -102,7 +96,6 @@ export class FinancialAnalysisTemplatesService {
           loanId,
           bankName,
         });
-        console.log("standard format");
         return await this.generateStandardFormat(
           ExcelJS,
           financialAnalysis,
@@ -163,16 +156,14 @@ export class FinancialAnalysisTemplatesService {
     worksheet.columns = [
       { width: 25 },
       { width: 15 },
-      { width: 15 },
       { width: 25 },
-      { width: 15 },
       { width: 15 },
     ];
 
     const titleRow = worksheet.addRow([
       'Trading and Profit & Loss Account for the year ending 31.03.2026',
     ]);
-    worksheet.mergeCells('A1:F1');
+    worksheet.mergeCells('A1:D1');
     titleRow.font = { bold: true, size: 14 };
     titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
     titleRow.height = 30;
@@ -181,15 +172,12 @@ export class FinancialAnalysisTemplatesService {
       pattern: 'solid',
       fgColor: { argb: 'FFD9E1F2' },
     };
-    console.log('financialAnalysis', financialAnalysis);
     // Add header row
     const headerRow = worksheet.addRow([
       'Particulars',
       'Actuals',
-      'Estimations',
       'Particulars',
       'Actuals',
-      'Estimations',
     ]);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -207,52 +195,55 @@ export class FinancialAnalysisTemplatesService {
       };
     });
 
+    // Using field names from generic.ts schema
+    // Debit side fields (left) - matching the order in generic.ts debit array
     const leftItems = [
-      { label: 'To Opening Stock', key: 'openingStockEstimations', actualKey: 'openingStockActuals' },
-      { label: 'To Purchase', key: 'purchaseEstimations', actualKey: 'purchaseActuals' },
-      { label: 'To Cost of Services', key: 'costOfServicesEstimations', actualKey: 'costOfServicesActuals' },
-      { label: 'To Wages', key: 'wagesEstimations', actualKey: 'wagesActuals' },
-      { label: 'To Hamali Charges', key: 'hamaliChargesEstimations', actualKey: 'hamaliChargesActuals' },
-      { label: 'To Manufacturing Expenses', key: 'manufacturingExpensesEstimations', actualKey: 'manufacturingExpensesActuals' },
-      { label: 'To Packing Charges', key: 'packingChargesEstimations', actualKey: 'packingChargesActuals' },
+      { label: 'To Opening Stock', key: 'openingStock' },
+      { label: 'To Purchase', key: 'purchase' },
+      { label: 'To Cost of Services', key: 'costOfServices' },
+      { label: 'To Wages', key: 'wages' },
+      { label: 'To Hamali Charges', key: 'hamaliCharges' },
+      { label: 'To Manufacturing Expenses', key: 'manufacturingExpenses' },
+      { label: 'To Packing Charges', key: 'packingCharges' },
       { label: '', key: '' },
-      { label: 'To Gross Profit', key: 'grossProfitDebitEstimations', actualKey: 'grossProfitDebitActuals', isBold: true },
+      { label: 'To Gross Profit', key: 'grossProfitDebit', isBold: true },
       { label: '', key: '' },
-      { label: 'To Salaries', key: 'salariesEstimations', actualKey: 'salariesActuals' },
-      { label: 'To Rent', key: 'rentEstimations', actualKey: 'rentActuals' },
-      { label: 'To Electricity Charges', key: 'electricityChargesEstimations', actualKey: 'electricityChargesActuals' },
-      { label: 'To Printing & Stationery', key: 'printingStationeryEstimations', actualKey: 'printingStationeryActuals' },
-      { label: 'To Telephone Charges', key: 'telephoneChargesEstimations', actualKey: 'telephoneChargesActuals' },
-      { label: 'To Postage & Telegram', key: 'postageTelegramEstimations', actualKey: 'postageTelegramActuals' },
-      { label: 'To Office Maintenance', key: 'officeMaintenanceEstimations', actualKey: 'officeMaintenanceActuals' },
-      { label: 'To Repairs & Maintenance', key: 'repairsMaintenanceEstimations', actualKey: 'repairsMaintenanceActuals' },
-      { label: 'To Sadar Expenses', key: 'sadarExpensesEstimations', actualKey: 'sadarExpensesActuals' },
-      { label: 'To Audit Fee', key: 'auditFeeEstimations', actualKey: 'auditFeeActuals' },
-      { label: 'To Advertisement', key: 'advertisementEstimations', actualKey: 'advertisementActuals' },
-      { label: 'To Bank Charges', key: 'bankChargesEstimations', actualKey: 'bankChargesActuals' },
-      { label: 'To Insurance', key: 'insuranceEstimations', actualKey: 'insuranceActuals' },
-      { label: 'To Depreciation', key: 'depreciationEstimations', actualKey: 'depreciationActuals' },
-      { label: 'To Interest on Loan', key: 'interestOnLoanEstimations', actualKey: 'interestOnLoanActuals' },
+      { label: 'To Salaries', key: 'salaries' },
+      { label: 'To Rent', key: 'rent' },
+      { label: 'To Electricity Charges', key: 'electricityCharges' },
+      { label: 'To Printing & Stationery', key: 'printingStationery' },
+      { label: 'To Telephone Charges', key: 'telephoneCharges' },
+      { label: 'To Postage & Telegram', key: 'postageTelegram' },
+      { label: 'To Office Maintenance', key: 'officeMaintenance' },
+      { label: 'To Repairs & Maintenance', key: 'repairsMaintenance' },
+      { label: 'To Sadar Expenses', key: 'sadarExpenses' },
+      { label: 'To Audit Fee', key: 'auditFee' },
+      { label: 'To Advertisement', key: 'advertisement' },
+      { label: 'To Bank Charges', key: 'bankCharges' },
+      { label: 'To Insurance', key: 'insurance' },
+      { label: 'To Depreciation', key: 'depreciation' },
+      { label: 'To Interest on Loan', key: 'interestOnLoan' },
       { label: '', key: '' },
-      { label: 'To Net Profit', key: 'netProfitEstimations', actualKey: 'netProfitActuals', isBold: true },
+      { label: 'To Net Profit', key: 'netProfit', isBold: true },
       { label: '', key: '' },
     ];
 
+    // Credit side fields (right) - matching the order in generic.ts credit array
     const rightItems = [
-      { label: 'By Sales', key: 'salesEstimations', actualKey: 'salesActuals' },
-      { label: 'By Services', key: 'servicesEstimations', actualKey: 'servicesActuals' },
-      { label: 'By Closing Stock', key: 'closingStockEstimations', actualKey: 'closingStockActuals' },
+      { label: 'By Sales', key: 'sales' },
+      { label: 'By Services', key: 'services' },
+      { label: 'By Closing Stock', key: 'closingStock' },
       ...Array(5).fill({ label: '', key: '' }),
-      { label: 'By Gross Profit', key: 'grossProfitCreditEstimations', actualKey: 'grossProfitCreditActuals', isBold: true },
-      { label: 'By Rent Received', key: 'rentReceivedEstimations', actualKey: 'rentReceivedActuals' },
-      { label: 'By Commission Received', key: 'commissionReceivedEstimations', actualKey: 'commissionReceivedActuals' },
+      { label: 'By Gross Profit', key: 'grossProfitCredit', isBold: true },
+      { label: 'By Rent Received', key: 'rentReceived' },
+      { label: 'By Commission Received', key: 'commissionReceived' },
       ...Array(17).fill({ label: '', key: '' }),
     ];
 
     // Add data rows
     for (let i = 0; i < Math.max(leftItems.length, rightItems.length); i++) {
-      const leftItem = leftItems[i] || { label: '', key: '', actualKey: '' };
-      const rightItem = rightItems[i] || { label: '', key: '', actualKey: '' };
+      const leftItem = leftItems[i] || { label: '', key: '' };
+      const rightItem = rightItems[i] || { label: '', key: '' };
 
       // Helper function to get value, handling empty strings and null/undefined
       const getValue = (key: string): any => {
@@ -262,13 +253,12 @@ export class FinancialAnalysisTemplatesService {
         return value;
       };
 
+      // Add row with only Actuals columns (no Estimations)
       const row = worksheet.addRow([
         leftItem.label,
-        getValue(leftItem.actualKey),
-        getValue(leftItem.key),
+        getValue(leftItem.key), // Actuals column
         rightItem.label,
-        getValue(rightItem.actualKey),
-        getValue(rightItem.key),
+        getValue(rightItem.key), // Actuals column
       ]);
 
       if (leftItem.isBold || rightItem.isBold) {
@@ -292,8 +282,8 @@ export class FinancialAnalysisTemplatesService {
         cell.alignment = { vertical: 'middle' };
       });
 
-      // Align numbers to the right and format numeric values
-      [2, 3, 5, 6].forEach((colNum) => {
+      // Align numbers to the right and format numeric values (only Actuals columns: 2 and 4)
+      [2, 4].forEach((colNum) => {
         const cell = row.getCell(colNum);
         const value = cell.value;
         if (value !== null && value !== undefined && value !== '') {
