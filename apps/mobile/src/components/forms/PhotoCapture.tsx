@@ -486,33 +486,80 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
               .substring(7)}.jpg`;
 
         // Get presigned URL
+        console.log('s3FileName', s3FileName);
+        console.log('mimeType', mimeType);
         const {
           data: {url: presignedUrl},
         } = await getImageUploadPresignedUrl(s3FileName, mimeType);
 
-        // Upload file - use ReactNativeBlobUtil for content:// URIs (documents)
+        // Upload file - use ReactNativeBlobUtil for documents (handles both content:// and file:// URIs)
         let uploadResponse: any;
-        if (
-          file.isDocument &&
-          (fileUri.startsWith('content://') || fileUri.startsWith('file://'))
-        ) {
-          // For documents, use react-native-blob-util to upload directly
-          // Read file and upload using ReactNativeBlobUtil.fetch with file URI
-          uploadResponse = await ReactNativeBlobUtil.fetch(
-            'PUT',
-            presignedUrl,
-            {
-              'Content-Type': mimeType,
-            },
-            fileUri, // Pass file URI directly - ReactNativeBlobUtil handles it
+        if (file.isDocument) {
+          // For documents (PDF/DOCX), use ReactNativeBlobUtil.config() to ensure Content-Type is set correctly
+          // ReactNativeBlobUtil handles both content:// and file:// URIs correctly
+          // console.log('fileUri', fileUri);
+          // console.log('uri', file.uri);
+          // console.log('mimeType for upload', mimeType);
+
+          // For PDFs, we need to use ReactNativeBlobUtil to read content:// URIs
+          // Standard fetch doesn't handle content:// URIs properly
+          // Read file as base64, then convert to binary and upload
+          let filePathToRead = fileUri;
+
+          // If it's a content:// URI, we need to copy it to a file:// path first
+          if (fileUri.startsWith('content://')) {
+            try {
+              const tempReadPath = `${
+                ReactNativeBlobUtil.fs.dirs.CacheDir
+              }/upload_${Date.now()}-${Math.random()
+                .toString(36)
+                .substring(7)}${fileExtension}`;
+              await ReactNativeBlobUtil.fs.cp(fileUri, tempReadPath);
+              filePathToRead = tempReadPath;
+            } catch (error) {
+              console.error('Failed to copy document for upload:', error);
+              throw new Error(
+                `Failed to prepare document file for upload: ${error}`,
+              );
+            }
+          }
+
+          // Ensure we have a file:// path (remove file:// prefix if present)
+          const cleanPath = filePathToRead.startsWith('file://')
+            ? filePathToRead.replace('file://', '')
+            : filePathToRead;
+
+          // Read file content as base64
+          const base64Data = await ReactNativeBlobUtil.fs.readFile(
+            cleanPath,
+            'base64',
           );
+
+          // Convert base64 to binary ArrayBuffer
+          const binaryString = atob(base64Data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const arrayBuffer = bytes.buffer;
+
+          // Upload using standard fetch with ArrayBuffer (binary data)
+          // This ensures Content-Type is set correctly to application/pdf
+          uploadResponse = await fetch(presignedUrl, {
+            method: 'PUT',
+            body: arrayBuffer,
+            headers: {
+              'Content-Type': mimeType, // Set to application/pdf for PDFs
+            },
+          });
+          // console.log('uploadResponse', uploadResponse);
         } else {
           // For regular file:// URIs (images), use standard fetch with blob
           const fileResponse = await fetch(fileUri);
           const blob = await fileResponse.blob();
           uploadResponse = await fetch(presignedUrl, {
             method: 'PUT',
-            body: blob,
+            body: file,
             headers: {
               'Content-Type': mimeType,
             },
