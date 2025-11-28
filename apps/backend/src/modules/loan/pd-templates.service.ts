@@ -9,7 +9,7 @@ import {
 } from "./forms-schema";
 import { LoanService } from "./loan.service";
 import { PrismaService } from "src/prisma.service";
-import * as templates from "./templates/PD/html/_index";
+// import * as templates from "./templates/PD/html/_index";
 // import * as interfaces from "./templates/PD/interface/_index";
 import { VerificationType, Department } from "@prisma/client";
 import { S3Service } from "src/modules/common/s3utils/s3.service";
@@ -50,7 +50,7 @@ import { janaSalariedTemplate } from "./templates/PD/html/jana-salaried.template
 import { janaSenpAbove50lTemplate } from "./templates/PD/html/jana-senp-above-50l.template";
 import { janaSenpBelow50lTemplate } from "./templates/PD/html/jana-senp-below-50l.template";
 
-import * as templatesPD from "./templates/PD/html/_index";
+// import * as templatesPD from "./templates/PD/html/_index";
 
 import {
   validateVerificationData,
@@ -423,15 +423,7 @@ export class PDTemplateService {
     console.log("bankName", bankName);
     console.log("matchKey", matchKey);
     // Banks with custom templates - match by templateName
-<<<<<<< HEAD
-    if (
-      matchesTemplate("AXIS FINANCE-UBL") ||
-      matchKey === "Axis Finance UBL Above 10L" ||
-      matchKey === "Axis Finance UBL Below 10L"
-    ) {
-=======
     if (matchesTemplate("AXIS FINANCE-UBL ABOVE 10L") || matchKey === "Axis Finance UBL Above 10L") {
->>>>>>> sandeep
       // const verificationData = (verification?.verificationData ||
       // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
