@@ -21,8 +21,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
     if (
       amount === null ||
       amount === undefined ||
-      amount === 0 ||
-      amount === ""
+      amount === 0 
     ) {
       return "Not Provided";
     }
