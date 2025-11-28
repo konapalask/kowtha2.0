@@ -449,11 +449,11 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
     annexureAfhl.purposeOfPurchase
   )}
         ${renderKeyValue(
-    "Distance from current business / residence",
+    "Distance of the property from current business and residence",
     annexureAfhl.distanceFromWork
   )}
         ${renderKeyValue(
-    "Commute plan / reason for buying in far area",
+    "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
     annexureAfhl.commutePlan
   )}
       </table>
@@ -542,5 +542,6 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
 
 
     </div>
+    ${pdBaseTemplateFooter(html_data)}
   `;
 };

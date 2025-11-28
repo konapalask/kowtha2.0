@@ -354,12 +354,14 @@ export const axisBankSchema = {
           },
           customerIdentityDetails: {
             type: "string",
-            title: "If yes, established through document",
-            show: {
+            title: "If yes, established through documents",
+            dependencies: {
+              show: {
               customerIdentityEstablished: "Yes",
             },
             required: {
               customerIdentityEstablished: "Yes",
+            },
             },
           },
           charteredACDetails: {
