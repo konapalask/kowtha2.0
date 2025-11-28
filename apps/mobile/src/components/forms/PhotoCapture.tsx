@@ -815,22 +815,14 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
     }
 
     try {
-      // Check if types are available
+      // Check if types are available - restrict to PDF only
       const pickerTypes = picker.types || {};
-      const allowedTypes = [
-        pickerTypes.pdf,
-        pickerTypes.docx,
-        pickerTypes.doc,
-      ].filter(Boolean); // Remove undefined values
+      const allowedTypes = [pickerTypes.pdf].filter(Boolean); // Only PDF
 
       if (allowedTypes.length === 0) {
-        // Fallback: use mime types if types object is not available
+        // Fallback: use mime type if types object is not available
         const result = await picker.pick({
-          type: [
-            'application/pdf',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/msword',
-          ],
+          type: ['application/pdf'], // Only PDF
           allowMultiSelection: true,
         });
 
@@ -839,7 +831,7 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({
         }
       } else {
         const result = await picker.pick({
-          type: allowedTypes,
+          type: allowedTypes, // Only PDF
           allowMultiSelection: true,
         });
 
