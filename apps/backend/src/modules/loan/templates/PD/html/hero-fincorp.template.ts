@@ -166,12 +166,9 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     familyRows
   );
 
-  const documentsList = financialSummary.documentsObserved
-    ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary.documentsObserved
-        .split("\n")
-        .map((line: string) => line.trim())
-        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-        .join("")}</ul>`
+  const documentsList = financialSummary?.documentsObserved
+    ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary?.documentsObserved.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}
+    </ul>`
     : "Not provided";
 
   // Handle nested structures for customers
@@ -248,11 +245,8 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
   );
 
   const otherBusinessList = loanAnalysis.otherBusinessIncome
-    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis.otherBusinessIncome
-        .split("\n")
-        .map((line: string) => line.trim())
-        .map((line: string) => `<li style="margin-left: 8px;">${line}</li>`)
-        .join("")}</ul>`
+    ? `<ul style="margin: 0; padding-left: 20px;">${loanAnalysis?.otherBusinessIncome?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}
+    </ul>`
     : "Not provided";
 
   const statusTable = renderTwoColumnTable([
@@ -274,7 +268,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${generalTable}
 
       ${sectionTitle("About the Applicant")}
-      ${applicantProfile.applicantSummary ? `<ul style="margin: 0; padding-left: 20px;">${applicantProfile.applicantSummary.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}
+      ${applicantProfile.applicantSummary ? `<ul style="margin: 0; padding-left: 20px;">${applicantProfile?.applicantSummary?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}</ul>` : "Not provided"}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Family Details</h3>
       ${familyTable}
@@ -282,7 +276,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${sectionTitle("About the Business")}
       ${
         businessProfileData?.aboutTheBusiness
-          ? `<ul style="margin: 0; padding-left: 20px;">${formatMultiline(businessProfileData?.aboutTheBusiness).split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}
+          ? `<ul style="margin: 0; padding-left: 20px;">${formatMultiline(businessProfileData?.aboutTheBusiness)?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}
             </ul>`
           : "Not provided"
       }
@@ -294,7 +288,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
       ${documentsList}
 
       <h3 style="margin:12px 0 6px;font-size:16px;font-weight:600;color:#1f2d3d;">Automation Level</h3>
-      ${financialSummary.automationLevel ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary.automationLevel.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}
+      ${financialSummary.automationLevel ? `<ul style="margin: 0; padding-left: 20px;">${financialSummary?.automationLevel?.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("") || "Not provided"}</ul>` : "Not provided"}
 
       ${sectionTitle("Customers")}
       <ul>

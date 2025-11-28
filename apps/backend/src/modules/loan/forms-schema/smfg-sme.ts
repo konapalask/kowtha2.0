@@ -1,4 +1,4 @@
-import statement2Schema from "../financials-schema/statement2";
+import financialsSchema from "../financials-schema/generic";
 export const smfgSmeSchema = {
   id: 25,
   bankName: "SMFG SME",
@@ -465,7 +465,7 @@ export const smfgSmeSchema = {
         },
       },
     },
-    statement2Schema,
+    financialsSchema,
   ],
 } as const;
 

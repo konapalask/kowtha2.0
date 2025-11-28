@@ -44,7 +44,7 @@ export const axisBankSchema = {
           pdAddress: {
             type: "string",
             title: "PD Address Type (Residence/Office/Factory/Godown)",
-            enum: ["Residence", "Office", "Factory", "Godown"],
+            readOnly: true,
           },
           initiatedAddress: {
             type: "string",
