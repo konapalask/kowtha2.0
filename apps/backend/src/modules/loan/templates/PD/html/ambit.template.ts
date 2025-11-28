@@ -76,8 +76,8 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
   const purposeOfLoan = verificationData.purposeOfLoan || {};
   const documentsObserved = verificationData.documentsObserved || {};
   const regularCustomersAndSuppliersActivity = verificationData.regularCustomersAndSuppliersActivity || {};
-  const regularCustomer = regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularCustomers || {};
-  const regularSupplier = regularCustomersAndSuppliersActivity.nameAndContactNumberOfRegularSuppliers || {};
+  const regularCustomer = regularCustomersAndSuppliersActivity?.nameAndContactNumberOfRegularCustomers || {};
+  const regularSupplier = regularCustomersAndSuppliersActivity?.nameAndContactNumberOfRegularSuppliers || {};
   const businessActivityAndStockLevelObserved = verificationData.businessActivityAndStockLevelObserved || {};
   const bankingDetails = verificationData.bankingDetails || {};
   const existingLoans = verificationData.existingLoans || {};
@@ -135,7 +135,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
                 <td style="${labelCellStyle}">Occupied since (years)</td>
               </tr>
               <tr>
-                <td style="${valueCellStyle}">${propertyDetails.marketValue}</td>
+                <td style="${valueCellStyle}">${formatCurrency(propertyDetails.marketValue)}</td>
                 <td style="${valueCellStyle}">${propertyDetails.ownedBy}</td>
                 <td style="${valueCellStyle}">${propertyDetails.areaInSqFt}</td>
                 <td style="${valueCellStyle}">${propertyDetails.occupiedSinceYears}</td>
@@ -177,21 +177,54 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
           </td>
         </tr>
 
-        ${renderKeyValue("About the Business", formatMultiline(aboutTheBusiness.aboutTheBusiness))}
-        ${renderKeyValue("Other Observations", formatMultiline(otherObservations.observations))}
-        ${renderKeyValue("Concerns", formatMultiline(otherObservations.concerns))}
+        ${renderKeyValue("About the Business", aboutTheBusiness.aboutTheBusiness ? `<ul style="margin: 0; padding-left: 8px;">${aboutTheBusiness.aboutTheBusiness.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
+        ${renderKeyValue("Other Observations", otherObservations.observations ? `<ul style="margin: 0; padding-left: 8px;">${otherObservations.observations.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
+        ${renderKeyValue("Concerns", otherObservations.concerns ? `<ul style="margin: 0; padding-left: 8px;">${otherObservations.concerns.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
         ${renderKeyValue("Purpose of Loan", formatMultiline(purposeOfLoan.purposeOfLoan))}
         ${renderKeyValue("As per Audited individual ITR's", purposeOfLoan.asPerAuditedIndividualItrS)}
         ${renderKeyValue("Whether registered under MSME", purposeOfLoan.whetherRegisteredUnderMsme)}
         ${renderKeyValue("Whether registered under GST", purposeOfLoan.whetherRegisteredUnderGst)}
-        ${renderKeyValue("Documents Observed", formatMultiline(documentsObserved.documentsObserved))}
+        ${renderKeyValue("Documents Observed", documentsObserved.documentsObserved ? `<ul style="margin: 0; padding-left: 8px;">${documentsObserved.documentsObserved.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided")}
         ${renderKeyValue("Automation Level", documentsObserved.automationLevel)}
         ${renderKeyValue("Receipts", formatCurrency(documentsObserved.receipts))}
         ${renderKeyValue("Payments", formatCurrency(documentsObserved.payments))}
         
 
-        ${renderKeyValue("Name and Contact number of Regular Customers",formatMultiline(regularCustomer.nameAndContactNumberOfRegularCustomers))}
-        ${renderKeyValue("Name and Contact number of Regular Suppliers", formatMultiline(regularSupplier.nameAndContactNumberOfRegularSuppliers))}
+        
+        <tr>
+          <td style="${labelCellStyle}">Name and Contact number of Regular Customers</td>
+          <td style="border:1px solid #ccc;padding:8px">
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Name</td>
+                <td style="${labelCellStyle}">Contact Number</td>
+              </tr>
+              ${ensureArray(regularCustomer).map((customer) => `
+                <tr>
+                  <td style="${valueCellStyle}">${customer.name}</td>
+                  <td style="${valueCellStyle}">${customer.contactNumber}</td>
+                </tr>
+              `).join("")}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="${labelCellStyle}">Name and Contact number of Regular Suppliers</td>
+          <td style="border:1px solid #ccc;padding:8px">
+            <table style="${tableStyle}">
+              <tr>
+                <td style="${labelCellStyle}">Name</td>
+                <td style="${labelCellStyle}">Contact Number</td>
+              </tr>
+              ${ensureArray(regularSupplier).map((supplier) => `
+                <tr>
+                  <td style="${valueCellStyle}">${supplier.name}</td>
+                  <td style="${valueCellStyle}">${supplier.contactNumber}</td>
+                </tr>
+              `).join("")}
+            </table>
+          </td>
+        </tr>
         ${renderKeyValue("Net Margin", formatCurrency(businessActivityAndStockLevelObserved.netMargin))}
         ${renderKeyValue("Expenditure", formatCurrency(businessActivityAndStockLevelObserved.expenditure))}
         ${renderKeyValue("Employees", businessActivityAndStockLevelObserved.employees)}
@@ -212,7 +245,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                   <td style="${valueCellStyle}">${banking.bankName}</td>
                   <td style="${valueCellStyle}">${banking.accountType}</td>
-                  <td style="${valueCellStyle}">${banking.averageBalance}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(banking.averageBalance)}</td>
                   <td style="${valueCellStyle}">${banking.noOfYearsMaintained}</td>
                 </tr>
               `).join("")}  
@@ -233,10 +266,10 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
               </tr>
               ${ensureArray(existingLoans.loanDetails).map((existingLoan) => `
                 <tr>
-                  <td style="${valueCellStyle}">${existingLoan.bank}</td>
+                  <td style="${valueCellStyle}">${existingLoan.bankName}</td>
                   <td style="${valueCellStyle}">${existingLoan.type}</td>
-                  <td style="${valueCellStyle}">${existingLoan.loanAmount}</td>
-                  <td style="${valueCellStyle}">${existingLoan.emi}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(existingLoan.loanAmount)}</td>
+                  <td style="${valueCellStyle}">${formatCurrency(existingLoan.emi)}</td>
                   <td style="${valueCellStyle}">${existingLoan.openClose}</td>
                 </tr>
               `).join("")}  
@@ -247,7 +280,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("End Use", formatMultiline(otherBusinessIncome.endUse))}
         ${renderKeyValue("Security Offered", formatMultiline(otherBusinessIncome.securityOffered))}
         ${renderKeyValue("Address", otherBusinessIncome.address_3)}
-        ${renderKeyValue("Other Business/Income", formatMultiline(otherBusinessIncome.otherBusinessIncome))}
+        ${renderKeyValue("Other Business/Income", formatMultiline(otherBusinessIncome.otherBusinessInterestSourceOfIncomeFamilyIncome))}
         ${renderKeyValue("Neighbor Check", formatMultiline(otherBusinessIncome.neighborCheck))}
         ${renderKeyValue("Status", status.status)}
       </table>

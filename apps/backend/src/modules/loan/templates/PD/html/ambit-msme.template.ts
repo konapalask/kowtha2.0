@@ -74,10 +74,9 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
 
 export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
   const general = verificationData.general || {};
-  const addressDetails = verificationData.addressDetails || {};
-  const initiatedAddress = addressDetails.initiatedAddress || {};
-  const visitedAddress = addressDetails.visitedAddress || {};
-  const businessLicenseAddress = addressDetails.businessLicenseAddress || {};
+  const initiatedAddress = verificationData.addressDetails.initiatedAddress || {};
+  const visitedAddress = verificationData.addressDetails.visitedAddress || {};
+  const businessLicenseAddress = verificationData.addressDetails.businessLicenseAddress || {};
   const residentialDetails = verificationData.residentialDetails || {};
   const propertyDetails = verificationData.propertyDetails || {};
   const generalInfo = verificationData.generalInfo || {};
@@ -121,7 +120,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
           <td style="${labelCellStyle}">Visited Address</td>
-          <td style="${valueCellStyle}">${visitedAddress?.address || ""}${visitedAddress?.latitude !== undefined && visitedAddress?.latitude !== null ? `<br>Latitude: ${visitedAddress.latitude}` : ""}${visitedAddress?.longitude !== undefined && visitedAddress?.longitude !== null ? `<br>Longitude: ${visitedAddress.longitude}` : ""}</td>
+          <td style="${valueCellStyle}">${visitedAddress?.address || ""}${visitedAddress?.latitude ? `<br>Latitude: ${visitedAddress.latitude}` : ""}${visitedAddress?.longitude ? `<br>Longitude: ${visitedAddress.longitude}` : ""}</td>
         </tr>
         <tr>
           <td style="${labelCellStyle}">Business License Address</td>
@@ -133,7 +132,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
           <td style="border:1px solid #ccc;padding:8px">
             <table style="${tableStyle}">
               <tr>
-                <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${residentialDetails.address + ", " + residentialDetails.latitude + ", " + residentialDetails.longitude}</td>
+                <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${residentialDetails.address + "<br><strong>Latitude:</strong> " + residentialDetails.latitude + "<br><strong>Longitude:</strong> " + residentialDetails.longitude}</td>
                 
               </tr>
               <tr>
@@ -160,7 +159,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                     <tr>
-                        <td style="${labelCellStyle}" colspan="4"><u>Address with Lattitude and Longitude:</u> ${propertyDetails.address + ", " + propertyDetails.latitude + ", " + propertyDetails.longitude}</td>
+                        <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${propertyDetails.address + "<br><strong>Latitude:</strong> " + propertyDetails.latitude + "<br><strong>Longitude:</strong> " + propertyDetails.longitude}</td>
                         ${renderKeyValue("Type of Property", propertyDetails.typeOfProperty)}
                         ${renderKeyValue("Property owner name", propertyDetails.ownerName)}
                         ${renderKeyValue("Nature of uses", propertyDetails.natureOfUses)}
@@ -192,12 +191,12 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">1</td>
                 <td style="${labelCellStyle}">Applicant Profile</td>
-                <td style="${valueCellStyle}">${formatMultiline(applicantDetails.applicantProfile)}</td>
+                <td style="${valueCellStyle}">${applicantDetails.applicantProfile ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.applicantProfile.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">2</td>
                 <td style="${labelCellStyle}">Details of all Co-Applicant</td>
-                <td style="${valueCellStyle}">${formatMultiline(applicantDetails.detailsOfCoApplicant)}</td>
+                <td style="${valueCellStyle}">${applicantDetails.detailsOfCoApplicant ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.detailsOfCoApplicant.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">3</td>
@@ -235,12 +234,12 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">4</td>
                 <td style="${labelCellStyle}">Business/Employment Details</td>
-                <td style="${valueCellStyle}">${formatMultiline(businessDetails.businessDetails)}</td>
+                <td style="${valueCellStyle}">${businessDetails.businessDetails ? `<ul style="margin: 0; padding-left: 8px;">${businessDetails.businessDetails.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">5</td>
                 <td style="${labelCellStyle}">Income Assessment details</td>
-                <td style="${valueCellStyle}">${formatMultiline(incomeAssessment.incomeAssessment)}</td>
+                <td style="${valueCellStyle}">${incomeAssessment.incomeAssessment ? `<ul style="margin: 0; padding-left:8px;">${incomeAssessment.incomeAssessment.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">6</td>

@@ -77,6 +77,7 @@ export const ambitMsmeSchema = {
           },
           visitedAddress: {
             type: "object",
+            title: "Visited Address",
             properties: {
               address: {
                 type: "string",
