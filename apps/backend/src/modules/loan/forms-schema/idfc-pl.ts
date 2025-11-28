@@ -43,7 +43,7 @@ export const idfcPlSchema = {
             enum: ["Married", "Divorced", "Bachelor"],
           },
         },
-        required: ["nameOfTheApplicant", "sdfcId", "visitedAddress"],
+        required: ["nameOfTheApplicant", "applicationId", "visitedAddress"],
       },
       required: true,
     },

@@ -230,7 +230,7 @@ function renderObjectField(
  */
 function formatValue(value: any, property: any): string {
   if (value === null || value === undefined || value === "") {
-    return "";
+    return "Not Provided";
   }
 
   // Handle boolean
@@ -246,6 +246,14 @@ function formatValue(value: any, property: any): string {
   // Handle dates
   if (property?.format === "date" && value) {
     return value.toString();
+  }
+
+  // Handle textarea/descriptive fields - format as bullet points
+  if (property?.ui?.widget === "textarea" || property?.format === "textarea") {
+    const text = String(value);
+    const lines = text.split(/\n+/).filter((line: string) => line.trim().length > 0);
+    if (lines.length === 0) return "Not Provided";
+    return `<ul style="margin: 0; padding-left: 20px; list-style-type: disc;">${lines.map((line: string) => `<li style="margin-left: 8px;">${line.trim()}</li>`).join("")}</ul>`;
   }
 
   // Handle objects (shouldn't happen in leaf values, but just in case)

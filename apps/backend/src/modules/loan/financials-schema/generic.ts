@@ -5,9 +5,9 @@ export const financialsSchema = {
     type: "object",
     properties: {
       // Debit side (To ...)
-      openingStockActuals: {
+      openingStock: {
         type: "number",
-        title: "To Opening Stock - Actuals",
+        title: "To Opening Stock",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -16,9 +16,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      openingStockEstimations: {
+      purchase: {
         type: "number",
-        title: "To Opening Stock - Estimations",
+        title: "To Purchase",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -27,9 +27,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      purchaseActuals: {
+      costOfServices: {
         type: "number",
-        title: "To Purchase - Actuals",
+        title: "To Cost of Services",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -38,9 +38,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      purchaseEstimations: {
+      wages: {
         type: "number",
-        title: "To Purchase - Estimations",
+        title: "To Wages",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -49,9 +49,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      costOfServicesActuals: {
+      hamaliCharges: {
         type: "number",
-        title: "To Cost of Services - Actuals",
+        title: "To Hamali Charges",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -60,9 +60,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      costOfServicesEstimations: {
+      manufacturingExpenses: {
         type: "number",
-        title: "To Cost of Services - Estimations",
+        title: "To Manufacturing Expenses",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -71,9 +71,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      wagesActuals: {
+      packingCharges: {
         type: "number",
-        title: "To Wages - Actuals",
+        title: "To Packing Charges",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -82,9 +82,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      wagesEstimations: {
+      grossProfitDebit: {
         type: "number",
-        title: "To Wages - Estimations",
+        title: "To Gross Profit",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -93,9 +93,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      hamaliChargesActuals: {
+      salaries: {
         type: "number",
-        title: "To Hamali Charges - Actuals",
+        title: "To Salaries",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -104,9 +104,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      hamaliChargesEstimations: {
+      rent: {
         type: "number",
-        title: "To Hamali Charges - Estimations",
+        title: "To Rent",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -115,9 +115,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      manufacturingExpensesActuals: {
+      electricityCharges: {
         type: "number",
-        title: "To Manufacturing Expenses - Actuals",
+        title: "To Electricity Charges",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -126,9 +126,10 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      manufacturingExpensesEstimations: {
+
+      printingStationery: {
         type: "number",
-        title: "To Manufacturing Expenses - Estimations",
+        title: "To Printing & Stationery",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -137,9 +138,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      packingChargesActuals: {
+      telephoneCharges: {
         type: "number",
-        title: "To Packing Charges - Actuals",
+        title: "To Telephone Charges",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -148,9 +149,10 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      packingChargesEstimations: {
+
+      postageTelegram: {
         type: "number",
-        title: "To Packing Charges - Estimations",
+        title: "To Postage & Telegram",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -159,9 +161,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      grossProfitDebitActuals: {
+      officeMaintenance: {
         type: "number",
-        title: "To Gross Profit - Actuals",
+        title: "To Office Maintenance",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -170,9 +172,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      grossProfitDebitEstimations: {
+      repairsMaintenance: {
         type: "number",
-        title: "To Gross Profit - Estimations",
+        title: "To Repairs & Maintenance",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -181,9 +183,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      salariesActuals: {
+      sadarExpenses: {
         type: "number",
-        title: "To Salaries - Actuals",
+        title: "To Sadar Expenses",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -192,9 +194,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      salariesEstimations: {
+      auditFee: {
         type: "number",
-        title: "To Salaries - Estimations",
+        title: "To Audit Fee",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -203,9 +205,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      rentActuals: {
+      advertisement: {
         type: "number",
-        title: "To Rent - Actuals",
+        title: "To Advertisement",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -214,9 +216,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      rentEstimations: {
+      bankCharges: {
         type: "number",
-        title: "To Rent - Estimations",
+        title: "To Bank Charges",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -225,9 +227,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      electricityChargesActuals: {
+      insurance: {
         type: "number",
-        title: "To Electricity Charges - Actuals",
+        title: "To Insurance",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -236,9 +238,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      electricityChargesEstimations: {
+      depreciation: {
         type: "number",
-        title: "To Electricity Charges - Estimations",
+        title: "To Depreciation",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -247,9 +249,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      printingStationeryActuals: {
+      interestOnLoan: {
         type: "number",
-        title: "To Printing & Stationery - Actuals",
+        title: "To Interest on Loan",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -258,273 +260,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      printingStationeryEstimations: {
+      netProfit: {
         type: "number",
-        title: "To Printing & Stationery - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      telephoneChargesActuals: {
-        type: "number",
-        title: "To Telephone Charges - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      telephoneChargesEstimations: {
-        type: "number",
-        title: "To Telephone Charges - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      postageTelegramActuals: {
-        type: "number",
-        title: "To Postage & Telegram - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      postageTelegramEstimations: {
-        type: "number",
-        title: "To Postage & Telegram - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      officeMaintenanceActuals: {
-        type: "number",
-        title: "To Office Maintenance - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      officeMaintenanceEstimations: {
-        type: "number",
-        title: "To Office Maintenance - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      repairsMaintenanceActuals: {
-        type: "number",
-        title: "To Repairs & Maintenance - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      repairsMaintenanceEstimations: {
-        type: "number",
-        title: "To Repairs & Maintenance - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      sadarExpensesActuals: {
-        type: "number",
-        title: "To Sadar Expenses - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      sadarExpensesEstimations: {
-        type: "number",
-        title: "To Sadar Expenses - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      auditFeeActuals: {
-        type: "number",
-        title: "To Audit Fee - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      auditFeeEstimations: {
-        type: "number",
-        title: "To Audit Fee - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      advertisementActuals: {
-        type: "number",
-        title: "To Advertisement - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      advertisementEstimations: {
-        type: "number",
-        title: "To Advertisement - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      bankChargesActuals: {
-        type: "number",
-        title: "To Bank Charges - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      bankChargesEstimations: {
-        type: "number",
-        title: "To Bank Charges - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      insuranceActuals: {
-        type: "number",
-        title: "To Insurance - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      insuranceEstimations: {
-        type: "number",
-        title: "To Insurance - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      depreciationActuals: {
-        type: "number",
-        title: "To Depreciation - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      depreciationEstimations: {
-        type: "number",
-        title: "To Depreciation - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      interestOnLoanActuals: {
-        type: "number",
-        title: "To Interest on Loan - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      interestOnLoanEstimations: {
-        type: "number",
-        title: "To Interest on Loan - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      netProfitActuals: {
-        type: "number",
-        title: "To Net Profit - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      netProfitEstimations: {
-        type: "number",
-        title: "To Net Profit - Estimations",
+        title: "To Net Profit",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -535,9 +273,9 @@ export const financialsSchema = {
       },
 
       // Credit side (By ...)
-      salesActuals: {
+      sales: {
         type: "number",
-        title: "By Sales - Actuals",
+        title: "By Sales",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -546,9 +284,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      salesEstimations: {
+      services: {
         type: "number",
-        title: "By Sales - Estimations",
+        title: "By Services",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -557,9 +295,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      servicesActuals: {
+      closingStock: {
         type: "number",
-        title: "By Services - Actuals",
+        title: "By Closing Stock",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -568,9 +306,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      servicesEstimations: {
+      grossProfitCredit: {
         type: "number",
-        title: "By Services - Estimations",
+        title: "By Gross Profit",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -579,9 +317,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      closingStockActuals: {
+      rentReceived: {
         type: "number",
-        title: "By Closing Stock - Actuals",
+        title: "By Rent Received",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -590,75 +328,9 @@ export const financialsSchema = {
           minDecimalPlaces: 0,
         },
       },
-      closingStockEstimations: {
+      commissionReceived: {
         type: "number",
-        title: "By Closing Stock - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      grossProfitCreditActuals: {
-        type: "number",
-        title: "By Gross Profit - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      grossProfitCreditEstimations: {
-        type: "number",
-        title: "By Gross Profit - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      rentReceivedActuals: {
-        type: "number",
-        title: "By Rent Received - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      rentReceivedEstimations: {
-        type: "number",
-        title: "By Rent Received - Estimations",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      commissionReceivedActuals: {
-        type: "number",
-        title: "By Commission Received - Actuals",
-        minimum: 0,
-        formatter: {
-          useIndianFormat: true,
-          locale: "en-IN",
-          maxDecimalPlaces: 2,
-          minDecimalPlaces: 0,
-        },
-      },
-      commissionReceivedEstimations: {
-        type: "number",
-        title: "By Commission Received - Estimations",
+        title: "By Commission Received",
         minimum: 0,
         formatter: {
           useIndianFormat: true,
@@ -668,99 +340,70 @@ export const financialsSchema = {
         },
       },
     },
+    
     debit: [
       // Opening Stock
-      "openingStockEstimations",
-      "openingStockActuals",
+      "openingStock",
       // Purchase
-      "purchaseEstimations",
-      "purchaseActuals",
+      "purchase",
       // Cost of Services
-      "costOfServicesEstimations",
-      "costOfServicesActuals",
+      "costOfServices",
       // Wages
-      "wagesEstimations",
-      "wagesActuals",
+      "wages",
       // Hamali Charges
-      "hamaliChargesEstimations",
-      "hamaliChargesActuals",
+      "hamaliCharges",
       // Manufacturing Expenses
-      "manufacturingExpensesEstimations",
-      "manufacturingExpensesActuals",
+      "manufacturingExpenses",
       // Packing Charges
-      "packingChargesEstimations",
-      "packingChargesActuals",
+      "packingCharges",
       // Gross Profit (Debit)
-      "grossProfitDebitEstimations",
-      "grossProfitDebitActuals",
+      "grossProfitDebit",
       // Salaries
-      "salariesEstimations",
-      "salariesActuals",
+      "salaries",
       // Rent
-      "rentEstimations",
-      "rentActuals",
+      "rent",
       // Electricity Charges
-      "electricityChargesEstimations",
-      "electricityChargesActuals",
+      "electricityCharges",
       // Printing & Stationery
-      "printingStationeryEstimations",
-      "printingStationeryActuals",
+      "printingStationery",
       // Telephone Charges
-      "telephoneChargesEstimations",
-      "telephoneChargesActuals",
+      "telephoneCharges",
       // Postage & Telegram
-      "postageTelegramEstimations",
-      "postageTelegramActuals",
+      "postageTelegram",
       // Office Maintenance
-      "officeMaintenanceEstimations",
-      "officeMaintenanceActuals",
+      "officeMaintenance",
       // Repairs & Maintenance
-      "repairsMaintenanceEstimations",
-      "repairsMaintenanceActuals",
+      "repairsMaintenance",
       // Sadar Expenses
-      "sadarExpensesEstimations",
-      "sadarExpensesActuals",
+      "sadarExpenses",
       // Audit Fee
-      "auditFeeEstimations",
-      "auditFeeActuals",
+      "auditFee",
       // Advertisement
-      "advertisementEstimations",
-      "advertisementActuals",
+      "advertisement",
       // Bank Charges
-      "bankChargesEstimations",
-      "bankChargesActuals",
+      "bankCharges",
       // Insurance
-      "insuranceEstimations",
-      "insuranceActuals",
+      "insurance",
       // Depreciation
-      "depreciationEstimations",
-      "depreciationActuals",
+      "depreciation",
       // Interest on Loan
-      "interestOnLoanEstimations",
-      "interestOnLoanActuals",
+      "interestOnLoan",
       // Net Profit
-      "netProfitEstimations",
-      "netProfitActuals",
+      "netProfit",
     ],
     credit: [
       // Sales
-      "salesEstimations",
-      "salesActuals",
+      "sales",
       // Services
-      "servicesEstimations",
-      "servicesActuals",
+      "services",
       // Closing Stock
-      "closingStockEstimations",
-      "closingStockActuals",
+      "closingStock",
       // Gross Profit (Credit)
-      "grossProfitCreditEstimations",
-      "grossProfitCreditActuals",
+      "grossProfitCredit",
       // Rent Received
-      "rentReceivedEstimations",
-      "rentReceivedActuals",
+      "rentReceived",
       // Commission Received
-      "commissionReceivedEstimations",
-      "commissionReceivedActuals",
+      "commissionReceived",
     ],
   },
 } as const;

@@ -44,7 +44,7 @@ export const axisBankSchema = {
           pdAddress: {
             type: "string",
             title: "PD Address Type (Residence/Office/Factory/Godown)",
-            enum: ["Residence", "Office", "Factory", "Godown"],
+            readOnly: true,
           },
           initiatedAddress: {
             type: "string",
@@ -69,13 +69,7 @@ export const axisBankSchema = {
           relationshipWithBorrower: {
             type: "string",
             title: "Relationship with Borrower",
-            enum: [
-              "Himself or Herself",
-              "Co-applicant",
-              "Guarantor",
-              "Family",
-              "Neighbor",
-            ],
+            ui: { widget: "textarea", rows: 1 },
           },
         },
       },
@@ -104,6 +98,22 @@ export const axisBankSchema = {
                 age: {
                   type: "integer",
                   title: "age",
+                },
+                qualification: {
+                  type: "string",
+                  title: "Qualification",
+                  enum: [
+                    "Below 10th",
+                    "10th pass",
+                    "12th pass",
+                    "Diploma/ITI certification",
+                    "Graduate",
+                    "PG/Professional Certification",
+                  ],
+                },
+                occupation: {
+                  type: "string",
+                  title: "Occupation",
                 },
               },
             },
@@ -135,29 +145,47 @@ export const axisBankSchema = {
             type: "string",
             title:
               "Constitution (Proprietorship / Partnership / Company / LLP)",
-            enum: ["Proprietorship", "Partnership", "Company", "LLP"],
+            enum: [
+              "Proprietorship",
+              "Partnership",
+              "Company",
+              "LLP",
+              "Society",
+              "Trust",
+              "Govt",
+              "Body of Individual",
+            ],
           },
           whoStartedBusiness: {
             type: "string",
             title: "Who started the business (Self / Acquired / Second gen)",
-            enum: ["self", "acquired", "second gen"],
+            enum: [
+              "self",
+              "acquired",
+              "second gen",
+              "Others",
+              "Not Applicable",
+            ],
           },
           ownershipOfBusinessPlace: {
             type: "string",
             title: "Ownership of business place (Self-owned / Rented)",
-            enum: ["owned", "rented"],
+            enum: ["Self-owned", "Family owned", "Leased", "Rented"],
           },
           yearsInCurrentOffice: {
-            type: "integer",
+            type: "string",
             title: "Years in current office",
+            ui: { widget: "textarea", rows: 2 },
           },
           yearsInCurrentCity: {
-            type: "integer",
+            type: "string",
             title: "Years in current city",
+            ui: { widget: "textarea", rows: 2 },
           },
           yearsInCurrentBusiness: {
-            type: "integer",
+            type: "string",
             title: "Years in current business",
+            ui: { widget: "textarea", rows: 2 },
           },
           previousEmployment: {
             type: "string",
@@ -319,7 +347,17 @@ export const axisBankSchema = {
         properties: {
           turnOverAndMargin: {
             type: "number",
-            title: "Turnover and Margin",
+            title: "Turnover",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          netMargin: {
+            type: "number",
+            title: "Net Margin (%)",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -357,11 +395,11 @@ export const axisBankSchema = {
             title: "If yes, established through documents",
             dependencies: {
               show: {
-              customerIdentityEstablished: "Yes",
-            },
-            required: {
-              customerIdentityEstablished: "Yes",
-            },
+                customerIdentityEstablished: "Yes",
+              },
+              required: {
+                customerIdentityEstablished: "Yes",
+              },
             },
           },
           charteredACDetails: {
@@ -557,6 +595,16 @@ export const axisBankSchema = {
               minDecimalPlaces: 0,
             },
           },
+          netMargin: {
+            type: "number",
+            title: "Net Margin (%)",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
           cashFlowAnalysisDuringPD: {
             type: "object",
             title: "Estimated income - Cash flow analysis during PD",
@@ -574,6 +622,18 @@ export const axisBankSchema = {
               anyOtherIncome: {
                 type: "number",
                 title: "Any other income (monthly)(commison rental etc.)",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              grossMonthlyIncomeTotal: {
+                type: "number",
+                title: "Gross monthly income (total)",
+                readOnly: true,
+                formula: "monthlyToGrossReceiptsEstimated + anyOtherIncome",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -712,9 +772,24 @@ export const axisBankSchema = {
                   minDecimalPlaces: 0,
                 },
               },
+              netMonthlyIncomePostAllExpenses: {
+                type: "number",
+                title: "Net monthly income post all expenses",
+                readOnly: true,
+                formula:
+                  "incomeLeftForDomesticExpenses - foodExpenses - childrenEducation - houseRent - medicalExpenses - otherHouseHoldExpenses - lessSavingsInvestmentsInsurancePremium - lessExistingEmisObligations - emiAllocatedFoTheProposedLoan",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
               netSurplus: {
                 type: "number",
                 title: "Net Surplus income post all expenses & obligations",
+                readOnly: true,
+                formula: "netMonthlyIncomePostAllExpenses",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
