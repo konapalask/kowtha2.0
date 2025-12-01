@@ -1240,19 +1240,29 @@ export const BusinessVerificationDetails: React.FC<
     const uploadPromises = newFiles.map(async (file: File) => {
       try {
         const fileNameLower = file.name.toLowerCase();
-        const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
-        const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+        const mimeType = (file.type || "").toLowerCase();
+        const isJpeg =
+          mimeType === "image/jpeg" ||
+          fileNameLower.endsWith(".jpg") ||
+          fileNameLower.endsWith(".jpeg");
+        const isPng =
+          mimeType === "image/png" || fileNameLower.endsWith(".png");
+        const isImage = isJpeg || isPng;
+        const isPdf =
+          mimeType === "application/pdf" || fileNameLower.endsWith(".pdf");
 
         const dept = currentDepartment || curDept;
         if (dept === "PD") {
           if (!isImage && !isPdf) {
-            message.error(`${file.name}: Please upload a JPG image or PDF file only`);
+            message.error(
+              `${file.name}: Please upload a JPG/PNG image or PDF file only`
+            );
             failCount++;
             return;
           }
         } else {
           if (!isImage) {
-            message.error(`${file.name}: Please upload a JPG image file`);
+            message.error(`${file.name}: Please upload a JPG/PNG image file`);
             failCount++;
             return;
           }
@@ -1270,7 +1280,9 @@ export const BusinessVerificationDetails: React.FC<
         let fileExtension = "jpg";
         if (isPdf) {
           fileExtension = "pdf";
-        } else if (isImage) {
+        } else if (isPng) {
+          fileExtension = "png";
+        } else if (isJpeg) {
           fileExtension = "jpg";
         }
         
@@ -1299,7 +1311,7 @@ export const BusinessVerificationDetails: React.FC<
           id: `${timestamp}-${randomStr}`,
           s3ImageUrl: fileName,
           type: isPdf ? "document" : "photo",
-          fileType: isPdf ? "pdf" : "jpg",
+          fileType: isPdf ? "pdf" : isPng ? "png" : "jpg",
           fileName: file.name,
           timestamp: new Date().toISOString(),
           isCamera: false,
@@ -1354,18 +1366,25 @@ export const BusinessVerificationDetails: React.FC<
   const handlePhotoUpload = async (file: File) => {
     try {
       const fileNameLower = file.name.toLowerCase();
-      const isImage = file.type === "image/jpeg" || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg");
-      const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+      const mimeType = (file.type || "").toLowerCase();
+      const isJpeg =
+        mimeType === "image/jpeg" ||
+        fileNameLower.endsWith(".jpg") ||
+        fileNameLower.endsWith(".jpeg");
+      const isPng = mimeType === "image/png" || fileNameLower.endsWith(".png");
+      const isImage = isJpeg || isPng;
+      const isPdf =
+        mimeType === "application/pdf" || fileNameLower.endsWith(".pdf");
 
-        const dept = currentDepartment || curDept;
+      const dept = currentDepartment || curDept;
       if (dept === "PD") {
         if (!isImage && !isPdf) {
-          message.error("Please upload a JPG image or PDF file only");
+          message.error("Please upload a JPG/PNG image or PDF file only");
           return false;
         }
       } else {
         if (!isImage) {
-          message.error("Please upload a JPG image file");
+          message.error("Please upload a JPG/PNG image file");
           return false;
         }
       }
@@ -1381,7 +1400,9 @@ export const BusinessVerificationDetails: React.FC<
       let fileExtension = "jpg";
       if (isPdf) {
         fileExtension = "pdf";
-      } else if (isImage) {
+      } else if (isPng) {
+        fileExtension = "png";
+      } else if (isJpeg) {
         fileExtension = "jpg";
       }
       
@@ -1410,7 +1431,7 @@ export const BusinessVerificationDetails: React.FC<
         id: `${timestamp}-${randomStr}`,
         s3ImageUrl: fileName,
         type: isPdf ? "document" : "photo",
-        fileType: isPdf ? "pdf" : "jpg",
+        fileType: isPdf ? "pdf" : isPng ? "png" : "jpg",
         fileName: file.name,
         timestamp: new Date().toISOString(),
         isCamera: false,
@@ -4579,7 +4600,11 @@ export const BusinessVerificationDetails: React.FC<
                 extra={
                   !(!!verificationData?.approvedStatus || hasEditRequest) ? (
                     <Upload
-                      accept={(currentDepartment || curDept) === "PD" ? "image/jpeg,.jpg,.jpeg,.pdf" : "image/jpeg,.jpg,.jpeg"}
+                      accept={
+                        (currentDepartment || curDept) === "PD"
+                          ? "image/jpeg,image/png,.jpg,.jpeg,.png,application/pdf,.pdf"
+                          : "image/jpeg,image/png,.jpg,.jpeg,.png"
+                      }
                       showUploadList={false}
                       beforeUpload={() => false}
                       onChange={handleMultipleFileUpload}
