@@ -535,7 +535,6 @@ export const tataUblSchema = {
                     maxDecimalPlaces: 0,
                     minDecimalPlaces: 0,
                   },
-                  readOnly: true,
                 },
                 emi: {
                   type: "number",

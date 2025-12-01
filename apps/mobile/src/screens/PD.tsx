@@ -50,6 +50,7 @@ const FIELD_KEY_MAPPINGS = {
     'applicantMobile',
     'applicantContactNumber',
     'applicantPhoneNumber',
+    'phoneNoOfApplicant',
   ],
   applicationNumber: [
     'applicationNumber',
