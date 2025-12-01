@@ -1,61 +1,22 @@
 import * as fs from "fs";
 import * as path from "path";
+import { LoanService } from "./loan.service";
+import { PrismaService } from "src/prisma.service";
+import * as templates from "./templates/PD/html/_index";
+import { VerificationType, Department } from "@prisma/client";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { S3Service } from "src/modules/common/s3utils/s3.service";
+import { LoggingService } from "src/modules/common/logging/logging.service";
+import {
+  validateVerificationData,
+  logDataStructure,
+} from "./templates/PD/html/template-validator";
 import {
   formSchema,
   getFooterNameFromTemplate,
   getBankNameFromTemplate,
   getSchemaFromTemplate,
-  bankSchemas,
 } from "./forms-schema";
-import { LoanService } from "./loan.service";
-import { PrismaService } from "src/prisma.service";
-import * as templates from "./templates/PD/html/_index";
-// import * as interfaces from "./templates/PD/interface/_index";
-import { VerificationType, Department } from "@prisma/client";
-import { S3Service } from "src/modules/common/s3utils/s3.service";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { LoggingService } from "src/modules/common/logging/logging.service";
-// import { AxisFinanceUBLInterface } from "./templates/PD/interface/axis-finance-ubl.interface";
-import { axisFinanceUBLTemplate } from "./templates/PD/html/axis-finance-ubl-above-10l.template";
-import { axisFinanceUBLBelow10lTemplate } from "./templates/PD/html/axis-finance-ubl-below-10l.template";
-// import { mapAxisUBL } from "./templates/PD/mappers/axis-finance-ubl.mapper";
-// import { RBLInterface } from "./templates/PD/interface/rbl.interface";
-import { rblTemplate } from "./templates/PD/html/rbl.template";
-import { iciciTemplate } from "./templates/PD/html/icici.template";
-import { cholaTemplate } from "./templates/PD/html/chola.template";
-import { heroFincorpTemplate } from "./templates/PD/html/hero-fincorp.template";
-import { iiflTemplate } from "./templates/PD/html/iifl.template";
-import { yesBankTemplate } from "./templates/PD/html/yes-bank.template";
-import { tataUblTemplate } from "./templates/PD/html/tata-ubl.template";
-import { axisBankTemplate } from "./templates/PD/html/axis-bank.template";
-import { axisFinanceTemplate } from "./templates/PD/html/axis-finance.template";
-import { arkaFincapTemplate } from "./templates/PD/html/arka-fincap.template";
-import { heroHousingSelfTemplate } from "./templates/PD/html/hero-housing-self.template";
-import { herohousingSalariedTemplate } from "./templates/PD/html/herohousing-salaried.template";
-import { idfcHlMlTemplate } from "./templates/PD/html/idfc-hl-ml.template";
-import { idfcPlTemplate } from "./templates/PD/html/idfc-pl.template";
-import { indiaShelterSalariedTemplate } from "./templates/PD/html/india-shelter-salaried.template";
-import { indiaShelterSenpTemplate } from "./templates/PD/html/india-shelter-senp.template";
-import { axisAgriTemplate } from "./templates/PD/html/axis-agri.template";
-import { smfgSmeTemplate } from "./templates/PD/html/smfg-sme.template";
-import { adityaBirlaTemplate } from "./templates/PD/html/aditya-birla.template";
-import { niwasSenpTemplate } from "./templates/PD/html/niwas-senp.template";
-import { niwasSalariedTemplate } from "./templates/PD/html/niwas-salaried.template";
-import { genericPDTemplate } from "./templates/PD/html/generic.template";
-import { dcbTemplate } from "./templates/PD/html/dcb.template";
-import { incredTemplate } from "./templates/PD/html/incred.template";
-import { ambitTemplate } from "./templates/PD/html/ambit.template";
-import { ambitMsmeTemplate } from "./templates/PD/html/ambit-msme.template";
-import { janaSalariedTemplate } from "./templates/PD/html/jana-salaried.template";
-import { janaSenpAbove50lTemplate } from "./templates/PD/html/jana-senp-above-50l.template";
-import { janaSenpBelow50lTemplate } from "./templates/PD/html/jana-senp-below-50l.template";
-
-import * as templatesPD from "./templates/PD/html/_index";
-
-import {
-  validateVerificationData,
-  logDataStructure,
-} from "./templates/PD/html/template-validator";
 
 @Injectable()
 export class PDTemplateService {
@@ -419,19 +380,8 @@ export class PDTemplateService {
 
     // Match by templateName first, then fallback to bankName for backward compatibility
     const matchKey = templateName || bankName;
-    console.log("templateName", templateName);
-    console.log("bankName", bankName);
-    console.log("matchKey", matchKey);
     // Banks with custom templates - match by templateName
-<<<<<<< HEAD
-    if (
-      matchesTemplate("AXIS FINANCE-UBL") ||
-      matchKey === "Axis Finance UBL Above 10L" ||
-      matchKey === "Axis Finance UBL Below 10L"
-    ) {
-=======
     if (matchesTemplate("AXIS FINANCE-UBL ABOVE 10L") || matchKey === "Axis Finance UBL Above 10L") {
->>>>>>> sandeep
       // const verificationData = (verification?.verificationData ||
       // verification) as AxisFinanceUBLInterface;
       const html_data = await this.FormatPDImages(
@@ -443,7 +393,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisFinanceUBLTemplate(verification, html_data);
+      return templates.axisFinanceUBLTemplate(verification, html_data);
     }
     if (matchesTemplate("AXIS FINANCE-UBL BELOW 10L") || matchKey === "Axis Finance UBL Below 10L") {
       // const verificationData = (verification?.verificationData ||
@@ -457,7 +407,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisFinanceUBLBelow10lTemplate(verification, html_data);
+      return templates.axisFinanceUBLBelow10lTemplate(verification, html_data);
     }
 
     if (matchesTemplate("RBL BANK (PD & LIP)")) {
@@ -471,7 +421,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return rblTemplate(verification, html_data);
+      return templates.rblTemplate(verification, html_data);
     }
 
     if (matchesTemplate("ICICI")) {
@@ -484,7 +434,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return iciciTemplate(verification, html_data);
+      return templates.iciciTemplate(verification, html_data);
     }
 
     if (matchesTemplate("CHOLA-HL") || matchesTemplate("CHOLA-ML")) {
@@ -497,7 +447,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return cholaTemplate(verification, html_data);
+      return templates.cholaTemplate(verification, html_data);
     }
 
     if (matchesTemplate("HERO FINCORP")) {
@@ -510,7 +460,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return heroFincorpTemplate(verification, html_data);
+      return templates.heroFincorpTemplate(verification, html_data);
     }
 
     if (matchesTemplate("IIFL")) {
@@ -523,7 +473,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return iiflTemplate(verification, html_data);
+      return templates.iiflTemplate(verification, html_data);
     }
 
     if (matchesTemplate("YES BANK-HL")) {
@@ -536,7 +486,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return yesBankTemplate(verification, html_data);
+      return templates.yesBankTemplate(verification, html_data);
     }
 
     if (matchesTemplate("TATA CAPITAL-UBL")) {
@@ -549,7 +499,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return tataUblTemplate(verification, html_data);
+      return templates.tataUblTemplate(verification, html_data);
     }
 
     if (matchesTemplate("AXIS BANK")) {
@@ -562,7 +512,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisBankTemplate(verification, html_data);
+      return templates.axisBankTemplate(verification, html_data);
     }
 
     if (
@@ -582,7 +532,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisFinanceTemplate(verification, html_data);
+      return templates.axisFinanceTemplate(verification, html_data);
     }
 
     if (matchesTemplate("AXIS AGRI") || matchesTemplate("AXIS BUSINESS AGRI")) {
@@ -595,7 +545,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return axisAgriTemplate(verification, html_data);
+      return templates.axisAgriTemplate(verification, html_data);
     }
 
     if (matchesTemplate("SMFG-SME")) {
@@ -608,7 +558,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return smfgSmeTemplate(verification, html_data);
+      return templates.smfgSmeTemplate(verification, html_data);
     }
 
     if (matchesTemplate("NIWAS SALARIED")) {
@@ -621,7 +571,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return niwasSalariedTemplate(verification, html_data);
+      return templates.niwasSalariedTemplate(verification, html_data);
     }
 
     if (matchesTemplate("NIWAS SENP")) {
@@ -634,7 +584,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return niwasSenpTemplate(verification, html_data);
+      return templates.niwasSenpTemplate(verification, html_data);
     }
 
     if (
@@ -668,7 +618,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return arkaFincapTemplate(verification, html_data);
+      return templates.arkaFincapTemplate(verification, html_data);
     }
 
     if (matchesTemplate("HERO HOUSING SELF")) {
@@ -681,7 +631,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return heroHousingSelfTemplate(verification, html_data);
+      return templates.heroHousingSelfTemplate(verification, html_data);
     }
 
     if (matchesTemplate("HERO HOUSING SALARIED")) {
@@ -694,7 +644,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return herohousingSalariedTemplate(verification, html_data);
+      return templates.herohousingSalariedTemplate(verification, html_data);
     }
 
     if (matchesTemplate("INDIA SHELTER SENP")) {
@@ -707,7 +657,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return indiaShelterSenpTemplate(verification, html_data);
+      return templates.indiaShelterSenpTemplate(verification, html_data);
     }
 
     if (matchesTemplate("INDIA SHELTER SALARIED")) {
@@ -720,7 +670,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return indiaShelterSalariedTemplate(verification, html_data);
+      return templates.indiaShelterSalariedTemplate(verification, html_data);
     }
 
     if (matchesTemplate("IDFC FIRST-PL")) {
@@ -733,7 +683,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return idfcPlTemplate(verification, html_data);
+      return templates.idfcPlTemplate(verification, html_data);
     }
 
     if (matchesTemplate("IDFC FIRST-HL") || matchesTemplate("IDFC FIRST-ML")) {
@@ -746,7 +696,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return idfcHlMlTemplate(verification, html_data);
+      return templates.idfcHlMlTemplate(verification, html_data);
     }
 
     if (
@@ -763,7 +713,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return adityaBirlaTemplate(verification, html_data);
+      return templates.adityaBirlaTemplate(verification, html_data);
     }
 
     if (matchesTemplate("DCB BANK")) {
@@ -777,7 +727,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return dcbTemplate(verification, html_data);
+      return templates.dcbTemplate(verification, html_data);
     }
 
     if (matchesTemplate("INCRED/KKR India Financial Services Limited")) {
@@ -790,7 +740,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return incredTemplate(verification, html_data);
+      return templates.incredTemplate(verification, html_data);
     }
     if (matchesTemplate("AMBIT-HL")) {
       const html_data = await this.FormatPDImages(
@@ -802,7 +752,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return ambitTemplate(verification, html_data);
+      return templates.ambitTemplate(verification, html_data);
     }
     if (matchesTemplate("AMBIT-MSME")) {
       const html_data = await this.FormatPDImages(
@@ -814,7 +764,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return ambitMsmeTemplate(verification, html_data);
+      return templates.ambitMsmeTemplate(verification, html_data);
     }
 
     if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SALARIED")) {
@@ -827,7 +777,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return janaSalariedTemplate(verification, html_data);
+      return templates.janaSalariedTemplate(verification, html_data);
     }
 
     if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SENP ABOVE 50L")) {
@@ -840,7 +790,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return janaSenpAbove50lTemplate(verification, html_data);
+      return templates.janaSenpAbove50lTemplate(verification, html_data);
     }
 
     if (matchesTemplate("JANA SMALL FINANCE BANK LIMITED SENP BELOW 50L")) {
@@ -853,7 +803,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return janaSenpBelow50lTemplate(verification, html_data);
+      return templates.janaSenpBelow50lTemplate(verification, html_data);
     }
 
     // Generic template for all other banks (uses schema-driven approach)
@@ -892,7 +842,7 @@ export class PDTemplateService {
         financialAnalysis,
         loan
       );
-      return genericPDTemplate(verification, schemaToUse, html_data);
+      return templates.genericPDTemplate(verification, schemaToUse, html_data);
     } catch (error) {
       await this.loggingService.error(
         "Failed to generate PDF using generic template",
@@ -1053,90 +1003,4 @@ export class PDTemplateService {
     }
   }
 
-  // async FormatPDImages(verification: any, bankName: string, applicationNumber: string, synopsis: string, financialAnalysis: any): Promise<any> {
-
-  //   const signaturePath = path.resolve(process.cwd(),process.env.SIGNATURE_PATH);
-  //   const imageBase64 = fs.readFileSync(signaturePath, "base64");
-  //   const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
-
-  //   const status = verification?.approvedStatus || "";
-
-  //   const uploadedItems = verification?.uploadedItems || [];
-
-  //   // Generate presigned URLs for images
-  //   const imageUrls = await Promise.all(
-  //     uploadedItems.map(async (item: any) => {
-  //       try {
-  //         return await this.s3Service.generatePresignedDownloadUrl(
-  //           item.s3ImageUrl
-  //         );
-  //       } catch (error) {
-  //         await this.loggingService.error(
-  //           "Failed to generate presigned URL for image",
-  //           {
-  //             s3ImageUrl: item.s3ImageUrl,
-  //             error: error.message,
-  //           }
-  //         );
-  //         return null;
-  //       }
-  //     })
-  //   );
-
-  //   // Filter out any failed URL generations
-  //   const validImageUrls = imageUrls.filter((url) => url !== null);
-
-  //   const fieldExecutive = verification.fieldExecutive?.name || "";
-
-  //   const imagesData = await this.loanService.formatImages(
-  //     validImageUrls,
-  //     bankName,
-  //     fieldExecutive
-  //   );
-
-  //   return {
-  //     bankName: bankName,
-  //     applicationNumber: applicationNumber,
-  //     path: synopsis,
-  //     financialAnalysis: financialAnalysis,
-  //     status: status,
-  //     imageDataUri: imageDataUri,
-  //     imagesData: imagesData,
-  //     fieldExecutive: fieldExecutive,
-  //   };
-  // }
-
-  // async InterfaceMapping(
-  //   bankName: string,
-  //   verification: any,
-  //   loan: any,
-  //   synopsis: string,
-  //   financialAnalysis: any,
-  //   schema?: any
-  // ): Promise<any> {
-
-  //   if (bankName == "Axis Bank") {
-  //     let verificationData = loan.verificationData as interfaces.AxisFinanceUBLInterface;
-  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
-  //     return templates.axisFinanceUBLTemplate(verificationData, html_data);
-  //   }
-
-  //   if (bankName == "RBL" || bankName == "Rbl") {
-  //     let verificationData = verification as interfaces.RBLInterface;
-  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
-  //     return templates.rblTemplate(verificationData, html_data);
-  //   }
-
-  //   if (bankName == "Aditya Birla") {
-  //     let verificationData = verification as any;
-  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
-  //     return templates.adityaBirlaTemplate(verificationData, html_data);
-  //   }
-
-  //   if (bankName == "Arka Fincap") {
-  //     let verificationData = verification as interfaces.ArkaFincapInterface;
-  //     const html_data = await this.FormatPDImages( verificationData, bankName, loan.applicationNumber, synopsis, financialAnalysis );
-  //     return templates.arkaFincapTemplate(verificationData, html_data);
-  //   }
-  // }
 }
