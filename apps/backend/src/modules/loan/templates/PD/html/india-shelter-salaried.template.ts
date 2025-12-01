@@ -625,7 +625,7 @@ export const indiaShelterSalariedTemplate = (
       })}
       <tr>
         <td style="${labelCellStyle}">PD Status</td>
-        <td style="${valueCellStyle}">${formatMultiline(pdReview.pdStatus)}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
         <td style="${labelCellStyle}">Name of PD Officer</td>
         <td style="${valueCellStyle}">${formatMultiline(
           pdReview.pdOfficerName
@@ -636,12 +636,6 @@ export const indiaShelterSalariedTemplate = (
         <td style="${valueCellStyle}">${formatMultiline(pdReview.visitDate)}</td>
         <td style="${labelCellStyle}">Time of Visit</td>
         <td style="${valueCellStyle}">${formatMultiline(pdReview.visitTime)}</td>
-      </tr>
-      <tr>
-        <td style="${labelCellStyle}">Signature of the PD Officer</td>
-        <td style="${valueCellStyle}" colspan="3">${formatMultiline(
-          pdReview.officerSignature
-        )}</td>
       </tr>
     </table>
   `;

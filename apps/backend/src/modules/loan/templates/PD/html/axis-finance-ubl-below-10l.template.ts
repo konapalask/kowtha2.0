@@ -305,7 +305,7 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Name of the Third Party Check</td>
         <td style="${cellStyle}">${thirdPartyCheck?.nameOfThirdParty || "Not provided"}</td>
         <td style="${labelCellStyle}">Third Party Check Status</td>
-        <td style="${cellStyle}">${thirdPartyCheck?.statusOfThirdParty || "Not provided"}</td>
+        <td style="${cellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Third Party Feedback Remarks</td>

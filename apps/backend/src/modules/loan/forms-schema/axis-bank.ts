@@ -531,11 +531,6 @@ export const axisBankSchema = {
             type: "string",
             title: "Details of collateral- Address of property",
           },
-          statusOfPD: {
-            type: "string",
-            title: "Status of PD (Positive, Negative, Credit Refer)",
-            enum: ["Positive", "Negative", "Credit Refer"],
-          },
         },
       },
     },

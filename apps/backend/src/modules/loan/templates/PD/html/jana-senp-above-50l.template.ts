@@ -632,7 +632,7 @@ export const janaSenpAbove50lTemplate = (verificationData: any, html_data: any) 
         <td style="text-align: center;${labelCellStyle}">Status</td>
        </tr>
        <tr>
-        <td style="${valueCellStyle}">${status.status}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
        </tr>
        </table>
 

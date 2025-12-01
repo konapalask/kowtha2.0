@@ -250,7 +250,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
     : "Not provided";
 
   const statusTable = renderTwoColumnTable([
-    ["Status of this case", loanAnalysis.status],
+    ["Status of this case", html_data.approvedStatus|| "Not provided"],
     ["Place", loanAnalysis.place],
   ]);
 

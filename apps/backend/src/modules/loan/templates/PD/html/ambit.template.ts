@@ -282,7 +282,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Address", otherBusinessIncome.address_3)}
         ${renderKeyValue("Other Business/Income", formatMultiline(otherBusinessIncome.otherBusinessInterestSourceOfIncomeFamilyIncome))}
         ${renderKeyValue("Neighbor Check", formatMultiline(otherBusinessIncome.neighborCheck))}
-        ${renderKeyValue("Status", status.status)}
+        ${renderKeyValue("Status", html_data.approvedStatus|| "Not provided")}
       </table>
 
       <h3 style="margin:0 0 16px;color:#1f2a37;font-size:14px;">Disclaimer Clause:</h3>

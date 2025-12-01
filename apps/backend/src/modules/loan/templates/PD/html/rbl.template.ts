@@ -653,7 +653,12 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         ],
         "Geo-coordinates not available"
       )}
-
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">PD Status</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        </tr>
+      </table>
       ${renderSubHeading("Disclaimer:")}
       ${renderParagraph(
         "The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions."
