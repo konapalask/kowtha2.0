@@ -1006,17 +1006,7 @@ export const niwasSenpSchema = {
             title: "Concerns",
             ui: { widget: "textarea", rows: 2 },
           },
-          statusOfCase: {
-            type: "string",
-            title: "Status of the case",
-            enum: ["Positive", "Negative", "Others"],
-          },
-          pdOfficerName: { type: "string", title: "Name of PD Officer" },
           discussionDate: { type: "date", title: "Date of Discussion" },
-          pdOfficerSignature: {
-            type: "string",
-            title: "Signature of PD Officer",
-          },
         },
       },
     },

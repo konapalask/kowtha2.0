@@ -10,7 +10,7 @@ export const statement4Schema = {
         title: "Synopsis of the verification",
         ui: { widget: "textarea", rows: 3 },
       },
-      businessName: { type: "string", title: "Business Name", readonly: true },
+      businessName: { type: "string", title: "Business Name", readOnly: true },
       partnersNames: {
         type: "string",
         title: "Partners Names",

@@ -125,7 +125,8 @@ export const axisFinanceUblBelow10lSchema = {
           },
           businessActivity: {
             type: "string",
-            title: "level ofBusiness Activity (Remarks on Stocks, Total/current working capacity of Plant. )",
+            title:
+              "level ofBusiness Activity (Remarks on Stocks, Total/current working capacity of Plant. )",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -205,7 +206,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Turnover Details",
+          details: {
+            type: "string",
+            title: "Turnover Details",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -221,7 +224,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Other Business or Source of Income",
+          details: {
+            type: "string",
+            title: "Other Business or Source of Income",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -236,7 +241,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Movable/Immovable Assets Details",
+          details: {
+            type: "string",
+            title: "Movable/Immovable Assets Details",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -258,7 +265,7 @@ export const axisFinanceUblBelow10lSchema = {
             items: {
               type: "object",
               properties: {
-                name: { 
+                name: {
                   type: "string",
                   title: "Name",
                 },
@@ -287,16 +294,33 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          permanentAddress: { type: "string", title: "Permanent Address (If different from above)",ui: { widget: "textarea", rows: 3 } },
-          residenceAddress: { type: "string", title: "Residence Address",ui: { widget: "textarea", rows: 3 } },
-          resiStability: { 
-            type: "object", 
-            title: "Residence Stability", 
+          permanentAddress: {
+            type: "string",
+            title: "Permanent Address (If different from above)",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          residenceAddress: {
+            type: "string",
+            title: "Residence Address",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          resiStability: {
+            type: "object",
+            title: "Residence Stability",
             properties: {
-            typeOfResidence: { type: "string", title: "Type of Residence" },
-            durationOfStay: { type: "string", title: "Duration"},
-            rentPerMonth: { type: "number", title: "Rent per month",formatter: { useIndianFormat: true, locale: "en-IN", maxDecimalPlaces: 2, minDecimalPlaces: 0 } },
-            }, 
+              typeOfResidence: { type: "string", title: "Type of Residence" },
+              durationOfStay: { type: "string", title: "Duration" },
+              rentPerMonth: {
+                type: "number",
+                title: "Rent per month",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+            },
           },
         },
       },
@@ -308,7 +332,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Existing Loan Details",
+          details: {
+            type: "string",
+            title: "Existing Loan Details",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -321,7 +347,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Banking Habits",
+          details: {
+            type: "string",
+            title: "Banking Habits",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -334,7 +362,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Credit Card Details if any",
+          details: {
+            type: "string",
+            title: "Credit Card Details if any",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -346,10 +376,28 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          loanType: { type: "string", title: "Type of Loan"},
-          loanPurpose: { type: "string", title: "Loan Purpose"},
-          loanAmount: { type: "number", title: "Loan Amount",formatter: { useIndianFormat: true, locale: "en-IN", maxDecimalPlaces: 2, minDecimalPlaces: 0 } },
-          affordableEMI: { type: "number", title: "Affordable EMI",formatter: { useIndianFormat: true, locale: "en-IN", maxDecimalPlaces: 2, minDecimalPlaces: 0 } },
+          loanType: { type: "string", title: "Type of Loan" },
+          loanPurpose: { type: "string", title: "Loan Purpose" },
+          loanAmount: {
+            type: "number",
+            title: "Loan Amount",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
+          affordableEMI: {
+            type: "number",
+            title: "Affordable EMI",
+            formatter: {
+              useIndianFormat: true,
+              locale: "en-IN",
+              maxDecimalPlaces: 2,
+              minDecimalPlaces: 0,
+            },
+          },
         },
       },
       required: true,
@@ -360,7 +408,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: { type: "string", title: "Documents Seen",
+          details: {
+            type: "string",
+            title: "Documents Seen",
             ui: { widget: "textarea", rows: 3 },
           },
         },
@@ -373,9 +423,19 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          nameOfThirdParty: { type: "string", title: "Name of Third Party Check"},
-          statusOfThirdParty: { type: "string", title: "Third party check status"},
-          feedbackRemarks: { type: "string", title: "Third party feedback remarks",ui: { widget: "textarea", rows: 3 } },
+          nameOfThirdParty: {
+            type: "string",
+            title: "Name of Third Party Check",
+          },
+          statusOfThirdParty: {
+            type: "string",
+            title: "Third party check status",
+          },
+          feedbackRemarks: {
+            type: "string",
+            title: "Third party feedback remarks",
+            ui: { widget: "textarea", rows: 3 },
+          },
         },
       },
       required: true,
@@ -386,10 +446,11 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          overallRemarks: { type: "string", title: "Overall Remarks of the visit",ui: { widget: "textarea", rows: 3 } },
-          aflVerifierName: { type: "string", title: "AFL Verifier's Name"},
-          aflVerifierEmpCode: { type: "string", title: "AFL Verifier's Emp Code"},
-          aflVerifierSignature: { type: "string", title: "AFL Verifier's Signature"},
+          overallRemarks: {
+            type: "string",
+            title: "Overall Remarks of the visit",
+            ui: { widget: "textarea", rows: 3 },
+          },
         },
       },
     },

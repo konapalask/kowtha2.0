@@ -556,18 +556,6 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Overall outcome of the personal discussion",
           },
-          remarks: {
-            type: "string",
-            title: "Remarks",
-          },
-          pdConductedBy: {
-            type: "string",
-            title: "PD Conducted by",
-          },
-          signature: {
-            type: "string",
-            title: "Signature",
-          },
           pdDate: {
             type: "string",
             title: "Date",

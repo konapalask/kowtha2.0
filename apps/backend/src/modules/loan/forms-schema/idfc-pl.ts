@@ -353,10 +353,6 @@ export const idfcPlSchema = {
             type: "string",
             title: "Designation & Signature",
           },
-          statusOfThisCasePositiveNegativeCreditRefer: {
-            type: "string",
-            title: "Status of this Case (Positive / Negative / Credit Refer)",
-          },
           interviewersRemarks: {
             type: "string",
             title: "Interviewer's Remarks",

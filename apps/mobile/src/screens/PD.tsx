@@ -184,10 +184,8 @@ const getInitialDataByBank = (
             initialData[section.id][fieldKey] = loggedInUserName || '';
           }
 
-          // Special case: bankName (exact match only)
-          if (fieldKeyLower === 'bankname') {
-            initialData[section.id][fieldKey] = userData?.loan?.bankName || '';
-          }
+          // Note: bankName is NOT auto-populated - it must be explicitly added to FIELD_KEY_MAPPINGS
+          // to be populated automatically
 
           // Ensure field exists in initial data (even if empty)
           if (!(fieldKey in initialData[section.id])) {

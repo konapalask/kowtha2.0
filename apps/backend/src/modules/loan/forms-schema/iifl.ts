@@ -397,21 +397,6 @@ export const iiflSchema = {
         },
       },
     },
-    {
-      id: "pdOfficerDetails",
-      label: "PD Officer Details",
-      schema: {
-        type: "object",
-        properties: {
-          pdOfficerName: { type: "string", title: "Name of PD Officer" },
-          dateOfDiscussion: { type: "string", title: "Date of Discussion" },
-          pdOfficerSignature: {
-            type: "string",
-            title: "Signature of PD Officer",
-          },
-        },
-      },
-    },
     financialsSchema,
   ],
 } as const;

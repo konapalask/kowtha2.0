@@ -714,18 +714,6 @@ export const axisFinanceUblAbove10lSchema = {
               rows: 3,
             },
           },
-          status: {
-            type: "string",
-            title: "Status",
-          },
-          verifierNameEmpCode: {
-            type: "string",
-            title: "AFL Verifier's Name & Emp Code",
-          },
-          verifierSignature: {
-            type: "string",
-            title: "AFL Verifier's Signature",
-          },
         },
       },
       required: true,

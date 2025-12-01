@@ -688,15 +688,6 @@ export const indiaShelterSalariedSchema = {
               rows: 3,
             },
           },
-          pdStatus: {
-            type: "string",
-            title: "PD Status",
-            enum: ["Positive", "Negative", "Referred"],
-          },
-          pdOfficerName: {
-            type: "string",
-            title: "Name of PD Officer",
-          },
           visitDate: {
             type: "string",
             title: "Date of Visit",
@@ -706,10 +697,6 @@ export const indiaShelterSalariedSchema = {
             type: "string",
             title: "Time of Visit",
             format: "time",
-          },
-          officerSignature: {
-            type: "string",
-            title: "Signature of the PD Officer",
           },
         },
       },

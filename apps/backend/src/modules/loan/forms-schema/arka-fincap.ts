@@ -650,21 +650,6 @@ export const arkaFincapSchema = {
       },
       required: true,
     },
-    {
-      id: "status",
-      label: "Status",
-      schema: {
-        type: "object",
-        properties: {
-          status: {
-            type: "string",
-            title: "Status",
-            enum: ["Positive", "Negative", "Credit Refer"],
-          },
-        },
-      },
-      required: true,
-    },
     financialsSchema,
   ],
 } as const;
