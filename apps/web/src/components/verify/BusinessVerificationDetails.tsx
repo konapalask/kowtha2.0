@@ -1211,6 +1211,80 @@ export const BusinessVerificationDetails: React.FC<
     }
   };
 
+  const handleDownloadAllFiles = async () => {
+    try {
+      const uploadedItems = data?.uploadedItems || [];
+
+      if (uploadedItems.length === 0) {
+        message.warning("No files available to download");
+        return;
+      }
+
+      message.loading({ 
+        content: `Preparing ${uploadedItems.length} file(s) for download...`, 
+        key: "downloadAll",
+        duration: 0 
+      });
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < uploadedItems.length; i++) {
+        const item = uploadedItems[i];
+        try {
+          const fileType = isDocumentItem(item) ? "document" : "photo";
+          message.loading({ 
+            content: `Downloading ${fileType} ${i + 1} of ${uploadedItems.length}...`, 
+            key: "downloadAll",
+            duration: 0 
+          });
+
+          const presignedUrl = await getS3ImageUrl(item.s3ImageUrl);
+          
+          const response = await fetch(presignedUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch file: ${response.status}`);
+          }
+          
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          const fileName = item.fileName || item.s3ImageUrl.split("/").pop() || `file-${item.id}`;
+          link.download = fileName;
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+          }, 100);
+          
+          successCount++;
+          
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error(`Error downloading ${item.fileName || item.id}:`, error);
+          failCount++;
+        }
+      }
+
+      message.destroy("downloadAll");
+      if (successCount > 0) {
+        message.success(`Successfully downloaded ${successCount} file(s) to your device`);
+      }
+      if (failCount > 0) {
+        message.error(`Failed to download ${failCount} file(s)`);
+      }
+    } catch (error) {
+      console.error("Error downloading all files:", error);
+      message.destroy("downloadAll");
+      message.error("Failed to download files. Please try again.");
+    }
+  };
+
   const handleMultipleFileUpload = async (info: any) => {
     const { fileList } = info;
     
@@ -4598,27 +4672,41 @@ export const BusinessVerificationDetails: React.FC<
               <Card
                 title="Photo Capture"
                 extra={
-                  !(!!verificationData?.approvedStatus || hasEditRequest) ? (
-                    <Upload
-                      accept={
-                        (currentDepartment || curDept) === "PD"
-                          ? "image/jpeg,image/png,.jpg,.jpeg,.png,application/pdf,.pdf"
-                          : "image/jpeg,image/png,.jpg,.jpeg,.png"
-                      }
-                      showUploadList={false}
-                      beforeUpload={() => false}
-                      onChange={handleMultipleFileUpload}
-                      multiple={true}
-                    >
+                  <Space>
+                    {(currentDepartment || curDept) === "PD" && 
+                     data?.uploadedItems && 
+                     data.uploadedItems.length > 0 && (
                       <Button
-                        type="primary"
-                        icon={<UploadOutlined />}
+                        type="default"
+                        icon={<DownloadOutlined />}
                         size="small"
+                        onClick={handleDownloadAllFiles}
                       >
-                        {(currentDepartment || curDept) === "PD" ? "Upload Images and Documents" : "Upload Photo"}
+                        Download All Files
                       </Button>
-                    </Upload>
-                  ) : null
+                    )}
+                    {!(!!verificationData?.approvedStatus || hasEditRequest) && (
+                      <Upload
+                        accept={
+                          (currentDepartment || curDept) === "PD"
+                            ? "image/jpeg,image/png,.jpg,.jpeg,.png,application/pdf,.pdf"
+                            : "image/jpeg,image/png,.jpg,.jpeg,.png"
+                        }
+                        showUploadList={false}
+                        beforeUpload={() => false}
+                        onChange={handleMultipleFileUpload}
+                        multiple={true}
+                      >
+                        <Button
+                          type="primary"
+                          icon={<UploadOutlined />}
+                          size="small"
+                        >
+                          {(currentDepartment || curDept) === "PD" ? "Upload Images and Documents" : "Upload Photo"}
+                        </Button>
+                      </Upload>
+                    )}
+                  </Space>
                 }
               >
                 {(() => {
