@@ -1168,20 +1168,6 @@ export const janaSenpBelow50lSchema = {
       },
     },
     {
-      id: "pdStatus",
-      label: "PD Status (Positive/Negative/Refer)",
-      schema: {
-        type: "object",
-        properties: {
-          status: {
-            type: "string",
-            title: "Status",
-            enum: ["Positive", "Negative", "Refer"],
-          },
-        },
-      },
-    },
-    {
       id: "interviewerDetails",
       label: "Interviewer Details",
       schema: {

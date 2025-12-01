@@ -539,25 +539,6 @@ export const axisBankSchema = {
         },
       },
     },
-
-    {
-      id: "pdDetails",
-      label: "PD Details",
-      schema: {
-        type: "object",
-        properties: {
-          pdOfficerName: {
-            type: "string",
-            title: "PD Officer Name",
-          },
-          // pdOfficerSignature: {
-          //   type: "string",
-          //   title: "PD Officer Signature",
-          // },
-        },
-      },
-    },
-
     {
       id: "annexure1",
       label: "Annexure 1",

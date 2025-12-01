@@ -418,22 +418,12 @@ export const yesBankSchema = {
             type: "string",
             title: "Level of activity & stocks observed / other observations",
           },
-          pdStatus: {
-            type: "string",
-            title: "PD Status",
-            enum: ["Positive", "Negative", "Referred"],
-          },
-          remarks: {
-            type: "string",
-            title: "Remarks for Positive / Negative / Referred cases",
-          },
           yblEmployeeName: {
             type: "string",
             title: "Name of the YBL employee",
           },
           yblDesignation: { type: "string", title: "Designation" },
           yblEmpId: { type: "string", title: "Employee ID" },
-          yblSignature: { type: "string", title: "Signature" },
           pdAgencyInterviewer: {
             type: "string",
             title: "PD agency interviewer’s name",
@@ -515,7 +505,8 @@ export const yesBankSchema = {
           },
           commutePlan: {
             type: "string",
-            title: "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
+            title:
+              "If distance is more than 15-20Km from work place provide details of commute plan / reason for buying in far area",
           },
         },
       },

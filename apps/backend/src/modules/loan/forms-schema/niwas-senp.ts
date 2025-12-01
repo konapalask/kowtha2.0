@@ -9,8 +9,12 @@ export const niwasSenpSchema = {
       schema: {
         type: "object",
         properties: {
-          prospectNo: { type: "string", title: "Prospect No." },
-          name: { type: "string", title: "Name" },
+          prospectNo: { type: "string", title: "Prospect No.", readOnly: true },
+          applicantName: {
+            type: "string",
+            title: "Name of Applicant",
+            readOnly: true,
+          },
           maritalStatus: {
             type: "string",
             title: "Marital Status",
@@ -111,7 +115,7 @@ export const niwasSenpSchema = {
             title: "Washing Machine",
             enum: ["Yes", "No"],
           },
-          carRcNo: { type: "string", title: "Car RC No.", enum: ["Yes", "No"] },
+          carRcNo: { type: "string", title: "Car RC No." },
           twoWheeler: {
             type: "string",
             title: "Two-Wheeler",
@@ -1002,17 +1006,7 @@ export const niwasSenpSchema = {
             title: "Concerns",
             ui: { widget: "textarea", rows: 2 },
           },
-          statusOfCase: {
-            type: "string",
-            title: "Status of the case",
-            enum: ["Positive", "Negative", "Others"],
-          },
-          pdOfficerName: { type: "string", title: "Name of PD Officer" },
           discussionDate: { type: "date", title: "Date of Discussion" },
-          pdOfficerSignature: {
-            type: "string",
-            title: "Signature of PD Officer",
-          },
         },
       },
     },

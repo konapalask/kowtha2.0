@@ -580,20 +580,6 @@ export const incredSchema = {
       },
       required: true,
     },
-    {
-      id: "overallPositivesOrNegatives",
-      label: "Overall Positives or Negatives",
-      schema: {
-        type: "object",
-        properties: {
-          overallPositivesOrNegatives: {
-            type: "string",
-            title: "Overall Positives or Negatives",
-          },
-        },
-      },
-      required: true,
-    },
     statement2Schema,
   ],
 } as const;

@@ -10,7 +10,7 @@ export const statement3Schema = {
         title: "Synopsis of the verification",
         ui: { widget: "textarea", rows: 3 },
       },
-      businessName: { type: "string", title: "Business Name", readonly: true },
+      businessName: { type: "string", title: "Business Name", readOnly: true },
 
       // Opening Stock
       openingStock_2023: {
