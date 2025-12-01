@@ -2381,19 +2381,21 @@ export const BusinessVerificationDetails: React.FC<
         !sectionLabel.includes("comprehensive") &&
         !sectionLabel.includes("detailed")
       ) {
-        const sales = parseNum(mergedData.sales);
-        const services = parseNum(mergedData.services);
-        const closingStock = parseNum(mergedData.closingStock);
-        const openingStock = parseNum(mergedData.openingStock);
-        const purchase = parseNum(mergedData.purchase);
-        const costOfServices = parseNum(mergedData.costOfServices);
-        const wages = parseNum(mergedData.wages);
-        const hamaliCharges = parseNum(mergedData.hamaliCharges);
-        const manufacturingExpenses = parseNum(mergedData.manufacturingExpenses);
-        const packingCharges = parseNum(mergedData.packingCharges);
+        const storedGrossProfitDebit = parseNum(mergedData.grossProfitDebit || mergedData.toGrossProfit);
+        const storedGrossProfitCredit = parseNum(mergedData.grossProfitCredit || mergedData.byGrossProfit);
+        const storedNetProfit = parseNum(mergedData.netProfit || mergedData.toNetProfit);
+        const sales = parseNum(mergedData.bySales || mergedData.sales);
+        const services = parseNum(mergedData.byServices || mergedData.services);
+        const closingStock = parseNum(mergedData.byClosingStock || mergedData.closingStock);
+        const openingStock = parseNum(mergedData.toOpeningStock || mergedData.openingStock);
+        const purchase = parseNum(mergedData.toPurchase || mergedData.purchase);
+        const costOfServices = parseNum(mergedData.toCostOfServices || mergedData.costOfServices);
+        const wages = parseNum(mergedData.toWages || mergedData.wages);
+        const hamaliCharges = parseNum(mergedData.toHamaliCharges || mergedData.hamaliCharges);
+        const manufacturingExpenses = parseNum(mergedData.toManufacturingExpenses || mergedData.manufacturingExpenses);
+        const packingCharges = parseNum(mergedData.toPackingCharges || mergedData.packingCharges);
 
-        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-        const totalGrossProfit =
+        const calculatedGrossProfit =
           sales +
           services +
           closingStock -
@@ -2405,24 +2407,31 @@ export const BusinessVerificationDetails: React.FC<
             manufacturingExpenses +
             packingCharges);
 
-        // Net Profit = (Gross Profit + Other Incomes) - (Indirect Expenses)
-        const salaries = parseNum(mergedData.salaries);
-        const rent = parseNum(mergedData.rent);
-        const electricityCharges = parseNum(mergedData.electricityCharges);
-        const printingStationery = parseNum(mergedData.printingStationery);
-        const telephoneCharges = parseNum(mergedData.telephoneCharges);
-        const postageTelegram = parseNum(mergedData.postageTelegram);
-        const officeMaintenance = parseNum(mergedData.officeMaintenance);
-        const repairsMaintenance = parseNum(mergedData.repairsMaintenance);
-        const sadarExpenses = parseNum(mergedData.sadarExpenses);
-        const auditFee = parseNum(mergedData.auditFee);
-        const advertisement = parseNum(mergedData.advertisement);
-        const bankCharges = parseNum(mergedData.bankCharges);
-        const insurance = parseNum(mergedData.insurance);
-        const depreciation = parseNum(mergedData.depreciation);
-        const interestOnLoan = parseNum(mergedData.interestOnLoan);
-        const rentReceived = parseNum(mergedData.rentReceived);
-        const commissionReceived = parseNum(mergedData.commissionReceived);
+        const hasStoredGrossProfit = mergedData.grossProfitDebit !== undefined ||
+                                     mergedData.toGrossProfit !== undefined ||
+                                     mergedData.grossProfitCredit !== undefined || 
+                                     mergedData.byGrossProfit !== undefined;
+        const totalGrossProfit = hasStoredGrossProfit 
+          ? (storedGrossProfitDebit || storedGrossProfitCredit)
+          : calculatedGrossProfit;
+
+        const salaries = parseNum(mergedData.toSalaries || mergedData.salaries);
+        const rent = parseNum(mergedData.toRent || mergedData.rent);
+        const electricityCharges = parseNum(mergedData.toElectricityCharges || mergedData.electricityCharges);
+        const printingStationery = parseNum(mergedData.toPrintingStationery || mergedData.printingStationery);
+        const telephoneCharges = parseNum(mergedData.toTelephoneCharges || mergedData.telephoneCharges);
+        const postageTelegram = parseNum(mergedData.toPostageTelegram || mergedData.postageTelegram);
+        const officeMaintenance = parseNum(mergedData.toOfficeMaintenance || mergedData.officeMaintenance);
+        const repairsMaintenance = parseNum(mergedData.toRepairsMaintenance || mergedData.repairsMaintenance);
+        const sadarExpenses = parseNum(mergedData.toSadarExpenses || mergedData.sadarExpenses);
+        const auditFee = parseNum(mergedData.toAuditFee || mergedData.auditFee);
+        const advertisement = parseNum(mergedData.toAdvertisement || mergedData.advertisement);
+        const bankCharges = parseNum(mergedData.toBankCharges || mergedData.bankCharges);
+        const insurance = parseNum(mergedData.toInsurance || mergedData.insurance);
+        const depreciation = parseNum(mergedData.toDepreciation || mergedData.depreciation);
+        const interestOnLoan = parseNum(mergedData.toInterestOnLoan || mergedData.interestOnLoan);
+        const rentReceived = parseNum(mergedData.byRentReceived || mergedData.rentReceived);
+        const commissionReceived = parseNum(mergedData.byCommissionReceived || mergedData.commissionReceived);
 
         const indirectExpenses =
           salaries +
@@ -2441,40 +2450,61 @@ export const BusinessVerificationDetails: React.FC<
           depreciation +
           interestOnLoan;
         const otherIncomes = rentReceived + commissionReceived;
-        const totalNetProfit = totalGrossProfit + otherIncomes - indirectExpenses;
+        const calculatedNetProfit = totalGrossProfit + otherIncomes - indirectExpenses;
+        const hasStoredNetProfit = mergedData.netProfit !== undefined || mergedData.toNetProfit !== undefined;
+        const totalNetProfit = hasStoredNetProfit 
+          ? storedNetProfit 
+          : calculatedNetProfit;
 
         return { totalGrossProfit, totalNetProfit };
       }
 
       // Type 2: GP/PBDIT Financial Analysis
       if (sectionLabel.includes("gp/pbdit")) {
+        const storedGrossProfitAsPerAssumption = parseNum(mergedData.grossProfitAsPerAssumption);
+        const storedNetProfitAfterTax = parseNum(mergedData.netProfitAfterTax);
+        const storedNetProfitBeforeTax = parseNum(mergedData.netProfitBeforeTax);
+
         const grossReceipts = parseNum(mergedData.grossReceipts);
         const otherIncome = parseNum(mergedData.otherIncome);
         const costOfMaterialConsumed = parseNum(mergedData.costOfMaterialConsumed);
-        const grossProfitAsPerAssumption = parseNum(mergedData.grossProfitAsPerAssumption);
 
-        // Gross Profit = Gross Receipts + Other Income - Cost of Material Consumed
-        // Or use grossProfitAsPerAssumption if available
-        const totalGrossProfit =
-          grossProfitAsPerAssumption > 0
-            ? grossProfitAsPerAssumption
-            : grossReceipts + otherIncome - costOfMaterialConsumed;
+        const calculatedGrossProfit = grossReceipts + otherIncome - costOfMaterialConsumed;
+        const hasStoredGrossProfit = mergedData.grossProfitAsPerAssumption !== undefined;
+        const totalGrossProfit = hasStoredGrossProfit
+          ? storedGrossProfitAsPerAssumption
+          : calculatedGrossProfit;
 
-        // Net Profit = Net Profit After Tax (if available) or calculate from components
-        const netProfitAfterTax = parseNum(mergedData.netProfitAfterTax);
-        const netProfitBeforeTax = parseNum(mergedData.netProfitBeforeTax);
-        const totalNetProfit =
-          netProfitAfterTax > 0
-            ? netProfitAfterTax
-            : netProfitBeforeTax > 0
-            ? netProfitBeforeTax
-            : totalGrossProfit; // Fallback to gross profit if net profit not available
+        const salary = parseNum(mergedData.salary);
+        const rent = parseNum(mergedData.rent);
+        const electricity = parseNum(mergedData.electricity);
+        const travelling = parseNum(mergedData.travelling);
+        const otherExpenses = parseNum(mergedData.otherExpenses);
+        const financeExpenses = parseNum(mergedData.financeExpenses);
+        const depreciation = parseNum(mergedData.depreciation);
+        const incomeTax = parseNum(mergedData.incomeTax);
+
+        const incomeSubtotal = grossReceipts + otherIncome;
+        const expenditureSubtotal = salary + rent + electricity + travelling + otherExpenses;
+        const netProfitBeforeInterestTaxDepreciation = incomeSubtotal - expenditureSubtotal;
+        const netProfitBeforeTaxDepreciation = netProfitBeforeInterestTaxDepreciation - financeExpenses;
+        const netProfitBeforeTax = netProfitBeforeTaxDepreciation - depreciation;
+        const calculatedNetProfitAfterTax = netProfitBeforeTax - incomeTax;
+
+        const hasStoredNetProfit = mergedData.netProfitAfterTax !== undefined || 
+                                   mergedData.netProfitBeforeTax !== undefined;
+        const totalNetProfit = hasStoredNetProfit
+          ? (storedNetProfitAfterTax || storedNetProfitBeforeTax)
+          : calculatedNetProfitAfterTax;
 
         return { totalGrossProfit, totalNetProfit };
       }
 
       // Type 3: Comprehensive Actuals vs Estimated Analysis
       if (sectionLabel.includes("comprehensive")) {
+        const storedGrossProfitEstimated = parseNum(mergedData.grossProfitEstimated);
+        const storedNetProfitEstimated = parseNum(mergedData.netProfitEstimated);
+
         const salesEstimated = parseNum(mergedData.salesEstimated);
         const servicesEstimated = parseNum(mergedData.servicesEstimated);
         const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
@@ -2488,8 +2518,7 @@ export const BusinessVerificationDetails: React.FC<
         );
         const packingChargesEstimated = parseNum(mergedData.packingChargesEstimated);
 
-        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases + Cost of Services + Wages + Hamali + Manufacturing + Packing)
-        const totalGrossProfit =
+        const calculatedGrossProfit =
           salesEstimated +
           servicesEstimated +
           closingStockEstimated -
@@ -2501,47 +2530,60 @@ export const BusinessVerificationDetails: React.FC<
             manufacturingExpensesEstimated +
             packingChargesEstimated);
 
-        // Net Profit from estimated field or calculate
-        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
-        const totalNetProfit =
-          netProfitEstimated > 0
-            ? netProfitEstimated
-            : totalGrossProfit; // Fallback to gross profit if net profit not available
+        const hasStoredGrossProfit = mergedData.grossProfitEstimated !== undefined;
+        const totalGrossProfit = hasStoredGrossProfit
+          ? storedGrossProfitEstimated
+          : calculatedGrossProfit;
+
+        const hasStoredNetProfit = mergedData.netProfitEstimated !== undefined;
+        const totalNetProfit = hasStoredNetProfit
+          ? storedNetProfitEstimated
+          : totalGrossProfit;
 
         return { totalGrossProfit, totalNetProfit };
       }
 
       // Type 4: Detailed Financial Analysis with Balance Sheet
       if (sectionLabel.includes("detailed financial analysis with balance sheet")) {
-        const salesAudited = parseNum(mergedData.salesAudited);
-        const salesEstimated = parseNum(mergedData.salesEstimated);
-        const servicesAudited = parseNum(mergedData.servicesAudited);
-        const servicesEstimated = parseNum(mergedData.servicesEstimated);
-        const closingStockAudited = parseNum(mergedData.closingStockAudited);
-        const closingStockEstimated = parseNum(mergedData.closingStockEstimated);
-        const openingStockAssessed = parseNum(mergedData.openingStockAssessed);
-        const openingStockAudited = parseNum(mergedData.openingStockAudited);
-        const purchasesAssessed = parseNum(mergedData.purchasesAssessed);
-        const purchasesAudited = parseNum(mergedData.purchasesAudited);
+        const storedGrossProfitAssessed = parseNum(mergedData.grossProfitAssessed || mergedData.toGrossProfitAssessed);
+        const storedByGrossProfitEstimated = parseNum(
+          mergedData.byGrossProfitEstimated || 
+          mergedData.grossProfitEstimated
+        );
 
-        // Use Estimated values for calculations (or Audited if Estimated not available)
-        const sales = salesEstimated > 0 ? salesEstimated : salesAudited;
-        const services = servicesEstimated > 0 ? servicesEstimated : servicesAudited;
-        const closingStock =
-          closingStockEstimated > 0 ? closingStockEstimated : closingStockAudited;
-        const openingStock =
-          openingStockAssessed > 0 ? openingStockAssessed : openingStockAudited;
-        const purchases = purchasesAssessed > 0 ? purchasesAssessed : purchasesAudited;
+        const salesEstimated = parseNum(mergedData.salesEstimated || mergedData.bySalesEstimated);
+        const servicesEstimated = parseNum(mergedData.servicesEstimated || mergedData.byServicesEstimated);
+        const closingStockEstimated = parseNum(mergedData.closingStockEstimated || mergedData.byClosingStockEstimated);
+        const openingStockAssessed = parseNum(mergedData.openingStockAssessed || mergedData.toOpeningStockAssessed);
+        const purchasesAssessed = parseNum(mergedData.purchasesAssessed || mergedData.toPurchasesAssessed);
 
-        // Gross Profit = (Sales + Services + Closing Stock) - (Opening Stock + Purchases)
-        const totalGrossProfit = sales + services + closingStock - (openingStock + purchases);
+        const calculatedGrossProfit = 
+          salesEstimated + 
+          servicesEstimated + 
+          closingStockEstimated - 
+          openingStockAssessed - 
+          purchasesAssessed;
 
-        // Net Profit from estimated field or calculate from gross profit
-        const netProfitEstimated = parseNum(mergedData.netProfitEstimated);
-        const totalNetProfit =
-          netProfitEstimated > 0
-            ? netProfitEstimated
-            : totalGrossProfit; // Fallback to gross profit if net profit not available
+        const hasStoredGrossProfitAssessed = mergedData.grossProfitAssessed !== undefined || mergedData.toGrossProfitAssessed !== undefined;
+        const hasStoredByGrossProfitEstimated = mergedData.byGrossProfitEstimated !== undefined || mergedData.grossProfitEstimated !== undefined;
+        const totalGrossProfit = hasStoredGrossProfitAssessed
+          ? storedGrossProfitAssessed
+          : hasStoredByGrossProfitEstimated
+          ? storedByGrossProfitEstimated
+          : calculatedGrossProfit;
+
+        const electricity = parseNum(mergedData.electricity || mergedData.toElectricity);
+        const rent = parseNum(mergedData.rent || mergedData.toRent);
+        const salaries = parseNum(mergedData.salaries || mergedData.toSalaries);
+        const travellingCharges = parseNum(mergedData.travellingCharges || mergedData.toTravellingCharges);
+        const otherExpenses = parseNum(mergedData.otherExpenses || mergedData.toOtherExpenses);
+
+        const storedNetProfit = parseNum(mergedData.netProfit || mergedData.toNetProfit);
+        const calculatedNetProfit = totalGrossProfit - (electricity + rent + salaries + travellingCharges + otherExpenses);
+        const hasStoredNetProfit = mergedData.netProfit !== undefined || mergedData.toNetProfit !== undefined;
+        const totalNetProfit = hasStoredNetProfit 
+          ? storedNetProfit 
+          : calculatedNetProfit;
 
         return { totalGrossProfit, totalNetProfit };
       }
@@ -3560,7 +3602,7 @@ export const BusinessVerificationDetails: React.FC<
                           marginBottom: 4,
                         }}
                       >
-                        Total Gross Profit
+                        To Gross Profit
                       </Text>
                       <Text
                         strong
@@ -3596,7 +3638,7 @@ export const BusinessVerificationDetails: React.FC<
                           marginBottom: 4,
                         }}
                       >
-                        Total Net Profit
+                        To Net Profit
                       </Text>
                       <Text
                         strong
@@ -3681,7 +3723,7 @@ export const BusinessVerificationDetails: React.FC<
                         marginBottom: 4,
                       }}
                     >
-                      Total Gross Profit
+                      To Gross Profit
                     </Text>
                     <Text
                       strong
@@ -3717,7 +3759,7 @@ export const BusinessVerificationDetails: React.FC<
                         marginBottom: 4,
                       }}
                     >
-                      Total Net Profit
+                      To Net Profit
                     </Text>
                     <Text
                       strong
@@ -4548,7 +4590,7 @@ export const BusinessVerificationDetails: React.FC<
                         icon={<UploadOutlined />}
                         size="small"
                       >
-                        {(currentDepartment || curDept) === "PD" ? "Upload JPG/PDF" : "Upload Photo"}
+                        {(currentDepartment || curDept) === "PD" ? "Upload Images and Documents" : "Upload Photo"}
                       </Button>
                     </Upload>
                   ) : null
