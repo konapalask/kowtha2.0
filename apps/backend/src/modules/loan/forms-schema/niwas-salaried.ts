@@ -13,7 +13,7 @@ export const niwasSalariedSchema = {
           nameOfApplicant: {
             type: "string",
             title: "Name of Applicant",
-            readonly: true,
+            readOnly: true,
           },
           maritalStatus: {
             type: "string",
