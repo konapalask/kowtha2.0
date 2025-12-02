@@ -445,6 +445,7 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
       try {
         const schema = await loadMobilePDFormsSchema(
           userData?.loan?.templateName ?? bankName,
+          true, // Always fetch latest schema when a PD verification is opened
         );
         if (schema) {
           setSchemaForm(schema);
@@ -485,6 +486,28 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
     [investigable, STORAGE_KEY],
   );
 
+  const focusSectionHeader = (sectionId: string) => {
+    setTimeout(() => {
+      const sectionRef = sectionRefs.current[sectionId];
+      const scrollView = scrollViewRef.current;
+
+      if (sectionRef && scrollView) {
+        sectionRef.measureLayout(
+          scrollView as any,
+          (x, y) => {
+            scrollView.scrollTo({
+              y: Math.max(0, y - 20),
+              animated: true,
+            });
+          },
+          () => {
+            console.warn('Could not measure section layout');
+          },
+        );
+      }
+    }, 200);
+  };
+
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev: any) => {
       const isCurrentlyExpanded = prev[sectionId];
@@ -492,31 +515,11 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
 
       // Scroll to section when opening it
       if (willBeExpanded) {
-        setTimeout(() => {
-          const sectionRef = sectionRefs.current[sectionId];
-          const scrollView = scrollViewRef.current;
-
-          if (sectionRef && scrollView) {
-            // Use measureLayout to get position relative to ScrollView
-            sectionRef.measureLayout(
-              scrollView as any,
-              (x, y) => {
-                scrollView.scrollTo({
-                  y: Math.max(0, y - 20), // Add small offset, ensure non-negative
-                  animated: true,
-                });
-              },
-              () => {
-                // Fallback: error callback (measureLayout failed)
-                console.warn('Could not measure section layout');
-              },
-            );
-          }
-        }, 200); // Delay to ensure section is fully rendered
+        focusSectionHeader(sectionId);
       }
 
       return {
-        investigable: prev.investigable,
+        ...prev,
         [sectionId]: willBeExpanded,
       };
     });
@@ -637,6 +640,13 @@ const PD = ({navigation, route}: {navigation: any; route: any}) => {
         saveFormData(updatedSectionData);
         return updatedSectionData;
       });
+
+      // Collapse the section after successful save and keep its header in view
+      setExpandedSections((prev: any) => ({
+        ...prev,
+        [sectionId]: false,
+      }));
+      focusSectionHeader(sectionId);
 
       // Show success message to confirm save
       Toast.show({

@@ -13,7 +13,7 @@ export const iiflSchema = {
           nameOfApplicant: {
             type: "string",
             title: "Name of Applicant",
-            readonly: true,
+            readOnly: true,
           },
           maritalStatus: {
             type: "string",
@@ -150,8 +150,8 @@ export const iiflSchema = {
             title: "Family Members (Narrative)",
             ui: { widget: "textarea", rows: 3 },
           },
-          latitude: { type: "string", title: "Latitude" },
-          longitude: { type: "string", title: "Longitude" },
+          latitude: { type: "string", title: "Latitude", readOnly: true },
+          longitude: { type: "string", title: "Longitude", readOnly: true },
           region: { type: "string", title: "Region" },
           location: { type: "string", title: "Location" },
           branch: { type: "string", title: "Branch" },
@@ -205,7 +205,7 @@ export const iiflSchema = {
           businessName: {
             type: "string",
             title: "Business / Employer Name",
-            readonly: true,
+            readOnly: true,
           },
           businessType: {
             type: "string",

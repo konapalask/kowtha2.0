@@ -128,6 +128,22 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
         normalized[key] = value;
       }
     });
+
+    // Initialize nested object structures from schema if they don't exist in data
+    // This ensures React Hook Form can handle nested paths like "currentAssets.prepaidInsurance"
+    if (schema?.properties) {
+      Object.entries(schema.properties).forEach(([fieldId, property]) => {
+        if (
+          property.type === 'object' &&
+          property.properties &&
+          !normalized[fieldId]
+        ) {
+          // Initialize empty object for nested fields
+          normalized[fieldId] = {};
+        }
+      });
+    }
+
     return normalized;
   };
 
@@ -255,68 +271,194 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
     return denormalized;
   };
 
+  // Helper function to recursively evaluate formulas in nested objects
+  const evaluateNestedFormulas = (
+    properties: Record<string, JsonSchemaProperty>,
+    objectValues: AnyObject, // Values from the current object level (top-level or nested)
+    parentKey: string = '', // Parent object key if nested (e.g., "cashFlowAnalysisDuringPD")
+    calculatedSoFar: Record<string, any> = {}, // Previously calculated values in this object
+  ): Record<string, any> => {
+    const calculatedFields: Record<string, any> = {};
+    const currentCalculated: Record<string, any> = {...calculatedSoFar};
+
+    Object.entries(properties).forEach(([fieldId, property]) => {
+      // Check if this field has a formula
+      if ((property as any).formula) {
+        // Build numeric values map from the current object's values
+        // Include both raw form values AND previously calculated values
+        const numericValues: Record<string, any> = {};
+
+        // First, include all fields from the current object level (raw form values)
+        Object.entries(objectValues).forEach(([key, val]) => {
+          const fieldSchema = properties[key];
+          if (
+            fieldSchema?.type === 'number' ||
+            fieldSchema?.type === 'integer'
+          ) {
+            const numVal =
+              typeof val === 'number' ? val : parseFloat(String(val));
+            numericValues[key] = isNaN(numVal) ? 0 : numVal;
+          } else {
+            numericValues[key] =
+              val === undefined || val === null || val === '' ? 0 : val;
+          }
+        });
+
+        // Include previously calculated values (for formulas that depend on other calculated fields)
+        Object.entries(currentCalculated).forEach(([key, val]) => {
+          if (!(key in numericValues)) {
+            const numVal =
+              typeof val === 'number' ? val : parseFloat(String(val));
+            numericValues[key] = isNaN(numVal) ? 0 : numVal;
+          }
+        });
+
+        // Ensure all schema properties are included (in case formula references fields not yet in objectValues)
+        Object.keys(properties).forEach(key => {
+          if (!(key in numericValues)) {
+            numericValues[key] = 0;
+          }
+        });
+
+        const calculatedValue = evaluateFormula(
+          (property as any).formula,
+          numericValues,
+        );
+        if (calculatedValue !== null && !isNaN(calculatedValue)) {
+          const calculatedStr = calculatedValue.toString();
+          // Store in currentCalculated for subsequent formulas to use
+          currentCalculated[fieldId] = calculatedValue;
+
+          if (parentKey) {
+            // Nested field - store in nested structure
+            if (!calculatedFields[parentKey]) {
+              calculatedFields[parentKey] = {};
+            }
+            calculatedFields[parentKey][fieldId] = calculatedStr;
+          } else {
+            // Top-level field
+            calculatedFields[fieldId] = calculatedStr;
+          }
+        }
+      }
+
+      // Recursively check nested object properties
+      if (property.type === 'object' && property.properties) {
+        const nestedObjectValues = objectValues[fieldId] || {};
+        const nestedCalculated = evaluateNestedFormulas(
+          property.properties,
+          nestedObjectValues,
+          parentKey ? parentKey : fieldId, // Pass the object field key as parent
+          {}, // Start fresh for nested object calculations
+        );
+
+        // Merge nested calculated fields into the appropriate parent structure
+        if (parentKey) {
+          // We're already nested, merge into the existing parent
+          if (!calculatedFields[parentKey]) {
+            calculatedFields[parentKey] = {};
+          }
+          Object.entries(nestedCalculated).forEach(([nestedKey, nestedVal]) => {
+            if (typeof nestedVal === 'object' && nestedVal !== null) {
+              // Deeper nesting - merge object
+              calculatedFields[parentKey] = {
+                ...calculatedFields[parentKey],
+                ...nestedVal,
+              };
+            } else {
+              // Direct field
+              calculatedFields[parentKey][nestedKey] = nestedVal;
+            }
+          });
+        } else {
+          // Top-level nested object - merge into fieldId key
+          if (!calculatedFields[fieldId]) {
+            calculatedFields[fieldId] = {};
+          }
+          Object.entries(nestedCalculated).forEach(([nestedKey, nestedVal]) => {
+            if (typeof nestedVal === 'object' && nestedVal !== null) {
+              // Deeper nesting - merge object
+              calculatedFields[fieldId] = {
+                ...calculatedFields[fieldId],
+                ...nestedVal,
+              };
+            } else {
+              // Direct field
+              calculatedFields[fieldId][nestedKey] = nestedVal;
+            }
+          });
+        }
+      }
+    });
+
+    return calculatedFields;
+  };
+
   // Recalculate formula fields whenever form values change
   useEffect(() => {
     const subscription = watch(value => {
-      // Calculate formula fields
+      // Calculate formula fields (including nested objects)
       const formValues = value as AnyObject;
-      const calculatedFields: Record<string, any> = {};
-
-      Object.entries(schema.properties).forEach(([fieldId, property]) => {
-        if ((property as any).formula) {
-          // Convert form values to numbers for formula evaluation
-          // Include all fields from schema, treating empty values as 0
-          const numericValues: Record<string, any> = {};
-
-          // First, include all fields from formValues
-          Object.entries(formValues).forEach(([key, val]) => {
-            const fieldSchema = schema.properties[key];
-            if (
-              fieldSchema?.type === 'number' ||
-              fieldSchema?.type === 'integer'
-            ) {
-              const numVal =
-                typeof val === 'number' ? val : parseFloat(String(val));
-              // Treat empty/missing values as 0
-              numericValues[key] = isNaN(numVal) ? 0 : numVal;
-            } else {
-              // For non-numeric fields, use 0 if empty
-              numericValues[key] =
-                val === undefined || val === null || val === '' ? 0 : val;
-            }
-          });
-
-          // Also ensure all schema properties are included (in case formula references fields not yet in formValues)
-          Object.keys(schema.properties).forEach(key => {
-            if (!(key in numericValues)) {
-              // Field not in formValues, treat as 0
-              numericValues[key] = 0;
-            }
-          });
-
-          const calculatedValue = evaluateFormula(
-            (property as any).formula,
-            numericValues,
-          );
-          if (calculatedValue !== null) {
-            calculatedFields[fieldId] = calculatedValue.toString();
-          }
-        }
-      });
+      const calculatedFields = evaluateNestedFormulas(
+        schema.properties,
+        formValues,
+      );
 
       // Update form with calculated values only if they differ from current values
       if (Object.keys(calculatedFields).length > 0) {
         Object.entries(calculatedFields).forEach(([key, val]) => {
-          const currentValue = formValues[key];
-          const currentNum =
-            typeof currentValue === 'number'
-              ? currentValue
-              : parseFloat(String(currentValue));
-          const newNum = parseFloat(String(val));
+          if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+            // Handle nested objects (e.g., cashFlowAnalysisDuringPD)
+            const currentValue = formValues[key] || {};
+            // Start with all current values to preserve existing fields
+            const updatedNested: Record<string, any> = {...currentValue};
+            let hasChanges = false;
 
-          // Only update if value has actually changed (avoid infinite loops)
-          if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
-            setValue(key as any, val);
+            Object.entries(val).forEach(([nestedKey, nestedVal]) => {
+              const currentNestedValue = currentValue[nestedKey];
+              const currentStr =
+                currentNestedValue !== undefined && currentNestedValue !== null
+                  ? String(currentNestedValue)
+                  : '';
+              const newStr =
+                nestedVal !== undefined && nestedVal !== null
+                  ? String(nestedVal)
+                  : '';
+
+              // Compare as strings first (faster), then as numbers if different
+              if (currentStr !== newStr) {
+                const currentNum = parseFloat(currentStr || '0');
+                const newNum = parseFloat(newStr || '0');
+
+                // Only update if value has actually changed (avoid infinite loops)
+                if (
+                  isNaN(currentNum) ||
+                  Math.abs(currentNum - newNum) > 0.0001
+                ) {
+                  updatedNested[nestedKey] = nestedVal;
+                  hasChanges = true;
+                }
+              }
+            });
+
+            // Update the nested object only if there are changes
+            if (hasChanges) {
+              setValue(key as any, updatedNested, {shouldValidate: false});
+            }
+          } else {
+            // Handle regular fields
+            const currentValue = formValues[key];
+            const currentNum =
+              typeof currentValue === 'number'
+                ? currentValue
+                : parseFloat(String(currentValue || '0'));
+            const newNum =
+              typeof val === 'number' ? val : parseFloat(String(val || '0'));
+
+            // Only update if value has actually changed (avoid infinite loops)
+            if (isNaN(currentNum) || Math.abs(currentNum - newNum) > 0.0001) {
+              setValue(key as any, val, {shouldValidate: false});
+            }
           }
         });
       }
@@ -479,8 +621,18 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
       const isFormulaField = !!(property as any).formula;
       const fieldReadOnly = property.readOnly || isFormulaField;
 
-      // Handle nested object fields (like repaymentFrom)
+      // Handle nested object fields (like repaymentFrom, currentAssets)
       if (property.type === 'object' && property.properties) {
+        // Ensure the parent object exists in form data for nested field paths to work
+        // React Hook Form requires the parent object to exist for dot notation paths
+        if (
+          !formData[fieldId] ||
+          typeof formData[fieldId] !== 'object' ||
+          Array.isArray(formData[fieldId])
+        ) {
+          setValue(fieldId as any, {}, {shouldValidate: false});
+        }
+
         return (
           <View style={styles.nestedObjectContainer}>
             <Text style={styles.nestedObjectLabel}>
@@ -709,7 +861,7 @@ const SchemaSection: React.FC<SchemaSectionProps> = ({
                 }
                 style={styles.repeaterItem}>
                 <View style={styles.repeaterItemHeader}>
-                <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
+                  <Text style={styles.repeaterItemLabel}>Item {index + 1}</Text>
                   <TouchableOpacity
                     style={styles.removeButtonInline}
                     onPress={() => handleRemoveItem(index)}>
