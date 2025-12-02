@@ -53,9 +53,14 @@ export interface VerifierLoan {
 interface LoanFilters {
   status?: string;
   applicationNumber?: string;
-  employeeCode?: string;
-  employeeName?: string;
-  postponed?: boolean;
+  fieldExecutiveEmployeeCode?: string;
+  fieldExecutiveName?: string;
+  postponed?: boolean | string;
+  applicantName?: string;
+  applicantMobile?: string;
+  bankName?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const getLoansApi = (
