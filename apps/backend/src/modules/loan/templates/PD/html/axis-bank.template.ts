@@ -439,6 +439,10 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
                 <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.pdDetails?.pdOfficerName || ""}</strong></p></td>
             </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"></p></td>
+            </tr>
         </table>
 
 
@@ -511,7 +515,6 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Income left for domestic expenses</strong></p></td>
-                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.incomeLeftForDomesticExpenses || 0)}</p></td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Monthly Household Expenses</strong></p></td>

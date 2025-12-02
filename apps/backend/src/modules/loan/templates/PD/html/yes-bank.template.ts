@@ -389,6 +389,10 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
   )}
         ${renderKeyValue("Designation", finalComment.yblDesignation)}
         ${renderKeyValue("EMP ID", finalComment.yblEmpId)}
+        <tr>
+          <td style="${labelCellStyle}">Signature</td>
+          <td style="${valueCellStyle}" colspan="2"></td>
+        </tr>
         ${renderKeyValue(
     "PD agency Interviewer’s Name",
     finalComment.pdAgencyInterviewer

@@ -506,6 +506,10 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         <td style="${valueCellStyle}">Name: ${formatMultiline(observations.pdConductedBy)}</td>
         <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
       </tr>
+      <tr>
+        <td style="${labelCellStyle}">Signature</td>
+        <td style="${valueCellStyle}" colspan="2"></td>
+      </tr>
       ${renderKeyValueRow(
         `Date: ${observations.pdDate}`,
         `Time: ${observations.pdTime}`,

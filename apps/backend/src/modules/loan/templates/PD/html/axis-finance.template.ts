@@ -561,7 +561,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const overallPositivesOrNegativesTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${html_data.approvedStatus|| "Not provided"}<br> ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong><br> ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(
@@ -578,6 +578,15 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     tradeReferences,
     "No trade references provided"
   );
+
+  const pdStatusTable = `
+    <table style="${tableStyle}">
+      <tr>
+        <td style="${headerCellStyle};width:35%;">PD Status</td>
+        <td style="${cellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+      </tr>
+    </table>
+  `;
 
   const noteBlock = `
     <div style="font-size:12px;line-height:1.6;margin-top:16px;">
@@ -623,6 +632,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${otherObservationsTable}
       ${overallPositivesOrNegativesTable}
       ${renderSection("Trade References ", tradeReferenceTable)}
+      ${pdStatusTable}
       ${estimatedIncomeTable}
       ${noteBlock}
     </div>

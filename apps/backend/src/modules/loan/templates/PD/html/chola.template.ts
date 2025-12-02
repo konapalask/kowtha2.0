@@ -207,10 +207,10 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
   
   const businessList = [
     hasValue(aboutBusiness?.aboutTheApplicant)
-      ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${aboutBusiness?.aboutTheApplicant?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || ""}</p>`
+      ? `<p style="${paragraphStyle}"><strong>About the Applicant:</strong><br>${aboutBusiness?.aboutTheApplicant?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || ""}</p>`
       : "",
     hasValue(aboutBusiness?.aboutTheBusiness)
-      ? `<p style="${paragraphStyle}"><strong>About the Business:</strong><br>${aboutBusiness?.aboutTheBusiness?.split("\n").map((line: string) => `<li style="margin-left: 20px;">${line}</li>`).join("") || ""}</p>`
+      ? `<p style="${paragraphStyle}"><strong>About the Business:</strong><br>${aboutBusiness?.aboutTheBusiness?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || ""}</p>`
       : "",
   ]
     .filter((item) => item !== "")
