@@ -37,6 +37,7 @@ export const ambitMsmeSchema = {
               locale: "en-IN",
               maxDecimalPlaces: 2,
             },
+            readOnly: true,
           },
           emi: {
             type: "number",
@@ -50,6 +51,7 @@ export const ambitMsmeSchema = {
           businessName: {
             type: "string",
             title: "Business Name",
+            readOnly: true,
           },
           nameOfTheProprietor: {
             type: "string",
@@ -87,14 +89,6 @@ export const ambitMsmeSchema = {
                   rows: 2,
                 },
               },
-              latitude: {
-                type: "number",
-                title: "Latitude",
-              },
-              longitude: {
-                type: "number",
-                title: "Longitude",
-              },
             },
           },
           businessLicenseAddress: {
@@ -104,7 +98,6 @@ export const ambitMsmeSchema = {
               widget: "textarea",
               rows: 2,
             },
-            readOnly: true,
           },
         },
       },
@@ -123,14 +116,6 @@ export const ambitMsmeSchema = {
               widget: "textarea",
               rows: 2,
             },
-          },
-          latitude: {
-            type: "number",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "number",
-            title: "Longitude",
           },
           rentedOrOwned: {
             type: "string",
@@ -166,27 +151,9 @@ export const ambitMsmeSchema = {
               rows: 2,
             },
           },
-          latitude: {
-            type: "number",
-            title: "Latitude",
-          },
-          longitude: {
-            type: "number",
-            title: "Longitude",
-          },
-          typeOfProperty: {
-            type: "string",
-            title: "Type of Property",
-            enum: ["Residential", "Commercial", "Industrial"],
-          },
           ownerName: {
             type: "string",
             title: "Property owner name",
-          },
-          natureOfUses: {
-            type: "number",
-            title: "Nature of uses",
-            enum: ["Self-Occupied", "Rented", "Vacant", "Others"],
           },
           marketValue: {
             type: "number",
@@ -217,6 +184,7 @@ export const ambitMsmeSchema = {
           phoneNumberOfApplicant: {
             type: "integer",
             title: "Mob no. of Applicant",
+            readOnly: true,
           },
           phoneNumberOfCoApplicant: {
             type: "integer",
@@ -240,16 +208,12 @@ export const ambitMsmeSchema = {
             title: "Type of Loan",
           },
           noOfVisit: {
-            type: "number",
+            type: "string",
             title: "No. of Visit",
           },
           personMet: {
             type: "string",
-            title: "Person Met (with name and Relation",
-          },
-          pdDoneBy: {
-            type: "string",
-            title: "PD done Person name",
+            title: "Person Met (with name and Relation)",
           },
         },
       },
@@ -432,7 +396,7 @@ export const ambitMsmeSchema = {
                   title: "Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Mob Number",
                 },
                 location: {
@@ -466,7 +430,7 @@ export const ambitMsmeSchema = {
                   title: "Neighbour, Resi/Business & Collateral Name",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Mob Number",
                 },
                 location: {
@@ -501,7 +465,7 @@ export const ambitMsmeSchema = {
                 },
                 remarks: {
                   type: "string",
-                  title: "RemJarks",
+                  title: "Remarks",
                 },
               },
             },
@@ -569,7 +533,7 @@ export const ambitMsmeSchema = {
                 },
                 valueOfAsset: {
                   type: "string",
-                  title: "Vallue of Asset",
+                  title: "Value of Asset",
                 },
                 currentSratus: {
                   type: "string",
