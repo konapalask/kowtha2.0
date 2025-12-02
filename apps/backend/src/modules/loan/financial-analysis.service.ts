@@ -121,27 +121,60 @@ export class FinancialAnalysisTemplatesService {
    */
   private isServiceBusinessFormat(bankName: string): boolean {
     const serviceBanks = this.bankTemplateMappings['generic'];
-    return serviceBanks.some((bank) => bankName.includes(bank));
+    if (!serviceBanks || !Array.isArray(serviceBanks)) {
+      return false;
+    }
+    // Check if bankName matches any bank in the list (case-insensitive)
+    return serviceBanks.some((bank) => 
+      bankName.toUpperCase().includes(bank.toUpperCase()) || 
+      bank.toUpperCase().includes(bankName.toUpperCase())
+    );
   }
 
   private isDetailedBalanceSheetFormat(bankName: string): boolean {
     const detailedBanks = this.bankTemplateMappings['statement-2'];
-    return detailedBanks.some((bank) => bankName.includes(bank));
+    if (!detailedBanks || !Array.isArray(detailedBanks)) {
+      return false;
+    }
+    return detailedBanks.some((bank) => 
+      bankName.toUpperCase().includes(bank.toUpperCase()) || 
+      bank.toUpperCase().includes(bankName.toUpperCase())
+    );
   }
 
   private isProprietorGstFormat(bankName: string): boolean {
     const gstBanks = this.bankTemplateMappings['statement-3'];
-    return gstBanks.some((bank) => bankName.includes(bank));
+    if (!gstBanks || !Array.isArray(gstBanks)) {
+      return false;
+    }
+    return gstBanks.some((bank) => 
+      bankName.toUpperCase().includes(bank.toUpperCase()) || 
+      bank.toUpperCase().includes(bankName.toUpperCase())
+    );
   }
 
   private isGpPbditFormat(bankName: string): boolean {
     const pbditBanks = this.bankTemplateMappings['statement-4'];
-    return pbditBanks.some((bank) => bankName.includes(bank));
+    if (!pbditBanks || !Array.isArray(pbditBanks)) {
+      return false;
+    }
+    // Check both directions: bankName contains bank OR bank contains bankName
+    // This handles cases like "RBL" matching "RBL BANK (PD & LIP)"
+    return pbditBanks.some((bank) => 
+      bankName.toUpperCase().includes(bank.toUpperCase()) || 
+      bank.toUpperCase().includes(bankName.toUpperCase())
+    );
   }
 
   private isComprehensiveFormat(bankName: string): boolean {
     const comprehensiveBanks = this.bankTemplateMappings['statement-5'];
-    return comprehensiveBanks.some((bank) => bankName.includes(bank));
+    if (!comprehensiveBanks || !Array.isArray(comprehensiveBanks)) {
+      return false;
+    }
+    return comprehensiveBanks.some((bank) => 
+      bankName.toUpperCase().includes(bank.toUpperCase()) || 
+      bank.toUpperCase().includes(bankName.toUpperCase())
+    );
   }
 
 

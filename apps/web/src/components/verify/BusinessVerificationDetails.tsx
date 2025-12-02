@@ -206,6 +206,7 @@ interface BusinessVerificationDetailsProps {
   currentDepartment?: string;
   applicationNumber?: string;
   loanId?: number;
+  pdEmailLogs?: any[];
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -223,6 +224,7 @@ export const BusinessVerificationDetails: React.FC<
   currentDepartment,
   applicationNumber,
   loanId,
+  pdEmailLogs,
 }) => {
   console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
@@ -4953,6 +4955,12 @@ export const BusinessVerificationDetails: React.FC<
             setOpen={setOpen}
             verificationType="Business"
             currentDepartment={currentDepartment}
+            loanId={loanId}
+            hasPdEmail={
+              currentDepartment === "PD" &&
+              pdEmailLogs &&
+              pdEmailLogs.length > 0
+            }
           />
         </>
       )}
