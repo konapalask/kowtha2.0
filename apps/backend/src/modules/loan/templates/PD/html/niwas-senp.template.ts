@@ -563,6 +563,10 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Status of the case", pdComments.statusOfCase)}
         ${renderKeyValue("Name of PD Officer", pdComments.pdOfficerName)}
         ${renderKeyValue("Date of Discussion", pdComments.discussionDate)}
+        <tr>
+          <td style="${labelCellStyle}">Signature of the PD Officer</td>
+          <td style="${valueCellStyle}"></td>
+        </tr>
         ${renderKeyValue(
           "Pd Status",
           html_data.approvedStatus|| "Not provided"

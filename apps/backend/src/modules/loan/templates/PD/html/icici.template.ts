@@ -537,20 +537,20 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                   ${coApplicantObservations.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantSales || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantObservations.length}"></td>
+                  <td style="${labelCellStyle}" colspan="3"></td>
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantObservations.length}"><strong>Trigger Point Verification</strong></td>
+                  <td style="${labelCellStyle}" colspan="2"><strong>Trigger Point Verification</strong></td>
                   <td style="${labelCellStyle}">Remarks</td>
         </tr>
         <tr>
                   <td style="${labelCellStyle}">For Traders</td>
-                  <td style="${valueCellStyle}" colspan="${1 + coApplicantObservations.length}">${triggerPointVerification.forTraders || ""}</td>
+                  <td style="${valueCellStyle}">${triggerPointVerification.forTraders || ""}</td>
                   <td style="${valueCellStyle}">${triggerPointVerification.forTradersRemarks || ""}</td>
         </tr>
         <tr>
                   <td style="${labelCellStyle}">For Manufacturers</td>
-                  <td style="${valueCellStyle}" colspan="${1 + coApplicantObservations.length}">${triggerPointVerification.forManufacturers || ""}</td>
+                  <td style="${valueCellStyle}">${triggerPointVerification.forManufacturers || ""}</td>
                   <td style="${valueCellStyle}">${triggerPointVerification.forManufacturersRemarks || ""}</td>
         </tr>
                </table>

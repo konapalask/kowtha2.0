@@ -547,6 +547,12 @@ export const axisFinanceUBLTemplate = (
           thirdPartySection.verifierNameEmpCode || "",
         ],
       ])}
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">Signature</td>
+          <td style="${cellStyle}"></td>
+        </tr>
+      </table>
       <p style="${paragraphStyle};font-size:14px;"><strong>Disclaimer if any:</strong> ${formatMultiline(
         verificationData.recommendations?.disclaimer ||
           "We estimated financials, purely based on the valid documents provided by the applicant."

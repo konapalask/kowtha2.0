@@ -305,7 +305,7 @@ export const axisFinanceUBLBelow10lTemplate = (
         <td style="${labelCellStyle}">Name of the Third Party Check</td>
         <td style="${cellStyle}">${thirdPartyCheck?.nameOfThirdParty || "Not provided"}</td>
         <td style="${labelCellStyle}">Third Party Check Status</td>
-        <td style="${cellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        <td style="${cellStyle}">${thirdPartyCheck?.statusOfThirdParty|| "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Third Party Feedback Remarks</td>
@@ -318,8 +318,12 @@ export const axisFinanceUBLBelow10lTemplate = (
       <tr>
         <td style="${labelCellStyle}">AFL Verifier's Name & Emp Code</td>
         <td style="${cellStyle}">${overallDetails?.aflVerifierName || "Not provided"} ${overallDetails?.aflVerifierEmpCode ? "-"+overallDetails?.aflVerifierEmpCode : ""}</td>
-        <td style="${labelCellStyle}">AFL Verifier's Signature</td>
-        <td style="${cellStyle}">${overallDetails?.aflVerifierSignature || "Not provided"}</td>
+        <td style="${labelCellStyle}">PD Officer Signature</td>
+        <td style="${cellStyle}"></td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">PD Status</td>
+        <td style="${cellStyle}" colspan="3">${html_data.approvedStatus|| "Not provided"}</td>
       </tr>
     </table>
 
