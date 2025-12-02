@@ -927,16 +927,6 @@ export const janaSenpAbove50lSchema = {
         },
       },
     },
-    {
-      id: "status",
-      label: "Status",
-      schema: {
-        type: "object",
-        properties: {
-          status: { type: "string", title: "Status" },
-        },
-      },
-    },
     financialsSchema,
   ],
 };

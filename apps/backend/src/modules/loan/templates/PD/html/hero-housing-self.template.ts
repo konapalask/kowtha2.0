@@ -517,8 +517,7 @@ export const heroHousingSelfTemplate = (
   ]);
 
   const finalStatusValue = joinDetails([
-    ["Final PD status", finalStatus.pdStatus],
-    ["Comments / reason", finalStatus.statusComments],
+    ["Final PD status", html_data.approvedStatus|| "Not provided"],
   ]);
 
   const incomeItems = ensureArray(incomeAssessment.lineItems).map(
@@ -788,7 +787,7 @@ export const heroHousingSelfTemplate = (
     },
     {
       left: `<p style="${paragraphStyle}"><strong>Final PD status (Positive/Negative) with comment for reason of status</strong></p>`,
-      right: finalStatusValue,
+      right: `${html_data.approvedStatus|| "Not provided"}`,
     },
   ];
 
@@ -816,7 +815,6 @@ export const heroHousingSelfTemplate = (
       <p style="font-size:12px;">(Please provide the monthly net income of applicant and also mention comment/mode of validation under the column “Comments”)</p>
       ${incomeTable}
       ${noteBlock}
-      <p style="${paragraphStyle}"><strong>Photos with Geo coordinates of location</strong></p>
     </div>
     ${pdBaseTemplateFooter(html_data)}
   `;

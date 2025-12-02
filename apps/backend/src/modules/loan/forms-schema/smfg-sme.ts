@@ -1,4 +1,4 @@
-import statement2Schema from "../financials-schema/statement2";
+import financialsSchema from "../financials-schema/generic";
 export const smfgSmeSchema = {
   id: 25,
   bankName: "SMFG SME",
@@ -439,19 +439,6 @@ export const smfgSmeSchema = {
             title: "Concerns",
             ui: { widget: "textarea", rows: 3 },
           },
-          pdStatus: {
-            type: "string",
-            title: "Status of PD",
-            enum: ["Positive", "Negative", "Referred"],
-          },
-          pdConductedBy: {
-            type: "string",
-            title: "PD Conducted By (Name & Designation)",
-          },
-          pdDesignation: {
-            type: "string",
-            title: "PD Designation",
-          },
           pdDate: {
             type: "string",
             title: "PD Date",
@@ -465,7 +452,7 @@ export const smfgSmeSchema = {
         },
       },
     },
-    statement2Schema,
+    financialsSchema,
   ],
 } as const;
 

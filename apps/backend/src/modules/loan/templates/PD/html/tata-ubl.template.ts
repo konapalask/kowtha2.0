@@ -578,7 +578,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>30</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Final Status</strong></p></td>
-                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.otherObservations?.finalStatus || ""}</strong></p></td>
+                    <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus|| "Not provided"}</strong></p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>31</strong></p></td>

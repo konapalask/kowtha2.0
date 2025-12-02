@@ -498,7 +498,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       ${renderKeyValueRow("Concerns", observations.concerns, undefined, {
         colSpan: 3,
       })}
-      ${renderKeyValueRow("Status of PD", observations.pdStatus, undefined, {
+      ${renderKeyValueRow("Status of PD", html_data.approvedStatus|| "Not provided", undefined, {
         colSpan: 3,
       })}
       <tr>
@@ -506,9 +506,6 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         <td style="${valueCellStyle}">Name: ${formatMultiline(observations.pdConductedBy)}</td>
         <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
       </tr>
-      ${renderKeyValueRow("Signature", observations.pdSignature, undefined, {
-        colSpan: 3,
-      })}
       ${renderKeyValueRow(
         `Date: ${observations.pdDate}`,
         `Time: ${observations.pdTime}`,

@@ -557,20 +557,6 @@ export const ambitSchema = {
         },
       },
     },
-    {
-      id: "status",
-      label: "Status",
-      schema: {
-        type: "object",
-        properties: {
-          status: {
-            type: "string",
-            title: "Status",
-            enum: ["Positive", "Negative", "Credit Refer"],
-          },
-        },
-      },
-    },
     financialsSchema,
   ],
 } as const;

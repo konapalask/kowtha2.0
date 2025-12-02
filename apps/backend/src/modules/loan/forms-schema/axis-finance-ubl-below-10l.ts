@@ -26,86 +26,224 @@ export const axisFinanceUblBelow10lSchema = {
             title: "Ref No / Application No",
             readOnly: true,
           },
-          dateOfReport: {
-            type: "string",
-            title: "Date of Report",
-            format: "date",
-          },
           applicantName: {
             type: "string",
             title: "Name of Customer",
             readOnly: true,
           },
-          concernName: {
+          pdConductedAt: {
             type: "string",
-            title: "Name of Concern",
+            title: "PD Conducted At",
+            enum: ["Residence", "Office", "Residence cum Office"],
+          },
+          applicantContactNumber: {
+            type: "integer",
+            title: "Contact Number",
             readOnly: true,
           },
-          constitution: {
+          dateOfVisit: {
             type: "string",
-            title: "Constitution",
+            title: "Date of Visit",
+            format: "date",
           },
-          initiatedAddress: {
-            type: "string",
-            title: "Initiated Address",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-            readOnly: true,
-          },
-          visitedAddress: {
+          addressVisited: {
             type: "string",
             title: "Visited Address",
             ui: {
               widget: "textarea",
               rows: 3,
             },
+            readOnly: true,
           },
-          phoneNumber: {
-            type: "integer",
-            title: "Phone No.",
-          },
-          appointmentFixed: {
+          bornAndBroughtUpFrom: {
             type: "string",
-            format: "time",
-            title: "Appointment Fixed",
-          },
-          structureOfLoan: {
-            type: "string",
-            title: "Structure of Loan",
-          },
-          numberOfVisits: {
-            type: "integer",
-            title: "No. of Visit",
-          },
-          personMet: {
-            type: "string",
-            title: "Person Met",
-          },
-          visitedBy: {
-            type: "string",
-            title: "Visited By",
-          },
-          aboutApplicant: {
-            type: "string",
-            title: "About Applicant",
+            title: "Born and Brought Up From",
             ui: {
               widget: "textarea",
-              rows: 4,
+              rows: 2,
             },
           },
-          residentialDetails: {
+          dateOfBirth: {
             type: "string",
-            title: "Residential Details",
+            title: "Date of Birth",
+            format: "date",
+          },
+          qualification: {
+            type: "string",
+            title: "Qualification",
+          },
+          previousWorkExperience: {
+            type: "string",
+            title: "Previous Work Experience",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "businessDetails",
+      label: "Business Details",
+      schema: {
+        type: "object",
+        properties: {
+          nameOfFirm: {
+            type: "string",
+            title: "Name of the firm/company",
+            readOnly: true,
+          },
+          typeOfBusiness: {
+            type: "string",
+            title: "Type of Firm",
+          },
+          ifPartnership: {
+            type: "string",
+            title: "If Partnership OR Pvt. Ltd. Provide share Holders Details",
             ui: {
               widget: "textarea",
               rows: 3,
             },
           },
-          coApplicantDetails: {
+          natureOfBusiness: {
             type: "string",
-            title: "Co-Applicant Details",
+            title: "Nature of Business",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+          officeDetails: {
+            type: "string",
+            title: "Office Details (office stability)",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          businessActivity: {
+            type: "string",
+            title:
+              "level ofBusiness Activity (Remarks on Stocks, Total/current working capacity of Plant. )",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+          numberOfEmployees: {
+            type: "integer",
+            title: "Number of Employees",
+          },
+          salaryPaidToEmployees: {
+            type: "string",
+            title: "Salary paid to employees",
+            ui: {
+              widget: "textarea",
+              rows: 2,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "customerDetails",
+      label: "Customer Details",
+      schema: {
+        type: "object",
+        properties: {
+          majorCustomers: {
+            type: "array",
+            title: "Major Customers",
+            items: {
+              type: "object",
+              properties: {
+                nameOfCustomer: {
+                  type: "string",
+                  title: "Contact Person",
+                },
+                contactNo: { type: "integer", title: "Contact Number" },
+                creditPeriod: { type: "number", title: "Credit Period" },
+                paymentMode: { type: "string", title: "Payment Mode" },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "supplierDetails",
+      label: "Supplier Details",
+      schema: {
+        type: "object",
+        properties: {
+          majorSuppliers: {
+            type: "array",
+            title: "Major Suppliers",
+            items: {
+              type: "object",
+              properties: {
+                nameOfSupplier: {
+                  type: "string",
+                  title: "Contact Person",
+                },
+                contactNo: { type: "integer", title: "Contact Number" },
+                creditPeriod: { type: "number", title: "Credit Period" },
+                paymentMode: { type: "string", title: "Payment Mode" },
+              },
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "turnOverDetails",
+      label: "Turnover Details",
+      schema: {
+        type: "object",
+        properties: {
+          details: {
+            type: "string",
+            title: "Turnover Details",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+      required: true,
+    },
+    {
+      id: "otherBusinessOrSourceOfIncome",
+      label: "Other Business or Source of Income",
+      schema: {
+        type: "object",
+        properties: {
+          details: {
+            type: "string",
+            title: "Other Business or Source of Income",
+            ui: {
+              widget: "textarea",
+              rows: 3,
+            },
+          },
+        },
+      },
+    },
+    {
+      id: "assetDetails",
+      label: "Movable/Immovable Assets Details",
+      schema: {
+        type: "object",
+        properties: {
+          details: {
+            type: "string",
+            title: "Movable/Immovable Assets Details",
             ui: {
               widget: "textarea",
               rows: 3,
@@ -121,9 +259,9 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          details: {
+          familyMembers: {
             type: "array",
-            title: "Family Details",
+            title: "Details of applicants family members & their occupation",
             items: {
               type: "object",
               properties: {
@@ -131,55 +269,18 @@ export const axisFinanceUblBelow10lSchema = {
                   type: "string",
                   title: "Name",
                 },
-                relation: {
+                relationWithApplicant: {
                   type: "string",
                   title: "Relation with applicant",
-                  enum: [
-                    "Father",
-                    "Mother",
-                    "Brother",
-                    "Sister",
-                    "Spouse",
-                    "Son",
-                    "Daughter",
-                    "Other",
-                  ],
                 },
                 age: {
                   type: "integer",
                   title: "Age (Yrs)",
                 },
-                qualification: {
-                  type: "string",
-                  title: "Qualification",
-                  enum: [
-                    "Below 10th",
-                    "10th pass",
-                    "Under graduate",
-                    "Graduate",
-                    "Post Graduate",
-                    "Professional",
-                  ],
-                },
                 occupation: {
                   type: "string",
                   title: "Occupation",
                 },
-                incomePerMonth: {
-                  type: "number",
-                  title: "Income per month (approx.)",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                dependent: {
-                  type: "string",
-                  title: "Dependent",
-                  enum: ["Yes", "No"],
-                },
               },
             },
           },
@@ -188,83 +289,35 @@ export const axisFinanceUblBelow10lSchema = {
       required: true,
     },
     {
-      id: "shareholdingDetails",
-      label: "Constitution / Shareholding Details",
+      id: "addressDetails",
+      label: "Address Details",
       schema: {
         type: "object",
         properties: {
-          shareholdingDetails: {
-            type: "array",
-            title: "Constitution / Shareholding Details",
-            items: {
-              type: "object",
-              properties: {
-                shareholderName: {
-                  type: "string",
-                  title: "Name of the Shareholder",
-                },
-                relationWithMainApplicant: {
-                  type: "string",
-                  title: "Relation with main applicant",
-                },
-                designation: {
-                  type: "string",
-                  title: "Designation",
-                },
-                shareholdingPercentage: {
-                  type: "number",
-                  title: "% of Shareholding",
-                },
-                comingIntoLoanStructure: {
-                  type: "string",
-                  title: "Coming into loan structure",
-                },
-                functionalRole: {
-                  type: "string",
-                  title: "Functional role of partner / director",
-                },
-              },
-            },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "businessOverview",
-      label: "Business Overview",
-      schema: {
-        type: "object",
-        properties: {
-          aboutBusiness: {
+          permanentAddress: {
             type: "string",
-            title: "About the Business",
-            ui: {
-              widget: "textarea",
-              rows: 8,
-              },
+            title: "Permanent Address (If different from above)",
+            ui: { widget: "textarea", rows: 3 },
           },
-          documentsObserved: {
-            type: "array",
-            title: "Documents Observed",
-            items: {
-              type: "object",
-              properties: {
-                documentCategory: {
-                  type: "string",
-                  title: "Document Category",
-                },
-                documentName: {
-                  type: "string",
-                  title: "Document Name",
-                },
-                documentType: {
-                  type: "string",
-                  title: "Document Type",
-                },
-                remarks: {
-                  type: "string",
-                  title: "Remarks",
+          residenceAddress: {
+            type: "string",
+            title: "Residence Address",
+            ui: { widget: "textarea", rows: 3 },
+          },
+          resiStability: {
+            type: "object",
+            title: "Residence Stability",
+            properties: {
+              typeOfResidence: { type: "string", title: "Type of Residence" },
+              durationOfStay: { type: "string", title: "Duration" },
+              rentPerMonth: {
+                type: "number",
+                title: "Rent per month",
+                formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
                 },
               },
             },
@@ -274,106 +327,60 @@ export const axisFinanceUblBelow10lSchema = {
       required: true,
     },
     {
-      id: "suppliersCreditors",
-      label: "Suppliers / Creditors",
+      id: "existingLoanDetails",
+      label: "Existing Loan Details",
       schema: {
         type: "object",
         properties: {
-          numberOfFixedSuppliers: {
-            type: "integer",
-            title: "No of fixed suppliers",
-          },
-          creditPeriodDays: {
-            type: "integer",
-            title: "Credit period",
-          },
-          cashChequeProportion: {
-            type: "number",
-            title: "Cash - Cheque proportion",
-            formatter: {
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          topSuppliers: {
-            type: "array",
-            title: "Top 3 Suppliers",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                contactDetails: {
-                  type: "integer",
-                  title: "Contact details",
-                },
-                location: {
-                  type: "string",
-                  title: "Location",
-                },
-                referenceCheck: {
-                  type: "string",
-                  title: "Ref. Check",
-                },
-              },
-            },
+          details: {
+            type: "string",
+            title: "Existing Loan Details",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
       required: true,
     },
     {
-      id: "clientsDebtors",
-      label: "Clients / Debtors",
+      id: "bankingHabits",
+      label: "Banking Habits",
       schema: {
         type: "object",
         properties: {
-          numberOfFixedCustomers: {
-            type: "integer",
-            title: "No of fixed customers",
+          details: {
+            type: "string",
+            title: "Banking Habits",
+            ui: { widget: "textarea", rows: 3 },
           },
-          creditPeriodDays: {
-            type: "integer",
-            title: "Credit period",
+        },
+      },
+      required: true,
+    },
+    {
+      id: "creditCardDetails",
+      label: "Credit Card Details if any",
+      schema: {
+        type: "object",
+        properties: {
+          details: {
+            type: "string",
+            title: "Credit Card Details if any",
+            ui: { widget: "textarea", rows: 3 },
           },
-          cashChequeProportion: {
+        },
+      },
+    },
+    {
+      id: "loanapplied",
+      label: "Loan application Details",
+      schema: {
+        type: "object",
+        properties: {
+          loanType: { type: "string", title: "Type of Loan" },
+          loanPurpose: { type: "string", title: "Loan Purpose" },
+          loanAmount: {
             type: "number",
-            title: "Cash - Cheque proportion",
-            formatter: {
-              maxDecimalPlaces: 2,
-              minDecimalPlaces: 0,
-            },
-          },
-          topCustomers: {
-            type: "array",
-            title: "Top 3 Customers",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Name",
-                },
-                contactDetails: {
-                  type: "integer",
-                  title: "Contact details",
-                },
-                location: {
-                  type: "string",
-                  title: "Location",
-                },
-                referenceCheck: {
-                  type: "string",
-                  title: "Ref. Check",
-                },
-              },
-            },
-          },
-          averageStockMaintained: {
-            type: "number",
-            title: "Average stock maintained",
+            title: "Loan Amount",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -381,9 +388,9 @@ export const axisFinanceUblBelow10lSchema = {
               minDecimalPlaces: 0,
             },
           },
-          turnoverAndMargins: {
+          affordableEMI: {
             type: "number",
-            title: "Turnover & margins",
+            title: "Affordable EMI",
             formatter: {
               useIndianFormat: true,
               locale: "en-IN",
@@ -396,249 +403,15 @@ export const axisFinanceUblBelow10lSchema = {
       required: true,
     },
     {
-      id: "expenditure",
-      label: "Expenditure - Salaries & Wages",
+      id: "documentsSeen",
+      label: "Documents Seen",
       schema: {
         type: "object",
         properties: {
-          salariesAndWages: {
-            type: "array",
-            title: "Salaries & Wages Details",
-            items: {
-              type: "object",
-              properties: {
-                noOfEmployees: {
-                  type: "integer",
-                  title: "No of Employees",
-                },
-                salaryPerMonthPerEmployee: {
-                  type: "number",
-                  title: "Salary per month per employee",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                statusOfEmployee: {
-                  type: "string",
-                  title: "Status of employee",
-                },
-                noOfLabours: {
-                  type: "integer",
-                  title: "No. of labours",
-                },
-                wagesPerMonthOrDay: {
-                  type: "number",
-                  title: "Wages per month/per day",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                statusOfLabour: {
-                  type: "string",
-                  title: "Status of labour",
-                },
-                remarks: {
-                  type: "string",
-                  title: "Remarks",
-                  ui: {
-                    widget: "textarea",
-                    rows: 3,
-                  },
-                },
-              },
-            },
-          },
-          workingHours: {
+          details: {
             type: "string",
-            title: "Working Hours",
-          },
-          otherMajorExpensesAndBasis: {
-            type: "string",
-            title: "Other major expenses & basis",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "assetDetails",
-      label: "Asset Details",
-      schema: {
-        type: "object",
-        properties: {
-          immovableProperties: {
-            type: "array",
-            title: "Immovable Properties",
-            items: {
-              type: "object",
-              properties: {
-                address: {
-                  type: "string",
-                  title: "Address",
-                },
-                areaMeasurements: {
-                  type: "number",
-                  title: "Area measured (Sq.ft)",
-                  formatter: {
-                    useIndianFormat: true,
-                    locale: "en-IN",
-                    maxDecimalPlaces: 2,
-                    minDecimalPlaces: 0,
-                  },
-                },
-                purchaseCostLakhs: {
-                  type: "number",
-                  title: "Purchase cost (in Lakhs)",
-                },
-                purchaseYear: {
-                  type: "integer",
-                  title: "Purchase Year",
-                },
-                marketValueLakhs: {
-                  type: "number",
-                  title: "Market value (in Lakhs)",
-                },
-                ownerName: {
-                  type: "string",
-                  title: "Owner Name",
-                },
-                mortgaged: {
-                  type: "string",
-                  title: "Mortgaged",
-                  enum: ["Yes", "No"],
-                },
-              },
-            },
-          },
-          liquidMoveableAssets: {
-            type: "string",
-            title:
-              "Any Liquid, Moveable & Monetary items such as Cash, Gold, FD, RD, Mutual Funds, Shares, Bonds, Securities",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          insurances: {
-            type: "string",
-            title:
-              "Life insurance, mediclaim, property/asset insurance (premium & sum assured)",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          capitalInvestedLoans: {
-            type: "string",
-            title: "Capital invested in any business, loans & advances given",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          vehicles: {
-            type: "string",
-            title: "Car, Bike and any other vehicle (Company Name and Model)",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "existingLoans",
-      label: "Loan Details",
-      schema: {
-        type: "object",
-        properties: {
-          loans: {
-            type: "array",
-            title: "Loan Details",
-            items: {
-              type: "object",
-              properties: {
-                bankOrNbfcName: {
-                  type: "string",
-                  title: "Name of Bank / NBFC",
-                },
-                typeOfLoan: {
-                  type: "string",
-                  title: "Type of Loan",
-                },
-                sanctionedAmount: {
-                  type: "number",
-                  title: "Sanctioned Amount (in Lakhs)",
-                },
-                outstandingBalance: {
-                  type: "number",
-                  title: "O/S Balance",
-                },
-                emiAmount: {
-                  type: "number",
-                  title: "EMI (in Rs.)",
-                },
-                emiPaidBank: {
-                  type: "string",
-                  title: "EMI Paid Bank",
-                },
-                securedAgainstAsset: {
-                  type: "string",
-                  title: "Secured against which asset",
-                },
-              },
-            },
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "bankingDetails",
-      label: "Bank Details",
-      schema: {
-        type: "object",
-        properties: {
-          banks: {
-            type: "array",
-            title: "Bank Details",
-            items: {
-              type: "object",
-              properties: {
-                bankName: {
-                  type: "string",
-                  title: "Bank Name",
-                },
-                branchName: {
-                  type: "string",
-                  title: "Branch Name",
-                },
-                accountType: {
-                  type: "string",
-                  title: "Account Type",
-                },
-                openSince: {
-                  type: "number",
-                  title: "Open since (Year)",
-                },
-              },
-            },
-          },
-          endUseOfLoan: {
-            type: "string",
-            title: "End use of loan:(Loan Amount & Detailed End-Use)",
+            title: "Documents Seen",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
@@ -650,158 +423,38 @@ export const axisFinanceUblBelow10lSchema = {
       schema: {
         type: "object",
         properties: {
-          references: {
-            type: "array",
-            title: "References",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string",
-                  title: "Individual / Business Name",
-                },
-                address: {
-                  type: "string",
-                  title: "Address",
-                },
-                contactNo: {
-                  type: "number",
-                  title: "Contact No.",
-                },
-                knowingSince: {
-                  type: "number",
-                  title: "Knowing Since",
-                },
-                feedbackOnBorrower: {
-                  type: "string",
-                  title: "Feedback on borrower",
-                },
-                feedbackOnBusiness: {
-                  type: "string",
-                  title: "Feedback on business",
-                },
-              },
-            },
-          },
-          observations: {
+          nameOfThirdParty: {
             type: "string",
-            title: "Observations",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
+            title: "Name of Third Party Check",
           },
-          otherIncome: {
+          // statusOfThirdParty: {
+          //   type: "string",
+          //   title: "Third party check status",
+          // },
+          feedbackRemarks: {
             type: "string",
-            title: "Other income (income from other than initiated business)",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          siteCoordinates: {
-            type: "string",
-            title: "Site coordinates (Latitude, Longitude)",
-            readOnly: true,
-          },
-          remarks: {
-            type: "string",
-            title: "Remarks",
-            ui: {
-              widget: "textarea",
-              rows: 3,
-            },
-          },
-          status: {
-            type: "string",
-            title: "Status",
-          },
-          verifierNameEmpCode: {
-            type: "string",
-            title: "AFL Verifier's Name & Emp Code",
-          },
-          verifierSignature: {
-            type: "string",
-            title: "AFL Verifier's Signature",
+            title: "Third party feedback remarks",
+            ui: { widget: "textarea", rows: 3 },
           },
         },
       },
       required: true,
     },
-    // {
-    //   id: "financialSummary",
-    //   label: "Financial Summary",
-    //   schema: {
-    //     type: "object",
-    //     properties: {
-    //       totalGrossDisposableIncome: {
-    //         type: "number",
-    //         title: "Total Gross disposable Income (A) per month",
-    //         formatter: {
-    //           useIndianFormat: true,
-    //           locale: "en-IN",
-    //           maxDecimalPlaces: 2,
-    //           minDecimalPlaces: 0,
-    //         },
-    //       },
-    //       totalObligations: {
-    //         type: "number",
-    //         title: "Total Obligations (B) per month",
-    //         formatter: {
-    //           useIndianFormat: true,
-    //           locale: "en-IN",
-    //           maxDecimalPlaces: 2,
-    //           minDecimalPlaces: 0,
-    //         },
-    //       },
-    //       netDisposableIncome: {
-    //         type: "number",
-    //         title: "Net Disposable Income (C = A – B) per month",
-    //         formatter: {
-    //           useIndianFormat: true,
-    //           locale: "en-IN",
-    //           maxDecimalPlaces: 2,
-    //           minDecimalPlaces: 0,
-    //         },
-    //       },
-    //       note: {
-    //         type: "string",
-    //         title: "Notes / Comments",
-    //         ui: {
-    //           widget: "textarea",
-    //           rows: 3,
-    //         },
-    //       },
-    //     },
-    //   },
-    //   required: true,
-    // },
-    // {
-    //   id: "recommendations",
-    //   label: "Recommendations",
-    //   schema: {
-    //     type: "object",
-    //     properties: {
-    //       recommendations: {
-    //         type: "array",
-    //         title: "Recommendations",
-    //         items: {
-    //           type: "string",
-    //           title: "Recommendation",
-    //         },
-    //       },
-    //       disclaimer: {
-    //         type: "string",
-    //         title: "Disclaimer if any",
-    //         ui: {
-    //           widget: "textarea",
-    //           rows: 3,
-    //         },
-    //       },
-    //     },
-    //   },
-    //   required: true,
-    // },
+    {
+      id: "overallDetails",
+      label: "Overall Details",
+      schema: {
+        type: "object",
+        properties: {
+          overallRemarks: {
+            type: "string",
+            title: "Overall Remarks of the visit",
+            ui: { widget: "textarea", rows: 3 },
+          },
+        },
+      },
+    },
+
     financialsSchema,
   ],
 } as const;

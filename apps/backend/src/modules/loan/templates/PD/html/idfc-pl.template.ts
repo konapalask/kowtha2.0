@@ -144,15 +144,15 @@ const renderObligationsTable = (loans: any[]) => {
       loan?.institution ||
         loan?.institutionBankNbfcName ||
         loan?.financialInstitution ||
-        ""
+        "Not provided"
     ),
-    formatMultiline(loan?.typeOfLoan || loan?.loanType || ""),
+    formatMultiline(loan?.typeOfLoan || loan?.loanType || "Not provided"),
     formatMultiline(
       loan?.monthlyPrincipalEmi ||
         (hasValue(loan?.emi) ? formatCurrency(loan?.emi) : "") ||
-        ""
+        "Not provided"
     ),
-    formatMultiline(loan?.loanAmount ? formatCurrency(loan?.loanAmount) : ""),
+    formatMultiline(loan?.loanAmount ? formatCurrency(loan?.loanAmount) : "Not provided"),
   ]);
 
   return renderInnerTable(
@@ -201,46 +201,46 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
   ).map((entry: any) => formatMultiline(entry));
 
   const generalRows: Array<[string, any, ((value: any) => string)?]> = [
-    ["Name of the Applicant", general.nameOfTheApplicant],
-    ["SDFC ID", general.applicationId],
-    ["Person Contacted", general.personContacted],
-    ["Visited Address", general.addressVisited],
-    ["Date / Time of Visit", general.dateOfVisitTimeOfVisit],
+    ["Name of the Applicant", general.nameOfTheApplicant || "Not provided"],
+    ["SDFC ID", general.applicationId || "Not provided"],
+    ["Person Contacted", general.personContacted || "Not provided"],
+    ["Visited Address", general.addressVisited || "Not provided"],
+    ["Date / Time of Visit", general.dateOfVisitTimeOfVisit || "Not provided"],
     [
       "Alternate Contact Number",
-      general.alternateContactNumberOfTheCustomerMobileLandline,
+      general.alternateContactNumberOfTheCustomerMobileLandline || "Not provided",
     ],
-    ["Marital Status", general.maritalStatusMarriedDivorcedBachelor],
-    ["Name of the Employer", employment.nameOfTheEmployer],
+    ["Marital Status", general.maritalStatusMarriedDivorcedBachelor || "Not provided"],
+    ["Name of the Employer", employment.nameOfTheEmployer || "Not provided"],
     [
       "Type of Firm (Proprietor / Partnership / Pvt. Ltd. / Govt. / PSU / MNC)",
-      employment.typeOfFirmProprietorPartnershipPvtLtdGovtPsuMnc,
+      employment.typeOfFirmProprietorPartnershipPvtLtdGovtPsuMnc || "Not provided",
     ],
-    ["Number of Employees", employment.numberOfEmployees],
-    ["Department", employment.department],
-    ["Designation", employment.designation],
-    ["Years in Current Company", employment.yearsInCurrentCompany],
+    ["Number of Employees", employment.numberOfEmployees || "Not provided" || ""],
+    ["Department", employment.department || "Not provided"],
+    ["Designation", employment.designation || "Not provided"],
+    ["Years in Current Company", employment.yearsInCurrentCompany || "Not provided"],
     [
       "Previous Job Details / Total Experience",
-      employment.previousJobDetailsWorkExperienceTotalYearsOfExperience,
+      employment.previousJobDetailsWorkExperienceTotalYearsOfExperience || "Not provided",
     ],
     [
       "Level of activity & stocks (observations)",
-      employment.levelOfActivityStocksAlongWithObservations,
+      employment.levelOfActivityStocksAlongWithObservations || "Not provided",
     ],
     [
       "Company Profile (Service / Manufacturing / Small Scale / Finance / Other)",
-      employment.companyProfileServiceManufacturingSmallScaleFinanceOtherPleaseSpecify,
+      employment.companyProfileServiceManufacturingSmallScaleFinanceOtherPleaseSpecify || "Not provided",
     ],
-    ["Third Party Check", employment.thirdPartyCheck],
+    ["Third Party Check", employment.thirdPartyCheck || "Not provided"],
   ];
 
   const incomeRows: Array<[string, any, ((value: any) => string)?]> = [
-    ["Gross Salary", income.grossSalary, formatCurrency],
-    ["Net Salary", income.netSalary, formatCurrency],
-    ["Overtime Details (if any)", income.overtimeDetailsIfAny],
-    ["Monthly Expenses", income.monthlyExpenses, formatCurrency],
-    ["Monthly Net Income", income.monthlyNetIncome, formatCurrency],
+    ["Gross Salary", income.grossSalary || "Not provided", formatCurrency],
+    ["Net Salary", income.netSalary || "Not provided", formatCurrency],
+    ["Overtime Details (if any)", income.overtimeDetailsIfAny || "Not provided"],
+    ["Monthly Expenses", income.monthlyExpenses || "Not provided", formatCurrency],
+    ["Monthly Net Income", income.monthlyNetIncome || "Not provided", formatCurrency],
     [
       "Total No. of Family Members",
       renderFamilyTable(
@@ -263,28 +263,28 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
   ];
 
   const bankingRows: Array<[string, any, ((value: any) => string)?]> = [
-    ["Banking Relationship With", banking.bankingRelationshipWith],
-    ["Cash Credit Limit", banking.cashCreditLimit, formatCurrency],
-    ["Overdraft Limit", banking.overdraftLimit, formatCurrency],
+    ["Banking Relationship With", banking.bankingRelationshipWith || "Not provided"],
+    ["Cash Credit Limit", banking.cashCreditLimit || "Not provided", formatCurrency],
+    ["Overdraft Limit", banking.overdraftLimit || "Not provided", formatCurrency],
   ];
 
   const residenceRows: Array<[string, any, ((value: any) => string)?]> = [
     [
       "Current Residence (Owned / Rented / Parents House / Relatives House / Company Provided)",
       residence.currentResidenceOwnedRentedParentsHouseRelativesHouseCompanyProvided ||
-        residence.currentResidence,
+        residence.currentResidence || "Not provided",
     ],
     [
       "Years at Current Residence",
-      residence.yearsAtCurrentResidence || residence.yearsAtResidence,
+      residence.yearsAtCurrentResidence || residence.yearsAtResidence || "Not provided",
     ],
     ["Assets Owned", renderList(assetsOwned, "Assets not reported")],
-    ["Four Wheeler : _____(Make/Model)", residence.fourWheelerMakeModel],
-    ["Two Wheeler : _____(Make/Model)", residence.twoWheelerMakeModel],
+    ["Four Wheeler : _____(Make/Model)", residence.fourWheelerMakeModel || "Not provided"],
+    ["Two Wheeler : _____(Make/Model)", residence.twoWheelerMakeModel || "Not provided"],
   ];
 
   const loans =
-    verificationData.obligations?.loans ||
+    verificationData.obligationsLoans?.loans ||
     verificationData.obligationsLoans?.obligationsLoans ||
     verificationData.obligationsLoans ||
     [];
@@ -320,13 +320,13 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
 
       ${sectionTitle("BIL LOAN DETAILS:")}
       ${renderKeyValueTable([
-        ["Loan Amount Applied", bil.loanAmountApplied, formatCurrency],
-        ["End Use", bil.endUse],
-        ["Name of Interviewer", bil.nameOfInterviewer || ""],
-        ["Designation & Signature", bil.designationSignature || ""],
-        ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || ""],
-        ["Interviewer's Remarks", bil.interviewersRemarks || ""],
-      ])}
+        ["Loan Amount Applied", bil.loanAmountApplied || "Not provided", formatCurrency],
+        ["End Use", bil.endUse || "Not provided"],
+        ["Name of Interviewer", bil.nameOfInterviewer || "Not provided"],
+        ["Designation & Signature", bil.designationSignature || "Not provided"],
+        ["PD Status", `${html_data.approvedStatus|| "Not provided"}`],
+        ["Interviewer's Remarks", bil.interviewersRemarks?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || "Not provided"],
+      ])}>
 
       ${sectionTitle("Disclaimer Clause")}
       ${wrapParagraph(disclaimer)}

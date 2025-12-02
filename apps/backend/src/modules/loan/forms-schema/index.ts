@@ -78,14 +78,14 @@ export const bankSchemas: BankSchemaConfig[] = [
     bankName: "Axis Finance UBL Above 10L",
     schema: axisFinanceUblAbove10lSchema,
     templatesAndFooters: {
-      "AXIS FINANCE-UBL" : "AXIS FINANCE LIMITED" ,
+      "AXIS FINANCE-UBL ABOVE 10L" : "AXIS FINANCE LIMITED" ,
     },
   },
   {
     bankName: "Axis Finance UBL Below 10L",
-    schema: axisFinanceUblAbove10lSchema,
+    schema: axisFinanceUblBelow10lSchema,
     templatesAndFooters: {
-      "AXIS FINANCE-UBL" : "AXIS FINANCE LIMITED" ,
+      "AXIS FINANCE-UBL BELOW 10L" : "AXIS FINANCE LIMITED" ,
     },
   },
   {

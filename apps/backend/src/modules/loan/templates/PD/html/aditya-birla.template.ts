@@ -233,7 +233,7 @@ export const adityaBirlaTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Business Machinery", observations.businessMachinery || "NA")}
         ${renderKeyValue("Observation", formatObservations(observations.observation || "Not provided"))}
         ${renderKeyValue("Concerns / Deviations", formatObservations(observations.concernsDeviations || "Not provided"))}
-        ${renderKeyValue("Status", observations.statusOfPd || "Not provided")}
+        ${renderKeyValue("Status", html_data.approvedStatus|| "Not provided")}
 
 
         <tr>

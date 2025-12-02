@@ -535,7 +535,6 @@ export const tataUblSchema = {
                     maxDecimalPlaces: 0,
                     minDecimalPlaces: 0,
                   },
-                  readOnly: true,
                 },
                 emi: {
                   type: "number",
@@ -721,10 +720,7 @@ export const tataUblSchema = {
           documentSeen: {
             type: "string",
             title: "Document Seen",
-          },
-          finalStatus: {
-            type: "string",
-            title: "Final Status",
+            ui: { widget: "textarea", rows: 3 },
           },
           dateOfPD: {
             type: "string",
@@ -742,10 +738,6 @@ export const tataUblSchema = {
           phoneNoOfApplicant: {
             type: "integer",
             title: "Phone No. of Applicant",
-          },
-          pdDoneBy: {
-            type: "string",
-            title: "PD done by",
           },
           latitudeAndLongitude: {
             type: "string",

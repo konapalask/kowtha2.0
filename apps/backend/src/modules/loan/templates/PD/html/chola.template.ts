@@ -323,6 +323,8 @@ export const cholaTemplate = (verificationData: any, html_data: any) => {
         ${ensureArray(recom?.recommendations)?.map((item: any) => `<li>${item?.recommendation || ""}</li>`).join("")}
       </ul>
 
+      <p style="${paragraphStyle}"><strong>PD Status:</strong> ${html_data.approvedStatus|| "Not provided"}</p>
+
       <p style="${paragraphStyle}"><strong>Disclaimer if any:</strong> We estimated financials, purely based on the valid documents provided by the applicant.</p>
     </div>
     ${pdBaseTemplateFooter(html_data)}

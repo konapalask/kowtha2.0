@@ -22,7 +22,7 @@ const subHeadingStyle =
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0";
 const labelCellStyle =
-  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5";
+  "border:1px solid #ccc;padding:8px;font-weight:bold;vertical-align:top;line-height:1.5;width:32%";
 const valueCellStyle =
   "border:1px solid #ccc;padding:8px;vertical-align:top;line-height:1.5";
 const headerCellStyle = `${labelCellStyle};font-weight:bold`;
@@ -285,11 +285,11 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const familySummary = [
     {
       label: "<strong>About Applicant:</strong>",
-      value: familyDetails.aboutApplicant,
+      value: familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
     },
     {
       label: "<strong>About Co-applicant:</strong>",
-      value: familyDetails.aboutCoApplicant,
+      value: familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
     },
     {
       label: "<strong>And their family details:</strong>",
@@ -353,11 +353,11 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
     <div class="template-content">
       ${renderParagraph(
         `<strong>LOS ID:</strong> ${losId || ""}${
-          dateOfVisit ? `&nbsp;&nbsp;Dated: ${formatDate(dateOfVisit)}` : ""
+          dateOfVisit ? `&nbsp;&nbsp;<strong>Dated:</strong> ${formatDate(dateOfVisit)}` : ""
         }`
       )}
-      ${renderParagraph(`Client Name: ${applicantName || ""}`)}
-      ${renderParagraph(`Client Address: ${clientAddress || ""}`)}
+      ${renderParagraph(`<strong>Client Name:</strong> ${applicantName || ""}`)}
+      ${renderParagraph(`<strong>Client Address:</strong> ${clientAddress || ""}`)}
 
       <h2 style="${subHeadingStyle}">Sub:&nbsp;<u>LIP Visit(s) Report</u></h2>
       ${renderParagraph("Sir,")}
@@ -653,7 +653,12 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         ],
         "Geo-coordinates not available"
       )}
-
+      <table style="${tableStyle}">
+        <tr>
+          <td style="${labelCellStyle}">PD Status</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+        </tr>
+      </table>
       ${renderSubHeading("Disclaimer:")}
       ${renderParagraph(
         "The report contains information provided by the Applicant met. The information is provided verbally and could be verified only to a limited extent. RBL will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions."

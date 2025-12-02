@@ -27,15 +27,15 @@ export const axisFinanceUblAbove10lSchema = {
             title: "Ref No / Application No",
             readOnly: true,
           },
-          dateOfReport: {
-            type: "string",
-            title: "Date of Report",
-            format: "date",
-          },
           applicantName: {
             type: "string",
             title: "Name of Customer",
             readOnly: true,
+          },
+          dateOfReport: {
+            type: "string",
+            title: "Date of Report",
+            format: "date",
           },
           concernName: {
             type: "string",
@@ -713,18 +713,6 @@ export const axisFinanceUblAbove10lSchema = {
               widget: "textarea",
               rows: 3,
             },
-          },
-          status: {
-            type: "string",
-            title: "Status",
-          },
-          verifierNameEmpCode: {
-            type: "string",
-            title: "AFL Verifier's Name & Emp Code",
-          },
-          verifierSignature: {
-            type: "string",
-            title: "AFL Verifier's Signature",
           },
         },
       },

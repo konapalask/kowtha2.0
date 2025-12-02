@@ -323,25 +323,49 @@ export const idfcHlMlSchema = {
             type: "string",
             title: "Net profit for last 2 years",
           },
+          netProfitLastTwoYearsEstimated: {
+            type: "string",
+            title: "Net profit for last 2 years (estimation)",
+          },
           grossBusinessMarginPercent: {
             type: "string",
             title: "Gross business margin %",
+          },
+          grossBusinessMarginPercentEstimated: {
+            type: "string",
+            title: "Gross business margin % (estimation)",
           },
           netBusinessMarginPercent: {
             type: "string",
             title: "Net business margin %",
           },
+          netBusinessMarginPercentEstimated: {
+            type: "string",
+            title: "Net business margin % (estimation)",
+          },
           yearsFilingItrs: {
             type: "string",
             title: "No. of years filing ITRs",
+          },
+          yearsFilingItrsEstimated: {
+            type: "string",
+            title: "No. of years filing ITRs (estimation)",
           },
           lastTwoYearsItrs: {
             type: "string",
             title: "Last 2 years ITRs",
           },
+          lastTwoYearsItrsEstimated: {
+            type: "string",
+            title: "Last 2 years ITRs (estimation)",
+          },
           lastTwoYearsForm16: {
             type: "string",
             title: "Last 2 years Form 16 (Salaried)",
+          },
+          lastTwoYearsForm16Estimated: {
+            type: "string",
+            title: "Last 2 years Form 16 (Salaried) (estimation)",
           },
         },
       },
@@ -531,14 +555,6 @@ export const idfcHlMlSchema = {
           overallOutcome: {
             type: "string",
             title: "Overall outcome of the personal discussion",
-          },
-          remarks: {
-            type: "string",
-            title: "Remarks",
-          },
-          pdConductedBy: {
-            type: "string",
-            title: "PD Conducted by",
           },
           pdDate: {
             type: "string",

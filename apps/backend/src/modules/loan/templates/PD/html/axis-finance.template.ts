@@ -78,13 +78,25 @@ const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {
   return [value];
 };
 
-const renderTwoColumnTable = (rows: KeyValueRow[]) => {
+const renderTwoColumnTable = (
+  rows: KeyValueRow[],
+  headers?: { left?: string; right?: string }
+) => {
   const items = rows.filter((row) => hasValue(row.value));
   if (items.length === 0) return "";
 
+  const headerRow = headers?.left || headers?.right
+    ? `
+      <tr>
+        <td style="${headerCellStyle};width:35%;">${headers.left || ""}</td>
+        <td style="${headerCellStyle}">${headers.right || ""}</td>
+      </tr>
+    `
+    : "";
+
   return `
     <table style="${tableStyle}">
-      
+      ${headerRow}
       ${items
         .map(({ label, value, formatter }) => {
           const rendered = formatter ? formatter(value) : displayValue(value);
@@ -346,55 +358,61 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
     },
   ]);
 
-  const combinedBusinessTable = renderTwoColumnTable([
+  const combinedBusinessTable = renderTwoColumnTable(
+    [
+      {
+        label: "ANNUAL SALES",
+        value: businessData.annualSales || "Not Provided",
+        formatter: formatCurrency,
+      },
+      {
+        label: "OVERALL COSTS",
+        value: businessData.overallCosts || "Not Provided",
+        formatter: formatCurrency,
+      },
+      {
+        label: "MAJOR COST HEADS",
+        value: businessData.majorCostHeads || "Not Provided",
+      },
+      {
+        label: "GROSS MARGIN %",
+        value: businessData.grossMargin || "Not Provided",
+      },
+      {
+        label: "PBDIT MARGIN %",
+        value: businessData.pbditMargin || "Not Provided",
+      },
+      {
+        label: "DEBTORS CYCLE",
+        value: businessData.debtorsCycle || "Not Provided",
+      },
+      {
+        label: "CREDITORS CYCLE",
+        value: businessData.creditorsCycle || "Not Provided",
+      },
+      {
+        label: "CAPITAL INVESTED",
+        value: businessData.capitalInvested || "Not Provided",
+        formatter: formatCurrency,
+      },
+      {
+        label: "LOAN FUNDS (INCL. CC LIMIT)",
+        value: businessData.loanFundsInclCcLimit || "Not Provided",
+      },
+      {
+        label: "STOCK MAINTAINED",
+        value: businessData.stockMaintained || "Not Provided",
+      },
+      {
+        label: "BUSINESS BANK ACCOUNTS",
+        value: businessData.businessBankAccounts || "Not Provided",
+      },
+    ],
     {
-      label: "ANNUAL SALES",
-      value: businessData.annualSales || "Not Provided",
-      formatter: formatCurrency,
-    },
-    {
-      label: "OVERALL COSTS",
-      value: businessData.overallCosts || "Not Provided",
-      formatter: formatCurrency,
-    },
-    {
-      label: "MAJOR COST HEADS",
-      value: businessData.majorCostHeads || "Not Provided",
-    },
-    {
-      label: "GROSS MARGIN %",
-      value: businessData.grossMargin || "Not Provided",
-    },
-    {
-      label: "PBDIT MARGIN %",
-      value: businessData.pbditMargin || "Not Provided",
-    },
-    {
-      label: "DEBTORS CYCLE",
-      value: businessData.debtorsCycle || "Not Provided",
-    },
-    {
-      label: "CREDITORS CYCLE",
-      value: businessData.creditorsCycle || "Not Provided",
-    },
-    {
-      label: "CAPITAL INVESTED",
-      value: businessData.capitalInvested || "Not Provided",
-      formatter: formatCurrency,
-    },
-    {
-      label: "LOAN FUNDS (INCL. CC LIMIT)",
-      value: businessData.loanFundsInclCcLimit || "Not Provided",
-    },
-    {
-      label: "STOCK MAINTAINED",
-      value: businessData.stockMaintained || "Not Provided",
-    },
-    {
-      label: "BUSINESS BANK ACCOUNTS",
-      value: businessData.businessBankAccounts || "Not Provided",
-    },
-  ]);
+      left: "ACCOUNTING YEAR",
+      right: "ESTIMATED(RS.)",
+    }
+  );
 
   const coApplicantIncomeTable = renderTwoColumnTable([
     {
@@ -470,12 +488,14 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       sno: 2,
       label: "Net Surplus",
       value: budget.netSurplus || "Not Provided",
+      formatter: formatCurrency,
     },
     {
       sno: 3,
       label:
         "Total Monthly Net Income per month (Business income + Other Income)",
       value: budget.totalMonthlyIncomePerMonth || "Not Provided",
+      formatter: formatCurrency,
     },
     {
       sno: 4,
@@ -493,11 +513,13 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       sno: 6,
       label: "Overall Family Expenses per month",
       value: budget.overAllFamilyExpenses || "Not Provided",
+      formatter: formatCurrency,
     },
     {
       sno: 7,
       label: "Total Monthly Expenses per month",
       value: budget.totalMonthlyExpensesPerMonth || "Not Provided",
+      formatter: formatCurrency,
     },
   ];
 
@@ -539,7 +561,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const overallPositivesOrNegativesTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${html_data.approvedStatus|| "Not provided"}<br> ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(
@@ -587,7 +609,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
       ${renderSection("Personal Details", personalDetailsTable)}
       ${renderSection("Family Background", familyMembersTable + familySummaryTable)}
       ${renderSection("Place of Residence/Office", residenceTable)}
-      ${renderTextSection("Company Profile", company?.detailedProfileOfTheBusiness?.split("\n").map(line => `<li style="margin-left:10px;">${line}</li>`).join(""))}
+      ${renderTextSection("Company Profile", company?.detailedProfileOfTheBusiness?.split("\n").map(line => `<ul><li style="margin-left:10px;">${line}</li></ul>`).join(""))}
       ${renderSection("Self Employed/Salaried", employmentTable)}
       ${renderBusinessSection("BUSINESS DETAILS", businessDetailsTable)}
       ${renderBusinessSection("EMPLOYEE/OTHER MAJOR COST", employeeCostsTable)}

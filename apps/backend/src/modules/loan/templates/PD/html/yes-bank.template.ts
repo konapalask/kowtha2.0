@@ -378,7 +378,7 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
     "Level of activity & stocks observed Along with other Observations",
     finalComment.activityAndStocks
   )}
-        ${renderKeyValue("PD Status", finalComment.pdStatus)}
+        ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
         ${renderKeyValue(
     "Remarks for Positive / Negative / Referred cases",
     finalComment.remarks
@@ -389,7 +389,6 @@ export const yesBankTemplate = (verificationData: any, html_data: any) => {
   )}
         ${renderKeyValue("Designation", finalComment.yblDesignation)}
         ${renderKeyValue("EMP ID", finalComment.yblEmpId)}
-        ${renderKeyValue("Signature", finalComment.yblSignature)}
         ${renderKeyValue(
     "PD agency Interviewer’s Name",
     finalComment.pdAgencyInterviewer

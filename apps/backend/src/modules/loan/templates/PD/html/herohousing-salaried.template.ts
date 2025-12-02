@@ -422,6 +422,8 @@ export const herohousingSalariedTemplate = (
         </tr>
       </table>
 
+      <p style="margin:8px 0;line-height:1.5"><strong>PD Status:</strong> ${html_data.approvedStatus|| "Not provided"}</p>
+
       <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
       <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. HERO HOUSING FINANCE LTD will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO </strong>will not be held liable in any case.</p>
 

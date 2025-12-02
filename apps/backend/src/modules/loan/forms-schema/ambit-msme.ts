@@ -757,11 +757,6 @@ export const ambitMsmeSchema = {
               rows: 3,
             },
           },
-          pdStatus: {
-            type: "string",
-            title: "Overall PD Status",
-            enum: ["Positive", "Negative", "Credit Refer", "Fraud"],
-          },
         },
       },
     },

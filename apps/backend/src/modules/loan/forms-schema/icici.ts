@@ -56,6 +56,7 @@ export const iciciSchema = {
           locationAddressOfPd: {
             type: "string",
             title: "Location Address of PD",
+            readOnly: true,
           },
           pdConductedBy: {
             type: "string",
@@ -387,82 +388,94 @@ export const iciciSchema = {
             type: "number",
             title: "Applicant - Net Surplus Available for Proposed EMI",
           },
-          coApplicantMonthlyTO: {
-            type: "number",
-            title:
-              "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+
+          coApplicantCases: {
+            type: "array",
+            title: "Co-Applicant Cases (Not applicable in Salaried cases)",
+            items: {
+              type: "object",
+              properties: {
+              
+                    coApplicantMonthlyTO: {
+                      type: "number",
+                      title:
+                        "Co-Applicant - Monthly TO / Gross Receipts (Weekly sales * 4)",
+                    },
+                    coApplicantCostOfRawMaterial: {
+                      type: "number",
+                      title: "Co-Applicant - Less: Cost of Raw Material",
+                    },
+                    coApplicantRentIncome: {
+                      type: "number",
+                      title: "Co-Applicant - Rent Income (If Any)",
+                    },
+                    coApplicantOtherIncome: {
+                      type: "number",
+                      title:
+                        "Co-Applicant - Any Other Regular Income Other than Business",
+                    },
+                    coApplicantGrossMonthlyIncome: {
+                      type: "number",
+                      title: "Co-Applicant - Gross Monthly Income",
+                    },
+                    coApplicantBusinessExpensesRent: {
+                      type: "number",
+                      title: "Co-Applicant - Business Expenses: Rent",
+                    },
+                    coApplicantBusinessExpensesSalary: {
+                      type: "number",
+                      title: "Co-Applicant - Business Expenses: Salary",
+                    },
+                    coApplicantBusinessExpensesElectricity: {
+                      type: "number",
+                      title: "Co-Applicant - Business Expenses: Electricity",
+                    },
+                    coApplicantBusinessExpensesTravelling: {
+                      type: "number",
+                      title: "Co-Applicant - Business Expenses: Travelling",
+                    },
+                    coApplicantBusinessExpensesOther: {
+                      type: "number",
+                      title: "Co-Applicant - Business Expenses: Other Operating Expense",
+                    },
+                    coApplicantIncomeLeftForDomestic: {
+                      type: "number",
+                      title: "Co-Applicant - Income Left for Domestic Expenses",
+                    },
+                    coApplicantHouseholdExpensesFood: {
+                      type: "number",
+                      title: "Co-Applicant - Household Expenses: Food",
+                    },
+                    coApplicantHouseholdExpensesSchoolFees: {
+                      type: "number",
+                      title: "Co-Applicant - Household Expenses: School Fees",
+                    },
+                    coApplicantHouseholdExpensesOther: {
+                      type: "number",
+                      title:
+                        "Co-Applicant - Household Expenses: Others household expenses",
+                    },
+                    coApplicantNetMonthlyIncome: {
+                      type: "number",
+                      title: "Co-Applicant - Net Monthly Income Post All Expenses",
+                    },
+                    coApplicantSavingsInvestments: {
+                      type: "number",
+                      title:
+                        "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
+                    },
+                    coApplicantExistingEmi: {
+                      type: "number",
+                      title: "Co-Applicant - Less: Existing EMI",
+                    },
+                    coApplicantNetSurplusForEmi: {
+                      type: "number",
+                      title: "Co-Applicant - Net Surplus Available for Proposed EMI",
+                    },
+              },
+            },
           },
-          coApplicantCostOfRawMaterial: {
-            type: "number",
-            title: "Co-Applicant - Less: Cost of Raw Material",
-          },
-          coApplicantRentIncome: {
-            type: "number",
-            title: "Co-Applicant - Rent Income (If Any)",
-          },
-          coApplicantOtherIncome: {
-            type: "number",
-            title:
-              "Co-Applicant - Any Other Regular Income Other than Business",
-          },
-          coApplicantGrossMonthlyIncome: {
-            type: "number",
-            title: "Co-Applicant - Gross Monthly Income",
-          },
-          coApplicantBusinessExpensesRent: {
-            type: "number",
-            title: "Co-Applicant - Business Expenses: Rent",
-          },
-          coApplicantBusinessExpensesSalary: {
-            type: "number",
-            title: "Co-Applicant - Business Expenses: Salary",
-          },
-          coApplicantBusinessExpensesElectricity: {
-            type: "number",
-            title: "Co-Applicant - Business Expenses: Electricity",
-          },
-          coApplicantBusinessExpensesTravelling: {
-            type: "number",
-            title: "Co-Applicant - Business Expenses: Travelling",
-          },
-          coApplicantBusinessExpensesOther: {
-            type: "number",
-            title: "Co-Applicant - Business Expenses: Other Operating Expense",
-          },
-          coApplicantIncomeLeftForDomestic: {
-            type: "number",
-            title: "Co-Applicant - Income Left for Domestic Expenses",
-          },
-          coApplicantHouseholdExpensesFood: {
-            type: "number",
-            title: "Co-Applicant - Household Expenses: Food",
-          },
-          coApplicantHouseholdExpensesSchoolFees: {
-            type: "number",
-            title: "Co-Applicant - Household Expenses: School Fees",
-          },
-          coApplicantHouseholdExpensesOther: {
-            type: "number",
-            title:
-              "Co-Applicant - Household Expenses: Others household expenses",
-          },
-          coApplicantNetMonthlyIncome: {
-            type: "number",
-            title: "Co-Applicant - Net Monthly Income Post All Expenses",
-          },
-          coApplicantSavingsInvestments: {
-            type: "number",
-            title:
-              "Co-Applicant - Less: Savings/Investments/Insurance Premiums",
-          },
-          coApplicantExistingEmi: {
-            type: "number",
-            title: "Co-Applicant - Less: Existing EMI",
-          },
-          coApplicantNetSurplusForEmi: {
-            type: "number",
-            title: "Co-Applicant - Net Surplus Available for Proposed EMI",
-          },
+
           weeklySalesMonday: {
             type: "number",
             title: "Weekly Sales - Monday",
@@ -495,6 +508,47 @@ export const iciciSchema = {
             type: "number",
             title: "Total Weekly Sales",
           },
+          coApplicantWeeklySalesMonday: {
+            type: "array",
+            title: "Co-Applicant Weekly Sales - Monday",
+            items: {
+              type: "object",
+              properties: {
+                coApplicantWeeklySalesMonday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Monday",
+                },
+                coApplicantWeeklySalesTuesday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Tuesday",
+                },
+                coApplicantWeeklySalesWednesday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Wednesday",
+                },
+                coApplicantWeeklySalesThursday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Thursday",
+                },
+                coApplicantWeeklySalesFriday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Friday",
+                },
+                coApplicantWeeklySalesSaturday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Saturday",
+                },
+                coApplicantWeeklySalesSunday: {
+                  type: "number",
+                  title: "Co-Applicant Weekly Sales - Sunday",
+                },
+                coApplicantTotalWeeklySales: {
+                  type: "number",
+                  title: "Co-Applicant Total Weekly Sales",
+                },
+              },
+            },
+          },
         },
       },
       required: true,
@@ -520,6 +574,35 @@ export const iciciSchema = {
           sales: {
             type: "string",
             title: "Sales Observed",
+          },
+          coApplicantCases: {
+            type: "array",
+            title: "Co-Applicant Cases",
+            items: {
+              type: "object",
+              properties: {
+                coApplicantStockValue: {
+                  type: "string",
+                  title: "Co-Applicant Stock Value",
+                },
+                coApplicantTimeSpent: {
+                  type: "string",
+                  title: "Co-Applicant Time Spent",
+                },
+                coApplicantFootfall: {
+                  type: "string",
+                  title: "Co-Applicant Footfall",
+                },
+                coApplicantSales: {
+                  type: "string",
+                  title: "Co-Applicant Sales",
+                },
+                coApplicantSalesRemarks: {
+                  type: "string",
+                  title: "Co-Applicant Sales Remarks",
+                },
+              },
+            },
           },
         },
       },
@@ -827,25 +910,6 @@ export const iciciSchema = {
           summaryOfTransaction: {
             type: "string",
             title: "Summary of Transaction (Detailed Remarks)",
-          },
-        },
-      },
-      required: true,
-    },
-    {
-      id: "pdStatus",
-      label: "PD Status",
-      schema: {
-        type: "object",
-        properties: {
-          pdStatus: {
-            type: "string",
-            title: "Positive/Negative (If Negative then remarks)",
-            enum: ["Positive", "Negative", "Credit Refer"],
-          },
-          remarks: {
-            type: "string",
-            title: "Remarks",
           },
         },
       },

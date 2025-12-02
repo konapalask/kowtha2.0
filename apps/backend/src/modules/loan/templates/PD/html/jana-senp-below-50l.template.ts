@@ -819,7 +819,7 @@ export const janaSenpBelow50lTemplate = (verificationData: any, html_data: any) 
 
       <tr>
         <td style="${labelCellStyle}">Pd Status (Positive/Negative/Refer)</td>
-        <td style="${valueCellStyle}">${pdStatus?.status}</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
       </tr>
       <tr>
         <td style="${labelCellStyle}">Interviewer Details</td>

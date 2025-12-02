@@ -43,7 +43,7 @@ export const idfcPlSchema = {
             enum: ["Married", "Divorced", "Bachelor"],
           },
         },
-        required: ["nameOfTheApplicant", "applicationId", "visitedAddress"],
+        required: ["nameOfTheApplicant", "applicationId", "addressVisited"],
       },
       required: true,
     },
@@ -352,10 +352,6 @@ export const idfcPlSchema = {
           designationSignature: {
             type: "string",
             title: "Designation & Signature",
-          },
-          statusOfThisCasePositiveNegativeCreditRefer: {
-            type: "string",
-            title: "Status of this Case (Positive / Negative / Credit Refer)",
           },
           interviewersRemarks: {
             type: "string",

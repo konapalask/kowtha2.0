@@ -464,7 +464,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <tr>
             <td style="${labelCellStyle}">17</td>
             <td style="${labelCellStyle}">Overall PD Status</td>
-            <td style="${valueCellStyle}">${otherObservations.pdStatus}</td>
+            <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
        </table>
         
     </div>

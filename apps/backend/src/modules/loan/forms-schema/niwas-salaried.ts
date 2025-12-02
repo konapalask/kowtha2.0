@@ -9,8 +9,12 @@ export const niwasSalariedSchema = {
       schema: {
         type: "object",
         properties: {
-          prospectNo: { type: "string", title: "Prospect No." },
-          nameOfApplicant: { type: "string", title: "Name of Applicant" },
+          prospectNo: { type: "string", title: "Prospect No.", readOnly: true },
+          nameOfApplicant: {
+            type: "string",
+            title: "Name of Applicant",
+            readOnly: true,
+          },
           maritalStatus: {
             type: "string",
             title: "Marital Status",
@@ -105,7 +109,7 @@ export const niwasSalariedSchema = {
             title: "Washing Machine",
             enum: ["Yes", "No"],
           },
-          carRcNo: { type: "string", title: "Car RC No.", enum: ["Yes", "No"] },
+          carRcNo: { type: "string", title: "Car RC No." },
           twoWheeler: {
             type: "string",
             title: "Two-Wheeler",
@@ -775,26 +779,6 @@ export const niwasSalariedSchema = {
                 },
               },
             },
-          },
-        },
-      },
-    },
-    {
-      id: "pdOfficerComments",
-      label: "PD Officer Comments",
-      schema: {
-        type: "object",
-        properties: {
-          comments: {
-            type: "string",
-            title: "Comments / Observation of the case",
-            ui: { widget: "textarea", rows: 4 },
-          },
-          pdOfficerName: { type: "string", title: "Name of PD Officer" },
-          discussionDate: { type: "date", title: "Date of Discussion" },
-          pdOfficerSignature: {
-            type: "string",
-            title: "Signature of PD Officer",
           },
         },
       },

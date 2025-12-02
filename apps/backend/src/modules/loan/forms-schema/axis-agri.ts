@@ -274,19 +274,10 @@ export const axisAgriSchema = {
             title: "Remarks & Observations",
             ui: { widget: "textarea", rows: 3 },
           },
-          pdFinalStatus: {
-            type: "string",
-            title: "PD Final Status",
-            enum: ["Positive", "Negative", "Referred"],
-          },
           pdVendorDetails: {
             type: "string",
             title: "PD Vendor Name & Address",
             ui: { widget: "textarea", rows: 2 },
-          },
-          pdVendorStamp: {
-            type: "string",
-            title: "PD Vendor Stamp & Signature",
           },
         },
       },
