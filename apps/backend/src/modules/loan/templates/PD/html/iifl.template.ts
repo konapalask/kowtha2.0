@@ -336,6 +336,10 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
           "Date of Discussion",
           pdOfficer.dateOfDiscussion
         )}
+        <tr>
+          <td style="${labelCellStyle}">Signature</td>
+          <td style="${valueCellStyle}"></td>
+        </tr>
         ${renderKeyValue(
           "Pd Status",
           `${html_data.approvedStatus|| "Not provided"}`

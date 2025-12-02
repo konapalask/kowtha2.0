@@ -117,15 +117,12 @@ export default function Loans() {
   const fetchLoans = async (page = 1, limit = 20) => {
     try {
       setLoading(true);
-      // Map FilterValue to LoanFilters format
-      const apiFilters: any = {
-        ...filters,
-        employeeCode: filters.fieldExecutiveEmployeeCode,
-        employeeName: filters.fieldExecutiveName,
-      };
-      // Remove the fieldExecutive prefixed keys as they're mapped to employeeCode/Name
-      delete apiFilters.fieldExecutiveEmployeeCode;
-      delete apiFilters.fieldExecutiveName;
+      const apiFilters: any = { ...filters };
+      if (apiFilters.postponed === true) {
+        apiFilters.postponed = "true";
+      } else if (apiFilters.postponed === false || apiFilters.postponed === undefined) {
+        delete apiFilters.postponed;
+      }
       const result = await getLoansApi(page, limit, apiFilters);
       const data = result.data.data;
       setLoans(data?.items ?? [null]);

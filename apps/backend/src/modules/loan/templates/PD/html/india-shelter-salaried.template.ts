@@ -637,6 +637,10 @@ export const indiaShelterSalariedTemplate = (
         <td style="${labelCellStyle}">Time of Visit</td>
         <td style="${valueCellStyle}">${formatMultiline(pdReview.visitTime)}</td>
       </tr>
+      <tr>
+        <td style="${labelCellStyle}">Signature of the PD Officer TRUE/FALSE</td>
+        <td style="${valueCellStyle}"></td>
+      </tr>
     </table>
   `;
 

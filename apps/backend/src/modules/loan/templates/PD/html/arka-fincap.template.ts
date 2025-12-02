@@ -267,7 +267,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderConcernsSummary = () => {
     const summary = getValue(concerns.concernsSummary);
     return summary
-      ? summary.split("\n").map((line: string) => `<li style="margin-left:8px;line-height:1.5">${line}</li>`).join("")
+      ? summary.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
        : '<div>Not Provided</div>';
   };
 
@@ -801,14 +801,14 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
                 ${ensureArray(otherObservations).map(
-                  (item: any) => `<li style="margin-left:8px;line-height:1.5">${ item?.observation || ""}</li>`
+                  (item: any) => `<ul><li>${ item?.observation || ""}</li></ul>`
                 ).join("<br>")}
                 </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<li style="margin-left:8px;line-height:1.5">${income?.otherIncome || ""}</li>`).join("<br>")}
+                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<ul><li>${income?.otherIncome || ""}</li></ul>`).join("<br>")}
                 </td>
             </tr>
             <tr>

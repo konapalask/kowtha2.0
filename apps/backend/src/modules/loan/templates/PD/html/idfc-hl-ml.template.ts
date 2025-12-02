@@ -608,6 +608,10 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
         wrapParagraph(formatMultiline(personalDiscussion.pdConductedBy || "")) ,
     },
     {
+      instruction: `<p style="${paragraphStyle}"><strong>Signature</strong></p>`,
+      content: "",
+    },
+    {
       instruction: `<p style="${paragraphStyle}"><strong>Date</strong></p>`,
       content: wrapParagraph(formatMultiline(personalDiscussion.pdDate || "")),
     },
