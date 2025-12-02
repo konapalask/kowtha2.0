@@ -541,14 +541,10 @@ export const axisFinanceUBLTemplate = (
       ])}
       ${renderKeyValueTable([
         ["Remarks:", thirdPartySection.remarks || ""],
-        ["Status:", thirdPartySection.status || ""],
+        ["Status:", html_data.approvedStatus|| "Not provided"],
         [
           "AFL Verifier's Name & Emp Code:",
           thirdPartySection.verifierNameEmpCode || "",
-        ],
-        [
-          "AFL Verifier's Signature:",
-          thirdPartySection.verifierSignature || "",
         ],
       ])}
       <p style="${paragraphStyle};font-size:14px;"><strong>Disclaimer if any:</strong> ${formatMultiline(

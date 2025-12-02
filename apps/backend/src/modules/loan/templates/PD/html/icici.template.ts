@@ -5,7 +5,7 @@ import { pdBaseTemplate, pdBaseTemplateFooter } from "./pd-base.template";
 const tableStyle =
   "border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:16px 0";
 const labelCellStyle =
-  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#f4f6fb;vertical-align:top;width:32%";
+  "border:1px solid #c7cdd1;padding:8px;font-weight:600;color:#222;background:#fce4d6;vertical-align:top;width:25%";
 const valueCellStyle =
   "border:1px solid #c7cdd1;padding:8px;color:#333;vertical-align:top";
 
@@ -86,15 +86,18 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
   const pdDetails = verificationData.pdDetails || {};
   const applicants = verificationData.applicants || {};
   const familyDetails = verificationData.familyBackgroundPersonalDetails || {};
-  const residenceDetails = familyDetails.residenceDetails || {};
+  const residenceDetails = familyDetails?.residenceDetails || {};
   const natureOfBusinessAndBusinessVintage = verificationData.natureOfBusinessAndVintage || {};
   const incomeAssessment = verificationData.incomeAssessment || {};
   const assetCreationInLast5Years = verificationData.assetCreation || {};
   const cashFlowAnalysis = verificationData.cashFlowAnalysis || {};
+  const coApplicantCases = ensureArray(cashFlowAnalysis.coApplicantCases || []);
+  const coApplicantWeeklySales = ensureArray(cashFlowAnalysis.coApplicantWeeklySalesMonday || []);
   const observationsAtPd = verificationData.observationsAtPd || {};
+  const coApplicantObservations = ensureArray(observationsAtPd.coApplicantCases || []);
   const triggerPointVerification = verificationData.triggerPointVerification || {};
   const itrAndFinancial = verificationData.itrAndFinancial || {};
-  const bankingDetails = verificationData.bankingDetails.bankDetails || {};
+  const bankingDetails = verificationData.bankingDetails?.bankDetails || {};
 
 
   // Handle existing loan details - check multiple possible structures
@@ -198,13 +201,13 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
 
         <tr>
-          <td style="${labelCellStyle}"><strong>Family Background and Personal details</strong></td>
-          <td style="${labelCellStyle}"><strong>Residence Details</strong></td>
+          <td style="${labelCellStyle};vertical-align: middle;"><strong>Family Background and Personal details</strong></td>
+          <td style="${labelCellStyle};vertical-align: middle;"><strong>Residence Details</strong></td>
           <td style="border:1px solid #ccc;padding:8px" colspan="6">
             <table style="${tableStyle} width:100%;margin:0;">
             <tr>
               <td style="${labelCellStyle}">Current Residence- Owned/Rented</td>
-              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${"<br><strong>Address: </strong>"+residenceDetails.currentResidenceAddress}</td>
+              <td style="${valueCellStyle}">${residenceDetails.currentResidenceOwnedRented || ""} ${residenceDetails.currentResidenceAddress?"<br><strong>Address: </strong>"+residenceDetails.currentResidenceAddress:""}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">If Current Residence is Owned- Owner Name</td>
@@ -247,7 +250,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
         <!-- Nature of Business Section -->
         <tr>
-          <td style="${labelCellStyle}"><strong>Nature of Business and Business Vintage</strong></td>
+          <td style="${labelCellStyle};vertical-align: middle;"><strong>Nature of Business and Business Vintage</strong></td>
           <td style="border:1px solid #ccc;padding:8px" colspan="7">
           <table style="${tableStyle}">
           <tr>
@@ -276,7 +279,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Gross margin and Net Margin:</strong></td>
-            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin || ""} and ${natureOfBusinessAndBusinessVintage.netMargin || ""}</td>
+            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin?"Gross Margin: "+natureOfBusinessAndBusinessVintage.grossMargin+"%" : ""} ${natureOfBusinessAndBusinessVintage.netMargin?"<br>Net Margin: "+natureOfBusinessAndBusinessVintage.netMargin+"%" : ""}</td>
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Ideas about to start business:</strong></td>
@@ -311,7 +314,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
 
         <tr>
-          <td style="${labelCellStyle}"><strong>Income Assessment</strong></td>
+          <td style="${labelCellStyle};vertical-align: middle;"><strong>Income Assessment</strong></td>
           <td style="border:1px solid #ccc;padding:8px" colspan="7">
           <table style="${tableStyle}">
             <tr>
@@ -347,111 +350,111 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
                <table style="${tableStyle} width:100%;margin:0;padding:0;">
                  <tr>
                    <td style="${labelCellStyle}" colspan="2"><strong>Cash Flow Analysis During PD</strong></td>
-                   <td style="${labelCellStyle}">(Not Applicable in Salaried Cases)</td>
+                   ${coApplicantCases.length > 0 ? `<td style="${labelCellStyle}" colspan="${coApplicantCases.length}">(Not Applicable in Salaried Cases)</td>` : `<td style="${labelCellStyle}">(Not Applicable in Salaried Cases)</td>`}
                  </tr>
                  <tr>
                    <td style="${labelCellStyle}"><strong>Particulars</strong></td>
                    <td style="${labelCellStyle}">Applicnt <br>Rs</td>
-                   <td style="${labelCellStyle}">Co-applicant 1<br>Rs</td>
+                   ${coApplicantCases.map((_, index) => `<td style="${labelCellStyle}">Co-applicant ${index + 1}<br>Rs</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Monthly TO / Gross Receipts (Weekly sales * 4)</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantMonthlyTO || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantMonthlyTO || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantMonthlyTO || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Less: Cost of Raw Material</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantCostOfRawMaterial || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantCostOfRawMaterial || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantCostOfRawMaterial || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Rent Income (If Any)</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantRentIncome || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantRentIncome || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantRentIncome || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Any Other Regular Income Other than Business</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantOtherIncome || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantOtherIncome || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantOtherIncome || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Gross Monthly Income</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantGrossMonthlyIncome || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantGrossMonthlyIncome || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantGrossMonthlyIncome || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"><strong>Less Monthly Business Expenses</strong></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantCases.length}"><strong>Less Monthly Business Expenses</strong></td>
                 </tr>
                  <tr>
                   <td style="${labelCellStyle}">Rent</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantBusinessExpensesRent || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantBusinessExpensesRent || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantBusinessExpensesRent || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Salary</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantBusinessExpensesSalary || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantBusinessExpensesSalary || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantBusinessExpensesSalary || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Electricity</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantBusinessExpensesElectricity || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantBusinessExpensesElectricity || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantBusinessExpensesElectricity || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Travelling</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantBusinessExpensesTravelling || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantBusinessExpensesTravelling || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantBusinessExpensesTravelling || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Other Operating Expense</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantBusinessExpensesOther || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantBusinessExpensesOther || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantBusinessExpensesOther || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Income Left for Domestic Expenses</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantIncomeLeftForDomestic || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantIncomeLeftForDomestic || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantIncomeLeftForDomestic || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"><strong>Less Monthly Household Expenses</strong></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantCases.length}"><strong>Less Monthly Household Expenses</strong></td>
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">a) Food Expenses</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantHouseholdExpensesFood || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantHouseholdExpensesFood || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantHouseholdExpensesFood || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">b) School and tuition fees</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantHouseholdExpensesSchoolFees || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantHouseholdExpensesSchoolFees || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantHouseholdExpensesSchoolFees || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">c) Other HouseHold Expenses</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantHouseholdExpensesHouseRent || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantHouseholdExpensesHouseRent || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantHouseholdExpensesOther || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Net monthly income post all expenses</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantNetMonthlyIncome || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantNetMonthlyIncome || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantNetMonthlyIncome || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Less: Savings/Investments: Insurance Premiums</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantSavingsInvestments || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantSavingsInvestments || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantSavingsInvestments || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Less: Existing EMI</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantExistingEmi || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantExistingEmi || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantExistingEmi || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantCases.length}"></td>
         </tr>
         <tr>
                   <td style="${labelCellStyle}">Net Surplus Available for Propose EMI</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.applicantNetSurplusForEmi || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantNetSurplusForEmi || ""}</td>
+                  ${coApplicantCases.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantNetSurplusForEmi || ""}</td>`).join("")}
         </tr>
                </table>
              </td>
@@ -460,95 +463,96 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
              <td colspan="2" style="padding:0;vertical-align:top;">
                <table style="${tableStyle} width:100%;margin:0;padding:0;">
                  <tr>
-                   <td style="${labelCellStyle}" colspan="3"><strong>Weekly sales</strong></td>
+                   <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantWeeklySales.length}"><strong>Weekly sales</strong></td>
                  </tr>
+                 <tr>
                   <td style="${labelCellStyle}">Day</td>
                   <td style="${labelCellStyle}">Applicant</td>
-                  <td style="${labelCellStyle}">Co-applicant</td>
-                  </tr>
+                  ${coApplicantWeeklySales.map((_, index) => `<td style="${labelCellStyle}">Co-applicant ${index + 1}</td>`).join("")}
+                 </tr>
                  <tr>
                   <td style="${labelCellStyle}">Monday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesMonday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesMonday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesMonday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Tuesday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesTuesday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesTuesday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesTuesday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Wednesday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesWednesday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesWednesday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesWednesday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Thursday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesThursday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesThursday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesThursday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Friday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesFriday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesFriday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesFriday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Saturday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesSaturday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesSaturday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesSaturday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Sunday</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.weeklySalesSunday || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySalesSunday || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantWeeklySalesSunday || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Weekly Sales</td>
                   <td style="${valueCellStyle}">${cashFlowAnalysis.totalWeeklySales || ""}</td>
-                  <td style="${valueCellStyle}">${cashFlowAnalysis.coApplicantWeeklySales || ""}</td>
+                  ${coApplicantWeeklySales.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantTotalWeeklySales || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantWeeklySales.length}"></td>
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"><strong>Observations at the Time of PD</strong></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantObservations.length}"><strong>Observations at the Time of PD</strong></td>
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Stock Value</td>
                   <td style="${valueCellStyle}">${observationsAtPd.stockValue || ""}</td>
-                  <td style="${valueCellStyle}">${observationsAtPd.coApplicantStockValue || ""}</td>
+                  ${coApplicantObservations.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantStockValue || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Time Spent</td>
                   <td style="${valueCellStyle}">${observationsAtPd.timeSpent || ""}</td>
-                  <td style="${valueCellStyle}">${observationsAtPd.coApplicantTimeSpent || ""}</td>
+                  ${coApplicantObservations.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantTimeSpent || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Footfall</td>
                   <td style="${valueCellStyle}">${observationsAtPd.footfall || ""}</td>
-                  <td style="${valueCellStyle}">${observationsAtPd.coApplicantFootfall || ""}</td>
+                  ${coApplicantObservations.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantFootfall || ""}</td>`).join("")}
                  </tr>
                  <tr>
                   <td style="${labelCellStyle}">Sales</td>
                   <td style="${valueCellStyle}">${observationsAtPd.sales || ""}</td>
-                  <td style="${valueCellStyle}">${observationsAtPd.coApplicantSales || ""}</td>
+                  ${coApplicantObservations.map((coApp: any) => `<td style="${valueCellStyle}">${coApp.coApplicantSales || ""}</td>`).join("")}
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="3"></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantObservations.length}"></td>
                  </tr>
                  <tr>
-                  <td style="${labelCellStyle}" colspan="2"><strong>Trigger Point Verification</strong></td>
+                  <td style="${labelCellStyle}" colspan="${1 + 1 + coApplicantObservations.length}"><strong>Trigger Point Verification</strong></td>
                   <td style="${labelCellStyle}">Remarks</td>
         </tr>
         <tr>
                   <td style="${labelCellStyle}">For Traders</td>
-                  <td style="${valueCellStyle}">${triggerPointVerification.forTraders}</td>
-                  <td style="${valueCellStyle}">${triggerPointVerification.forTradersRemarks}</td>
+                  <td style="${valueCellStyle}" colspan="${1 + coApplicantObservations.length}">${triggerPointVerification.forTraders || ""}</td>
+                  <td style="${valueCellStyle}">${triggerPointVerification.forTradersRemarks || ""}</td>
         </tr>
         <tr>
                   <td style="${labelCellStyle}">For Manufacturers</td>
-                  <td style="${valueCellStyle}">${triggerPointVerification.forManufacturers}</td>
+                  <td style="${valueCellStyle}" colspan="${1 + coApplicantObservations.length}">${triggerPointVerification.forManufacturers || ""}</td>
                   <td style="${valueCellStyle}">${triggerPointVerification.forManufacturersRemarks || ""}</td>
-                 </tr>
+        </tr>
                </table>
              </td>
         </tr>
@@ -563,12 +567,12 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <tr>
             <td style="${labelCellStyle}"></td>
             <td style="${labelCellStyle}">ITR Filing</td>
-            <td style="${valueCellStyle}">${itrAndFinancial.itrFiling}</td>
+            <td style="${valueCellStyle}">${itrAndFinancial.itrFiling || "Not Provided"}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">ITR Details If any</td>
-            <td style="${valueCellStyle}">if filling - amount of income declared</td>
-            <td style="${valueCellStyle}">${itrAndFinancial.itrAmountDeclared} ${"-"+itrAndFinancial.itrDetailsIfAny || ""}</td>
+            <td style="${valueCellStyle}"><b>if filling - amount of income declared:</b></td>
+            <td style="${valueCellStyle}">${itrAndFinancial.itrAmountDeclared || "Not Provided"} ${itrAndFinancial.itrDetailsIfAny?"<br>Amount of income declared: "+itrAndFinancial.itrDetailsIfAny:"Not Provided"}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}"><strong>Banking Details</strong></td>
@@ -581,9 +585,9 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
               ${ensureArray(bankingDetails).map((bank: any) => `
                 <tr>
-                  <td style="${valueCellStyle}">${bank.bankName}</td>
-                  <td style="${valueCellStyle}">${bank.accountType}</td>
-                  <td style="${valueCellStyle}">${bank.noOfYears}</td>
+                  <td style="${valueCellStyle}">${bank.bankName || "Not Provided"}</td>
+                  <td style="${valueCellStyle}">${bank.accountType || "Not Provided"}</td>
+                  <td style="${valueCellStyle}">${bank.noOfYears || "Not Provided"}</td>
                 </tr>
               `).join("")}
             </table>
@@ -662,16 +666,16 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         <table style="${tableStyle}">
         <!-- Collateral Details Section -->
         <tr>
-          <td style="${labelCellStyle}" colspan="2"><strong>Collateral Details</strong></td>
+          <td style="${labelCellStyle};vertical-align: middle;" colspan="2"><strong>Collateral Details</strong></td>
           <td style="border:1px solid #ccc;padding:8px" >
             <table style="${tableStyle}">
               <tr>
                 <td style="${labelCellStyle}">Property Location</td>
-                <td style="${valueCellStyle}">${collateralDetails.propertyLocation || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.propertyLocation || "Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Property Type</td>
-                <td style="${valueCellStyle}">${collateralDetails.propertyType || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.propertyType || "Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Property Area (sqft.)</td>
@@ -679,19 +683,19 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Property Value and Registration Value</td>
-                <td style="${valueCellStyle}">${collateralDetails.propertyValue || ""} , ${"<br><strong>--- Registration Value: </strong>"+collateralDetails.registrationValue || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.propertyValue || "Not Provided"} ${collateralDetails.registrationValue?"<br><strong>Registration Value: </strong>"+collateralDetails.registrationValue:"Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Propose Property Current Occupancy</td>
-                <td style="${valueCellStyle}">${collateralDetails.proposePropertyCurrentOccupancy || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.proposePropertyCurrentOccupancy || "Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Propose Property Distance from Business</td>
-                <td style="${valueCellStyle}">${collateralDetails.proposePropertyDistanceFromBusiness || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.proposePropertyDistanceFromBusiness || "Not Provided"}</td>
         </tr>
         <tr>
                 <td style="${labelCellStyle}">Seller Details</td>
-                <td style="${valueCellStyle}">${collateralDetails.sellerDetails || ""}</td>
+                <td style="${valueCellStyle}">${collateralDetails.sellerDetails || "Not Provided"}</td>
               </tr>
             </table>
           </td>
@@ -700,16 +704,16 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         <!-- OCR Details Section -->
         <tr>
           <td colspan="2" rowspan="2" style="${labelCellStyle}"><strong>OCR details for Purchase Case:</strong></td>
-          <td style="${valueCellStyle}"><strong>OCR Paid:</strong> ${ocrDetails.ocrPaid || ""}</td>
+          <td style="${valueCellStyle}"><strong>OCR Paid:</strong> ${ocrDetails.ocrPaid || "Not Provided"}</td>
         </tr>
         <tr>
-          <td style="${valueCellStyle}"><strong>OCR source:</strong> ${ocrDetails.ocrSource || ""}</td>
+          <td style="${valueCellStyle}"><strong>OCR source:</strong> ${ocrDetails.ocrSource || "Not Provided"}</td>
         </tr>
 
         <!-- End Use Section -->
         <tr>
           <td style="${labelCellStyle}" colspan="2"><strong>End use of loan:</strong></td>
-          <td style="${valueCellStyle}">${endUseOfLoan.endUseOfLoan || ""}</td>
+          <td style="${valueCellStyle}">${endUseOfLoan.endUseOfLoan || "Not Provided"}</td>
         </tr>
         </table>
 
@@ -724,8 +728,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
 
         <tr>
           <td style="${labelCellStyle}"><strong>PD Status</strong></td>
-          <td style="${labelCellStyle}">Positive/Negative (if negative then remarks)</td>
-          <td style="${valueCellStyle}">${pdStatus.pdStatus || ""}${"-"+pdStatus.remarks || ""}</td>
+          <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
         </tr>
       </table>
 

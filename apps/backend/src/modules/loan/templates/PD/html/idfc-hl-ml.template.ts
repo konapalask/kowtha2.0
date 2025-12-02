@@ -589,6 +589,10 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
           : "") + wrapParagraph(""),
     },
     {
+      instruction: `<p style="${paragraphStyle}"><strong>PD Status</strong></p>`,
+      content: wrapParagraph(html_data.approvedStatus|| "Not provided"),
+    },
+    {
       instruction: `<p style="${paragraphStyle}"><strong>Overall outcome of the Personal Discussion</strong></p>`,
       content: wrapParagraph(
         formatMultiline(personalDiscussion.overallOutcome || "")
@@ -602,10 +606,6 @@ export const idfcHlMlTemplate = (verificationData: any, html_data: any) => {
       instruction: `<p style="${paragraphStyle}"><strong>PD Conducted by</strong></p>`,
       content:
         wrapParagraph(formatMultiline(personalDiscussion.pdConductedBy || "")) ,
-    },
-    {
-      instruction: `<p style="${paragraphStyle}"><strong>Signature</strong></p>`,
-      content: wrapParagraph(formatMultiline(personalDiscussion.signature || "")),
     },
     {
       instruction: `<p style="${paragraphStyle}"><strong>Date</strong></p>`,

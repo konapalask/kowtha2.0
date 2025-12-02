@@ -365,7 +365,7 @@ export const axisAgriTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "PD Final Status",
-        observations.pdFinalStatus,
+        html_data.approvedStatus|| "Not provided",
         undefined,
         { colSpan: 3 }
       )}

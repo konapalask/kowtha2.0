@@ -555,8 +555,8 @@ export const niwasSalariedTemplate = (
           pdComments.discussionDate
         )}
         ${renderKeyValue(
-          "Signature of PD Officer",
-          pdComments.pdOfficerSignature
+          "PD Status",
+          html_data.approvedStatus|| "Not provided"
         )}
       </table>
     </div>

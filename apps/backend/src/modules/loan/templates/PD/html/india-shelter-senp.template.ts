@@ -1013,13 +1013,7 @@ export const indiaShelterSenpTemplate = (
       ${renderKeyValueRow("Time of Visit", pdReview.visitTime, undefined, {
         colSpan: 5,
       })}
-      ${renderKeyValueRow(
-        "Signature of the PD Officer",
-        pdReview.officerSignature,
-        undefined,
-        { colSpan: 5 }
-      )}
-      ${renderKeyValueRow("PD Status", pdReview.pdStatus, undefined, {
+      ${renderKeyValueRow("PD Status", html_data.approvedStatus|| "Not provided", undefined, {
         colSpan: 5,
       })}
     </table>

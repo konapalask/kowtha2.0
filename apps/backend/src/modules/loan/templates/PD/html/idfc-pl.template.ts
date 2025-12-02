@@ -324,7 +324,7 @@ export const idfcPlTemplate = (verificationData: any, html_data: any) => {
         ["End Use", bil.endUse || "Not provided"],
         ["Name of Interviewer", bil.nameOfInterviewer || "Not provided"],
         ["Designation & Signature", bil.designationSignature || "Not provided"],
-        ["PD Status", bil.statusOfThisCasePositiveNegativeCreditRefer || "Not provided"],
+        ["PD Status", `${html_data.approvedStatus|| "Not provided"}`],
         ["Interviewer's Remarks", bil.interviewersRemarks?.split("\n").map((line: string) => `<ul style="margin-left: 8px;"><li>${line}</li></ul>`).join("") || "Not provided"],
       ])}>
 

@@ -337,8 +337,8 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
           pdOfficer.dateOfDiscussion
         )}
         ${renderKeyValue(
-          "Signature of PD Officer",
-          pdOfficer.pdOfficerSignature
+          "Pd Status",
+          `${html_data.approvedStatus|| "Not provided"}`
         )}
       </table>
     </div>

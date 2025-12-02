@@ -561,7 +561,7 @@ export const axisFinanceTemplate = (verificationData: any, html_data: any) => {
 
   const overallPositivesOrNegativesTable = `
     <div>
-      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
+      <p style="${paragraphStyle}"><strong><u>Overall Positives or Negatives</u></strong> <br>${html_data.approvedStatus|| "Not provided"}<br> ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
     </div>
   `;
   const tradeReferenceTable = renderMultiColumnTable(

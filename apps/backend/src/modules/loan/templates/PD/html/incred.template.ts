@@ -277,6 +277,7 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
 
       <table style="${tableStyle}">
         ${renderKeyValue("Observations/Remarks During PD", formatMultiline(observationsRemarksDuringPd.observationsRemarksDuringPd))}
+        ${renderKeyValue("PD Status", html_data.approvedStatus|| "Not provided")}
       </table>
 
       <p style="font-size:18px;font-weight:bold;text-align:center;"><u>Estimated Income</u></p>

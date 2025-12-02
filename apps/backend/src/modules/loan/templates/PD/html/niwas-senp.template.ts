@@ -564,8 +564,8 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         ${renderKeyValue("Name of PD Officer", pdComments.pdOfficerName)}
         ${renderKeyValue("Date of Discussion", pdComments.discussionDate)}
         ${renderKeyValue(
-          "Signature of the PD Officer",
-          pdComments.pdOfficerSignature
+          "Pd Status",
+          html_data.approvedStatus|| "Not provided"
         )}
       </table>
 

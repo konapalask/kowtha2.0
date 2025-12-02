@@ -427,10 +427,10 @@ export const axisFinanceUblBelow10lSchema = {
             type: "string",
             title: "Name of Third Party Check",
           },
-          statusOfThirdParty: {
-            type: "string",
-            title: "Third party check status",
-          },
+          // statusOfThirdParty: {
+          //   type: "string",
+          //   title: "Third party check status",
+          // },
           feedbackRemarks: {
             type: "string",
             title: "Third party feedback remarks",

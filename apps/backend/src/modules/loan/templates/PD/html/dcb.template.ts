@@ -448,6 +448,10 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
         <td style="${labelCellStyle}">Concluding Impressions</td>
         <td style="${valueCellStyle}">${formatMultiline(concludingImpressions.concludingImpressions)}</td>
     </tr>
+    <tr>
+        <td style="${labelCellStyle}">PD Status</td>
+        <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+    </tr>
     </table>
 
     ${pdBaseTemplateFooter(html_data)}
