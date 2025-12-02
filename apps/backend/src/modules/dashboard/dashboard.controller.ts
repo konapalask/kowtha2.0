@@ -16,7 +16,7 @@ export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   @Get('metrics')
-  @Roles(UserRole.Admin, UserRole.OperationsExecutive)
+  @Roles(UserRole.Admin, UserRole.OperationsExecutive, UserRole.Verifier)
   @ApiOperation({ summary: 'Get loan metrics for dashboard' })
   @ApiResponse({
     status: 200,

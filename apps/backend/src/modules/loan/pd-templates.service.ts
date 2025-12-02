@@ -343,6 +343,23 @@ export class PDTemplateService {
           }
         : undefined;
 
+    const getStyledApprovedStatus = (status: string): string => {
+      if (!status) return "Not provided";
+      
+      const statusLower = status.toLowerCase().trim();
+      let color = "#333";
+      let fontWeight = "bold";
+      
+      if (statusLower === "positive" || statusLower.includes("positive")) {
+        color = "#28a745"; // Green for positive
+      } else if (statusLower === "negative" || statusLower.includes("negative")) {
+        color = "#dc3545"; // Red for negative
+      } else if (statusLower === "creditrefer" || statusLower.includes("creditrefer") || statusLower === "credit refer" || statusLower.includes("credit refer")) {
+        color = "#ffa500"; // Yellow/Orange for credit refer
+      }
+      return `<span style="color: ${color}; font-weight: ${fontWeight};">${status}</span>`;
+    };
+
     return {
       bankName: loan?.templateName || bankName,
       applicationNumber: applicationNumber,
@@ -350,7 +367,7 @@ export class PDTemplateService {
       financialAnalysis: financialAnalysis,
       status: status,
       synopsis: synopsis,
-      approvedStatus: approvedStatus,
+      approvedStatus: getStyledApprovedStatus(approvedStatus),
       imageDataUri: imageDataUri,
       imagesData: imagesData,
       fieldExecutive: fieldExecutive,
