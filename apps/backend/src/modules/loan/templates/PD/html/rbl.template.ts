@@ -210,7 +210,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const tradeReferencesCustomers = source.tradeReferences?.customers ?? [];
   const otherSources = source.otherSourcesOfIncome?.otherSourcesOfIncome ?? [];
   const loanEntries = source.loansDetails?.loansDetails ?? [];
-  const netWorthEntries = source.netWorth?.netWorth ?? [];
+  const netWorthEntries = ensureArray(source.netWorth?.netWorth);
   const applicantsMainBankingDetails =
     source.applicantsMainBankingDetails ?? {};
   const rawBankingDetails = applicantsMainBankingDetails?.bankingDetails;
@@ -633,7 +633,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
           },
           { header: "Years of ownership", key: "yearsOfOwnership" },
         ],
-        netWorthEntries?.map((entry, index) => ({
+        netWorthEntries.map((entry, index) => ({
           ...entry,
           srNo: index + 1,
         })),
