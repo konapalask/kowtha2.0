@@ -285,15 +285,19 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const familySummary = [
     {
       label: "<strong>About Applicant:</strong>",
-      value: familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+      value: familyDetails.aboutApplicant
+        ? familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        : "",
     },
     {
       label: "<strong>About Co-applicant:</strong>",
-      value: familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+      value: familyDetails.aboutCoApplicant
+        ? familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        : "",
     },
     {
       label: "<strong>And their family details:</strong>",
-      value: familyDetails.andTheirFamilyDetails,
+      value: formatMultiline(familyDetails.andTheirFamilyDetails),
     },
   ];
 
