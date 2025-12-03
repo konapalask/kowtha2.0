@@ -52,7 +52,7 @@ export default function Verify() {
   const [searchApplicationNumber, setSearchApplicationNumber] = useState<string>("");
   const [searchApplicantName, setSearchApplicantName] = useState<string>("");
 
-  // Pagination state
+  // Pagination state - similar to loans page approach
   const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationMeta, setPaginationMeta] = useState({
@@ -62,20 +62,38 @@ export default function Verify() {
     totalPages: 0,
   });
 
-  // Restore page from query string on mount
-  useEffect(() => {
-    if (router.query.page) {
-      const page = parseInt(router.query.page as string, 10);
-      if (!isNaN(page) && page > 0) setCurrentPage(page);
-    }
-  }, [router.query.page]);
 
-  // Fetch loans when page or department changes
   useEffect(() => {
+    if (router.isReady) {
+      if (router.query.page) {
+        const page = parseInt(router.query.page as string, 10);
+        if (!isNaN(page) && page > 0) {
+          setCurrentPage((prevPage) => {
+            return prevPage !== page ? page : prevPage;
+          });
+        }
+      } else {
+        // If no page in query, reset to page 1
+        setCurrentPage((prevPage) => {
+          return prevPage !== 1 ? 1 : prevPage;
+        });
+      }
+    }
+  }, [router.isReady, router.query.page]);
+
+  useEffect(() => {
+    if (!router.isReady) return; 
+    
     const fetchLoans = async () => {
+
+      const pageFromQuery = router.query.page 
+        ? parseInt(router.query.page as string, 10) 
+        : currentPage;
+      const pageToUse = (!isNaN(pageFromQuery) && pageFromQuery > 0) ? pageFromQuery : currentPage;
+      
       setLoading(true);
       try {
-        const res = await getVerifierLoansApi(currentPage, pageSize, {
+        const res = await getVerifierLoansApi(pageToUse, pageSize, {
           applicationNumber: searchApplicationNumber,
           applicantName: searchApplicantName,
         });
@@ -84,13 +102,17 @@ export default function Verify() {
         const items = responseData?.items || responseData?.data || [];
         const meta = responseData?.meta || {
           total: items.length,
-          page: currentPage,
+          page: pageToUse,
           limit: pageSize,
           totalPages: Math.ceil(items.length / pageSize),
         };
 
         setLoans(Array.isArray(items) ? items : []);
         setPaginationMeta(meta);
+        // Ensure currentPage state matches the page we actually fetched
+        if (pageToUse !== currentPage) {
+          setCurrentPage(pageToUse);
+        }
       } catch (err) {
         console.log(err);
         setLoans([]);
@@ -106,7 +128,7 @@ export default function Verify() {
     };
 
     fetchLoans();
-  }, [currentDepartment, currentPage, pageSize, searchApplicationNumber, searchApplicantName]);
+  }, [router.isReady, router.query.page, currentDepartment, pageSize, searchApplicationNumber, searchApplicantName]);
 
   const getStatusTags = (record: any) => {
     const types = [
@@ -240,7 +262,7 @@ export default function Verify() {
   // Table pagination config
   const paginationConfig = paginationMeta.totalPages > 0
     ? {
-        current: paginationMeta.page,
+        current: currentPage,
         pageSize: paginationMeta.limit,
         total: paginationMeta.total,
         showSizeChanger: false,

@@ -327,7 +327,7 @@ export default function LoanVerifyDetails() {
               onClick={() => {
                 const page = router.query.page;
                 if (page) {
-                  router.push({ pathname: "/verify", query: { page } });
+                  router.push({ pathname: "/verify", query: { page: page.toString() } });
                 } else {
                   router.push("/verify");
                 }
