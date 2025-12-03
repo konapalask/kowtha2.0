@@ -358,7 +358,7 @@ const BusinessVerification = () => {
 
       console.log(finalData);
 
-      await submitVerification(finalData, item.verificationId);
+      await submitVerification(finalData, item.verificationId, 'FI');
       await clearItem(`${item.verificationId}_${verificationType}`);
       Alert.alert('Success', 'Verification submitted successfully');
       navigation.goBack();
