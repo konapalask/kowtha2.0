@@ -282,6 +282,7 @@ export default function LoanVerifyDetails() {
             currentDepartment={currentDepartment}
             applicationNumber={verificationData?.applicationNumber}
             loanId={verificationData?.loanId}
+            pdEmailLogs={verificationData?.pdEmailLogs}
           />
         );
     }

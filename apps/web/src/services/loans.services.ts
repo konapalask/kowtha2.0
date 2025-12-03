@@ -173,3 +173,9 @@ export const deleteLoanApi = (id: number) => {
 export const reassignLoanApi = (loanId: number) => {
   return postWithDepartment(`/loans/${loanId}/reassign`);
 };
+
+export const sendPdEmailReplyApi = (loanId: number, department: string) => {
+  return postWithDepartment(`/loans/${loanId}/pd-email-reply`, {}, {
+    params: { department },
+  });
+};

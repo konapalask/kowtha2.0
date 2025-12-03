@@ -4,10 +4,12 @@ import {
   generatePreviewReport,
   exportFinancialAnalysis,
 } from "@/services/verifier.services";
-import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Popconfirm } from "antd";
+import { sendPdEmailReplyApi } from "@/services/loans.services";
+import { EyeOutlined, DownloadOutlined, MailOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { getCurrentDepartment } from "@/utils/utility";
 
 const Footer: React.FC<{
   editorContent: any;
@@ -18,6 +20,8 @@ const Footer: React.FC<{
   setOpen: any;
   verificationType: string;
   currentDepartment?: string;
+  loanId?: number;
+  hasPdEmail?: boolean;
 }> = ({
   editorContent,
   disabled,
@@ -27,6 +31,8 @@ const Footer: React.FC<{
   setOpen,
   verificationType,
   currentDepartment,
+  loanId,
+  hasPdEmail,
 }) => {
   const { activeTab } = useTabContext();
   const router = useRouter();
@@ -36,6 +42,7 @@ const Footer: React.FC<{
   //   null
   // );
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   // const handleApprove = async () => {
   //   try {
@@ -165,6 +172,30 @@ const Footer: React.FC<{
     }
   };
 
+  const handleReplyToPdEmail = async () => {
+    if (!loanId) {
+      message.error("Loan ID not available");
+      return;
+    }
+
+    try {
+      setSendingEmail(true);
+      const dept = currentDepartment || getCurrentDepartment();
+      const response = await sendPdEmailReplyApi(loanId, dept);
+      message.success(
+        response?.data?.message || "Email reply sent successfully"
+      );
+    } catch (error: any) {
+      console.error("Error sending PD email reply:", error);
+      message.error(
+        error?.response?.data?.message ||
+          "Failed to send email reply. Please try again."
+      );
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
     <>
       <div
@@ -199,17 +230,34 @@ const Footer: React.FC<{
           Generate Preview
         </Button>
         {currentDepartment === "PD" && (
-          <Button
-            size="small"
-            icon={<DownloadOutlined />}
-            onClick={handleExportExcel}
-            style={{
-              height: "32px",
-              fontSize: "14px",
-            }}
-          >
-            Export Excel
-          </Button>
+          <>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={handleExportExcel}
+              style={{
+                height: "32px",
+                fontSize: "14px",
+              }}
+            >
+              Export Excel
+            </Button>
+            {hasPdEmail && loanId && (
+              <Button
+                size="small"
+                icon={<MailOutlined />}
+                onClick={handleReplyToPdEmail}
+                loading={sendingEmail}
+                disabled={sendingEmail || disabled}
+                style={{
+                  height: "32px",
+                  fontSize: "14px",
+                }}
+              >
+                Reply to PD Mail
+              </Button>
+            )}
+          </>
         )}
       </div>
       <Modal

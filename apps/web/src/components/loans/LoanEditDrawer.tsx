@@ -44,6 +44,16 @@ interface LoanDetails {
   status: string;
   verifierId?: string;
   verifications?: any[];
+  pdEmailLogs?: Array<{
+    id: number;
+    subject: string;
+    body: string;
+    fromEmail: string[];
+    toEmail: string[];
+    ccEmail: string[];
+    receivedAt: string | null;
+    createdAt: string;
+  }>;
   [key: string]: any;
 }
 
@@ -646,6 +656,64 @@ const LoanEditDrawer: React.FC<LoanEditProps> = ({
                 </Row>
               </>
             )}
+
+            {/* PD Email Section */}
+            {currentDepartment === "PD" &&
+              loanDetails?.pdEmailLogs &&
+              loanDetails.pdEmailLogs.length > 0 && (
+                <Card
+                  title="PD Email"
+                  style={{ marginTop: 16 }}
+                  size="small"
+                >
+                  {loanDetails.pdEmailLogs.map((emailLog, index) => (
+                    <div key={emailLog.id} style={{ marginBottom: index < loanDetails.pdEmailLogs!.length - 1 ? 16 : 0 }}>
+                      <Descriptions column={1} size="small" bordered>
+                        <Descriptions.Item label="Subject">
+                          {emailLog.subject}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="From">
+                          {emailLog.fromEmail.join(", ")}
+                        </Descriptions.Item>
+                        {emailLog.toEmail.length > 0 && (
+                          <Descriptions.Item label="To">
+                            {emailLog.toEmail.join(", ")}
+                          </Descriptions.Item>
+                        )}
+                        {emailLog.ccEmail.length > 0 && (
+                          <Descriptions.Item label="CC">
+                            {emailLog.ccEmail.join(", ")}
+                          </Descriptions.Item>
+                        )}
+                        {emailLog.receivedAt && (
+                          <Descriptions.Item label="Received">
+                            {dayjs(emailLog.receivedAt).format(
+                              "MMM DD, YYYY HH:mm"
+                            )}
+                          </Descriptions.Item>
+                        )}
+                      </Descriptions>
+                      <div
+                        style={{
+                          marginTop: 12,
+                          padding: 12,
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e8e8e8",
+                          borderRadius: 4,
+                          maxHeight: 400,
+                          overflowY: "auto",
+                          wordBreak: "break-word",
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                        }}
+                        dangerouslySetInnerHTML={{ 
+                          __html: emailLog.body || "<p style='color: #999;'>No email body content</p>" 
+                        }}
+                      />
+                    </div>
+                  ))}
+                </Card>
+              )}
           </>
         )}
       </Drawer>
