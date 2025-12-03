@@ -378,7 +378,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Gross & Net margins % in Business",
-        business.grossMargin,
+        business.grossMargin+"%",
         undefined,
         { colSpan: 3 }
       )}

@@ -400,8 +400,8 @@ export const dcbTemplate = (verificationData: any, html_data: any) => {
     <td style="${labelCellStyle}" colspan="2">Details of End-Use of Funds:</td>
     </tr>
     ${renderKeyValue("End-Use of Funds (incl Cash out use)", loanPurpose.detailsOfEndUseOfFunds)}
-    ${renderKeyValue("Loan Required", loanPurpose.loanRequired)}
-    ${renderKeyValue("EMI Comfortable With", loanPurpose.emiComfortableWith)}
+    ${renderKeyValue("Loan Required", formatCurrency(loanPurpose.loanAmountRequired))}
+    ${renderKeyValue("EMI Comfortable With", formatCurrency(loanPurpose.emiComfortableWith))}
     </table>
 
     <h2 style="margin:0 0 16px;color:#1f2a37;font-size:16px;">Details of Property to be mortgaged</h2>

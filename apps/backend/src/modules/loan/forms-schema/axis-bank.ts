@@ -608,8 +608,6 @@ export const axisBankSchema = {
               grossMonthlyIncomeTotal: {
                 type: "number",
                 title: "Gross monthly income (total)",
-                readOnly: true,
-                formula: "monthlyToGrossReceiptsEstimated + anyOtherIncome",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
@@ -668,6 +666,16 @@ export const axisBankSchema = {
                   minDecimalPlaces: 0,
                 },
               },
+              incomeLeftForDomesticExpenses: {
+                type: "number",
+                title: "Income left for domestic expenses",
+                  formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
               foodExpenses: {
                 type: "number",
                 title: "Food Expenses",
@@ -710,8 +718,18 @@ export const axisBankSchema = {
               },
               otherHouseHoldExpenses: {
                 type: "number",
-                title: "Other household expenses",
+                title: "Any Other household expenses",
                 formatter: {
+                  useIndianFormat: true,
+                  locale: "en-IN",
+                  maxDecimalPlaces: 2,
+                  minDecimalPlaces: 0,
+                },
+              },
+              netmonthlyincomepostallexpenses: {
+                type: "number",
+                title: "Net monthly income post all expenses",
+                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",
                   maxDecimalPlaces: 2,
@@ -748,24 +766,9 @@ export const axisBankSchema = {
                   minDecimalPlaces: 0,
                 },
               },
-              netMonthlyIncomePostAllExpenses: {
-                type: "number",
-                title: "Net monthly income post all expenses",
-                readOnly: true,
-                formula:
-                  "incomeLeftForDomesticExpenses - foodExpenses - childrenEducation - houseRent - medicalExpenses - otherHouseHoldExpenses - lessSavingsInvestmentsInsurancePremium - lessExistingEmisObligations - emiAllocatedFoTheProposedLoan",
-                formatter: {
-                  useIndianFormat: true,
-                  locale: "en-IN",
-                  maxDecimalPlaces: 2,
-                  minDecimalPlaces: 0,
-                },
-              },
               netSurplus: {
                 type: "number",
                 title: "Net Surplus income post all expenses & obligations",
-                readOnly: true,
-                formula: "netMonthlyIncomePostAllExpenses",
                 formatter: {
                   useIndianFormat: true,
                   locale: "en-IN",

@@ -218,7 +218,7 @@ export const heroFincorpTemplate = (verificationData: any, html_data: any) => {
         formatMultiline(financialSummary.assessmentYear || ""),
         formatCurrency(financialSummary.turnover),
         formatCurrency(financialSummary.netProfit),
-        formatMultiline(financialSummary.netMarginPercent || ""),
+        formatMultiline(financialSummary.netMarginPercent+"%" || ""),
       ],
     ]
   );
