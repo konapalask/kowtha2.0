@@ -271,7 +271,7 @@ const Footer: React.FC<{
             {/* <Button type={"primary"} onClick={handleSave}>
               Submit
             </Button> */}
-            <Popconfirm
+            {/* <Popconfirm
               title="Are you sure you want to submit this final verdict?"
               onConfirm={handleFinalReport}
             >
@@ -285,7 +285,7 @@ const Footer: React.FC<{
               >
                 Generate Final Report
               </Button>
-            </Popconfirm>
+            </Popconfirm> */}
             {/* </Space> */}
           </div>
         )}
