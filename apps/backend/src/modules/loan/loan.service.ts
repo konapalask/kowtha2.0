@@ -1466,14 +1466,27 @@ export class LoanService {
       }
       // Process only photos (not documents) in verificationData if it exists
       // Documents (PDFs/DOCX) don't need geotag overlay processing
+      // Only process images where isOverlayNeeded is true
       if (verificationData?.uploadedItems) {
-        const photoItems = verificationData.uploadedItems.filter(
-          (item: any) => item.type === "photo" || !item.type || !item.fileType
+        // Filter out PDFs/documents - they should never run worker
+        // For images, only process if isOverlayNeeded is true
+        const itemsToProcess = verificationData.uploadedItems.filter(
+          (item: any) => {
+            // Skip PDFs and documents completely
+            if (item.type === "document" || item.fileType === "pdf") {
+              return false;
+            }
+            // For images/photos, only process if isOverlayNeeded is true
+            if (item.type === "photo" || !item.type || !item.fileType) {
+              return item.isOverlayNeeded === true;
+            }
+            return false;
+          }
         );
 
-        if (photoItems.length > 0) {
+        if (itemsToProcess.length > 0) {
           await Promise.all(
-            photoItems.map((item: any) =>
+            itemsToProcess.map((item: any) =>
               limit(() =>
                 this.runWorker({
                   s3ImageUrl: item.s3ImageUrl,
