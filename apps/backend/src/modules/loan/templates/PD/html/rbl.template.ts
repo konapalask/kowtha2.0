@@ -285,19 +285,19 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const familySummary = [
     {
       label: "<strong>About Applicant:</strong>",
-      value: familyDetails.aboutApplicant
-        ? familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+      value: familyDetails?.aboutApplicant
+        ? familyDetails?.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
         : "",
     },
     {
       label: "<strong>About Co-applicant:</strong>",
-      value: familyDetails.aboutCoApplicant
+      value: familyDetails?.aboutCoApplicant
         ? familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
         : "",
     },
     {
       label: "<strong>And their family details:</strong>",
-      value: formatMultiline(familyDetails.andTheirFamilyDetails),
+      value: familyDetails?.andTheirFamilyDetails,
     },
   ];
 
@@ -430,15 +430,15 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         familySummary
           ? `<table style="${tableStyle}">
             <tr>
-            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label}</p></td>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label} || "Not provided"</p></td>
             <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[0].value)}</p></td>
             </tr>
             <tr>
-            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[1].label}</p></td>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[1].label} || "Not provided"</p></td>
             <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[1].value)}</p></td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[2].label}</p></td>
+              <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[2].label} || "Not provided"</p></td>
               <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                   <tr>
@@ -448,9 +448,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Qualification</p></td>
                   <td style="${labelCellStyle}"><p style="${paragraphStyle}">Occupation</p></td>
                   </tr>
-                  ${ensureArray(familySummary[2].value)
-                    .map(
-                      (item: any) => `
+                  ${Array.isArray(familySummary[2].value) ? familySummary[2].value.map((item: any) => `
                     <tr>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.name}</p></td>
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.relationship}</p></td>
@@ -459,8 +457,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                       <td style="${valueCellStyle}"><p style="${paragraphStyle}">${item.occupation}</p></td>
                     </tr>
                   `
-                    )
-                    .join("")}
+                    ).join("") : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Not provided</p></td></tr>`}
                   </table> 
                 </td>
                 </tr> `
