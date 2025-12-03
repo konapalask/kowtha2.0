@@ -225,7 +225,7 @@ export const ambitTemplate = (verificationData: any, html_data: any) => {
             </table>
           </td>
         </tr>
-        ${renderKeyValue("Net Margin", formatCurrency(businessActivityAndStockLevelObserved.netMargin))}
+        ${renderKeyValue("Net Margin", businessActivityAndStockLevelObserved.netMargin + "%" || "Not provided")}
         ${renderKeyValue("Expenditure", formatCurrency(businessActivityAndStockLevelObserved.expenditure))}
         ${renderKeyValue("Employees", businessActivityAndStockLevelObserved.employees)}
         ${renderKeyValue("Assets", formatMultiline(businessActivityAndStockLevelObserved.assets))}

@@ -297,7 +297,7 @@ export const iiflTemplate = (verificationData: any, html_data: any) => {
       <table style="${tableStyle}">
         ${renderKeyValue(
           "Net Margin %",
-          incomeReferences.netMarginPercent
+          incomeReferences.netMarginPercent+"%"
         )}
         ${renderKeyValue("Other Incomes", incomeReferences.otherIncomes)}
         ${renderKeyValue("Spouse Income", incomeReferences.spouseIncome)}

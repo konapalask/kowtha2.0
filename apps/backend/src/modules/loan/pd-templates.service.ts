@@ -205,7 +205,7 @@ export class PDTemplateService {
           const photosHtml = group.photos
             .map((photo) => {
               return `
-                <div style="width:31%;margin:1%;border:1px solid #ddd;padding:8px;text-align:center;display:inline-block;vertical-align:top;box-sizing:border-box;page-break-inside:avoid;">
+                <div style="width:100%;margin:1%;border:1px solid #ddd;padding:8px;text-align:center;display:inline-block;vertical-align:top;box-sizing:border-box;page-break-inside:avoid;">
                   <img src="${photo.url}" alt="${group.documentType}" style="width:100%;height:180px;object-fit:contain;margin-bottom:6px;" />
                   ${
                     photo.remarks

@@ -200,15 +200,22 @@ export const pdBaseTemplate = (html_data?: any) => {
               flex-wrap: wrap;
               justify-content: flex-start;
               gap: 16px;
+              width: 100%;
             }
             .photo-item {
-              width: 48%;
+              width: calc((100% - 32px) / 3);
               border: 1px solid #ddd;
               padding: 10px;
               text-align: center;
               vertical-align: top;
               box-sizing: border-box;
               page-break-inside: avoid;
+            }
+            .photo-grid > div {
+              width: calc((100% - 32px) / 3) !important;
+              margin: 0 !important;
+              flex-shrink: 0;
+              box-sizing: border-box;
             }
             .photo-item img {
               width: 100%;
@@ -368,7 +375,9 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
           ? `
         <div class="photos-section">
           <div class="photos-title">PHOTOS</div>
-          ${filteredImagesData}
+          <div class="photo-grid">
+            ${filteredImagesData}
+          </div>
         </div>
       `
           : ""
