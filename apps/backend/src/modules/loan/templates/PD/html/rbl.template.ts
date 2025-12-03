@@ -69,7 +69,7 @@ const renderHeading = (text: string) =>
   `<h1 style="${headingStyle}">${text}</h1>`;
 
 const renderSubHeading = (text: string) =>
-  `<p style="${paragraphStyle}"><strong>${text}</strong></p>`;
+  `<p style="${paragraphStyle} text-align:center;"><strong>${text}</strong></p>`;
 
 const renderTwoColumnTable = (rows: KeyValueRow[]) => {
   if (!rows.length) return "";
@@ -430,15 +430,15 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
         familySummary
           ? `<table style="${tableStyle}">
             <tr>
-            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label} || "Not provided"</p></td>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[0].label}</p></td>
             <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[0].value)}</p></td>
             </tr>
             <tr>
-            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[1].label} || "Not provided"</p></td>
+            <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[1].label}</p></td>
             <td style="${valueCellStyle}"><p style="${paragraphStyle}">${formatMultiline(familySummary[1].value)}</p></td>
             </tr>
             <tr>
-              <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[2].label} || "Not provided"</p></td>
+              <td style="${labelCellStyle}"><p style="${paragraphStyle}">${familySummary[2].label}</p></td>
               <td style="border:1px solid #ccc;padding:8px">
                 <table style="${tableStyle}">
                   <tr>
@@ -460,8 +460,9 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
                     ).join("") : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Not provided</p></td></tr>`}
                   </table> 
                 </td>
-                </tr> `
-          : renderSingleColumnTable(["Family details not provided"])
+                </tr> 
+                </table>`
+          : `<tr><td style="${valueCellStyle}"><p style="${paragraphStyle}">Family details not provided</p></td></tr>`
       }
 
       ${renderSubHeading("Business Details (Separate for additional business)")}
@@ -489,7 +490,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
             "Product Details (please also comment on Vintage of the product deals by the firm & Future changes if any)",
           value: businessDetails.productDetails,
         },
-        { label: "Business Process", value: businessDetails.businessProcess },
+        { label: "Business Process", value: businessDetails.businessProcess.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("") },
         { label: "Margins", value: businessDetails.margins },
         {
           label: "Documents Observed",
