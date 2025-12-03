@@ -287,7 +287,9 @@ export const incredTemplate = (verificationData: any, html_data: any) => {
       <p style="margin:8px 0;line-height:1.5"><strong>PAT of the Business Concern (Rs.)</strong> ${formatCurrency(estimatedIncome.patOfTheBusinessConcern)}</p>
 
       <p style="font-size:18px;"><strong>Overall Positives or Negatives:</strong>  ${formatMultiline(overallPositivesOrNegatives.overallPositivesOrNegatives)}</p>
-
+      <br>
+      <p style="margin:8px 0;line-height:1.5"><strong>Signature of the PD Officer TRUE/FALSE:</strong></p>
+      <br>  
       <p style="font-size:18px;"><strong>Note:</strong> We have taken the estimated figures based on customer feedback and the gross profit has been arrived taking into consideration market information gathered on our experience.</p>
       <p style="font-size:18px;"><strong>Disclaimer:</strong> The Report (Including any attachments) has been prepared based on verbal information provided by the person contacted. Incred Financial Services will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. Our efficient services will not be liable in any case</p>
 

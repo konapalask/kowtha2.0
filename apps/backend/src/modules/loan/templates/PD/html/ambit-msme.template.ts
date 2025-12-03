@@ -74,9 +74,11 @@ const renderArrayTable = (headers: string[], rows: string[][]): string => {
 
 export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
   const general = verificationData.general || {};
-  const initiatedAddress = verificationData.addressDetails.initiatedAddress || {};
+  const initiatedAddress =
+    verificationData.addressDetails.initiatedAddress || {};
   const visitedAddress = verificationData.addressDetails.visitedAddress || {};
-  const businessLicenseAddress = verificationData.addressDetails.businessLicenseAddress || {};
+  const businessLicenseAddress =
+    verificationData.addressDetails.businessLicenseAddress || {};
   const residentialDetails = verificationData.residentialDetails || {};
   const propertyDetails = verificationData.propertyDetails || {};
   const generalInfo = verificationData.generalInfo || {};
@@ -160,9 +162,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
                 <table style="${tableStyle}">
                     <tr>
                         <td style="${valueCellStyle}" colspan="4"><strong><u>Address with Lattitude and Longitude:</u></strong> ${propertyDetails.address + "<br><strong>Latitude:</strong> " + propertyDetails.latitude + "<br><strong>Longitude:</strong> " + propertyDetails.longitude}</td>
-                        ${renderKeyValue("Type of Property", propertyDetails.typeOfProperty)}
                         ${renderKeyValue("Property owner name", propertyDetails.ownerName)}
-                        ${renderKeyValue("Nature of uses", propertyDetails.natureOfUses)}
                         ${renderKeyValue("Market Value", propertyDetails.marketValue)}
                         ${renderKeyValue("Area (In Sq. Ft.)", propertyDetails.areaInSqft)}
                         ${renderKeyValue("Occupied since (years)", propertyDetails.occupiedSinceYears)}
@@ -191,12 +191,34 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">1</td>
                 <td style="${labelCellStyle}">Applicant Profile</td>
-                <td style="${valueCellStyle}">${applicantDetails.applicantProfile ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.applicantProfile.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
+                <td style="${valueCellStyle}">${
+                  applicantDetails.applicantProfile
+                    ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.applicantProfile
+                        .split("\n")
+                        .map((line: string) => line.trim())
+                        .map(
+                          (line: string) =>
+                            `<li style="margin-left: 8px;">${line}</li>`
+                        )
+                        .join("")}</ul>`
+                    : "Not provided"
+                }</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">2</td>
                 <td style="${labelCellStyle}">Details of all Co-Applicant</td>
-                <td style="${valueCellStyle}">${applicantDetails.detailsOfCoApplicant ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.detailsOfCoApplicant.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
+                <td style="${valueCellStyle}">${
+                  applicantDetails.detailsOfCoApplicant
+                    ? `<ul style="margin: 0; padding-left:8px;">${applicantDetails.detailsOfCoApplicant
+                        .split("\n")
+                        .map((line: string) => line.trim())
+                        .map(
+                          (line: string) =>
+                            `<li style="margin-left: 8px;">${line}</li>`
+                        )
+                        .join("")}</ul>`
+                    : "Not provided"
+                }</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">3</td>
@@ -234,12 +256,34 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
             <tr>
                 <td style="${labelCellStyle}">4</td>
                 <td style="${labelCellStyle}">Business/Employment Details</td>
-                <td style="${valueCellStyle}">${businessDetails.businessDetails ? `<ul style="margin: 0; padding-left: 8px;">${businessDetails.businessDetails.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
+                <td style="${valueCellStyle}">${
+                  businessDetails.businessDetails
+                    ? `<ul style="margin: 0; padding-left: 8px;">${businessDetails.businessDetails
+                        .split("\n")
+                        .map((line: string) => line.trim())
+                        .map(
+                          (line: string) =>
+                            `<li style="margin-left: 8px;">${line}</li>`
+                        )
+                        .join("")}</ul>`
+                    : "Not provided"
+                }</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">5</td>
                 <td style="${labelCellStyle}">Income Assessment details</td>
-                <td style="${valueCellStyle}">${incomeAssessment.incomeAssessment ? `<ul style="margin: 0; padding-left:8px;">${incomeAssessment.incomeAssessment.split("\n").map((line: string) => line.trim()).map((line: string) => `<li style="margin-left: 8px;">${line}</li>`).join("")}</ul>` : "Not provided"}</td>
+                <td style="${valueCellStyle}">${
+                  incomeAssessment.incomeAssessment
+                    ? `<ul style="margin: 0; padding-left:8px;">${incomeAssessment.incomeAssessment
+                        .split("\n")
+                        .map((line: string) => line.trim())
+                        .map(
+                          (line: string) =>
+                            `<li style="margin-left: 8px;">${line}</li>`
+                        )
+                        .join("")}</ul>`
+                    : "Not provided"
+                }</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}">6</td>
@@ -464,7 +508,7 @@ export const ambitMsmeTemplate = (verificationData: any, html_data: any) => {
         <tr>
             <td style="${labelCellStyle}">17</td>
             <td style="${labelCellStyle}">Overall PD Status</td>
-            <td style="${valueCellStyle}">${html_data.approvedStatus|| "Not provided"}</td>
+            <td style="${valueCellStyle}">${html_data.approvedStatus || "Not provided"}</td>
        </table>
         
     </div>

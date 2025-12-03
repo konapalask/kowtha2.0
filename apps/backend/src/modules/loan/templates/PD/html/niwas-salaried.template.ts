@@ -392,35 +392,35 @@ export const niwasSalariedTemplate = (
       <table style="${tableStyle}">
           <tr>
             <td style="${labelCellStyle}">Monthly Salary Income</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlySalaryIncome.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlySalaryIncome.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlySalaryIncome?.chequeAmount || 0)}</td>
           </tr>
           <tr>
-            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(financialDetails.otherMonthlyIncome || 0)}</td> 
+            <td style="${labelCellStyle}" colspan="3">Other Monthly Income:- ${formatCurrency(financialDetails?.otherMonthlyIncome || 0)}</td> 
           </tr>
           <tr>
             <td style="${labelCellStyle}">Rental Income (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.rentalIncome.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.rentalIncome.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.rentalIncome?.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.rentalIncome?.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Incentives/Perks (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.incentives.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.incentives.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.incentives?.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.incentives?.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Bonus (In Rs)</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlyBonus.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlyBonus.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyBonus?.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyBonus?.chequeAmount || 0)}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Others, please specify source type:</td>
-            <td style="${valueCellStyle}" colspan="2">${formatMultiline(financialDetails.otherMonthlyIncomeSourceType || "")}</td>
+            <td style="${valueCellStyle}" colspan="2">${formatMultiline(financialDetails?.otherMonthlyIncomeSourceType || "")}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}">Monthly Income (In Rs):</td>
-            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails.monthlyIncome.cashAmount || 0)}</td>
-            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails.monthlyIncome.chequeAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cash Amount: ${formatCurrency(financialDetails?.monthlyIncome?.cashAmount || 0)}</td>
+            <td style="${valueCellStyle}">Cheque Amount: ${formatCurrency(financialDetails?.monthlyIncome?.chequeAmount || 0)}</td>
           </tr>
       </table>
 
@@ -492,7 +492,7 @@ export const niwasSalariedTemplate = (
             "Total Transaction Cost (Total of all the above)",
             costAndFunds.totalTransactionCost
           )}
-          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)","Cash Amount:"+ formatCurrency(costAndFunds.modeOfPaymentToSeller.cashAmount || 0)+"<br>" +"Cheque Amount: "+ formatCurrency(costAndFunds.modeOfPaymentToSeller.chequeAmount || 0))}
+          ${renderKeyValue("Mode of Payment to Seller (Cash / Cheque)","Cash Amount:"+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.cashAmount || 0)+"<br>" +"Cheque Amount: "+ formatCurrency(costAndFunds?.modeOfPaymentToSeller?.chequeAmount || 0))}
             </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
@@ -554,6 +554,10 @@ export const niwasSalariedTemplate = (
           "Date of Discussion",
           pdComments.discussionDate
         )}
+        <tr>
+          <td style="${labelCellStyle}">Signature of the PD Officer</td>
+          <td style="${valueCellStyle}"></td>
+        </tr>
         ${renderKeyValue(
           "PD Status",
           html_data.approvedStatus|| "Not provided"

@@ -778,6 +778,39 @@ export class LoanController {
     }
   }
 
+  @Post(":id/pd-email-reply")
+  @Roles(UserRole.Verifier, UserRole.VerificationExecutive)
+  @ApiOperation({
+    summary: "Send PD email reply with attachments (Excel, PDF, uploaded documents)",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Email reply sent successfully",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Loan or PD email log not found",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - Missing attachments or configuration",
+  })
+  async sendPdEmailReply(
+    @Param("id") loanId: string,
+    @Query("department") department: Department
+  ) {
+    if (department !== Department.PD) {
+      throw new BadRequestException("This endpoint is only for PD department");
+    }
+
+    const result = await this.loanService.sendPdEmailReply(Number(loanId));
+    return {
+      status: 200,
+      message: result.message,
+      data: { success: result.success },
+    };
+  }
+
   /*
       The below API's are used by only Field Executive. His tasks include: Edit Verification Report, Submit Verification Data and Upload Proofs
   */

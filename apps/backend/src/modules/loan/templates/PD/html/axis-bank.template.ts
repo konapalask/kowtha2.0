@@ -107,7 +107,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         .map((line: string) => `<li>${line.trim()}</li>`)
         .join("");
     }
-    return "<li>Not Provided</li>";
+    return "";
   };
 
   const ensureArray = <T>(value: T | T[] | undefined | null): T[] => {
@@ -192,11 +192,11 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Total Family members (Nos)</strong></p></td>
-                <td style="${valueCellStyle}">${formatSummaryValue(computedTotalFamilyMembers)}</td>
+                <td style="${valueCellStyle}">${formatSummaryValue(computedTotalFamilyMembers || "")}</td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>No. of Earning members (Nos)</strong></p></td>
-                <td style="${valueCellStyle}">${formatSummaryValue(computedEarningMembers)}</td>
+                <td style="${valueCellStyle}">${formatSummaryValue(computedEarningMembers || "")}</td>
             </tr>
         </table>
         
@@ -327,7 +327,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>1) Turnover and Margin</strong></p></td>
-                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.turnOverAndMargin || formatCurrency(verificationData.commonPoints?.monthlyGrossReceipts || 0)} with ${verificationData.commonPoints?.netMargin || 0}% margin</p></td>
+                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">Turnover: ${formatCurrency(verificationData.commonPoints?.turnOverAndMargin) || ""} <br> Margin: ${verificationData.commonPoints?.netMargin+"%" || ""}</p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>2) Sales fluctuations (Seasonal business)</strong></p></td>
@@ -344,7 +344,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>4) Chartered A/c details</strong></p></td>
-                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.charteredACDetails || "N/A"}</p></td>
+                <td colspan="7" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.charteredACDetails || ""}</p></td>
             </tr>
             <tr>
                 <td  colspan="2" style="${labelCellStyle}"><strong>5) Details of existing loans confirmed during PD</strong></td>
@@ -377,7 +377,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </td>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>6) Loans taken from<br />family, friends business associates etc.</strong></p></td>
-                <td colspan="6" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.loansFromFamilyFriends || "N/A"}</p></td>
+                <td colspan="6" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${verificationData.commonPoints?.loansFromFamilyFriends || ""}</p></td>
             </tr>
             <tr>
                 <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>7) Details of Working capital (OD/CC) if any</strong></p></td>
@@ -436,8 +436,12 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
         </table>
         <table style="${tableStyle}">
             <tr>
-                <td colspan="2" style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Name</strong></p></td>
                 <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>${verificationData.pdDetails?.pdOfficerName || ""}</strong></p></td>
+            </tr>
+            <tr>
+                <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>PD Officer Signature</strong></p></td>
+                <td colspan="3" style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"></p></td>
             </tr>
         </table>
 
@@ -461,7 +465,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross and Net margin of business.</strong></p></td>
-                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.grossAndNetMargin || 0)} with ${verificationData.annexure1?.netMargin || 0}% margin<br> approx (Confirmed by customer during PD).</p></td>
+                <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross:</strong> ${formatCurrency(verificationData.annexure1?.grossAndNetMargin || 0)} <br> <strong>Net Margin:</strong> ${verificationData.annexure1?.netMargin+"%" || ""}<br> approx (Confirmed by customer during PD).</p></td>
             </tr>
             <tr>
                 <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Estimated income</strong></p></td>
@@ -483,7 +487,8 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.anyOtherIncome || 0)}</p></td>
                     </tr>
                     <tr>
-                      <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Gross monthly income(total)</strong></p></td>
+                      <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross monthly income(total)</strong></p></td>
+                      <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.grossMonthlyIncomeTotal || 0)}</p></td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Direct expenses (Purchase cost, cost of goods sold, selling expenses)</strong></p></td>
@@ -506,16 +511,12 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.lessAnyotherExpenses || 0)}</p></td>
                     </tr>
                     <tr>
-                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Gross monthly income (total)</strong></p></td>
-                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.grossMonthlyIncomeTotal || 0)}</p></td>
-                    </tr>
-                    <tr>
-                        <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Income left for domestic expenses</strong></p></td>
-                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.incomeLeftForDomesticExpenses || 0)}</p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Income left for domestic expenses</strong></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.incomeLeftForDomesticExpenses || 0)}</p></td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: Monthly Household Expenses</strong></p></td>
-                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5"></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"></p></td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>  a) Food Expenses</strong></p></td>
@@ -538,7 +539,8 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                         <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.otherHouseHoldExpenses || 0)}</p></td>
                     </tr>
                     <tr>
-                        <td style="${labelCellStyle}" colspan="2"><p style="margin:8px 0;line-height:1.5"><strong>Net monthly income post all expenses</strong></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Net monthly income post all expenses</strong></p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.netmonthlyincomepostallexpenses || 0)}</p></td>
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Less: a)Savings / investments / insurance premium etc.</strong></p></td>
@@ -554,7 +556,7 @@ export const axisBankTemplate = (verificationData: any, html_data: any) => {
                     </tr>
                     <tr>
                         <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5"><strong>Net Surplus income post all expenses & obligations</strong></p></td>
-                        <td style="${valueCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.netSurplus || 0)}</p></td>
+                        <td style="${labelCellStyle}"><p style="margin:8px 0;line-height:1.5">${formatCurrency(verificationData.annexure1?.cashFlowAnalysisDuringPD?.netSurplus || 0)}</p></td>
                     </tr>
                 </table>
                 </td>

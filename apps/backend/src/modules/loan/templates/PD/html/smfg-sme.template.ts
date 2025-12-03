@@ -378,7 +378,7 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
       )}
       ${renderKeyValueRow(
         "Gross & Net margins % in Business",
-        business.grossMargin,
+        business.grossMargin+"%",
         undefined,
         { colSpan: 3 }
       )}
@@ -505,6 +505,10 @@ export const smfgSmeTemplate = (verificationData: any, html_data: any) => {
         <td style="${labelCellStyle}">PD Conducted By</td>
         <td style="${valueCellStyle}">Name: ${formatMultiline(observations.pdConductedBy)}</td>
         <td style="${valueCellStyle}">Designation: ${formatMultiline(observations.pdDesignation)}</td>
+      </tr>
+      <tr>
+        <td style="${labelCellStyle}">Signature</td>
+        <td style="${valueCellStyle}" colspan="2"></td>
       </tr>
       ${renderKeyValueRow(
         `Date: ${observations.pdDate}`,

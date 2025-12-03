@@ -41,19 +41,33 @@ import {
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
 
 const limit = pLimit(3); // allow 3 workers at a time (tune this)
 
 @Injectable()
 export class LoanService {
   private financialAnalysisTemplatesService: any;
+  private pdTemplateServiceInstance: any;
 
   constructor(
     private prisma: PrismaService,
     private loggingService: LoggingService,
     private logger: Logger,
-    private s3Service: S3Service
+    private s3Service: S3Service,
+    private moduleRef: ModuleRef
   ) {}
+
+  // Lazy load PDTemplateService to avoid circular dependency
+  private async getPDTemplateService() {
+    if (!this.pdTemplateServiceInstance) {
+      const { PDTemplateService } = await import("./pd-templates.service");
+      this.pdTemplateServiceInstance = this.moduleRef.get(PDTemplateService, {
+        strict: false,
+      });
+    }
+    return this.pdTemplateServiceInstance;
+  }
 
   // Lazy loading to avoid circular dependencies
   private async getFinancialAnalysisTemplatesService() {
@@ -187,6 +201,41 @@ export class LoanService {
     // Close the browser
     await browser.close();
     return pdfBuffer;
+  }
+
+  async findLoanByApplicationNumber(
+    applicationNumber: string,
+    bankName?: string
+  ) {
+    try {
+      const where: any = {
+        applicationNumber,
+        department: "PD",
+      };
+
+      if (bankName) {
+        where.bankName = bankName;
+      }
+
+      const loan = await this.prisma.loan.findFirst({
+        where,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return loan;
+    } catch (error) {
+      await this.loggingService.error(
+        "Failed to find loan by application number",
+        {
+          applicationNumber,
+          error: error.message,
+          stack: error.stack,
+        }
+      );
+      return null;
+    }
   }
 
   async createLambdaLoan(data: CreateLambdaLoanDto) {
@@ -1077,6 +1126,11 @@ export class LoanService {
               },
             },
           },
+          pdEmailLogs: {
+            orderBy: {
+              receivedAt: "desc",
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -1722,6 +1776,12 @@ export class LoanService {
               },
             },
           },
+          ...(department === Department.PD && {
+            pdEmailLogs: {
+              orderBy: { receivedAt: "desc" },
+              take: 1,
+            },
+          }),
         },
       });
 
@@ -1810,6 +1870,9 @@ export class LoanService {
         applicationNumber: loan.applicationNumber,
         applicantName: loan.applicantName,
         verifications: verificationData,
+        ...(department === Department.PD && {
+          pdEmailLogs: (loan as any).pdEmailLogs || [],
+        }),
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -3033,6 +3096,525 @@ export class LoanService {
         }
       );
       throw error;
+    }
+  }
+
+  async sendPdEmailReply(
+    loanId: number
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const axios = (await import("axios")).default;
+      const FormData = (await import("form-data")).default;
+
+      // Fetch loan with PD email logs and verifications
+      const loan = await this.prisma.loan.findUnique({
+        where: { id: loanId, department: Department.PD },
+        include: {
+          pdEmailLogs: {
+            orderBy: { receivedAt: "desc" },
+            take: 1,
+          },
+          verifications: {
+            where: { type: VerificationType.Business },
+            include: {
+              fieldExecutive: {
+                select: { name: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!loan) {
+        throw new NotFoundException("PD loan not found");
+      }
+
+      if (!loan.pdEmailLogs || loan.pdEmailLogs.length === 0) {
+        throw new NotFoundException("No PD email log found for this loan");
+      }
+
+      const pdEmailLog = loan.pdEmailLogs[0];
+      const verification = loan.verifications[0];
+
+      if (!verification) {
+        throw new NotFoundException(
+          "Business verification not found for this loan"
+        );
+      }
+
+      // Check if financial analysis exists for better error messages
+      const verificationData = verification.verificationData as any;
+      const financialAnalysis = verificationData?.financialAnalysis;
+      const hasFinancialAnalysis =
+        financialAnalysis && Object.keys(financialAnalysis).length > 0;
+
+      await this.loggingService.info("Preparing email reply attachments", {
+        loanId,
+        hasFinancialAnalysis,
+        hasFinalReportPath: !!verification.finalReportPath,
+        verificationId: verification.id,
+      });
+
+      // Get Microsoft Graph API credentials from environment
+      const clientId = process.env.AZURE_CLIENT_ID;
+      const clientSecret = process.env.AZURE_CLIENT_SECRET;
+      const tenantId = process.env.AZURE_TENANT_ID;
+      const userEmail = process.env.USER_EMAIL;
+
+      if (!clientId || !clientSecret || !tenantId || !userEmail) {
+        throw new BadRequestException(
+          "Microsoft Graph API credentials not configured"
+        );
+      }
+
+      // Get access token using client credentials flow
+      const tokenResponse = await axios.post(
+        `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
+        new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          scope: "https://graph.microsoft.com/.default",
+          grant_type: "client_credentials",
+        }),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+      if (!accessToken) {
+        throw new Error("Failed to obtain access token");
+      }
+
+      // Log token acquisition for debugging (without exposing the token)
+      await this.loggingService.info("Access token obtained successfully", {
+        loanId,
+        userEmail,
+        tokenType: tokenResponse.data.token_type,
+        expiresIn: tokenResponse.data.expires_in,
+        scope: tokenResponse.data.scope,
+      });
+
+      // Prepare attachments
+      const attachments: Array<{
+        name: string;
+        content: Buffer;
+        contentType: string;
+      }> = [];
+
+      // 1. Generate and add Excel file
+      try {
+        await this.loggingService.info(
+          "Attempting to generate Excel file for email reply",
+          { loanId, bankName: loan.bankName }
+        );
+
+        const excelBuffer = await this.exportFinancialAnalysisToExcel(
+          loanId,
+          loan.bankName
+        );
+
+        if (excelBuffer && excelBuffer.length > 0) {
+          attachments.push({
+            name: `financial-analysis-loan-${loanId}.xlsx`,
+            content: excelBuffer,
+            contentType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          await this.loggingService.info(
+            "Excel file generated successfully for email reply",
+            { loanId, excelSize: excelBuffer.length }
+          );
+        } else {
+          await this.loggingService.warn(
+            "Excel buffer is empty or null for email reply",
+            { loanId, bankName: loan.bankName }
+          );
+        }
+      } catch (error) {
+        // Log detailed error information
+        const errorDetails = {
+          loanId,
+          bankName: loan.bankName,
+          errorMessage: error.message,
+          errorName: error.name,
+          errorStack: error.stack,
+          // Include response data if it's an HTTP error
+          ...(error.response && {
+            statusCode: error.response.status,
+            responseData: error.response.data,
+          }),
+        };
+
+        await this.loggingService.error(
+          "Failed to generate Excel file for email reply - will continue without Excel",
+          errorDetails
+        );
+
+        // Don't throw - continue with other attachments
+        // The email can still be sent with PDF attachments
+      }
+
+      // Helper function to download file from S3
+      const downloadFromS3 = async (s3Key: string): Promise<Buffer> => {
+        const { S3Client, GetObjectCommand } = await import(
+          "@aws-sdk/client-s3"
+        );
+        const s3Client = new S3Client({
+          region: process.env.AWS_REGION || "us-east-1",
+          credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+          },
+        });
+
+        const getCommand = new GetObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET || "",
+          Key: s3Key,
+        });
+
+        const response = await s3Client.send(getCommand);
+        const chunks: Uint8Array[] = [];
+        for await (const chunk of response.Body as any) {
+          chunks.push(chunk);
+        }
+        return Buffer.concat(chunks);
+      };
+
+      // 2. Generate final report PDF using the preview endpoint method
+      try {
+        const pdTemplateService = await this.getPDTemplateService();
+        const pdfBuffer = await pdTemplateService.generatePreviewPDF(loanId);
+        attachments.push({
+          name: `pd-final-report-loan-${loanId}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+        await this.loggingService.info(
+          "Generated final report PDF for email reply",
+          { loanId }
+        );
+      } catch (error) {
+        await this.loggingService.warn(
+          "Failed to generate final report PDF for email reply",
+          { loanId, error: error.message, stack: error.stack }
+        );
+        // Try fallback to S3 if available
+        try {
+          if (verification.finalReportPath) {
+            const pdfBuffer = await downloadFromS3(
+              verification.finalReportPath
+            );
+            attachments.push({
+              name: `pd-final-report-loan-${loanId}.pdf`,
+              content: pdfBuffer,
+              contentType: "application/pdf",
+            });
+            await this.loggingService.info(
+              "Used S3 final report PDF as fallback for email reply",
+              { loanId }
+            );
+          }
+        } catch (fallbackError) {
+          await this.loggingService.warn(
+            "Failed to get final report PDF from S3 as fallback",
+            { loanId, error: fallbackError.message }
+          );
+        }
+      }
+
+      // 3. Get uploaded PDFs from verification data
+      try {
+        const verificationData = verification.verificationData as any;
+        const uploadedItems = verificationData?.uploadedItems || [];
+        const pdfItems = uploadedItems.filter(
+          (item: any) =>
+            item?.fileType === "pdf" ||
+            item?.type === "document" ||
+            (item?.s3ImageUrl && item.s3ImageUrl.toLowerCase().endsWith(".pdf"))
+        );
+
+        for (const pdfItem of pdfItems) {
+          try {
+            if (pdfItem.s3ImageUrl) {
+              const pdfBuffer = await downloadFromS3(pdfItem.s3ImageUrl);
+              const fileName =
+                pdfItem.fileName ||
+                `uploaded-document-${pdfItem.id || Date.now()}.pdf`;
+              attachments.push({
+                name: fileName,
+                content: pdfBuffer,
+                contentType: "application/pdf",
+              });
+            }
+          } catch (error) {
+            await this.loggingService.warn(
+              "Failed to get uploaded PDF for email reply",
+              {
+                loanId,
+                s3Path: pdfItem.s3ImageUrl,
+                error: error.message,
+              }
+            );
+          }
+        }
+      } catch (error) {
+        await this.loggingService.warn(
+          "Failed to process uploaded PDFs for email reply",
+          { loanId, error: error.message }
+        );
+      }
+
+      // Log all attachments being prepared
+      await this.loggingService.info("Prepared attachments for email reply", {
+        loanId,
+        attachmentCount: attachments.length,
+        attachmentNames: attachments.map((a) => a.name),
+        attachmentSizes: attachments.map((a) => a.content.length),
+      });
+
+      if (attachments.length === 0) {
+        throw new BadRequestException(
+          "No attachments available to send (Excel, PDF, or uploaded documents)"
+        );
+      }
+
+      // Validate the messageID
+      if (!pdEmailLog.messageID || pdEmailLog.messageID.trim() === "") {
+        throw new BadRequestException("Message ID is missing or invalid");
+      }
+
+      // Microsoft Graph API message IDs may contain special characters that need URL encoding
+      const messageId = pdEmailLog.messageID.trim();
+
+      // Determine the correct message ID format by trying to fetch the message
+      let validMessageId = messageId;
+      let replyUrl: string;
+
+      // Try with URL encoding first (most common case)
+      const encodedMessageId = encodeURIComponent(messageId);
+      const getMessageUrlEncoded = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${encodedMessageId}`;
+
+      try {
+        const response = await axios.get(getMessageUrlEncoded, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        // Encoded version works, use it
+        validMessageId = encodedMessageId;
+        replyUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${validMessageId}/createReply`;
+      } catch (error) {
+        // Log the first error for debugging
+        const firstErrorDetails = error.response?.data?.error || {};
+        await this.loggingService.warn(
+          "First attempt to get message failed (encoded)",
+          {
+            loanId,
+            messageId,
+            encodedMessageId,
+            statusCode: error.response?.status,
+            errorCode: firstErrorDetails.code,
+            errorMessage: firstErrorDetails.message,
+            responseData: error.response?.data,
+          }
+        );
+
+        // Try without encoding
+        const getMessageUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${messageId}`;
+        try {
+          await axios.get(getMessageUrl, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          // Unencoded version works, use it
+          validMessageId = messageId;
+          replyUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${validMessageId}/createReply`;
+        } catch (unencodedError) {
+          const errorDetails = unencodedError.response?.data?.error || {};
+          const errorMessage = errorDetails.message || unencodedError.message;
+          const errorCode =
+            errorDetails.code || unencodedError.response?.status;
+
+          await this.loggingService.error(
+            "Failed to access original message (both attempts)",
+            {
+              loanId,
+              messageId,
+              encodedMessageId,
+              userEmail,
+              errorCode,
+              errorMessage,
+              firstError: firstErrorDetails,
+              secondError: errorDetails,
+              fullResponseData: unencodedError.response?.data,
+            }
+          );
+
+          // Provide more detailed error message
+          const detailedError =
+            errorDetails.message ||
+            firstErrorDetails.message ||
+            "Unknown error";
+          const errorCodeStr =
+            errorDetails.code || firstErrorDetails.code || errorCode;
+
+          throw new BadRequestException(
+            `Failed to access message in mailbox ${userEmail}. ` +
+              `Error Code: ${errorCodeStr}. ` +
+              `Error: ${detailedError}. ` +
+              `Please verify: 1) The app has Mail.Read permission, 2) Admin consent is granted, ` +
+              `3) The mailbox ${userEmail} exists and is accessible, 4) The message ID is correct.`
+          );
+        }
+      }
+
+      const replyMessage = {
+        message: {
+          body: {
+            contentType: "Text",
+            content: `Please find attached the PD verification documents for loan application ${loan.applicationNumber}.\n\nAttachments:\n${attachments.map((a) => `- ${a.name}`).join("\n")}`,
+          },
+          toRecipients: pdEmailLog.fromEmail.map((email) => ({
+            emailAddress: { address: email },
+          })),
+          ccRecipients:
+            pdEmailLog.ccEmail && pdEmailLog.ccEmail.length > 0
+              ? pdEmailLog.ccEmail.map((email) => ({
+                  emailAddress: { address: email },
+                }))
+              : [],
+        },
+      };
+
+      // Create the reply draft
+      let createReplyResponse;
+      try {
+        createReplyResponse = await axios.post(replyUrl, replyMessage, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (error) {
+        const errorDetails = error.response?.data?.error || {};
+        await this.loggingService.error("Failed to create reply message", {
+          loanId,
+          userEmail,
+          messageId: validMessageId,
+          statusCode: error.response?.status,
+          errorCode: errorDetails.code,
+          errorMessage: errorDetails.message,
+          fullError: errorDetails,
+          responseData: error.response?.data,
+        });
+
+        const errorMessage = errorDetails.message || error.message;
+        const errorCode = errorDetails.code || error.response?.status;
+
+        throw new BadRequestException(
+          `Failed to create reply message. ` +
+            `Error Code: ${errorCode}. ` +
+            `Error: ${errorMessage}. ` +
+            `Please verify: 1) Mail.Send permission is granted with admin consent, ` +
+            `2) The app can access mailbox ${userEmail}, ` +
+            `3) There are no conditional access policies blocking the request.`
+        );
+      }
+
+      const replyMessageId = createReplyResponse.data.id;
+      if (!replyMessageId) {
+        throw new Error("Failed to create reply message");
+      }
+
+      // Add attachments to the reply message one by one
+      for (const attachment of attachments) {
+        const attachmentUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${replyMessageId}/attachments`;
+
+        const attachmentPayload = {
+          "@odata.type": "#microsoft.graph.fileAttachment",
+          name: attachment.name,
+          contentBytes: attachment.content.toString("base64"),
+          contentType: attachment.contentType,
+        };
+
+        try {
+          await axios.post(attachmentUrl, attachmentPayload, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+        } catch (error) {
+          await this.loggingService.warn(
+            "Failed to add attachment to email reply",
+            {
+              loanId,
+              attachmentName: attachment.name,
+              error: error.response?.data || error.message,
+            }
+          );
+          // Continue with other attachments even if one fails
+        }
+      }
+
+      // Send the reply message
+      const sendUrl = `https://graph.microsoft.com/v1.0/users/${userEmail}/messages/${replyMessageId}/send`;
+      await axios.post(
+        sendUrl,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      await this.loggingService.info("PD email reply sent successfully", {
+        loanId,
+        messageId: pdEmailLog.messageID,
+        attachmentsCount: attachments.length,
+      });
+
+      return {
+        success: true,
+        message: `Email reply sent successfully with ${attachments.length} attachment(s)`,
+      };
+    } catch (error) {
+      const errorDetails = {
+        loanId,
+        error: error.message,
+        stack: error.stack,
+      };
+
+      // Include Graph API error details if available
+      if (error.response) {
+        errorDetails["statusCode"] = error.response.status;
+        errorDetails["responseData"] = error.response.data;
+        errorDetails["responseHeaders"] = error.response.headers;
+      }
+
+      await this.loggingService.error(
+        "Failed to send PD email reply",
+        errorDetails
+      );
+
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Provide more detailed error message
+      const errorMessage = error.response?.data?.error?.message
+        ? `Failed to send email reply: ${error.response.data.error.message}`
+        : `Failed to send email reply: ${error.message}`;
+
+      throw new BadRequestException(errorMessage);
     }
   }
 }

@@ -41,7 +41,7 @@ const formatObservations = (value: any): string => {
     .split(/\n+/)
     .filter((line: string) => line.trim().length > 0);
   if (lines.length === 0) return "Not provided";
-  return lines.map((line: string) => `• ${line.trim()}`).join("<br>");
+  return lines.map((line: string) => `<ul><li>${line.trim()}</li></ul>`).join("<br>");
 };
 
 const ensureArray = <T>(value: T | T[] | null | undefined): T[] => {

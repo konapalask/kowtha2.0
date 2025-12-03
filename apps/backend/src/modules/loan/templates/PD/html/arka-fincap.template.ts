@@ -267,7 +267,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
   const renderConcernsSummary = () => {
     const summary = getValue(concerns.concernsSummary);
     return summary
-      ? summary.split("\n").map((line: string) => `<li style="margin-left:8px;line-height:1.5">${line}</li>`).join("")
+      ? summary.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
        : '<div>Not Provided</div>';
   };
 
@@ -779,7 +779,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Net Margin</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${getValue(
                   netMargin.netMargin
-                )}</p></td>
+                )+"%"}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Family Expenses</strong></p></td>
@@ -801,14 +801,14 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other observations</strong></p></td>
                 <td colspan="6" style="border:1px solid #ccc;padding:8px">
                 ${ensureArray(otherObservations).map(
-                  (item: any) => `<li style="margin-left:8px;line-height:1.5">${ item?.observation || ""}</li>`
+                  (item: any) => `<ul><li>${ item?.observation || ""}</li></ul>`
                 ).join("<br>")}
                 </td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Other Incomes</strong></p></td>
                 <td colspan="8" style="border:1px solid #ccc;padding:8px">
-                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<li style="margin-left:8px;line-height:1.5">${income?.otherIncome || ""}</li>`).join("<br>")}
+                ${ensureArray(otherIncomes.otherIncomes).map((income: any) => `<ul><li>${income?.otherIncome || ""}</li></ul>`).join("<br>")}
                 </td>
             </tr>
             <tr>
@@ -820,9 +820,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
                 <td colspan="8" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>${html_data.approvedStatus|| "Not provided"}</strong></p></td>
             </tr>
             </table>
-        
-        <div style="margin-bottom: 40px; margin-top: 20px;"></div>
-            
+                    
         <p style="margin:8px 0;line-height:1.5"><strong>Disclaimer Clause:</strong></p>
         <p style="margin:8px 0;line-height:1.5">This report (including any attachments) has been prepared based on verbal information provided by the person contacted. ARKA FINCAP LIMITED will be solely responsible for any actions taken on this report and any liabilities directly or indirectly accruing from such actions. <strong>M/s. KOWTHA & CO</strong> will not be held liable in any case.</p>
      ${pdBaseTemplateFooter(html_data)}

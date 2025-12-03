@@ -200,15 +200,22 @@ export const pdBaseTemplate = (html_data?: any) => {
               flex-wrap: wrap;
               justify-content: flex-start;
               gap: 16px;
+              width: 100%;
             }
             .photo-item {
-              width: 48%;
+              width: calc((100% - 32px) / 3);
               border: 1px solid #ddd;
               padding: 10px;
               text-align: center;
               vertical-align: top;
               box-sizing: border-box;
               page-break-inside: avoid;
+            }
+            .photo-grid > div {
+              width: calc((100% - 32px) / 3) !important;
+              margin: 0 !important;
+              flex-shrink: 0;
+              box-sizing: border-box;
             }
             .photo-item img {
               width: 100%;
@@ -311,13 +318,66 @@ export const pdBaseTemplateFooter = (html_data?: any) => {
     return stringValue;
   };
 
+  // Filter out PDF files from imagesData HTML string
+  const filterOutPdfFiles = (htmlString: string): string => {
+    if (!htmlString) return "";
+    
+    // Pattern to match URLs ending with .pdf (case-insensitive, with optional query parameters)
+    const pdfUrlPattern = /\.pdf(\?[^"']*)?/i;
+    
+    // Remove div blocks that contain img tags with PDF URLs
+    // Matches: <div...><img src="...pdf..." /></div>
+    let filtered = htmlString.replace(
+      /<div[^>]*>[\s\S]*?<img[^>]*src=["']([^"']*)["'][^>]*>[\s\S]*?<\/div>/gi,
+      (match, url) => {
+        // Check if the URL contains .pdf
+        if (pdfUrlPattern.test(url)) {
+          return ""; // Remove the entire div if it contains a PDF
+        }
+        return match; // Keep the div if it's not a PDF
+      }
+    );
+    
+    // Also remove standalone img tags with PDF URLs (if any remain)
+    filtered = filtered.replace(
+      /<img[^>]*src=["']([^"']*)["'][^>]*>/gi,
+      (match, url) => {
+        if (pdfUrlPattern.test(url)) {
+          return ""; // Remove the img tag if it's a PDF
+        }
+        return match; // Keep the img tag if it's not a PDF
+      }
+    );
+    
+    // Clean up any empty document type sections (from photoGroups structure)
+    // Pattern: <div style="margin-bottom:16px..."><div>DOCUMENT TYPE</div><div style="display:flex..."></div></div>
+    filtered = filtered.replace(
+      /<div[^>]*style="[^"]*margin-bottom:16px[^"]*"[^>]*>[\s\S]*?<div[^>]*>[^<]*<\/div>[\s\S]*?<div[^>]*style="[^"]*display:flex[^"]*"[^>]*>\s*<\/div>[\s\S]*?<\/div>/gi,
+      ""
+    );
+    
+    // Clean up any remaining empty divs
+    filtered = filtered.replace(
+      /<div[^>]*>\s*<\/div>/gi,
+      ""
+    );
+    
+    return filtered.trim();
+  };
+
+  const filteredImagesData = html_data?.imagesData 
+    ? filterOutPdfFiles(html_data.imagesData)
+    : "";
+
   return `
       ${
-        html_data?.imagesData
+        filteredImagesData
           ? `
         <div class="photos-section">
           <div class="photos-title">PHOTOS</div>
-          ${html_data.imagesData}
+          <div class="photo-grid">
+            ${filteredImagesData}
+          </div>
         </div>
       `
           : ""

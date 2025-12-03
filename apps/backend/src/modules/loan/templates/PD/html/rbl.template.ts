@@ -210,7 +210,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const tradeReferencesCustomers = source.tradeReferences?.customers ?? [];
   const otherSources = source.otherSourcesOfIncome?.otherSourcesOfIncome ?? [];
   const loanEntries = source.loansDetails?.loansDetails ?? [];
-  const netWorthEntries = source.netWorth?.netWorth ?? [];
+  const netWorthEntries = ensureArray(source.netWorth?.netWorth);
   const applicantsMainBankingDetails =
     source.applicantsMainBankingDetails ?? {};
   const rawBankingDetails = applicantsMainBankingDetails?.bankingDetails;
@@ -285,15 +285,19 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
   const familySummary = [
     {
       label: "<strong>About Applicant:</strong>",
-      value: familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+      value: familyDetails.aboutApplicant
+        ? familyDetails.aboutApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        : "",
     },
     {
       label: "<strong>About Co-applicant:</strong>",
-      value: familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join(""),
+      value: familyDetails.aboutCoApplicant
+        ? familyDetails.aboutCoApplicant.split("\n").map((line: string) => `<ul><li>${line}</li></ul>`).join("")
+        : "",
     },
     {
       label: "<strong>And their family details:</strong>",
-      value: familyDetails.andTheirFamilyDetails,
+      value: formatMultiline(familyDetails.andTheirFamilyDetails),
     },
   ];
 
@@ -629,7 +633,7 @@ export const rblTemplate = (verificationData: any, html_data: any) => {
           },
           { header: "Years of ownership", key: "yearsOfOwnership" },
         ],
-        netWorthEntries?.map((entry, index) => ({
+        netWorthEntries.map((entry, index) => ({
           ...entry,
           srNo: index + 1,
         })),
