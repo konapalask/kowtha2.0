@@ -207,6 +207,7 @@ interface BusinessVerificationDetailsProps {
   applicationNumber?: string;
   loanId?: number;
   pdEmailLogs?: any[];
+  loanTemplateName?: string;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -225,6 +226,7 @@ export const BusinessVerificationDetails: React.FC<
   applicationNumber,
   loanId,
   pdEmailLogs,
+  loanTemplateName,
 }) => {
   console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
@@ -4677,23 +4679,43 @@ export const BusinessVerificationDetails: React.FC<
 
   return (
     <div>
-      {/* Bank Name Header */}
-      {currentDepartment === "PD" &&
-        (completeVerificationData?.bankName ||
-          verificationData?.bankName ||
-          verificationData?.loan?.bankName) && (
+      {currentDepartment === "PD" && (() => {
+        const bankName =
+          (typeof completeVerificationData?.bankName === "string"
+            ? completeVerificationData.bankName
+            : undefined) ||
+          (typeof verificationData?.bankName === "string"
+            ? verificationData.bankName
+            : undefined) ||
+          (typeof verificationData?.loan?.bankName === "string"
+            ? verificationData.loan.bankName
+            : undefined) ||
+          "";
+
+        const templateName =
+          loanTemplateName ||
+          (typeof completeVerificationData?.loan?.templateName === "string"
+            ? completeVerificationData.loan.templateName
+            : undefined) ||
+          (typeof verificationData?.loan?.templateName === "string"
+            ? verificationData.loan.templateName
+            : undefined) ||
+          "";
+
+        if (!bankName && !templateName) return null;
+
+        const headerText = templateName
+          ? `${bankName}${bankName ? " - " : ""}${templateName}`
+          : bankName;
+
+        return (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
             <Text style={{ color: "#1e40af", fontWeight: 600 }}>
-              {typeof completeVerificationData?.bankName === "string"
-                ? completeVerificationData.bankName
-                : typeof verificationData?.bankName === "string"
-                  ? verificationData.bankName
-                  : typeof verificationData?.loan?.bankName === "string"
-                    ? verificationData.loan.bankName
-                    : "Unknown Bank"}
+              {headerText || "Unknown Bank"}
             </Text>
           </section>
-        )}
+        );
+      })()}
 
       {/* Loading Indicator */}
       {formLoading && (
