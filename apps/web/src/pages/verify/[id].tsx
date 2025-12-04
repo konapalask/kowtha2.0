@@ -17,6 +17,7 @@ import { LeftOutlined } from "@ant-design/icons";
 import PdfPreview from "@/components/verify/PdfPreview";
 import { useDepartmentChange } from "@/utils/utility";
 import dayjs from "dayjs";
+import { Loan, getLoansByIdApi } from "@/services/loans.services";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -45,6 +46,7 @@ export default function LoanVerifyDetails() {
   const [editRequests, setEditRequests] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const currentDepartment = useDepartmentChange();
+  const [loanDetails, setLoanDetails] = useState<Loan | null>(null);
 
   const fetchVerificationData = async () => {
     getVerificationData(id as string)
@@ -72,6 +74,23 @@ export default function LoanVerifyDetails() {
         console.error(err);
         message.error("Failed to fetch verification data");
       });
+  };
+
+  const fetchLoanDetails = async () => {
+    if (!id) return;
+    try {
+      const res = await getLoansByIdApi(id as string);
+      const loanData =
+        res?.data?.data?.items?.[0] ||
+        res?.data?.data?.items ||
+        res?.data?.data ||
+        res?.data;
+      if (loanData) {
+        setLoanDetails(loanData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch loan details:", error);
+    }
   };
 
   const fetchEditRequests = async () => {
@@ -103,6 +122,7 @@ export default function LoanVerifyDetails() {
       fetchEditRequests();
 
       fetchVerificationData();
+      fetchLoanDetails();
     }
   }, [id, currentDepartment]);
 
@@ -283,6 +303,7 @@ export default function LoanVerifyDetails() {
             applicationNumber={verificationData?.applicationNumber}
             loanId={verificationData?.loanId}
             pdEmailLogs={verificationData?.pdEmailLogs}
+            loanTemplateName={loanDetails?.templateName}
           />
         );
     }

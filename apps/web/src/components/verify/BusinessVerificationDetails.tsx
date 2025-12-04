@@ -207,6 +207,7 @@ interface BusinessVerificationDetailsProps {
   applicationNumber?: string;
   loanId?: number;
   pdEmailLogs?: any[];
+  loanTemplateName?: string;
 }
 
 export const BusinessVerificationDetails: React.FC<
@@ -225,6 +226,7 @@ export const BusinessVerificationDetails: React.FC<
   applicationNumber,
   loanId,
   pdEmailLogs,
+  loanTemplateName,
 }) => {
   console.log("verificationData", verificationData);
   const curDept = getItem("currentDepartment");
@@ -1733,24 +1735,99 @@ export const BusinessVerificationDetails: React.FC<
         const formInstance = formInstancesRef.current[sectionId];
         let sectionData: any = {};
 
+        const initialSectionData = formData?.[sectionId] || {};
+
         if (formInstance) {
-          // Get all current form values from this section's form
           const formValues = formInstance.getFieldsValue();
-          // Find the section schema to convert flat arrays
           const sectionSchema = schema?.sections?.find(
             (s: any) => s.id === sectionId
           );
-          // Convert flat array format to nested array format
           sectionData = convertFlatArraysToNested(formValues, sectionSchema);
         }
 
-        // Always merge with uncommitted changes (array fields store data here)
         const uncommittedData = sectionUncommittedChanges[sectionId] || {};
         sectionData = { ...uncommittedData, ...sectionData };
+        Object.keys(initialSectionData).forEach((key) => {
+          const initialValue = initialSectionData[key];
+          if (
+            !Array.isArray(initialValue) &&
+            (typeof initialValue === "string" || typeof initialValue === "number" || initialValue === null)
+          ) {
+            if (sectionData[key] === undefined || sectionData[key] === null) {
+              if (initialValue !== "" && initialValue !== null && initialValue !== undefined) {
+                sectionData[key] = "";
+              }
+            }
+          }
+        });
 
-        // Check if there are actual changes by comparing with initial data
-        // Get initial data from formData (original data) before any changes
-        const initialSectionData = formData?.[sectionId] || {};
+        const sectionSchema = schema?.sections?.find(
+          (s: any) => s.id === sectionId
+        );
+        
+        const getNestedValue = (obj: any, path: string): any => {
+          const keys = path.split('.');
+          let value = obj;
+          for (const key of keys) {
+            if (value && typeof value === 'object' && key in value) {
+              value = value[key];
+            } else {
+              return undefined;
+            }
+          }
+          return value;
+        };
+        
+        const isEmptyValue = (value: any): boolean => {
+          return (
+            value === "" || 
+            value === null || 
+            value === undefined ||
+            (typeof value === "string" && value.trim() === "")
+          );
+        };
+        
+        if (sectionSchema && sectionSchema.fields) {
+          const validationErrors: string[] = [];
+          
+          sectionSchema.fields.forEach((field: any) => {
+            let fieldValue = sectionData[field.id];
+            
+            if (fieldValue === undefined && field.id.includes('.')) {
+              fieldValue = getNestedValue(sectionData, field.id);
+            }
+            
+            if (fieldValue === undefined) {
+              if (sectionData.basicDetails && sectionData.basicDetails[field.id] !== undefined) {
+                fieldValue = sectionData.basicDetails[field.id];
+              } else if (sectionData.businessDetails && sectionData.businessDetails[field.id] !== undefined) {
+                fieldValue = sectionData.businessDetails[field.id];
+              }
+            }
+            
+            const isFieldEmpty = isEmptyValue(fieldValue);
+            const isRequired = field.required === true;
+            const isLoanAmount = field.id === "loanAmount" || field.id.endsWith(".loanAmount");
+            
+            if (isRequired && !isLoanAmount && isFieldEmpty) {
+              const fieldLabel = field.label || field.id || "Field";
+              validationErrors.push(`${fieldLabel} is mandatory and cannot be empty`);
+            }
+          });
+          
+          if (validationErrors.length > 0) {
+            message.error(
+              `Cannot save: ${validationErrors.join(", ")}`
+            );
+            
+            if (formInstance && initialSectionData && Object.keys(initialSectionData).length > 0) {
+              formInstance.setFieldsValue(initialSectionData);
+            }
+            
+            return;
+          }
+        }
+
         const hasActualChanges = (() => {
           // If we have form values from the form instance, there might be changes
           // Don't immediately return false if sectionData is empty - check form values first
@@ -1850,8 +1927,7 @@ export const BusinessVerificationDetails: React.FC<
 
               // If normalized values differ, it's a change
               if (normalizedCurrent !== normalizedInitial) {
-                // Only consider it a change if the current value is not empty/null
-                if (normalizedCurrent !== null) {
+                if (normalizedCurrent !== null || normalizedInitial !== null) {
                   return true;
                 }
               }
@@ -4603,23 +4679,43 @@ export const BusinessVerificationDetails: React.FC<
 
   return (
     <div>
-      {/* Bank Name Header */}
-      {currentDepartment === "PD" &&
-        (completeVerificationData?.bankName ||
-          verificationData?.bankName ||
-          verificationData?.loan?.bankName) && (
+      {currentDepartment === "PD" && (() => {
+        const bankName =
+          (typeof completeVerificationData?.bankName === "string"
+            ? completeVerificationData.bankName
+            : undefined) ||
+          (typeof verificationData?.bankName === "string"
+            ? verificationData.bankName
+            : undefined) ||
+          (typeof verificationData?.loan?.bankName === "string"
+            ? verificationData.loan.bankName
+            : undefined) ||
+          "";
+
+        const templateName =
+          loanTemplateName ||
+          (typeof completeVerificationData?.loan?.templateName === "string"
+            ? completeVerificationData.loan.templateName
+            : undefined) ||
+          (typeof verificationData?.loan?.templateName === "string"
+            ? verificationData.loan.templateName
+            : undefined) ||
+          "";
+
+        if (!bankName && !templateName) return null;
+
+        const headerText = templateName
+          ? `${bankName}${bankName ? " - " : ""}${templateName}`
+          : bankName;
+
+        return (
           <section style={{ margin: "6px 0 12px", textAlign: "center" }}>
             <Text style={{ color: "#1e40af", fontWeight: 600 }}>
-              {typeof completeVerificationData?.bankName === "string"
-                ? completeVerificationData.bankName
-                : typeof verificationData?.bankName === "string"
-                  ? verificationData.bankName
-                  : typeof verificationData?.loan?.bankName === "string"
-                    ? verificationData.loan.bankName
-                    : "Unknown Bank"}
+              {headerText || "Unknown Bank"}
             </Text>
           </section>
-        )}
+        );
+      })()}
 
       {/* Loading Indicator */}
       {formLoading && (
