@@ -271,8 +271,12 @@ export default function OrganizationSettings() {
     {
       title: "No. of Employees",
       dataIndex: "numberofEmployees",
-      key: "emplnumberofEmployeesoyees",
-      sorter: (a: any, b: any) => a.employees - b.employees,
+      key: "numberofEmployees",
+      sorter: (a: any, b: any) => {
+        const aValue = a.numberofEmployees ?? 0;
+        const bValue = b.numberofEmployees ?? 0;
+        return aValue - bValue;
+      },
       render: (value: number | undefined) => value ?? 0,
       width: 150,
     },

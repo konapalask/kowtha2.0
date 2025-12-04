@@ -1751,6 +1751,19 @@ export const BusinessVerificationDetails: React.FC<
         // Check if there are actual changes by comparing with initial data
         // Get initial data from formData (original data) before any changes
         const initialSectionData = formData?.[sectionId] || {};
+        Object.keys(initialSectionData).forEach((key) => {
+          const initialValue = initialSectionData[key];
+          if (
+            !Array.isArray(initialValue) &&
+            (typeof initialValue === "string" || typeof initialValue === "number" || initialValue === null)
+          ) {
+            if (sectionData[key] === undefined || sectionData[key] === null) {
+              if (initialValue !== "" && initialValue !== null && initialValue !== undefined) {
+                sectionData[key] = "";
+              }
+            }
+          }
+        });
         const hasActualChanges = (() => {
           // If we have form values from the form instance, there might be changes
           // Don't immediately return false if sectionData is empty - check form values first
@@ -1850,8 +1863,7 @@ export const BusinessVerificationDetails: React.FC<
 
               // If normalized values differ, it's a change
               if (normalizedCurrent !== normalizedInitial) {
-                // Only consider it a change if the current value is not empty/null
-                if (normalizedCurrent !== null) {
+                if (normalizedCurrent !== null || normalizedInitial !== null) {
                   return true;
                 }
               }

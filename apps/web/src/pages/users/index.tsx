@@ -554,33 +554,40 @@ export default function Users() {
       : []),
   ];
 
+  const currentRole = getCurrentDepartmentRole();
+  const isAdmin = currentRole === "Admin" || currentRole === "PDAdmin";
+  const showFilters = isAdmin || currentRole === "OperationsExecutive" || currentRole === "PDOperationsExecutive" || currentRole === "Verifier" || currentRole === "PDVerifier";
+
   return (
     <DashboardLayout>
       <Card>
-        {getCurrentDepartmentRole() === "Admin" && (
+        {showFilters && (
           <div
             style={{
               marginBottom: 16,
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: isAdmin ? "space-between" : "flex-start",
+              alignItems: "center",
             }}
           >
             <FilterOverlay
               filters={filters}
               onFilterChange={handleFilterChange}
             />
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingUser(null);
-                form.resetFields();
-                form.setFieldsValue({ departmentRoles: [] });
-                setIsModalVisible(true);
-              }}
-            >
-              Add User
-            </Button>
+            {isAdmin && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingUser(null);
+                  form.resetFields();
+                  form.setFieldsValue({ departmentRoles: [] });
+                  setIsModalVisible(true);
+                }}
+              >
+                Add User
+              </Button>
+            )}
           </div>
         )}
 
