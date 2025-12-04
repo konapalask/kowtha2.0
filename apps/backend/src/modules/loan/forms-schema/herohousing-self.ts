@@ -165,10 +165,6 @@ export const herohousingSelfSchema = {
             type: "string",
             title: "Running since",
           },
-          industryExperienceYears: {
-            type: "number",
-            title: "Years of experience in the same line of business",
-          },
           detailspartnersDirectorsShareholdersWithFamilyBackground: {
             type: "string",
             title:

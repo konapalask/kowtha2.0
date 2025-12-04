@@ -164,7 +164,7 @@ export const tataUblTemplate = (verificationData: any, html_data: any) => {
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>7</strong></p></td>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Address of PD</strong></p></td>
-                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">PD done in office & met: ${verificationData.addressOfPDAndPersonMet?.addressOfPDAndPersonMet || ""}</p></td>
+                    <td colspan="9" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>PD done in office & met:</strong> ${verificationData.addressOfPDAndPersonMet?.addressOfPDAndPersonMet || ""}</p></td>
                 </tr>
                 <tr>
                     <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>8</strong></p></td>
