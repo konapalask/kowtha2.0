@@ -162,32 +162,39 @@ export const herohousingSalariedTemplate = (
 
       <p style="margin:8px 0;line-height:1.5"><strong>Profile of customer</strong></p>
       
-      <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
+      <table style="border-collapse:collapse;border:1px solid #ccc;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Borrower details ---</strong></p>
             <p style="margin:8px 0;line-height:1.5"><strong>It should include the</strong></p>
-            <ul>
-              <li><strong>Qualification of customer,</strong></li>
-              <li><strong>Complete professional journey (service/ business details of each activity post qualification to till date</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-          <ul>
-            <li><p style="margin:8px 0;line-height:1.5">${borrowerDetails.qualificationOfCustomer || ""}</p></li>
-            <li><p style="margin:8px 0;line-height:1.5">${borrowerDetails.professionalJourney || ""}</p></li>
-          </ul>
+          <td style="padding:8px;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Qualification of customer</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${borrowerDetails.qualificationOfCustomer || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Complete professional journey (service/ business details of each activity post qualification to till date)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${borrowerDetails.professionalJourney || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Family details</strong></p>
-            <ul>
+            <ul style="margin:8px 0;padding-left:20px">
               <li><strong>Family details – Including dependents</strong></li>
               <li><strong>Family background (Parents and siblings including all dependents)</strong></li>
             </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;padding:8px;width:60%;vertical-align:top">
             <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;margin:10px 0">
               <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Name</strong></p></td>
@@ -215,209 +222,409 @@ export const herohousingSalariedTemplate = (
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Current Job profile</strong></p>
-            <ul>
-              <li><strong>Name of Employer</strong></li>
-              <li><strong>Working since</strong></li>
-              <li><strong>Type of employment (permanent/Contractual)</strong></li>
-              <li><strong>Designation</strong></li>
-              <li><strong>Job profile</strong></li>
-              <li><strong>Reporting to (Name/Designation)</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.nameOfEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.workingSince || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.typeOfEmployment || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.designation || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.jobProfile || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${currentJobProfile.reportingTo || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;border-bottom:none;padding:8px;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Name of Employer</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.nameOfEmployer || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Working since</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;padding:8px;border-top:none;border-bottom:none;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.workingSince || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Type of employment (permanent/Contractual)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.typeOfEmployment || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Designation</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.designation || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Job profile</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.jobProfile || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Reporting to (Name/Designation)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${currentJobProfile.reportingTo || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of employer</strong></p>
-            <ul>
-              <li><strong>Current business Name</strong></li>
-              <li><strong>Constitution</strong></li>
-              <li><strong>Nature of business/product or services details</strong></li>
-              <li><strong>Running since</strong></li>
-              <li><strong>Details of partners, director, shareholders with family background and other details</strong></li>
-              <li><strong>No. of employee and set up of business</strong></li>
-              <li><strong>Quantum of stock</strong></li>
-              <li><strong>No of Machinery and assets seen</strong></li>
-              <li><strong>Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.businessName || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.constitution || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.natureOfBusiness || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.runningSince || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.partnersDetails || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.setupDetails || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.stockQuantum || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.machineryAssets || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${detailsOfEmployer.localityFeedback || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Current business Name</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.businessName || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Constitution</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.constitution || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Nature of business/product or services details</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.natureOfBusiness || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Running since</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.runningSince || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Details of partners, director, shareholders with family background and other details</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.partnersDetails || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>No. of employee and set up of business</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.setupDetails || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Quantum of stock</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.stockQuantum || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>No of Machinery and assets seen</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.machineryAssets || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Brief details about the locality of business, surrounding competitors, overall prospect of location etc and any negative feedback</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${detailsOfEmployer.localityFeedback || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of Property –</strong></p>
-            <ul>
-              <li><strong>Whether customer visited the property</strong></li>
-              <li><strong>Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)</strong></li>
-              <li><strong>Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)</strong></li>
-              <li><strong>Source of property purchase (through dealer, builder/reference/relative)</strong></li>
-              <li><strong>Name of seller and any relationship with customer</strong></li>
-              <li><strong>Type of property/structure and area,</strong></li>
-              <li><strong>What is actual deal value and sale deed value, OCR source</strong></li>
-              <li><strong>Whether seller is having any loan on the property</strong></li>
-              <li><strong>When seller bought the property,</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.customerVisitedProperty || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.propertyType || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.propertyOccupancy || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.sourceOfPropertyPurchase || ""}</p></li>  
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.sellerDetails || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.relationshipWithCustomer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.typeOfProperty || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.areaOfProperty || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.dealValue || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.saleDeedValue || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.ocrSource || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.whenSellerBoughtTheProperty || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${propertyDetails.sellerLoanOnProperty || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Whether customer visited the property</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.customerVisitedProperty || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Type of property (Ready build/Plot/Self Construction/under construction/vacant etc)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.propertyType || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Property is occupied by whom and reason if not self-occupied (Also mention stage in case self-construction/under construction and expected completion date, also mention rent amount and period of tenancy if the property is given on rent)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.propertyOccupancy || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Source of property purchase (through dealer, builder/reference/relative)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.sourceOfPropertyPurchase || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Name of seller and any relationship with customer</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.sellerDetails || "Not provided"} ${propertyDetails.relationshipWithCustomer ? " - Relationship: " + propertyDetails.relationshipWithCustomer : ""}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Type of property/structure and area</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.typeOfProperty || "Not provided"} ${propertyDetails.areaOfProperty ? " - Area: " + propertyDetails.areaOfProperty : ""}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>What is actual deal value and sale deed value, OCR source</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.dealValue || "Not provided"} ${propertyDetails.saleDeedValue ? " - Sale Deed Value: " + propertyDetails.saleDeedValue : ""} ${propertyDetails.ocrSource ? " - OCR Source: " + propertyDetails.ocrSource : ""}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Whether seller is having any loan on the property</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.sellerLoanOnProperty || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>When seller bought the property</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${propertyDetails.whenSellerBoughtTheProperty || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Investment and properties -</strong></p>
-            <ul>
-              <li><strong>What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving</strong></li>
-              <li><strong>Whether current residence is owned or rented and rent amount if any</strong></li>
-              <li><strong>Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.investmentHabits || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.currentResidenceOwnership || ""} ${investmentAndProperties.rentedAmountIfAny ? "Rent amount: " + investmentAndProperties.rentedAmountIfAny : ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${investmentAndProperties.detailsOfAssetsBuiltTillDate || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>What is customer investment habits and he is doing any monthly saving in any of saving scheme, investment in properties, FD or any other nature of saving</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${investmentAndProperties.investmentHabits || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Whether current residence is owned or rented and rent amount if any</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${investmentAndProperties.currentResidenceOwnership || "Not provided"} ${investmentAndProperties.rentedAmountIfAny ? " - Rent amount: " + investmentAndProperties.rentedAmountIfAny : ""}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Details of assets built till date (Including immovable properties, movable property, gold, FD, Equity investment, other savings)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${investmentAndProperties.detailsOfAssetsBuiltTillDate || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>End use of property/fund –</strong></p>
-            <ul>
-              <li><strong>Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases</strong></li>
-              <li><strong>Clear and detailed end use of fund in LAP cases</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.proposedEndUseOfProperty || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.detailedEndUseOfFundInLapCases || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Proposed End use of property (self-occupation/investment etc) for HL/P+C/Self construction cases</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.proposedEndUseOfProperty || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Clear and detailed end use of fund in LAP cases</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${endUseOfPropertyFund?.detailedEndUseOfFundInLapCases || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Details of loans –</strong></p>
-            <ul>
-              <li><strong>Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue,</strong></li>
-              <li><strong>Repayment account from which all these EMI are getting paid</strong></li>
-              <li><strong>What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use</strong></li>
-              <li><strong>Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any OD limit or any other facility in the name of customer</strong></li>
-              <li><strong>Comment whether there is any bouncing in loans and if yes, period and reason of such bounces</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.detailsOfLoansPresentlyServicing || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.repaymentAccount || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.pastLoanEndUse || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.checkIfAnyHomeLoanLap || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${loanDetails?.anyBouncingInLoans || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check and provide the details of loan presently servicing and whether he will be closing such loans or going to continue</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${loanDetails?.detailsOfLoansPresentlyServicing || "Not provided"}</li></ul>
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
-            <p style="margin:8px 0;line-height:1.5"><strong>Banking –</strong></p>
-            <ul>
-              <li><strong>Please check and mention details of all his bank account, account open date, Name of bank account where salary is getting credited (if bank salary)</strong></li>
-              <li><strong>Please check any saving account of applicant and co applicant and provide the details of these accounts</strong></li>
-            </ul>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Repayment account from which all these EMI are getting paid</strong></li></ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-          ${
-            bankingDetails?.bankAccounts &&
-            Array.isArray(bankingDetails.bankAccounts) &&
-            bankingDetails.bankAccounts.length > 0
-              ? `
-          <p style="margin:8px 0;line-height:1.5"><strong>Bank Accounts:</strong></p>
-          <ul>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${loanDetails?.repaymentAccount || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>What was the end use of fund of these loans (All BL/PL/LAP loan taken in last 3 years), also please check if there is any exceptional borrowing in last 12 months than exact use</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${loanDetails?.pastLoanEndUse || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Also check if any home loan/LAP than what is address of mortgage property, usage of such property, any OD limit or any other facility in the name of customer</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${loanDetails?.checkIfAnyHomeLoanLap || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Comment whether there is any bouncing in loans and if yes, period and reason of such bounces</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${loanDetails?.anyBouncingInLoans || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
+            <p style="margin:8px 0;line-height:1.5"><strong>Banking –</strong></p>
+          </td>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check and mention details of all his bank account, account open date, Name of bank account where salary is getting credited (if bank salary)</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            ${
+              bankingDetails?.bankAccounts &&
+              Array.isArray(bankingDetails.bankAccounts) &&
+              bankingDetails.bankAccounts.length > 0
+                ? `
+            <p style="margin:8px 0;line-height:1.5"><strong>Bank Accounts:</strong></p>
             ${ensureArray(bankingDetails.bankAccounts)
               .map(
                 (account: any) => `
-              <li><p style="margin:8px 0;line-height:1.5">${account.bankDetails || ""}${account.accountOpenDate ? " - " + account.accountOpenDate : ""}${account.nameOfBankAccount ? " - " + account.nameOfBankAccount : ""}</p></li>
+              <ul><li style="margin:8px 0;line-height:1.5">${account.bankDetails || ""}${account.accountOpenDate ? " - " + account.accountOpenDate : ""}${account.nameOfBankAccount ? " - " + account.nameOfBankAccount : ""}</li></ul>
             `
               )
               .join("")}
-          </ul>
-          `
-              : ""
-          }
+            `
+                : "<p style=\"margin:8px 0;line-height:1.5\">Not provided</p>"
+            }
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check any saving account of applicant and co applicant and provide the details of these accounts</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
             ${
               bankingDetails?.savingAccounts &&
               Array.isArray(bankingDetails.savingAccounts) &&
               bankingDetails.savingAccounts.length > 0
                 ? `
-              <p style="margin:8px 0;line-height:1.5"><strong>Savings Accounts:</strong></p>
-              <ul>
-                ${ensureArray(bankingDetails.savingAccounts)
-                  .map(
-                    (account: any) => `
-                  <li><p style="margin:8px 0;line-height:1.5">${account.savingsAccountDetails || ""}</p></li>
-                `
-                  )
-                  .join("")}
-              </ul>
+            <p style="margin:8px 0;line-height:1.5"><strong>Savings Accounts:</strong></p>
+            ${ensureArray(bankingDetails.savingAccounts)
+              .map(
+                (account: any) => `
+              <ul><li style="margin:8px 0;line-height:1.5">${account.savingsAccountDetails || ""}</li></ul>
             `
-                : ""
+              )
+              .join("")}
+            `
+                : "<p style=\"margin:8px 0;line-height:1.5\">Not provided</p>"
             }
           </td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc;padding:8px">
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-bottom:none;padding:8px;width:40%;vertical-align:top">
             <p style="margin:8px 0;line-height:1.5"><strong>Document verification and other checks</strong></p>
-            <ul>
-              <li><strong>Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations</strong></li>
-              <li><strong>TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period</strong></li>
-              <li><strong>Additional check to be done from reference if there is any family relationship with employer and employee</strong></li>
-              <li><strong>Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations</strong></li>
-              <li><strong>Google check and any negative observation/feedback/dedupe match or any other feedback</strong></li>
-            </ul>
           </td>
-          <td style="border:1px solid #ccc;padding:8px">
-            <ul>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.checkPayrollRegisterAndAttendanceRegister || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.thirdPartyCheck || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.familyRelationshipCheckWithEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || ""}</p></li>
-              <li><p style="margin:8px 0;line-height:1.5">${doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || ""}</p></li>
-            </ul>
+          <td style="border:1px solid #ccc;padding:8px;border-bottom:none;width:60%;vertical-align:top"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check all Payroll register, attendance register to check employment and salary details of applicant and share observations</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${doc.checkPayrollRegisterAndAttendanceRegister || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>TPC from minimum 1 neighbour and 1 local independent party to be done (It should be done by showing the photo of customer and employment to be confirmed in the name of customer with existence period</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${doc.thirdPartyCheck || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Additional check to be done from reference if there is any family relationship with employer and employee</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${doc.familyRelationshipCheckWithEmployer || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Please check all QR code, license, permits, name board, contact number etc and all these belongs to employer and share observations</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${doc.checkQrCodesLicensesPermitsNameBoardContactNumberBelongingToEmployer || "Not provided"}</li></ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc;border-right:1px solid #ccc;border-top:none;border-bottom:none;padding:8px;width:40%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5"><strong>Google check and any negative observation/feedback/dedupe match or any other feedback</strong></li></ul>
+          </td>
+          <td style="border:1px solid #ccc;border-top:none;padding:8px;width:60%;vertical-align:middle">
+            <ul><li style="margin:8px 0;line-height:1.5">${doc.googleCheckAnyNegativeObservationsFeedbackDedupeMatch || "Not provided"}</li></ul>
           </td>
         </tr>
       </table>
