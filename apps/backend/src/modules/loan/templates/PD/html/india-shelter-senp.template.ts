@@ -453,12 +453,14 @@ export const indiaShelterSenpTemplate = (
         undefined,
         { colSpan: 3 }
       )}
-      ${renderKeyValueRow(
-        "Partners",
-        renderSimpleList(ensureArray(business.partners)),
-        undefined,
-        { colSpan: 3 }
-      )}
+     <tr>
+      <td style="${labelCellStyle}">Partners</td>
+      <td style="${valueCellStyle}">
+        ${ensureArray(business.partners)
+          .map((item: any) => item?.partnerName)
+          .join(", ")}
+        </td>
+     </tr>
       <tr>
         <td style="${labelCellStyle}">Date of commencement of Business</td>
         <td style="${valueCellStyle}">${formatMultiline(
@@ -1017,9 +1019,14 @@ export const indiaShelterSenpTemplate = (
         <td style="${labelCellStyle}">Signature of the PD Officer</td>
         <td style="${valueCellStyle}"></td>
       </tr>
-      ${renderKeyValueRow("PD Status", html_data.approvedStatus|| "Not provided", undefined, {
-        colSpan: 5,
-      })}
+      ${renderKeyValueRow(
+        "PD Status",
+        html_data.approvedStatus || "Not provided",
+        undefined,
+        {
+          colSpan: 5,
+        }
+      )}
     </table>
   `;
 

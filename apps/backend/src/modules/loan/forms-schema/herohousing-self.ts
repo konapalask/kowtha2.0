@@ -308,9 +308,8 @@ export const herohousingSelfSchema = {
                   title: "Relation (Supplier / Customer)",
                 },
                 contactNumber: {
-                  type: "string",
+                  type: "integer",
                   title: "Contact number",
-                  pattern: "^[0-9]{10}$",
                 },
               },
             },

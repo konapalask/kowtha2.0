@@ -27,7 +27,7 @@ export const smfgSmeSchema = {
             type: "string",
             title: "Applicant Office Address",
             ui: { widget: "textarea", rows: 2 },
-            readonly: true,
+            readOnly: true,
           },
           personMetName: {
             type: "string",
