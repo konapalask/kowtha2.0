@@ -418,6 +418,10 @@ export const yesBankSchema = {
             type: "string",
             title: "Level of activity & stocks observed / other observations",
           },
+          remarks: {
+            type: "string",
+            title: "Remarks for Positive / Negative / Referred cases",
+          },
           yblEmployeeName: {
             type: "string",
             title: "Name of the YBL employee",

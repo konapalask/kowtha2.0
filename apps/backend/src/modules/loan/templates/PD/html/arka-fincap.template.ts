@@ -429,21 +429,6 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
     return parts.join(" | ") || purpose || loanAmountDisplay || "";
   })();
 
-  const typeOfCollateralDisplay = (() => {
-    const type = getValue(
-      applicantDetails.typeOfCollateral,
-      verificationData.typeOfCollateral
-    );
-    const valueDisplay = formatCurrency(
-      applicantDetails.marketValueOfCollateral ||
-        verificationData.marketValueOfCollateral
-    );
-    if (type && valueDisplay) {
-      return `${type} (Value: ${valueDisplay})`;
-    }
-    return type || valueDisplay || "";
-  })();
-
   const collateralPropertyAddress = getValue(
     applicantDetails.collateralPropertyAddress,
     verificationData.collateralPropertyAddress
@@ -662,7 +647,7 @@ export const arkaFincapTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Type of collateral</strong></p></td>
-                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${typeOfCollateralDisplay || getValue(verificationData.collateralArea)}</p></td>
+                <td colspan="6" style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5">${applicantDetails?.typeOfCollateral} ${applicantDetails?.marketValueOfCollateral ? `<br><b>Market value of collateral security:</b> ${formatCurrency(applicantDetails?.marketValueOfCollateral)}` : ""}</p></td>
             </tr>
             <tr>
                 <td style="border:1px solid #ccc;padding:8px"><p style="margin:8px 0;line-height:1.5"><strong>Collateral Property Address</strong></p></td>

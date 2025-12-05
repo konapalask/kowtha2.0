@@ -239,17 +239,17 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}" colspan="5">
             <table style="border-collapse:collapse;width:100%;margin:0;">
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Smartphone (Yes/No): ${assetRows[0]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Washing Machine (Yes/No): ${assetRows[1]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Car RC No. (Yes/No): ${assetRows[2]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Two-Wheeler (Yes/No): ${assetRows[3]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Auto/Cab (Yes/No): ${assetRows[4]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Smartphone (Yes/No):</b> ${assetRows[0]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Washing Machine (Yes/No):</b> ${assetRows[1]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Car RC No. (Yes/No):</b> ${assetRows[2]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Two-Wheeler (Yes/No):</b> ${assetRows[3]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Auto/Cab (Yes/No):</b> ${assetRows[4]?.[1] || "Not provided"}</td>
               </tr>
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Computer / Laptop (Yes/No): ${assetRows[5]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">AC (Yes/No): ${assetRows[6]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fridge (Yes/No): ${assetRows[7]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Induction (Yes/No): ${assetRows[8]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Computer / Laptop (Yes/No):</b> ${assetRows[5]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>AC (Yes/No):</b> ${assetRows[6]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Fridge (Yes/No):</b> ${assetRows[7]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Induction (Yes/No):</b> ${assetRows[8]?.[1] || "Not provided"}</td>
               </tr>
             </table>
           </td>
@@ -259,15 +259,15 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           <td style="${valueCellStyle}" colspan="5">
             <table style="border-collapse:collapse;width:100%;margin:0;">
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Property: ${assetRows[9]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Insurance (LIC): ${assetRows[10]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Fixed Deposit: ${assetRows[11]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Chit Funds: ${assetRows[12]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Post Office Savings: ${assetRows[13]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Property:</b> ${assetRows[9]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Insurance (LIC):</b> ${assetRows[10]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Fixed Deposit:</b> ${assetRows[11]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Chit Funds:</b> ${assetRows[12]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Post Office Savings:</b> ${assetRows[13]?.[1] || "Not provided"}</td>
               </tr>
               <tr>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Is Post Office savings monthly (Yes/No): ${assetRows[14]?.[1] || "Not provided"}</td>
-                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;">Any recurring deposit (Yes/No): ${assetRows[15]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Is Post Office savings monthly (Yes/No):</b> ${assetRows[14]?.[1] || "Not provided"}</td>
+                <td style="border:1px solid #c7cdd1;padding:0 8px 0 0;color:#333;"><b>Any recurring deposit (Yes/No):</b> ${assetRows[15]?.[1] || "Not provided"}</td>
               </tr>
             </table>
           </td>
@@ -291,7 +291,7 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         )}
         ${renderKeyValue(
           "Place of incorporation",
-          "Address: " + employment.placeOfIncorporation
+          "Address: " + formatMultiline(employment.placeOfIncorporation)
         )}
         <tr>
           <td style="${labelCellStyle}" colspan="2">if above less than 3 years, then provide details:-</td>
@@ -429,8 +429,8 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           </tr>
           <tr>
             <td style="${labelCellStyle} colspan="2">Monthly Income (In Rs):</td>
-            <td style="${valueCellStyle}" colspan="1">Cash Amount: ${formatCurrency(employment.monthlyIncomeCash || 0)}</td>
-            <td style="${valueCellStyle}" colspan="2">Cheque Amount: ${formatCurrency(employment.monthlyIncomeCheque || 0)}</td>
+            <td style="${valueCellStyle}" colspan="1">Cash Amount: ${formatCurrency(employment.monthlyIncomeCash || "Not provided")}</td>
+            <td style="${valueCellStyle}" colspan="2">Cheque Amount: ${formatCurrency(employment.monthlyIncomeCheque || "Not provided")}</td>
           </tr>
       </table>
 
@@ -449,9 +449,9 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
           <tr>
             <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[0] || "")}</td>
             <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[1] || "")}</td>
-            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[2] || 0)}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[2] || "Not provided")}</td>
             <td style="${valueCellStyle}">${formatMultiline(existingLoanRows[0]?.[4] || "")}</td>
-            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[3] || 0)}</td>
+            <td style="${valueCellStyle}">${formatCurrency(existingLoanRows[0]?.[3] || "Not provided")}</td>
       </table>
 
       <h2 style="margin:24px 0 16px;color:#1f2a37;font-size:16px;">
@@ -492,8 +492,8 @@ export const niwasSenpTemplate = (verificationData: any, html_data: any) => {
         <tr>
           <td style="${labelCellStyle}" >Mode of Payment to Seller:</td>
           <td style="${valueCellStyle}" colspan="2">
-          <span>Cash Amount: ${formatCurrency(costFunds.cashAmount || 0)}</span>
-          <span style="margin-left: 16px;">Cheque Amount: ${formatCurrency(costFunds.chequeAmount || 0)}</span>
+          <span>Cash Amount: ${formatCurrency(costFunds.cashAmount || "Not provided")}</span>
+          <span style="margin-left: 16px;">Cheque Amount: ${formatCurrency(costFunds.chequeAmount || "Not provided")}</span>
           </td>
         </tr>
       </table>

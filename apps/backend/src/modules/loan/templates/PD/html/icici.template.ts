@@ -223,7 +223,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
             </tr>
             <tr>
               <td style="${labelCellStyle}">No of Years in Current Residence and previous residence details</td>
-              <td style="${valueCellStyle}">${residenceDetails.noOfYearsInCurrentResidence || ""} ${residenceDetails.previousResidenceDetails ? `- Previous: ${residenceDetails.previousResidenceDetails}` : ""}</td>
+              <td style="${valueCellStyle}">${residenceDetails.noOfYearsInCurrentResidence || "" ? `<strong>Current:</strong> ${residenceDetails.noOfYearsInCurrentResidence || ""}` : ""} ${residenceDetails.previousResidenceDetails ? `<br><strong>Previous:</strong> ${residenceDetails.previousResidenceDetails}` : ""}</td>
             </tr>
             <tr>
               <td style="${labelCellStyle}">No of Years in Same City</td>
@@ -279,7 +279,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Gross margin and Net Margin:</strong></td>
-            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin?"Gross Margin: "+natureOfBusinessAndBusinessVintage.grossMargin+"%" : ""} ${natureOfBusinessAndBusinessVintage.netMargin?"<br>Net Margin: "+natureOfBusinessAndBusinessVintage.netMargin+"%" : ""}</td>
+            <td style="${valueCellStyle}">${natureOfBusinessAndBusinessVintage.grossMargin?`<strong>Gross Margin:</strong> ${natureOfBusinessAndBusinessVintage.grossMargin}%` : ""} ${natureOfBusinessAndBusinessVintage.netMargin?`<br><strong>Net Margin:</strong> ${natureOfBusinessAndBusinessVintage.netMargin}%` : ""}</td>
         </tr>
         <tr>
             <td style="${labelCellStyle}"><strong>Ideas about to start business:</strong></td>
@@ -572,7 +572,7 @@ export const iciciTemplate = (verificationData: any, html_data: any) => {
           <tr>
             <td style="${labelCellStyle}">ITR Details If any</td>
             <td style="${valueCellStyle}"><b>if filling - amount of income declared:</b></td>
-            <td style="${valueCellStyle}">${itrAndFinancial.itrAmountDeclared || "Not Provided"} ${itrAndFinancial.itrDetailsIfAny?"<br>Amount of income declared: "+itrAndFinancial.itrDetailsIfAny:"Not Provided"}</td>
+            <td style="${valueCellStyle}">${itrAndFinancial.itrDetailsIfAny || "Not Provided"} ${itrAndFinancial.itrFiling ==="Yes"? `<br><strong>Amount of income declared:</strong> ${itrAndFinancial.itrAmountDeclared || "Not Provided"}` : "Not Provided"}</td>
           </tr>
           <tr>
             <td style="${labelCellStyle}"><strong>Banking Details</strong></td>
